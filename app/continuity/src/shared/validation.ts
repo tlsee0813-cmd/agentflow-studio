@@ -439,7 +439,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const twelve=version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    const thirteen=version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[])]);ensure(r.version==='map-reading.1'||two);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
@@ -461,8 +461,10 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       if(nine){
         list(p.steps,12);for(const s of p.steps as unknown[]){obj(s,['name','does','uses','quote']);text(s.name,40);if(s.does!==null)text(s.does,120);list(s.uses,4);for(const u of s.uses as unknown[])text(u,60);unique(s.uses);quote(s.quote);}
         unique((p.steps as {name:unknown}[]).map(s=>s.name));
-        if(p.loop!==null){obj(p.loop,['unit','stop','resume','quote']);for(const k of ['unit','stop','resume'] as const)if(p.loop[k]!==null)text(p.loop[k],60);ensure(p.loop.unit!==null||p.loop.stop!==null||p.loop.resume!==null);quote(p.loop.quote);}
-        list(p.stateVars,8);for(const s of p.stateVars as unknown[]){obj(s,['name','scope','readBy','changedBy']);text(s.name,40);if(s.scope!==null)text(s.scope,40);for(const k of ['readBy','changedBy'] as const){list(s[k],4);for(const u of s[k] as unknown[])text(u,40);unique(s[k]);}}
+        // map-reading.13: every loop and kept state says whether the program put it there (a program state names nothing but itself).
+        if(p.loop!==null){obj(p.loop,['unit','stop','resume','quote',...(thirteen?['program']:[])]);for(const k of ['unit','stop','resume'] as const)if(p.loop[k]!==null)text(p.loop[k],60);ensure(p.loop.unit!==null||p.loop.stop!==null||p.loop.resume!==null);quote(p.loop.quote);if(thirteen)ensure(typeof p.loop.program==='boolean');}
+        list(p.stateVars,8);for(const s of p.stateVars as unknown[]){obj(s,['name','scope','readBy','changedBy',...(thirteen?['program']:[])]);text(s.name,40);if(s.scope!==null)text(s.scope,40);for(const k of ['readBy','changedBy'] as const){list(s[k],4);for(const u of s[k] as unknown[])text(u,40);unique(s[k]);}
+          if(thirteen)ensure(typeof s.program==='boolean'&&(!s.program||s.scope===null&&(s.readBy as unknown[]).length===0&&(s.changedBy as unknown[]).length===0));}
         unique((p.stateVars as {name:unknown}[]).map(s=>s.name));
       }
       // map-reading.12: the part's condition rows (up to 24), each its condition, outcome and other outcome as written, on its own row, once.
@@ -502,7 +504,9 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       claims.set(p.areaId as string,(p.claims as unknown[]).length);
     }
     // map-reading.9: a first map holds 48 relations (earlier readings 32).
-    list(r.relations,nine?48:32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[])]);if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
+    // map-reading.13: every relation holds the fields of the format artifact it carries (up to 24 of 60, each once; [] when not said).
+    list(r.relations,nine?48:32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[]),...(thirteen?['payloadFields']:[])]);if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));
+      if(thirteen){list(x.payloadFields,24);for(const f of x.payloadFields as unknown[])text(f,60);ensure(new Set(x.payloadFields as unknown[]).size===(x.payloadFields as unknown[]).length);}id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
     // map-reading.9: each port-map row names a relation of this reading, the part at its end by direction (in: the receiver, out: the
     // sender) as this reading kept it, an input or output name and a step of that part, once each, on its own passage.
     if(nine){list(r.portMap,12);const rows=new Set<string>();for(const m of r.portMap as unknown[]){obj(m,['relationId','areaId','port','step','direction','quote']);

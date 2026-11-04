@@ -2,7 +2,7 @@
 // Neither the blueprint nor extraction notes are source evidence. The final map still cites the original ask.
 import { ApiError } from '../../server/errors.mjs';
 import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusions, anchorDowngrades, attachExclusions, explainExclusion, versionLike, DIVIDED_EXCLUSIONS_MAX, MAP6_NEW_PARTS, MAP6_RELATIONS, MAP6_CLAIMS, PART_LIST_MAX, FIELD_ITEM_MAX, fileKeys,
-  artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT } from '../dist/public/shared/map-reading.js';
+  artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
@@ -44,7 +44,7 @@ export const BLUEPRINT_CORRECTIONS_PER_PART_MAX = 4;
 export const BLUEPRINT_GLOBAL_KINDS = Object.freeze(['condition', 'correction', 'uncertain', 'material', 'relation', 'request']);
 const NEW = /^new:[a-z0-9_-]{1,24}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
-const SAFE_VALIDATION_PATH = /^(?:reply|summary|parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(?:\[\d{1,3}\])?(?:\.(?:ref|name|parent|role|roleAbout|roleAboutAt|roleReplaces|basis|claims|kind|text|at|about|aboutAt|replaces|key|from|to|note|target|targets|statement|parts|record|quote|what|stance|why|requestId|itemId|topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|unit|stop|resume|does|uses|scope|readBy|changedBy|port|step|direction|relation|scopeName|anchors|enforcedBy|withdrawalKind|gate|conditions|when|then|else)(?:\[\d{1,3}\])?)*$/;
+const SAFE_VALIDATION_PATH = /^(?:reply|summary|parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(?:\[\d{1,3}\])?(?:\.(?:ref|name|parent|role|roleAbout|roleAboutAt|roleReplaces|basis|claims|kind|text|at|about|aboutAt|replaces|key|from|to|note|target|targets|statement|parts|record|quote|what|stance|why|requestId|itemId|topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|unit|stop|resume|does|uses|scope|readBy|changedBy|port|step|direction|relation|scopeName|anchors|enforcedBy|withdrawalKind|gate|conditions|when|then|else|payloadFields)(?:\[\d{1,3}\])?)*$/;
 const SAFE_VALIDATION_RULES = new Set(['contract', 'reference', 'length', 'duplicate-key', 'duplicate-target', 'settled-and-open',
   'material-evidence', 'source-kind', 'condition-form', 'condition-source', 'condition-length']);
 // map-reading.ts ContractGuard: the fixed categories a rule 'contract' refusal names. Nothing else of error.target is ever read.
@@ -62,7 +62,9 @@ const SAFE_CONTRACT_CATEGORIES = new Set(['shape', 'keys', 'text', 'count', 'new
   // map-reading.10 (.33): a rule's scope, one of its places or devices, a withdrawal's kind, a gate's kind.
   'scope', 'anchor', 'enforced-by', 'withdrawal-kind', 'gate',
   // map-reading.12 (.36): a part's condition row; .36: a store part on another's place, a line no record row backs.
-  'condition', 'store-dup', 'unrecorded']);
+  'condition', 'store-dup', 'unrecorded',
+  // map-reading.13 (.37): a relation's format fields; .37: a line read twice.
+  'payload-fields', 'dup-line']);
 /** Fixed path/rule (and, for rule 'contract', its fixed guard category) of a refusal; null for anything else. */
 export function safeValidation(error) {
   try {
@@ -557,6 +559,8 @@ const LOOP_ROWS = /^(부분별\s*설계|안의\s*단계)/;
  * their loop is null, as { rows: parts with such rows, missing: ['name: the first such row as written'] }.
  * .36: a setting of the part's own design row saying how often (j1_cadence 60 s, POLL_MS 30000) names it first, as 「name: 설정 | the
  * item」; a retired or unbuilt part (its state on the wire) repeats nothing now and is never named. */
+/* .37: a part the program gives a loop (programLoop of map-reading.ts: a cadence setting of its config in its own design row's 설정 cell,
+ * the .36 engine's 「j1_cadence 60 s」) is never named: its loop is filled when the wire is read. */
 export function loopRows(ask, parts) {
   const list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === "object" && typeof part.name === "string" && part.state !== 'retired' && part.state !== 'unbuilt');
   const byName = new Map(list.map(part => [plainName(part.name), part])), seen = new Map();
@@ -573,10 +577,16 @@ export function loopRows(ask, parts) {
   }
   // .36: a loop whose every item was left null (a wire after its set-aside items) is no loop.
   const looped = loop => !!loop && typeof loop === "object" && ["unit", "stop", "resume"].some(k => typeof loop[k] === "string" && !!loop[k].trim());
-  const missing = [...seen].filter(([part]) => !looped(part.loop)).map(([, name]) => name);
+  const missing = [...seen].filter(([part]) => !looped(part.loop) && !programLoop(ask, { name: part.name, config: part.config, state: part.state })).map(([, name]) => name);
   return { rows: seen.size, missing };
 }
-export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [] }) {
+/* .37: asideLines: the combined wire's lines the contract left out whole because the records rule them out ({ from, to, category }, by
+ * refs; ASIDE_LINES: unrecorded, store-dup — a line set aside for what its correction can rewrite, such as a control channel on an
+ * artifact, stays missing and still pays the global correction, as in .36). A connection row or a plan
+ * relation item that only such a line draws, and a plan relation item resting on no line a relation may stand on (unrecordedAt: a part
+ * row's 「하는 일」, the KORU owner → ARM and the web 알림톡 대행사 → 고객), is no missing line: it is named under lines-set-aside with
+ * its category and counted in neither connections nor plan-relations (the .36 global first passes paid their correction for them). */
+export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [], asideLines = [] }) {
   const issues = [];
   try {
     const claims = (Array.isArray(parts) ? parts : []).flatMap(part => Array.isArray(part?.claims) ? part.claims : []).filter(claim => claim && typeof claim === 'object');
@@ -616,16 +626,27 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
       const stores = new Set(list.filter(part => part.type === 'store').map(part => part.ref));
       const lines = relations.filter(r => r && typeof r === 'object'), joined = (a, b) => lines.some(r => r.from === a && r.to === b);
       const through = (a, b) => joined(a, b) || [...stores].some(s => joined(a, s) && joined(s, b));
-      const missing = rows.filter(([from, to]) => { const a = refOf.get(from), b = refOf.get(to); return !(!!a && !!b && through(a, b)); });
+      // .37: the lines set aside whole join what they would have joined, for telling a set-aside line from a missing one.
+      const aside = (Array.isArray(asideLines) ? asideLines : []).filter(x => x && typeof x.from === 'string' && typeof x.to === 'string');
+      const all = [...lines, ...aside], joinedAll = (a, b) => all.some(r => r.from === a && r.to === b);
+      const asideOf = (a, b) => (aside.find(r => r.from === a && r.to === b) ?? aside.find(r => r.from === a || r.to === b))?.category ?? 'contract';
+      const setAsideNames = [], noteAside = (a, b, category) => { const n = `${a} → ${b}: ${category}`; if (!setAsideNames.includes(n)) setAsideNames.push(n); };
+      let asideRows = 0;
+      const missing = rows.filter(([from, to]) => {
+        const a = refOf.get(from), b = refOf.get(to);
+        if (!!a && !!b && through(a, b)) return false;
+        if (!!a && !!b && (joinedAll(a, b) || [...stores].some(s => joinedAll(a, s) && joinedAll(s, b)))) { asideRows++; noteAside(a, b, asideOf(a, b)); return false; }
+        return true;
+      });
       // .31: the rows without a line are named (the records' own cells, loosely compared), so the one correction can draw them.
-      if (rows.length && missing.length) issues.push({ path: 'relations', rule: 'connections', expected: rows.length, actual: rows.length - missing.length, names: missing.slice(0, 12).map(([from, to]) => `${from} → ${to}`) });
+      if (rows.length - asideRows && missing.length) issues.push({ path: 'relations', rule: 'connections', expected: rows.length - asideRows, actual: rows.length - asideRows - missing.length, names: missing.slice(0, 12).map(([from, to]) => `${from} → ${to}`) });
       // .31: the plan's relation items (「from ref → to ref: …」) between two rendered parts that no relation draws, directly or
       // through one store part holding a file the item names (any store when it names none), named by their refs (the .30 run lost
       // five of 39 at the global stage, with no exclusion: the model did not write them).
       const refs = new Set(list.map(part => part.ref)), items = Array.isArray(blueprint?.global) ? blueprint.global.filter(g => g?.kind === 'relation' && typeof g.text === 'string') : [];
       const held = new Map(list.filter(part => part.type === 'store').map(part => [part.ref, [part.name, ...(Array.isArray(part.outputs) ? part.outputs : []), ...(Array.isArray(part.files) ? part.files : [])]
         .filter(x => typeof x === 'string').flatMap(fileKeys)]));
-      const planned = items.flatMap(g => { const m = PLAN_LINE.exec(g.text); return m && refs.has(m[1]) && refs.has(m[2]) && m[1] !== m[2] ? [[m[1], m[2], fileKeys(g.text)]] : []; });
+      const planned = items.flatMap(g => { const m = PLAN_LINE.exec(g.text); return m && refs.has(m[1]) && refs.has(m[2]) && m[1] !== m[2] ? [[m[1], m[2], fileKeys(g.text), Array.isArray(g.at) ? g.at : []]] : []; });
       // .36: an artifact row whose maker is also its reader, kept in a store part of the reading (the place it holds), is a write and a
       // read: two lines through that store, counted with the plan's items (the .35 web map lost 주문 API ↔ 관리자 세션 and 결제 웹훅
       // 수신기 ↔ processed_events, and 관리자 세션 stood as an island).
@@ -635,13 +656,23 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
         return a && store && a !== store.ref ? [[a, store.ref, []], [store.ref, a, []]] : [];
       }) : []);
       const pairs = [...planned, ...self.filter(([a, b], i) => !planned.some(([x, y]) => x === a && y === b) && !self.slice(0, i).some(([x, y]) => x === a && y === b))];
-      const lost = pairs.filter(([a, b, files]) => !(joined(a, b) || [...held].some(([s, keys]) => (!files.length || keys.some(k => files.includes(k))) && joined(a, s) && joined(s, b))));
-      if (lost.length) issues.push({ path: 'relations', rule: 'plan-relations', expected: pairs.length, actual: pairs.length - lost.length, names: [...new Set(lost.map(([a, b]) => `${a} → ${b}`))].slice(0, 12) });
-      // .36: a store part no line reaches, named with the artifact rows that write or read it by the record (store-island).
+      const drawnIn = (join, a, b, files) => join(a, b) || [...held].some(([s, keys]) => (!files.length || keys.some(k => files.includes(k))) && join(a, s) && join(s, b));
+      // .37: an item only a set-aside line draws, or resting on no recorded line (unrecordedAt), is set aside, not lost.
+      let asidePairs = 0;
+      const lost = pairs.filter(([a, b, files, at]) => {
+        if (drawnIn(joined, a, b, files)) return false;
+        if (drawnIn(joinedAll, a, b, files)) { asidePairs++; noteAside(a, b, asideOf(a, b)); return false; }
+        if (Array.isArray(at) && at.length && unrecordedAt(ask, at)) { asidePairs++; noteAside(a, b, 'unrecorded'); return false; }
+        return true;
+      });
+      if (lost.length) issues.push({ path: 'relations', rule: 'plan-relations', expected: pairs.length - asidePairs, actual: pairs.length - asidePairs - lost.length, names: [...new Set(lost.map(([a, b]) => `${a} → ${b}`))].slice(0, 12) });
+      if (setAsideNames.length) issues.push({ path: 'relations', rule: 'lines-set-aside', expected: null, actual: setAsideNames.length, names: setAsideNames.slice(0, 12) });
+      // .36: a store part no line reaches, named with the artifact rows that write or read it by the record (store-island). .37: only a
+      // store the records give such a row (the KORU ARM has none: no line is the record's own answer, and naming it pressed for one).
       const touched = new Set(lines.flatMap(r => [r.from, r.to])), storeParts = list.filter(part => part.type === 'store' && typeof part.name === 'string');
-      const islands = storeParts.filter(part => !touched.has(part.ref)).map(part => {
+      const islands = storeParts.filter(part => !touched.has(part.ref)).flatMap(part => {
         const places = heldPlaces(ask, part.name), rows = artifactRows(ask).filter(row => row.store && places.has(row.place));
-        return rows.length ? `${part.name}: ${rows.map(row => `${row.name} | ${row.makerCell} → ${row.readerCell}`).join(' · ')}` : part.name;
+        return rows.length ? [`${part.name}: ${rows.map(row => `${row.name} | ${row.makerCell} → ${row.readerCell}`).join(' · ')}`] : [];
       });
       if (islands.length) issues.push({ path: 'relations', rule: 'store-island', expected: storeParts.length, actual: storeParts.length - islands.length, names: islands.slice(0, 12) });
     }
@@ -786,7 +817,7 @@ export function fragmentSetAside(value, group, ask, blueprint) {
 /** .30: the fixed reasons of a stage's set-aside items as a stage record keeps them (never a position or an explanation). */
 export const stageSetAside = exclusions => exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX).map(x => ({ path: x.path, rule: x.rule, category: x.category ?? null }));
 /** .25: the optional fields of map-reading.7 (map-reading.ts), by the place a set-aside names or by its contract category. */
-const FIELD_PATH = /(\.(topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|conditions)|^basis(At|Version)|\.(steps|stateVars|conditions)\[\d+\](\.at)?|\.loop\.(unit|stop|resume|at)|^portMap(\[\d+\](\.at)?)?|\.claims\[\d+\]\.(scope|scopeName|anchors|enforcedBy|withdrawalKind|gate)|\.claims\[\d+\]\.(anchors|enforcedBy)\[\d+\](\.at)?)$/;
+const FIELD_PATH = /(\.(topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|conditions|payloadFields)|\.payloadFields\[\d+\]|^basis(At|Version)|\.(steps|stateVars|conditions)\[\d+\](\.at)?|\.loop\.(unit|stop|resume|at)|^portMap(\[\d+\](\.at)?)?|\.claims\[\d+\]\.(scope|scopeName|anchors|enforcedBy|withdrawalKind|gate)|\.claims\[\d+\]\.(anchors|enforcedBy)\[\d+\](\.at)?)$/;
 const FIELD_CATEGORIES = new Set(['topic', 'evidence', 'when', 'where', 'before', 'state', 'state-at', 'state-when', 'files', 'payload', 'cadence', 'mode',
   'type', 'type-at', 'inputs', 'outputs', 'fields', 'config', 'channel', 'basis-at', 'basis-version',
   // .29: the program's own reading of a quoted line refuses a first pass the same way (render: wrong-part; global: via-store, sender).
@@ -796,7 +827,9 @@ const FIELD_CATEGORIES = new Set(['topic', 'evidence', 'when', 'where', 'before'
   // .33 (map-reading.10): a rule's scope, places and devices, a withdrawal's kind and a gate's kind (render).
   'scope', 'anchor', 'enforced-by', 'withdrawal-kind', 'gate',
   // .36 (map-reading.12): a part's condition row (render).
-  'condition']);
+  'condition',
+  // .37 (map-reading.13): a relation's format fields (global).
+  'payload-fields']);
 // The global stage owns the relations, (.28) the reply's basis time and version, and (.30) the port map.
 const PARTS_SCOPE = /^parts\[/, RELATIONS_SCOPE = /^(relations\[|basis(At|Version)$|portMap(\[|$))/;
 /** Refuses with the first set-aside of an optional field inside scope: its fixed path, rule and (rule 'contract') category. */
@@ -823,10 +856,14 @@ function withoutSetAside(raw, exclusions) {
   const drop = new Map(), limit = new Map(), unsaid = new Map(), top = new Set(), claimUnsaid = new Map();
   const blank = (index, keys) => { if (!unsaid.has(index)) unsaid.set(index, new Set()); for (const key of keys) unsaid.get(index).add(key); };
   const mark = (list, index) => { if (!drop.has(list)) drop.set(list, new Set()); drop.get(list).add(index); };
+  // .37: a relation's cadence or its format fields (the list, or one field) left out alone; the line stays.
+  const relationUnsaid = new Set();
   for (const x of exclusions) {
     const count = x.rule === 'contract' && x.category === 'count';
     let m;
-    if ((m = /^(relations|candidates|gaps|matches|material)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(m[1], Number(m[2]));
+    if ((m = /^relations\[(\d{1,4})\]\.(cadence|payloadFields)$/.exec(x.path))) relationUnsaid.add(`${Number(m[1])}.${m[2]}`);
+    else if ((m = /^relations\[(\d{1,4})\]\.payloadFields\[(\d{1,4})\]$/.exec(x.path))) mark(`relations.${Number(m[1])}.payloadFields`, Number(m[2]));
+    else if ((m = /^(relations|candidates|gaps|matches|material)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(m[1], Number(m[2]));
     // .33 (map-reading.10): one place or device of a claim is left out at its index, a claim's scope (with its name), its list of
     // places or devices, its withdrawalKind or gate is written null there; the claim stays at its raw index (checked before claims).
     else if ((m = /^parts\[(\d{1,3})\]\.claims\[(\d{1,4})\]\.(anchors|enforcedBy)\[(\d{1,4})\]$/.exec(x.path))) mark(`parts.${m[1]}.claims.${m[2]}.${m[3]}`, Number(m[4]));
@@ -859,6 +896,14 @@ function withoutSetAside(raw, exclusions) {
   // .30: a port-map row names its relation by index: the index is renumbered by the relations left out before it, so it names the
   // very relation it named (a row whose relation was left out was set aside with it).
   const relationsOut = Array.isArray(clean.relations) ? clean.relations.map((_, i) => drop.get('relations')?.has(i) || i >= (limit.get('relations') ?? Infinity)) : [];
+  // .37: a kept line's own fields left out alone go first (the line is still at its raw index).
+  if (Array.isArray(clean.relations)) clean.relations = clean.relations.map((r, i) => {
+    if (!r || typeof r !== 'object' || Array.isArray(r)) return r;
+    let out = r;
+    if (drop.has(`relations.${i}.payloadFields`) && Array.isArray(out.payloadFields)) out = { ...out, payloadFields: keep(`relations.${i}.payloadFields`, out.payloadFields) };
+    for (const key of ['cadence', 'payloadFields']) if (relationUnsaid.has(`${i}.${key}`) && Object.hasOwn(out, key)) out = { ...out, [key]: null };
+    return out;
+  });
   for (const key of Object.keys(LIST_LIMITS)) if (Array.isArray(clean[key])) clean[key] = keep(key, clean[key]);
   if (Array.isArray(clean.portMap)) clean.portMap = keep('portMap', clean.portMap).map(row => row && typeof row === 'object' && Number.isSafeInteger(row.relation) && row.relation >= 0
     ? { ...row, relation: row.relation - relationsOut.slice(0, row.relation).filter(Boolean).length } : row);
@@ -907,7 +952,7 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
       if (strict) refuseField(readingExclusions(normalized), RELATIONS_SCOPE);
       if (absentCorrections(normalized, planned).length) invalid({ validation: { path: 'parts', rule: 'contract' } });
     } catch (error) { invalid(error); }
-    return { wire: combined, exclusions: [], folds: [] };
+    return { wire: combined, exclusions: [], folds: [], asideLines: [] };
   }
   // .32: a new part made of what a line hands over (payloadParts) is left out whole before the reading, with its own reason; every
   // other reason is read on what remains and then named by the combined wire's part index again (the wire the model wrote).
@@ -941,9 +986,19 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
     attachExclusions(strict, exclusions, ask);
   } catch (error) { invalid(error); }
   // .36: the folds left out, 「part → the store it stands beside」, for the final diagnostics (store-dup).
-  return { wire, exclusions, folds: folds.map(f => `${f.name} → ${f.into}`) };
+  // .37: and the lines left out whole because the records rule them out (ASIDE_LINES: a line on no recorded row, a line of a folded
+  // store), by their refs and category. A line set aside for what its correction can rewrite as the record writes it (a control channel
+  // on an artifact, a file line skipping its store, a sender, a reference) stays a missing line, as in .36.
+  const asideLines = exclusions.flatMap(x => {
+    const m = /^relations\[(\d+)\]$/.exec(x.path), line = m ? lines[Number(m[1])] : null;
+    if (!m || !ASIDE_LINES.has(x.category) || !line || typeof line.from !== 'string' || typeof line.to !== 'string') return [];
+    return [{ from: line.from, to: line.to, category: x.category ?? x.rule }];
+  });
+  return { wire, exclusions, folds: folds.map(f => `${f.name} → ${f.into}`), asideLines };
 }
 
+/** .37: the set-aside categories that leave a line out because the records rule it out: no correction draws it again. */
+const ASIDE_LINES = new Set(['unrecorded', 'store-dup']);
 /* .32 (payload-part): the names a line hands over: every relation's payload of the wire and every 「넘기는 것」 cell of the records'
  * connection tables, each split on 「·」 and 「,」 outside parentheses, loosely compared, and the files they name. */
 const splitOutside = text => {
@@ -1003,15 +1058,15 @@ function aliasExclusion(path, category, alias, ask) {
 /** .32: the diagnostics of the final wire a first map's global stage record keeps (fixed shapes, capped; never a refusal). */
 // .35: and the parts that repeat with no loop (loop-missing) and the places read as inferred (anchor-kind).
 // .36: and the store parts left out beside the store holding their place (store-dup) and the stores no line reaches (store-island).
-export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'unbacked', 'withdrawn-count', 'unknown-count']);
+export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'lines-set-aside', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'unbacked', 'withdrawn-count', 'unknown-count']);
 export const FINAL_DIAGNOSTICS_MAX = 16;
 export function finalDiagnostics(fragments, global, ask, blueprint) {
   try {
-    const { wire, exclusions, folds } = combineRenderedReading(fragments, global, ask, blueprint);
+    const { wire, exclusions, folds, asideLines } = combineRenderedReading(fragments, global, ask, blueprint);
     // .35: what was set aside on a row lands its plan unit; the places the reading took as inferred are named (anchor-kind).
     let downgrades = [];
     try { downgrades = anchorDowngrades(validateMapReply(wire, ask)).map(x => `${x.ref} ${x.key ?? "?"}: ${x.text}`); } catch { downgrades = []; }
-    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades });
+    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades, asideLines });
     const refs = new Set(wire.parts.map(part => part.ref)), coverage = blueprintCoverage({ parts: blueprint.parts.filter(part => refs.has(part.ref)) }, ask);
     if (coverage && coverage.covered < coverage.rows) found.push({ path: 'parts', rule: 'coverage', expected: coverage.rows, actual: coverage.covered, names: coverage.missing });
     if (folds.length) found.push({ path: 'parts', rule: 'store-dup', expected: 0, actual: folds.length, names: folds });
@@ -1019,6 +1074,31 @@ export function finalDiagnostics(fragments, global, ask, blueprint) {
     return FINAL_DIAGNOSTICS.flatMap(rule => found.filter(x => x.rule === rule)).slice(0, FINAL_DIAGNOSTICS_MAX).map(x => ({ path: x.path, rule: x.rule,
       expected: count(x.expected), actual: count(x.actual), names: (Array.isArray(x.names) ? x.names : []).flatMap(n => typeof n === 'string' ? [n.replace(/\s+/g, ' ').trim().slice(0, 160)] : [])
         .filter(n => n && !CONTROL.test(n)).slice(0, PLAN_CLAIMS_NAMES) }));
+  } catch { return []; }
+}
+
+/** .37 (diagnostic only, kept on a render correction's stage record): what a fragment's first pass held that its correction no longer
+ * does, so a row lost on the way is said (the .36 KORU corrections dropped 종이 생산자's and 성적표's step chains and 질감's
+ * make_baseline with no exclusion): each part's steps by name, its claims by their at (one the correction still cites with a claim, a
+ * step, a condition or a rule's place is kept) and its kept states by name, named 「ref step 「name」」, 「ref claim at: text」 and
+ * 「ref stateVar 「name」」. [{ path: 'parts', rule: 'dropped', expected: the first pass's items, actual: those kept, names }] or []. */
+export function droppedItems(first, kept) {
+  try {
+    if (!first || !Array.isArray(first.parts) || !kept || !Array.isArray(kept.parts)) return [];
+    const list = (o, key) => Array.isArray(o?.[key]) ? o[key].filter(x => x && typeof x === 'object' && !Array.isArray(x)) : [];
+    const clip = s => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, 100);
+    const names = []; let items = 0;
+    for (const before of first.parts) {
+      if (!before || typeof before !== 'object') continue;
+      const after = kept.parts.find(part => part && part.ref === before.ref) ?? null;
+      const cited = new Set([...list(after, 'claims'), ...list(after, 'steps'), ...list(after, 'conditions'), ...list(after, 'claims').flatMap(c => list(c, 'anchors'))]
+        .map(x => x.at).filter(at => typeof at === 'string'));
+      for (const step of list(before, 'steps')) { items++; if (!list(after, 'steps').some(x => x.name === step.name)) names.push(`${before.ref} step 「${clip(step.name)}」`); }
+      for (const claim of list(before, 'claims')) { items++; if (typeof claim.at === 'string' && !cited.has(claim.at)) names.push(`${before.ref} claim ${claim.at}: ${clip(claim.text)}`); }
+      for (const state of list(before, 'stateVars')) { items++; if (!list(after, 'stateVars').some(x => x.name === state.name)) names.push(`${before.ref} stateVar 「${clip(state.name)}」`); }
+    }
+    const safe = names.map(n => n.slice(0, 160)).filter(n => n && !CONTROL.test(n));
+    return safe.length ? [{ path: 'parts', rule: 'dropped', expected: Math.min(items, 9999), actual: Math.min(items - names.length, 9999), names: safe.slice(0, PLAN_CLAIMS_NAMES) }] : [];
   } catch { return []; }
 }
 
@@ -1153,6 +1233,15 @@ export function mapStageIssues(value, error, context = null) {
       if (Array.isArray(value.relations)) for (let i = 0; i < Math.min(value.relations.length, limits.relations); i++) {
         const relation = value.relations[i], path = `relations[${i}]`;
         bounded(relation, 'payload', 80, path, 'payload'); bounded(relation, 'cadence', 40, path, 'cadence'); fixed(relation, 'mode', RELATION_MODES, path, 'mode');
+        // .37 (map-reading.13): the format fields a line carries (24 of 60), each at its own index.
+        if (said(relation, 'payloadFields')) {
+          if (!Array.isArray(relation.payloadFields)) add(`${path}.payloadFields`, 'contract', null, null, 'payload-fields');
+          else if (relation.payloadFields.length > PART_LIST_MAX.payloadFields) add(`${path}.payloadFields`, 'count', PART_LIST_MAX.payloadFields, relation.payloadFields.length);
+          else relation.payloadFields.forEach((f, j) => {
+            if (typeof f !== 'string' || !f.trim() || CONTROL.test(f)) add(`${path}.payloadFields[${j}]`, 'contract', null, null, 'payload-fields');
+            else if (f.length > FIELD_ITEM_MAX) add(`${path}.payloadFields[${j}]`, 'length', FIELD_ITEM_MAX, f.length);
+          });
+        }
         fixed(relation, 'channel', CHANNELS, path, 'channel');
         // .36: a first map's control line carrying an artifact of the records' artifact table (its channel alone is set aside).
         if (firstAsk && relation?.channel === 'control' && carriesArtifact(context.ask, nameOf(relation.from), nameOf(relation.to), typeof relation.payload === 'string' ? relation.payload : null))

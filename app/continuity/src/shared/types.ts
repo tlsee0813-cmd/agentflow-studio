@@ -323,9 +323,15 @@ export interface ReadingCondition { when: string; then: string; else: string | n
 export interface ReadingStep { name: string; does: string | null; uses: string[]; quote: ReadingQuote }
 /** map-reading.9: the unit a part repeats, what stops it and what resumes it, each as written and on its own (null: not said),
  * with the line that says so. */
-export interface ReadingLoop { unit: string | null; stop: string | null; resume: string | null; quote: ReadingQuote }
+export interface ReadingLoop { unit: string | null; stop: string | null; resume: string | null; quote: ReadingQuote;
+  /** map-reading.13 (pipeline .37): true when the program filled an item of the loop (a unit from the part's own cadence setting, a
+   * stop or resume from one of its condition rows; the model's own items stay as read; the UI labels it 프로그램); absent before .13. */
+  program?: boolean }
 /** map-reading.9: a state a part keeps: its name, where it holds (null: not said), the steps or parts that read and change it. */
-export interface ReadingStateVar { name: string; scope: string | null; readBy: string[]; changedBy: string[] }
+export interface ReadingStateVar { name: string; scope: string | null; readBy: string[]; changedBy: string[];
+  /** map-reading.13 (pipeline .37): true when the program put it there (a dotted variable of a condition the records call kept state;
+   * by name only: no scope, readers or changers); absent before .13. */
+  program?: boolean }
 /** map-reading.9: where the record explicitly maps a line of the map onto a port (an input or output name) and a step of the part
  * at that end ('in': the line's receiver, 'out': its sender), with the line that says so. Only explicit correspondences. */
 export interface ReadingPortMap { relationId: string; areaId: string; port: string; step: string; direction: 'in' | 'out'; quote: ReadingQuote }
@@ -333,7 +339,10 @@ export interface ReadingRelation { relationId: string; from: string; to: string;
   /** map-reading.7: what is handed over (as the record names it), how often or when, and whether the record designed or saw it. */
   payload?: string | null; cadence?: string | null; mode?: RelationMode | null;
   /** map-reading.8: what the line carries (CHANNELS), as the record's wording says; null when it does not. */
-  channel?: Channel | null }
+  channel?: Channel | null;
+  /** map-reading.13: the fields of the format artifact the line carries (a 산출물 row at HTTP, 메모리 or a request), up to 24 of 60
+   * as written; [] when not said. The UI shows them on the line's chip, never as a node. */
+  payloadFields?: string[] }
 /** What a candidate leaves undecided (map-reading.5): whose statement this is (attribution), whether two parts are one
  * (identity), whether a part is inside a parent (parent), or whether a statement holds (holds). An attribution or holds candidate
  * keeps the undecided statement itself (content, kind, version, exact quote): it is in no part's claims. areaIds name the
@@ -352,7 +361,7 @@ export interface ReadingMaterial { record: string; from: number; to: number; wha
 export const READING_EXCLUSION_RULES = ['settled-and-open', 'duplicate-target', 'duplicate-key', 'material-evidence', 'reference', 'length', 'source-kind', 'condition-form', 'condition-source', 'condition-length', 'contract'] as const;
 export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION_RULES[number]; category: string | null; explanation: string; record: string | null; from: number | null; to: number | null }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -373,7 +382,8 @@ export interface MapReading {
   basisAt?: string | null; basisVersion?: string | null;
   /** map-reading.9: the record's explicit correspondences of a line to a port and a step (parts carry steps, loop and stateVars).
    * map-reading.10: claims carry scope, scopeName, anchors, enforcedBy, withdrawalKind and gate. map-reading.11: each anchor carries
-   * program (the program's candidate or the model's place). map-reading.12: parts carry conditions. */
+   * program (the program's candidate or the model's place). map-reading.12: parts carry conditions. map-reading.13: loops and kept
+   * states carry program, relations payloadFields. */
   portMap?: ReadingPortMap[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
@@ -434,7 +444,7 @@ export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at
   /** The pasted record read, and the ledger version (the map reading id) the record was read against (null: no map reading). */
   record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13';
 export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;

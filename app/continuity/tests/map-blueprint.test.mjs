@@ -11,7 +11,7 @@ import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fr
   missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
   BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows,
-  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, planShort, loopRows, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS, planStoreFolds, storeDupParts } from '../server/map-blueprint.mjs';
+  BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, planShort, loopRows, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS, planStoreFolds, storeDupParts, droppedItems } from '../server/map-blueprint.mjs';
 
 function fixture(existing = 0) {
   let project = D.createProject(); for (let i = 0; i < existing; i++) project = D.addArea(project, `사용자 부분 ${i + 1}`, '직접 쓴 설명');
@@ -652,7 +652,8 @@ test('.29: a first map plans (.31) 36 new parts (a later map 12) in twelve fragm
   assert.deepEqual(blueprintStageIssues({ ...many(24), global: items(65) }, f.ask).filter(x => x.path === 'global'), [{ path: 'global', rule: 'count', expected: 64, actual: 65 }]);
   // The global stage of a first map reads 48 relations whole; the 49th is set aside past the count (plain map.6 refuses it).
   const fragments = koruFragments(f), line = koruGlobal(f).relations[1];
-  const wide = { ...koruGlobal(f), relations: Array.from({ length: 49 }, () => structuredClone(line)) };
+  // .37: 49 lines of their own (the same ends, channel and payload twice would be one line read again, dup-line).
+  const wide = { ...koruGlobal(f), relations: Array.from({ length: 49 }, (_, i) => ({ ...structuredClone(line), payload: `review.jsonl 행 ${i + 1}` })) };
   const read = combineRenderedReading(fragments, { ...wide, relations: wide.relations.slice(0, 48) }, f.ask, koruPlan(f));
   assert.equal(read.wire.relations.length, 48);
   assert.ok(read.exclusions.every(x => !x.path.startsWith('relations')));
@@ -1050,8 +1051,8 @@ test('.32: a part made of a payload token (no table row, no type, no line) is le
 test('.32: the final wire\'s diagnostics come in fixed shapes for the global stage record (eight rules, .35 ten, at most sixteen)', () => {
   const f = koruText(KORU32), plan = plan32(f), fragments = koruFragments(f), global = { ...koruGlobal(f), summary: '어느 주장도 받치지 않는 요약 문장이다.' };
   const found = finalDiagnostics(fragments, global, f.ask, plan);
-  // .36: and store-dup, store-island after the lines.
-  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'unbacked', 'withdrawn-count', 'unknown-count']);
+  // .36: and store-dup, store-island after the lines. .37: and the lines the contract set aside (lines-set-aside), after the lines.
+  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'lines-set-aside', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'unbacked', 'withdrawn-count', 'unknown-count']);
   assert.ok(found.length >= 1 && found.length <= 16);
   for (const x of found) {
     assert.deepEqual(Object.keys(x), ['path', 'rule', 'expected', 'actual', 'names']);
@@ -1114,7 +1115,7 @@ test('.33: a wrong scope, place, device or gate is set aside alone on the combin
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, meta30('R_koru33'));
   const engineId = applied.reading.parts[3].areaId, u = M.partUnderstanding(applied.project, engineId);
-  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.12', exclusions.map(x => x.path)]);
+  assert.deepEqual([applied.reading.version, applied.reading.exclusions.map(x => x.path)], ['map-reading.13', exclusions.map(x => x.path)]);
   assert.deepEqual([u.rules.map(c => [c.scope, c.anchors.length, c.enforcedBy.map(e => e.kind)]), u.withdrawals.map(c => c.withdrawalKind), u.gates.map(c => c.gate)],
     [[['part', 0, ['gate']], [null, 1, ['code']]], ['design'], ['run']]);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -1333,7 +1334,8 @@ test('.35 plan-claims: a part\'s own rows count by its name (rules, withdrawals,
     { key: 's7', kind: 'describes', text: 'checkpoint 시각을 본다.', at: f.at('| 카드 러너 | not stamp'), about: null, replaces: null, topic: 'how' });
   owner.claims.push({ key: 's8', kind: 'describes', text: 'watch OFF는 INVALID다.', at: f.at("| 카드 러너 | watch=="), about: null, replaces: null, topic: 'how' });
   const read = read35(f, plan, landed);
-  assert.deepEqual(M.readingExclusions(read).map(x => [x.path, x.category]), [['parts[0].claims[1]', 'wrong-part']]);
+  // .37: the card runner's withdrawal row says 철회 while its claim leaves the kind null: named on its row (the claim stays).
+  assert.deepEqual(M.readingExclusions(read).map(x => [x.path, x.category]), [['parts[0].claims[1]', 'wrong-part'], ['parts[2].claims[0].withdrawalKind', 'withdrawal-kind']]);
   assert.deepEqual(planClaims(f.ask, plan, landed.parts.map(p => p.ref === 'new:owner' ? { ...p, claims: [p.claims[0]] } : p), M.readingExclusions(read)).missing, [], 'the exclusion on the row lands it');
   assert.deepEqual(planShort(f.ask, plan, landed.parts, read), []);
   assert.deepEqual(validateRenderedFragment(landed, groups[0], f.ask, plan, true), landed);
@@ -1350,10 +1352,12 @@ test('.35 loop-missing: a part whose own design or step rows say it repeats (매
   const f = koru35(), plan = plan35(f), parts = structuredClone(fragments35(f).flatMap(x => x.parts));
   // The step row that says how often (매분) names it before the design row's 「tick :00」, as written up to 120 characters.
   const row = '카드 러너 | 11 | tick | 매분 checkpoint·kill·만료·trigger·pull | tick·checkpoint·kill·pull_due | KILL/EXPIRED → review 갱신 | [파일: C/card_runner.py]';
-  // .36: the engine's settings cell (j1_cadence 60 s) says how often it runs: named by that item (never by its 재진입 간격 step).
-  assert.deepEqual(loopRows(f.ask, parts), { rows: 2, missing: ['엔진: 설정 | j1_cadence 60 s', `카드 러너: ${row.slice(0, 120)}`] });
+  // .36: the engine's settings cell (j1_cadence 60 s) says how often it runs. .37: the program fills that loop when the wire is read
+  // (programLoop: the setting stands in its own design row's 설정 cell), so it is no longer named; the card runner's 매분 row still is.
+  assert.deepEqual(loopRows(f.ask, parts), { rows: 2, missing: [`카드 러너: ${row.slice(0, 120)}`] });
+  assert.deepEqual(M.programLoop(f.ask, parts.find(p => p.ref === 'new:engine')), { unit: 'j1_cadence 60 s', at: f.at('| 엔진 | review') });
   assert.deepEqual(readingDiagnostics({ ask: f.ask, summary: '', parts, blueprint: plan }).find(x => x.rule === 'loop-missing'),
-    { path: 'parts', rule: 'loop-missing', expected: 2, actual: 0, names: loopRows(f.ask, parts).missing });
+    { path: 'parts', rule: 'loop-missing', expected: 2, actual: 1, names: loopRows(f.ask, parts).missing });
   parts.find(p => p.ref === 'new:card').loop = { unit: '매분 tick', stop: null, resume: null, at: f.at('| 카드 러너 | 11') };
   parts.find(p => p.ref === 'new:engine').loop = { unit: '60 s', stop: null, resume: null, at: f.at('| 엔진 | review') };
   assert.deepEqual(loopRows(f.ask, parts), { rows: 2, missing: [] });
@@ -1401,12 +1405,12 @@ test('.35 io and restate: a bare prefix of an item of the part\'s own design cel
   const f = koru35(), plan = plan35(f), fragments = fragments35(f), engine = fragments[1].parts[0], cardRunner = fragments[0].parts[2];
   assert.deepEqual(M.sharedItems('review·policy·state 행, 패킷'), ['review 행', 'policy 행', 'state 행', '패킷']);
   // .36: a two-word noun is no unit word: nothing is shared.
-  assert.deepEqual(M.sharedItems('journal·outcomes 경주 행'), ['journal', 'outcomes 경주 행']);
+  assert.deepEqual(M.sharedItems('journal·outcomes 경주 행'), ['journal 행', 'outcomes 경주 행']);
   assert.deepEqual(M.sharedItems('원자료·σ·runner cards'), ['원자료', 'σ', 'runner cards'], 'a Latin tail belongs to the last name');
   assert.deepEqual(M.sharedItems('달력·지난 24 h LEDGER'), ['달력', '지난 24 h LEDGER']);
   assert.deepEqual(M.sharedItems('cards·counter·review 행·LEDGER'), ['cards', 'counter', 'review 행', 'LEDGER']);
-  // The .34 engine: 「review」「policy」 of 「review·policy·state 행」 go; 「state 행」 and 「패킷」 stay. .36: its 「journal」 out to the
-  // scorecard is the line's own first item now (「journal·outcomes 경주 행」 shares no noun) and stays.
+  // The .34 engine: 「review」「policy」 of 「review·policy·state 행」 go; 「state 행」 and 「패킷」 stay. .37: its 「journal」 out to the
+  // scorecard is a bare prefix of the line's first item 「journal 행」 again (「journal·outcomes 경주 행」 shares 행) and goes.
   Object.assign(engine, { inputs: ['review', 'policy', 'state 행', '패킷'], outputs: ['J1 답 → 주문', 'journal'] });
   // The card runner's own cell items stay, a payload name they begin notwithstanding (plan of 「plan.jsonl …」 would not refuse it).
   Object.assign(cardRunner, { inputs: ['패킷 원천', 'plan', 'facts', 'posture'], outputs: ['cards', 'counter', 'review 행', 'LEDGER'] });
@@ -1418,9 +1422,9 @@ test('.35 io and restate: a bare prefix of an item of the part\'s own design cel
     { from: 'new:engine', to: 'new:sheet', kind: 'flow', note: '', at: f.at('| 엔진 | 성적표'), payload: 'journal·outcomes 경주 행', mode: 'observed' }] };
   const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
   assert.deepEqual(exclusions.map(x => [x.path, x.category]).filter(([, c]) => ['inputs', 'outputs', 'restate'].includes(c)),
-    [['parts[3].inputs[0]', 'inputs'], ['parts[3].inputs[1]', 'inputs'], ['parts[2].claims[2]', 'restate']]);
+    [['parts[3].inputs[0]', 'inputs'], ['parts[3].inputs[1]', 'inputs'], ['parts[3].outputs[1]', 'outputs'], ['parts[2].claims[2]', 'restate']]);
   const engineOut = wire.parts.find(p => p.ref === 'new:engine'), cardOut = wire.parts.find(p => p.ref === 'new:card');
-  assert.deepEqual([engineOut.inputs, engineOut.outputs], [['state 행', '패킷'], ['J1 답 → 주문', 'journal']]);
+  assert.deepEqual([engineOut.inputs, engineOut.outputs], [['state 행', '패킷'], ['J1 답 → 주문']]);
   assert.deepEqual([cardOut.inputs, cardOut.outputs], [['패킷 원천', 'plan', 'facts', 'posture'], ['cards', 'counter', 'review 행', 'LEDGER']]);
   assert.deepEqual(cardOut.claims.map(c => c.key), ['s3', 's4', 's10']);
   assert.equal(M.setAside(M.validateMapReply(wire, f.ask)).length, 0);
@@ -1553,9 +1557,9 @@ test('.36 store-dup: a plan standing two store parts on one place is named for i
   assert.deepEqual(validateMapBlueprint(plan, f.ask), plan, 'the plan is valid; only a first map\'s plan stage refuses its first pass for it');
   assert.deepEqual(storeDupParts({ parts: fragments.flatMap(x => x.parts) }, f.ask).map(x => [x.index, x.name, x.into]), [[4, 'orders 행', 'orders 테이블'], [6, 'events 메시지', 'events 큐']]);
   const global = { ...empty(), summary: '주문 API가 주문 행을 쓴다.', relations: [
-    webLine(f, 'new:order_api', 'new:orders_table', '| 주문 API | orders 테이블', { payload: '주문 행 INSERT(status received)', mode: 'design' }),
+    webLine(f, 'new:order_api', 'new:orders_table', '| 주문 API | orders 테이블', { payload: '주문 행 INSERT(status received)', cadence: '주문 때', mode: 'design' }),
     webLine(f, 'new:order_api', 'new:orders_rows', '| orders 행', { payload: 'orders 행' }), webLine(f, 'new:orders_rows', 'new:worker', '| orders 행', { payload: 'orders 행' }),
-    webLine(f, 'new:webhook', 'new:events_queue', '| 결제 웹훅 수신기 | events 큐', { payload: 'order.paid 메시지(XADD)', mode: 'observed' }),
+    webLine(f, 'new:webhook', 'new:events_queue', '| 결제 웹훅 수신기 | events 큐', { payload: 'order.paid 메시지(XADD)', cadence: '결제 때', mode: 'observed' }),
     webLine(f, 'new:webhook', 'new:event_messages', '| events 메시지', { payload: 'events 메시지' }), webLine(f, 'new:event_messages', 'new:worker', '| events 메시지', { payload: 'events 메시지' }),
     webLine(f, 'new:events_queue', 'new:worker', '| events 큐 | 작업자', { payload: 'order.paid·shipment.updated(XREADGROUP workers)', cadence: '5 s 블록 읽기, 10개씩', mode: 'design' })],
     portMap: [{ relation: 2, port: 'orders 행', step: '읽기', direction: 'in', at: f.at('| 작업자 | 1 | 읽기') }, { relation: 6, port: 'events 메시지', step: '읽기', direction: 'in', at: f.at('| 작업자 | 1 | 읽기') }] };
@@ -1600,10 +1604,10 @@ test('.36 channel and unrecorded: a control line carrying an artifact is set asi
     webPart(f, 'new:flags', '기능 플래그 서비스', '| 기능 플래그 서비스 | 외부')];
   const plan = webPlan(f, parts), fragments = webFragments(parts), control = { channel: 'control', mode: 'observed' };
   const global = { ...empty(), summary: '', relations: [
-    webLine(f, 'new:order_api', 'new:provider', '| 주문 API | 결제사', { payload: '결제 세션 생성(금액은 서버 계산)', ...control }),
-    webLine(f, 'new:provider', 'new:webhook', '| 결제사 | 결제 웹훅 수신기', { payload: 'payment.succeeded·payment.failed(PayOn-Signature 헤더)', ...control }),
-    webLine(f, 'new:worker', 'new:carrier', '| 작업자 | 택배사 API', { payload: '주소 검증·송장 발급 요청', ...control }),
-    webLine(f, 'new:operator', 'new:flags', '| 운영 담당자 | 기능 플래그 서비스', { payload: 'checkout_enabled 끄기·켜기', ...control }),
+    webLine(f, 'new:order_api', 'new:provider', '| 주문 API | 결제사', { payload: '결제 세션 생성(금액은 서버 계산)', cadence: '주문 때', ...control }),
+    webLine(f, 'new:provider', 'new:webhook', '| 결제사 | 결제 웹훅 수신기', { payload: 'payment.succeeded·payment.failed(PayOn-Signature 헤더)', cadence: '결제 때', ...control }),
+    webLine(f, 'new:worker', 'new:carrier', '| 작업자 | 택배사 API', { payload: '주소 검증·송장 발급 요청', cadence: 'order.paid마다', ...control }),
+    webLine(f, 'new:operator', 'new:flags', '| 운영 담당자 | 기능 플래그 서비스', { payload: 'checkout_enabled 끄기·켜기', cadence: '사건 때', ...control }),
     // A line on the operator's own part row (「관리자 화면에서 환불·…」): no connection row draws it.
     webLine(f, 'new:operator', 'new:order_api', '| 운영 담당자 | 관리자', { payload: '환불', ...control })] };
   const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
@@ -1664,7 +1668,7 @@ test('.36 conditions: a part\'s own 「조건·거부·분기」 rows stand outs
   assert.equal(M.setAside(plain).length, 0);
   M.attachExclusions(plain, exclusions, f.ask);
   const applied = M.applyReading(f.project, f.input, plain, { id: 'R_web36c', at: '2026-11-04T03:00:00.000Z', model: 'stub', prompt: 'm6-000000000036', hash: '7'.repeat(64) });
-  assert.equal(applied.reading.version, 'map-reading.12');
+  assert.equal(applied.reading.version, 'map-reading.13');
   assert.deepEqual(applied.reading.parts.map(p => p.conditions.length), [2, 1]);
   assert.equal(WEB36_DESIGN.slice(applied.reading.parts[1].conditions[0].quote.from, applied.reading.parts[1].conditions[0].quote.to), applied.reading.parts[1].conditions[0].quote.quote);
   assert.deepEqual(validateProject(applied.project), applied.project);
@@ -1705,7 +1709,7 @@ test('.36 loops: a resume sentence is no unit, a retired part repeats nothing no
 test('.36 shared noun: one bare unit word after bare names is shared, nothing else; an io item adding a unit noun to a bare item of its own design cell is set aside', () => {
   assert.deepEqual(M.sharedItems('review·policy·state 행, 패킷'), ['review 행', 'policy 행', 'state 행', '패킷']);
   assert.deepEqual(M.sharedItems('cards·counter·review 행·LEDGER'), ['cards', 'counter', 'review 행', 'LEDGER']);
-  assert.deepEqual(M.sharedItems('journal·outcomes 경주 행'), ['journal', 'outcomes 경주 행'], 'a two-word noun is no unit word');
+  assert.deepEqual(M.sharedItems('journal·outcomes 경주 행'), ['journal 행', 'outcomes 경주 행'], '.37: the last Hangul word is the shared noun');
   assert.deepEqual(M.sharedItems('A/server.ts·config.ts·middleware/rate.ts'), ['A/server.ts', 'config.ts', 'middleware/rate.ts']);
   assert.deepEqual(M.sharedItems('tracking_events 행·shipments 행·events 메시지'), ['tracking_events 행', 'shipments 행', 'events 메시지']);
   assert.deepEqual(M.sharedItems('orders 행·결제 세션 요청·관리자 세션 키'), ['orders 행', '결제 세션 요청', '관리자 세션 키']);
@@ -1716,4 +1720,283 @@ test('.36 shared noun: one bare unit word after bare names is shared, nothing el
   const { wire, exclusions } = combineRenderedReading(fragments, { ...empty(), summary: '' }, f.ask, plan);
   assert.deepEqual(exclusions.filter(x => x.category === 'outputs').map(x => x.path), ['parts[2].outputs[0]', 'parts[2].outputs[1]']);
   assert.deepEqual(wire.parts.find(p => p.ref === 'new:card').outputs, ['review 행', 'LEDGER']);
+});
+
+// ---- first-map-divided.37 (map-reading.13, from the blind judging of the .36 maps: KORU and the web app both 20/20 and design 18/18,
+// whose global first passes paid their one correction for lines the contract itself set aside (the KORU owner → ARM, the web
+// 알림톡 대행사 → 고객) and for a store the records give no line (ARM), whose engine kept its 설정 cadence as loop-missing, whose
+// collector kept a null stop beside its QUOTA_REACHED row, whose admin-screen rule found no place in the order API's conditions,
+// whose HTTP formats lost their fields, whose payment polling read 폐기 as implementation and whose render corrections dropped rows
+// unseen). The rows are the real rows of both test sets (webapp-design-v1 §1-§5, webapp-status-v3 §2, §4, §6 and §7; koru-orch-design-v1
+// §3-§5, koru-orch-v3 §2 and §4), copied as written; no model quality is claimed. ----
+const WEB37_DESIGN = WEB36_DESIGN
+  .replace('| 결제사 | 외부 시스템 | PayOn [파일: A/lib/payon.ts] |', ['| 결제사 | 외부 시스템 | PayOn [파일: A/lib/payon.ts] |',
+    '| 관리자 화면 | [모름] | 화면(아홉 유형에 맞는 것 없음) [파일: F/admin/page.tsx] |', '| 알림톡 대행사 | 외부 시스템 | 알림톡 발송 [파일: W/notify.ts 이름만] |',
+    '| 고객 | 사람 | 주문·결제·조회 [파일: F/order/page.tsx] |'].join('\n'))
+  .replace('| 플래그 값 | checkout_enabled·address_ai | 기능 플래그 서비스 | 주문 API·작업자 | 메모리(SDK 캐시) | [파일: A/lib/flags.ts] |', ['| 플래그 값 | checkout_enabled·address_ai | 기능 플래그 서비스 | 주문 API·작업자 | 메모리(SDK 캐시) | [파일: A/lib/flags.ts] |',
+    '| 추적 응답 | tracking_no·stage·occurred_at … | 택배사 API | 택배 추적 수집기 | HTTP | [파일: git 3e9a1c07:tracker/src/carrier-client.ts] |',
+    '| 관리자 요청 | action·order_id·reason·amount | 관리자 화면 | 주문 API | HTTP(세션 쿠키) | [파일: A/routes/admin.ts] |', '| 알림 요청 | [모름] | 작업자 | 알림톡 대행사 | HTTP | [모름] |'].join('\n'));
+const WEB37_STATUS = ['모아배송 프로젝트 현황 보고서 (v3 표 형식, 검토 세션 작성, 2026-11-04 02:0xZ 기준, 나머지 표)',
+  '2. 부분', '| 이름 | 하는 일 한 줄 | 담당 파일·폴더 | 상태 단어 | 상태의 기준 시각 | 꼬리표 |', '|---|---|---|---|---|---|',
+  '| 고객 | 주문서 입력·결제·배송 조회 | — | 돌고 있음 | 11-03 23:50Z | [보고: 운영 담당자 11-03 23:50Z] |',
+  '| 관리자 화면 | 운영 담당자용 주문 목록·환불·제안 확인 | web/app/admin/ | 돌고 있음 | 11-04 01:40Z | [보고: 개발 세션 docs/STATUS.md 11-04 01:40Z] |',
+  '| 알림톡 대행사 | 고객 알림톡 발송 | 외부 | 돌고 있음 | 11-03 23:50Z | [보고: 운영 담당자 11-03 23:50Z] |',
+  '4. 연결', '| 보내는 부분 | 받는 부분 | 넘기는 것 | 언제·얼마나 자주 | 설계/관찰 | 꼬리표 |', '|---|---|---|---|---|---|',
+  '| 작업자 | 알림톡 대행사 | 주문 확인·발송 시작·배송 완료 알림 | 상태 바뀔 때 | 관찰 | [보고: 운영 담당자 11-03 01:20Z] |',
+  '| 택배사 API | 택배 추적 수집기 | 송장별 추적 단계 | 10분마다 | 관찰 | [보고: 개발 세션 docs/STATUS.md 11-02 09:15Z] |',
+  '| 관리자 화면 | 주문 API | /admin/api/* 요청(세션 쿠키) | 수시 | 설계 | [파일: api/src/routes/admin.ts] |',
+  '6. 철회·변경', '| 부분 이름 | 옛 결정 | 지금 | 근거·날짜 |', '|---|---|---|---|',
+  '| 결제 폴링 동기화 | 결제 확인은 5분마다 결제사 조회 | 폐기, 웹훅만 | [파일: docs/DECISIONS.md D-04 10-20] |',
+  '| 주소 보정기 | 신뢰도 0.9 이상이면 orders.address에 자동 적용 | 철회, 운영 담당자 확인 뒤에만 적용 | [파일: docs/DECISIONS.md D-07 10-24] |',
+  '| 정산 배치 | 00:05Z 실행, UTC 날짜 경계 | 15:30Z 실행, KST 날짜 경계 | [실행: git show 5d0c2e19 10-28] |',
+  '| 작업자 | 재시도 지수 백오프 8회 뒤 버림 | 5회 뒤 events:dlq로 옮김 | [파일: docs/DECISIONS.md D-09 10-27] |',
+  '| CI 관문 | 「e2e 전부 통과」(개발 세션 10-29 보고) | 정정: e2e 잡은 건너뛰어졌음, 10-31부터 필수 잡 | [보고: 개발 세션 docs/STATUS.md 10-31 08:02Z] |',
+  '| events 큐 | 스트림 길이 제한 없음, maxmemory 1 GB | MAXLEN ~100000, maxmemory 2 GB | [파일: docs/INCIDENT-1102.md 11-02 12:20Z] |',
+  '7. 지켜야 할 것과 하지 않기로 한 것', '| 부분 이름 | 규칙 한 줄 | 누가 정했나·언제 |', '|---|---|---|',
+  '| 관리자 화면 | 환불은 운영 담당자·소유자만, 관리자 세션은 8 h 만료 | 소유자 10-16 [파일: docs/DECISIONS.md D-03] |'].join('\n');
+function web37() {
+  let project = D.pasteRecord(D.createProject(), WEB37_DESIGN, null).project;
+  project = D.pasteRecord(project, WEB36_STATUS, null).project;
+  project = D.pasteRecord(project, WEB37_STATUS, null).project;
+  const input = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP6_SCHEMA), spans = input.ask.records.flatMap(r => r.spans);
+  assert.ok(M.firstAsk(input.ask));
+  const at = head => { const hit = spans.filter(span => span.t.startsWith(head)); assert.equal(hit.length, 1, head); return hit[0].s; };
+  return { project, input, ask: input.ask, at };
+}
+const meta37 = (id, n) => ({ id, at: '2026-11-04T05:00:00.000Z', model: 'stub', prompt: 'm6-000000000037', hash: n.repeat(64) });
+
+test('.37 lines set aside: a line the contract leaves out as unrecorded, or a plan item resting on no recorded line, is named under lines-set-aside and never as missing (no global correction); a store the records give no artifact row is no island', () => {
+  const f = web37();
+  const parts = [webPart(f, 'new:worker', '작업자', '| 작업자 | 루프'), webPart(f, 'new:notify', '알림톡 대행사', '| 알림톡 대행사 | 외부'), webPart(f, 'new:customer', '고객', '| 고객 | 사람')];
+  const plan = { ...webPlan(f, parts), global: [
+    { kind: 'relation', text: 'new:worker → new:notify: 주문 확인·발송 시작·배송 완료 알림', at: [f.at('| 작업자 | 알림톡 대행사')] },
+    // The .36 web plan drew this from the vendor's part row (「고객 알림톡 발송」); no connection or artifact row backs it.
+    { kind: 'relation', text: 'new:notify → new:customer: 고객 알림톡 발송', at: [f.at('| 알림톡 대행사 | 고객 알림톡')] }] };
+  const fragments = webFragments(parts);
+  const global = { ...empty(), summary: '', relations: [
+    webLine(f, 'new:worker', 'new:notify', '| 작업자 | 알림톡 대행사', { payload: '주문 확인·발송 시작·배송 완료 알림', cadence: '상태 바뀔 때', mode: 'observed' }),
+    webLine(f, 'new:notify', 'new:customer', '| 알림톡 대행사 | 고객 알림톡', { payload: '고객 알림톡' })] };
+  const { exclusions, asideLines } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.category]), [['relations[1]', 'unrecorded']]);
+  assert.deepEqual(asideLines, [{ from: 'new:notify', to: 'new:customer', category: 'unrecorded' }]);
+  const found = finalDiagnostics(fragments, global, f.ask, plan), by = rule => found.find(x => x.rule === rule);
+  assert.equal(by('plan-relations'), undefined, 'the line the contract set aside is no missing line');
+  assert.deepEqual(by('lines-set-aside'), { path: 'relations', rule: 'lines-set-aside', expected: null, actual: 1, names: ['new:notify → new:customer: unrecorded'] });
+  assert.ok(!missingLines(fragments, global, f.ask, plan).some(x => x.rule === 'plan-relations'), 'the global first pass pays no correction for it');
+  assert.ok(!by('connections').names.includes('작업자 → 알림톡 대행사'), 'the vendor\'s own connection row is drawn');
+  // Left undrawn, the plan item on the part row alone is set aside the same way (the global correction's feedback says so too).
+  const bare = { ...global, relations: [global.relations[0]] };
+  assert.deepEqual(finalDiagnostics(fragments, bare, f.ask, plan).find(x => x.rule === 'lines-set-aside')?.names, ['new:notify → new:customer: unrecorded']);
+  assert.deepEqual(mapStageIssues(bare, null, { ask: f.ask, parts: fragments.flatMap(x => x.parts), blueprint: plan }).filter(x => ['plan-relations', 'lines-set-aside'].includes(x.rule)).map(x => [x.rule, x.names]),
+    [['lines-set-aside', ['new:notify → new:customer: unrecorded']]]);
+  // KORU (koru-orch-v3 §2): owner → ARM rests on the owner's part row only (「잔고 입출금으로 노출 조절」); a plan item on a connection row
+  // left undrawn is still missing.
+  const k = koru35(), base = plan35(k), kPlan = { ...base, global: [...base.global,
+    { kind: 'relation', text: 'new:owner → new:arm: 잔고 입출금으로 노출 조절', at: [k.at('| 소유자 | 지시')] },
+    { kind: 'relation', text: 'new:card → new:engine: review.jsonl watch·allowed_side·valid_until', at: [k.at('| 카드 러너 | 엔진')] }] };
+  const plainAsk = fixture(), kParts = fragments35(k).flatMap(x => x.parts), kFound = readingDiagnostics({ ask: k.ask, summary: '', parts: kParts, relations: [], blueprint: kPlan });
+  assert.deepEqual(kFound.find(x => x.rule === 'plan-relations'), { path: 'relations', rule: 'plan-relations', expected: 1, actual: 0, names: ['new:card → new:engine'] });
+  assert.deepEqual(kFound.find(x => x.rule === 'lines-set-aside').names, ['new:owner → new:arm: unrecorded']);
+  assert.deepEqual([M.unrecordedAt(k.ask, [k.at('| 소유자 | 지시')]), M.unrecordedAt(k.ask, [k.at('| 소유자 | 지시'), k.at('| 카드 러너 | 엔진')]), M.unrecordedAt(plainAsk.ask, [plainAsk.at[0]])],
+    [true, false, false], 'any recorded line backs an item; without a connection table nothing is unrecorded');
+  // ARM as a store part (koru-orch-design-v1 §3 gives it no artifact row): no island is named; the web 관리자 세션 still is (.36).
+  Object.assign(kParts.find(p => p.ref === 'new:arm'), { type: 'store', typeAt: k.at('| ARM | e=1.00') });
+  assert.equal(readingDiagnostics({ ask: k.ask, summary: '', parts: kParts, relations: [], blueprint: kPlan }).find(x => x.rule === 'store-island'), undefined);
+});
+
+test('.37 program loop: a part with no loop whose cadence setting stands in its own design row gets that item as its unit, marked program; a loop takes a condition\'s stop or quota code as its stop; the model\'s own items never change', () => {
+  // KORU (koru-orch-design-v1 §3, §5): the engine's 「j1_cadence 60 s」 (the .36 loop-missing) and its STOP_NOT_RESIDENT (a stop price).
+  const k = koru35(), kPlan = plan35(k), kFragments = fragments35(k);
+  kFragments[0].parts[2].loop = { unit: '매분', stop: null, resume: null, at: k.at('| 카드 러너 | 11') };
+  kFragments[1].parts[0].conditions = [{ when: 'not 1 <= stop <= 250', then: 'STOP_NOT_RESIDENT', else: 'J1 답', at: k.at('| 엔진 | not 1') }];
+  const { wire, exclusions } = combineRenderedReading(kFragments, { ...empty(), summary: '' }, k.ask, kPlan);
+  assert.equal(wire.parts.find(p => p.ref === 'new:engine').loop ?? null, null, 'the wire keeps the reply as written');
+  const read = M.validateMapReply(wire, k.ask), loopOf = ref => read.parts.find(p => p.ref === ref).loop;
+  assert.deepEqual([loopOf('new:engine').unit, loopOf('new:engine').stop, loopOf('new:engine').resume, loopOf('new:engine').program], ['j1_cadence 60 s', null, null, true]);
+  assert.ok(loopOf('new:engine').quote.quote.includes('| 엔진 | review·policy·state 행, 패킷 | 4절 |'), 'on the engine\'s own design row');
+  assert.deepEqual([loopOf('new:card').unit, loopOf('new:card').program], ['매분', undefined]);
+  assert.equal(loopOf('new:arm'), null, 'ARM (24 h 만료) holds no cadence setting');
+  assert.equal(finalDiagnostics(kFragments, { ...empty(), summary: '' }, k.ask, kPlan).find(x => x.rule === 'loop-missing'), undefined, 'loop-missing names neither');
+  M.attachExclusions(read, exclusions, k.ask);
+  const applied = M.applyReading(k.project, k.input, read, meta37('R_loop37', '1'));
+  const stored = ref => applied.reading.parts.find(p => p.areaId === applied.created[kPlan.parts.findIndex(x => x.ref === ref)]).loop;
+  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.deepEqual([stored('new:engine').unit, stored('new:engine').program, stored('new:card').program], ['j1_cadence 60 s', true, false]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  // The web app (webapp-design-v1 §3, §5): the collector's own unit stays and takes its QUOTA_REACHED row as its stop; the worker's
+  // per-message dlq is no stop; the front's POLL_MS 30000 is its unit.
+  const f = web37(), condition = (when, then, otherwise, head) => ({ when, then, else: otherwise, at: f.at(head) });
+  const collector = webPart(f, 'new:collector', '택배 추적 수집기', '| 택배 추적 수집기 | 수집기', { config: ['INTERVAL_MS 600000', 'BATCH 200', 'DAILY_QUOTA 10000'],
+    loop: { unit: '600 s 주기', stop: null, resume: null, at: f.at('| 택배 추적 수집기 | 수집기') }, conditions: [condition('quota.today >= DAILY_QUOTA', 'QUOTA_REACHED, 오늘 조회 멈춤', '다음', '| 택배 추적 수집기 | quota')] });
+  const worker = webPart(f, 'new:worker', '작업자', '| 작업자 | 루프', { config: ['GROUP workers', 'BLOCK_MS 5000', 'COUNT 10', 'MAX_ATTEMPTS 5', 'BACKOFF_BASE_S 1'],
+    loop: { unit: '5 s 블록 읽기, 10개씩', stop: null, resume: '없으면 다시 읽기', at: f.at('| 작업자 | 1 | 읽기') }, conditions: [condition('msg.attempt >= MAX_ATTEMPTS', 'events:dlq로 XADD, XACK', '2^attempt s 뒤 재시도', '| 작업자 | msg.attempt')] });
+  const front = webPart(f, 'new:front', '웹 프런트', '| 웹 프런트 | [모름]', { config: ['POLL_MS 30000'] });
+  const parts = [collector, worker, front], plan = webPlan(f, parts), web = combineRenderedReading(webFragments(parts), { ...empty(), summary: '' }, f.ask, plan);
+  const webRead = M.validateMapReply(web.wire, f.ask), webLoop = ref => { const l = webRead.parts.find(p => p.ref === ref).loop; return [l.unit, l.stop, l.resume, l.program ?? false]; };
+  assert.deepEqual([webLoop('new:collector'), webLoop('new:worker'), webLoop('new:front')],
+    [['600 s 주기', 'QUOTA_REACHED, 오늘 조회 멈춤', null, true], ['5 s 블록 읽기, 10개씩', null, '없으면 다시 읽기', false], ['POLL_MS 30000', null, null, true]]);
+  assert.ok(webRead.parts.find(p => p.ref === 'new:front').loop.quote.quote.startsWith('| 웹 프런트 | shipments 행·tracking_events 행 |'));
+  assert.deepEqual(loopRows(f.ask, web.wire.parts).missing, [], 'the front is no longer named for its POLL_MS');
+  assert.deepEqual([M.CADENCE_SETTING.test('j1_cadence 60 s'), M.CADENCE_SETTING.test('POLL_MS 30000'), M.CADENCE_SETTING.test('INTERVAL_MS 600000'), M.CADENCE_SETTING.test('600 s 주기'),
+    M.CADENCE_SETTING.test('BLOCK_MS 5000'), M.CADENCE_SETTING.test('TIMEOUT_MS 8000'), M.CADENCE_SETTING.test('SESSION_TTL 8h')], [true, true, true, true, false, false, false]);
+  assert.deepEqual([M.STOP_CODE.test('QUOTA_REACHED, 오늘 조회 멈춤'), M.STOP_CODE.test('STOP_NOT_RESIDENT'), M.STOP_CODE.test('events:dlq로 XADD, XACK'), M.STOP_CODE.test('CONCURRENCY_NOT_ONE 쉼')], [true, false, false, false]);
+  // A program loop never stands on a retired part, and a loop item the model wrote on the wire as program is its own (the key is passed over).
+  assert.equal(M.programLoop(f.ask, { name: '웹 프런트', config: ['POLL_MS 30000'], state: 'retired' }), null);
+  const forged = structuredClone(web.wire); forged.parts[1].loop.program = true; forged.parts[1].stateVars = [{ name: 'msg.attempt', scope: null, readBy: [], changedBy: [], program: true }];
+  const forgedRead = M.validateMapReply(forged, f.ask).parts[1];
+  assert.deepEqual([forgedRead.loop.program, forgedRead.stateVars[0].program], [undefined, undefined]);
+});
+
+test('.37 program places and kept state: a rule its own part places nowhere takes the conditions of the part its line reaches; a condition variable the records call 키 is a kept state by name, marked program', () => {
+  const f = web37(), condition = (when, then, otherwise, head) => ({ when, then, else: otherwise, at: f.at(head) });
+  const admin = webPart(f, 'new:admin', '관리자 화면', '| 관리자 화면 | [모름]', { claims: [webClaim(f, 's1', '| 관리자 화면 | 환불은',
+    { kind: 'want', topic: 'rule', text: '환불은 운영 담당자와 소유자만 할 수 있고 관리자 세션은 8 h 후 만료한다.', scope: 'part', enforcedBy: [{ kind: 'unknown', text: '장치 미상', at: null }] })] });
+  const api = webPart(f, 'new:order_api', '주문 API', '| 주문 API | 루프', { conditions: [condition("!flags.isOn('checkout_enabled')", '503 CHECKOUT_DISABLED', '다음', '| 주문 API | !flags'),
+    condition('!sess 또는 now - sess.issued_at > SESSION_TTL', '401 SESSION_EXPIRED', '다음', '| 주문 API | !sess'),
+    condition("action === 'refund' && !['ops','owner'].includes(sess.role)", '403 ROLE_REQUIRED', '다음', '| 주문 API | action')] });
+  const worker = webPart(f, 'new:worker', '작업자', '| 작업자 | 루프', { conditions: [condition('msg.attempt >= MAX_ATTEMPTS', 'events:dlq로 XADD, XACK', '2^attempt s 뒤 재시도', '| 작업자 | msg.attempt')] });
+  const parts = [admin, api, worker], plan = webPlan(f, parts), fragments = webFragments(parts);
+  const global = { ...empty(), summary: '', relations: [webLine(f, 'new:admin', 'new:order_api', '| 관리자 화면 | 주문 API', { payload: '/admin/api/* 요청(세션 쿠키)', cadence: '수시', mode: 'design' })] };
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual(exclusions, []);
+  const read = M.validateMapReply(wire, f.ask), partOf = ref => read.parts.find(p => p.ref === ref);
+  // 환불·소유자·세션 read as refund·owner·sess: the refund row shares three words, the session row two (sess, expir); most first.
+  assert.deepEqual(partOf('new:admin').claims[0].anchors.map(a => [a.kind, a.text, a.program]),
+    [['inferred', "action === 'refund' && !['ops','owner'].includes(sess.role)", true], ['inferred', '!sess 또는 now - sess.issued_at > SESSION_TTL', true]]);
+  assert.equal(partOf('new:admin').claims[0].anchors[0].quote.quote, "| 주문 API | action === 'refund' && !['ops','owner'].includes(sess.role) | 403 ROLE_REQUIRED | 다음 | [파일: A/routes/admin.ts] |");
+  // Without the line the admin screen's rule stays unplaced (its own part has no row).
+  assert.deepEqual(M.validateMapReply(combineRenderedReading(fragments, { ...empty(), summary: '' }, f.ask, plan).wire, f.ask).parts[0].claims[0].anchors, []);
+  // 「관리자 세션 키 | user_id·role·issued_at | 주문 API | 주문 API」 calls sess.issued_at and sess.role kept state; msg.attempt's row (events 메시지) does not.
+  assert.deepEqual(partOf('new:order_api').stateVars, [{ name: 'sess.issued_at', scope: null, readBy: [], changedBy: [], program: true }, { name: 'sess.role', scope: null, readBy: [], changedBy: [], program: true }]);
+  assert.deepEqual(partOf('new:worker').stateVars, []);
+  assert.deepEqual(M.conditionVariables("action === 'refund' && !['ops','owner'].includes(sess.role) || flags.isOn('x') && evt.type === 'payment.succeeded'"), ['sess.role', 'evt.type']);
+  const applied = M.applyReading(f.project, f.input, read, meta37('R_places37', '2'));
+  const storedApi = applied.reading.parts.find(p => p.areaId === applied.created[1]);
+  assert.deepEqual(storedApi.stateVars.map(s => [s.name, s.program]), [['sess.issued_at', true], ['sess.role', true]]);
+  assert.deepEqual(applied.reading.parts.find(p => p.areaId === applied.created[0]).claims[0].anchors.map(a => a.program), [true, true]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+});
+
+test('.37 format fields: a line carrying a format artifact (HTTP, 메모리, a request) keeps its fields as payloadFields; a field no row gives, a list on a line carrying none or a list past 24 is left out alone and the line stays', () => {
+  const f = web37();
+  const parts = [webPart(f, 'new:order_api', '주문 API', '| 주문 API | 루프'), webPart(f, 'new:provider', '결제사', '| 결제사 | 외부'), webPart(f, 'new:webhook', '결제 웹훅 수신기', '| 결제 웹훅 수신기 | 계산'),
+    webPart(f, 'new:operator', '운영 담당자', '| 운영 담당자 | 관리자'), webPart(f, 'new:flags', '기능 플래그 서비스', '| 기능 플래그 서비스 | 외부')];
+  const plan = webPlan(f, parts), fragments = webFragments(parts);
+  const global = { ...empty(), summary: '', relations: [
+    webLine(f, 'new:order_api', 'new:provider', '| 주문 API | 결제사', { payload: '결제 세션 생성(금액은 서버 계산)', cadence: '주문 때', payloadFields: ['order_id', 'amount', 'currency', 'success_url', 'cancel_url', 'memo'] }),
+    webLine(f, 'new:provider', 'new:webhook', '| 결제사 | 결제 웹훅 수신기', { payload: 'payment.succeeded·payment.failed(PayOn-Signature 헤더)', cadence: '결제 때', payloadFields: ['id', 'type', 'data(payment_id·order_id·amount)', 'created'] }),
+    webLine(f, 'new:operator', 'new:flags', '| 운영 담당자 | 기능 플래그 서비스', { payload: 'checkout_enabled 끄기·켜기', cadence: '사건 때', channel: 'control', payloadFields: ['checkout_enabled'] })] };
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.category]), [['relations[0].payloadFields[5]', 'payload-fields'], ['relations[2].payloadFields', 'payload-fields']]);
+  assert.match(exclusions[1].explanation, /그 칸\(또는 그 필드 하나\)만 빼고 연결은 남겼어요/);
+  assert.deepEqual(wire.relations.map(r => r.payloadFields), [['order_id', 'amount', 'currency', 'success_url', 'cancel_url'], ['id', 'type', 'data(payment_id·order_id·amount)', 'created'], null]);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0);
+  assert.deepEqual(plain.relations.map(r => r.payloadFields), [['order_id', 'amount', 'currency', 'success_url', 'cancel_url'], ['id', 'type', 'data(payment_id·order_id·amount)', 'created'], []]);
+  M.attachExclusions(plain, exclusions, f.ask);
+  const applied = M.applyReading(f.project, f.input, plain, meta37('R_fields37', '3'));
+  assert.deepEqual(applied.reading.relations.map(r => r.payloadFields.length), [5, 4, 0]);
+  assert.deepEqual(validateProject(applied.project), applied.project);
+  assert.deepEqual(M.artifactRows(f.ask).filter(r => r.format).map(r => [r.name, r.fields.length]),
+    [['결제 세션 요청', 5], ['결제 웹훅', 4], ['송장 요청', 5], ['플래그 값', 2], ['추적 응답', 3], ['관리자 요청', 4], ['알림 요청', 0]], 'HTTP and memory rows are formats; a [모름] cell has no field');
+  // Past 24 the list is left out alone; plain map.6 refuses a field over 60; the global correction hears each by its own bound.
+  const long = structuredClone(global); long.relations[0].payloadFields = Array.from({ length: 25 }, (_, i) => `f${i}`);
+  assert.deepEqual(combineRenderedReading(fragments, long, f.ask, plan).exclusions.filter(x => x.category === 'payload-fields').map(x => x.path), ['relations[0].payloadFields', 'relations[2].payloadFields']);
+  const loud = structuredClone(wire); loud.relations[0].payloadFields = ['가'.repeat(61)];
+  assert.throws(() => M.validateMapReply(loud, f.ask));
+  assert.deepEqual(mapStageIssues(loud).filter(x => x.path.startsWith('relations[0].payloadFields')), [{ path: 'relations[0].payloadFields[0]', rule: 'length', expected: 60, actual: 61 }]);
+  assert.deepEqual(mapStageIssues(long).filter(x => x.path === 'relations[0].payloadFields'), [{ path: 'relations[0].payloadFields', rule: 'count', expected: 24, actual: 25 }]);
+});
+
+test('.37 cadence and duplicate lines: a line on a connection row that says when keeps that cadence (a wrong word or none leaves the cadence out alone, the line stays); a later line with the same ends, channel and payload is dup-line', () => {
+  const f = web37();
+  const parts = [webPart(f, 'new:events_queue', 'events 큐', '| events 큐 | 행', { type: 'store', typeAt: f.at('| events 큐 | 행') }), webPart(f, 'new:worker', '작업자', '| 작업자 | 루프'),
+    webPart(f, 'new:webhook', '결제 웹훅 수신기', '| 결제 웹훅 수신기 | 계산'), webPart(f, 'new:carrier', '택배사 API', '| 택배사 API | 외부'), webPart(f, 'new:collector', '택배 추적 수집기', '| 택배 추적 수집기 | 수집기')];
+  const plan = webPlan(f, parts), fragments = webFragments(parts);
+  const global = { ...empty(), summary: '', relations: [
+    // webapp-status-v3 §4 「5 s 블록 읽기, 10개씩」: the .36 map left it null (the worker's loop unit said it too).
+    webLine(f, 'new:events_queue', 'new:worker', '| events 큐 | 작업자', { payload: 'order.paid·shipment.updated(XREADGROUP workers)', mode: 'design' }),
+    webLine(f, 'new:webhook', 'new:events_queue', '| 결제 웹훅 수신기 | events 큐', { payload: 'order.paid 메시지(XADD)', cadence: '가'.repeat(41), mode: 'observed' }),
+    webLine(f, 'new:webhook', 'new:events_queue', '| 결제 웹훅 수신기 | events 큐', { payload: 'order.paid 메시지(XADD)', cadence: '결제 때', mode: 'observed' }),
+    webLine(f, 'new:carrier', 'new:collector', '| 택배사 API | 택배 추적 수집기', { payload: '송장별 추적 단계', cadence: '10분마다', mode: 'observed' })] };
+  const { wire, exclusions } = combineRenderedReading(fragments, global, f.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.category]), [['relations[0].cadence', 'cadence'], ['relations[1].cadence', 'cadence'], ['relations[2]', 'dup-line']]);
+  assert.match(exclusions[0].explanation, /그 칸을 진단에 남겼어요/);
+  assert.match(exclusions[2].explanation, /뒤의 겹친 연결을 제외했어요/);
+  assert.ok(exclusions[0].record, 'the cadence names its line\'s row');
+  assert.deepEqual(wire.relations.map(r => [r.from, r.to, r.cadence ?? null]), [['new:events_queue', 'new:worker', null], ['new:webhook', 'new:events_queue', null], ['new:carrier', 'new:collector', '10분마다']]);
+  const plain = M.validateMapReply(wire, f.ask);
+  assert.equal(M.setAside(plain).length, 0);
+  assert.equal(plain.relations.length, 3);
+  // Plain map.6 still refuses a wrong cadence word whole; a later map (map.7) still sets its line aside.
+  assert.throws(() => M.validateMapReply({ ...structuredClone(wire), relations: [global.relations[1]] }, f.ask));
+  // Written as the row says it, and once, nothing is set aside.
+  const kept = { ...global, relations: [{ ...global.relations[0], cadence: '5 s 블록 읽기, 10개씩' }, global.relations[2], global.relations[3]] };
+  assert.deepEqual(combineRenderedReading(fragments, kept, f.ask, plan).exclusions, []);
+});
+
+test('.37 withdrawal kind: a withdrawal whose row\'s 지금 cell says 폐기 or 철회 holds design (another kind is left null alone), and a kind left null beside 폐기·철회·롤백·되돌림 is named on its row', () => {
+  const f = web37(), withdrawn = (key, head, extra = {}) => webClaim(f, key, head, { topic: 'withdrawn', ...extra });
+  const parts = [webPart(f, 'new:polling', '결제 폴링 동기화', '| 결제 폴링 동기화 | 타이머', { claims: [withdrawn('s1', '| 결제 폴링 동기화 | 결제 확인은', { withdrawalKind: 'implementation' })] }),
+    webPart(f, 'new:fixer', '주소 보정기', '| 주소 보정기 | 신뢰도', { claims: [withdrawn('s2', '| 주소 보정기 | 신뢰도')] }),
+    webPart(f, 'new:events_queue', 'events 큐', '| events 큐 | 행', { claims: [withdrawn('s3', '| events 큐 | 스트림 길이')] }),
+    webPart(f, 'new:ci', 'CI 관문', '| CI 관문 | 「e2e', { claims: [withdrawn('s61', '| CI 관문 | 「e2e', { withdrawalKind: 'report' })] }),
+    webPart(f, 'new:worker', '작업자', '| 작업자 | 루프', { claims: [withdrawn('s62', '| 작업자 | 재시도 지수', { withdrawalKind: 'design' })] })];
+  const plan = webPlan(f, parts), fragments = webFragments(parts);
+  const { wire, exclusions } = combineRenderedReading(fragments, { ...empty(), summary: '' }, f.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.category]), [['parts[0].claims[0].withdrawalKind', 'withdrawal-kind'], ['parts[1].claims[0].withdrawalKind', 'withdrawal-kind']]);
+  assert.ok(exclusions.every(x => x.record), 'each names the withdrawal row');
+  assert.deepEqual(M.validateMapReply(wire, f.ask).parts.map(p => p.claims[0].withdrawalKind), [null, null, null, 'report', 'design'], 'the claims stay; MAXLEN names no kind word');
+  // KORU (koru-orch-v3 §6 「철회(코드 상한과 같음)」): design stays; implementation is left out.
+  const k = koru35(), kPlan = plan35(k), kFragments = fragments35(k);
+  kFragments[0].parts[2].claims[0].withdrawalKind = 'design';
+  assert.equal(combineRenderedReading(kFragments, { ...empty(), summary: '' }, k.ask, kPlan).exclusions.filter(x => x.category === 'withdrawal-kind').length, 0);
+  kFragments[0].parts[2].claims[0].withdrawalKind = 'implementation';
+  assert.deepEqual(combineRenderedReading(kFragments, { ...empty(), summary: '' }, k.ask, kPlan).exclusions.filter(x => x.category === 'withdrawal-kind').map(x => x.path), ['parts[2].claims[0].withdrawalKind']);
+});
+
+test('.37 shared noun, final form: the last item\'s last Hangul word goes on every earlier item unless one holds it or ends in its own class word; the KORU 「전날 체결」 and 「GTX 진입」 are bare prefixes of their line\'s items', () => {
+  assert.deepEqual(M.sharedItems('전날 체결·마크 원자료'), ['전날 체결 원자료', '마크 원자료']);
+  assert.deepEqual(M.sharedItems('GTX 진입·HARD STOP_MARKET·TP GTX 주문'), ['GTX 진입 주문', 'HARD STOP_MARKET 주문', 'TP GTX 주문']);
+  assert.deepEqual(M.sharedItems('aggTrade·markPrice@1s·forceOrder·bookTicker 스트림'), ['aggTrade 스트림', 'markPrice@1s 스트림', 'forceOrder 스트림', 'bookTicker 스트림']);
+  assert.deepEqual(M.sharedItems('주소 검증·송장 발급 요청'), ['주소 검증 요청', '송장 발급 요청']);
+  for (const whole of ['주문 요청·관리자 요청·플래그 값·관리자 세션 키', 'orders 행·결제 세션 요청·관리자 세션 키', 'tracking_events 행·shipments 행·events 메시지', 'shipments 행·tracking_events 행',
+    'checkout_enabled 끄기·켜기', 'A/server.ts·config.ts·middleware/rate.ts', 'cards·counter·review 행·LEDGER', '원자료·σ·runner cards', 'events:dlq·x 메시지'])
+    assert.deepEqual(M.sharedItems(whole), whole.split('·'), whole);
+  assert.deepEqual(M.CLASS_NOUNS, ['행', '메시지', '스트림', '파일', '줄', '요청', '응답', '값', '키', '결과', '답']);
+  // koru-orch-v3 §2 and §4: marketws's 「전날 체결」 and 바이낸스's 「GTX 진입」「HARD STOP_MARKET」 (the .36 regressions) go; the full names stay.
+  const k = koruText(['2. 부분', '| 이름 | 하는 일 한 줄 | 담당 파일·폴더 | 상태 단어 | 상태의 기준 시각 | 꼬리표 |', '|---|---|---|---|---|---|',
+    '| 엔진 | 행 셋 합성 → J1 → 집행자 하나 → 주문·TP·HARD | koru-wt/d4/code/exec/live_direct/ (라이브 sha 618df374) | 돌고 있음 | 11-03 08:49Z | [보고: ops 세션 STATUS 11-03 08:49Z] |',
+    '| 종이 생산자 | 전날 재생 경주 행 | 미니PC koru-paper/replay.py (8f9d3697) | 돌고 있음 | 11-03 02:47Z | [보고: 감독자 세션 SUPERVISOR-LOG 11-03 02:47Z] |',
+    '| marketws 수집기 | KORU aggTrade·markPrice1s·forceOrder·bookTicker | 미니PC koru-shadow-marketws-koru(-public) | 돌고 있음 | 11-03 07:23Z | [보고: ops 세션 STATUS 11-03 07:23Z] |',
+    '| 바이낸스 | 거래소(주문·체결·스트림) | 외부 | 돌고 있음 | 11-03 08:49Z | [보고: ops 세션 STATUS 11-03 08:49Z] |',
+    '4. 연결', '| 보내는 부분 | 받는 부분 | 넘기는 것 | 언제·얼마나 자주 | 설계/관찰 | 꼬리표 |', '|---|---|---|---|---|---|',
+    '| marketws 수집기 | 종이 생산자 | 전날 체결·마크 원자료 | 매일 02:10Z | 설계 | [파일: koru-hold/NOW/KICKOFF/KEEP-DELETE.md] |',
+    '| 엔진 | 바이낸스 | GTX 진입·HARD STOP_MARKET·TP GTX 주문 | 카드가 쪽을 낼 때 | 관찰 | [보고: 감독자 세션 SUPERVISOR-LOG 11-02 14:20Z] |'].join('\n'));
+  const part = (ref, name, head, extra) => ({ ref, name, parent: null, role: `${name}의 책임`, roleAbout: null, roleReplaces: null, basis: [k.at(head)], claims: [], ...extra });
+  const parts = [part('new:marketws', 'marketws 수집기', '| marketws 수집기 | KORU', { outputs: ['전날 체결', '마크 원자료'] }), part('new:paper', '종이 생산자', '| 종이 생산자 | 전날'),
+    part('new:engine', '엔진', '| 엔진 | 행 셋'), part('new:binance', '바이낸스', '| 바이낸스 | 거래소', { inputs: ['GTX 진입', 'HARD STOP_MARKET', 'TP GTX 주문'] })];
+  const plan = { global: [], parts: parts.map(p => ({ ref: p.ref, name: p.name, parent: null, at: [p.basis[0]], focus: p.name })) };
+  const global = { ...empty(), summary: '', relations: [
+    { from: 'new:marketws', to: 'new:paper', kind: 'flow', note: '', at: k.at('| marketws 수집기 | 종이'), payload: '전날 체결·마크 원자료', cadence: '매일 02:10Z', mode: 'design', channel: 'data' },
+    { from: 'new:engine', to: 'new:binance', kind: 'flow', note: '', at: k.at('| 엔진 | 바이낸스'), payload: 'GTX 진입·HARD STOP_MARKET·TP GTX 주문', cadence: '카드가 쪽을 낼 때', mode: 'observed', channel: 'data' }] };
+  const { wire, exclusions } = combineRenderedReading([{ ...empty(), parts: parts.slice(0, 3) }, { ...empty(), parts: parts.slice(3) }], global, k.ask, plan);
+  assert.deepEqual(exclusions.map(x => [x.path, x.category]), [['parts[0].outputs[0]', 'outputs'], ['parts[3].inputs[0]', 'inputs'], ['parts[3].inputs[1]', 'inputs']]);
+  assert.deepEqual([wire.parts[0].outputs, wire.parts[3].inputs], [['마크 원자료'], ['TP GTX 주문']]);
+  const named = structuredClone(parts); named[0].outputs = ['전날 체결 원자료', '마크 원자료']; named[3].inputs = ['GTX 진입 주문', 'HARD STOP_MARKET 주문', 'TP GTX 주문'];
+  assert.deepEqual(combineRenderedReading([{ ...empty(), parts: named.slice(0, 3) }, { ...empty(), parts: named.slice(3) }], global, k.ask, plan).exclusions, [], 'the shared names stand');
+});
+
+test('.37 dropped: what a render first pass held and its correction no longer does is named by part (steps, claims by their row, kept states); a row the correction still cites elsewhere is kept', () => {
+  const k = koru35(), first = structuredClone(fragments35(k)[1]);
+  first.parts[0].steps = [{ name: '집행', does: '주문·HARD 상주', uses: ['engine.py(이번에 안 읽음)'], at: k.at('| 엔진 | 10 |') }];
+  first.parts[0].stateVars = [{ name: '재진입 카운터', scope: null, readBy: [], changedBy: [] }];
+  const kept = structuredClone(first);
+  kept.parts[0].steps = []; kept.parts[0].stateVars = [];
+  // s64 (the engine's STOP_NOT_RESIDENT row) moved to its conditions: kept. The scorecard's 「읽기용, 판정 아님」 row (s63): dropped.
+  kept.parts[0].conditions = [{ when: 'not 1 <= stop <= 250', then: 'STOP_NOT_RESIDENT', else: 'J1 답', at: k.at('| 엔진 | not 1') }];
+  kept.parts[0].claims = kept.parts[0].claims.filter(c => c.key !== 's64'); kept.parts[1].claims = [];
+  assert.deepEqual(droppedItems(first, kept), [{ path: 'parts', rule: 'dropped', expected: 6, actual: 3,
+    names: ['new:engine step 「집행」', 'new:engine stateVar 「재진입 카운터」', `new:sheet claim ${k.at('| 성적표 | 하루')}: 원문 행을 옮긴다(s63).`] }]);
+  assert.deepEqual([droppedItems(first, first), droppedItems(undefined, kept), droppedItems(first, null)], [[], [], []]);
 });

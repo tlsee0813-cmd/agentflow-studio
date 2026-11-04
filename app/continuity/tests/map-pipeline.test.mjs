@@ -1072,8 +1072,8 @@ function browserApply(f, wire, exclusions, n = 7) {
 }
 
 test('recipe identities are bumped for the changed prompts and validation semantics', () => {
-  assert.equal(PIPELINE_RECIPE, 'first-map-divided.36');
-  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.36');
+  assert.equal(PIPELINE_RECIPE, 'first-map-divided.37');
+  assert.equal(LATER_PIPELINE_RECIPE, 'later-map-divided.37');
 });
 
 test('a render fragment with one unresolvable claim alias is applied with only that claim set aside and a durable diagnostic', async t => {
@@ -1239,7 +1239,7 @@ test('.29: a 24-part first map renders in eight fragments; a run ceiling that ca
 // ---- first-map-divided.30: map-reading.9 (steps, loop, kept state, port map) and the rules from the blind judging of the .29 map. ----
 test('.30 rule sentences: every connection row a line, absorption into the group parent only, row names verbatim, "·" outside parentheses, state facts first, steps, loop, kept state and the port map', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.36', 'later-map-divided.36']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.37', 'later-map-divided.37']);
   for (const rule of ['흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고', '연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다',
     '부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고', '「facts-refresh」 행을 「calendar.json」으로 부르지 않는다', '모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다',
     'global은64개 이하(그중 relation 항목 48개까지)']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
@@ -1512,7 +1512,7 @@ test('.31: a render or global reply cut at its cap fails the run as MAP_STAGE_IN
 // the final wire's diagnostics on the global stage record, the row-level, payload and hedge rules (fake providers only). ----
 test('.32 rule sentences: sixteen claims a first-map part, a table row one claim, the summary money facts on the engine, withdrawals on their 부분 이름 part, one payload list, the record\'s own hedge', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.36', 'later-map-divided.36']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.37', 'later-map-divided.37']);
   for (const rule of ['그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다', '「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며', '한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다)',
     '연결 행의 「넘기는 것」 칸은 산출물 이름 목록 하나이며 부분이 아니다', '산출물 표에 그 파일의 행이 있을 때만 그 저장소 부분을 거친다', '「new:facts_refresh → new:engine: fee_policy·calendar.json」']) assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   for (const gone of ['돌고 있는 부분에 맡기는 정정·철회·모름은 둘까지로 한다', '넘치는 철회는 원문이 대신 둔 것을 맡은 부분', '기록의 화살표가 파일 이름(calendar.json 같은)을 넘기는 것으로 적은 흐름도 그 파일의 저장소 부분을 거친다'])
@@ -1571,7 +1571,7 @@ test('.32: a render correction hears its own parts\' plan items no claim quotes;
 // and correction rules, with the recipe identity bumped. ----
 test('.33 rule sentences: a rule\'s scope from its row, places only from lines that place it, devices from the condition row, a gate line, a person or 「기록상 미설계」, a withdrawal\'s kind from its content, a gate run or dev', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.36', 'later-map-divided.36']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.37', 'later-map-divided.37']);
   for (const rule of ['topic이 rule인 주장(기록의 「지켜야 할 것」 표의 행 하나이며 claim.at은 그 행이다)에는 scope·scopeName·anchors·enforcedBy를 더한다',
     'part(그 행의 부분 이름 칸이 이름 붙인 부분 전체이며 기본값이다)', 'project(행의 부분 이름 칸이 「전체」일 때만)', '「돈 안전」 같은 말만으로 project로 올리지 않는다',
     'anchors는 그 규칙이 적용되는 자리를 놓는 원문 줄에서만 최대 4개이며', '「조건·거부·분기」 표에서 이 규칙을 구현하는 조건 행', '그 규칙을 직접 지키는 행)이 그 자리이며 at은 그 행이다',
@@ -1623,7 +1623,7 @@ test('.33: a first map\'s global first pass that leaves a plan relation item und
 // plan item lost under the cap (fake providers only; no model quality is claimed). ----
 test('.34 rule sentences: anchors cite one of the program\'s condition rows or stay [], code only from a condition or file-map row, unknown where the record does not know the device, one kept state per 「·」 item, DROP an implementation', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.36', 'later-map-divided.36']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.37', 'later-map-divided.37']);
   for (const rule of ['입력의 conditions는 프로그램이 원문에서 옮겨 둔 목록이다', '{"at":"그 행의 구간 별칭","condition":"조건 칸","then":"참이면 칸","else":"거짓이면 칸(없으면 null)"}',
     'anchors는 규칙의 말이 conditions 한 행의 조건·결과와 맞을 때', '그 행을 at으로 인용하고, 그렇지 않으면 []다', '프로그램 후보로 따로 붙이고 모델의 답과 구별해 표시하므로',
     'code는 그 at이 「조건·거부·분기」 표의 행이거나 「파일 지도」 표의 행일 때만 쓴다', 'code이고 text는 그 행의 then이다',
@@ -1719,10 +1719,10 @@ test('.35: a first map\'s final review (global-final) that leaves a plan relatio
 
 test('.35 rule sentences: a condition row is the rule\'s place and stated only on its own row or written in it, the program\'s places read file-map rows and settings, a shared noun on every 「·」 item, every 「·」 state item, no claim restating a connection row, loop-missing and settings in the correction', async () => {
   const P = await import('../server/map-pipeline.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.36', 'later-map-divided.36']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.37', 'later-map-divided.37']);
   for (const rule of ['kind=stated는 그 자리 줄이 규칙 주장 자신의 at과 같은 행이거나 규칙 행이 그 자리 행의 칸(조건이나 「STOP_NOT_RESIDENT」 같은 결과)을 글자 그대로 적을 때만 쓰고',
     '그 밖의 stated는 지도가 inferred로 읽고 진단 anchor-kind에 남긴다', '같은 부분의 조건 행·「파일 지도」 행·「부분별 설계」 설정 칸 가운데 낱말이 겹치는 것을 프로그램 후보로',
-    '그 명사를 항목마다 붙인다(「review 행」·「policy 행」·「state 행」)', '이 부분의 「부분별 설계」 칸 항목의 앞부분만 쓴 항목(「review 행」 자리의 「review」)은 지도에서 빠진다',
+    '그 명사를 앞 항목마다 붙인다(「review 행」·「policy 행」·「state 행」', '이 부분의 「부분별 설계」 칸 항목의 앞부분만 쓴 항목(「review 행」 자리의 「review」)은 지도에서 빠진다',
     '칸의 「·」 항목 하나하나가 상태 변수 하나이며 하나도 빼지 않는다', '「팔당 16회/일 넘으면 DAILY_CAP」의 팔당 호출 수도 stateVars 하나다(scope 「하루」)',
     '연결 표의 행(보내는 부분 | 받는 부분)은 관계가 맡으므로 그 행을 인용해 넘기는 것·박자만 다시 말하는 status·how 주장은 쓰지 않는다',
     '"anchors":[{"kind":"inferred","text":"엔진 · not 1 <= stop <= 250","at":"N02.40"}]']) assert.ok(P.RENDER_RULES.includes(rule), rule);
@@ -1796,7 +1796,7 @@ test('.36: a first map\'s plan standing two store parts on one place pays one pl
 
 test('.36 rule sentences: condition rows to conditions outside the cap and the cap\'s priority, artifacts folded into their place\'s store, a self row\'s two lines, a line\'s kind by its artifact, a loop unit\'s words, the shared noun, recorded lines only', async () => {
   const P = await import('../server/map-pipeline.mjs'), B = await import('../server/map-blueprint.mjs');
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.36', 'later-map-divided.36']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.37', 'later-map-divided.37']);
   for (const rule of ['설계 기록의 「조건·거부·분기」 표의 행은 claims가 아니라 그 부분의 conditions에 행마다 하나씩 쓴다',
     '{"when":"조건 칸","then":"참이면 칸","else":"거짓이면 칸(칸이 없거나 비면 null)","at":"그 행 한 줄의 구간 별칭"}', 'conditions는 claims 20개 상한 밖이므로 조건 행 때문에 기록 행을 빼지 않는다',
     '조건 행을 주장으로 다시 쓰지 않는다(conditions가 같은 행을 가지면 그 주장은 지도에서 빠진다, restate)',
@@ -1805,7 +1805,7 @@ test('.36 rule sentences: condition rows to conditions outside the cap and the c
     '저장소 부분은 「있는 곳」 하나에 하나다', 'outputs에는 접힌 산출물 행 이름을 산출물 표 순서대로 모두(최대 8개)',
     'unit은 시간·사건 단위만 쓴다', '「없으면 다시 읽기」처럼 다시 도는 조건은 resume에', 'state가 retired·unbuilt인 부분의 loop는 null이다',
     '「재진입 간격」처럼 기다림만 말하는 줄은 반복이 아니다', '설정 칸의 주기 값이 근거이면 unit에는 그 값의 주기만 적힌 그대로(「60 s」) 쓰고 at은 그 행이다',
-    '「·」 목록의 마지막 항목 뒤에 단위 명사 하나(행·메시지·스트림·파일·줄)가 붙고 모든 항목이 「/」·「:」 없는 한 낱말 이름이면', '칸의 맨이름 항목에 단위 명사를 덧붙인 항목(「cards」 자리의 「cards 행」)은 지도에서 빠진다'])
+    '그 명사를 앞 항목마다 붙인다(「review 행」·「policy 행」·「state 행」', '칸의 맨이름 항목에 단위 명사를 덧붙인 항목(「cards」 자리의 「cards 행」)은 지도에서 빠진다'])
     assert.ok(P.RENDER_RULES.includes(rule), rule);
   assert.ok(!P.RENDER_RULES.includes('「journal 경주 행」·「outcomes 경주 행」'), 'the two-word shared noun example is gone');
   assert.ok(!P.RENDER_RULES.includes('blueprint가 이 부분에 맡긴 condition·uncertain 항목'), 'condition rows are no claims now');
@@ -1819,4 +1819,47 @@ test('.36 rule sentences: condition rows to conditions outside the cap and the c
     '만드는 부분과 읽는 부분이 같은 산출물 행도 「있는 곳」이 부분 표의 저장소 부분이면', '「있는 곳」이 폴더(「/var/lib/koru-desk/cards/」)이면 행의 파일마다 따로 세운다'])
     assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
   assert.ok(B.LATER_BLUEPRINT_PROMPT.startsWith(B.MAP_BLUEPRINT_PROMPT));
+});
+
+// ---- first-map-divided.37 (map-reading.13, from the blind judging of the .36 KORU and web-app maps): lines the contract set aside are
+// no missing lines, the program fills a loop from its cadence setting and a stop from a condition, rule places and kept state come from
+// conditions, the shared noun in its final form, format fields on their line, cadence kept, one line per pair and payload, a withdrawal's
+// 폐기·철회, and a render correction's dropped items. ----
+test('.37 rule sentences: the shared noun\'s final form, the program\'s loop, stop and kept state, places from the conditions a line reaches, a withdrawal\'s 폐기·철회, cadence kept, one line per pair, format fields; the correction\'s lines-set-aside', async () => {
+  const P = await import('../server/map-pipeline.mjs');
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.37', 'later-map-divided.37']);
+  for (const rule of ['그 명사를 앞 항목마다 붙인다', '「전날 체결 원자료」·「마크 원자료」', '「GTX 진입 주문」·「HARD STOP_MARKET 주문」·「TP GTX 주문」',
+    '자기 종류 낱말(행·메시지·스트림·파일·줄·요청·응답·값·키·결과·답)로 끝나면(「orders 행·결제 세션 요청·관리자 세션 키」) 붙이지 않고',
+    '프로그램이 그 항목을 글자 그대로 unit으로 채우고 프로그램 표시를 붙이므로, 지어내 채우지 않는다', '그 칸을 stop에, 재개 코드(RESUME·재개)이면 resume에 칸 그대로 쓴다',
+    '메시지마다의 끝(「events:dlq로 XADD」)과 스탑 가격(STOP_NOT_RESIDENT)은 stop이 아니다', '프로그램이 그 이름만으로 stateVars 하나를 더해 표시한다',
+    '그 부분의 나가는 선이 닿는 부분의 conditions에서 낱말이 둘 이상 겹치는 조건', '「지금」 칸이 「폐기」·「철회」로 설계 결정을 거둔 행', '(implementation·report로 쓰면 그 칸이 빠진다)',
+    'withdrawalKind를 null로 두면 진단(withdrawal-kind)에 남는다']) assert.ok(P.RENDER_RULES.includes(rule), rule);
+  assert.ok(!P.RENDER_RULES.includes('두 낱말 명사이거나(「journal·outcomes 경주 행」은 「journal」·「outcomes 경주 행」)'), 'the .36 two-word exception is gone');
+  for (const rule of ['그 행의 선은 그 칸을 cadence에 적힌 그대로 쓰고, 그 값이 받는 부분의 loop unit이나 설정과 같아도 지우지 않는다', '같은 from·to·channel·payload의 선은 한 번만 쓴다',
+    '형식 산출물(결제 세션 요청·결제 웹훅·송장 요청·추적 응답·관리자 요청·플래그 값)은 부분도 저장소도 아니다', 'payloadFields에 그 행의 「필드」 칸을 「·」(괄호 밖)마다 나눈 이름을 적힌 그대로 최대 24개',
+    '"payloadFields":["order_id","amount","currency","success_url","cancel_url"]']) assert.ok(P.GLOBAL_RULES.includes(rule), rule);
+  for (const rule of ['rule이 lines-set-aside이면 names의 선은 계약이 기록에 없는 줄이나 규칙 위반으로 이미 뺀 것이므로 다시 그리지 않는다', 'dup-line이면 겹친 뒤의 선을 빼며',
+    'payload-fields이면 그 선이 나르는 형식 산출물 행의 「필드」 칸 이름만', '관계의 payload·cadence·mode·channel·payloadFields']) assert.ok(P.CORRECTION_RULES.includes(rule), rule);
+});
+
+test('.37: a render correction\'s stage record names what its first pass held and the correction dropped (dropped); a stage taken on its first pass keeps none', async t => {
+  const { dir, make } = await setup(t), ask = askFor(), calls = [], wire0 = originalWire(ask);
+  const used = new Set(wire0.parts.flatMap(p => [...p.basis, ...p.claims.map(c => c.at)]));
+  const spare = ask.records[0].spans.map(s => s.s).find(s => !used.has(s));
+  assert.ok(spare, 'a piece no part of the wire cites');
+  let firstPass = null;
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => {
+    // A structural first pass (a claim key outside the fragment's range) pays the fragment's one correction, which leaves that claim out.
+    if (call.stage === 'render' && !call.input.correction && call.input.assignment.id === 'parts-1') {
+      const fragment = payloadFor(call.input, ask, wire0);
+      fragment.parts[0].claims.push({ ...structuredClone(fragment.parts[0].claims[0]), key: 's801', text: '첫 판에만 있던 주장이다.', at: spare });
+      firstPass = structuredClone(fragment); return fragment;
+    }
+  }) });
+  await pipeline.read(ask);
+  const items = firstPass.parts.reduce((n, p) => n + (p.steps ?? []).length + p.claims.length + (p.stateVars ?? []).length, 0);
+  const stages = Object.values(JSON.parse(await readFile(join(dir, 'pipeline.json'), 'utf8')).body.jobs).at(-1).stages;
+  assert.deepEqual(stages['render-1-correction'].diagnostics, [{ path: 'parts', rule: 'dropped', expected: items, actual: items - 1, names: [`${firstPass.parts[0].ref} claim ${spare}: 첫 판에만 있던 주장이다.`] }]);
+  assert.equal(Object.hasOwn(stages['render-1'], 'diagnostics'), false, 'the refused first pass keeps none');
+  assert.ok(Object.keys(stages).filter(id => /^render-\d+$/.test(id) && id !== 'render-1').every(id => !Object.hasOwn(stages[id], 'diagnostics')), 'a fragment taken on its first pass keeps none');
 });
