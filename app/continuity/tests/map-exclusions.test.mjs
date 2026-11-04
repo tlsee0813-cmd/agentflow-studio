@@ -442,7 +442,7 @@ test('map-reading.8: a map.6 reply with every new field is read, applied, stored
   assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
 });
 
-test('map-reading.8 lenient: a wrong field leaves out only that field of its part, sets aside its relation, or nulls the basis', () => {
+test('map-reading.8 lenient: a wrong field leaves out only that field of its part or relation (.38: a wrong channel word leaves the channel out, the line stays), or nulls the basis', () => {
   const f = firstMap(), r = eightReply(f);
   r.parts[0].type = 'engine';
   r.parts[0].inputs = Array(9).fill('a');
@@ -454,7 +454,7 @@ test('map-reading.8 lenient: a wrong field leaves out only that field of its par
   assert.deepEqual(got.parts.map(p => p.ref), ['new:save', 'new:read'], 'no part is set aside');
   assert.deepEqual(eightOf(got.parts[0]), [null, [], ['e=1 행'], ['watch', 'allowed_side'], []]);
   assert.equal(got.parts[0].typeQuote, null);
-  assert.deepEqual(got.relations, []);
+  assert.deepEqual(got.relations.map(x => [x.from, x.to, x.channel]), [['new:save', 'new:read', null]]);
   assert.deepEqual([got.basisAt, got.basisVersion], [null, null]);
   const reasons = M.readingExclusions(got);
   assert.deepEqual(reasons.map(e => [e.path, e.rule, e.category]), [['parts[0].type', 'contract', 'type'], ['parts[0].inputs', 'contract', 'inputs'], ['parts[0].config[0]', 'contract', 'config'],

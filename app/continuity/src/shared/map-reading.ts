@@ -152,7 +152,13 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * channel and payload as one read before is set aside (relations[i], dup-line); a withdrawal whose 철회·변경 row's 지금 cell says 폐기
  * or 철회 took back a design decision (another kind is left null, withdrawal-kind), and one left null where its row names 폐기·철회·롤백·
  * 되돌림 is named (withdrawal-kind, the claim's own row); the shared noun of a 「·」 list is its last item's last Hangul word, on every
- * earlier item when none contains it, none ends in a class word (CLASS_NOUNS) and no item holds 「/」 or 「:」. */
+ * earlier item when none contains it, none ends in a class word (CLASS_NOUNS) and no item holds 「/」 or 「:」.
+ * Pipeline .38 (still map-reading.13; an io item's exclusion may now carry value, ≤60, and its record cell in record/from/to): the
+ * shared noun is an artifact or unit noun only (SHARED_NOUNS; a 「경주 행」 pair whole; a -기 act takes none; a time word stays on its
+ * item); an input or output standing as written in its part's design cell or a connection row's 넘기는 것 cell is never a bare prefix;
+ * a null cadence is named only on the line's own connection row (its sender the row's, its receiver the row's or a store); a wrong
+ * channel word and a control line carrying an artifact leave the channel out alone (relations[i].channel, written null; the line
+ * stays). */
 /** A first map: nothing of the map, no request and no prior is sent (map.7 is never one). */
 export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): boolean => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
@@ -359,14 +365,33 @@ const splitOutside = (text: string, seps: string): string[] => {
  * 「주문 요청」, 「플래그 값」 are whole names) and no item holds 「/」 or 「:」: 「전날 체결·마크 원자료」 → 「전날 체결 원자료」, 「마크
  * 원자료」; 「GTX 진입·HARD STOP_MARKET·TP GTX 주문」 → each 「… 주문」; 「journal·outcomes 경주 행」 → 「journal 행」, 「outcomes 경주 행」.
  * A Latin or numbered tail is the last name's own (「runner cards」, 「지난 24 h LEDGER」); 「cards·counter·review 행·LEDGER」 shares
- * nothing. (.36 shared only a unit word after bare names, and lost 원자료 and 주문.) */
+ * nothing. (.36 shared only a unit word after bare names, and lost 원자료 and 주문.)
+ * Pipeline .38 (from the blind judging of the .37 maps, whose io checks set aside seven KORU and four web-app items the records
+ * write): the shared noun is an artifact or unit noun only (SHARED_NOUNS; or a word ending in 파일 or 스트림, or in 행 where that 행
+ * ends no act word such as 진행·실행·수행): 「한 줄 보고·결정 필요」, 「읽기 한 쪽·메모·사전 등록」, 「주문서 입력·배송 조회」, 「환불·수동
+ * 상태 변경·주소 제안 확인」 share nothing (.37 made 「한 줄 보고 필요」, 「메모 등록」, 「주문서 입력 조회」 and then took the record's own
+ * 「한 줄 보고」, 「메모」, 「주문서 입력」 for their prefixes). A last item of three words or more whose last two words are Hangul (the
+ * first no time word) and end in 행·파일·스트림 or stand in SHARED_NOUNS shares both: 「journal·outcomes 경주 행」 → 「journal 경주 행」,
+ * 「outcomes 경주 행」. An earlier item ending in a -기 act (「감독자 보고 붙여 넣기」, 「CSV 내려받기」) takes no noun. A leading time
+ * word stays on its own item: 「전날 체결·마크 원자료」 → 「전날 체결 원자료」, 「마크 원자료」. */
 export const UNIT_NOUNS: readonly string[] = Object.freeze(['행', '메시지', '스트림', '파일', '줄']);
 export const CLASS_NOUNS: readonly string[] = Object.freeze([...UNIT_NOUNS, '요청', '응답', '값', '키', '결과', '답']);
+export const SHARED_NOUNS: readonly string[] = Object.freeze(['행', '메시지', '스트림', '파일', '줄', '원자료', '주문', '요청', '결과', '이벤트', '응답', '경주 행', '체결 행', '카드 행', '알림톡']);
+/** Pipeline .38: a 행 ending an act word (진행, 실행, 수행, 발행 …) names no row. */
+const ACT_ROW = /(?:진|실|수|시|이|발|운|병|강|유|선|후|비|은|여|통|동|흥|현|직|역|평|급|서|보|악|만|횡|순|간)행$/;
+const sharedNoun = (w: string): boolean => SHARED_NOUNS.includes(w) || /^[가-힣]+(?:파일|스트림)$/.test(w) || (/^[가-힣]+행$/.test(w) && !ACT_ROW.test(w));
+/** Pipeline .38: a -기 act (넣기, 내려받기, 끄기 …) ends an act, which takes no shared noun (the nouns ending in 기 are left out). */
+const actWord = (w: string): boolean => /^[가-힣]+기$/.test(w) && !/^(?:주기|크기|시기|초기|후기|동기|경기|위기|인기|기기|일기|공기|전기|무기|용기|정기|증기|연기|분기|장기|단기|표기)$/.test(w);
+const TIME_WORD = /^(?:전날|당일|오늘|어제|지난|매일|다음날|그날)$/;
 export const sharedItems = (cell: string): string[] => splitOutside(cell, ',').flatMap(group => {
   const items = splitOutside(group, '·'); if (items.length < 2) return items;
-  const last = items.at(-1)!, words = last.split(/\s+/), noun = words.at(-1)!, head = items.slice(0, -1);
-  const shares = words.length >= 2 && /^[가-힣]+$/.test(noun) && !items.some(x => /[/:]/.test(x))
-    && head.every(x => { const w = x.split(/\s+/); return !w.includes(noun) && !CLASS_NOUNS.includes(w.at(-1)!); });
+  const last = items.at(-1)!, words = last.split(/\s+/), head = items.slice(0, -1);
+  const pair = words.length >= 3 ? words.slice(-2) : null;
+  const phrase = pair && /^[가-힣]+$/.test(pair[0]!) && !TIME_WORD.test(pair[0]!) && /^[가-힣]+$/.test(pair[1]!)
+    && (SHARED_NOUNS.includes(pair.join(' ')) || ['행', '파일', '스트림'].includes(pair[1]!)) ? pair.join(' ') : null;
+  const noun = phrase ?? words.at(-1)!, tail = noun.split(' ').at(-1)!;
+  const shares = words.length >= 2 && (phrase !== null || (/^[가-힣]+$/.test(noun) && sharedNoun(noun))) && !items.some(x => /[/:]/.test(x))
+    && head.every(x => { const w = x.split(/\s+/); return !w.includes(tail) && !CLASS_NOUNS.includes(w.at(-1)!) && !actWord(w.at(-1)!); });
   return shares ? [...head.map(x => `${x} ${noun}`), last] : items;
 });
 /* Pipeline .36: the records' artifact table (「산출물」) as the program reads it, for the stores a reading draws (one per place), the
@@ -491,26 +516,51 @@ export function unrecordedAt(ask: MapAsk, aliases: readonly unknown[]): boolean 
   const rows = [...links, ...[ARTIFACT_TABLE_TS, DESIGN_TABLE, STEP_TABLE].flatMap(t => rowsUnder(texts, t))];
   return !spans.some(s => rows.some(l => l.record === s.record && s.from < l.to && l.from < s.to) || lineSenders(s.text).some(l => l.row === null));
 }
-/** Pipeline .37: the connection-table rows whose 언제·얼마나 자주 cell says when (not blank, not a dash), where each stands. */
-function cadenceLines(texts: Map<string, { text: string; spans: Span[] | null }>): { record: string; from: number; to: number }[] {
-  const out: { record: string; from: number; to: number }[] = [];
+/** Pipeline .38: the cells of a table line standing at [from, to) of text, each as written (its own white space left out) and where
+ * it stands; the same cells as splitting the line on 「|」 once its outer pipes are left off. */
+interface Cell { text: string; from: number; to: number }
+function lineCells(text: string, from: number, to: number): Cell[] {
+  const line = text.slice(from, to), out: Cell[] = [];
+  let start = line.startsWith('|') ? 1 : 0;
+  for (let i = start; i <= line.length; i++) {
+    if (i < line.length && line[i] !== '|') continue;
+    if (i === line.length && start >= line.length) break;
+    const raw = line.slice(start, i), lead = raw.length - raw.trimStart().length, cell = raw.trim();
+    out.push({ text: cell, from: from + start + lead, to: from + start + lead + cell.length });
+    start = i + 1;
+  }
+  return out;
+}
+/** Pipeline .38: the data rows of every connection table (a header naming 보내는 부분 and 받는 부분), each with its 보내는 부분, 받는
+ * 부분, 넘기는 것 and 언제·얼마나 자주 cells (null or '' where the table has none) and where the row stands. */
+interface FlowRow { record: string; from: number; to: number; sender: string; receiver: string; payload: Cell | null; when: string }
+function flowTable(texts: Map<string, { text: string; spans: Span[] | null }>): FlowRow[] {
+  const out: FlowRow[] = [];
   for (const [record, { text }] of texts) {
-    let at: number | null = null, offset = 0;
+    let at: { s: number; r: number; p: number; w: number } | false | null = null, offset = 0;
     for (const raw of text.split('\n')) {
       const start = offset; offset += raw.length + 1;
       const line = raw.trim();
       if (!line.startsWith('|')) { at = null; continue; }
-      const cells = line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
-      if (at === null) { at = cells.some(c => /보내는\s*부분/.test(c)) && cells.some(c => /받는\s*부분/.test(c)) ? cells.findIndex(c => /언제|얼마나\s*자주/.test(c)) : -1; continue; }
-      if (at < 0 || cells.every(c => !c || /^:?-{2,}:?$/.test(c))) continue;
-      const cell = cells[at] ?? '';
-      if (!cell || /^[—–-]+$/.test(cell)) continue;
-      const from = start + raw.indexOf(line);
-      out.push({ record, from, to: from + line.length });
+      const from = start + raw.indexOf(line), cells = lineCells(text, from, from + line.length), words = cells.map(c => c.text);
+      if (at === null) {
+        const s = words.findIndex(c => /보내는\s*부분/.test(c)), r = words.findIndex(c => /받는\s*부분/.test(c));
+        at = s >= 0 && r >= 0 ? { s, r, p: words.findIndex(c => /넘기는\s*것/.test(c)), w: words.findIndex(c => /언제|얼마나\s*자주/.test(c)) } : false;
+        continue;
+      }
+      if (!at || words.every(c => !c || /^:?-{2,}:?$/.test(c))) continue;
+      out.push({ record, from, to: from + line.length, sender: words[at.s] ?? '', receiver: words[at.r] ?? '', payload: at.p >= 0 ? cells[at.p] ?? null : null, when: at.w >= 0 ? words[at.w] ?? '' : '' });
     }
   }
   return out;
 }
+/** Pipeline .37: the connection-table rows whose 언제·얼마나 자주 cell says when (not blank, not a dash), where each stands.
+ * Pipeline .38: with the row's sender and receiver cells (a line keeps that cadence only on its own row). */
+function cadenceLines(texts: Map<string, { text: string; spans: Span[] | null }>): FlowRow[] {
+  return flowTable(texts).filter(r => !!r.when && !/^[—–-]+$/.test(r.when));
+}
+/** Pipeline .38: whether a table cell names a part of this name (the whole cell, or one of its 「·」「,」「/」 names, loosely compared). */
+const cellNamesPart = (cell: string, name: string): boolean => { const n = plainName(name); return !!n && (plainName(cell) === n || cellNames(cell).includes(n)); };
 /** Pipeline .35: where the data rows of every connection table (a header naming 보내는 부분 and 받는 부분) stand, wherever it stands. */
 function connectionLines(texts: Map<string, { text: string; spans: Span[] | null }>): { record: string; from: number; to: number }[] {
   const out: { record: string; from: number; to: number }[] = [];
@@ -842,7 +892,8 @@ const exclusionExplanation = (e: MapReplyError): string => {
     : e.rule === 'contract' && e.target === 'condition' ? '부분의 조건 행 하나가 규칙에 맞지 않거나 그 부분의 「조건·거부·분기」 행에서 찾을 수 없어 그 조건만 제외했어요.'
     : e.rule === 'contract' && e.target === 'store-dup' ? '같은 「있는 곳」을 이미 다른 저장소 부분이 맡고 있어 겹친 저장소 부분과 그 연결을 제외했어요. 다른 부분으로 다시 잇지 않았어요.'
     : e.rule === 'contract' && e.target === 'unrecorded' ? '기록의 연결 표·산출물·부분별 설계·안의 단계 행이나 화살표 줄이 아닌 줄에서 만든 연결이어서 제외했어요.'
-    : e.rule === 'contract' && e.target === 'channel' && /^relations\[\d+\]\.channel$/.test(e.path) ? '연결이 나르는 것(채널) 칸이 규칙에 맞지 않거나, 산출물 표의 산출물을 나르는 연결이 control로 적혀 그 연결을 제외했어요.'
+    // pipeline .38: the channel alone is written null; the line stays.
+    : e.rule === 'contract' && e.target === 'channel' && /^relations\[\d+\]\.channel$/.test(e.path) ? '연결이 나르는 것(채널) 칸이 규칙에 맞지 않거나, 산출물 표의 산출물을 나르는 연결이 control로 적혀 그 칸만 비우고 연결은 남겼어요.'
     // map-reading.13: a relation's format fields (the list or one field); pipeline .37: a cadence left out alone, a line read twice.
     : e.rule === 'contract' && e.target === 'payload-fields' ? '연결이 나르는 형식 산출물의 필드 칸이 규칙에 맞지 않거나 그 산출물 행의 필드가 아니어서 그 칸(또는 그 필드 하나)만 빼고 연결은 남겼어요.'
     : e.rule === 'contract' && e.target === 'cadence' && /^relations\[\d+\]\.cadence$/.test(e.path) ? '연결의 박자(언제·얼마나 자주) 칸이 규칙에 맞지 않거나, 연결 표 행이 적은 박자가 비어 있어 그 칸을 진단에 남겼어요.'
@@ -1451,7 +1502,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   const flowLines = () => flowRows ??= { table: connectionLines(texts).length > 0,
     rows: [...connectionLines(texts), ...[ARTIFACT_TABLE_TS, DESIGN_TABLE, STEP_TABLE].flatMap(t => rowsUnder(texts, t))].map(r => ({ record: r.record, from: r.from, to: r.to })) };
   // pipeline .37 (divided): the connection rows that say when (a 언제·얼마나 자주 cell), and the lines read so far (ends, channel, payload).
-  let whenRows: { record: string; from: number; to: number }[] | undefined;
+  let whenRows: FlowRow[] | undefined;
   const linesRead: { from: string; to: string; channel: Channel | null; payload: string }[] = [];
   const relations = many(value.relations, ask.schemaVersion === MAP6_SCHEMA ? MAP6_RELATIONS : 12, 'relations').flatMap((r, i) => { const got = soft(() => {
     object(r, ['from', 'to', 'kind', 'note', ...evidenceKeys], `relations[${i}]`);
@@ -1483,7 +1534,12 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       }
       return out;
     };
-    const said7 = six ? { payload: phrase(r, 'payload', 80, `relations[${i}]`, 'payload'), cadence: cadence7(), mode: oneOf(r, 'mode', RELATION_MODES, `relations[${i}]`, 'mode'), channel: oneOf(r, 'channel', CHANNELS, `relations[${i}]`, 'channel'), payloadFields: fields13() } : {};
+    // pipeline .38: a wrong channel word leaves the channel out alone in the lenient readings (relations[i].channel, channel); the line stays.
+    const channel7 = (): Channel | null => {
+      if (!lenient) return oneOf(r, 'channel', CHANNELS, `relations[${i}]`, 'channel');
+      try { return oneOf(r, 'channel', CHANNELS, `relations[${i}]`, 'channel'); } catch (e) { if (e instanceof MapReplyError) { held7.push(e); return null; } throw e; }
+    };
+    const said7 = six ? { payload: phrase(r, 'payload', 80, `relations[${i}]`, 'payload'), cadence: cadence7(), mode: oneOf(r, 'mode', RELATION_MODES, `relations[${i}]`, 'mode'), channel: channel7(), payloadFields: fields13() } : {};
     // pipeline .29 (divided): a data line naming a file runs through that file's store part (one of its two ends); an unbuilt or
     // retired part sends only by design; when a quoted line names another part of this reading as its sender, the relation's
     // sender is that part, except where the line itself places this sender: a store row naming it in another cell (its producer),
@@ -1511,10 +1567,10 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const flow = flowLines();
       if (flow.table) need(flow.rows.some(l => q.record === l.record && q.from !== undefined && q.to !== undefined && q.from < l.to && l.from < q.to) || lineSenders(q.quote).some(l => l.row === null), `relations[${i}]`, 'unrecorded');
       // pipeline .36: a control line carrying an artifact of the artifact table (the .35 web map's payment session, webhook, invoice and
-      // notification lines) is data by the record: the line is set aside alone at its channel (relations[i].channel, channel), as a
-      // wrong channel word is; the global first pass that loses a connection row this way pays its one correction, which hears both.
+      // notification lines) is data by the record. Pipeline .38: only its channel is left out (relations[i].channel, channel, written
+      // null) and the line stays, as a wrong channel word's does (the .37 web map lost 주문 API → 결제사 payon.refund, its only refund line).
       const nameOf = (ref: string) => byRef.get(ref)?.name ?? parts.get(ref)?.name ?? '';
-      need(!(s7.channel === 'control' && carriesArtifact(ask, nameOf(r.from as string), nameOf(r.to as string), s7.payload)), `relations[${i}].channel`, 'channel');
+      if (s7.channel === 'control' && carriesArtifact(ask, nameOf(r.from as string), nameOf(r.to as string), s7.payload)) { held7.push(new MapReplyError(`relations[${i}].channel`, 'contract', 'channel')); s7.channel = null; }
       // pipeline .37: a later line with the same ends, channel and payload as one read before is that line again (dup-line).
       const key = { from: r.from as string, to: r.to as string, channel: s7.channel, payload: plainName(s7.payload ?? '') };
       need(!linesRead.some(x => x.from === key.from && x.to === key.to && x.channel === key.channel && x.payload === key.payload), `relations[${i}]`, 'dup-line');
@@ -1533,9 +1589,13 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         }
       }
       // pipeline .37: a line on a connection row that says when (언제·얼마나 자주) carries that cadence; with none it is named (the line stays).
-      const sc = said7 as { cadence: string | null };
+      // pipeline .38: only on the line's own row: its sender is the row's 보내는 부분 and its receiver the row's 받는 부분 or a store (the
+      // write line through the store carries the beat). A store → reader line split from a writer's row has the reader's own beat (the
+      // .37 KORU state_rows → engine, policy_rows → engine, plan → card runner and review_rows → engine were named for a right null).
+      const sc = said7 as { cadence: string | null }, toStore = byRef.get(r.to as string)?.type === 'store';
       if (sc.cadence === null && !held7.some(e => e.path === `relations[${i}].cadence`) && q.from !== undefined && q.to !== undefined
-        && (whenRows ??= cadenceLines(texts)).some(l => l.record === q.record && q.from! < l.to && l.from < q.to!)) held7.push(new MapReplyError(`relations[${i}].cadence`, 'contract', 'cadence'));
+        && (whenRows ??= cadenceLines(texts)).some(l => l.record === q.record && q.from! < l.to && l.from < q.to!
+          && cellNamesPart(l.sender, nameOf(r.from as string)) && (cellNamesPart(l.receiver, nameOf(r.to as string)) || toStore))) held7.push(new MapReplyError(`relations[${i}].cadence`, 'contract', 'cadence'));
       linesRead.push(key);
     }
     aside.push(...held7);
@@ -1544,15 +1604,22 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   // pipeline .33 (divided): an input or output of a part that is a field of one of its store partners (a store at the other end of one
   // of the lines read) or a bare prefix of another item of the same list (「review」 beside 「review 행」) is set aside alone at its raw
   // index (every raw copy of it), with the list's category; the port map below reads the lists as left.
+  // pipeline .38: what an io item set aside was (≤60, as written) and the record cell it came from (the part's own design cell, else
+  // a 넘기는 것 cell of a connection row it stands on), for its exclusion; never a secret-like value.
+  const ioSource = new Map<MapReplyError, { value: string | null; place: { record: string; from: number; to: number } | null }>();
   if (divided) {
     const rawOf = new Map(entries.map(([pi, p]) => [p.ref as string, [pi, p] as const]));
     // pipeline .34: a name standing in the part's own 「부분별 설계」 cell (받는 산출물 for inputs, 내는 산출물 for outputs) is the record's
     // own item, kept even where a store partner's field repeats it (the .33 run set aside 카드 러너's 「counter」 of 「cards·counter·…」).
     const design = rowsUnder(texts, DESIGN_TABLE);
-    const designCell = (name: string, cell: RegExp): string => {
+    // pipeline .38: the design cell with where it stands.
+    const designPlace = (name: string, cell: RegExp): (Cell & { record: string }) | null => {
       const row = design.find(r => plainName(r.cells[column(r.header, /이름/, 0)] ?? '') === plainName(name)), at = row ? column(row.header, cell) : -1;
-      return row && at >= 0 ? row.cells[at] ?? '' : '';
+      const got = row && at >= 0 ? lineCells(texts.get(row.record)!.text, row.from, row.to)[at] : undefined;
+      return got ? { ...got, record: row!.record } : null;
     };
+    const designCell = (name: string, cell: RegExp): string => designPlace(name, cell)?.text ?? '';
+    const flows = flowTable(texts);
     // pipeline .35: y names more than x does, x being y's first word(s) (a space or a dot after it): 「review」 of 「review 행」.
     const bare = (x: string, y: string): boolean => y.length > x.length && y.startsWith(x) && /^[\s.]/.test(y.slice(x.length));
     for (const b of outParts) {
@@ -1565,13 +1632,30 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         // pipeline .35: the cell's own items and the payload names of the part's lines in this direction, split the same way.
         const items = sharedItems(raw).map(plainName), payloads = relations.filter(r => (k === 'inputs' ? r.to : r.from) === b.ref && typeof r.payload === 'string')
           .flatMap(r => sharedItems(r.payload as string).map(plainName));
-        const prefix = (x: string): boolean => !items.includes(x) && [...items, ...payloads].some(y => bare(x, y));
+        // pipeline .38: an item standing as written in a record cell of this part (its design cell, or the 넘기는 것 cell of a connection
+        // row it sends on for outputs, receives on for inputs) is the record's own and never a bare prefix: only a fragment the shared
+        // noun lengthened (「전날 체결」 of 「전날 체결·마크 원자료」, 「review」 of 「review·policy·state 행」) or no such cell holds is checked.
+        const own = b.name ?? parts.get(b.ref)?.name ?? '';
+        const placed = designPlace(own, k === 'inputs' ? /받는/ : /내는/);
+        const cells: { text: string; place: { record: string; from: number; to: number } }[] = [
+          ...(placed ? [{ text: placed.text, place: { record: placed.record, from: placed.from, to: placed.to } }] : []),
+          ...flows.filter(l => l.payload && cellNamesPart(k === 'inputs' ? l.receiver : l.sender, own)).map(l => ({ text: l.payload!.text, place: { record: l.record, from: l.payload!.from, to: l.payload!.to } }))];
+        const standing = new Set<string>();
+        for (const c of cells) {
+          const plain = splitOutside(c.text, ',').flatMap(g => splitOutside(g, '·')).map(plainName), shared = sharedItems(c.text).map(plainName);
+          plain.forEach((x, n) => { if (x === shared[n]) standing.add(x); });
+        }
+        const prefix = (x: string): boolean => !items.includes(x) && !standing.has(x) && [...items, ...payloads].some(y => bare(x, y));
         // pipeline .36: a bare item of the part's own cell with a unit noun the cell does not give it (「cards 행」 of 「cards·counter·
         // review 행·LEDGER」, the .35 card runner) is no name the record writes.
         const added = (x: string): boolean => !items.includes(x) && items.some(y => UNIT_NOUNS.some(n => x === `${y} ${n}`));
-        const odd = new Set(list.filter((_, j) => (partnerFields.has(names[j]!) && !(cell && cell.includes(names[j]!))) || names.some((y, i) => i !== j && y.length > names[j]!.length && y.startsWith(names[j]!)) || prefix(names[j]!) || added(names[j]!)));
+        const odd = new Set(list.filter((_, j) => (partnerFields.has(names[j]!) && !(cell && cell.includes(names[j]!))) || (!standing.has(names[j]!) && names.some((y, i) => i !== j && y.length > names[j]!.length && y.startsWith(names[j]!))) || prefix(names[j]!) || added(names[j]!)));
         if (!odd.size || !Array.isArray(p[k])) continue;
-        (p[k] as unknown[]).forEach((x, j) => { if (typeof x === 'string' && odd.has(x.trim())) aside.push(new MapReplyError(`parts[${pi}].${k}[${j}]`, 'contract', k)); });
+        (p[k] as unknown[]).forEach((x, j) => {
+          if (typeof x !== 'string' || !odd.has(x.trim())) return;
+          const e = new MapReplyError(`parts[${pi}].${k}[${j}]`, 'contract', k), v = x.trim(), at = cells.find(c => plainName(c.text).includes(plainName(v)))?.place ?? null;
+          aside.push(e); ioSource.set(e, { value: v && v.length <= FIELD_ITEM_MAX && !CONTROL.test(v) && !secretLike(v) ? v : null, place: at });
+        });
         b[k] = list.filter(x => !odd.has(x));
       }
     }
@@ -1851,6 +1935,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const alias = typeof item === 'string' && ANCHOR.test(item) ? item : typeof o?.at === 'string' ? o.at : typeof o?.stateAt === 'string' && /\.state(When)?$/.test(e.path) ? o.stateAt : typeof o?.typeAt === 'string' && /\.type$/.test(e.path) ? o.typeAt : Array.isArray(o?.basis) ? o.basis.find(x => typeof x === 'string' && ANCHOR.test(x)) : null;
       const record = typeof alias === 'string' ? alias.split('.')[0]! : null, source = record ? texts.get(record) : null;
       const range = source?.spans && typeof alias === 'string' ? resolveRange(alias, record!, source.text, source.spans) : null;
+      // pipeline .38: an io item set aside says what it was and the record cell it came from (its value only when not secret-like).
+      const io = ioSource.get(e);
+      if (io) return { path: e.path, rule: e.rule, category: e.target, explanation: exclusionExplanation(e), record: io.place?.record ?? null, from: io.place?.from ?? null, to: io.place?.to ?? null, ...(io.value !== null ? { value: io.value } : {}) };
       return { path: e.path, rule: e.rule, category: e.rule === 'contract' ? e.target : null, explanation: exclusionExplanation(e), record: range ? record : null, from: range?.from ?? null, to: range?.to ?? null };
     }));
   }
@@ -1866,6 +1953,8 @@ export const readingExclusions = (reply: MapReply): readonly ReadingExclusion[] 
 // map-reading.10: and a claim's scope, one of its places or devices, its withdrawalKind or gate (parts[i].claims[j].anchors[k]).
 // map-reading.12: and one condition row of a part (parts[i].conditions[j]).
 const EXCLUSION_PATH = /^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop|conditions)(\[\d+\])?)?(\.[A-Za-z]+(\[\d+\])?)?$/;
+/** Pipeline .38: the exclusions that may carry the value they set aside (one input or output of a part). */
+export const IO_EXCLUSION_PATH = /^parts\[\d+\]\.(inputs|outputs)\[\d+\]$/;
 /** A divided first map (studio.map.6) arrives as the wire with every set-aside item already left out (it reads whole under plain
  * map.6), and the reasons they were set aside travel beside it. Those reasons are checked here before they join the reply's own
  * diagnostics: fixed rules and categories only, the explanation this module itself gives for them (no other words are taken), and
@@ -1875,7 +1964,10 @@ export function attachExclusions(reply: MapReply, value: unknown, ask: MapAsk): 
   check(ask.schemaVersion === MAP6_SCHEMA && firstAsk(ask) && Array.isArray(value) && value.length <= DIVIDED_EXCLUSIONS_MAX, code);
   const texts = askRecords(ask), out: ReadingExclusion[] = [];
   for (const x of value as unknown[]) {
-    obj(x, ['path', 'rule', 'category', 'explanation', 'record', 'from', 'to'], code);
+    // pipeline .38: an io item's exclusion may say what it was (value, ≤60, never secret-like).
+    const valued = !!x && typeof x === 'object' && Object.hasOwn(x as object, 'value');
+    obj(x, ['path', 'rule', 'category', 'explanation', 'record', 'from', 'to', ...(valued ? ['value'] : [])], code);
+    if (valued) check(typeof x.path === 'string' && IO_EXCLUSION_PATH.test(x.path) && typeof x.value === 'string' && !!x.value.trim() && x.value.length <= FIELD_ITEM_MAX && !CONTROL.test(x.value) && !secretLike(x.value), code);
     check(typeof x.path === 'string' && x.path.length <= 160 && EXCLUSION_PATH.test(x.path), code);
     check(READING_EXCLUSION_RULES.includes(x.rule as ReadingExclusion['rule']), code);
     check(x.rule === 'contract' ? typeof x.category === 'string' && /^[a-z][a-z-]{0,39}$/.test(x.category) : x.category === null, code);
@@ -1887,7 +1979,7 @@ export function attachExclusions(reply: MapReply, value: unknown, ask: MapAsk): 
       const source = typeof x.record === 'string' ? texts.get(x.record) : undefined;
       check(!!source && Number.isSafeInteger(x.from) && Number.isSafeInteger(x.to) && 0 <= (x.from as number) && (x.from as number) < (x.to as number) && (x.to as number) <= source!.text.length, code);
     }
-    out.push({ path: x.path as string, rule, category, explanation, record: x.record as string | null, from: x.from as number | null, to: x.to as number | null });
+    out.push({ path: x.path as string, rule, category, explanation, record: x.record as string | null, from: x.from as number | null, to: x.to as number | null, ...(valued ? { value: x.value as string } : {}) });
   }
   if (out.length) EXCLUSIONS.set(reply, [...out, ...(EXCLUSIONS.get(reply) ?? [])]);
 }

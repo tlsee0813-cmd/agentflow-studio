@@ -2,7 +2,7 @@
 // Neither the blueprint nor extraction notes are source evidence. The final map still cites the original ask.
 import { ApiError } from '../../server/errors.mjs';
 import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusions, anchorDowngrades, attachExclusions, explainExclusion, versionLike, DIVIDED_EXCLUSIONS_MAX, MAP6_NEW_PARTS, MAP6_RELATIONS, MAP6_CLAIMS, PART_LIST_MAX, FIELD_ITEM_MAX, fileKeys,
-  artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt } from '../dist/public/shared/map-reading.js';
+  artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt, conditionRows } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
@@ -373,6 +373,32 @@ function tableRowsUnder(ask, title) {
   return rows;
 }
 export const factRows = ask => tableRowsUnder(ask, FACT_TABLE).map(({ record, from, to, name }) => ({ record, from, to, name }));
+/* .38 (diagnostic only): the sentences of the records' 「한 줄 요약」 section (one span each), each with the part it names among the
+ * given names (loosely compared, two characters or more): the name standing first in the sentence outside its bracketed tags, else
+ * the first one its tags name; null when none. The .37 web map lost the status report's three summary sentences (가게 14곳, 베타
+ * 3주째·누적 3,912건, b71f2d40 승인 대기) with no record: they were no row of any table the plan counts. */
+const SUMMARY_SECTION = /^한\s*줄\s*요약/;
+export function summarySentences(ask, names) {
+  const out = [], wanted = [...new Set((Array.isArray(names) ? names : []).filter(n => typeof n === 'string').map(plainName).filter(n => n.length >= 2))];
+  const first = hay => wanted.map(n => [n, hay.indexOf(n)]).filter(([, i]) => i >= 0).sort((a, b) => a[1] - b[1] || b[0].length - a[0].length)[0]?.[0] ?? null;
+  for (const [record, { text, spans }] of askRecords(ask)) {
+    if (!spans) continue;
+    const body = []; let open = false, offset = 0;
+    for (const raw of text.split('\n')) {
+      const from = offset; offset += raw.length + 1;
+      const line = raw.trim(), heading = line.startsWith('|') ? null : /^\d{1,2}\.\s*(.+)$/.exec(line);
+      if (heading) { open = SUMMARY_SECTION.test(heading[1].trim()); continue; }
+      if (open && line) body.push({ from, to: from + raw.length });
+    }
+    if (!body.length) continue;
+    for (const s of spans) {
+      if (!body.some(b => s.from < b.to && b.from < s.to)) continue;
+      const sentence = text.slice(s.from, s.to), tags = sentence.match(/\[[^\]]*\]/g) ?? [];
+      out.push({ record, from: s.from, to: s.to, text: sentence.replace(/\s+/g, ' ').trim(), name: first(plainName(sentence.replace(/\[[^\]]*\]/g, ' '))) ?? first(plainName(tags.join(' '))) });
+    }
+  }
+  return out;
+}
 /** .31: the fact rows (factRows) no claim of the given parts quotes (its at range overlaps the row), as { rows, uncited: [names] };
  * own (a set of loosely compared part names) keeps only the rows naming one of them (a render fragment's own parts). */
 export function uncitedFacts(ask, parts, own = null) {
@@ -384,8 +410,12 @@ export function uncitedFacts(ask, parts, own = null) {
     if (range) ranges.push({ record, from: range.from, to: range.to });
   }
   const rows = factRows(ask).filter(row => !own || own.has(plainName(row.name)));
-  const uncited = rows.filter(row => !ranges.some(r => r.record === row.record && r.from < row.to && row.from < r.to)).map(row => row.name);
-  return { rows: rows.length, uncited };
+  const quoted = row => ranges.some(r => r.record === row.record && r.from < row.to && row.from < r.to);
+  // .38: and the 「한 줄 요약」 sentences naming one of the given parts (of own, when given), named 「한 줄 요약: the sentence's opening」.
+  const names = (Array.isArray(parts) ? parts : []).flatMap(part => typeof part?.name === 'string' ? [part.name] : []);
+  const sentences = summarySentences(ask, names).filter(s => s.name && (!own || own.has(s.name)));
+  const uncited = [...rows.filter(row => !quoted(row)).map(row => row.name), ...sentences.filter(s => !quoted(s)).map(s => `한 줄 요약: ${s.text.slice(0, 60)}`)];
+  return { rows: rows.length + sentences.length, uncited };
 }
 /* .32: the tables whose rows are each a claim of the part they name: a plan item's own rows (change, defect, withdrawal, rule,
  * unknown, hedge, next gate) and a part's own focus rows (the plan's at of the part on a change, defect, withdrawal or rule row). */
@@ -508,6 +538,12 @@ export function planClaims(ask, blueprint, parts, exclusions = []) {
       }
     });
   }
+  // .38: each 「한 줄 요약」 sentence naming a given part is a unit of that part (diagnostic only: it never refuses a render's first pass).
+  for (const s of summarySentences(ask, [...byName.keys()])) {
+    const ref = s.name ? byName.get(s.name) : null, row = { record: s.record, from: s.from, to: s.to };
+    if (!ref || has(ref, row)) continue;
+    items.push({ ref, rows: [row], name: `${ref}: ${opening(s.text)}`, landed: said(row), trigger: false });
+  }
   const missing = items.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref));
   return { items: items.length, missing: missing.map(item => item.name), missingUnits: missing.map(item => ({ ref: item.ref, name: item.name, trigger: item.trigger })) };
 }
@@ -586,7 +622,14 @@ export function loopRows(ask, parts) {
  * relation item that only such a line draws, and a plan relation item resting on no line a relation may stand on (unrecordedAt: a part
  * row's 「하는 일」, the KORU owner → ARM and the web 알림톡 대행사 → 고객), is no missing line: it is named under lines-set-aside with
  * its category and counted in neither connections nor plan-relations (the .36 global first passes paid their correction for them). */
-export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [], asideLines = [] }) {
+/** .38: a condition row's 참이면 that is a code outcome: a constant (STOP_NOT_RESIDENT, QUOTA_REACHED) or an HTTP status (401, 503). */
+const CODE_OUTCOME = /\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b|\b[A-Z]{3,}\b|\b[45]\d\d\b/;
+/* .38 (diagnostic only): portmap-missing, a data line from a store part to a part with steps that no port-map row names (by refs and
+ * payload; the .37 web map went from two rows to none, unseen); anchor-enforce, a rule claim placed on a 「조건·거부·분기」 row whose
+ * 참이면 is a code outcome while no code device keeps it (the .37 web map's admin rule: anchors on the order API's 401·403 rows,
+ * enforcedBy 장치 미상), named by the part, the claim's key and the row (nothing is added: the render prompt asks for the device). */
+// readParts: the checked reply's parts (with the program's places, each anchor by its quote), for anchor-enforce; the wire's otherwise.
+export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [], asideLines = [], portMap = null, readParts = null }) {
   const issues = [];
   try {
     const claims = (Array.isArray(parts) ? parts : []).flatMap(part => Array.isArray(part?.claims) ? part.claims : []).filter(claim => claim && typeof claim === 'object');
@@ -618,6 +661,32 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
     // named by their cells (up to 120 characters). Diagnostic only.
     const unknown = unknownRows(ask, parts);
     if (unknown.missing.length) issues.push({ path: 'parts', rule: 'unknown-count', expected: unknown.rows, actual: unknown.rows - unknown.missing.length, names: unknown.missing.slice(0, 12) });
+  } catch { /* A diagnostic read failure says nothing. */ }
+  try {
+    const list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === 'object'), byRef = new Map(list.map(part => [part.ref, part]));
+    if (Array.isArray(relations)) {
+      const rows = Array.isArray(portMap) ? portMap.filter(m => m && typeof m === 'object') : [];
+      const due = relations.flatMap((r, i) => r && typeof r === 'object' && r.channel === 'data' && byRef.get(r.from)?.type === 'store' && Array.isArray(byRef.get(r.to)?.steps) && byRef.get(r.to).steps.length ? [[i, r]] : []);
+      const unmapped = due.filter(([i]) => !rows.some(m => m.relation === i));
+      if (unmapped.length) issues.push({ path: 'portMap', rule: 'portmap-missing', expected: due.length, actual: due.length - unmapped.length,
+        names: unmapped.slice(0, 12).map(([, r]) => `${r.from} → ${r.to}${typeof r.payload === 'string' ? `: ${r.payload}` : ''}`) });
+    }
+    const texts = askRecords(ask), where = alias => {
+      if (typeof alias !== 'string' || !alias.includes('.')) return null;
+      const record = alias.slice(0, alias.indexOf('.')), source = texts.get(record), range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
+      return range ? { record, from: range.from, to: range.to } : null;
+    };
+    const coded = conditionRows(ask).filter(row => CODE_OUTCOME.test(row.then)), unkept = [];
+    const placeOf = anchor => typeof anchor?.at === 'string' ? where(anchor.at)
+      : anchor?.quote && typeof anchor.quote.record === 'string' && Number.isSafeInteger(anchor.quote.from) && Number.isSafeInteger(anchor.quote.to) ? anchor.quote : null;
+    for (const part of (Array.isArray(readParts) ? readParts : list).filter(p => p && typeof p === 'object')) for (const claim of Array.isArray(part.claims) ? part.claims : []) {
+      if (!claim || claim.topic !== 'rule' || (Array.isArray(claim.enforcedBy) ? claim.enforcedBy : []).some(x => x?.kind === 'code')) continue;
+      for (const anchor of Array.isArray(claim.anchors) ? claim.anchors : []) {
+        const at = placeOf(anchor), row = at && coded.find(c => c.record === at.record && c.from < at.to && at.from < c.to);
+        if (row) { unkept.push(`${part.ref} ${claim.key ?? '?'}: ${row.at} ${row.condition} → ${row.then}`); break; }
+      }
+    }
+    if (unkept.length) issues.push({ path: 'parts', rule: 'anchor-enforce', expected: null, actual: unkept.length, names: unkept.slice(0, 12) });
   } catch { /* A diagnostic read failure says nothing. */ }
   try {
     if (Array.isArray(relations)) {
@@ -856,12 +925,13 @@ function withoutSetAside(raw, exclusions) {
   const drop = new Map(), limit = new Map(), unsaid = new Map(), top = new Set(), claimUnsaid = new Map();
   const blank = (index, keys) => { if (!unsaid.has(index)) unsaid.set(index, new Set()); for (const key of keys) unsaid.get(index).add(key); };
   const mark = (list, index) => { if (!drop.has(list)) drop.set(list, new Set()); drop.get(list).add(index); };
-  // .37: a relation's cadence or its format fields (the list, or one field) left out alone; the line stays.
+  // .37: a relation's cadence or its format fields (the list, or one field) left out alone; the line stays. .38: and its channel
+  // (a wrong word, or control on a line carrying an artifact), written null.
   const relationUnsaid = new Set();
   for (const x of exclusions) {
     const count = x.rule === 'contract' && x.category === 'count';
     let m;
-    if ((m = /^relations\[(\d{1,4})\]\.(cadence|payloadFields)$/.exec(x.path))) relationUnsaid.add(`${Number(m[1])}.${m[2]}`);
+    if ((m = /^relations\[(\d{1,4})\]\.(cadence|payloadFields|channel)$/.exec(x.path))) relationUnsaid.add(`${Number(m[1])}.${m[2]}`);
     else if ((m = /^relations\[(\d{1,4})\]\.payloadFields\[(\d{1,4})\]$/.exec(x.path))) mark(`relations.${Number(m[1])}.payloadFields`, Number(m[2]));
     else if ((m = /^(relations|candidates|gaps|matches|material)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(m[1], Number(m[2]));
     // .33 (map-reading.10): one place or device of a claim is left out at its index, a claim's scope (with its name), its list of
@@ -901,7 +971,7 @@ function withoutSetAside(raw, exclusions) {
     if (!r || typeof r !== 'object' || Array.isArray(r)) return r;
     let out = r;
     if (drop.has(`relations.${i}.payloadFields`) && Array.isArray(out.payloadFields)) out = { ...out, payloadFields: keep(`relations.${i}.payloadFields`, out.payloadFields) };
-    for (const key of ['cadence', 'payloadFields']) if (relationUnsaid.has(`${i}.${key}`) && Object.hasOwn(out, key)) out = { ...out, [key]: null };
+    for (const key of ['cadence', 'payloadFields', 'channel']) if (relationUnsaid.has(`${i}.${key}`) && Object.hasOwn(out, key)) out = { ...out, [key]: null };
     return out;
   });
   for (const key of Object.keys(LIST_LIMITS)) if (Array.isArray(clean[key])) clean[key] = keep(key, clean[key]);
@@ -1058,15 +1128,17 @@ function aliasExclusion(path, category, alias, ask) {
 /** .32: the diagnostics of the final wire a first map's global stage record keeps (fixed shapes, capped; never a refusal). */
 // .35: and the parts that repeat with no loop (loop-missing) and the places read as inferred (anchor-kind).
 // .36: and the store parts left out beside the store holding their place (store-dup) and the stores no line reaches (store-island).
-export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'lines-set-aside', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'unbacked', 'withdrawn-count', 'unknown-count']);
+// .38: and the data lines from a store to a part with steps no port-map row names (portmap-missing) and the rules placed on a code
+// condition row with no code device (anchor-enforce).
+export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'lines-set-aside', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'unbacked', 'withdrawn-count', 'unknown-count']);
 export const FINAL_DIAGNOSTICS_MAX = 16;
 export function finalDiagnostics(fragments, global, ask, blueprint) {
   try {
     const { wire, exclusions, folds, asideLines } = combineRenderedReading(fragments, global, ask, blueprint);
     // .35: what was set aside on a row lands its plan unit; the places the reading took as inferred are named (anchor-kind).
-    let downgrades = [];
-    try { downgrades = anchorDowngrades(validateMapReply(wire, ask)).map(x => `${x.ref} ${x.key ?? "?"}: ${x.text}`); } catch { downgrades = []; }
-    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades, asideLines });
+    let downgrades = [], read = null;
+    try { read = validateMapReply(wire, ask); downgrades = anchorDowngrades(read).map(x => `${x.ref} ${x.key ?? "?"}: ${x.text}`); } catch { downgrades = []; }
+    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades, asideLines, portMap: wire.portMap ?? null, readParts: read?.parts ?? null });
     const refs = new Set(wire.parts.map(part => part.ref)), coverage = blueprintCoverage({ parts: blueprint.parts.filter(part => refs.has(part.ref)) }, ask);
     if (coverage && coverage.covered < coverage.rows) found.push({ path: 'parts', rule: 'coverage', expected: coverage.rows, actual: coverage.covered, names: coverage.missing });
     if (folds.length) found.push({ path: 'parts', rule: 'store-dup', expected: 0, actual: folds.length, names: folds });
@@ -1081,20 +1153,35 @@ export function finalDiagnostics(fragments, global, ask, blueprint) {
  * does, so a row lost on the way is said (the .36 KORU corrections dropped 종이 생산자's and 성적표's step chains and 질감's
  * make_baseline with no exclusion): each part's steps by name, its claims by their at (one the correction still cites with a claim, a
  * step, a condition or a rule's place is kept) and its kept states by name, named 「ref step 「name」」, 「ref claim at: text」 and
- * 「ref stateVar 「name」」. [{ path: 'parts', rule: 'dropped', expected: the first pass's items, actual: those kept, names }] or []. */
-export function droppedItems(first, kept) {
+ * 「ref stateVar 「name」」. [{ path: 'parts', rule: 'dropped', expected: the first pass's items, actual: those kept, names }] or [].
+ * .38: given the ask, a claim is read by the range its at stands for: kept while a claim, step, condition, place or device of its
+ * part in the correction cites a range meeting it (another alias of the same row, a range holding it), and once that range is gone
+ * named by the record's own words, 「ref claim at: 「the quote's first 40 characters」」 (the .37 KORU judging found a range claim
+ * vanish with no record). */
+export function droppedItems(first, kept, ask = null) {
   try {
     if (!first || !Array.isArray(first.parts) || !kept || !Array.isArray(kept.parts)) return [];
     const list = (o, key) => Array.isArray(o?.[key]) ? o[key].filter(x => x && typeof x === 'object' && !Array.isArray(x)) : [];
     const clip = s => String(s ?? '').replace(/\s+/g, ' ').trim().slice(0, 100);
+    const texts = ask ? askRecords(ask) : null, where = alias => {
+      if (!texts || typeof alias !== 'string' || !alias.includes('.')) return null;
+      const record = alias.slice(0, alias.indexOf('.')), source = texts.get(record), range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
+      return range ? { record, from: range.from, to: range.to, text: source.text.slice(range.from, range.to) } : null;
+    };
     const names = []; let items = 0;
     for (const before of first.parts) {
       if (!before || typeof before !== 'object') continue;
       const after = kept.parts.find(part => part && part.ref === before.ref) ?? null;
-      const cited = new Set([...list(after, 'claims'), ...list(after, 'steps'), ...list(after, 'conditions'), ...list(after, 'claims').flatMap(c => list(c, 'anchors'))]
+      const cited = new Set([...list(after, 'claims'), ...list(after, 'steps'), ...list(after, 'conditions'), ...list(after, 'claims').flatMap(c => [...list(c, 'anchors'), ...list(c, 'enforcedBy')])]
         .map(x => x.at).filter(at => typeof at === 'string'));
+      const ranges = [...cited].map(where).filter(Boolean);
       for (const step of list(before, 'steps')) { items++; if (!list(after, 'steps').some(x => x.name === step.name)) names.push(`${before.ref} step 「${clip(step.name)}」`); }
-      for (const claim of list(before, 'claims')) { items++; if (typeof claim.at === 'string' && !cited.has(claim.at)) names.push(`${before.ref} claim ${claim.at}: ${clip(claim.text)}`); }
+      for (const claim of list(before, 'claims')) {
+        items++; if (typeof claim.at !== 'string' || cited.has(claim.at)) continue;
+        const range = where(claim.at);
+        if (range && ranges.some(r => r.record === range.record && r.from < range.to && range.from < r.to)) continue;
+        names.push(range ? `${before.ref} claim ${claim.at}: 「${range.text.replace(/\s+/g, ' ').trim().slice(0, 40)}」` : `${before.ref} claim ${claim.at}: ${clip(claim.text)}`);
+      }
       for (const state of list(before, 'stateVars')) { items++; if (!list(after, 'stateVars').some(x => x.name === state.name)) names.push(`${before.ref} stateVar 「${clip(state.name)}」`); }
     }
     const safe = names.map(n => n.slice(0, 160)).filter(n => n && !CONTROL.test(n));
@@ -1283,6 +1370,6 @@ export function mapStageIssues(value, error, context = null) {
         if (plan.missing.length) add('parts', 'plan-claims', plan.items, plan.items - plan.missing.length, null, plan.missing.slice(0, PLAN_CLAIMS_NAMES));
       }
     } catch { /* A diagnostic read failure says nothing. */ }
-  } else if (context?.ask) for (const x of readingDiagnostics({ ask: context.ask, summary: value?.summary, parts: context.parts, relations: value?.relations, blueprint: context.blueprint ?? null })) add(x.path, x.rule, x.expected, x.actual, null, x.names ?? null);
+  } else if (context?.ask) for (const x of readingDiagnostics({ ask: context.ask, summary: value?.summary, parts: context.parts, relations: value?.relations, blueprint: context.blueprint ?? null, portMap: value?.portMap ?? null })) add(x.path, x.rule, x.expected, x.actual, null, x.names ?? null);
   return issues;
 }

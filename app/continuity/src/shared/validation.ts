@@ -3,6 +3,7 @@ import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 import { validEvidence, recordIdentity } from './record-source.js';
+import { secretLike } from './secret.js';
 export class ContextError extends Error { constructor(code: string) { super(code); this.name = 'ContextError'; } }
 export function ensure(condition: unknown, code = 'INVALID_DATA'): asserts condition { if (!condition) throw new ContextError(code); }
 function obj(v: unknown, keys: string[]): asserts v is Record<string, unknown> {
@@ -524,7 +525,10 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
     list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped',...(four?['material']:[])].includes(x.reason as string));}
     if(four){list(r.material,8);for(const x of r.material){obj(x,['record','from','to','what']);ensure(records.has(x.record as string));text(x.what,120);integer(x.from);integer(x.to);ensure((x.from as number)<(x.to as number)&&read.some(y=>y.id===x.record&&y.from<=(x.from as number)&&(x.to as number)<=y.to));}}
     if(six){list(r.exclusions,512);for(const x of r.exclusions){
-      obj(x,['path','rule','category','explanation','record','from','to']);text(x.path,160);ensure((twelve?/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop|conditions)(\[\d+\])?)?(\.[A-Za-z]+(\[\d+\])?)?$/:nine?/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop)(\[\d+\])?)?(\.[A-Za-z]+(\[\d+\])?)?$/:/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/).test(x.path as string));text(x.explanation,160);
+      // pipeline .38 (map-reading.13): an io item's exclusion may carry the value it set aside (≤60, never secret-like), as stored.
+      const valued=thirteen&&!!x&&typeof x==='object'&&Object.hasOwn(x,'value');
+      obj(x,['path','rule','category','explanation','record','from','to',...(valued?['value']:[])]);text(x.path,160);
+      if(valued){text(x.value,60);ensure(/^parts\[\d+\]\.(inputs|outputs)\[\d+\]$/.test(x.path as string)&&!secretLike(x.value as string));}ensure((twelve?/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop|conditions)(\[\d+\])?)?(\.[A-Za-z]+(\[\d+\])?)?$/:nine?/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(\[\d+\])?(\.(claims|basis|statement|steps|stateVars|loop)(\[\d+\])?)?(\.[A-Za-z]+(\[\d+\])?)?$/:/^(parts|relations|candidates|gaps|matches|material|basisAt|basisVersion)(\[\d+\])?(\.(claims|basis|statement)(\[\d+\])?)?(\.[A-Za-z]+)?$/).test(x.path as string));text(x.explanation,160);
       ensure(READING_EXCLUSION_RULES.includes(x.rule as never));ensure(x.category===null||typeof x.category==='string'&&/^[a-z][a-z-]{0,39}$/.test(x.category));
       if(x.record===null)ensure(x.from===null&&x.to===null);else{ensure(records.has(x.record as string));integer(x.from);integer(x.to);ensure((x.from as number)<(x.to as number)&&read.some(y=>y.id===x.record&&y.from<=(x.from as number)&&(x.to as number)<=y.to));}
     }}

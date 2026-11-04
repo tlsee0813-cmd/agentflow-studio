@@ -359,7 +359,10 @@ export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 
 export interface ReadingMaterial { record: string; from: number; to: number; what: string }
 /** A validator exclusion, not model text. The optional place names the original, unshortened source range. */
 export const READING_EXCLUSION_RULES = ['settled-and-open', 'duplicate-target', 'duplicate-key', 'material-evidence', 'reference', 'length', 'source-kind', 'condition-form', 'condition-source', 'condition-length', 'contract'] as const;
-export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION_RULES[number]; category: string | null; explanation: string; record: string | null; from: number | null; to: number | null }
+export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION_RULES[number]; category: string | null; explanation: string; record: string | null; from: number | null; to: number | null;
+  /** Pipeline .38 (map-reading.13, optional): an input or output set aside as written (≤60, never secret-like), its record cell in
+   * record/from/to; only on parts[i].inputs[j] and parts[i].outputs[j]. Exclusions without it keep their exact shape. */
+  value?: string }
 export interface MapReading {
   version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
