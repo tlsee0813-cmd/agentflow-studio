@@ -70,7 +70,9 @@ test('map tools: icons on the zoom and help buttons, hairlines between groups, a
   for (const id of ['recent-toggle', 'zoom-out', 'zoom-in', 'zoom-fit', 'arrange', 'help-toggle']) assert.match(tools, new RegExp(`id="${id}"[^>]*>(?:(?!</button>)[\\s\\S])*<svg`), id);
   // app.ts inserts 찾기 before zoom-out's previous sibling: that sibling must be the first group's hairline
   assert.match(tools, /<span class="tool-sep" aria-hidden="true"><\/span>\s*<button type="button" id="zoom-out"/);
-  assert.equal((tools.match(/class="tool-sep/g) ?? []).length, 4);
+  // Map design v3 7.3: the lens switch is a group of its own (five segments), between the arrange and help groups.
+  assert.equal((tools.match(/class="tool-sep/g) ?? []).length, 5);
+  assert.match(tools, /<div class="lens-seg" role="radiogroup"[^>]*>(?:<button type="button" role="radio" data-lens="(compose|data|start|state|scenario)"[^>]*>[^<]+<\/button>){5}<\/div>/);
   assert.match(css, /\.tool-sep\.add-sep:has\(\+ \.add-part\[hidden\]\) \{ display: none; \}/);
 });
 

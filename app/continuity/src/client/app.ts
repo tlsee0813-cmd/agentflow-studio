@@ -37,7 +37,8 @@ import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
-import { lineStyle, lineWidth, lineBadge, labelRank, mergeByChannel, multiWord, portFaces, HEAD_PX, DASH, LABEL_MAX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, labelRank, mergeByChannel, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
@@ -1674,7 +1675,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   }
   world.append(edges);
   markLines();
-  renderLineKey(present);
+  // The legend of the lens this map is read with (view-lens): what the map draws, counted.
+  void present; loadLens(o); renderLegend();
   // Each group's head says how many relations cross its boundary (stored relations, any depth inside): where it connects, before
   // anything is selected. Part of the head, so clicking it selects the group and the head's own button role reads it.
   const crossing = boundaryCounts(view);
@@ -1797,6 +1799,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   fitCards();
   if (planOverlay) planView.overlay();
   applyReadMarks();
+  applyLens();
   if (openState) syncOpenSoon();
 }
 
@@ -1945,7 +1948,7 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); placeScenarioMarks(); }
+function placeEdgeLabels() { placeLineLabels(); placeScenarioMarks(); applyLegendMarks(); }
 function placeLineLabels() {
   const world = $('world'), o = opened; if (!o) return;
   let box = world.querySelector<HTMLElement>('.edge-labels');
@@ -2003,7 +2006,7 @@ function placeLineLabels() {
     // The selection's line says what it hands over (the head of its note) where its runs have room; the verb alone otherwise.
     // (Not when the line's own label already says the same words, as a payload often does.)
     const head = on && !fan && e.notes.length === 1 && !plannedNote(e.notes[0]!) ? noteHead(e.notes[0]!) : '', said = head === wordOf(e) ? '' : head;
-    const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}` }, verb);
+    const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}`, 'data-key': e.key }, verb);
     box.append(label);
     const inv = labelInv(), pts = edgePts(e.key, path), len = path.getTotalLength(), prefer = fan ? (e.to === selected ? 'end' : 'start') : 'long';
     let spot: Rect | null = null;
@@ -2102,7 +2105,7 @@ function countOf(e: Edge): string {
 /** A line's type chip (map spec 2.4, 타입 칩 = 산출물 이름): the artifact's name and up to three of its fields, one cell each, '+N'
  * for the rest (line-view typeChipForms), in an accent outline; a click picks the line (its fields read in the pane under 데이터 계약). */
 function typeChipEl(e: Edge, tp: { name: string; fields: string[] }, on = false): HTMLElement {
-  return h('button', { type: 'button', tabindex: '-1', class: `edge-label type-chip k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}`, 'data-type-chip': e.key,
+  return h('button', { type: 'button', tabindex: '-1', class: `edge-label type-chip k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}`, 'data-type-chip': e.key, 'data-key': e.key,
     title: `데이터 계약 · ${tp.name} · ${tp.fields.length} 필드
 ${tp.fields.join(' · ')}
 눌러서 읽기면에 필드`, onclick: (ev: Event) => { ev.stopPropagation(); pickLine(e); } });
@@ -2150,7 +2153,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     if (tp) { const chip = typeChipEl(e, tp); box.append(chip);
       for (const form of typeChipForms(tp.name, tp.fields)) { fillTypeChip(chip, form); mine = spotsFor(chip); if (mine.length) break; }
       if (mine.length) label = chip; else chip.remove(); }
-    if (!label) { label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, restWord(e)); box.append(label); mine = spotsFor(label); }
+    if (!label) { label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}`, 'data-key': e.key }, restWord(e)); box.append(label); mine = spotsFor(label); }
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
     // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
     // then better places across all labels: every label's first place before any label's second.
@@ -2541,6 +2544,8 @@ function enterScenario(id: string) {
   scOn = id; scVisit = null; scCond = null; redrawScenario();
   if ($('lens').classList.contains('scenario-read')) hideLens();
   if (selected) refreshReading(); // the selected part's lens says whether the path visits it
+  // A path read on the map is the 시나리오 lens (map design v3 7.1).
+  if (viewLens !== 'scenario') { viewLens = 'scenario'; legend = NO_FILTER; legendMenu = null; saveLens(); renderLegend(); applyLens(); }
 }
 function leaveScenario() {
   const o = opened; if (!o || !scOn) return;
@@ -2548,6 +2553,7 @@ function leaveScenario() {
   scOn = null; scVisit = null; scCond = null; redrawScenario();
   if ($('lens').classList.contains('scenario-read')) hideLens();
   if (selected) refreshReading();
+  if (viewLens === 'scenario') { viewLens = DEFAULT_LENS; legend = NO_FILTER; legendMenu = null; saveLens(); renderLegend(); applyLens(); }
   if (focusPart) document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(focusPart)}"]`)?.focus({ preventScroll: true });
 }
 /** The map again in place (the title's scenario line changes its height): same camera, same selection. */
@@ -3623,6 +3629,130 @@ function renderLineKey(present: Set<Channel>) {
   };
   key.replaceChildren(...(['data', 'control', 'uses'] as const).filter(c => present.has(c)).map(c => h('span', { class: `lk-row lk-${c}`, role: 'listitem' }, sample(c), h('span', {}, CHANNEL_LABEL[c]))));
   key.hidden = !present.size;
+}
+/* ---------- lenses and the legend (map design v3 7; view-lens.ts) ----------
+ * The lens switch in the map's tools and the legend in its lower left. A lens only puts classes on the space; the legend's marks
+ * only put classes on the parts, lines, labels and badges it stands for. Neither lays out, routes or places a label again. */
+let viewLens: LensId = DEFAULT_LENS, legend: LegendState = NO_FILTER, legendFor = '', legendNow: LegendItem[] = [], legendMenu: string | null = null, legendHoverTimer = 0;
+const lensStore = (): string | null => { try { return localStorage.getItem(LENS_KEY); } catch { return null; } };
+function saveLens() { const o = opened; if (!o) return; try { localStorage.setItem(LENS_KEY, writeLensRecord(lensStore(), o.key, { lens: viewLens, legend })); } catch { /* a view record only: the map reads the same without it */ } }
+const lensUsable = (id: LensId) => id !== 'scenario' || (!!opened && scenarioReadings(opened).length > 0);
+/** The lens and legend kept for this map (read once per opened map). */
+function loadLens(o: Opened) {
+  if (legendFor === o.key) return;
+  legendFor = o.key; const r = readLensRecord(lensStore(), o.key);
+  viewLens = r.lens === 'scenario' && !scenarioReadings(o).length ? DEFAULT_LENS : r.lens; legend = r.legend; legendMenu = null;
+}
+function setLens(id: LensId) {
+  const o = opened; if (!o || !lensUsable(id) || id === viewLens) return;
+  const was = viewLens; viewLens = id; legend = NO_FILTER; legendMenu = null; // each lens reads its own legend
+  if (id === 'scenario' && !scOn) { const first = scenarioReadings(o)[0]; if (first) enterScenario(first.id); }
+  if (was === 'scenario' && scOn) leaveScenario();
+  saveLens(); renderLegend(); applyLens();
+}
+/** What the legend counts of the drawn parts: family, type, the overview's short status, a loop, the card's gaps. */
+function lensPartsOf(o: Opened): LensPart[] {
+  const said = relationLines(o.project);
+  return [...lay.boxes.values()].filter(b => b.kind === 'node').map(b => {
+    const p = partOf(o, b.id)!, t = cardTpls.get(b.id), r = p.reading, s = r?.stateRead;
+    const life = r ? lifecycleOf(s?.state, s?.quote?.quote ?? '') : null, ops = r ? opsCard(s?.state ?? null, s?.when ?? null, opsRef, life) : null;
+    return { id: b.id, family: t?.family ?? 'neutral', type: r?.typeRead?.type ?? null, short: life ?? ops?.short ?? '운영 기록 없음', loop: !!r?.loop,
+      unlinked: !!t && t.contract.kind === 'lines' && t.contract.lines.some(l => l.endsWith('항목 근거 미연결')), unmapped: t && r ? cardFactsOf(o, p, r, said).unmapped ?? 0 : 0 };
+  });
+}
+const lensLinesOf = (): LensLine[] => [...lay.edges.map(e => ({ e, sum: false })), ...restSums.map(e => ({ e, sum: true }))].map(({ e, sum }) => ({ key: e.key, channel: lineChans.get(e.key) ?? null, badge: lineBadges.has(e.key), from: e.from, to: e.to, sum }));
+/** The lens's classes on the space and its line opacities (lensLook); the switch's state; the legend's marks. */
+function applyLens() {
+  const sp = $('space');
+  for (const c of [...sp.classList]) if (c.startsWith('lens-')) sp.classList.remove(c);
+  for (const c of lensClasses(viewLens)) sp.classList.add(c);
+  for (const [k, v] of Object.entries(lensLook(viewLens).lines)) sp.style.setProperty(`--lo-${k}`, String(v));
+  document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { const on = b.dataset.lens === viewLens; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); (b as HTMLButtonElement).disabled = !lensUsable(b.dataset.lens as LensId); });
+  applyLegendMarks();
+}
+/** The legend's marks: the picked item's targets outlined (.lg-pick), dimmed (.lg-dim) and hidden (.lg-hide, its room kept). */
+function applyLegendMarks() {
+  const world = $('world'), m = legendMarks(legend, legendNow);
+  world.querySelectorAll('.lg-pick, .lg-dim, .lg-hide').forEach(el => el.classList.remove('lg-pick', 'lg-dim', 'lg-hide'));
+  const mark = (set: Set<string>, cls: string) => { for (const x of set) {
+    if (x.startsWith('line:')) { const k = CSS.escape(x.slice(5)); world.querySelectorAll(`.edge[data-key="${k}"], .edge-label[data-key="${k}"], .edge-badge[data-badge="${k}"]`).forEach(el => el.classList.add(cls)); }
+    else world.querySelector(`[data-box="${CSS.escape(x)}"]`)?.classList.add(cls); } };
+  mark(m.dim, 'lg-dim'); mark(m.hide, 'lg-hide'); mark(m.picked, 'lg-pick');
+}
+/** Pointing at a legend item: after ~150 ms its parts and lines keep an outline until the pointer leaves (7.2: no blinking). */
+function legendHover(item: LegendItem | null) {
+  clearTimeout(legendHoverTimer);
+  const world = $('world'); world.querySelectorAll('.lg-hover').forEach(el => el.classList.remove('lg-hover'));
+  if (!item) return;
+  legendHoverTimer = window.setTimeout(() => {
+    for (const id of item.parts) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('lg-hover');
+    for (const k of item.lines) world.querySelectorAll(`.edge[data-key="${CSS.escape(k)}"]`).forEach(el => el.classList.add('lg-hover'));
+  }, 150);
+}
+function legendAct(a: LegendAction, focusId?: string) {
+  legend = legendApply(legend, a, legendNow); legendMenu = null; saveLens(); applyLegendMarks(); renderLegend();
+  if (focusId) document.querySelector<HTMLElement>(`#line-key .lg-item[data-item="${CSS.escape(focusId)}"]`)?.focus();
+}
+const legendActive = () => !!legend.picked || Object.keys(legend.mode).length > 0;
+const FAMILY_GLYPH: Record<string, string> = { participant: 'person', process: 'compute', store: 'store', trigger: 'timer', neutral: 'neutral' };
+function legendSample(s: Sample): HTMLElement | SVGElement {
+  if (s.kind === 'family') { const t = h('span', { class: `glyph-tile lg-tile g-${s.family}`, 'aria-hidden': 'true' }); t.innerHTML = glyphSvg((FAMILY_GLYPH[s.family] ?? 'neutral') as Parameters<typeof glyphSvg>[0]); return t; }
+  if (s.kind === 'badge') return h('span', { class: 'lg-badge', 'aria-hidden': 'true' }, '박자');
+  if (s.kind === 'mark') return h('span', { class: 'lg-mark', 'aria-hidden': 'true' }, s.text);
+  const c = s.channel, sv = svg('svg', { viewBox: '0 0 28 10', width: '28', height: '10', 'aria-hidden': 'true', class: `lg-line lk-${c}` });
+  if (c === 'uses') sv.append(svg('circle', { class: 'lk-ear', cx: '3', cy: '5', r: '2.2' }));
+  if (c === 'related') sv.append(svg('circle', { class: 'lk-dot', cx: '2.5', cy: '5', r: '1.8' }), svg('path', { class: 'lk-line', d: 'M7 5H21' }), svg('circle', { class: 'lk-dot', cx: '25.5', cy: '5', r: '1.8' }));
+  else sv.append(svg('path', { class: 'lk-line', d: c === 'data' ? 'M1 5H21' : c === 'uses' ? 'M7 5H24' : 'M1 5H25' }), svg('path', { class: c === 'data' ? 'lk-head filled' : 'lk-head', d: c === 'data' ? 'M19 1.5L26 5L19 8.5z' : c === 'uses' ? 'M21.5 2.5L26 5L21.5 7.5' : 'M20 1.5L26 5L20 8.5' }));
+  return sv;
+}
+/** The legend (7.2): the lens's name and question, '숨김 N · 흐림 N · 모두 보기' while anything is, and one row per item this map has
+ * (sample, name, count) with its ⋯ menu. */
+function renderLegend() {
+  const o = opened;
+  let key = document.getElementById('line-key');
+  if (!key) { key = h('div', { id: 'line-key', class: 'line-key legend', role: 'group', 'aria-label': '범례' }); $('space').append(key); }
+  key.classList.add('legend');
+  if (!o) { key.hidden = true; return; }
+  legendNow = legendItems(viewLens, lensPartsOf(o), lensLinesOf());
+  // Marks of items this map no longer has are dropped (never a hidden count for nothing drawn).
+  const ids = new Set(legendNow.map(i => i.id));
+  legend = { picked: legend.picked && ids.has(legend.picked) ? legend.picked : null, mode: Object.fromEntries(Object.entries(legend.mode).filter(([k]) => ids.has(k))) };
+  const def = lensDef(viewLens), head = legendHead(legend);
+  const menuOf = (it: LegendItem) => h('div', { class: 'lg-menu', role: 'menu', 'aria-label': `${it.label} 보기` },
+    ...([['dim', '흐리게', 'Shift+클릭'], ['hide', '숨김', ''], ['solo', '그것만', 'Ctrl+클릭'], ['all', '모두 보기', '']] as const).map(([d, word, kbd]) =>
+      h('button', { type: 'button', role: 'menuitem', class: `lg-act${d !== 'all' && d !== 'solo' && legend.mode[it.id] === d ? ' on' : ''}`, onclick: () => legendAct(d === 'all' ? { do: 'all' } : { do: d, id: it.id }, it.id) }, word, kbd ? h('kbd', {}, kbd) : null)));
+  const rows = legendNow.map(it => {
+    const m = legend.mode[it.id], picked = legend.picked === it.id;
+    return h('li', { class: `lg-row${picked ? ' picked' : ''}${m ? ` m-${m}` : ''}`, role: 'presentation' },
+      h('button', { type: 'button', class: 'lg-item', role: 'option', 'aria-selected': String(picked), 'data-item': it.id, title: `${it.label} ${it.count}${picked ? ' · 선택됨 (다시 누르거나 Esc로 풀기)' : ' · 눌러서 지도에 표시'}${m === 'hide' ? ' · 숨김' : m === 'dim' ? ' · 흐림' : ''}`,
+        onclick: (ev: Event) => { const e = ev as MouseEvent; legendAct(e.shiftKey ? { do: 'dim', id: it.id } : e.ctrlKey || e.metaKey ? { do: 'solo', id: it.id } : { do: 'pick', id: it.id }, it.id); },
+        onpointerenter: () => legendHover(it), onpointerleave: () => legendHover(null), onfocus: () => legendHover(it), onblur: () => legendHover(null) },
+        legendSample(it.sample), h('span', { class: 'lg-label' }, it.label), h('span', { class: 'lg-count' }, String(it.count)), m ? h('span', { class: 'lg-mode' }, m === 'hide' ? '숨김' : '흐림') : null),
+      h('button', { type: 'button', class: 'lg-more', 'aria-haspopup': 'menu', 'aria-expanded': String(legendMenu === it.id), 'aria-label': `${it.label} 보기 메뉴`, title: '흐리게 · 숨김 · 그것만 · 모두 보기',
+        onclick: () => { legendMenu = legendMenu === it.id ? null : it.id; renderLegend(); document.querySelector<HTMLElement>('#line-key .lg-menu .lg-act')?.focus(); } }, '⋯'),
+      legendMenu === it.id ? menuOf(it) : null);
+  });
+  key.replaceChildren(...[
+    h('div', { class: 'lg-head' }, h('strong', {}, def.name), h('span', { class: 'lg-asks' }, def.asks)),
+    head ? h('div', { class: 'lg-state' }, h('span', {}, head), h('button', { type: 'button', class: 'link-button lg-all', onclick: () => legendAct({ do: 'all' }) }, '모두 보기')) : null,
+    rows.length ? h('ul', { class: 'lg-items', role: 'listbox', 'aria-label': `${def.name} 범례 · ↑↓ 이동 · Enter 선택 · Shift+F10 메뉴 · Esc 해제` }, ...rows)
+      : h('p', { class: 'lg-none' }, viewLens === 'scenario' ? '경로와 방문은 제목 아래 시나리오 줄에서' : '이 지도에 해당하는 것 없음')].filter(<T,>(x: T | null): x is T => !!x));
+  key.hidden = false;
+}
+/** Keys inside the legend (7.3): ↑↓ between items, Enter selects (the button's own), Shift+F10 or the menu key opens the item's
+ * menu, Esc closes the menu, else clears the legend and goes back to the map. */
+function bindLegendKeys() {
+  document.addEventListener('keydown', e => {
+    const key = document.getElementById('line-key'), t = e.target as HTMLElement; if (!key || !key.contains(t)) return;
+    const items = [...key.querySelectorAll<HTMLElement>('.lg-item')], i = items.indexOf(t.closest('.lg-row')?.querySelector<HTMLElement>('.lg-item') ?? t);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus(); return; }
+    if ((e.key === 'F10' && e.shiftKey) || e.key === 'ContextMenu') { e.preventDefault(); const id = items[i]?.dataset.item; if (id) { legendMenu = id; renderLegend(); key.querySelector<HTMLElement>('.lg-menu .lg-act')?.focus(); } return; }
+    if (e.key === 'Escape') {
+      e.preventDefault(); e.stopImmediatePropagation();
+      if (legendMenu) { const id = legendMenu; legendMenu = null; renderLegend(); key.querySelector<HTMLElement>(`.lg-item[data-item="${CSS.escape(id)}"]`)?.focus(); return; }
+      legendAct({ do: 'clear' }); $('world').querySelector<HTMLElement>('.node[tabindex], .frame-head[tabindex]')?.focus({ preventScroll: true });
+    }
+  }, true);
 }
 /** The map head's basis line (spec 6): what the newest reading's records give as their basis time and target version, as
  * written, and that every state is a reported one; a blank says it is unknown, never the time a record arrived. */
@@ -5232,6 +5362,8 @@ function bindCanvas() {
   $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k / 1.2, x, y, true); });
   $('zoom-level').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(1, x, y, true); });
   $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); });
+  document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId)));
+  bindLegendKeys();
   $('arrange').addEventListener('click', arrange);
   const help = $('help'), helpButton = $('help-toggle');
   helpButton.addEventListener('click', () => { help.hidden = !help.hidden; helpButton.setAttribute('aria-expanded', String(!help.hidden)); });
@@ -5253,6 +5385,15 @@ function bindCanvas() {
     if (e.key === 'Escape' && autoSync.isOpen()) { autoSync.close(); return; } // the sync panel is a popover over everything below
     // The wide reading is over everything (its own keys handle Esc inside it; this is focus left on the page).
     if (wide.isOpen()) { if (e.key === 'Escape') wide.escape(); return; }
+    // Lenses (map design v3 7.3): Alt+1 … Alt+5 and [ ] pick one; L goes to the legend. On the map only, never inside a field.
+    if (opened && !$('space').hidden && !$('space').classList.contains('sheet-read') && !openState) {
+      const next = lensKey(e, viewLens, lensUsable);
+      if (next) { e.preventDefault(); setLens(next); return; }
+      if ((e.key === 'l' || e.key === 'L') && !e.altKey && !e.ctrlKey && !e.metaKey && !(e.target as HTMLElement).closest('#lens, #panel, [contenteditable]')) {
+        const first = document.querySelector<HTMLElement>(`#line-key .lg-item${legend.picked ? `[data-item="${CSS.escape(legend.picked)}"]` : ''}`) ?? document.querySelector<HTMLElement>('#line-key .lg-item');
+        if (first) { e.preventDefault(); first.focus(); return; }
+      }
+    }
     // The detail view's other two moves: 이전 읽기 위치 (Alt+←) and 상위 구성 (Alt+↑); 닫기 is Escape, below.
     if (e.altKey && openState?.mode === 'detail' && (e.key === 'ArrowLeft' || e.key === 'ArrowUp')) { e.preventDefault(); if (e.key === 'ArrowLeft') goBackPlace(); else goUp(); return; }
     // Innermost first: an open ⋯ menu closes before anything else, and focus goes back to its button.
@@ -5270,7 +5411,9 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && selected) { const key = opened.key, part = selected; go(key); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(part)}"]`)?.focus()); return; }
     if (e.key === 'Escape' && opened && scopeReading && !selected) { closeScopeReading(); return; }
     if (e.key === 'Escape' && opened && returnView.isOpen() && !selected) { returnView.escape(); return; }
-    if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
+    if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); return; }
+    // The end of the chain (7.3): the legend's selection and filters let go.
+    if (e.key === 'Escape' && opened && legendActive()) legendAct({ do: 'clear' });
   });
   let resize = 0;
   window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncPaneWidth(); syncMapArea(); if (openState?.mode === 'detail') drawDetailLines(); if (opened && !selected && !planView.isOpen() && $('lens').hidden && !mapMoved) fitView(false); }); });
