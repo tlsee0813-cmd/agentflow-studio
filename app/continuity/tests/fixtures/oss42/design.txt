@@ -1,0 +1,51 @@
+rowcheck 설계 기록 v1 (시험용 세션, 2026-11-04 09:00 UTC; 작업 트리를 직접 읽음)
+경로 약속: 모든 경로는 main@a1b2c3d 기준 · EN = src/entry.rs · LP = src/loop · VC = src/verify.rs
+
+1. 부분 유형
+| 이름 | 유형 | 한 줄 |
+|---|---|---|
+| 관리자 | 사람 | 규칙을 정함 [파일: README.md] |
+| 사용자 | 사람 | 결과를 받음 [파일: README.md] |
+| entry | [모름] | 한 번 도는 진입 흐름 [파일: EN] |
+| verifier | 계산 | 행 문법 검사기 [파일: VC] |
+| sweeper | 루프·엔진 | 묶음 반복 [파일: LP/sweep.rs] |
+| worker | [모름] | 묶음 하나 처리 [파일: LP/worker.rs] |
+| sampler | 수집기 | 시간·메모리 측정 [파일: LP/sampler.rs] |
+| reporter | 계산 | 결과 출력 [파일: LP/report.rs] |
+| codec | 외부 시스템 | 문자 인코딩 [파일: VC] |
+| 노트 | 계산 | 크기·메모리·속도 계산(이번에 안 읽음) [모름] |
+
+2. 산출물
+| 이름 | 필드 | 만드는 부분 | 읽는 부분 | 있는 곳 | 꼬리표 |
+|---|---|---|---|---|---|
+| Sample | wall_ms·rss_kb·counters(cycles·instructions·cache_hits·cache_misses·branch_misses·stalls)·status | sampler | worker·sweeper | 메모리 | [파일: LP/sampler.rs] |
+| 요약 JSON | count·mean | reporter | 사용자 | 화면 | [파일: LP/report.rs] |
+| 요약 CSV | count·mean | reporter | 사용자 | 화면 | [파일: LP/report.rs] |
+
+3. 부분별 설계
+| 이름 | 받는 산출물 | 안의 단계 | 내는 산출물 | 설정 | 꼬리표 |
+|---|---|---|---|---|---|
+| entry | 인자 | 인자 해석 → 행 문법 거부 → run_sweep | — | — | [파일: EN] |
+| verifier | 행 | 인코딩 확인(codec 사용) → 문법 검사 | — | — | [파일: VC] |
+| worker | 묶음·Sample | 열기 → 측정 → 닫기 → 실패면 retry_policy를 보고 measured_ms에서 base_ms를 빼 0 미만은 0으로 | Sample | — | [파일: LP/worker.rs] |
+| reporter | 결과·Sample | 요약 → 출력 | 요약 JSON·요약 CSV | — | [파일: LP/report.rs] |
+
+4. 안의 단계
+| 부분 이름 | 순번 | 단계 이름 | 하는 일 한 줄 | 쓰는 파일·함수·모델 | 조건·분기 | 꼬리표 |
+|---|---|---|---|---|---|---|
+| sweeper | 1 | 준비 | 묶음 목록 만들기 | plan_batches | — | [파일: LP/sweep.rs] |
+| sweeper | 2 | 예열 루프 | 열기 → 측정(버림) → 닫기 | run_once | warmup > 0일 때만 | [파일: LP/sweep.rs] |
+| sweeper | 3 | 묶음 순회 | 묶음마다 worker 실행, 첫 결과를 기준으로 | run_batch(first_result) | 오류면 중단 | [파일: LP/sweep.rs] |
+| sweeper | 4 | 본 루프 | rounds-1회 열기 → 측정 → 닫기 | run_once | — | [파일: LP/sweep.rs] |
+| sweeper | 5 | 종료 검사 | 회차 증가 후 검사 | — | round > max_rounds → break | [파일: LP/sweep.rs] |
+| worker | 1 | 분할 | 묶음을 일꾼에 나눔 | split_batch | 묶음 크기 % 일꾼 수 != 0 → assert 실패 | [파일: LP/worker.rs] |
+| worker | 2 | 측정 | 카운터는 본 반복일 때만 | sample_once | — | [파일: LP/worker.rs] |
+| reporter | 1 | 요약 | 묶음별 평균 | summarize | — | [파일: LP/report.rs] |
+| reporter | 2 | 출력 | 표 출력 | print_table | — | [파일: LP/report.rs] |
+
+5. 조건·거부·분기
+| 부분 이름 | 조건 | 참이면 | 거짓이면 | 꼬리표 |
+|---|---|---|---|---|
+| entry | quote_overlap(&row) 있음 | bail!(구분자 안내) | 다음 | [파일: EN] |
+| entry | header.is_empty() | bail!(머리행 요구) | 다음 | [파일: EN] |
+| sweeper | round == 0 and dry_run | break | 계속 | [파일: LP/sweep.rs] |

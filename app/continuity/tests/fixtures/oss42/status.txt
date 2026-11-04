@@ -1,0 +1,42 @@
+rowcheck 현황 보고서 (v3 표 형식, 시험용 세션, 2026-11-04 09:00 UTC)
+
+0. 기준
+| 오늘 날짜·시각 | 브랜치·커밋 sha | 파일을 읽을 수 있는지 | 이 대화의 앞부분이 요약됐는지 |
+|---|---|---|---|
+| 2026-11-04 09:00 UTC [실행: date -u] | main · a1b2c3d [실행: git log -1] | 읽을 수 있음 [실행: git ls-files] | 요약 안 됨 [추정] |
+
+1. 한 줄 요약
+rowcheck는 CSV 행을 검사해 결과를 내는 작은 CLI이고, entry → sweeper → reporter가 메모리 안에서 이어진다 [파일: README.md].
+마지막 변경은 2026-10-30 검사 규칙 정리다 [실행: git log --oneline].
+
+2. 부분
+| 이름 | 하는 일 한 줄 | 담당 파일·폴더 | 상태 단어 | 상태의 기준 시각 | 꼬리표 |
+|---|---|---|---|---|---|
+| 관리자 | 규칙을 정하고 배포를 맡음 | — | 모름 | [모름] | [실행: git log] |
+| 사용자 | 명령을 돌리고 표를 받음 | README.md | 모름 | [모름] | [파일: README.md] |
+| entry | 인자를 읽고 행 문법을 거부 | src/entry.rs | 돌고 있음 | HEAD | [파일: src/entry.rs] |
+| verifier | 행 문법 검사 | src/verify.rs | 돌고 있음 | HEAD | [파일: src/verify.rs] |
+| sweeper | 묶음 반복 | src/loop/sweep.rs | 돌고 있음 | HEAD | [파일: src/loop/sweep.rs] |
+| worker | 묶음 하나 처리 | src/loop/worker.rs | 돌고 있음 | HEAD | [파일: src/loop/worker.rs] |
+| sampler | 시간·메모리 측정 | src/loop/sampler.rs | 돌고 있음 | HEAD | [파일: src/loop/sampler.rs] |
+| reporter | 결과 출력 | src/loop/report.rs | 돌고 있음 | HEAD | [파일: src/loop/report.rs] |
+
+4. 연결
+| 보내는 부분 | 받는 부분 | 넘기는 것 | 언제·얼마나 자주 | 설계/관찰 | 꼬리표 |
+|---|---|---|---|---|---|
+| entry | sweeper | 설정 | 실행마다 1회 | 설계 | [파일: src/entry.rs] |
+| sweeper | worker | 묶음·retry_policy | 묶음마다(앞뒤 open_batch·close_batch), setup·teardown 1회 | 설계 | [파일: src/loop/sweep.rs] |
+| worker | sampler | 측정 요청 | 실행 1회마다 | 설계 | [파일: src/loop/worker.rs] |
+| sampler | worker | Sample | 실행 1회마다 | 설계 | [파일: src/loop/sampler.rs] |
+| worker | sweeper | Sample | 묶음마다 | 설계 | [파일: src/loop/worker.rs] |
+| sweeper | reporter | 결과 | 끝에 1회 | 설계 | [파일: src/loop/report.rs] |
+| reporter | 사용자 | 결과 표 | 끝에 1회 | 설계 | [파일: src/loop/report.rs] |
+
+7. 지켜야 할 것과 하지 않기로 한 것
+| 부분 이름 | 규칙 한 줄 | 누가 정했나·언제 |
+|---|---|---|
+| verifier | 따옴표 밖 구분자 겹침과 빈 머리행은 거부 | 관리자 2026-10-20 [파일: src/entry.rs] |
+| sweeper | 첫 묶음 결과가 항상 비교 기준 | 관리자 2026-10-21 [파일: src/loop/sweep.rs] |
+| worker | 묶음 크기 % 일꾼 수 == 0 | 관리자 2026-10-22 [파일: src/loop/worker.rs] |
+| reporter | 출력 표는 짧게 유지 | 관리자 2026-10-24 [파일: README.md] |
+| 전체 | 배포 전 체크리스트는 사람이 확인 | 관리자 2026-10-23 [파일: README.md] |

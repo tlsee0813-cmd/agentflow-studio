@@ -58,7 +58,7 @@ test('76-Z1 an undecided bus use leaves the FAST clock and default/sleep facts o
   const bus = project.space.areas.find(a => a.name === 'I2C 버스(i2c0)').id;
   assert.deepEqual(claimsOf(project, bus), ['describes:i2c0은 FAST 비트레이트로 설정된다', 'describes:핀 설정은 default와 sleep 두 상태를 둔다']);
   const c = reading.candidates[0];
-  assert.equal(reading.version, 'map-reading.16'); assert.equal(c.target, 'holds'); assert.deepEqual(c.areaIds, [bus]);
+  assert.equal(reading.version, 'map-reading.17'); assert.equal(c.target, 'holds'); assert.deepEqual(c.areaIds, [bus]);
   assert.equal(c.statement.text, 'i2c0은 Arduino 헤더 확장용 버스다'); assert.equal(c.statement.quote.quote, 'arduino_i2c: &i2c0 {');
   assert.ok(!claimsOf(project, bus).some(x => x.includes('Arduino')), 'the undecided statement is in no part');
   assert.deepEqual(parseProject(JSON.stringify(project)), project); assert.deepEqual(parseBackup(serializeBackup(project, null)).project, project);

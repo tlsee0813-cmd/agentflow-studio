@@ -440,7 +440,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const sixteen=version==='map-reading.16',fifteen=sixteen||version==='map-reading.15',fourteen=fifteen||version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    const seventeen=version==='map-reading.17',sixteen=seventeen||version==='map-reading.16',fifteen=sixteen||version==='map-reading.15',fourteen=fifteen||version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[])]);ensure(r.version==='map-reading.1'||two);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
@@ -449,7 +449,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       // The digest names exactly the text read: the record is the one this reading was made of, its whole length too.
       if(four)ensure(records.get(x.id as string)!.length===x.total&&x.digest===textDigest(records.get(x.id as string)!.slice(x.from as number,x.to as number)));}
     read=r.records as {id:string;from:number;to:number}[];
-    text(r.summary,200,true);list(r.parts,64);const claims=new Map<string,number>(),parts=new Set<string>();
+    // map-reading.17 (pipeline .42): a summary of 360 (earlier entries 200).
+    text(r.summary,seventeen?360:200,true);list(r.parts,64);const claims=new Map<string,number>(),parts=new Set<string>();
     for(const p of r.parts){
       obj(p,['areaId','created','role','roleAbout','roleReplaces','basis','claims',...(seven?['state','stateWhen','stateQuote','files']:[]),...(eight?['type','typeQuote','inputs','outputs','fields','config']:[]),...(nine?['steps','loop','stateVars']:[]),...(twelve?['conditions']:[]),...(fourteen?['fileRoles']:[])]);if(p.roleAbout!==null){ensure(p.role!==null);text(p.roleAbout,80);}
       // map-reading.8: the record's own type word with its passage (none: both null), and the part's interface, fields and settings.
@@ -463,7 +464,9 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       if(nine){
         // map-reading.14: every step says whether the program put it there (a program step does nothing and uses nothing).
         // map-reading.16 (pipeline .41): sixteen steps (earlier entries twelve).
-        list(p.steps,sixteen?16:12);for(const s of p.steps as unknown[]){obj(s,['name','does','uses','quote',...(fourteen?['program']:[])]);text(s.name,40);if(s.does!==null)text(s.does,120);list(s.uses,4);for(const u of s.uses as unknown[])text(u,60);unique(s.uses);quote(s.quote);
+        // map-reading.17 (pipeline .42): a step name of 60 (earlier entries 40).
+        // map-reading.17: 24 steps, each with its row's 조건·분기 cell (when: 120 or null).
+        list(p.steps,seventeen?24:sixteen?16:12);for(const s of p.steps as unknown[]){obj(s,['name','does','uses','quote',...(fourteen?['program']:[]),...(seventeen?['when']:[])]);text(s.name,seventeen?60:40);if(seventeen&&s.when!==null)text(s.when,120);if(s.does!==null)text(s.does,120);list(s.uses,4);for(const u of s.uses as unknown[])text(u,60);unique(s.uses);quote(s.quote);
           // map-reading.15: a program step's does may hold its name's parenthesised tail (it still uses nothing).
           if(fourteen)ensure(typeof s.program==='boolean'&&(!s.program||(fifteen||s.does===null)&&(s.uses as unknown[]).length===0));}
         unique((p.steps as {name:unknown}[]).map(s=>s.name));
@@ -477,7 +480,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       if(twelve){list(p.conditions,24);for(const c of p.conditions as unknown[]){obj(c,['when','then','else','quote']);text(c.when,80);text(c.then,60);if(c.else!==null)text(c.else,60);quote(c.quote);}
         unique((p.conditions as {quote:{record:unknown;from:unknown;to:unknown}}[]).map(c=>JSON.stringify([c.quote.record,c.quote.from,c.quote.to])));}
       // map-reading.14: the part's file-map rows (up to twelve), each its path (120) and role (80) as written, on its own row, each path once.
-      if(fourteen){list(p.fileRoles,12);for(const f of p.fileRoles as unknown[]){obj(f,['path','role','quote']);text(f.path,120);text(f.role,80);quote(f.quote);}
+      // map-reading.17 (pipeline .42): a role of 120 (earlier entries 80).
+      if(fourteen){list(p.fileRoles,12);for(const f of p.fileRoles as unknown[]){obj(f,['path','role','quote']);text(f.path,120);text(f.role,seventeen?120:80);quote(f.quote);}
         unique((p.fileRoles as {path:unknown}[]).map(f=>f.path));}
       if(p.roleReplaces!==null){ensure(p.role!==null&&p.created===null);quote(p.roleReplaces);}ensure(areaIds.has(p.areaId as string)&&!parts.has(p.areaId as string));parts.add(p.areaId as string);
       if(p.created!==null){obj(p.created,['name','parentId']);text(p.created.name,60);ensure(p.created.parentId===null||areaIds.has(p.created.parentId as string));}
@@ -501,7 +505,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
           // map-reading.15: every device says whether the program put it there (a program device is code, on its row). map-reading.16: or a
           // person (a hand-kept rule's 누가 정했나 cell), on its row.
           list(c.enforcedBy,4);for(const e of c.enforcedBy as unknown[]){obj(e,['kind','text','quote',...(fifteen?['program']:[])]);ensure(ENFORCER_KINDS.includes(e.kind as never));text(e.text,80);if(e.quote===null)ensure(e.kind==='unknown');else quote(e.quote);
-            if(fifteen)ensure(typeof e.program==='boolean'&&(!e.program||(e.kind==='code'||sixteen&&e.kind==='person')&&e.quote!==null));}
+            // map-reading.17: or unknown with no passage (a rule whose decider device was set aside).
+            if(fifteen)ensure(typeof e.program==='boolean'&&(!e.program||(e.kind==='code'||sixteen&&e.kind==='person')&&e.quote!==null||seventeen&&e.kind==='unknown'&&e.quote===null));}
           const devices=c.enforcedBy as {kind:string;text:string}[],rank=(k:string)=>k==='none'?1:k==='unknown'?0:2,top=Math.max(-1,...devices.map(e=>rank(e.kind)));
           ensure(new Set(devices.map(e=>JSON.stringify([e.kind,e.text]))).size===devices.length&&devices.every(e=>rank(e.kind)===2||rank(e.kind)===top));
           ensure(c.topic==='rule'||c.scope===null&&(c.anchors as unknown[]).length===0&&devices.length===0);
@@ -517,14 +522,14 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
     }
     // map-reading.9: a first map holds 48 relations (earlier readings 32).
     // map-reading.13: every relation holds the fields of the format artifact it carries (up to 24 of 60, each once; [] when not said).
-    list(r.relations,nine?48:32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[]),...(thirteen?['payloadFields']:[])]);if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));
+    list(r.relations,nine?48:32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[]),...(thirteen?['payloadFields']:[])]);if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,seventeen?80:40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));
       if(thirteen){list(x.payloadFields,24);for(const f of x.payloadFields as unknown[])text(f,60);ensure(new Set(x.payloadFields as unknown[]).size===(x.payloadFields as unknown[]).length);}id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
     // map-reading.9: each port-map row names a relation of this reading, the part at its end by direction (in: the receiver, out: the
     // sender) as this reading kept it, an input or output name and a step of that part, once each, on its own passage.
     // map-reading.14: every row says whether the program put it there.
     // map-reading.15: up to 24 rows (the program's beside the model's twelve).
     if(nine){list(r.portMap,fifteen?24:12);const rows=new Set<string>();for(const m of r.portMap as unknown[]){obj(m,['relationId','areaId','port','step','direction','quote',...(fourteen?['program']:[])]);if(fourteen)ensure(typeof m.program==='boolean');
-      ensure(m.direction==='in'||m.direction==='out');text(m.port,40);text(m.step,40);quote(m.quote);
+      ensure(m.direction==='in'||m.direction==='out');text(m.port,40);text(m.step,seventeen?60:40);quote(m.quote);
       const line=(r.relations as {relationId:unknown;from:unknown;to:unknown}[]).find(x=>x.relationId===m.relationId);ensure(!!line&&m.areaId===(m.direction==='in'?line!.to:line!.from));
       const part=(r.parts as {areaId:unknown;steps:{name:unknown}[];inputs:unknown[];outputs:unknown[]}[]).find(x=>x.areaId===m.areaId);
       ensure(!!part&&part!.steps.some(s=>s.name===m.step)&&(m.direction==='in'?part!.inputs:part!.outputs).includes(m.port));
