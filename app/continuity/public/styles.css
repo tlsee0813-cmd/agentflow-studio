@@ -876,8 +876,15 @@ button:disabled { opacity: .5; cursor: default; }
 .fv-pop .fv-acts { display: flex; gap: 8px; } .fv-pop .fv-acts:empty { display: none; }
 .controls .fv-pop .fv-acts .fv-b { height: 28px; padding: 0 10px; border: 1px solid var(--line); font-size: 12px; color: var(--text-2); }
 .controls .fv-pop .fv-src { height: 24px; padding: 0; font-size: 12px; color: var(--accent-strong); }
-.space .node.fv-emph:not(.selected), .space .frame.fv-emph:not(.selected) { border-color: var(--text-2); box-shadow: 0 0 0 1px var(--text-2); }
-.space .world .edge.fv-emph .edge-line { --lw: 2.25; }
+/* An emphasised card keeps its family edge (its border and a lens's lift are untouched): a neutral halo apart from the edge, 1.5px at
+   3px out on screen at every zoom, a form of its own, never a lift or a colour. A mark of its own (.lit, .plan-impact, the selection)
+   stays over it. */
+.space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact), .space .frame.fv-emph:not(.selected):not(.plan-impact) {
+  outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: calc(3px * var(--u, 1)); }
+/* A firmer stroke only where it is firmer: never on a selected, summary, picked or path line (each is wider already); a dotted or
+   sparse line keeps its dots (its stroke darkens instead). */
+.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):not(.s-dotted):not(.s-sparse) .edge-line { --lw: 2.25; }
+.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):is(.s-dotted, .s-sparse) .edge-line { stroke: var(--text-2); }
 .space .world .edge-label.fv-emph { color: var(--text); border-color: var(--text-3); }
 /* What a lens does to the map (view-lens lensLook): each channel's lines at its opacity, lifted families with a firmer edge.
    Selection, hover, a scenario path and the legend's own marks stay over it. */

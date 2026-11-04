@@ -6,10 +6,10 @@
  * - One that names a start, coordination or loop AND that control line, loop scope, starting entry or human gate exists → 시작과 반복.
  * - Anything else → 구성. Weak or mixed signals → 구성, with at most two other foci offered. No ratio, share or count of anything.
  * - No line maps to the map (a v4 or v3 record has none): 구성 with no guide line, unless the structure alone is unambiguous (only data
- *   lines, only control lines or loops, or neither): then that lens, saying so (「기록의 구조로 골랐어요」), with nothing emphasised.
+ *   lines, or only control lines or loops): then that lens, saying so (「기록의 구조로 골랐어요」), with nothing emphasised.
  * What this never does (A6's fixed list): move, resize, recolour or hide anything; apply the legend's 「그것만」; change a card's identity,
- * family, ports or line grammar; touch coordinates, camera, selection or a saved view. Emphasis is a firmer border and label priority
- * only. Pure: no DOM, no storage (the record's read and write take and give strings, wrapped by the caller). */
+ * family, ports or line grammar; touch coordinates, camera, selection or a saved view. Emphasis is a halo apart from the card's family
+ * edge and label priority only. Pure: no DOM, no storage (the record's read and write take and give strings, wrapped by the caller). */
 import type { Channel } from '../shared/types.js';
 
 export type FirstLensId = 'compose' | 'data' | 'start';
@@ -17,8 +17,8 @@ export type FirstLensName = '구성' | '데이터 이동' | '시작과 반복';
 export const FIRST_LENS_NAME: Readonly<Record<FirstLensId, FirstLensName>> = Object.freeze({ compose: '구성', data: '데이터 이동', start: '시작과 반복' });
 
 /** A drawn part as the first view reads it: its id and name, its record row ID (B03), whether it holds parts (a group) or repeats (a
- * loop), whether it is a gate a person keeps, its C-ENTRY kinds and its C-STATE names. */
-export interface FvPart { id: string; name: string; ref?: string | null; group?: boolean; loop?: boolean; humanGate?: boolean; entries?: readonly (string | null)[]; states?: readonly string[] }
+ * loop), whether it is a gate a person keeps, whether its family is a trigger (촉발), its C-ENTRY kinds and its C-STATE names. */
+export interface FvPart { id: string; name: string; ref?: string | null; group?: boolean; loop?: boolean; humanGate?: boolean; trigger?: boolean; entries?: readonly (string | null)[]; states?: readonly string[] }
 /** A relation: its id, its ends, its channel (null: a plain relation) and what it hands over as the record says (C-LINK payload). */
 export interface FvLine { id: string; from: string; to: string; channel: Channel | null; payload?: string | null }
 /** A C-LOOP row: the part owning it, its ID (B03:L01), the part of the loop just outside it, and its unit as written. */
@@ -52,6 +52,10 @@ export const DATA_WORDS = /변환|바꾸|바꾼|바꿔|바뀌|만들|만든|생�
 export const START_WORDS = /시작|실행|돌리|돌린|돌려|호출|부르|부른|분배|나누|나눈|나눠|배정|배분|디스패치|조정|지휘|위임|맡기|맡긴|맡겨|반복|되풀이|루프|주기|마다|틱|프레임|스케줄|일정|예약|트리거|촉발|깨우|깨운|깨워|명령|재시도|대기|기다|종료|감시|이벤트|사건|신호|승인|검토|개입|프로세스|매\s?(?:번|회|단계|스텝|시간?|일|분|주|초)|\b(?:dispatch(?:es)?|schedules?|triggers?|loops?|ticks?|frames?|retr(?:y|ies)|spawns?|runs?|starts?|commands?)\b/i;
 /** A loop scope named (a loop row counts only then). */
 const LOOP_WORDS = /반복|되풀이|루프|주기|마다|틱|프레임|에포크|매\s?(?:번|회|단계|스텝|시간?|일|분|주|초)|\b(?:loops?|ticks?|frames?|epochs?|every)\b/i;
+/** A time beat (매시, 매일, 주기, 틱, 정각, interval, cron): a loop word that says when, not over what. A loop whose unit is written and
+ * is no beat (「화분마다」: over items) is not the loop a beat names. */
+const BEAT = /매\s?(?:시간?|일|분|주|초)(?![가-힣])|주기|틱|정각|간격|\d\s*(?:ms|s|sec|m|min|h|d)\b|\d\s*(?:초|분|시간|일)|\b(?:ticks?|interval|cron|hourly|daily|period)\b/i;
+const BEAT_ALL = new RegExp(BEAT.source, 'gi'), LOOP_ALL = new RegExp(LOOP_WORDS.source, 'gi');
 /** A person stepping in (a human gate counts only then). */
 const GATE_WORDS = /승인|검토|사람|개입|확인|허가|\b(?:review|approv)/i;
 /** A flow drawn as a chain: it names a flow of either kind; the lines between the named parts say which. */
@@ -108,7 +112,8 @@ function previewsOf(parts: readonly string[], inp: FirstViewInput): string[] {
   const byId = new Map(inp.parts.map(p => [p.id, p])), owners = new Set((inp.loops ?? []).map(l => l.owner));
   return parts.filter(id => byId.get(id)?.group || byId.get(id)?.loop || owners.has(id)).slice(0, 2);
 }
-type Read = FvFocus & { data: string[]; control: string[]; startOk: boolean; dataOk: boolean };
+/** named: the parts the line names; startParts: those with the trigger it starts from (a beat line's 매시 틱), for its start reading. */
+type Read = FvFocus & { data: string[]; control: string[]; startOk: boolean; dataOk: boolean; named: string[]; startParts: string[] };
 /** What one first-structure line rests on in the map: the data lines and the control lines between the parts it names (a data line
  * touching a named part whose payload the line repeats counts too), the loops of named parts when it names a loop, a named part's
  * starting entry and a named human gate when it names one. null: it names no real part (a weak line). */
@@ -117,22 +122,37 @@ function analyse(line: string, index: number, inp: FirstViewInput): Read | null 
   if (!M.size) return null;
   // The words are read with the named parts' names taken out (a part called 「Reader」 names no read).
   const byId = new Map(inp.parts.map(p => [p.id, p]));
+  // A name is taken out as matched (spaces aside: 「일정계산기」 is 「일정 계산기」), so none of its words reads as a verb.
+  const loose = (w: string) => new RegExp([...w.replace(/\s+/g, '')].map(escRe).join('\\s*'), 'gi');
   const said = named.parts.reduce((t, id) => { const nm = byId.get(id)?.name.trim(); if (!nm || nm.length < 2) return t;
-    const s = nameStem(nm); return [nm, ...(s ? [s] : [])].reduce((x, w) => x.replace(new RegExp(escRe(w), 'gi'), ' '), t); }, line);
+    const s = nameStem(nm); return [nm, ...(s ? [s] : [])].reduce((x, w) => x.replace(loose(w), ' '), t); }, line);
   const n = norm(line), arrow = ARROW.test(line), dataWord = DATA_WORDS.test(said), startWord = START_WORDS.test(said), loopWord = LOOP_WORDS.test(said);
   const between = (l: FvLine) => l.from !== l.to && M.has(l.from) && M.has(l.to);
   const paid = (l: FvLine) => (M.has(l.from) || M.has(l.to)) && !!l.payload && norm(l.payload).length >= 2 && n.includes(norm(l.payload));
   const data = inp.lines.filter(l => l.channel === 'data' && (between(l) || paid(l))).map(l => l.id);
-  const control = inp.lines.filter(l => l.channel === 'control' && between(l)).map(l => l.id);
+  // Where it starts: a line that names a start (a beat, or a start word that is no mere loop word) whose start is not among the parts
+  // it names takes the trigger one control line before them (a trigger family or a starting C-ENTRY), and that control line. One
+  // neighbour only, never a data line.
+  const beat = BEAT.test(said), startish = beat || START_WORDS.test(said.replace(LOOP_ALL, ' '));
+  const starts = (p: FvPart | undefined) => !!p && (!!p.trigger || (p.entries ?? []).some(k => !!k && STARTING_ENTRIES.has(k)));
+  const inner = inp.lines.filter(l => l.channel === 'control' && between(l)).map(l => l.id);
+  const starters = startish && !inner.length ? [...new Set(inp.lines.filter(l => l.channel === 'control' && M.has(l.to) && !M.has(l.from) && starts(byId.get(l.from))).map(l => l.from))] : [];
+  const S = new Set([...starters, ...M]);
+  const control = starters.length ? inp.lines.filter(l => l.channel === 'control' && l.from !== l.to && S.has(l.from) && S.has(l.to)).map(l => l.id) : inner;
   const any = inp.lines.filter(between).map(l => l.id);
-  const loopScope = loopWord ? [...new Set([...named.loops, ...loops.filter(l => M.has(l.owner)).map(l => l.ref)])] : named.loops;
+  // A loop row counts when the line writes its ID, its unit, or a loop word for it: a beat alone names a loop over time, never one
+  // whose written unit is no beat (「매시」 is not 「화분마다」).
+  const generic = LOOP_WORDS.test(said.replace(BEAT_ALL, ' '));
+  const fits = (l: FvLoop) => generic || !l.unit || BEAT.test(l.unit) || (norm(l.unit).length >= 2 && n.includes(norm(l.unit)));
+  const loopScope = loopWord ? [...new Set([...named.loops, ...loops.filter(l => S.has(l.owner) && fits(l)).map(l => l.ref)])] : named.loops;
   const entry = startWord && named.parts.some(id => (byId.get(id)?.entries ?? []).some(k => !!k && STARTING_ENTRIES.has(k)));
   const gate = GATE_WORDS.test(said) && named.parts.some(id => byId.get(id)?.humanGate);
   const looped = loopScope.length > 0 || (loopWord && named.parts.some(id => byId.get(id)?.loop));
   const dataOk = (dataWord || arrow) && data.length > 0;
   const startOk = ((startWord || arrow) && control.length > 0) || (startWord && (looped || entry || gate));
   const lens: FirstLensId = dataOk && !startOk ? 'data' : startOk && !dataOk ? 'start' : 'compose';
-  return { line, index, lens, parts: named.parts, lines: lens === 'data' ? data : lens === 'start' ? control : any, loops: loopScope, previews: previewsOf(named.parts, inp), data, control, startOk, dataOk };
+  const startParts = [...starters.filter(id => !M.has(id)), ...named.parts], own = lens === 'start' ? startParts : named.parts;
+  return { line, index, lens, parts: own, lines: lens === 'data' ? data : lens === 'start' ? control : any, loops: loopScope, previews: previewsOf(own, inp), data, control, startOk, dataOk, named: named.parts, startParts };
 }
 const plain = (f: FvFocus): FvFocus => ({ line: f.line, index: f.index, lens: f.lens, parts: [...f.parts], lines: [...f.lines], loops: [...f.loops], previews: [...f.previews] });
 
@@ -147,14 +167,14 @@ export function firstView(inp: FirstViewInput): FirstView {
     reason: { text: reasonText(lensId, focus.line), quoteRef, line: focus.line, lines: [...focus.lines], loops: [...focus.loops] },
     focus: plain(focus), alternatives: alternatives.slice(0, 2).map(plain), basis: 'record' });
   // A mixed line offers itself twice: once by its data lines, once by its control lines and loops.
-  const asData = (f: Read): FvFocus => ({ ...f, lens: 'data', lines: f.data, loops: [] });
-  const asStart = (f: Read): FvFocus => ({ ...f, lens: 'start', lines: f.control });
+  const asData = (f: Read): FvFocus => ({ ...f, lens: 'data', parts: f.named, lines: f.data, loops: [], previews: previewsOf(f.named, inp) });
+  const asStart = (f: Read): FvFocus => ({ ...f, lens: 'start', parts: f.startParts, lines: f.control, previews: previewsOf(f.startParts, inp) });
   const asOwn = (f: Read): FvFocus => (f.dataOk ? asData(f) : f.startOk ? asStart(f) : f);
   const dataFoci = foci.filter(f => f.dataOk), startFoci = foci.filter(f => f.startOk);
   if (dataFoci.length && startFoci.length) {
     // Two foci of equal standing (or one line naming both): 구성, the first of each offered, the emphasis on what both name.
     const d = dataFoci[0]!, s = startFoci[0]!, first = d.index <= s.index ? d : s;
-    const parts = [...new Set([...d.parts, ...s.parts])], ls = [...new Set([...d.data, ...s.control])];
+    const parts = [...new Set([...d.named, ...s.startParts])], ls = [...new Set([...d.data, ...s.control])];
     return out('compose', { ...first, lens: 'compose', parts, lines: ls, loops: [...s.loops], previews: previewsOf(parts, inp) }, [asData(d), asStart(s)]);
   }
   const decisive = dataFoci[0] ?? startFoci[0];
@@ -170,7 +190,8 @@ function structureOnly(inp: FirstViewInput): FirstView {
   const none: FirstView = { lens: '구성', lensId: 'compose', emphasis: { parts: [], lines: [] }, previews: [], reason: null, focus: null, alternatives: [], basis: 'none' };
   if (!inp.parts.length) return none;
   const hasData = inp.lines.some(l => l.channel === 'data'), hasStart = inp.lines.some(l => l.channel === 'control') || (inp.loops ?? []).length > 0 || inp.parts.some(p => p.loop);
-  if (hasData && hasStart) return none;
+  // Neither kind drawn: 구성, which is what the map opens with anyway, so there is nothing to say either.
+  if (hasData === hasStart) return none;
   const lensId: FirstLensId = hasData ? 'data' : hasStart ? 'start' : 'compose';
   return { ...none, lens: FIRST_LENS_NAME[lensId], lensId, reason: { text: `첫 보기: ${FIRST_LENS_NAME[lensId]} · ${STRUCTURE_REASON}`, quoteRef: null, line: null, lines: [], loops: [] }, basis: 'structure' };
 }
@@ -207,6 +228,18 @@ export function writeFirstView(raw: string | null, map: string, rec: FirstViewRe
   let all: Record<string, FirstViewRecord> = {};
   try { const p = raw ? JSON.parse(raw) : {}; if (p && typeof p === 'object' && !Array.isArray(p)) all = p; } catch { /* a broken record starts over */ }
   all[map] = rec; return JSON.stringify(all);
+}
+/** One draw of a map against its first view: what it keeps, whether the first view is still to come, and whether the recommendation
+ * is applied now (its lens set, its record written). kept: the record kept for the map (from storage when the map opens, the one in
+ * hand on a later draw); chosen: the person kept a lens for it; pending: no first view has happened yet (true when the map opens);
+ * hasParts: the map has parts now. An empty map records nothing and stays pending: the draw that first has parts (the first record
+ * applied, after create → paste) is the first visit. Once a view stands or the person chose a lens, a later draw never switches. */
+export interface FvStep { rec: FirstViewRecord | null; pending: boolean; apply: boolean }
+export function firstViewStep(st: { kept: FirstViewRecord | null; chosen: boolean; pending: boolean; hasParts: boolean }, v: FirstView): FvStep {
+  if (st.kept) return { rec: st.kept, pending: false, apply: false };
+  if (!st.pending || st.chosen) return { rec: null, pending: false, apply: false };
+  if (!st.hasParts) return { rec: null, pending: true, apply: false };
+  return { rec: recordOf(v, 'auto'), pending: false, apply: true };
 }
 /** Whether the person kept a lens for this map before (a lens record written by a lens switch or the legend): restored, never overridden. */
 export function lensChosen(raw: string | null, map: string): boolean {
