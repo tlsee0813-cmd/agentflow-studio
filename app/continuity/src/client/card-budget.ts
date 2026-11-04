@@ -103,7 +103,12 @@ const FIT_PAD = 12 * 2 + 2;
  * blank), the value rows and the sign row, each only while its scaled lines fit, so the fixed box is used rather than left empty;
  * never pins (their names hide; the lines' ends stay). 개요 and the dot map keep the head only: two name lines, else one, and the
  * kind line with the short status when it fits. */
-export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier): CardFit {
+/** S10 (the first view): a focused group or loop shows its 「안에」 preview first (preview), and an emphasised card gives its kind rows and
+ * 받는 것·내는 것 priority over its second name line and inner line (alt, Factorio's Alt-mode) — each only inside the card's own box, so
+ * nothing grows or moves; with no room, nothing is added. At 개요 the preview is a group's 안에 row or a loop card's first row, and an
+ * emphasised card that is no preview shows its first kind row (never a group's 안에 row: at most two previews show there). */
+export interface FitPriority { preview?: boolean; alt?: boolean }
+export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPriority = {}): CardFit {
   const nl = Math.min(2, Math.max(1, c.nameLines));
   if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, vals: c.vals ?? 0, contract: true, inner: c.inner > 0, signs: c.signs > 0, bottom: true };
   const T = tierText(k, tier);
@@ -113,8 +118,15 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier): CardFit {
   // and a second name line when there is still room (a name that kept one line at 가까이 may need two at the larger type here).
   room -= T.titleLh;
   if (tier !== 'mid') {
-    const kind = take(T.kindLh), status = !!c.status && take(T.kindLh), names = take(T.titleLh) ? 2 : 1;
-    return { nameLines: names, kind, status, rows: 0, vals: 0, contract: false, inner: false, signs: false, bottom: false };
+    const kind = take(T.kindLh), said0 = Math.max(0, c.rows - (c.blank ? 1 : 0));
+    // The name reads first (its second line before anything shown first); a preview with no row of its own (a loop container: its
+    // steps read on the inner line) shows that inner line instead.
+    const far = tier === 'far' && kind && (!!pri.preview || !!pri.alt), rowFirst = said0 > 0 && (!!c.members || !(pri.preview && c.inner > 0));
+    const named2 = far && take(T.titleLh);
+    const lead = far && rowFirst && (!!pri.preview || (!!pri.alt && !c.members)) && take(T.rowLh) ? 1 : 0;
+    const innerLead = far && !lead && !!pri.preview && c.inner > 0 && take(Math.max(24, T.rowLh + 4));
+    const status = !!c.status && take(T.kindLh), names = named2 || (!far && take(T.titleLh)) ? 2 : 1;
+    return { nameLines: names, kind, status, rows: lead, vals: 0, contract: false, inner: innerLead, signs: false, bottom: false };
   }
   // 중간: the kind line, the bottom line (it says the status) under the head's gap, then a second name line, the inner line, the
   // kind rows but the blank, the value rows and the sign row, each while it fits.
@@ -125,10 +137,14 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier): CardFit {
   let rows = c.members && said > 0 && take(T.rowLh + after) ? 1 : 0;
   // A name that took two lines at 가까이 keeps its second line first; one that kept one line there takes a second (the larger type
   // here may wrap it) only with the room the rows leave, so the body is never left empty for a line the name may not need.
-  const bottom = take(T.bottom); let names = nl >= 2 && take(T.titleLh) ? 2 : 1;
-  const inner = c.inner > 0 && take(Math.max(24, T.rowLh + 4));
+  const bottom = take(T.bottom), alt = !!pri.alt;
+  let names = !alt && nl >= 2 && take(T.titleLh) ? 2 : 1;
+  let inner = !alt && c.inner > 0 && take(Math.max(24, T.rowLh + 4));
   while (rows < said && take(T.rowLh + (rows ? 0 : after))) rows++;
   let vals = 0; const all = c.vals ?? 0; while (rows === said && vals < all && take(T.rowLh + (vals ? 0 : after))) vals++;
+  // Alt-mode: the kind rows and values went first; the second name line and the inner line take the room that is left.
+  if (alt && nl >= 2 && take(T.titleLh)) names = 2;
+  if (alt && c.inner > 0) inner = take(Math.max(24, T.rowLh + 4));
   const signs = c.signs > 0 && take(Math.max(24, T.rowLh + 4));
   if (names === 1 && take(T.titleLh)) names = 2;
   return { nameLines: names, kind, status: false, rows, vals, contract: vals > 0, inner, signs, bottom };

@@ -38,6 +38,7 @@ import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
+import { firstView, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, stateText as wellStateText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, badgeForms, quietTip, isRelativeRef, overflowMark, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
@@ -910,7 +911,8 @@ function fitCards() {
   const t = tier ?? zoomTier(camera.k), k = camera.k;
   document.querySelectorAll<HTMLElement>('#world .node.card[data-shape]').forEach(el => {
     const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0, vals = 0, blank = 0, members = 0] = el.dataset.shape!.split(',').map(Number);
-    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status, vals, blank, members }, k, t);
+    // S10: a focused group or loop shows its 「안에」 preview first, an emphasised card its rows (inside its own box; card-budget tierFit).
+    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status, vals, blank, members }, k, t, { preview: el.classList.contains('fv-preview'), alt: el.classList.contains('fv-emph') });
     el.style.setProperty('--nl', String(f.nameLines)); el.dataset.fitRows = String(f.rows); el.dataset.fitVals = String(f.vals);
     el.classList.toggle('fit-nokind', !f.kind); el.classList.toggle('fit-nocontract', !f.contract); el.classList.toggle('fit-noinner', !f.inner);
     el.classList.toggle('fit-nosigns', !f.signs); el.classList.toggle('fit-nobottom', !f.bottom); el.classList.toggle('fit-status', f.status);
@@ -1815,7 +1817,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   world.append(edges);
   markLines();
   // The legend of the lens this map is read with (view-lens): what the map draws, counted.
-  void present; loadLens(o); renderLegend();
+  void present; loadLens(o); renderLegend(); renderFirstView();
   // Each group's head says how many relations cross its boundary (stored relations, any depth inside): where it connects, before
   // anything is selected. Part of the head, so clicking it selects the group and the head's own button role reads it.
   const crossing = boundaryCounts(view);
@@ -2130,6 +2132,7 @@ function placeLineLabels() {
   box.replaceChildren();
   placedInv = labelInv();
   syncLineMode();
+  markFirstView(); // S10: an emphasised line's label goes first (its rank), so its class is on before the labels are placed
   world.querySelectorAll('.edge.label-hidden').forEach(g => g.classList.remove('label-hidden'));
   world.dataset.labelsHidden = '0';
 
@@ -2375,7 +2378,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
     // then better places across all labels: every label's first place before any label's second.
     const word = wordOf(e), said = word !== (REL_LABEL[e.kind] ?? e.kind) && word !== '제어' && word !== '참조';
-    const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path'), spine: g.classList.contains('spine'), said });
+    const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path'), spine: g.classList.contains('spine') || g.classList.contains('fv-emph'), said });
     mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i, rank, el: label }));
   }
   const { kept, dropped } = resolveLabels(spots, 6);
@@ -4013,9 +4016,126 @@ function saveLens() { const o = opened; if (!o) return; try { localStorage.setIt
 const lensUsable = (id: LensId) => id !== 'scenario' || (!!opened && scenarioReadings(opened).length > 0);
 /** The lens and legend kept for this map (read once per opened map). */
 function loadLens(o: Opened) {
-  if (legendFor === o.key) return;
-  legendFor = o.key; const r = readLensRecord(lensStore(), o.key);
+  if (legendFor === o.key) { syncFirstView(o); return; }
+  legendFor = o.key; const raw = lensStore(), r = readLensRecord(raw, o.key);
   viewLens = r.lens === 'scenario' && !scenarioReadings(o).length ? DEFAULT_LENS : r.lens; legend = r.legend; legendMenu = null;
+  loadFirstView(o, lensChosen(raw, o.key));
+}
+/* ---------- the first view (display slice S10, first-view.ts) ----------
+ * Once per map, on its first visit: the lens, the emphasis and the previews the record's first-structure line maps to on the real
+ * map, with one guide line beside the lens switch. Kept per map; restored on later visits (the person's own lens choice first). A record
+ * arriving while the map is read never switches anything: only an emphasised target that disappeared drops. */
+let fvRec: FirstViewRecord | null = null, fvNow: FirstView | null = null, fvMenu: 'why' | 'change' | null = null;
+const fvStore = (): string | null => { try { return localStorage.getItem(FIRST_VIEW_KEY); } catch { return null; } };
+function saveFirstView() { const o = opened; if (!o || !fvRec) return; try { localStorage.setItem(FIRST_VIEW_KEY, writeFirstView(fvStore(), o.key, fvRec)); } catch { /* a view record only */ } }
+/** What the first view reads of the opened map: the newest record's first lines and their C-HEAD row, each part (name, record ID,
+ * group, loop, human gate, C-ENTRY kinds, C-STATE names), each relation (channel and payload as drawn) and the C-LOOP rows. */
+function firstViewInput(o: Opened): FirstViewInput {
+  const maps = o.project.readings.filter(isMapReading), withLines = [...maps].reverse().find(r => r.firstLines?.length);
+  const latest = new Map<string, MapReading['parts'][number]>(); for (const r of maps) for (const p of r.parts) latest.set(p.areaId, p);
+  const said = relationLines(o.project);
+  const parts = o.view.parts.map(p => {
+    const rp = latest.get(p.id), u = p.reading, fam = u?.familyRead;
+    return { id: p.id, name: p.name, ref: rp?.recordRef ?? null, group: p.childIds.length > 0, loop: !!u?.loop || !!u?.recordLoops.length,
+      humanGate: fam?.family === 'gate' && (u?.typeRead?.type === 'person' || /사람|승인|검토|리뷰|사용자/.test(fam.role ?? '')),
+      entries: (rp?.entries ?? []).map(e => e.kind), states: (rp?.states ?? []).map(s => s.name) };
+  });
+  const lines = o.view.relations.map(r => ({ id: r.id, from: r.from, to: r.to, channel: r.kind === 'related' ? null : said.get(r.id)?.channel ?? (r.kind === 'flow' ? 'data' as const : 'uses' as const), payload: said.get(r.id)?.payload ?? null }));
+  const loops = o.view.parts.flatMap(p => (p.reading?.recordLoops ?? []).map(l => ({ owner: p.id, ref: l.recordRef, parentPart: l.parentPart, unit: l.unit })));
+  const quote = withLines ? headQuote(withLines.records.map(x => ({ id: x.id, text: o.project.pasted.find(r => r.id === x.id)?.text ?? '' }))) : null;
+  return { firstLines: withLines?.firstLines ?? [], parts, lines, loops, quote };
+}
+const fvTargets = (o: Opened) => ({ parts: new Set(o.view.parts.map(p => p.id)), lines: new Set(o.view.relations.map(r => r.id)) });
+/** A map opened: its kept first view (a target gone drops alone), else on its first visit the recommendation applied, unless the person
+ * kept a lens for it before (then the recommendation is only offered). */
+function loadFirstView(o: Opened, chosen: boolean) {
+  fvMenu = null; fvNow = firstView(firstViewInput(o));
+  const kept = readFirstView(fvStore(), o.key), t = fvTargets(o);
+  if (kept) { fvRec = keepExisting(kept, t.parts, t.lines); if (!chosen) viewLens = fvRec.lens; if (JSON.stringify(fvRec) !== JSON.stringify(kept)) saveFirstView(); return; }
+  if (chosen) { fvRec = null; return; }
+  fvRec = recordOf(fvNow, 'auto'); viewLens = fvRec.lens; saveFirstView();
+}
+/** The same map drawn again (a record arrived, a fold, a scope): nothing switches; an emphasised target that disappeared drops alone, and
+ * the recommendation is read again only to offer it. */
+function syncFirstView(o: Opened) {
+  fvNow = firstView(firstViewInput(o));
+  if (!fvRec) return;
+  const t = fvTargets(o), next = keepExisting(fvRec, t.parts, t.lines);
+  if (next.parts.length !== fvRec.parts.length || next.lines.length !== fvRec.lines.length || next.previews.length !== fvRec.previews.length) { fvRec = next; saveFirstView(); }
+}
+/** The person picks the recommendation again (「추천 첫 보기로」) or an offered focus (「바꾸기」): its lens, emphasis and previews. */
+function applyFirstView(focus: FvFocus | null) {
+  const o = opened; if (!o || !fvNow) return;
+  fvRec = recordOf(fvNow, 'person', focus); fvMenu = null; saveFirstView();
+  if (fvRec.lens !== viewLens) setLens(fvRec.lens); else applyLens();
+}
+function clearEmphasis() { if (!fvRec) return; fvRec = { ...fvRec, off: true }; fvMenu = null; saveFirstView(); applyLens(); }
+const fvOn = () => !!fvRec && !fvRec.off;
+/** The first view's marks: a firmer border on the emphasised parts, a firmer stroke and label on their lines (a drawn line holding an
+ * emphasised relation), the preview first on the focused groups and loops; then the cards fit again (inside their own boxes). */
+function markFirstView() {
+  const world = $('world');
+  world.querySelectorAll('.fv-emph, .fv-preview').forEach(el => el.classList.remove('fv-emph', 'fv-preview'));
+  if (fvOn()) {
+    const r = fvRec!, rels = new Set(r.lines);
+    for (const id of r.parts) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('fv-emph');
+    for (const id of r.previews) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('fv-preview');
+    for (const e of [...lay.edges, ...restSums]) if (e.ids.some(id => rels.has(id))) {
+      const k = CSS.escape(e.key); world.querySelectorAll(`.edge[data-key="${k}"], .edge-label[data-key="${k}"]`).forEach(el => el.classList.add('fv-emph'));
+    }
+  }
+  fitCards();
+}
+/** The guide line beside the lens switch: 「첫 보기: <lens> · 기록의 '<첫 구조 줄>'을 중심으로」 (it opens the record's sentence and what it used),
+ * 「바꾸기」 (the lens switch, with the other foci), and apart from each other 「강조 해제」 and 「추천 첫 보기로」. Hidden with nothing to say. */
+function renderFirstView() {
+  const box = document.getElementById('first-view'); if (!box) return;
+  const o = opened, v = fvNow, r = fvRec;
+  const offer = !!o && !!v && (!!v.reason || v.emphasis.parts.length > 0) && differs(r, viewLens, v);
+  const emph = fvOn() && (r!.parts.length > 0 || r!.lines.length > 0);
+  if (!o || !v || (!r?.reason && !offer && !emph)) { box.hidden = true; box.replaceChildren(); return; }
+  const btn = (cls: string, text: string, title: string, on: () => void, extra: Record<string, string> = {}) => h('button', { type: 'button', class: `fv-b ${cls}`, title, onclick: on, ...extra }, text);
+  const why = r?.reason ? btn('fv-why', r.reason, r.line ? `기록의 첫 구조 줄 “${r.line}” · 눌러서 그 문장과 쓴 연결 보기` : '첫 구조 줄 없이 지도의 선과 반복만 보고 고른 첫 보기 · 눌러서 자세히',
+    () => { fvMenu = fvMenu === 'why' ? null : 'why'; renderFirstView(); }, { 'aria-expanded': String(fvMenu === 'why') }) : null;
+  const change = r?.reason || v.alternatives.length ? btn('fv-change', '바꾸기', '렌즈 바꾸기 · 다른 중심', () => { fvMenu = fvMenu === 'change' ? null : 'change'; renderFirstView();
+    if (fvMenu === 'change') document.querySelector<HTMLElement>('.lens-seg button.on')?.focus(); }, { 'aria-expanded': String(fvMenu === 'change') }) : null;
+  // One of the two quiet actions at a time on the line (the toolbar stays short); both, apart, in 「바꾸기」.
+  const off = emph && !offer ? fvOffButton() : null, rec = offer ? fvRecButton(v) : null;
+  const dot = () => h('span', { class: 'fv-dot', 'aria-hidden': 'true' }, '·');
+  const row = [why, change, off, rec].filter(<T,>(x: T | null): x is T => !!x).flatMap((x, i): HTMLElement[] => (i ? [dot(), x] : [x]));
+  box.replaceChildren(...row, ...(fvMenu ? [fvPop(o, v, r)] : []));
+  box.hidden = false;
+}
+const fvOffButton = () => h('button', { type: 'button', class: 'fv-b fv-off', title: '첫 보기의 테두리·선 강조만 풀어요 (렌즈는 그대로)', onclick: clearEmphasis }, '강조 해제');
+const fvRecButton = (v: FirstView) => h('button', { type: 'button', class: 'fv-b fv-rec', title: `${v.reason?.text ?? `첫 보기: ${v.lens}`} · 렌즈와 강조를 다시 적용해요`, onclick: () => applyFirstView(null) }, '추천 첫 보기로');
+/** The guide line's two popovers: 「왜」 (the record's sentence, the links and loops it used, the source) and 「바꾸기」 (the other foci). */
+function fvPop(o: Opened, v: FirstView, r: FirstViewRecord | null): HTMLElement {
+  const name = (id: string) => partOf(o, id)?.name ?? id;
+  const close = h('button', { type: 'button', class: 'fv-x', 'aria-label': '닫기', onclick: () => { fvMenu = null; renderFirstView(); } }, '×');
+  if (fvMenu === 'why') {
+    const rels = new Map(o.view.relations.map(x => [x.id, x])), said = relationLines(o.project);
+    const used = (r?.lines ?? []).flatMap(id => { const x = rels.get(id); if (!x) return [];
+      const s = said.get(id), ch = s?.channel === 'data' ? '데이터' : s?.channel === 'control' ? '제어' : s?.channel === 'uses' ? '참조' : '관계';
+      return [h('li', {}, `${name(x.from)} → ${name(x.to)}`, h('small', {}, ` · ${ch}${s?.payload ? ` · ${s.payload}` : ''}`))]; });
+    const loops = (v.reason?.line === r?.line ? v.reason?.loops ?? [] : []).map(ref => { const l = o.view.parts.flatMap(p => (p.reading?.recordLoops ?? []).map(x => ({ p, x }))).find(y => y.x.recordRef === ref);
+      return h('li', {}, `반복 ${ref}`, h('small', {}, l ? ` · ${l.p.name}${l.x.unit ? ` · ${l.x.unit}` : ''}` : '')); });
+    const q = v.reason?.quoteRef, src = q && o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button fv-src', onclick: () => { fvMenu = null; renderFirstView(); showQuote(q.record, q.quote, q.from); } }, '원문에서 보기 ›') : null;
+    return h('div', { class: 'fv-pop', role: 'dialog', 'aria-label': '첫 보기의 근거' }, close,
+      r?.line ? h('p', { class: 'fv-k' }, '기록의 첫 구조 줄') : h('p', { class: 'fv-k' }, '지도의 구조만 보고 골랐어요'),
+      r?.line ? h('q', { class: 'fv-q' }, r.line) : h('p', { class: 'fv-t' }, '기록에 첫 구조 줄이 없거나 지도의 부분과 맞지 않아, 그려진 선의 종류(데이터 · 제어)와 반복만 보았어요.'),
+      r?.parts.length ? h('p', { class: 'fv-t' }, `강조: ${r.parts.map(name).join(' · ')}`) : null,
+      used.length || loops.length ? h('ul', { class: 'fv-used', 'aria-label': '쓴 연결과 반복' }, ...used, ...loops) : null,
+      h('p', { class: 'fv-t fv-fine' }, '테두리와 선 이름표만 앞세워요. 아무것도 숨기거나 옮기지 않아요.'), src);
+  }
+  const alts = v.alternatives.filter(a => !(r && a.line === r.line && a.lens === r.lens));
+  return h('div', { class: 'fv-pop', role: 'dialog', 'aria-label': '첫 보기 바꾸기' }, close,
+    h('p', { class: 'fv-k' }, '렌즈는 아래 줄에서 바로 바꿀 수 있어요 (배치는 그대로)'),
+    alts.length ? h('p', { class: 'fv-t' }, '기록의 다른 중심') : h('p', { class: 'fv-t fv-fine' }, '기록에서 다른 중심을 찾지 못했어요.'),
+    alts.length ? h('ul', { class: 'fv-alts' }, ...alts.map(a => { const q = a.line.length > REASON_CUT ? `${a.line.slice(0, REASON_CUT - 1)}…` : a.line;
+      return h('li', {}, h('button', { type: 'button', class: 'fv-alt', title: `${FIRST_LENS_NAME[a.lens]} · “${a.line}” · ${a.parts.map(name).join(' · ')}`, onclick: () => applyFirstView(a) },
+        h('strong', {}, FIRST_LENS_NAME[a.lens]), ` · '${q}'${objectJosa(a.line)} 중심으로`)); })) : null,
+    // 「추천 첫 보기로」 and 「강조 해제」 stay two actions, apart.
+    h('div', { class: 'fv-acts' }, (v.reason || v.emphasis.parts.length) && differs(r, viewLens, v) ? fvRecButton(v) : null, fvOn() && (r!.parts.length || r!.lines.length) ? fvOffButton() : null));
 }
 function setLens(id: LensId) {
   const o = opened; if (!o || !lensUsable(id) || id === viewLens) return;
@@ -4042,7 +4162,7 @@ function applyLens() {
   for (const c of lensClasses(viewLens)) sp.classList.add(c);
   for (const [k, v] of Object.entries(lensLook(viewLens).lines)) sp.style.setProperty(`--lo-${k}`, String(v));
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { const on = b.dataset.lens === viewLens; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); (b as HTMLButtonElement).disabled = !lensUsable(b.dataset.lens as LensId); });
-  applyLegendMarks();
+  applyLegendMarks(); renderFirstView();
 }
 /** The legend's marks: the picked item's targets outlined (.lg-pick), dimmed (.lg-dim) and hidden (.lg-hide, its room kept). */
 function applyLegendMarks() {
@@ -4061,7 +4181,10 @@ function applyLegendMarks() {
   // S8 (critique 9): a lens steps back the cards it is not about (view-lens lensOffTopic), so switching lens changes what the map
   // says at a glance; nothing moves, nothing hides.
   const o = opened, off = o ? lensOffTopic(viewLens, [...lay.boxes.values()].filter(b => b.kind === 'node').map(b => ({ id: b.id, family: cardTpls.get(b.id)?.family ?? 'neutral', loop: !!partOf(o, b.id)?.reading?.loop })), lensLinesOf()) : new Set<string>();
-  world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => el.classList.toggle('lens-off', off.has(el.dataset.box!)));
+  // S10: an emphasised part of the first view is never stepped back by the lens.
+  const emph = new Set(fvOn() ? fvRec!.parts : []);
+  world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => el.classList.toggle('lens-off', off.has(el.dataset.box!) && !emph.has(el.dataset.box!)));
+  markFirstView();
 }
 /** Pointing at a legend item: after ~150 ms its parts and lines keep an outline until the pointer leaves (7.2: no blinking). */
 function legendHover(item: LegendItem | null) {
@@ -5793,6 +5916,9 @@ function bindCanvas() {
   $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); if (syncLegendFold()) fitView(true, true); });
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId)));
   bindLegendKeys();
+  // S10: the first view's popovers close with Esc or a press outside the guide line.
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && fvMenu) { e.preventDefault(); e.stopImmediatePropagation(); fvMenu = null; renderFirstView(); document.querySelector<HTMLElement>('#first-view .fv-b')?.focus(); } }, true);
+  document.addEventListener('pointerdown', e => { if (fvMenu && !(e.target as HTMLElement).closest?.('#first-view, .lens-seg')) { fvMenu = null; renderFirstView(); } }, true);
   $('arrange').addEventListener('click', arrange);
   const help = $('help'), helpButton = $('help-toggle');
   helpButton.addEventListener('click', () => { help.hidden = !help.hidden; helpButton.setAttribute('aria-expanded', String(!help.hidden)); });
