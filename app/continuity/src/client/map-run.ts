@@ -115,7 +115,7 @@ function stageCapText(detail: MapErrorDetail): string | null {
 /** .45 (12.4 (d)): MAP_SEGMENT_TOO_LARGE with the segment and its measured size against the bound it passed. */
 function segmentSizeText(detail: MapErrorDetail): string | null {
   const n = (v: unknown) => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0 ? v.toLocaleString('en-US') : null;
-  const where = stepName(detail.stage, detail.total) ?? (typeof detail.stage === 'string' && /^extract-d{1,2}$/.test(detail.stage) ? `구간 ${detail.stage.slice(8)}` : null);
+  const where = stepName(detail.stage, detail.total) ?? (typeof detail.stage === 'string' && /^extract-\d{1,2}$/.test(detail.stage) ? `구간 ${detail.stage.slice(8)}` : null);
   const chars = n(detail.chars), maxChars = n(detail.maxChars), bytes = n(detail.bytes), maxBytes = n(detail.maxBytes);
   if (!where || !chars || !maxChars || !bytes || !maxBytes) return null;
   return `${where}이 원문·열쇠 ${chars}자(한도 ${maxChars}자), 요청 전체 ${bytes}바이트(한도 ${maxBytes}바이트)로 보낼 수 있는 크기를 넘어 보내지 않았어요. 잘라서 보내지 않았고 원문과 기존 지도는 그대로예요.`;
