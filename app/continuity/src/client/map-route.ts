@@ -6,11 +6,34 @@
  *   moved line still touches no box it does not belong to.
  * - quick: while a part is dragged, every line is the plain shape from its ports (no search round other boxes), so lines follow
  *   the hand continuously; the full routing (and a morph from the quick shape) comes when the part is dropped. */
-import { edgePath, rounded, offRims, LANE_CLEAR, type Box, type Edge, type Point, type Route } from './map-layout.js';
+import { edgePath, faceRoute, rounded, offRims, LANE_CLEAR, type Box, type Edge, type Point, type Route, type PortFace } from './map-layout.js';
+import { FACE_TURNS, turnsOf } from './line-grammar.js';
 
-export interface Routed extends Route { key: string }
-/** Space between lines that run side by side in one gap, and the least space between ports on one side. */
+/** faces: the faces the route really takes (a control line's top or bottom kept only for a route of few turns). */
+export interface Routed extends Route { key: string; faces?: { a: PortFace; b: PortFace } }
+/** Space between lines that run side by side in one gap (6.7: 12), and the least space between ports on one side. */
 export const TRACK_GAP = 9, PORT_GAP = 12, PORT_MIN = 7;
+/** Where a reference's ear sits on a box without one of its own (an untyped card): the head band, at most halfway down. */
+export const earY = (b: Box): number => (b.kind === 'node' ? b.y + (b.ear ?? Math.min(20, b.h / 2)) : b.kind === 'frame' ? b.y + b.head / 2 : b.y + b.h / 2);
+/** The x where a control line meets a card's top or bottom: the head's left third (the wedge's place, 3.6), lines of one face
+ * spread PORT_GAP apart round it in the order of their other ends, kept 8 inside the card's corners. */
+function facePorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: number; b?: number }> {
+  const at = new Map<string, { key: string; end: 'a' | 'b'; far: number }[]>(), out = new Map<string, { a?: number; b?: number }>();
+  for (const e of edges) {
+    const f = e.faces; if (!f) continue;
+    for (const end of ['a', 'b'] as const) {
+      const face = f[end]; if (face !== 'top' && face !== 'bottom') continue;
+      const me = boxes.get(end === 'a' ? e.from : e.to), far = boxes.get(end === 'a' ? e.to : e.from); if (!me || !far || me.kind !== 'node') continue;
+      const k = `${me.id}|${face}`; (at.get(k) ?? at.set(k, []).get(k)!).push({ key: e.key, end, far: far.x + far.w / 2 });
+    }
+  }
+  for (const [k, list] of at) {
+    const box = boxes.get(k.split('|')[0]!)!, x0 = box.x + box.w / 3, n = list.length;
+    list.sort((p, q) => p.far - q.far);
+    list.forEach((p, i) => { const x = Math.max(box.x + 8, Math.min(box.x + box.w - 8, x0 + (i - (n - 1) / 2) * PORT_GAP)); const port = out.get(p.key) ?? {}; port[p.end] = x; out.set(p.key, port); });
+  }
+  return out;
+}
 
 type Side = 'l' | 'r' | 'v' | 'in';
 /** Which side of a a line to b leaves (edgePath decides the same way): 'in' when one end holds the other (the margin route),
@@ -40,23 +63,28 @@ export function pinOf(box: Box, e: Edge, end: 'a' | 'b'): number | undefined {
  * step a stair, and no straight run long enough for its verb). One end's port moves to the other's height when that height
  * lies on its side, passes no other port of that side (the order that keeps lines from crossing at the part holds) and the
  * straight run between them crosses no box. The spine's steps go first, then the smallest steps. */
-function assignPorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: number; b?: number }> {
+function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<string, { a: PortFace; b: PortFace }> = new Map()): Map<string, { a?: number; b?: number }> {
   type End = { key: string; end: 'a' | 'b'; far: number };
   const out = new Map<string, { a?: number; b?: number }>(), at = new Map<string, End[]>(), sides = new Map<string, { a: string; b: string; e: Edge }>();
   for (const e of edges) {
     const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
     const side = sideOf(a, b, boxes); if (side !== 'l' && side !== 'r') continue;
-    const other = side === 'r' ? 'l' : 'r', sa = `${a.id}|${side}`, sb = `${b.id}|${other}`;
-    (at.get(sa) ?? at.set(sa, []).get(sa)!).push({ key: e.key, end: 'a', far: mid(b) });
-    (at.get(sb) ?? at.set(sb, []).get(sb)!).push({ key: e.key, end: 'b', far: mid(a) });
+    const other = side === 'r' ? 'l' : 'r', sa = `${a.id}|${side}`, sb = `${b.id}|${other}`, f = faced.get(e.key);
+    // An end that keeps a card's top or bottom (a control line) takes no place on a side.
+    if (f?.a !== 'top' && f?.a !== 'bottom') (at.get(sa) ?? at.set(sa, []).get(sa)!).push({ key: e.key, end: 'a', far: mid(b) });
+    if (f?.b !== 'top' && f?.b !== 'bottom') (at.get(sb) ?? at.set(sb, []).get(sb)!).push({ key: e.key, end: 'b', far: mid(a) });
     sides.set(e.key, { a: sa, b: sb, e });
   }
   const put = (key: string, end: 'a' | 'b', y: number) => { const port = out.get(key) ?? {}; port[end] = y; out.set(key, port); };
-  // An end tied to a pin stands at the pin and never moves; the side's other lines spread round its contact point.
+  // An end tied to a pin stands at the pin and never moves; so does a reference's ear (the head band, 3.6: no port, no spread).
+  // The side's other lines spread round its contact point.
   const pinned = new Set<string>();
   for (const [k, list] of [...at]) {
     const box = boxes.get(k.split('|')[0]!)!, free: End[] = [];
-    for (const p of list) { const e = sides.get(p.key)!.e, y = pinOf(box, e, p.end); if (y === undefined) free.push(p); else { put(p.key, p.end, y); pinned.add(`${p.key}|${p.end}`); } }
+    for (const p of list) {
+      const e = sides.get(p.key)!.e, ear = (p.end === 'a' ? e.faces?.a : e.faces?.b) === 'ear' && box.kind === 'node', y = ear ? earY(box) : pinOf(box, e, p.end);
+      if (y === undefined) free.push(p); else { put(p.key, p.end, y); pinned.add(`${p.key}|${p.end}`); }
+    }
     if (free.length) at.set(k, free); else at.delete(k);
   }
   for (const [k, list] of at) {
@@ -83,7 +111,7 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: 
     if (p.key === key) return true;
     const y = out.get(p.key)![p.end]!; return y < Math.min(from, to) - PORT_MIN + 0.01 || y > Math.max(from, to) + PORT_MIN - 0.01;
   });
-  const order = [...sides.values()].sort((p, q) => Number(!!q.e.spine) - Number(!!p.e.spine) || Math.abs(out.get(p.e.key)!.a! - out.get(p.e.key)!.b!) - Math.abs(out.get(q.e.key)!.a! - out.get(q.e.key)!.b!));
+  const order = [...sides.values()].filter(s => out.get(s.e.key)?.a !== undefined && out.get(s.e.key)?.b !== undefined).sort((p, q) => Number(!!q.e.spine) - Number(!!p.e.spine) || Math.abs(out.get(p.e.key)!.a! - out.get(p.e.key)!.b!) - Math.abs(out.get(q.e.key)!.a! - out.get(q.e.key)!.b!));
   for (const { a: sa, b: sb, e } of order) {
     const port = out.get(e.key)!, ya = port.a!, yb = port.b!; if (Math.abs(ya - yb) < 0.5) continue;
     const A = boxes.get(e.from)!, B = boxes.get(e.to)!;
@@ -96,6 +124,13 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: 
   return out;
 }
 
+/** The drag's plain shape of a line through a top or bottom: straight down (or up) to halfway between the two faces, across, and
+ * into the other face; null when the faces do not look at each other (the side shape is drawn instead). */
+function quickFace(a: Box, b: Box, fa: { face: PortFace; at: number }, fb: { face: PortFace; at: number }): Route | null {
+  if (fa.face !== 'bottom' || fb.face !== 'top' || b.y < a.y + a.h + 32) return null;
+  const y1 = a.y + a.h, y2 = b.y, ym = (y1 + y2) / 2, pts = Math.abs(fa.at - fb.at) < 1 ? [{ x: fa.at, y: y1 }, { x: fa.at, y: y2 }] : [{ x: fa.at, y: y1 }, { x: fa.at, y: ym }, { x: fb.at, y: ym }, { x: fb.at, y: y2 }];
+  return { d: rounded(pts), pts, mx: (fa.at + fb.at) / 2, my: ym, clear: true };
+}
 /** The plain shape of a line from its ports, with no regard to what lies between (the drag's continuous shape). */
 function quickRoute(a: Box, b: Box, pa: number | undefined, pb: number | undefined, byId: Map<string, Box>): Route {
   const side = sideOf(a, b, byId);
@@ -181,11 +216,26 @@ function order(c: Seg[], vertical: boolean) {
 
 /** Every line of one drawn set (the map's lines, or its summary lines), routed together. */
 export function routeEdges(boxes: Map<string, Box>, edges: Edge[], opts: { quick?: boolean } = {}): Map<string, Routed> {
-  const ports = assignPorts(boxes, edges), out = new Map<string, Routed>();
+  // A control line read as such leaves its card's bottom and comes in at the top (map design v3 3.6): routed first, kept only
+  // when its route turns at most FACE_TURNS times (else it meets the sides, told by its dash and open head alone). Only cards
+  // have those faces; a group, an outside partner or an end that holds the other keeps its side.
+  const fx = facePorts(boxes, edges), faceKept = new Map<string, { a: PortFace; b: PortFace }>(), faceRoutes = new Map<string, Route>();
+  for (const e of edges) {
+    const f = e.faces, a = boxes.get(e.from), b = boxes.get(e.to); if (!f || !a || !b) continue;
+    const fa: PortFace = (f.a === 'top' || f.a === 'bottom') && a.kind === 'node' ? f.a : f.a === 'ear' ? 'ear' : 'side';
+    const fb: PortFace = (f.b === 'top' || f.b === 'bottom') && b.kind === 'node' ? f.b : f.b === 'ear' ? 'ear' : 'side';
+    if ((fa !== 'top' && fa !== 'bottom' && fb !== 'top' && fb !== 'bottom') || sideOf(a, b, boxes) === 'in') { if (fa === 'ear' || fb === 'ear') faceKept.set(e.key, { a: fa, b: fb }); continue; }
+    const px = fx.get(e.key) ?? {}, at = (box: Box, face: PortFace, x?: number) => ({ face, at: face === 'top' || face === 'bottom' ? x ?? box.x + box.w / 3 : mid(box) });
+    const r = opts.quick ? quickFace(a, b, at(a, fa, px.a), at(b, fb, px.b)) : faceRoute(a, b, boxes.values(), at(a, fa, px.a), at(b, fb, px.b));
+    if (r && turnsOf(r.pts) <= FACE_TURNS) { faceKept.set(e.key, { a: fa, b: fb }); faceRoutes.set(e.key, r); }
+  }
+  const ports = assignPorts(boxes, edges, faceKept), out = new Map<string, Routed>();
   for (const e of edges) {
     const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
-    const p = ports.get(e.key) ?? {}, r = opts.quick ? quickRoute(a, b, p.a, p.b, boxes) : edgePath(a, b, boxes.values(), p);
-    out.set(e.key, { key: e.key, ...r, pts: r.pts.map(q => ({ ...q })) });
+    const p = ports.get(e.key) ?? {}, fr = faceRoutes.get(e.key), r = fr ?? (opts.quick ? quickRoute(a, b, p.a, p.b, boxes) : edgePath(a, b, boxes.values(), p));
+    // The faces the line really takes: its kept top or bottom, else its sides (an ear stays an ear).
+    const f = fr ? faceKept.get(e.key) : e.faces ? { a: e.faces.a === 'ear' ? 'ear' : 'side', b: e.faces.b === 'ear' ? 'ear' : 'side' } as const : undefined;
+    out.set(e.key, { key: e.key, ...r, pts: r.pts.map(q => ({ ...q })), ...(f ? { faces: f } : {}) });
   }
   // What a line must keep off while it is nudged: every box but its own two ends and the groups around them.
   const byId = boxes, within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };

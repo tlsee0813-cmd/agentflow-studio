@@ -206,7 +206,9 @@ export const NAME_ROOM = CARD_W - 16 * 2 - 20 - 8, TOGGLE_W = 28;
 export const BORDER = 2, PAD_Y = 12, NAME_LH = 20, KIND_LH = 16, HEAD_GAP = 16, ROW_H = 20, ROWS_GAP = 12, PIN_TITLE = 16, PIN_H = 24, PIN_GAP = 8, LINE_H16 = 16, CONTRACT_PAD = 16, INNER_H = 24, SIGNS_H = 24, BOTTOM_H = 28, GRID = 8;
 export interface CardHeights { head: number; rows: number; contract: number; inner: number; signs: number; bottom: number; total: number;
   /** From the card's top: the card-level contact point (the contract area's middle) and each pin's centre ('in:결과', 'out:결과'). */
-  contact: number; pins: Record<string, number> }
+  contact: number; pins: Record<string, number>;
+  /** From the card's top: the first name line's middle, where a reference's port-less ear sits on a side (3.6). */
+  ear: number }
 export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): CardHeights {
   const nl = Math.min(2, Math.max(1, Math.floor(nameLines) || 1));
   const head = nl * NAME_LH + KIND_LH + HEAD_GAP + planned;
@@ -222,7 +224,7 @@ export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): Ca
     c.outs.forEach((n, i) => { pins[`out:${n}`] = top + PIN_TITLE + i * PIN_H + PIN_H / 2; });
   }
   const pinRows = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H : contract;
-  return { head, rows, contract, inner, signs, bottom: BOTTOM_H, total, contact: top + pinRows / 2, pins };
+  return { head, rows, contract, inner, signs, bottom: BOTTOM_H, total, contact: top + pinRows / 2, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
 }
 /** The lines a name takes on the card: one, or two (the most drawn; a longer name is cut with an ellipsis, its whole in the tip). */
 export function nameLinesOf(need: number, kids: boolean): 1 | 2 {

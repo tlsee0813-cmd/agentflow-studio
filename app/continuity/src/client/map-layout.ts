@@ -32,7 +32,9 @@ export interface Point { x: number; y: number }
  * inside). shape(nameLines, planned) is its whole height for those lines (planned: the change preview's lines under the name),
  * once, at the near tier's content (the zoom never changes it), with its card-level contact point and its pins (from the card's
  * top; pins by '<relationId>|in' or '<relationId>|out', the relation ends a model portMap row ties to a pin). */
-export interface CardShape { h: number; contact: number; pins: Record<string, number> }
+export interface CardShape { h: number; contact: number; pins: Record<string, number>;
+  /** From the card's top: the head band's middle, where a reference's port-less ear sits (map design v3 3.6). */
+  ear?: number }
 export interface TypedCard { nameRoom: number; shape: (nameLines: number, planned: number) => CardShape }
 export type Positions = Record<string, Record<string, Point>>;
 export const ROOT = 'root';
@@ -48,11 +50,18 @@ export interface Box { id: string; x: number; y: number; w: number; h: number; k
   list?: boolean;
   /** A typed card (TypedCard): from its top, where a line meets it when no pin is tied to that line's end (the card-level contact
    * point), and the pins tied to relation ends ('<relationId>|in' / '|out'). */
-  contact?: number; pins?: Record<string, number> }
+  contact?: number; pins?: Record<string, number>;
+  /** From the box's top: where a reference line's port-less ear sits on the side it leaves (the head band; 3.6). */
+  ear?: number }
+/** Which face of a card a line end takes (line-grammar portFaces): a side, the top (a control line coming in), the bottom (a
+ * control line going out) or the ear (a reference's port-less start on the head band of its side). */
+export type PortFace = 'side' | 'top' | 'bottom' | 'ear';
 /** agg: at least one end is drawn by a folded ancestor (a summary of inner relations, not a relation of that ancestor). */
 export interface Edge { key: string; from: string; to: string; kind: RelationView['kind']; notes: string[]; ids: string[]; agg: boolean;
   /** A line of the scope's spine: the longest directed chain of its parts, drawn on one line (see layoutScope). */
-  spine?: boolean }
+  spine?: boolean;
+  /** The faces its two ends take (absent: both sides). The router keeps a top or a bottom only for a route of few turns. */
+  faces?: { a: PortFace; b: PortFace } }
 /** heads: over each run of outside partners that belong to the same place, that place once ('밖 · 확장 실행과 연결'). */
 export interface GhostHead { key: string; x: number; y: number; w: number; h: number; text: string }
 export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: GhostHead[]; bounds: { x: number; y: number; w: number; h: number };
@@ -60,7 +69,7 @@ export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: Gh
    * on one line. Empty when no two parts are so linked. */
   spine: string[] }
 
-interface Measure { w: number; h: number; ox: number; oy: number; head: number; contact?: number; pins?: Record<string, number> }
+interface Measure { w: number; h: number; ox: number; oy: number; head: number; contact?: number; pins?: Record<string, number>; ear?: number }
 export const ghostId = (id: string) => `ghost:${id}`;
 /** The head over the scope's own boundary end (see placeEnds). */
 export const SELF_HEAD = '이 범위';
@@ -494,7 +503,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       // A typed card (unit or row alike): CARD_W wide, its name on one line or two, its height its near content's (fixed).
       const face: Face = depth === 0 ? 'unit' : 'row', t = typedCard(id, face)!, need = measureText(p.name, 'head') * 1.06 + 2;
       const nl = need > t.nameRoom ? 2 : 1, pl = nodeLines(id, t.nameRoom), s = t.shape(nl, pl ? 3 + pl * PLAN_LINE : 0);
-      m = { w: CARD_W, h: s.h, ox: 0, oy: 0, head: 0, face, contact: s.contact, pins: s.pins };
+      m = { w: CARD_W, h: s.h, ox: 0, oy: 0, head: 0, face, contact: s.contact, pins: s.pins, ...(s.ear !== undefined ? { ear: s.ear } : {}) };
     } else if (depth === 0) {
       // A folded group reads by its name and count; its note is the selection's. A part without an inside keeps its sentence.
       const note = kids ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
@@ -518,7 +527,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const place = (id: string, anchor: Point, rel: Point, depth: number, container: string | null) => {
     const m = measure(id, depth, container), kids = kidsOf(id).length, isOpen = open(id, depth);
     boxes.set(id, { id, x: anchor.x + m.ox, y: anchor.y + m.oy, w: m.w, h: m.h, kind: isOpen ? 'frame' : 'node', depth, container: container ?? ROOT, kids, rel, head: m.head,
-      ...(isOpen ? { list: listOf(id) } : { face: m.face ?? 'row', ...(m.contact !== undefined ? { contact: m.contact, pins: m.pins ?? {} } : {}) }) });
+      ...(isOpen ? { list: listOf(id) } : { face: m.face ?? 'row', ...(m.contact !== undefined ? { contact: m.contact, pins: m.pins ?? {} } : {}), ...(m.ear !== undefined ? { ear: m.ear } : {}) }) });
     if (!isOpen) return;
     const { at } = anchors(id, depth + 1);
     // One column of rows fills the group's width, so a region widened for its name or note keeps an even edge.
@@ -649,7 +658,7 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
     const holds = (o: Box) => o.kind === 'frame' && within(inner, o), inGroup = all.filter(o => o !== outer && o !== inner && within(o, outer));
     const stop: Rect[] = [...inGroup.filter(o => !holds(o)), ...inGroup.filter(o => holds(o) && o.head > 0).map(o => ({ x: o.x, y: o.y, w: o.w, h: o.head }))];
     const open = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !stop.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m);
-    const draw = (pts: Point[], mid: Point): Route => { const p = outer === a ? pts : [...pts].reverse(); return { d: rounded(p, 6), pts: p, mx: mid.x, my: mid.y, detour: true, clear: true }; };
+    const draw = (pts: Point[], mid: Point): Route => { const p = outer === a ? pts : [...pts].reverse(); return { d: rounded(p), pts: p, mx: mid.x, my: mid.y, detour: true, clear: true }; };
     const lane = [{ x: lx, y: top }, { x: lx, y: iy }, { x: inner.x, y: iy }];
     if (lane.every((p, i) => !i || open(lane[i - 1]!.x, lane[i - 1]!.y, p.x, p.y, -1))) return draw(lane, { x: lx, y: (top + iy) / 2 });
     const LEAD = 12, starts = new Set([lx, outer.x + outer.w - PAD / 2, inner.x + inner.w / 2, inner.x - PAD / 2, inner.x + inner.w + PAD / 2]);
@@ -699,6 +708,34 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
   return around();
 }
 
+/** A route through a card's top or bottom (map design v3 3.6, S4b): a control line leaves its card's bottom and comes in at the
+ * top at the given x (the head's left third, spread by the router); an end on a side keeps its port's y. The path keeps
+ * LANE_CLEAR off every other box and off its own two cards past their ports, and its first bend at least 16 from each port.
+ * null when no free path is found (the caller keeps the side route). */
+export function faceRoute(a: Box, b: Box, others: Iterable<Box>, fa: { face: PortFace; at: number }, fb: { face: PortFace; at: number }): Route | null {
+  const all = [...others], byId = new Map(all.map(o => [o.id, o]));
+  const within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
+  type Rect = { x: number; y: number; w: number; h: number };
+  const blocks: Rect[] = all.filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))));
+  for (const o of all) if (o.kind === 'frame' && o !== a && o !== b && o.head > 0 && (within(a, o) || within(b, o))) blocks.push({ x: o.x, y: o.y, w: o.w, h: o.head });
+  const rims: Rect[] = all.filter(o => o.kind === 'frame' && o !== a && o !== b && (within(a, o) || within(b, o)));
+  const stop: Rect[] = [...blocks, a, b];
+  const segFree = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !stop.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m) && offRims(rims, x1, y1, x2, y2, m);
+  const LEAD = 16, port = (x: Box, f: { face: PortFace; at: number }, toward: Box): Port => {
+    if (f.face === 'top') return { at: { x: f.at, y: x.y }, lead: { x: f.at, y: x.y - LEAD }, cost: 0 };
+    if (f.face === 'bottom') return { at: { x: f.at, y: x.y + x.h }, lead: { x: f.at, y: x.y + x.h + LEAD }, cost: 0 };
+    const right = toward.x + toward.w / 2 > x.x + x.w / 2, sx = right ? x.x + x.w : x.x;
+    return { at: { x: sx, y: f.at }, lead: { x: sx + (right ? LEAD : -LEAD), y: f.at }, cost: 0 };
+  };
+  const pa = port(a, fa, b), pb = port(b, fb, a);
+  // Each lead is free from just past its own card's edge (the card itself is in the way of every other run).
+  const leadFree = (p: Port) => segFree(p.at.x + Math.sign(p.lead.x - p.at.x) * (LANE_CLEAR + 1), p.at.y + Math.sign(p.lead.y - p.at.y) * (LANE_CLEAR + 1), p.lead.x, p.lead.y);
+  if (!leadFree(pa) || !leadFree(pb)) return null;
+  const x0 = Math.min(a.x, b.x) - 120, x1 = Math.max(a.x + a.w, b.x + b.w) + 120, y0 = Math.min(a.y, b.y) - 120, y1 = Math.max(a.y + a.h, b.y + b.h) + 120;
+  const r = searchRoute([pa], [pb], stop, segFree, { x0, x1, y0, y1 }, false, rims);
+  return r ? { d: rounded(r.pts), pts: r.pts, mx: r.mid.x, my: r.mid.y, clear: true } : null;
+}
+
 /** Whether a straight run keeps m off the edges of these groups where it runs along them (a run across an edge is fine, and a
  * run of no length is a point, not a run along anything). */
 export function offRims(rims: { x: number; y: number; w: number; h: number }[], x1: number, y1: number, x2: number, y2: number, m: number): boolean {
@@ -720,7 +757,11 @@ function corners(raw: Point[]): Point[] {
  * meets b on the side facing a, or on its top or bottom when that side is shut in; a group end only at its head row, as
  * everywhere. Only boxes near the two ends are searched; null when no such path is found, and the crossing curve stays. */
 function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, given: Ports = {}, rims: { x: number; y: number; w: number; h: number }[] = []): { pts: Point[]; mid: Point } | null {
-  const LEAD = 12, SIDE = 0, END = 34, END_FAR = 600;
+  // The first bend keeps 16 from its port (map design v3 9.9-5); a gap too tight for that takes the old 12 rather than a crossing.
+  return gapRouteAt(a, b, dir, blocks, segFree, given, rims, 16) ?? gapRouteAt(a, b, dir, blocks, segFree, given, rims, 12);
+}
+function gapRouteAt(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, given: Ports, rims: { x: number; y: number; w: number; h: number }[], LEAD: number): { pts: Point[]; mid: Point } | null {
+  const SIDE = 0, END = 34, END_FAR = 600;
   // A part's top or bottom is a cheap way in only from an end that really lies above or below it; from an end beside it, a
   // line into the top reads as coming from nowhere, so that way costs more than a turn (600 > a 400 turn).
   const above = (x: Box, o: Box) => o.y + o.h < x.y - 8 || o.y > x.y + x.h + 8;
@@ -818,12 +859,15 @@ export function restSummary(boxes: Map<string, Box>, edges: Edge[], own: (e: Edg
 }
 
 /** A verb's place on the map and how far it sits from the end it is read at. */
-export interface LabelSpot { key: string; x: number; y: number; w: number; h: number; dist: number }
-/** Verbs that would touch (one box grown by pad): the one nearer its own end keeps its place, the other takes its next free
- * place (spots may hold several per key, nearest first wins) or, with none left, is left off the map. */
+export interface LabelSpot { key: string; x: number; y: number; w: number; h: number; dist: number;
+  /** The label's place in the protected order (map design v3 6.3, line-grammar labelRank): lower wins; absent ranks first. */
+  rank?: number }
+/** Verbs that would touch (one box grown by pad): the one higher in the protected order keeps its place, then the one nearer
+ * its own end; the other takes its next free place (spots may hold several per key, nearest first wins) or, with none left, is
+ * left off the map. */
 export function resolveLabels<T extends LabelSpot>(spots: T[], pad = 6): { kept: T[]; dropped: string[] } {
   const kept: T[] = [], done = new Set<string>();
-  for (const s of [...spots].sort((p, q) => p.dist - q.dist)) {
+  for (const s of [...spots].sort((p, q) => (p.rank ?? 0) - (q.rank ?? 0) || p.dist - q.dist)) {
     if (done.has(s.key) || kept.some(k => s.x - pad < k.x + k.w && k.x < s.x + s.w + pad && s.y - pad < k.y + k.h && k.y < s.y + s.h + pad)) continue;
     kept.push(s); done.add(s.key);
   }

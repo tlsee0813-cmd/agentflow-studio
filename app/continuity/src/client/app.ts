@@ -37,6 +37,7 @@ import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
+import { lineStyle, lineWidth, lineBadge, labelRank, mergeByChannel, multiWord, portFaces, HEAD_PX, DASH, LABEL_MAX, type Head, type LineBadge } from './line-grammar.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
@@ -827,7 +828,17 @@ const heldPositions = (o: Opened): Positions => {
   for (const c of new Set([...Object.keys(held), ...Object.keys(pos)])) out[c] = { ...(held[c] ?? {}), ...(pos[c] ?? {}) };
   return out;
 };
-const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(); lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); cardTpls = tpls; core = { ...lay.bounds }; withTitle(); };
+const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(); lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; core = { ...lay.bounds }; withTitle(); };
+/** The map's lines in the line grammar (map design v3 6.5, 3.6): one stroke per pair, direction and channel (data and control
+ * never share one), each with the faces its ends take (a control line the reading called so: out of its card's bottom, in at
+ * the top; a reference: from its ear). */
+function grammarEdges(o: Opened, edges: Edge[]): Edge[] {
+  const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
+  return mergeByChannel(edges, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id)).map(e => {
+    const ch = edgeChannel(e, said), f = portFaces(e.kind, ch, e.ids.some(id => !!said.get(id)?.channel));
+    return f.a === 'side' && f.b === 'side' ? e : { ...e, faces: f };
+  });
+}
 
 /** Two real parts with one name under one parent ('Types' and 'Types'): told apart by the first clause of their own note, as
  * written ('원명 extHostTypes.ts'), only where the name is really ambiguous. Never merged, renamed or guessed: null when the name
@@ -1157,7 +1168,7 @@ function typedRoom(o: Opened, tpls?: Map<string, CardTemplate>): (id: string, fa
     return { nameRoom: NAME_ROOM - (p.childIds.length ? TOGGLE_W : 0), shape: (nl, planned) => {
       const hs = cardHeights(t, nl, planned), pins: Record<string, number> = {};
       for (const m of pm) { const y = hs.pins[`${m.direction}:${m.port}`]; if (y !== undefined) pins[`${m.relationId}|${m.direction}`] = y; }
-      return { h: hs.total, contact: hs.contact, pins };
+      return { h: hs.total, contact: hs.contact, pins, ear: hs.ear };
     } };
   };
 }
@@ -1636,43 +1647,33 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   if (cameraMode !== 'keep') lastFresh = performance.now();
   world.replaceChildren();
   const edges = svg('svg', { class: 'edges', width: '1', height: '1', 'aria-hidden': 'true' });
-  const defs = svg('defs', {});
-  for (const id of ['arrow', 'arrow-on', 'arrow-near']) {
-    const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '7', markerHeight: '7', orient: 'auto-start-reverse' });
-    m.append(svg('path', { d: 'M0,0 L10,5 L0,10 L3,5 z' })); defs.append(m);
-  }
-  // A control or reference line ends in an open V (no base, never filled, so it stays open on a selected line): ten pixels of
-  // the map whatever the line's width, its tip where the line ends.
-  for (const id of ['arrow-open', 'arrow-open-on', 'arrow-open-near']) {
-    const m = svg('marker', { id, viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '10', markerHeight: '10', markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse' });
-    m.append(svg('path', { d: 'M1,1 L8,5 L1,9' })); defs.append(m);
-  }
-  // A selected line also marks where it starts, so both of its ends read on the map.
-  // Every line carries a start dot; styles.css shows it only on a line being read (hovered or selected) and on a plain relation.
-  for (const id of ['dot', 'dot-on']) { const d = svg('marker', { id, viewBox: '0 0 10 10', refX: '5', refY: '5', markerWidth: '6', markerHeight: '6' }); d.append(svg('circle', { cx: '5', cy: '5', r: id === 'dot' ? '2.6' : '3.6' })); defs.append(d); }
-  edges.append(defs);
+  edges.append(endMarkDefs());
   // A line between two parts of the same group belongs to that group: it reads above the group's surface (a line between
   // groups stays under them, so it never seems to end at a group it only passes).
   const frames = (id: string) => { const out = new Set<string>(); for (let c = lay.boxes.get(id)?.container, g = 0; c && g < 64; c = lay.boxes.get(c)?.container, g++) if (lay.boxes.get(c)?.kind === 'frame') out.add(c); return out; };
   // A busy map at rest reads as its summary (summaryEdges: one line per pair of groups and kind, with its count); a selection,
   // the change plan or a map of a few lines draws each line. Both sets are drawn; .rest-sum on the space shows one of them.
-  restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
+  restSums = sums = lay.edges.length > 6 ? sumLines(o, summaryEdges(lay.boxes, lay.edges)) : [];
   const relInfo = relationLines(o.project), present = new Set<Channel>();
-  lineWords = new Map(); lineChans = new Map(); lineTypes = new Map();
+  lineWords = new Map(); lineChans = new Map(); lineTypes = new Map(); lineBadges = new Map(); lineMulti = new Set();
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:'), ch = edgeChannel(e, relInfo);
     if (ch) present.add(ch);
+    if (ch !== 'uses' && new Set(e.ids.map(id => relInfo.get(id)?.payload).filter(Boolean)).size > 1) lineMulti.add(e.key);
     lineWords.set(e.key, lineWord(e, ch, relInfo)); lineChans.set(e.key, ch);
+    const badge = lineBadge(e.ids.map(id => relInfo.get(id) ?? {})); if (badge) lineBadges.set(e.key, badge);
     // map-reading.13: a data line whose relations hand over one format artifact with its fields draws its label as a type chip.
     if (ch === 'data') { const fields = edgeFields(e.ids, relInfo); if (fields.length) lineTypes.set(e.key, { name: relInfo.get(e.ids[0]!)!.payload!, fields }); }
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
-    // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
-    // A plain relation ends in the same dot at both ends: it is drawn, not directed. Data ends in a filled head, control and
-    // reference in an open V.
-    g.append(svg('path', { class: 'edge-line', 'marker-end': e.kind === 'related' ? 'url(#dot)' : ch === 'data' ? 'url(#arrow)' : 'url(#arrow-open)', 'marker-start': 'url(#dot)' }), svg('path', { class: 'edge-hit' }));
+    // The line grammar (map design v3 6.1): the stroke and the head say the relation (data solid with a filled head, control
+    // dashed with an open head, a reference dotted from its ear to a small V, a shared use dotted with ears, a plain relation
+    // sparse dots with a dot at both ends); a planned, corrected or summary line keeps its kind's dash.
+    const st = lineStyle(e.kind, ch);
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''} s-${st.stroke}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}${badge ? ' badged' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key, 'data-head': st.head, 'data-start': st.start });
+    g.append(svg('path', { class: 'edge-line' }), svg('path', { class: 'edge-hit' }));
     edges.append(g);
   }
   world.append(edges);
+  markLines();
   renderLineKey(present);
   // Each group's head says how many relations cross its boundary (stored relations, any depth inside): where it connects, before
   // anything is selected. Part of the head, so clicking it selects the group and the head's own button role reads it.
@@ -1974,8 +1975,12 @@ function placeLineLabels() {
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
   // At rest: every line drawn now (on a busy map its summary lines, each with its count) carries its label. Lines of one kind
   // meeting the same part share one label only when theirs would read the same (the first of them carries it).
+  // A line's text badge (6.2–6.3) outranks every label but the selection's: at rest the badges go first, beside a selection
+  // right after the selection's own labels. One badge per drawn line that has one is always set (never silently dropped).
+  const drawnNow = shownLines(), badged = [...world.querySelectorAll<SVGGElement>('.edge.badged')].filter(g => drawnNow.has(g.dataset.key!) && !g.classList.contains('hit'));
   if (!selected && !planView.isOpen()) {
-    const drawn = shownLines(), seenEnd = new Set<string>();
+    const drawn = drawnNow, seenEnd = new Set<string>();
+    placeBadges(box, badged, clear, blocks, drawn);
     const rest = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit')).filter(g => {
       const e = edgeOf(g.dataset.key); if (!e) return false;
       const k = `${e.to}|${e.kind}|${lineChans.get(e.key) ?? ''}|${restWord(e)}`; if (seenEnd.has(k)) return false;
@@ -1984,7 +1989,7 @@ function placeLineLabels() {
     if (rest.length) placeRestLabels(box, rest, clear);
     return;
   }
-  if (!selected) { if (lines.length) placeRestLabels(box, lines, clear); return; }
+  if (!selected) { placeBadges(box, badged, clear, blocks, drawnNow); if (lines.length) placeRestLabels(box, lines, clear); return; }
   const shown = shownLines();
   for (const g of lines) {
     const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
@@ -1994,7 +1999,7 @@ function placeLineLabels() {
     const tp = fan ? undefined : lineTypes.get(e.key);
     if (tp) { const at = placeTypeChip(box, e, tp, edgePts(e.key, path), 'long', r => clear(r) && !lineUnder(r, e.key, shown), on);
       if (at) { blocks.push(at); if (on) seenSel.add(selKey(e)); continue; } }
-    const verb = `${wordOf(e)}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+    const verb = `${wordOf(e)}${!fan ? countOf(e) : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
     // The selection's line says what it hands over (the head of its note) where its runs have room; the verb alone otherwise.
     // (Not when the line's own label already says the same words, as a payload often does.)
     const head = on && !fan && e.notes.length === 1 && !plannedNote(e.notes[0]!) ? noteHead(e.notes[0]!) : '', said = head === wordOf(e) ? '' : head;
@@ -2029,8 +2034,41 @@ function placeLineLabels() {
     label.style.left = `${spot.x}px`; label.style.top = `${spot.y}px`; blocks.push(spot);
     if (on) seenSel.add(selKey(e));
   }
+  placeBadges(box, badged, clear, blocks, shown);
   // The dimmed summary beside the selection keeps its counts (what each line still holds), after the selection's verbs.
   if ($('space').classList.contains('sel-sum')) placeCounts(box, clear, blocks, true, shown);
+}
+/** The text badges of the drawn lines that have one (line-grammar lineBadge, map design v3 6.2): on the line's first runs from
+ * the port it leaves, at the first place clear of parts, heads, the title, the labels set so far and other lines; with none, at
+ * its first place all the same (.forced): a line whose record says when it flows never reads as one that always flows. A
+ * selected line's badge reads whole and taller (its full words, the mode as read); its line's own badges are set first. */
+function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) => boolean, blocks: Rect[], shown: Set<string>) {
+  const parts: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
+  const offParts = (r: Rect) => !parts.some(o => r.x < o.x + o.w + 2 && o.x < r.x + r.w + 2 && r.y < o.y + o.h + 2 && o.y < r.y + r.h + 2);
+  const mine: Rect[] = [], inv = labelInv(), order = [...lines].sort((a, b) => Number(b.classList.contains('on') || b.classList.contains('sc-path')) - Number(a.classList.contains('on') || a.classList.contains('sc-path')));
+  for (const g of order) {
+    const e = edgeOf(g.dataset.key), b = e && lineBadges.get(e.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !b || !path) continue;
+    const on = g.classList.contains('on') || g.classList.contains('sc-path'), beside = !!selected && !on;
+    const el = h('span', { class: `edge-badge b-${b.kind}${on ? ' on' : ''}${beside ? ' beside' : ''}`, 'data-badge': e.key }, on ? b.full : b.short);
+    box.append(el);
+    const pts = edgePts(e.key, path), len = path.getTotalLength();
+    // The first runs from the start, then a free place anywhere on the line; then the same with the badge's kind word alone
+    // ('박자', '조건', '선택': its words read in the tip and on selection); then (forced) a place on the line off every part and
+    // every other badge, over other lines or labels if it must. A part's name is never covered (6.3: names come first).
+    const apart = (r: Rect) => !mine.some(o => r.x < o.x + o.w + 2 && o.x < r.x + r.w + 2 && r.y < o.y + o.h + 2 && o.y < r.y + r.h + 2);
+    const find = () => { const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, spots = labelSpots(pts, w, hh, 'start');
+      const along = Array.from({ length: 13 }, (_, i) => path.getPointAtLength(len * (0.04 + i * 0.075))).map(p => ({ x: p.x - w / 2, y: p.y - hh / 2, w, h: hh }));
+      return { w, hh, spots, along, spot: spots.find(r => clear(r) && !lineUnder(r, e.key, shown)) ?? spots.find(clear) ?? null }; };
+    let f = find();
+    if (!f.spot) { el.textContent = b.kind === 'cadence' ? '박자' : b.kind === 'condition' ? '조건' : '선택'; el.classList.add('short'); f = find(); }
+    let spot = f.spot;
+    if (!spot) {
+      spot = [...f.spots, ...f.along].find(r => offParts(r) && apart(r)) ?? [...f.spots, ...f.along].find(offParts) ?? f.along[2]!;
+      el.classList.add('forced');
+    }
+    mine.push(spot);
+    el.style.left = `${spot.x}px`; el.style.top = `${spot.y}px`; blocks.push(spot);
+  }
 }
 /** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none).
  * Beside a selection (dimmed, .beside) a count that finds no clear place is left off rather than set over a part or a verb. */
@@ -2054,7 +2092,12 @@ function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect
 function restWord(e: Edge): string {
   let w = wordOf(e);
   if (lineChans.get(e.key) === 'data' && w === (REL_LABEL[e.kind] ?? e.kind) && e.notes.length === 1 && !plannedNote(e.notes[0]!)) w = noteHead(e.notes[0]!) || w;
-  return `${w}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+  return `${w}${countOf(e)}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+}
+/** How many relations a stroke holds, after its label: ' 3' when they hand over one thing (or name none); nothing when the label
+ * already names them ('a · b +1', line-grammar multiWord). */
+function countOf(e: Edge): string {
+  return e.ids.length < 2 || lineMulti.has(e.key) ? '' : ` ${e.ids.length}`;
 }
 /** A line's type chip (map spec 2.4, 타입 칩 = 산출물 이름): the artifact's name and up to three of its fields, one cell each, '+N'
  * for the rest (line-view typeChipForms), in an accent outline; a click picks the line (its fields read in the pane under 데이터 계약). */
@@ -2109,8 +2152,11 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
       if (mine.length) label = chip; else chip.remove(); }
     if (!label) { label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, restWord(e)); box.append(label); mine = spotsFor(label); }
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
-    // Better places first, across all labels: every label's first place before any label's second.
-    mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i, el: label }));
+    // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
+    // then better places across all labels: every label's first place before any label's second.
+    const word = wordOf(e), said = word !== (REL_LABEL[e.kind] ?? e.kind) && word !== '제어' && word !== '참조';
+    const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path'), spine: g.classList.contains('spine'), said });
+    mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i, rank, el: label }));
   }
   const { kept, dropped } = resolveLabels(spots, 6);
   for (const s of kept) { s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; }
@@ -2173,11 +2219,14 @@ function applyCamera(animate = false) {
   for (const [v, n] of [['title', T.title], ['title-lh', T.titleLh], ['kind', T.kind], ['kind-lh', T.kindLh], ['row', T.row], ['row-lh', T.rowLh], ['label', T.label], ['bottom', T.bottom], ['glyph', T.glyph], ['gap', T.gap]] as const) sp.style.setProperty(`--t-${v}`, px(n));
   if (!fitFrame) fitFrame = requestAnimationFrame(fitCards);
   sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
-  // Chips on the lines (verbs, counts) grow as the map shrinks, up to 1.5×, so they stay readable; their places are found
-  // again when the scale changed enough to matter.
-  const inv = Math.min(1.5, Math.max(1, 0.8 / camera.k));
+  // The line grammar is drawn in screen pixels (map design v3 6.1): --u is one screen pixel in map units, so widths, dashes and
+  // the hit band keep their size on screen at every zoom, and the heads and ears with them (syncMarks).
+  sp.style.setProperty('--u', (1 / camera.k).toFixed(4)); syncMarks(camera.k);
+  // Chips on the lines (labels, badges, counts) keep their screen size (5.2: line labels 13px on screen, badges ≥16px high);
+  // their places are found again when the scale changed enough to matter.
+  const inv = Math.min(1 / 0.3, Math.max(0.625, 1 / camera.k));
   sp.style.setProperty('--inv', inv.toFixed(3));
-  if (Math.abs(inv - placedInv) > 0.1 && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
+  if (Math.abs(inv - placedInv) / placedInv > 0.08 && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
   updateSticky();
   saveViewSoon();
 }
@@ -2676,11 +2725,41 @@ function badgeHolds(b: HTMLElement, id: string): boolean { return (b.getAttribut
 function markLines() {
   document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
     const lit = el.classList.contains('on') || el.classList.contains('sc-path'), line = el.querySelector('.edge-line'); if (!line) return;
-    // A wait on the path reads as a control line: its open V head (placeScenarioMarks dashes its end).
-    const plain = el.classList.contains('k-related'), head = el.classList.contains('c-data') && !el.classList.contains('sc-wait') ? 'arrow' : 'arrow-open';
-    line.setAttribute('marker-end', plain ? (lit ? 'url(#dot-on)' : 'url(#dot)') : lit ? `url(#${head}-on)` : `url(#${head})`);
-    line.setAttribute('marker-start', lit ? 'url(#dot-on)' : 'url(#dot)');
+    // A wait on the path reads as a control line: its open head (placeScenarioMarks dashes its end).
+    const head = (el.classList.contains('sc-wait') && el.dataset.head === 'filled' ? 'open' : el.dataset.head ?? 'filled') as Head, start = (el.dataset.start ?? 'none') as Head;
+    const mark = (h: Head) => (h === 'none' ? 'none' : `url(#m-${h}${lit ? '-on' : ''})`);
+    line.setAttribute('marker-end', mark(head));
+    // A data or control line marks where it starts while it is read (styles.css shows that dot on a hovered or selected line); an
+    // ear or a plain relation's dot is always drawn.
+    line.setAttribute('marker-start', start === 'none' ? `url(#m-dot${lit ? '-on' : ''})` : mark(start));
   });
+}
+/** The end marks of the map's lines (map design v3 6.1, 9.6), each in three paints (rest, selected, pointed at): the filled
+ * triangle (data), the open V (control), a reference's smaller V, the ear's ring and a dot. Sized in screen pixels by syncMarks. */
+function endMarkDefs(): SVGElement {
+  const defs = svg('defs', {});
+  const shapes: Record<Exclude<Head, 'none'>, { ref: string; el: () => SVGElement }> = {
+    filled: { ref: '9', el: () => svg('path', { class: 'mk-fill', d: 'M0,1 L10,5 L0,9 z' }) },
+    open: { ref: '9', el: () => svg('path', { class: 'mk-open', d: 'M1,1 L9,5 L1,9' }) },
+    ref: { ref: '9', el: () => svg('path', { class: 'mk-open', d: 'M1.5,1.5 L9,5 L1.5,8.5' }) },
+    ear: { ref: '5', el: () => svg('circle', { class: 'mk-ring', cx: '5', cy: '5', r: '3.4' }) },
+    dot: { ref: '5', el: () => svg('circle', { class: 'mk-fill', cx: '5', cy: '5', r: '4' }) } };
+  for (const [k, s] of Object.entries(shapes)) for (const suf of ['', '-on', '-near']) {
+    const m = svg('marker', { id: `m-${k}${suf}`, class: `mk mk-${k}${suf ? ` mk${suf}` : ''}`, viewBox: '0 0 10 10', refX: s.ref, refY: '5', markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse', 'data-px': String(HEAD_PX[k as keyof typeof HEAD_PX]) });
+    m.append(s.el()); defs.append(m);
+  }
+  return defs;
+}
+/** Heads and ears keep their screen size whatever the zoom (6.1): each marker is HEAD_PX screen pixels, so 1/k of the map. */
+let marksAt = 0;
+function syncMarks(k: number) {
+  if (Math.abs(k - marksAt) < 0.005) return; marksAt = k;
+  document.querySelectorAll<SVGMarkerElement>('#world marker.mk').forEach(m => { const px = Number(m.dataset.px) / k; m.setAttribute('markerWidth', px.toFixed(2)); m.setAttribute('markerHeight', px.toFixed(2)); });
+}
+/** The summary lines of a busy map in the line grammar: one per pair of groups, direction and channel. */
+function sumLines(o: Opened, list: Edge[]): Edge[] {
+  const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
+  return mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true);
 }
 /** A badge chosen: that visit in the pane (a part selected before steps back, as choosing another part would), the map unmoved. */
 function selectVisit(id: string | null) {
@@ -3511,15 +3590,21 @@ function edgeChannel(e: Edge, said: Map<string, LineSaid>): Channel | null {
 /** The one-line label of a line: data says what it hands over, control what starts it, a reference only that it is one. A
  * line drawing several relations says a payload or a beat only when all of them name the same. */
 function lineWord(e: Edge, ch: Channel | null, said: Map<string, LineSaid>): string {
-  const one = (k: 'payload' | 'cadence') => { const v = new Set(e.ids.map(id => said.get(id)?.[k] ?? null)); return v.size === 1 ? [...v][0] ?? null : null; };
-  const clip = (t: string) => (t.length > 30 ? `${t.slice(0, 29)}…` : t);
-  if (ch === 'data') { const p = one('payload'); return p ? clip(p) : REL_LABEL[e.kind] ?? e.kind; }
-  if (ch === 'control') { const c = one('cadence') ?? one('payload'); return c ? `기동 · ${clip(c)}` : '제어'; }
+  const clip = (t: string) => (t.length > 30 ? `${t.slice(0, 29)}…` : t), pays = e.ids.map(id => said.get(id)?.payload ?? null);
+  // One stroke for several relations (6.5) names what they hand over: 'a · b +N'.
+  const named = multiWord(pays, clip);
+  // The record's cadence words read on the line's badge (line-grammar lineBadge), not in its label.
+  if (ch === 'data') return named ?? REL_LABEL[e.kind] ?? e.kind;
+  if (ch === 'control') return named ? `기동 · ${named}` : '제어';
   if (ch === 'uses') return '참조';
   return REL_LABEL[e.kind] ?? e.kind;
 }
 /** The labels of the lines drawn now (renderSpace), by line key; a line drawn later (a summary beside a selection) says its verb. */
 let lineWords = new Map<string, string>();
+/** The text badge of each drawn line whose relations' readings say when it flows (line-grammar lineBadge), by line key. */
+let lineBadges = new Map<string, LineBadge>();
+/** The strokes whose label names several things handed over ('a · b +N'): their count is in the label already. */
+let lineMulti = new Set<string>();
 const wordOf = (e: Edge) => lineWords.get(e.key) ?? REL_LABEL[e.kind] ?? e.kind;
 /** The short word of a line's channel (its label without a payload or a beat). */
 let lineChans = new Map<string, Channel | null>();
@@ -3528,9 +3613,12 @@ const shortOf = (e: Edge) => { const c = lineChans.get(e.key); return c === 'con
 function renderLineKey(present: Set<Channel>) {
   let key = document.getElementById('line-key');
   if (!key) { key = h('div', { id: 'line-key', class: 'line-key', role: 'list', 'aria-label': '선의 종류' }); $('space').append(key); }
+  // Each sample as the map draws it (6.1): data solid with a filled head, control dashed with an open head, a reference dotted
+  // from its ear to a small V.
   const sample = (c: Channel) => {
     const s = svg('svg', { viewBox: '0 0 28 10', width: '28', height: '10', 'aria-hidden': 'true' });
-    s.append(svg('path', { class: 'lk-line', d: c === 'data' ? 'M1 5H21' : 'M1 5H25' }), svg('path', { class: c === 'data' ? 'lk-head filled' : 'lk-head', d: c === 'data' ? 'M19 1.5L26 5L19 8.5z' : 'M20 1.5L26 5L20 8.5' }));
+    if (c === 'uses') s.append(svg('circle', { class: 'lk-ear', cx: '3', cy: '5', r: '2.2' }));
+    s.append(svg('path', { class: 'lk-line', d: c === 'data' ? 'M1 5H21' : c === 'uses' ? 'M7 5H24' : 'M1 5H25' }), svg('path', { class: c === 'data' ? 'lk-head filled' : 'lk-head', d: c === 'data' ? 'M19 1.5L26 5L19 8.5z' : c === 'uses' ? 'M21.5 2.5L26 5L21.5 7.5' : 'M20 1.5L26 5L20 8.5' }));
     return s;
   };
   key.replaceChildren(...(['data', 'control', 'uses'] as const).filter(c => present.has(c)).map(c => h('span', { class: `lk-row lk-${c}`, role: 'listitem' }, sample(c), h('span', {}, CHANNEL_LABEL[c]))));
@@ -3625,7 +3713,7 @@ function markSelection(partId: string | null) {
   // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
   // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
   const scLines = new Set([...document.querySelectorAll<SVGGElement>('#world .edge.sc-path')].map(g => g.dataset.key!));
-  sums = me || scLines.size ? restSummary(lay.boxes, lay.edges, e => (!!me && (e.from === me || e.to === me)) || path.lines.has(e.key) || scLines.has(e.key)) : restSums;
+  sums = me || scLines.size ? (opened ? sumLines(opened, restSummary(lay.boxes, lay.edges, e => (!!me && (e.from === me || e.to === me)) || path.lines.has(e.key) || scLines.has(e.key))) : []) : restSums;
   markLines();
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   syncLineMode();
@@ -5189,6 +5277,7 @@ function bindCanvas() {
 }
 
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */
+let linePeek = 0;
 function bindEdgeHints() {
   const world = $('world'), tip = $('edge-tip'), space = $('space');
   const nameOf = (boxId: string) => { const o = opened; if (!o) return ''; return partOf(o, boxId.startsWith('ghost:') ? boxId.slice(6) : boxId)?.name ?? ''; };
@@ -5220,7 +5309,19 @@ function bindEdgeHints() {
       // While the map or a part is dragged, no tooltip: it would chase the hand.
       if ($('viewport').classList.contains('grabbing') || $('viewport').classList.contains('moving')) return;
       g.classList.add('near');
-      tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
+      // Pointing at a line (6.4): it and its two ends light at once; after ~150 ms the rest of the map steps back (.peek), so
+      // passing over lines on the way elsewhere never makes the map blink.
+      world.querySelectorAll('.near-end, .near-self').forEach(el => el.classList.remove('near-end', 'near-self'));
+      world.querySelectorAll('.edge.near:not(.path)').forEach(x => { if (x !== g) x.classList.remove('near'); });
+      for (const end of [edge.from, edge.to]) world.querySelector(`[data-box="${CSS.escape(end)}"]`)?.classList.add('near-end');
+      clearTimeout(linePeek); linePeek = window.setTimeout(() => { if (g.classList.contains('near')) space.classList.add('peek'); }, 150);
+      const o = opened, said = o ? relationLines(o.project) : new Map<string, LineSaid>(), ch = lineChans.get(edge.key) ?? null;
+      const modes = [...new Set(edge.ids.map(id => said.get(id)?.mode).filter((m): m is RelationMode => !!m))];
+      const pays = [...new Set(edge.ids.map(id => said.get(id)?.payload).filter((p): p is string => !!p))];
+      const facts = [ch ? `${CHANNEL_LABEL[ch]} · ${lineStyle(edge.kind, ch).stroke === 'solid' ? '실선 · 채운 머리' : lineStyle(edge.kind, ch).stroke === 'dashed' ? '파선 · 열린 머리' : '점렬 · 귀'}` : '', pays.length === 1 ? pays[0]! : pays.length ? `${pays.length}가지` : '', modes.length === 1 ? MODE_LABEL[modes[0]!] : ''].filter(Boolean).join(' · ');
+      const badge = lineBadges.get(edge.key);
+      tip.replaceChildren(h('strong', {}, `${nameOf(edge.from)} ${edge.kind === 'related' ? '—' : '→'} ${nameOf(edge.to)}`),
+        ...(facts ? [h('span', { class: 'tip-kind' }, facts)] : []), ...(badge ? [h('span', { class: 'tip-badge' }, badge.n === 1 || edge.ids.length === 1 ? `${badge.kind === 'cadence' ? '박자' : badge.kind === 'condition' ? '조건' : '선택'} · ${badge.short} (기록의 글자)` : badge.full)] : []), h('span', { class: 'tip-kind' }, `${REL_LABEL[edge.kind] ?? edge.kind}${restOf(edge) ? ` · 선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? ` · 안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : edge.ids.length > 1 ? ` · 관계 ${edge.ids.length}개를 한 선으로 묶음` : ''}`),
         ...edge.notes.slice(0, 3).map(n => h('span', {}, n)), ...(edge.notes.length > 3 ? [h('span', { class: 'tip-kind' }, `설명 ${edge.notes.length - 3}개 더 · 선택하면 모두 읽힘`)] : []), ...(edge.notes.length && edge.notes.every(plannedNote) ? [h('span', { class: 'tip-kind' }, '계획된 연결 · 아직 돌지 않음')] : []), ...(edgeRevised(edge) ? [h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, ''))] : []));
       tip.hidden = false; place(e as PointerEvent);
       if (g.classList.contains('on')) lightRows(edge.ids);
@@ -5234,7 +5335,7 @@ function bindEdgeHints() {
   world.addEventListener('pointermove', e => { if (!tip.hidden) place(e); });
   world.addEventListener('pointerout', e => {
     const t = e.target as Element;
-    if (t.classList.contains('edge-hit')) tip.hidden = true;
+    if (t.classList.contains('edge-hit')) { tip.hidden = true; clearTimeout(linePeek); }
     const to = e.relatedTarget as Element | null;
     if (!to || !to.closest?.('.node, .frame-head, .ghost, .edge')) clearNear();
   });
