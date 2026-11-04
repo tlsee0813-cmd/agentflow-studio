@@ -125,7 +125,11 @@ test('.45 pipeline (13.7a): no maker × reader line from a D row a C-LINK row ca
   const f = ofPages([page(1), page(2), page(3)]), at = f.at('|D01|');
   const wire = { relations: [{ from: 'new:app', to: 'new:api', kind: 'flow', note: '', at, channel: 'data', payload: '등록 요청' }, { from: 'new:app', to: 'new:login', kind: 'flow', note: '', at: f.at('|LN02|'), channel: 'data', payload: 'D01 등록 요청' }],
     parts: [{ ref: 'new:app', name: '물주기 앱' }, { ref: 'new:api', name: '화분 API' }, { ref: 'new:login', name: '로그인 검사' }] };
-  assert.deepEqual(B.productLines(wire, f.ask).shortcuts, [{ index: 0, via: 'C-LINK' }]);
+  // Review D1: D01 has one maker and one reader (no product): 13.7a leaves its line alone; the path the model draws through the login
+  // check (app → login → API, both carrying D01) still makes it a shortcut (.42).
+  assert.deepEqual(B.productLines(wire, f.ask), { merges: [], shortcuts: [], candidates: [] });
+  const through = { ...wire, relations: [...wire.relations, { from: 'new:login', to: 'new:api', kind: 'flow', note: '', at: f.at('|LN03|'), channel: 'data', payload: 'D01 등록 요청' }] };
+  assert.deepEqual(B.productLines(through, f.ask).shortcuts, [{ index: 0, via: 'new:login' }]);
   assert.ok(P.GLOBAL_RULES.includes('C-DATA 한 행의 만드는 부분과 읽는 부분을 짝지어 선을 만들지 않는다'));
 });
 
@@ -197,7 +201,9 @@ test('.45 cards: the record family first (a gate in the trigger tint with its ow
   const open = cardTemplate({ ...base, family: { family: null, role: null, reason: 'thin', unclear: false } });
   assert.deepEqual([open.family, open.kind, open.undecided], ['neutral', '미정: 책임 설명 부족', '미정: 책임 설명 부족']);
   const v4 = cardTemplate({ ...base, type: 'loop', family: { family: null, role: '루프·엔진', reason: null, unclear: true } });
-  assert.deepEqual([v4.family, v4.kind, v4.undecided], ['process', '루프·엔진', '대응 불명확: 루프·엔진']);
+  // Review N8: the card carries no 「대응 불명확」 chip (the pane head says it, undecidedChip).
+  assert.deepEqual([v4.family, v4.kind, v4.undecided], ['process', '루프·엔진', null]);
+  assert.equal(undecidedChip({ family: null, role: '루프·엔진', reason: null, unclear: true }), '대응 불명확: 루프·엔진');
 });
 
 test('.45 recipe: first-map-divided.45 and later-map-divided.45; the prompts read v5 records with their key sets', () => {

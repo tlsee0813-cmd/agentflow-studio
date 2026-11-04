@@ -13,7 +13,7 @@ import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
-import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, PARTTYPE_TABLE, type TableRow } from './record-table.js';
+import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 export { glossVariants };
 
@@ -282,7 +282,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // pipeline .44: a claim on a change row naming a person another change row gives as its actor and its own row does not.
   | 'actor'
   // Recipe .45 (13.7d): a part splitting one part-table row (a list row, a contributors row) or a C-GROUP 목록 item written as a part.
-  | 'list-split';
+  | 'list-split'
+  // Recipe .45 (review N9): a claim on a v5 row whose grade its row's cites do not reach (a run-grade claim on a row citing reports only).
+  | 'cite-grade';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -374,6 +376,28 @@ const lineSenders = (text: string): LineSender[] => text.split('\n').flatMap((li
   if (!arrows.length || arrows[0]!.index! === 0) return [];
   return [{ name: plainName(t.slice(0, arrows[0]!.index).replace(/^(?:[-*•]|\d{1,2}[.)])\s*/, '')), row: null, head: t.slice(0, arrows.at(-1)!.index) }];
 }).filter(x => !!x.name);
+/* Recipe .45 (review B1): a v5 record's row opens with its row ID (LN05, B09, CH02), never a part's name, and its 「부분」 cells hold B IDs.
+ * The checks that read a quoted row by its cells (a line's sender, a claim's wrong part) read a v5 row through its v4 view instead
+ * (record-table.ts rowsOf: B IDs as the parts' names, the cells in the v4 column order, a C-PART row by its 이름): the rows the quote
+ * stands on, from the folded record. A v4 or v3 record's lines are read as before. */
+const V5_ROW_TABLES: readonly string[] = [...Q1_TABLES, ...Q2_TABLES, ...PROFILE_TABLES.map(t => t.id)];
+type QuoteAt = { record: string; quote: string; from?: number; to?: number };
+const isV5Text = (texts: Map<string, { text: string; spans: Span[] | null }>, record: string): boolean => readRecordTables(texts.get(record)?.text ?? '').version === 'v5';
+/** The v5 rows (v4 view) a quote stands on, in record order; [] for a quote of a v4 or v3 record. */
+function v5RowsAt(texts: Map<string, { text: string; spans: Span[] | null }>, q: { record: string; from?: number; to?: number }): TableRow[] {
+  if (q.from === undefined || q.to === undefined || !isV5Text(texts, q.record)) return [];
+  return rowsOf(texts, V5_ROW_TABLES).filter(x => x.dialect === 'v5' && x.record === q.record && x.from < q.to! && q.from! < x.to).sort((a, b) => a.from - b.from);
+}
+/** The senders a quote's lines name (lineSenders), a v5 record's table rows read in their v4 view. */
+function quoteSenders(texts: Map<string, { text: string; spans: Span[] | null }>, q: QuoteAt): LineSender[] {
+  if (q.from === undefined || q.to === undefined || !isV5Text(texts, q.record)) return lineSenders(q.quote);
+  return [...lineSenders(q.quote).filter(l => !l.row), ...v5RowsAt(texts, q).map(r => ({ name: plainName(r.cells[0] ?? ''), row: r.cells, head: '' })).filter(x => !!x.name)];
+}
+/** The cells of a quote's table rows (tableRows), a v5 record's rows read in their v4 view. */
+function quoteTableRows(texts: Map<string, { text: string; spans: Span[] | null }>, q: QuoteAt): string[][] {
+  if (q.from === undefined || q.to === undefined || !isV5Text(texts, q.record)) return tableRows(q.quote);
+  return v5RowsAt(texts, q).map(r => r.cells);
+}
 /** The files a part holds by its own words: its name, its outputs and its files. */
 const storeKeys = (b: MapReplyPart): string[] => [b.name ?? '', ...(b.outputs ?? []), ...(b.files ?? [])].flatMap(fileKeys);
 /** Pipeline .32: the files the records' artifact tables (「2. 산출물」) give a row of their own (its first cell's file), or null when
@@ -1109,7 +1133,8 @@ export function partNamesIn44(cell: string, names: ReadonlySet<string>): string[
 }
 function v4ClaimRow(texts: Map<string, { text: string; spans: Span[] | null }>, q: { record: string; from?: number; to?: number }): { id: string; part: string | undefined; actors: string[] } | null {
   if (q.from === undefined || q.to === undefined) return null;
-  const r = rowsOf(texts, Object.keys(PART_COLUMN44)).find(x => x.dialect === 'v4' && x.record === q.record && x.from < q.to! && q.from! < x.to); if (!r) return null;
+  // Recipe .45 (review B1): a v5 change or status row too, its 바뀐 부분 or 대상 B IDs read as the parts' names (its v4 view).
+  const r = rowsOf(texts, Object.keys(PART_COLUMN44)).find(x => (x.dialect === 'v4' || x.dialect === 'v5') && x.record === q.record && x.from < q.to! && q.from! < x.to); if (!r) return null;
   const actors = r.id === 'C-CHANGE' ? actorsOf(r.byColumn['관련 주체·역할'] ?? '') : [];
   return { id: r.id, part: r.byColumn[PART_COLUMN44[r.id]!], actors: actors.some(a => !a.name) ? [] : actors.map(a => a.name!) };
 }
@@ -1120,7 +1145,7 @@ const v4Rule = (texts: Map<string, { text: string; spans: Span[] | null }>, q: {
 const actorNameCache = new WeakMap<object, string[]>();
 function changeActorNames(texts: Map<string, { text: string; spans: Span[] | null }>): string[] {
   const hit = actorNameCache.get(texts); if (hit) return hit;
-  const out = [...new Set(rowsOf(texts, ['C-CHANGE']).filter(r => r.dialect === 'v4').flatMap(r => actorsOf(r.byColumn['관련 주체·역할'] ?? '')).flatMap(a => a.name && a.name.length >= 4 ? [a.name.toLowerCase()] : []))];
+  const out = [...new Set(rowsOf(texts, ['C-CHANGE']).filter(r => r.dialect !== 'v3').flatMap(r => actorsOf(r.byColumn['관련 주체·역할'] ?? '')).flatMap(a => a.name && a.name.length >= 4 ? [a.name.toLowerCase()] : []))];
   actorNameCache.set(texts, out); return out;
 }
 /** Pipeline .42: the 「지켜야 할 것」 row a claim quotes, with its 부분 and 누가 정했나 columns (who -1 when the table has none). */
@@ -1560,6 +1585,7 @@ const exclusionExplanation = (e: MapReplyError): string => {
     // line no record row backs, the channel of a control line carrying an artifact.
     : e.rule === 'contract' && e.target === 'condition' ? '부분의 조건 행 하나가 규칙에 맞지 않거나 그 부분의 「조건·거부·분기」 행에서 찾을 수 없어 그 조건만 제외했어요.'
     : e.rule === 'contract' && e.target === 'list-split' ? '부분 표의 한 행(목록·기여자 목록)이나 묶음 표의 목록 항목을 따로 세운 부분이어서 그 부분과 연결을 제외했어요. 그 행은 부분 하나이고 항목은 목록으로 남아요.'
+    : e.rule === 'contract' && e.target === 'cite-grade' ? '주장의 근거 등급이 그 행이 인용한 근거(장부의 등급)보다 높아서 제외했어요. 보고만 인용한 행에서 실행·파일 등급 주장을 만들지 않아요.'
     : e.rule === 'contract' && e.target === 'store-dup' ? '같은 「있는 곳」을 이미 다른 저장소 부분이 맡고 있어 겹친 저장소 부분과 그 연결을 제외했어요. 다른 부분으로 다시 잇지 않았어요.'
     : e.rule === 'contract' && e.target === 'unrecorded' ? '기록의 연결 표·산출물·부분별 설계·안의 단계 행이나 화살표 줄이 아닌 줄에서 만든 연결이어서 제외했어요.'
     // pipeline .38: the channel alone is written null; the line stays.
@@ -1840,7 +1866,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // pipeline .29 (divided): a claim quoting a table row whose first cell names another part of this reading (no cell of that
       // row naming this part, and no quoted row of its own) is set aside: the row is that part's.
       if (divided && typeof p.name === 'string') {
-        const own = plainName(p.name), rows = tableRows(q.quote).filter(c => c.length > 1);
+        // Recipe .45 (review B1): a v5 row by its v4 view (its first cell a part's name, never its row ID).
+        const own = plainName(p.name), rows = quoteTableRows(texts, q).filter(c => c.length > 1);
         const other = rows.some(c => plainName(c[0]!) !== own && partNames.has(plainName(c[0]!)) && !c.slice(1).some(cell => cellNames(cell).includes(own) || partNamesIn44(cell, partNames).includes(own)));
         need(!other || rows.some(c => plainName(c[0]!) === own), `parts[${pi}].claims[${j}]`, 'wrong-part');
         // pipeline .44: a v4 change or status row names its part in its own column (바뀐 부분, 대상), not its first cell: one naming another
@@ -1869,6 +1896,12 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const at = `parts[${pi}].claims[${j}]`, topic = oneOf(c, 'topic', CLAIM_TOPICS, at, 'topic'), grade = oneOf(c, 'evidence', EVIDENCE_GRADES, at, 'evidence');
       const when = phrase(c, 'when', 40, at, 'when'), where = phrase(c, 'where', 120, at, 'where'), before = phrase(c, 'before', 120, at, 'before');
       need(before === null || topic === 'withdrawn', `${at}.before`, 'before');
+      // Recipe .45 (review N9, 12.8): on a v5 row a claim's grade stands on the row's own cites (the ledgers' grades): a run-grade claim
+      // needs a run-grade E, a file-grade one a file it read, a report one any cite but a guess. One past its row's cites is left out.
+      if (grade === 'file' || grade === 'run' || grade === 'report') {
+        const cites = v5RowsAt(texts, q).flatMap(r => r.fold?.cites ?? []);
+        if (cites.length) need(cites.some(x => grade === 'report' ? x.grade === 'file' || x.grade === 'run' || x.grade === 'report' : x.grade === grade), at, 'cite-grade');
+      }
       // map-reading.10: a rule's scope, the places it applies and what keeps it; a withdrawal's kind; a gate's kind. Each is the
       // claim's own and left out alone (the claim stays): in the lenient readings set aside with its fixed path and category (an
       // anchor or a device at its own index, whatever rule it broke there), a quote too long to keep set aside as it is; plain map.6
@@ -2330,7 +2363,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const sender = pair[0];
       need(!['unbuilt', 'retired'].includes(sender?.state ?? '') || s7.mode === 'design', `relations[${i}]`, 'sender');
       const own = plainName(sender?.name ?? ''), holds = (text: string) => sender?.type === 'store' && fileKeys(text).some(k => heldKeys(sender).includes(k));
-      for (const line of lineSenders(q.quote)) {
+      // Recipe .45 (review B1): a v5 row by its v4 view (its 보내는 부분 a part's name, never its row ID LN05).
+      for (const line of quoteSenders(texts, q)) {
         const x = refByName.get(line.name); if (!x || x === r.from) continue;
         // pipeline .30: the reader's own row (what it receives, 「달력·지난 24 h LEDGER」) places a store sending to it, whatever the
         // store's state (the .29 run refused 0층 달력 → 편집장 for the editor's own row and left the calendar with no line).
@@ -2348,6 +2382,20 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         const placed = line.row ? (byRef.get(x)?.type === 'store' ? !!own && line.row.slice(1).some(cell => cellNames(cell).includes(own)) : holds(line.row.slice(1).join(' | ')))
           : holds(line.head) || (!!own && plainName(line.head).includes(own));
         need(placed, `relations[${i}]`, 'sender');
+      }
+      // Recipe .45 (review B1): a line standing on v5 C-LINK rows alone has both its ends on one of them, its 보내는 부분 and 받는 부분
+      // (the direction is the sender check's, above); a line to or from a part the row does not name is not the row's. A store part is the
+      // one end the row may leave unnamed: a half of a stored hand-over the row writes maker → reader (maker → store → reader, 13.7b).
+      const linkRows5 = v5RowsAt(texts, q);
+      if (linkRows5.length && linkRows5.every(x => x.id === 'C-LINK')) {
+        const endName = (ref: unknown) => plainName(typeof ref === 'string' ? byRef.get(ref)?.name ?? parts.get(ref)?.name ?? '' : '');
+        const storeRows = rowsOf(texts, ['C-PART']).filter(x => x.dialect === 'v5' && /^\s*저장/.test(x.byColumn['표현군·역할'] ?? ''));
+        const isStore = (ref: unknown, n: string) => (typeof ref === 'string' && byRef.get(ref)?.type === 'store') || storeRows.some(x => plainName(x.byColumn['이름'] ?? '') === n);
+        const a = endName(r.from), b = endName(r.to), cell = (x: TableRow, c: string) => cellNames(String(x.byColumn[c] ?? '').replace(/\s*:\s*.+$/, ''));
+        need(!a || !b || linkRows5.some(x => {
+          const s = cell(x, '보내는 부분'), t = cell(x, '받는 부분'), on = (n: string) => s.includes(n) || t.includes(n);
+          return (s.includes(a) && t.includes(b)) || (s.includes(b) && t.includes(a)) || (isStore(r.from, a) && t.includes(b)) || (isStore(r.to, b) && s.includes(a) && !on(b));
+        }), `relations[${i}]`, 'sender');
       }
       // pipeline .36: when a record draws a connection table, a line stands on a row of a connection, artifact, part-design or
       // inner-step table or on an arrow line; one on any other line (the .35 KORU owner → ARM on the owner's part row, 「잔고 입출금으로

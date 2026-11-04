@@ -606,8 +606,11 @@ export interface LedgerEvidence { id: string; grade: 'file' | 'run' | 'report' |
   previous: { grade: string | null; source: string | null; quote: string | null; citedBy: string[] } | null }
 export interface Ledger { files: ReadonlyMap<string, LedgerFile>; evidence: ReadonlyMap<string, LedgerEvidence> }
 export interface CiteProblem { kind: 'cite-missing' | 'cite-equals' | 'cite-unread' | 'cite-word'; ref: string }
-/** A run's source is the read command this conversation ran (2.3, 2.5 rule 2): a command word first. */
-export const commandLike = (s: string): boolean => /^`?[a-z][\w.+-]*(?:\s|`|$)/.test(s.trim()) || /^`?(?:Get|Select|Measure|Test)-\w+/.test(s.trim());
+/** A run's source is the read command this conversation ran (2.3, 2.5 rule 2). Review N1: a read command's word first (git, rg, grep, ls,
+ * cat, sed, wc, find, head, tail, a PowerShell Get-* or Select-String, node -e, python -c), after any 「VAR=value」 settings, or a command
+ * written in backticks; 「commit 3f2a1b」, 「changelog 2026-10」 or 「issue 12」 are no command (a report). */
+const READ_COMMAND = /^(?:[A-Z_][A-Z0-9_]*=\S*\s+)*(?:(?:git|rg|grep|ls|cat|sed|wc|find|head|tail)(?:\s|$)|Get-[A-Za-z]+\b|Select-String\b|node\s+-e\b|python3?\s+-c\b)/;
+export const commandLike = (s: string): boolean => { const t = s.trim(); return READ_COMMAND.test(t) || /^`[^`\n]+`/.test(t); };
 const said5 = (s: string | undefined): string | null => { const t = (s ?? '').trim(); return !t || /^[—–-]+$/.test(t) ? null : t; };
 /** The cites of a 근거 cell (2.4 as 12.2): explicit F and E IDs joined by 「+」, 추정 or 추정(F03), 모름, and v4's bracket tags. 「=」 is no
  * cite (cite-equals); an ID the ledgers do not hold is none (cite-missing); a file the ledger marks 안 읽음 is cited with grade unknown
@@ -704,6 +707,8 @@ export interface FoldedRecord { recordId: string; basis: string; title: string; 
   reservations: { id: string; name: string; page: number }[]; deleted: Set<string>; extras: FoldRow[];
   states: Map<string, TableState>; diagnostics: FoldDiagnostic[]; level: 0 | 1 | 2; obligations: Obligation[] }
 const ORDER5 = [...Q1_TABLES, ...Q2_TABLES];
+/** 12.4 (b): the detail tables whose first-structure rows (a mode switch, a variant that splits the map) go on the first-structure pages. */
+const EARLY_Q2: readonly string[] = ['C-COND', 'C-VARIANT'];
 const CLOSING: readonly string[] = ['done', 'na', 'unchecked'];
 const foldCache = new Map<string, FoldedRecord[]>();
 /** Every v5 record among the texts, folded (one per record ID and basis sha, in the order their first page arrives). */
@@ -775,11 +780,13 @@ function foldGroup(key: string, srcs: (FoldPage & { t: RecordTables; index: numb
     ends.push(...pageEnds);
     const endOf = (id: string) => pageEnds.filter(e => e.table === id).at(-1)?.state ?? null;
     const writtenHere = new Set<string>();
-    const settled = ORDER5.every(id => states.get(id)?.state === 'closed'), passed = new Set<string>();
+    const settled = ORDER5.every(id => states.get(id)?.state === 'closed'), q1Settled = Q1_TABLES.every(id => states.get(id)?.state === 'closed'), passed = new Set<string>();
     for (const table of tables) {
       const def = V5_TABLE_DEFS.get(table.id)!, written = table.header.length > 0 || !!table.none || table.body.length > 0;
       // 12.1: the order inside Q1 and Q2 is recommended; a table written before an earlier one is settled is said, its rows kept.
       if (def.queue === 3 && !settled) d('out-of-order', s.record, s.n, table.id, table.id, table.from, table.to);
+      // 12.4 (b) (review N6): C-COND and C-VARIANT rows that change the first structure belong with it; written early they are in order.
+      else if (EARLY_Q2.includes(table.id)) { /* in order */ }
       else if (def.queue === 1 || def.queue === 2) {
         // Said once per page for each table passed over (the first table written past it).
         const at = ORDER5.indexOf(table.id), open = ORDER5.slice(0, at).find(u => !passed.has(u) && !writtenHere.has(u) && states.get(u)?.state !== 'closed' && !CLOSING.includes(endOf(u) ?? ''));
@@ -813,9 +820,11 @@ function foldGroup(key: string, srcs: (FoldPage & { t: RecordTables; index: numb
       }
     }
     // A table's state after the page: closed once written (unless the page's C-END keeps it 이어짐 or 아직) or closed by its C-END word.
+    // Review N6: a C-COND or C-VARIANT table written on a page before the first structure was settled holds its first-structure rows only:
+    // it stays open for the detail unless the page's C-END closes it (끝남, 해당 없음, 확인 못함).
     for (const id of ORDER5) {
-      const e = endOf(id), remaining = pageEnds.filter(x => x.table === id).at(-1)?.remaining ?? null;
-      if (writtenHere.has(id) || e) states.set(id, { state: e === 'cont' || e === 'pending' ? 'open' : writtenHere.has(id) || CLOSING.includes(e ?? '') ? 'closed' : 'open', end: e, remaining, page: s.n });
+      const e = endOf(id), remaining = pageEnds.filter(x => x.table === id).at(-1)?.remaining ?? null, early = EARLY_Q2.includes(id) && !q1Settled && !e;
+      if (writtenHere.has(id) || e) states.set(id, { state: e === 'cont' || e === 'pending' || early ? 'open' : writtenHere.has(id) || CLOSING.includes(e ?? '') ? 'closed' : 'open', end: e, remaining: remaining ?? (early ? '첫 구조 행만' : null), page: s.n });
     }
     for (const x of s.t.declared) if (x.page === s.index) declared.push({ page: s.n, level: x.level });
     for (const x of s.t.nexts) if (x.page === s.index) nexts.push({ page: s.n, text: x.text });
@@ -864,10 +873,12 @@ function foldGroup(key: string, srcs: (FoldPage & { t: RecordTables; index: numb
       }
     }
   }
-  // 4.6: a page's C-END 쓴 행 against the rows the page really holds (the rows win).
+  // 4.6: a page's C-END 쓴 행 against the rows the page really holds (the rows win). Review N2: the page's own original rows (every row an
+  // ID stood on, history), so a later page's 교체 or C-DROP never makes an earlier page's C-END wrong.
+  const written = [...[...history.values()].flat(), ...extras];
   for (const e of ends) {
     if (!e.written.length || !/^(?:C-[A-Z]{2,12}|P\d-\d{2})$/.test(e.table)) continue;
-    const there = new Set([...byId.values(), ...extras, ...[...replacedE.values()]].filter(x => x.page === e.page && x.record === e.record && x.table === e.table).map(x => x.id));
+    const there = new Set(written.filter(x => x.page === e.page && x.record === e.record && x.table === e.table).map(x => x.id));
     if (e.written.some(x => !there.has(x)) || [...there].some(x => !e.written.includes(x))) d('end-mismatch', e.record, e.page, e.table, null, e.from, e.to);
   }
   const record: FoldedRecord = { recordId: srcs[0]!.t.pages[srcs[0]!.index]!.recordId, basis: srcs[0]!.basis, title: srcs[0]!.title, key,
@@ -878,6 +889,8 @@ function foldGroup(key: string, srcs: (FoldPage & { t: RecordTables; index: numb
   return record;
 }
 function page(s: FoldPage): FoldPage { return { record: s.record, n: s.n, prev: s.prev, basis: s.basis, title: s.title, hash: s.hash, conflict: s.conflict, repeated: s.repeated, from: s.from, to: s.to }; }
+/** Review N3: a fix on a supplementary table's row (P4-02): the supplementary request asks it; it never holds the detail level back. */
+export const supplementFix = (o: Obligation): boolean => o.kind === 'fix' && /^P\d-\d{2}$/.test(o.table ?? '');
 const FIX_TEXT: Readonly<Partial<Record<FoldCategory, string>>> = { 'duplicate-id': '표시 없이 겹친 ID: 교체할지 새 ID로 쓸지', 'row-id': '행 ID가 없거나 형식 밖', 'cite-missing': '장부에 없는 F·E 인용',
   'cite-equals': '「=」 인용(ID를 명시)', 'row-cells': '칸 수가 머리 줄과 다른 행' };
 /** The record's level and remaining obligations (4.5 as 12.1 amends it), computed by the app: level 1 when every Q1 table is settled
@@ -919,7 +932,8 @@ export function recordLevel(f: Pick<FoldedRecord, 'rows' | 'byId' | 'states' | '
   const settled = (ids: readonly string[]) => ids.every(id => f.states.get(id)?.state === 'closed');
   // Level 1 waits on the Q1 fixes 4.5 names: a family word, a row's cells or ID, a C-CHECK row (a cite fix waits for level 2).
   const q1Fix = out.some(o => o.kind === 'fix' && !!o.table && Q1_TABLES.includes(o.table) && (o.text.startsWith('표현군') || /칸 수|행 ID|행 없음/.test(o.text)));
-  const level1 = settled(Q1_TABLES) && !q1Fix, level2 = level1 && settled(Q2_TABLES) && !out.some(o => !o.candidate);
+  // Review N3: a supplementary table's fix (a P row's ID or cells) is the supplementary request's to ask (4.5: Q1 and Q2 decide the detail).
+  const level1 = settled(Q1_TABLES) && !q1Fix, level2 = level1 && settled(Q2_TABLES) && !out.some(o => !o.candidate && !supplementFix(o));
   return { level: level2 ? 2 : level1 ? 1 : 0, obligations: out.slice(0, 200) };
 }
 

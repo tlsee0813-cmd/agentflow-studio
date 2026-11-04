@@ -72,7 +72,9 @@ const SAFE_CONTRACT_CATEGORIES = new Set(['shape', 'keys', 'text', 'count', 'new
   // .44: a change claim naming another change row's actor.
   'actor',
   // .45: a part splitting one part-table row or a list item written as a part.
-  'list-split']);
+  'list-split',
+  // .45 (review N9): a v5 claim whose grade its row's cites do not reach.
+  'cite-grade']);
 /** Fixed path/rule (and, for rule 'contract', its fixed guard category) of a refusal; null for anything else. */
 export function safeValidation(error) {
   try {
@@ -1306,8 +1308,10 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
   // .42: the product lines left out, 「from → to: payload (합침 → the line it joined | 지름길 · via)」, and merged names past 80 (product-lines).
   const said = i => `${lines[i].from} → ${lines[i].to}${typeof lines[i].payload === 'string' ? `: ${lines[i].payload}` : ''}`;
   const productNames = [...products.merges.map(m => `${said(m.index)} (합침 → ${lines[m.into].from} → ${lines[m.into].to})`),
-    ...products.shortcuts.map(s => `${said(s.index)} (지름길 · ${s.via} 거침)`), ...unfitted.map(n => `${n} (합침 · 넘기는 것 80자 밖)`)];
-  return { wire, exclusions, folds: folds.map(f => `${f.name} → ${f.into}`), asideLines, products: productNames };
+    ...products.shortcuts.map(s => `${said(s.index)} (지름길 · ${s.via} 거침)`),
+    // .45 (review D1): a maker → reader line the C-LINK rows carrying its D never reach, kept and named as a missing C-LINK row's candidate.
+    ...(products.candidates ?? []).map(c => `${said(c.index)} (C-LINK 누락 후보)`), ...unfitted.map(n => `${n} (합침 · 넘기는 것 80자 밖)`)];
+  return { wire, exclusions, folds: folds.map(f => `${f.name} → ${f.into}`), asideLines, products: productNames, linkCandidates: (products.candidates ?? []).map(c => said(c.index)) };
 }
 
 /** .45 (13.7d): the combined wire's new parts (none a parent) that split one part-table row: several parts every basis of which stands on
@@ -1391,8 +1395,32 @@ export function productLines(wire, ask, skip = []) {
     const dataRows = rowsOf(texts, ['C-DATA']).filter(r => r.dialect !== 'v3'), linkRows = rowsOf(texts, ['C-LINK']).filter(r => r.dialect !== 'v3');
     const dOf = row => { const d = dataRows.find(x => x.record === row.record && x.from <= row.from && row.to <= x.to + 1); const id = (d?.byColumn['행 ID'] ?? '').trim(); return /^D\d{1,3}$/.test(id) ? id : null; };
     const pieces = cell => String(cell ?? '').replace(/\s*:\s*.+$/, '').split(/\s*·\s*/).map(plainName).filter(Boolean);
+    // .45 (review D1): the composition and list groups (C-GROUP 구성 · 목록): a part a C-LINK row reaches reaches what it is made of.
+    const inside = new Map();
+    for (const g of rowsOf(texts, ['C-GROUP']).filter(r => r.dialect !== 'v3' && /구성|목록/.test(r.byColumn['묶음 뜻'] ?? ''))) {
+      const parent = plainName(String(g.byColumn['부모 이름'] ?? '').replace(/\s*:\s*.+$/, '')); if (!parent) continue;
+      inside.set(parent, [...inside.get(parent) ?? [], ...pieces(g.byColumn['자식 이름들'])]);
+    }
+    const linkEnds = linkRows.map(l => ({ from: pieces(l.byColumn['보내는 부분']), to: pieces(l.byColumn['받는 부분']) }));
+    const inLinks = n => linkEnds.some(l => l.from.includes(n) || l.to.includes(n));
+    /** Whether the record's C-LINK rows reach b from a (a → X → … → b, any row, a part reached reaching its composition and list items). */
+    const reaches = (a, b) => {
+      const seen = new Set([a]), queue = [a];
+      while (queue.length) {
+        const n = queue.shift();
+        const next = [...linkEnds.filter(l => l.from.includes(n)).flatMap(l => l.to), ...(n === a ? [] : inside.get(n) ?? [])];
+        for (const m of next) { if (m === b) return true; if (!seen.has(m)) { seen.add(m); queue.push(m); } }
+      }
+      return false;
+    };
+    // .45 (review D1): 'shortcut' only where the C-LINK rows carrying the D show the maker handing it to another part and reach the reader
+    // through it (or draw the reader on no line at all: the rows say where the D goes, and it goes through the part they hand it to);
+    // a reader the rows draw on lines of its own but never reach from the maker is a missing C-LINK row's candidate ('candidate'): the
+    // line stays. A D row of one maker and one reader is no product of makers × readers: its line stays (null).
     const linkedBy = (row, from, to) => {
       const id = dOf(row); if (!id) return null;
+      const d = dataRows.find(x => x.record === row.record && x.from <= row.from && row.to <= x.to + 1);
+      if (d && pieces(d.byColumn['만드는 부분']).length <= 1 && pieces(d.byColumn['읽는 부분']).length <= 1) return null;
       const carrying = linkRows.filter(l => /^\s*(D\d{1,3})\b/.exec(l.byColumn['넘기는 것'] ?? '')?.[1] === id);
       if (!carrying.length) return null;
       const a = plainName(nameOf(from)), b = plainName(nameOf(to)), whole = cell => plainName(String(cell ?? '').replace(/\s*:\s*.+$/, ''));
@@ -1400,9 +1428,10 @@ export function productLines(wire, ask, skip = []) {
       if (carrying.some(l => sends(l) && gets(l))) return true;
       // Only where the rows say where the maker hands it (A sends it to another part) is the pair a shortcut; a maker the rows never show
       // sending it (a reply going back, a second maker the rows leave out) keeps its line.
-      return carrying.some(sends) ? false : null;
+      if (!carrying.some(sends)) return null;
+      return reaches(a, b) || !inLinks(b) ? 'shortcut' : 'candidate';
     };
-    const kept = lines.flatMap((_, i) => valid(i) && !product[i] ? [i] : []), merges = [], shortcuts = [];
+    const kept = lines.flatMap((_, i) => valid(i) && !product[i] ? [i] : []), merges = [], shortcuts = [], candidates = [];
     for (const [i, row] of product.entries()) {
       if (!row) continue;
       const r = lines[i], channel = x => lines[x].channel ?? null;
@@ -1410,14 +1439,15 @@ export function productLines(wire, ask, skip = []) {
       if (into !== undefined) { merges.push({ index: i, into }); continue; }
       // A store's own write and read lines are its readers' and writers' (never a shortcut of a path through another part).
       const isStore = ref => parts.find(p => p?.ref === ref)?.type === 'store';
-      if (!isStore(r.from) && !isStore(r.to) && linkedBy(row, r.from, r.to) === false) { shortcuts.push({ index: i, via: 'C-LINK' }); continue; }
+      const linked = isStore(r.from) || isStore(r.to) ? null : linkedBy(row, r.from, r.to);
+      if (linked === 'shortcut') { shortcuts.push({ index: i, via: 'C-LINK' }); continue; }
       const via = isStore(r.from) || isStore(r.to) ? undefined : kept.filter(k => lines[k].from === r.from && lines[k].to !== r.to && carries(k, row)).map(k => lines[k].to)
         .find(m => kept.some(k => lines[k].from === m && lines[k].to === r.to && (carries(k, row) || (conns.some(c => meets(placed[k], c)) && receives(r.to, row.name)))));
       if (via !== undefined) { shortcuts.push({ index: i, via }); continue; }
-      kept.push(i);
+      kept.push(i); if (linked === 'candidate') candidates.push({ index: i });
     }
-    return { merges, shortcuts };
-  } catch { return { merges: [], shortcuts: [] }; }
+    return { merges, shortcuts, candidates };
+  } catch { return { merges: [], shortcuts: [], candidates: [] }; }
 }
 /** .42: a kept line with the payloads (a 「 · 」 list while it fits 80, each name once, loosely compared) and format fields (24) of the
  * product lines merged into it; the names that did not fit, for the diagnostic. */

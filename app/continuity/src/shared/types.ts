@@ -360,7 +360,9 @@ export const RECORD_DIAGNOSTIC_CATEGORIES = ['row-cells', 'unknown-table', 'unkn
   'type-word', 'loop-replaced',
   // Recipe .45 (map-reading.19, a 기록 v5 record): a page with no head, and what folding its pages found (record-table.ts foldPages).
   'page-head', 'page-conflict', 'page-gap', 'page-prev', 'duplicate-id', 'replace-unknown', 'id-reused', 'row-id', 'out-of-order', 'reserve-unused', 'dangling-ref',
-  'ref-deleted', 'end-mismatch', 'level-mismatch', 'cite-missing', 'cite-equals', 'cite-unread', 'cite-word', 'grade-source', 'part-added', 'drop-unknown'] as const;
+  'ref-deleted', 'end-mismatch', 'level-mismatch', 'cite-missing', 'cite-equals', 'cite-unread', 'cite-word', 'grade-source', 'part-added', 'drop-unknown',
+  // Recipe .45 (review N4): a model part standing on no C-PART row of a v5 record.
+  'part-no-row'] as const;
 export interface ReadingRecordDiagnostic { category: typeof RECORD_DIAGNOSTIC_CATEGORIES[number]; table: string | null; column: string | null; record: string; from: number; to: number }
 /** The record's focus line (K4): which question groups the record answered more of first; never a fact of the project. */
 export interface ReadingFocus { profiles: string[]; reason: string | null; tables: string[]; quote: ReadingQuote }

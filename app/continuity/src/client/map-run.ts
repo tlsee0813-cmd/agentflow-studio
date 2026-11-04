@@ -58,6 +58,7 @@ const MAP_ERROR: Record<string, string> = {
   MAP_PIPELINE_STORE_UNAVAILABLE: '구간별 처리 결과를 안전하게 보관할 수 없어 시작하지 않았어요. 원문은 그대로예요.',
   MAP_PARTITION_LIMIT: '이번 자료가 한 번에 나눠 읽을 수 있는 범위를 넘었어요. 일부만 읽은 결과를 적용하지 않았어요.',
   MAP_PARTITION_TOO_LARGE: '하나의 원문 구간이 너무 길어 안전하게 나누지 못했어요. 원문은 그대로예요.',
+  MAP_SEGMENT_TOO_LARGE: '나눈 구간 하나가 원문·열쇠·지시를 합쳐 보낼 수 있는 크기(글자 12,000 · 바이트 64KB)를 넘어 보내지 않았어요. 잘라서 보내지 않았고 원문은 그대로예요.',
   MAP_CHANGED: '정리하는 동안 지도가 바뀌어(다른 정리가 반영되었거나 부분이 보관됨) 이번 결과는 반영하지 않았어요. 다시 정리해 주세요.',
   ALREADY_APPLIED: '같은 기록은 이미 지도에 정리했어요.',
   READINGS_FULL: '이 프로젝트에 더 정리할 수 없어요(정리 기록 한도).',
@@ -99,7 +100,9 @@ function stepName(stage: unknown, total: unknown): string | null {
   }
   return m[5] === 'plan' ? '전체 조건 대조 단계' : m[5] === 'render-semantic' ? '부분 다시 정리 단계' : '관계·조건 마지막 확인 단계';
 }
-export interface MapErrorDetail { stage?: unknown; phase?: unknown; total?: unknown; rule?: unknown; path?: unknown; category?: unknown; reason?: unknown; target?: unknown; cap?: unknown }
+export interface MapErrorDetail { stage?: unknown; phase?: unknown; total?: unknown; rule?: unknown; path?: unknown; category?: unknown; reason?: unknown; target?: unknown; cap?: unknown;
+  /** .45 (MAP_SEGMENT_TOO_LARGE): a segment's measured characters and bytes and their bounds. */
+  chars?: unknown; maxChars?: unknown; bytes?: unknown; maxBytes?: unknown }
 /** MAP_STAGE_INCOMPLETE: a render or global stage cut at its output-token cap ('부분 정리 3/12 단계의 AI 응답이 길이 한도(8,192
  * 토큰)를…'), in the progress labels' words, with the setting that raises it; without a readable stage or cap the plain wording. */
 function stageCapText(detail: MapErrorDetail): string | null {
@@ -109,8 +112,17 @@ function stageCapText(detail: MapErrorDetail): string | null {
   const key = detail.stage.startsWith('render') ? 'STUDIO_MAP_RENDER_TOKENS' : 'STUDIO_MAP_GLOBAL_TOKENS';
   return `${where}의 AI 응답이 길이 한도(${String(cap).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} 토큰)를 넘어 이 단계에서 정리를 멈췄어요. 아무것도 반영하지 않았고 원문과 기존 지도는 그대로예요. ${STAGE_CAP_SETTING(key)}`;
 }
+/** .45 (12.4 (d)): MAP_SEGMENT_TOO_LARGE with the segment and its measured size against the bound it passed. */
+function segmentSizeText(detail: MapErrorDetail): string | null {
+  const n = (v: unknown) => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0 ? v.toLocaleString('en-US') : null;
+  const where = stepName(detail.stage, detail.total) ?? (typeof detail.stage === 'string' && /^extract-d{1,2}$/.test(detail.stage) ? `구간 ${detail.stage.slice(8)}` : null);
+  const chars = n(detail.chars), maxChars = n(detail.maxChars), bytes = n(detail.bytes), maxBytes = n(detail.maxBytes);
+  if (!where || !chars || !maxChars || !bytes || !maxBytes) return null;
+  return `${where}이 원문·열쇠 ${chars}자(한도 ${maxChars}자), 요청 전체 ${bytes}바이트(한도 ${maxBytes}바이트)로 보낼 수 있는 크기를 넘어 보내지 않았어요. 잘라서 보내지 않았고 원문과 기존 지도는 그대로예요.`;
+}
 /** The person's words for a refused or failed reading. An INVALID_RESPONSE that names a divided step says which step and which rule. */
 export function mapErrorText(code: string, detail?: MapErrorDetail | null): string {
+  if (code === 'MAP_SEGMENT_TOO_LARGE' && detail) { const text = segmentSizeText(detail); if (text) return text; }
   if (code === 'MAP_STAGE_INCOMPLETE' && detail) { const text = stageCapText(detail); if (text) return text; }
   if (code === 'INVALID_RESPONSE' && detail && typeof detail.phase === 'string') {
     const where = stepName(detail.stage, detail.total);

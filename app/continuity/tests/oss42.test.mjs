@@ -137,7 +137,7 @@ test('.42 (4) product lines: an artifact row\'s maker × reader line between two
     line(f, 'new:reporter', 'new:user', '| 요약 JSON |', { payload: '요약 JSON' }),
     line(f, 'new:reporter', 'new:user', '| 요약 CSV |', { payload: '요약 CSV' })];
   const parts = names.map(([ref, name, head]) => part(f, ref, name, head));
-  assert.deepEqual(productLines(wire(parts, relations), f.ask), { merges: [{ index: 7, into: 3 }, { index: 9, into: 6 }, { index: 10, into: 6 }], shortcuts: [{ index: 8, via: 'new:worker' }] });
+  assert.deepEqual(productLines(wire(parts, relations), f.ask), { merges: [{ index: 7, into: 3 }, { index: 9, into: 6 }, { index: 10, into: 6 }], shortcuts: [{ index: 8, via: 'new:worker' }], candidates: [] });
   // Through the combine step: the kept wire, the reasons, and the final diagnostic.
   const blueprint = { parts: names.map(([ref, name, head]) => ({ ref, name, parent: null, focus: `${name}의 책임`, at: [f.at(head)] })), global: [] };
   const fragments = splitBlueprintParts(blueprint).map((group, index) => ({ ...wire([]), parts: group.parts.map((p, i) => ({ ...part(f, p.ref, p.name, names.find(n => n[0] === p.ref)[2]),
@@ -156,9 +156,9 @@ test('.42 (4) product lines: an artifact row\'s maker × reader line between two
   assert.ok(FINAL_DIAGNOSTICS.includes('product-lines'));
   assert.ok(!finalDiagnostics(fragments, global, f.ask, blueprint).some(x => x.rule === 'plan-relations' || x.rule === 'connections'));
   // A product line with no line between its ends and no recorded path stays; a control line between the same ends takes no data list.
-  assert.deepEqual(productLines(wire(parts, [relations[8]]), f.ask), { merges: [], shortcuts: [] });
+  assert.deepEqual(productLines(wire(parts, [relations[8]]), f.ask), { merges: [], shortcuts: [], candidates: [] });
   const control = [{ ...relations[6], channel: 'control' }, relations[9]];
-  assert.deepEqual(productLines(wire(parts, control), f.ask), { merges: [], shortcuts: [] });
+  assert.deepEqual(productLines(wire(parts, control), f.ask), { merges: [], shortcuts: [], candidates: [] });
   const P = await import('../server/map-pipeline.mjs');
   assert.ok(P.GLOBAL_RULES.includes('product-shortcut') && P.GLOBAL_RULES.includes('product-merge'));
   assert.ok(MAP_BLUEPRINT_PROMPT.includes('지름길'));

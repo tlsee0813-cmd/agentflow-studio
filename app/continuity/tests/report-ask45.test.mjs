@@ -22,7 +22,7 @@ test('ASK-13 the base request: Q1 and Q2 header rows as the parser defines them,
   assert.ok(ask.indexOf('\nC-CHECK 점검\n') < ask.indexOf('\nC-STEP 안의 단계\n'), 'the first structure before the detail');
   assert.deepEqual(ask.match(/P\d-\d{2}/g), null, 'no supplementary table ID');
   assert.ok(!/보충 표/.test(ask));
-  for (const s of R.NO_INVENTION) assert.ok(ask.includes(s));
+  for (const s of R.NO_INVENTION_V5) assert.ok(ask.includes(s));
   assert.ok(ask.includes(R.FAMILY_RULES) && ask.includes('평가기는 처리이고, 그 결과로 막는 부분이 관문이다') && ask.includes('시간 신호만 내는 스케줄러는 촉발'));
   assert.ok(ask.includes('「=」나 생략은 쓰지 않는다') && !ask.includes('[=]'));
   assert.ok(ask.includes('restore|reintroduc|rewrite|replace|migrat') && ask.includes('문서로만 폐기') && ask.includes('기능 일부(이름)') && ask.includes('공유: B05·B07') && ask.includes('자료마다(어떤 자료)'));
@@ -53,7 +53,7 @@ test('ASK-14 the page request: the app\'s own remaining obligations, the rows wr
   assert.ok(/다음 ID: F08 · E05 · D01 · X01 · N01 · K01 · B11/.test(plan.text));
   assert.ok(!plan.text.includes(R.FAMILY_RULES), 'C-PART is written: its criteria are not repeated');
   assert.ok(plan.text.includes(R.HISTORY_SEARCH), 'C-CHANGE is still to write');
-  for (const s of R.NO_INVENTION) assert.ok(plan.text.includes(s));
+  for (const s of R.NO_INVENTION_V5) assert.ok(plan.text.includes(s));
   assert.ok(plan.text.length < R.recordAskV5().length);
   // A page that leaves C-LINK 이어짐 asks for C-LINK first; a family word outside the list asks for 「교체」 with the criteria.
   const open = R.pageAsk([page(1).replace('|C-LINK|끝남|LN01–LN09|', '|C-LINK|이어짐|LN01–LN09|')]);

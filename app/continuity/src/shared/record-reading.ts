@@ -76,7 +76,8 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   let aliases: Map<string, string> | undefined;
   const aliasOf = (n: string) => (aliases ??= new Map(rowsOf(texts, ['C-PART']).filter(r => r.dialect === 'v5').map(r => [plain(bare(r.byColumn['이름'] ?? '')), (r.byColumn['행 ID'] ?? '').trim()] as [string, string]))).get(n);
   const byName = (name: string): Part43 | undefined => { const n = plain(bare(name)); if (!n) return undefined; const id = aliasOf(n);
-    return parts.find(b => plain(nameOfPart(b)) === n) ?? (id ? parts.find(b => b.recordRef === id) : undefined); };
+    // Review N4 (8.3): a v5 row's part by its ID first (the part record45Parts joined to the row), its name only as a fallback.
+    return (id ? parts.find(b => b.recordRef === id) : undefined) ?? parts.find(b => plain(nameOfPart(b)) === n); };
   const diag = (category: ReadingRecordDiagnostic['category'], table: string | null, record: string, from: number, to: number, column: string | null = null) => {
     if (out.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && from < to) out.recordDiagnostics.push({ category, table, column, record, from, to });
   };
@@ -271,6 +272,15 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   };
   programLines({ parts, relations, links, dataRows, byName, nameOfPart, rowQuote, dataById, maxLines: ctx.maxLines });
   /* Lines (C-LINK): 조건·선택, 경계, 박자, the D row named first, 통로, the list item. */
+  // Review D2: whether a part's own C-STEP rows (their part by row ID) or C-COND rows (their 부분) write one of a condition's code words.
+  let ownRows: { part: Part43; text: string }[] | undefined;
+  const readerChecks = (b: Part43 | undefined, condition: string): boolean => {
+    if (!b) return false;
+    const words = codeWords(condition); if (!words.length) return false;
+    ownRows ??= [...v4(['C-STEP']).flatMap(r => { const p = byName(r.cells[0] ?? ''); return p ? [{ part: p, text: r.cells.slice(1).join(' | ') }] : []; }),
+      ...v4(['C-COND']).flatMap(r => partsInCell(r.byColumn['부분'] ?? '', byName).map(p => ({ part: p, text: [r.byColumn['조건'] ?? '', r.byColumn['참이면'] ?? '', r.byColumn['거짓이면'] ?? ''].join(' | ') })))];
+    return ownRows.some(x => x.part === b && words.some(w => x.text.includes(w)));
+  };
   for (const l of relations) {
     if (!l.span) continue;
     const r = links.find(x => overlaps({ record: l.record, from: l.span!.from, to: l.span!.to }, x)); if (!r) continue;
@@ -281,7 +291,11 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     const senders = partsInCell((r.byColumn['보내는 부분'] ?? '').replace(/\s*:\s*.+$/, ''), byName), receivers = partsInCell((r.byColumn['받는 부분'] ?? '').replace(/\s*:\s*.+$/, ''), byName);
     const from = parts.find(b => b.ref === l.from), self = senders.some(s => receivers.includes(s));
     const storeHalf = !!from && (from.type === 'store' || from.family === 'store') && !senders.includes(from) && !self;
-    l.optional = choice !== null && !storeHalf; l.variantRef = variant && !storeHalf ? variant[1]! : null; l.when = choice && !variant && !storeHalf ? cut(choice, 120) : null;
+    // Review D2: the reader's own check stays on its half: a condition whose code words (os.path.exists, meta_path) the reader's own
+    // C-STEP or C-COND rows write is the reader's, not only the writer's (a training script's 「os.path.exists(meta_path)」 on its own step).
+    const readerOwn = storeHalf && choice !== null && !variant && readerChecks(parts.find(b => b.ref === l.to), choice);
+    const writerHalf = storeHalf && !readerOwn;
+    l.optional = choice !== null && !writerHalf; l.variantRef = variant && !writerHalf ? variant[1]! : null; l.when = choice && !variant && !writerHalf ? cut(choice, 120) : null;
     // Recipe .45 (12.2): a v5 row's 주장 성격 and cites; its mode is observed only for 실행 관측 with a run-grade cite (the view's 설계/관찰).
     if (r.dialect === 'v5') {
       l.claimNature = fixedWord(r.fold?.row.byColumn['주장 성격'] ?? '', NATURE_WORDS)?.value ?? null; l.cites = r.fold?.cites ?? [];
@@ -355,29 +369,49 @@ const opt = (s: string | undefined, n: number): string | null => { const t = sai
  * name and 하는 일 as written, the row its only basis, nothing else said for it (record43 then reads its row's fields like any part's).
  * Never past MAP6_NEW_PARTS new parts. Returns the parts added. */
 export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: (q: Record43Quote) => boolean; maxNew: number }): Part43[] {
-  const folds = foldPages([...ctx.texts].map(([record, { text }]) => ({ record, text }))); if (!folds.length) return [];
+  // Review N5: the parts of the latest v5 record only (a record of an earlier basis no longer stands: a part its newer pages dropped stays out).
+  const f = latestFold45(ctx.texts, foldPages([...ctx.texts].map(([record, { text }]) => ({ record, text })))); if (!f) return [];
   const added: Part43[] = [], plainOf = (b: Part43) => plain(bare(b.name ?? ''));
   let fresh = ctx.parts.filter(b => /^new:/.test(b.ref)).length;
-  for (const f of folds) for (const r of f.rows.get('C-PART') ?? []) {
-    const name = cut(bare(r.row.byColumn['이름'] ?? ''), 60); if (!name || secretLike(name)) continue;
-    const text = ctx.texts.get(r.record)?.text; if (text === undefined) continue;
+  const rows = (f.rows.get('C-PART') ?? []).flatMap(r => {
+    const name = cut(bare(r.row.byColumn['이름'] ?? ''), 60); if (!name || secretLike(name)) return [];
+    const text = ctx.texts.get(r.record)?.text; if (text === undefined) return [];
     const q: Record43Quote = { record: r.record, quote: text.slice(r.row.from, Math.min(r.row.to, r.row.from + 600)), from: r.row.from, to: Math.min(r.row.to, r.row.from + 600) };
-    if (ctx.onMaterial(q)) continue;
-    // A basis on any row the ID stood on (a row 교체 later replaced) takes it too.
-    const onRow = (x: { record: string; from?: number; to?: number }) => (f.history.get(r.id) ?? [r]).some(h => overlaps(x, { record: h.record, from: h.row.from, to: h.row.to }));
-    // The model's part of the row's name is joined by record43; one the model named otherwise but standing on the row is joined here by
-    // its ID (record43 then reads the row's fields onto it, record45 its family).
-    if (ctx.parts.some(b => b.name !== null && plainOf(b) === plain(name))) continue;
-    const onIt = ctx.parts.find(b => b.name !== null && !b.recordRef && (b.basis ?? []).some(onRow));
-    if (onIt) { onIt.recordRef = r.id; continue; }
+    return ctx.onMaterial(q) ? [] : [{ r, name, q }];
+  });
+  // Any row the ID stood on (a row 교체 later replaced) is the ID's too.
+  const stood = (r: FoldRow) => f.history.get(r.id) ?? [r];
+  const within = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => x.from !== undefined && x.to !== undefined && stood(r).some(h => x.record === h.record && h.row.from <= x.from! && x.to! <= h.row.to + 1);
+  const onRow = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => stood(r).some(h => overlaps(x, { record: h.record, from: h.row.from, to: h.row.to }));
+  const taken = (id: string) => ctx.parts.some(b => b.recordRef === id);
+  const open = (b: Part43) => b.name !== null && !b.recordRef;
+  // 8.3 (review N4): a v5 part is joined to its C-PART row by ID first: the model's part whose basis stands within the row (the one of the
+  // row's name first); then by name; then a part whose basis meets the row. A row no part takes becomes the program's part.
+  for (const { r, name } of rows) {
+    if (taken(r.id)) continue;
+    const on = ctx.parts.filter(b => open(b) && (b.basis ?? []).some(within(r))), b = on.find(x => plainOf(x) === plain(name)) ?? on[0];
+    if (b) b.recordRef = r.id;
+  }
+  for (const { r, name, q } of rows) {
+    if (taken(r.id)) continue;
+    const b = ctx.parts.find(x => open(x) && plainOf(x) === plain(name)) ?? ctx.parts.find(x => open(x) && (x.basis ?? []).some(onRow(r)));
+    if (b) { b.recordRef = r.id; continue; }
+    // A part of the row's name the ID join gave another row stays unjoined (record45 says it); the row is not added again under its name.
+    if (ctx.parts.some(x => x.name !== null && plainOf(x) === plain(name))) continue;
     if (fresh >= ctx.maxNew) continue;
     const role = opt(r.row.byColumn['하는 일 한 줄'], 300);
-    const ref = `new:rec-${r.id.toLowerCase()}`; if (ctx.parts.some(b => b.ref === ref)) continue;
-    const b = { ref, name, parent: null, role: role && !secretLike(role) ? role : null, roleAbout: null, roleReplaces: null, basis: [q], claims: [], state: null, stateQuote: null, stateWhen: null,
-      files: [], type: null, typeQuote: null, inputs: [], outputs: [], fields: [], config: [], steps: [], loop: null, stateVars: [], conditions: [], fileRoles: [] } as Part43;
-    ctx.parts.push(b); added.push(b); fresh++;
+    const ref = `new:rec-${r.id.toLowerCase()}`; if (ctx.parts.some(x => x.ref === ref)) continue;
+    const p = { ref, name, parent: null, role: role && !secretLike(role) ? role : null, roleAbout: null, roleReplaces: null, basis: [q], claims: [], state: null, stateQuote: null, stateWhen: null,
+      files: [], type: null, typeQuote: null, inputs: [], outputs: [], fields: [], config: [], steps: [], loop: null, stateVars: [], conditions: [], fileRoles: [], recordRef: r.id } as Part43;
+    ctx.parts.push(p); added.push(p); fresh++;
   }
   return added;
+}
+/** The fold the latest of the texts belongs to (the last text's page): the v5 record that stands now. */
+function latestFold45(texts: Texts, folds: FoldedRecord[]): FoldedRecord | null {
+  const order = [...texts.keys()]; let best: FoldedRecord | null = null, at = -1;
+  for (const f of folds) for (const p of f.pages) { const i = order.indexOf(p.record); if (i > at) { at = i; best = f; } }
+  return best;
 }
 /** The family a v3 or v4 part's type word gives (the generic tail of record45: a part no v5 or v4 row gave a family). */
 const TYPE_FAMILY: Readonly<Record<PartType, { family: RecordFamily; role: string } | null>> = { person: { family: 'participant', role: '사람' }, session: { family: 'participant', role: '세션' },
@@ -401,8 +435,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   };
   const rowQ = (r: FoldRow) => quoteOf(r.record, r.row.from, r.row.to);
   const folds = foldPages([...texts].map(([record, { text }]) => ({ record, text })));
-  const latest = (() => { const order = [...texts.keys()]; let best: FoldedRecord | null = null, at = -1;
-    for (const f of folds) for (const p of f.pages) { const i = order.indexOf(p.record); if (i > at) { at = i; best = f; } } return best; })();
+  const latest = latestFold45(texts, folds);
   const cites6 = (c: readonly Cite[]) => c.filter(x => ![x.source, x.place, x.quote].some(w => w && secretLike(w))).slice(0, RECORD43_MAX.cites).map(x => ({ ...x, ref: cut(x.ref, 12), source: x.source ? cut(x.source, 120) : null, place: x.place ? cut(x.place, 80) : null, quote: x.quote ? cut(x.quote, 200) : null }));
   for (const f of folds) {
     const nameOf = (id: string) => (f.byId.get(id)?.row.byColumn['이름'] ?? '').trim() || id;
@@ -491,6 +524,17 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
       const q = rowQ(r), value = opt(r.row.byColumn['값'], 120); if (!q || !value || secretLike(value)) continue;
       if (item === '첫 구조 줄') out.firstLines = value.split(/\s+·\s+|\s*\/\s*|\s*;\s*/).map(x => cut(x.trim(), 80)).filter(Boolean).slice(0, RECORD43_MAX.firstLines);
       else if (out.defaults.length < RECORD43_MAX.defaults) out.defaults.push({ item: cut(item, 20), value, quote: q });
+    }
+  }
+  // Review N4 (8.3): in a v5 record the parts are the C-PART rows': a model part standing on no row (no row ID joined, by ID or name) is said
+  // (part-no-row, where its first basis stands); a group's parent (a C-GROUP 부모, a part with children of its own) is no such part.
+  if (latest && ctx.read43) {
+    const parents = new Set([...(latest.rows.get('C-GROUP') ?? []).map(g => plain(bare(g.row.byColumn['부모'] ?? ''))), ...parts.flatMap(b => b.parent ? [b.parent] : [])]);
+    for (const b of parts) {
+      if (b.recordRef || b.name === null || /^new:rec-/.test(b.ref) || parents.has(b.ref) || parents.has(plain(bare(b.name)))) continue;
+      const q = (b.basis ?? []).find(x => x.from !== undefined && x.to !== undefined && texts.has(x.record));
+      if (q && ctx.read43.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && q.from! < q.to!)
+        ctx.read43.recordDiagnostics.push({ category: 'part-no-row', table: 'C-PART', column: null, record: q.record, from: q.from!, to: q.to! });
     }
   }
   // Every part with no family yet: from its type word, the unambiguous ones only (a v4 or v3 record; 12.3).
@@ -733,4 +777,14 @@ function branchesOf(cell: string, own: string): ReadingStepBranch[] {
     const outcome = after.replace(/(?:(B\d{1,3})\s*:\s*)?S\d{1,3}[a-z]?/g, ' ').replace(/최대\s*\d+\s*(?:번|회)/, ' ').replace(/^[\s,·]+|[\s,·]+$/g, '').replace(/\s+/g, ' ');
     return { when: when ? cut(when, 120) : null, to: [...new Set(to)].slice(0, 4), max, outcome: outcome ? cut(outcome, 80) : null };
   });
+}
+/** Review D2: the code words of a condition as written: identifiers with 「_」 or 「.」 in them, camelCase ones, and calls (「exists(」), four
+ * characters or more (os.path.exists, meta_path, GITHUB_REF, best_val_loss); plain words are none. */
+export function codeWords(condition: string): string[] {
+  const out: string[] = [];
+  for (const m of condition.matchAll(/[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*/g)) {
+    const w = m[0], call = condition[m.index! + w.length] === '(';
+    if (w.length >= 4 && (/[_.]/.test(w) || /[a-z][A-Z]/.test(w) || call) && !out.includes(w)) out.push(w);
+  }
+  return out;
 }

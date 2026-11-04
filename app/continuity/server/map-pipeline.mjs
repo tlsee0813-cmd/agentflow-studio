@@ -1,5 +1,5 @@
 import { ApiError } from '../../server/errors.mjs';
-import { validateMapAsk, validateMapReply, conditionRows, ruleConditionRows, askRecords } from '../dist/public/shared/map-reading.js';
+import { validateMapAsk, validateMapReply, conditionRows, ruleConditionRows, askRecords, MAP_RECORD_CHARS, MAP_BYTES } from '../dist/public/shared/map-reading.js';
 import { segmentKeys } from '../dist/public/shared/record-table.js';
 import { isFirstMap, dividedKind } from '../dist/public/shared/map-route.js';
 import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, map7Prompt } from './map-prompt.mjs';
@@ -439,6 +439,23 @@ export function partitionKeysOf(ask, partition) {
   const inputs = recordInputs(ask), keys = (partition?.records ?? []).flatMap(r => { const k = segmentKeys(inputs, r.id, [r.lead ?? '', ...(r.spans ?? []).map(s => s.t)].join('\n')); return k ? [k] : []; });
   return keys.length ? { keys } : {};
 }
+/** .45 (RECORD_ASKS_V5_KO.md 12.4 (d), review N10): an extraction segment's real size as it is sent, measured at run time: the characters of
+ * what it carries (its records' lead and spans, the 원문, and its key set, the 열쇠) and the UTF-8 bytes of the whole request (the
+ * instruction, the 지시, and the input as sent). Over MAP_RECORD_CHARS or MAP_BYTES the segment is not sent: it fails with
+ * MAP_SEGMENT_TOO_LARGE and says where and by how much (nothing is cut to fit). */
+export function segmentSize(system, input) {
+  const records = Array.isArray(input?.partition?.records) ? input.partition.records : [];
+  const source = records.reduce((n, r) => n + String(r?.lead ?? '').length + (Array.isArray(r?.spans) ? r.spans : []).reduce((m, x) => m + String(x?.t ?? '').length, 0), 0);
+  const keys = input?.keys ? JSON.stringify(input.keys).length : 0;
+  return { chars: source + keys, bytes: new TextEncoder().encode(String(system ?? '') + JSON.stringify(input)).length };
+}
+export function checkSegmentSize(stage, system, input, { total, limits = { chars: MAP_RECORD_CHARS, bytes: MAP_BYTES } } = {}) {
+  const size = segmentSize(system, input);
+  if (size.chars <= limits.chars && size.bytes <= limits.bytes) return size;
+  const error = new ApiError('MAP_SEGMENT_TOO_LARGE', 413);
+  error.detail = { stage, phase: 'extract', ...(Number.isSafeInteger(total) ? { total } : {}), chars: size.chars, maxChars: limits.chars, bytes: size.bytes, maxBytes: limits.bytes };
+  throw error;
+}
 const MODELS = new Set(['gpt-6.1-sol', 'gpt-6-astra', 'gpt-6.1-terra']);
 // The route rule is shared with the browser and studio.mjs (shared/map-route.ts): a first map.6 or a later map.7.
 export { isFirstMap };
@@ -622,8 +639,10 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
         const work = async () => {
           while (!failure && !controller.signal.aborted && next < partitions.length) {
             const index = next++, part = partitions[index];
-            try { results[index] = await stage(`extract-${index + 1}`, { provider: 'deepseek', model: deepseekModel,
-              system: EXTRACTION_PROMPT, input: { schemaVersion: ask.schemaVersion, project: ask.project, snapshot, sources, partition: part, ...partitionKeysOf(ask, part) }, maxOutputTokens: extractionTokens,
+            const input = { schemaVersion: ask.schemaVersion, project: ask.project, snapshot, sources, partition: part, ...partitionKeysOf(ask, part) };
+            try { checkSegmentSize(`extract-${index + 1}`, EXTRACTION_PROMPT, input, { total: partitions.length });
+              results[index] = await stage(`extract-${index + 1}`, { provider: 'deepseek', model: deepseekModel,
+              system: EXTRACTION_PROMPT, input, maxOutputTokens: extractionTokens,
               check: value => validateExtraction(value, part), total: partitions.length, correction: extractionCorrection(part) }); }
             catch (error) { failure ??= error; }
           }

@@ -176,7 +176,7 @@ export interface CardTemplate {
   /** A part with children (display slice S8): drawn as a group (a stack of cards, a place's region face), its kind line the axis
    * and the count (groupKind), its 안에 row the first parts' names; null for any other card. */
   group: { axis: string | null; word: string | null; names: string[]; recorded: boolean } | null;
-  /** Recipe .45: the 「미정: 이유」 (or 「대응 불명확」) chip of a part with no record family; null for any other card. */
+  /** Recipe .45: the 「미정: 이유」 chip of a part with no record family; null for any other card (review N8: 「대응 불명확」 reads in the pane only). */
   undecided?: string | null;
 }
 
@@ -300,7 +300,8 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   const mr = group ? membersRow(group.names) : null;
   // Recipe .45: the record family first (a gate keeps the trigger tint with its own glyph); the kind line says the role word the record
   // wrote beside the family (「처리 · 실행 조정」 reads 「실행 조정」), or 「미정: 이유」 for a part the record could not give a family.
-  const fam = f.family ?? null, chip = undecidedChip(fam), role = fam?.family && fam.role ? fam.role : null;
+  // Review N8: a v4 type word whose family is unclear (「대응 불명확」) is no chip on the card (nothing to do there): the pane head says it.
+  const fam = f.family ?? null, chip = fam?.unclear ? null : undecidedChip(fam), role = fam?.family && fam.role ? fam.role : null;
   return { family: familyOf({ family: fam?.family ?? null, type: f.type }), inner, glyph: gateGlyph(fam, f.type) ?? (group ? groupGlyph(group.axis) : 'neutral'),
     kind: group ? groupKind(f.type, group.word, kids) : role && !f.type ? role : chip && !f.type ? chip : kindLabel(f.type, recorded || f.steps.length, !!f.loop),
     rows: mr ? [mr, ...kindRows(f)] : kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs,
