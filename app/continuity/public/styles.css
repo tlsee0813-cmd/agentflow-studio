@@ -16,6 +16,9 @@
   --ok: #17b26a; --busy: #f79009; --plan: #98a2b3; --warn: #f04438;
   --frame-0: #eceef2; --frame-1: #e4e7ec; --frame-2: #dde1e7;
   --edge: #b3bac4; --edge-spine: #4a5160; --edge-soft: #c9d0da; --tint: #f3f4f7; --hair-2: #e6e8eb; --region-line: #dcdfe4;
+  /* map design v3 9.1: a retired or unbuilt card one step lower, and the solid outline of what carries meaning (a lifecycle card, a
+     trigger's top edge, a store's spine). */
+  --surface-off: #eceae4; --line-essential: #8d8a82;
   /* The ladder a part's records climb: a request, a report of work, a check. Reported is not checked: amber, then green. */
   --rung-off: #e4e7ec; --rung-ask: #667085; --rung-report: #f79009; --rung-check: #12b76a;
   /* Status tints: a soft fill and a darker text of the same hue, for chips and short messages (text on its own soft at 4.5:1+). */
@@ -218,8 +221,8 @@ button:disabled { opacity: .5; cursor: default; }
 /* density by zoom (the layout stays; only what is drawn inside the boxes changes) */
 .space.z-mid .node:not(.typed):not(.selected):not(.related):not(.dragging):not(.cited) :is(.node-note, .node-meta .meta-text),
 .space.z-mid .frame:not(.selected) > .frame-head .frame-note { visibility: hidden; }
-.space.z-low .node .node-name { font-size: calc(13.5px * var(--grow)); line-height: 1.15; -webkit-line-clamp: 1; }
-.space.z-low .node.unit .node-name,
+.space.z-low .node:not(.card) .node-name { font-size: calc(13.5px * var(--grow)); line-height: 1.15; -webkit-line-clamp: 1; }
+.space.z-low .node.unit:not(.card) .node-name,
 .space.z-low .region > .frame-head .frame-name { font-size: calc(15px * var(--grow)); line-height: 1.15; white-space: nowrap; }
 .space.z-low .frame.group > .frame-head .frame-name { font-size: calc(13px * var(--grow)); }
 .space.z-low .node .node-text { justify-content: center; align-self: stretch; }
@@ -416,45 +419,89 @@ button:disabled { opacity: .5; cursor: default; }
 .node-meta.alias { color: var(--text-3); text-overflow: ellipsis; }
 .lens-alias { margin: 2px 0 0; font-size: 12.5px; color: var(--text-3); overflow-wrap: anywhere; }
 .node.fresh .node-meta { color: var(--text-2); }
-/* A card the readings typed (map spec 2.1): the record's type word over the name, the operations line in plain text (no colour
-   per state: a report is not a status), then on a unit what it takes and hands over, one region by family and one setting.
-   Every line is one line; the heights here are the ones app.ts gives the layout (typedLines). */
+/* The type word as the short expansion and the detail view read it (small, over a name). */
 .node-type { display: block; font-size: 11.5px; line-height: 15px; height: 15px; font-weight: var(--fw-meta); color: var(--text-4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.node .node-meta:has(.ladder) .meta-text.ops { color: var(--text-3); }
-/* A typed card with an inside: its group chips (연결 N, 안쪽 N) at the end of its one name line, or on a line of their own
-   under the body (card-budget chips), never beside the operations line. */
-.node-headline { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.node-headline > .node-name { flex: 1 1 auto; min-width: 0; }
-.node-chips { flex: none; display: inline-flex; align-items: center; gap: 4px; }
-.node-chips.own-line { display: flex; height: 22px; }
-.node-chips .frame-links { margin-top: 0; }
-.node-typed { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.node-io, .node-body, .node-set { display: flex; align-items: center; gap: 4px; min-width: 0; height: 17px; font-size: 12px; line-height: 17px; color: var(--text-3); white-space: nowrap; overflow: hidden; }
-.node-io .io-mark { flex: none; width: 14px; text-align: center; color: var(--text-4); }
-.node-io .io-text, .node-body .body-text, .node-set { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.node-set { display: block; color: var(--text-4); }
-.node-body .body-mark { flex: none; color: var(--text-4); }
-/* A store: a ledger, a double rule over its fields as cells (the names of its rows' columns, never a count of rows). */
-.node-body.b-store { height: 22px; padding-top: 2px; border-top: 3px double var(--line-strong); }
-.node-body .ledger { display: flex; min-width: 0; overflow: hidden; }
-.node-body .ledger-cell, .node-body .ledger-more { flex: 0 1 auto; min-width: 0; padding: 0 6px; border-left: 1px solid var(--hair-2); overflow: hidden; text-overflow: ellipsis; }
-.node-body .ledger-cell:first-child { padding-left: 0; border-left: 0; }
-.node-body .ledger-more { flex: none; color: var(--text-4); }
-.node-body .ledger.blank { color: var(--text-4); }
-/* A loop: a framed strip with its unit at its head, as the record wrote it. */
-.node-body.b-loop { height: 19px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; }
-/* A participant (a person, a session, an outside system): one common, rounder outline; the type word tells which. */
-.node.unit.f-participant { border-radius: 18px; }
-/* The entry line (map spec 4, 열기): what the part holds past what the card shows, in totals, and the one way to open it. The
-   accent only on 열기; '내부 미상' is a blank in the card's quiet grey (no fake inside: no grid, no stacked shadow). */
-.node-entry { display: flex; align-items: center; gap: 6px; min-width: 0; height: 17px; font-size: 11.5px; line-height: 17px; color: var(--text-4); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.node-entry .entry-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.node-entry button { height: 17px; padding: 0; border: 0; border-radius: 4px; background: none; font-size: 11.5px; line-height: 17px; font-weight: var(--fw-name); }
-.node-entry .entry-kids { color: var(--text-3); }
-.node-entry .entry-kids:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-.node-entry .entry-open { flex: none; margin-left: auto; padding: 0 5px; color: var(--accent); }
-.node-entry .entry-open:hover { background: var(--accent-soft); color: var(--accent-strong); }
-.space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .node-entry :is(.entry-text, .entry-kids) { color: var(--text-4); }
+/* A typed card (map design v3 3): one template for every part a reading spoke of, as a unit and as a row in a group. Top to bottom:
+   the head (glyph tile 20 · name 15/20, two lines at most · kind word 12/16), at most three kind rows (20 each, then 12), the
+   contract area, the inner line (24), the sign row (24) and the bottom line (28), inside 12px above and below and 16px a side.
+   These heights are card-family cardHeights's: the layout gives the card that box once, and the zoom only shows or hides what is
+   inside it (card-budget tierFit), never resizing it. Colour lives only on the glyph tile (the family); the card's face, outline
+   and shadow are neutral, so nothing reads as a status by colour. */
+.node.card { --c-pad: 16px; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 12px var(--c-pad); overflow: hidden; border-radius: 8px; background: var(--surface); border: 1px solid rgba(17,24,39,.11); box-shadow: 0 1px 2px rgb(15 23 42 / 6%); }
+.node.card:hover { box-shadow: 0 1px 2px rgb(15 23 42 / 6%), 0 4px 10px -4px rgba(17,24,39,.14); }
+.node.card.has-kids { padding-left: var(--c-pad); box-shadow: 0 1px 2px rgb(15 23 42 / 6%); }
+.node.card.has-kids:hover { box-shadow: 0 1px 2px rgb(15 23 42 / 6%), 0 4px 10px -4px rgba(17,24,39,.14); }
+.node.card.selected, .node.card.selected:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 4px 12px -6px rgba(51,88,255,.4); }
+/* Silhouettes by family (3.1), kept at every zoom: a participant is rounder, a store has its 4px spine and a double rule under its
+   head, a trigger or gate has square top corners under a heavier top edge; a process and a neutral part keep 8px corners. */
+.node.card.f-participant { border-radius: 14px; }
+.node.card.f-store { border-left: 4px solid var(--line-essential); padding-left: calc(var(--c-pad) - 3px); }
+.node.card.f-store .c-head { box-shadow: 0 3px 0 -2px var(--surface), 0 4px 0 -2px var(--line-strong); }
+.node.card.f-trigger { border-radius: 0 0 8px 8px; border-top: 2px solid var(--line-essential); padding-top: 11px; }
+/* The lifecycle surface (3.7): a retired or unbuilt part one step lower, its outline solid (a dash is a reference line's), its
+   rows quieter; its name stays ink. */
+.node.card.life { background: var(--surface-off); border-color: var(--line-essential); }
+.node.card.life :is(.c-row, .c-cline, .c-inner, .c-ops) { color: var(--text-3); }
+.node.card.life .c-label { color: var(--text-3); }
+/* The head: the glyph tile, the name and the kind line; a card with an inside keeps its fold toggle at the head's right. */
+.c-head { flex: none; display: flex; align-items: flex-start; gap: 8px; min-width: 0; padding-bottom: var(--t-gap, 16px); }
+.glyph-tile { position: relative; flex: none; display: grid; place-items: center; width: var(--t-glyph, 20px); height: var(--t-glyph, 20px); border-radius: calc(var(--t-glyph, 20px) * .3); background: var(--fam-bg); color: var(--fam-ink); }
+.glyph-tile > svg { width: calc(var(--t-glyph, 20px) * .8); height: calc(var(--t-glyph, 20px) * .8); }
+.glyph-tile .glyph-badge { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 11px; height: 11px; border-radius: 3px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); color: var(--text-3); }
+.glyph-tile .glyph-badge > svg { width: 9px; height: 9px; }
+.glyph-tile.g-participant { --fam-bg: #efeefa; --fam-ink: #4b44a8; }
+.glyph-tile.g-process { --fam-bg: #edf1f7; --fam-ink: #34506e; }
+.glyph-tile.g-store { --fam-bg: #eaf4ee; --fam-ink: #2f6a4f; }
+.glyph-tile.g-trigger { --fam-bg: #f8f0e3; --fam-ink: #87560f; }
+.glyph-tile.g-neutral { --fam-bg: #f1f1ef; --fam-ink: #5a5d64; }
+.c-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.node.card .c-name { font-size: var(--t-title, 15px); line-height: var(--t-title-lh, 20px); font-weight: var(--fw-name); letter-spacing: -.012em; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: var(--nl, 2); -webkit-box-orient: vertical; overflow: hidden; }
+.c-kind { display: flex; align-items: center; gap: 6px; min-width: 0; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-meta); color: var(--text-4); white-space: nowrap; overflow: hidden; }
+.c-kind-word { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-life { flex: none; padding: 0 5px; border: 1px solid var(--line-essential); border-radius: 6px; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); font-weight: var(--fw-name); color: var(--text-2); }
+/* The short status (5.4) reads only where the card shows nothing under its head. */
+.c-short { display: none; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); }
+.c-head > .toggle { flex: none; margin: -2px -6px 0 0; }
+/* Kind rows (3.3): a label column (12/500, ≤80px) and the value (13/420, one line); the defining blank a quiet 「?」 over a 1px
+   rule, no weight, no colour (3.5). */
+.c-rows { flex: none; display: flex; flex-direction: column; padding-bottom: 12px; }
+.c-row { display: flex; align-items: center; gap: 8px; min-width: 0; height: var(--t-row-lh, 20px); font-size: var(--t-row, 13px); line-height: var(--t-row-lh, 20px); font-weight: var(--fw-body); color: var(--text-2); white-space: nowrap; }
+.c-label { flex: none; max-width: 80px; min-width: 52px; overflow: hidden; text-overflow: ellipsis; font-size: var(--t-label, 12px); font-weight: var(--fw-meta); color: var(--text-4); }
+.c-val { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-row .prog-chip { flex: none; }
+.c-row.blank .c-val { color: var(--text-4); font-size: var(--t-label, 12px); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+/* The contract area (3.3): today one count line ('받는 것 3 · 내는 것 2 · 항목 근거 미연결'), or the pin rows of the ports a model
+   portMap row ties to a line: 「받는 것」·「내는 것」 over two columns, a 5px pin on the card's edge, a 24px row. */
+.c-contract { flex: none; display: flex; flex-direction: column; }
+.c-contract.lines { padding: 8px 0; }
+.c-cline { margin: 0; height: 16px; font-size: var(--t-kind, 12px); line-height: 16px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-contract.pins { padding-bottom: 8px; }
+.c-pin-head { display: flex; justify-content: space-between; height: 16px; font-size: var(--t-kind, 12px); line-height: 16px; font-weight: var(--fw-meta); color: var(--text-4); }
+.c-pin-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 24px; height: 24px; align-items: center; }
+.c-pin { position: relative; display: flex; align-items: center; min-width: 0; font-size: var(--t-row, 13px); line-height: 18px; color: var(--text-2); white-space: nowrap; }
+.c-pin.out { justify-content: flex-end; }
+.c-pin-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-pin .pin { position: absolute; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: var(--edge-spine); }
+.c-pin.in .pin { left: calc(-1 * var(--c-pad) - 3px); }
+.c-pin.out .pin { right: calc(-1 * var(--c-pad) - 3px); }
+/* The inner line (a part with recorded steps): their count in the record's row order, the loop's unit when it has one. */
+.c-inner { flex: none; display: flex; align-items: center; gap: 6px; min-width: 0; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); font-size: var(--t-kind, 12px); line-height: 16px; color: var(--text-3); white-space: nowrap; border-top: 1px solid var(--hair-2); }
+.c-inner-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-signs { flex: none; display: flex; align-items: center; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); min-width: 0; }
+.c-signs .node-signs { margin-left: 0; }
+.node.card .c-signs .sign-tab { height: auto; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
+/* The bottom line (3.2): the operations report with its time ('가동 보고 · 08:01Z') and the author's tag of its line, then the way
+   in at the right (내부 보기, or 구성 N › with its 연결 N). Pinned to the card's bottom at every height. */
+.c-bottom { flex: none; display: flex; align-items: center; gap: 6px; height: var(--t-bottom, 28px); margin-top: auto; min-width: 0; font-size: var(--t-kind, 12px); line-height: 16px; white-space: nowrap; }
+.c-ops { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); font-weight: var(--fw-meta); font-variant-numeric: tabular-nums; }
+.node.card .c-bottom .ev { flex: none; background: none; border-color: var(--line-strong); color: var(--text-3); font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
+.c-entry { flex: none; display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
+.c-entry .entry-open { height: auto; padding: 0 5px; border: 0; border-radius: 4px; background: none; font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-name); color: var(--accent); }
+.c-entry .entry-open:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.c-entry :is(.enter, .frame-links) { border-color: transparent; background: none; font-size: var(--t-kind, 12px); color: var(--text-3); }
+.c-entry .enter:hover { color: var(--accent); }
+.node.card .plan-note:empty { display: none; }
+.space.dim .node.card:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) :is(.c-row, .c-val, .c-cline, .c-inner, .c-ops, .c-kind) { color: var(--text-4); }
 /* The short expansion (짧은 펼침): over the card and the empty space beside it, in the selection's accent; nothing under it moves. */
 .expansion { position: absolute; z-index: 6; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 3px rgba(51,88,255,.16), 0 14px 28px -14px rgba(16,24,40,.32); cursor: default; user-select: text; text-align: left; }
 .expansion:focus { outline: none; }
@@ -562,7 +609,7 @@ button:disabled { opacity: .5; cursor: default; }
 .dv-vars li { color: var(--text-3); }
 /* Parts outside the selection step back by colour, not by fading: names and second lines stay at 4.5:1 or more. */
 .space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) { border-color: var(--hair-2); box-shadow: none; }
-.space.dim .node.has-kids:not(.item):not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
+.space.dim .node.has-kids:not(.item):not(.card):not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) { box-shadow: 0 3px 0 -1px var(--surface), 0 3px 0 0 var(--hair-2); }
 .space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .node-name { color: var(--text-3); }
 .space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) :is(.node-note, .node-meta, .node-meta .meta-text, .node-type, .node-io, .node-body, .node-set) { color: var(--text-4); }
 .space.dim .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) :is(.dot, .ladder) { opacity: .55; }
@@ -1216,7 +1263,7 @@ button:disabled { opacity: .5; cursor: default; }
 .plan-strip:not(:has(.ps-row)) { grid-template-areas: "head close close"; }
 
 /* A folded group without a sentence on the map: its name and count sit on the card's middle line. */
-.node.unit.has-kids:not(:has(.node-note)) { align-items: center; padding-top: 0; padding-bottom: 0; }
+.node.unit.has-kids:not(.card):not(:has(.node-note)) { align-items: center; padding-top: 0; padding-bottom: 0; }
 
 /* The current view of an open plan: where the pane is reading stays marked, neutrally (no change colour, no change words). */
 .node.plan-reading-now, .frame.plan-reading-now { border-color: var(--text-3); box-shadow: inset 3px 0 0 var(--text-3); }
@@ -1544,14 +1591,21 @@ button:disabled { opacity: .5; cursor: default; }
 .node-name { -webkit-line-clamp: 3; }
 /* Below 70%: no notes or state lines; each name on one line across its card, a little larger (--grow ≤ 1.25). */
 .space.z-mid .node:not(.typed) :is(.node-note, .node-meta), .space.z-mid .frame-head .frame-note { display: none; }
-/* A typed card by zoom level (app.ts zoomLevel, spec 4): 개요 its type word, name and operations line; 중간 also what it takes
-   and hands over; 상세 everything. The layout gives each level its height; these hold while a level's redraw is on its way. */
-.space.lv-overview .node.typed .node-typed, .space.lv-mid .node.typed .node-typed > :not(.node-io):not(.node-entry) { display: none; }
+/* A typed card by zoom tier (map design v3 5, app.ts fitCards): its box never changes; what does not fit it at the tier and the
+   scale is hidden (fit-*), never shrunk. 개요 and the dot map read the head only, the kind line with the short status (5.4); the
+   dot map keeps the glyph and names only what is selected, cited or focused. */
+.node.card.fit-nokind .c-kind, .node.card.fit-nocontract .c-contract, .node.card.fit-noinner .c-inner, .node.card.fit-nosigns .c-signs, .node.card.fit-nobottom .c-bottom { display: none; }
+.node.card[data-fit-rows="0"] .c-rows { display: none; }
+.node.card[data-fit-rows="1"] .c-row:nth-child(n+2), .node.card[data-fit-rows="2"] .c-row:nth-child(n+3) { display: none; }
+.space:is(.tier-far, .tier-dots) .node.card.fit-status .c-short { display: block; }
+.space:is(.tier-far, .tier-dots) .node.card .plan-note { display: none; }
+.space.tier-dots .node.card { background: var(--surface); }
+.space.tier-dots .node.card:not(.selected):not(.cited):not(:focus-visible):not(:hover) .c-title { visibility: hidden; }
 .space.z-mid .node .node-text { justify-content: center; align-self: stretch; }
-.space.z-mid :is(.node .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
-.space.z-mid .node .node-name { font-size: calc(13.5px * var(--grow)); }
+.space.z-mid :is(.node:not(.card) .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.space.z-mid .node:not(.card) .node-name { font-size: calc(13.5px * var(--grow)); }
 .space.z-mid .node.item .node-name, .space.z-mid .frame.group > .frame-head .frame-name { font-size: calc(13px * var(--grow)); }
-.space.z-mid .node.unit .node-name, .space.z-mid .region > .frame-head .frame-name { font-size: calc(15px * var(--grow)); }
+.space.z-mid .node.unit:not(.card) .node-name, .space.z-mid .region > .frame-head .frame-name { font-size: calc(15px * var(--grow)); }
 .space.rest-sum.dense-lines .edge.sum.detour:not(.on):not(.near):not(.ctx) .edge-line { stroke-opacity: 1; }
 .space.rest-sum.dense-lines .edge.sum.agg.detour:not(.on):not(.near):not(.ctx) .edge-line { stroke-opacity: .42; }
 /* ---------- 67 · reading pane: frame relations, visit line, collapsible rail, disabled AI ---------- */
@@ -1631,9 +1685,6 @@ button:disabled { opacity: .5; cursor: default; }
 .mu-durable, .mu-notice, .mu-blocked { flex-basis: 100%; font-size: 12px; line-height: 1.5; color: var(--text-3); word-break: keep-all; }
 .space-empty .se-acts .mu-durable { margin-top: 0; }
 .rr-map .pending { flex-wrap: wrap; } .rr-map .pending .mu-pending { flex: 1; min-width: 0; }
-.node.rs-reported .node-meta .dot { background: var(--ok); }
-.node.rs-checked .node-meta .dot { background: var(--ok); }
-.node.rs-want .node-meta .dot, .node.rs-idea .node-meta .dot { background: var(--accent-line); }
 .claims { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .claim { display: flex; align-items: baseline; gap: 8px; font-size: 13px; line-height: 1.5; color: var(--text); }
 .cl-kind { flex: none; min-width: 52px; font-size: 11px; font-weight: var(--fw-name); color: var(--text-3); }

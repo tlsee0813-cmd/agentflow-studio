@@ -17,7 +17,7 @@ import { recordTexts } from '../shared/request-return.js';
 import type { MapReading, ReadingExclusion } from '../shared/types.js';
 import { recordLabel } from '../shared/record-source.js';
 import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, SavedCamera } from '../shared/types.js';
-import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic, type PartFamily } from '../shared/claim-topic.js';
+import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
 import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
@@ -31,12 +31,14 @@ import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
-import { typedBudget, typedLines, typedPx, zoomLevel, entryKind, entryParts, loopBody, TYPE_H, LINE_H, type CardBudget, type ChipsAt, type BodyKind, type ZoomLevel, type EntryKind, type EntryCounts, type EntryShown } from './card-budget.js';
+import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
+import { cardTemplate, cardHeights, lifecycleOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, type CardFacts, type CardTemplate } from './card-family.js';
+import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
-import { opsLines, opsHead } from './ops-line.js';
+import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { modelLabel } from '../shared/model-label.js';
@@ -247,7 +249,7 @@ function budgetFolded(o: Opened): Set<string> {
       else { const parent = partOf(o, p.parentId); v = !!parent && depth <= 3 && parent.childIds.length === 1 && open(parent.id, depth - 1); }
       memo.set(id, v); return v;
     };
-    const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect(), typedRoom(o.view)), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
+    const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect(), typedRoom(o)), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
     return { L, ok: (L.bounds.w + 40) * 0.85 <= window.innerWidth - 48 && (L.bounds.h + titleRoom + 40) * 0.85 <= window.innerHeight - 152 };
   };
   for (let g = 0; g < ids.length; g++) {
@@ -825,7 +827,7 @@ const heldPositions = (o: Opened): Positions => {
   for (const c of new Set([...Object.keys(held), ...Object.keys(pos)])) out[c] = { ...(held[c] ?? {}), ...(pos[c] ?? {}) };
   return out;
 };
-const relayout = (o: Opened) => { const budgets = new Map<string, CardBudget>(); lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect(), typedRoom(o.view, budgets)); cardBudgets = budgets; core = { ...lay.bounds }; withTitle(); };
+const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(); lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); cardTpls = tpls; core = { ...lay.bounds }; withTitle(); };
 
 /** Two real parts with one name under one parent ('Types' and 'Types'): told apart by the first clause of their own note, as
  * written ('원명 extHostTypes.ts'), only where the name is really ambiguous. Never merged, renamed or guessed: null when the name
@@ -870,11 +872,9 @@ function metaLine(p: PartView, last: string | null): string | null {
   return `${STATUS_SHORT[p.status]}${last ? ` · ${ago(last)}` : ''}`;
 }
 
-/* ---------- a card's typed body (map spec 2.1): the record's type word over the name, one operations line, what the part
- * takes and hands over, one structural region by family and one setting. Only what readings said; a blank says so in place. */
-/** The operations line (ops-line): the newest reading's state for the part, as a report with the time the record gives, short
- * where the day is the map's basis day ('가동 보고 · 08:49Z · 현재 미확인'), in plain text; its brief form for a narrow card
- * and its tip (the time as written). Never a status the app saw, never made from "built" or "designed". */
+/** The operations line (ops-line) as the short expansion and the detail view read it: the newest reading's state for the part, as
+ * a report with the time the record gives, in plain text, and its tip (the time as written). Never a status the app saw, never
+ * made from "built" or "designed". A card's own bottom line is ops-line opsCard. */
 function opsOf(r: PartUnderstanding): { full: string; brief: string; tip: string } {
   const s = r.stateRead;
   return opsLines(s?.state ?? null, s?.when ?? null, opsRef);
@@ -882,24 +882,25 @@ function opsOf(r: PartUnderstanding): { full: string; brief: string; tip: string
 /** The day an operations line's time is read against: the newest map reading's basis time, else today (UTC, as records write Z). */
 let opsRef: string | null = null;
 const opsDay = (o: Opened) => [...o.project.readings].reverse().find(isMapReading)?.basisAt ?? new Date().toISOString().slice(0, 10);
-/** Each drawn operations line's two forms: fitOps keeps the full one unless it overflows its card. */
-const opsFit = new WeakMap<HTMLElement, { full: string; brief: string }>();
-/** After the cards have their widths: an operations line that does not fit reads '현재 ?' (its tip keeps the whole line). */
-function fitOps(world: HTMLElement) {
-  const rows = [...world.querySelectorAll<HTMLElement>('.node .meta-text.ops')].map(el => {
-    const meta = el.parentElement!, lad = meta.querySelector<HTMLElement>('.ladder');
-    return { el, room: meta.clientWidth - (lad ? lad.offsetWidth + 6 : 0) };
-  });
-  for (const { el, room } of rows) { const f = opsFit.get(el); if (f && room > 0) el.textContent = measureName(f.full, 'meta') > room ? f.brief : f.full; }
-}
-/* The map's zoom levels (card-budget zoomLevel, spec 4): 개요 keeps a typed card's head and operations line, 중간 its port
- * lines too, 상세 everything. Below Z_MID names read on one line (styles.css z-mid), so such a card is as high as one name
- * line. The layout is made for the level at hand (relayout records it); a zoom that changes it draws the map again. */
+/* The map's zoom tiers (card-budget zoomTier, map design v3 5): one for the whole map, by the card's projected width with ±6px of
+ * hysteresis. A typed card's box, its contact point and its pins never change with the tier or the scale (5.3): no relayout on a
+ * zoom; the tier and the scale only choose what is shown inside each box (tierFit, fitCards) and the type's on-screen floors
+ * (tierText, the --t-* sizes). Below Z_MID an untyped card's name reads on one line (styles.css z-mid). */
 const Z_MID = 0.705;
-const levelKey = (k: number) => `${zoomLevel(k)}|${k < Z_MID ? 1 : 0}`;
-let cardLevel: ZoomLevel = 'detail', cardOneLine = false, laidKey = '', relevel = 0, lastFresh = 0;
-/** program (map-reading.13): a loop's unit the program filled from the part's own cadence setting (the line carries 「프로그램」). */
-type BodyRegion = { kind: 'store'; fields: string[] } | { kind: 'loop' | 'timer' | 'actor'; mark: string | null; text: string; program?: boolean };
+let tier: ZoomTier | null = null, fitFrame = 0, lastFresh = 0;
+/** Every typed card shows what fits its own box at the tier and scale (card-budget tierFit): writes only (each card's shape was
+ * written on it when drawn), so it runs once per frame of a zoom. */
+function fitCards() {
+  fitFrame = 0;
+  const t = tier ?? zoomTier(camera.k), k = camera.k;
+  document.querySelectorAll<HTMLElement>('#world .node.card[data-shape]').forEach(el => {
+    const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0] = el.dataset.shape!.split(',').map(Number);
+    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status }, k, t);
+    el.style.setProperty('--nl', String(f.nameLines)); el.dataset.fitRows = String(f.rows);
+    el.classList.toggle('fit-nokind', !f.kind); el.classList.toggle('fit-nocontract', !f.contract); el.classList.toggle('fit-noinner', !f.inner);
+    el.classList.toggle('fit-nosigns', !f.signs); el.classList.toggle('fit-nobottom', !f.bottom); el.classList.toggle('fit-status', f.status);
+  });
+}
 /** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
 const progChip = (what?: string) => h('span', { class: 'sg-chip prog-chip', title: what ? `${PROGRAM_HINT} · ${what}` : PROGRAM_HINT }, PROGRAM_LABEL);
 /** map-reading.14: a step the program cut from the 3절 chain (steps-view stepFace), and a port → step correspondence it made. */
@@ -909,23 +910,6 @@ const portChip = (side: 'step' | 'pane', port: string) => h('span', { class: `sg
 const loopNodes = (segs: { text: string; program: boolean }[]): (string | HTMLElement)[] =>
   segs.flatMap((x, i) => [...(i ? [' · '] : []), x.text, ...(x.program ? [' ', progChip()] : [])]);
 const loopSegs = (r: PartUnderstanding) => (r.loop ? loopSegments(r.loop, r.config, r.conditions ?? [], UNSAID) : []);
-/** used: the setting the family's region already names (a loop's beat, a timer's schedule); the setting line shows another. */
-interface Typed { family: PartFamily | 'neutral'; body: BodyRegion | null; setting: string | null; used: string | null }
-function typedOf(r: PartUnderstanding): Typed {
-  const t = r.typeRead?.type ?? null, family = t ? FAMILY_OF[t] : 'neutral', cfg = r.config;
-  let body: BodyRegion | null = null, used: string | null = null;
-  if (family === 'store') body = { kind: 'store', fields: r.fields };
-  // A loop's frame names the unit the record gives for its repeat (map-reading.9), else its beat among the settings.
-  else if (family === 'loop') { const lb = loopBody(r.loop?.unit, cfg, programLoopItems(r.loop, cfg, r.conditions ?? []).unit); used = lb.used; body = { kind: 'loop', mark: null, text: lb.text, program: lb.program }; }
-  else if (family === 'timer') { used = cfg[0] ?? null; body = { kind: 'timer', mark: '⏱︎', text: used ?? '일정 ?' }; }
-  else if (t === 'actor') body = { kind: 'actor', mark: null, text: r.outputs[0] ? `효과 ▸ ${r.outputs[0]}` : '효과 ?' };
-  // Other kinds draw no region of their own: their first setting reads on the setting line instead.
-  return { family, body, setting: cfg.find(c => c !== used) ?? null, used };
-}
-/** What a unit's typed lines are before the six-line budget (card-budget) decides which of them the card keeps, at the zoom
- * level the layout is made for. The name is drawn on two lines at most (.node-name), so a longer measure counts as two. */
-const budgetOf = (t: Typed, r: PartUnderstanding, nameLines: number, chips: ChipsAt = 'none', level: ZoomLevel = cardLevel, entry: EntryKind = 'none'): CardBudget =>
-  typedBudget(Math.min(2, nameLines), !!t.setting, r.inputs.length > 0, r.outputs.length > 0, !!t.body, chips, level, entry, hasSigns(signsOf(r)));
 /* ---------- signs (map spec 5): 규칙 · 관문 · 변경 tabs at a card's bottom edge, their pane sections, the since-time filter ----------
  * signs-view.ts decides which claims are rules, gates and withdrawals (gates and a change's nature are provisional heuristics
  * until the contract carries scopeRef · anchors · enforcedBy · the withdrawal kind). A tab opens its section in the pane; the
@@ -1126,100 +1110,99 @@ function openChanges() {
   setPaneTab('history');
   const at = paneBody()?.querySelector<HTMLElement>('[data-sec="changes"] > h3'); if (at) { scrollToHead(at); at.focus({ preventScroll: true }); }
 }
-const bodyKind = (t: Typed): BodyKind => t.body?.kind ?? null;
-/** The budgets of the units the last layout typed (relayout): such a card is drawn with the lines its budget kept and without
- * its note (map spec 2.1: the note reads in the pane). A unit missing here draws as before. */
-let cardBudgets = new Map<string, CardBudget>();
-/** The room a card's typed lines need past what map-layout already counts (layoutScope's extra): the type word over the name,
- * the operations line where the layout kept no state line, and on a unit the typed lines (each run after the card's own gap,
- * 3px on a unit and 2px on a row). A unit with a type word or typed lines answers as a typed card: its lines are kept within
- * the six-line budget for the lines its name takes (budgets records what each kept). A part no reading spoke of takes none; a
- * list item keeps its one line. */
-function typedRoom(v: StudioView, budgets?: Map<string, CardBudget>): (id: string, face: Face) => number | TypedCard {
-  const byId = new Map(v.parts.map(p => [p.id, p])), names = new Map<string, number>();
-  for (const p of v.parts) names.set(p.name, (names.get(p.name) ?? 0) + 1);
+/* ---------- a typed card (map design v3 3): the family's silhouette, a glyph per kind on its tile, the head, at most three kind
+ * rows from the record's own fields with the kind's one defining blank, the contract area, the inner line, the sign row and the
+ * bottom line ('가동 보고 · 08:01Z' with the author's tag). card-family decides the template and the heights; this draws them. A
+ * card's box is the same at every zoom level: the level only chooses what is shown inside it. */
+/** What a card is made from (card-family CardFacts): the part's reading and what its adopted relations say of it: the parts that
+ * start it and that it starts (control), the parts whose data come in and their cadences, a store's writers and readers, the
+ * ports a model-written portMap row ties to a relation end (pins) and the data lines no such row ties (the card-level contact). */
+function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<string, LineSaid>): CardFacts {
+  const name = (id: string) => partOf(o, id)?.name ?? '부분', uniq = (xs: string[]) => [...new Set(xs)];
+  const pm = (r.portMap ?? []).filter(m => m.program !== true), tied = new Set(pm.map(m => `${m.relationId}|${m.direction}`));
+  const controlIn: string[] = [], controlOut: string[] = [], dataIn: string[] = [], cadence: string[] = [], writers = new Set<string>(), readers = new Set<string>();
+  let unmapped = 0;
+  for (const rel of o.view.relations) {
+    const out = rel.from === p.id, inn = rel.to === p.id; if (out === inn || rel.kind === 'related') continue;
+    const ch = said.get(rel.id)?.channel ?? (rel.kind === 'flow' ? 'data' : 'uses'), far = out ? rel.to : rel.from;
+    if (ch === 'control') (out ? controlOut : controlIn).push(name(far));
+    else if (ch === 'data') {
+      if (inn) { dataIn.push(name(far)); writers.add(far); const c = said.get(rel.id)?.cadence; if (c) cadence.push(c); } else readers.add(far);
+      if (!tied.has(`${rel.id}|${out ? 'out' : 'in'}`)) unmapped++;
+    }
+  }
+  const sg = signsOf(r), type = r.typeRead?.type ?? null, steps = stepsOf(r), conds = conditionsOf(r) ?? [];
+  const fb = failureBlanks(type, [...r.claims.flatMap(c => [c.text, c.before]), ...steps.flatMap(s => [s.name, s.does]), r.loop?.stop, r.loop?.resume]);
+  return { type, config: r.config, inputs: r.inputs, outputs: r.outputs, fields: r.fields, loop: r.loop ?? null, loopProgram: programLoopItems(r.loop, r.config, conds),
+    steps, conditions: conds, stateVars: r.stateVars?.length ?? 0, fileRoles: r.fileRoles?.length ?? 0,
+    personRules: sg.rules.filter(x => (x.enforcedBy ?? []).some(e => e.kind === 'person')).length, children: p.childIds.length,
+    controlIn: uniq(controlIn), controlOut: uniq(controlOut), dataIn: uniq(dataIn), dataInCadence: uniq(cadence), writers: writers.size, readers: readers.size,
+    pins: { in: pm.filter(m => m.direction === 'in').map(m => m.port), out: pm.filter(m => m.direction === 'out').map(m => m.port) }, unmapped,
+    signs: hasSigns(sg), failureSaid: !fb || !fb.failure };
+}
+/** The templates of the cards the last layout typed (relayout), by part id: renderSpace draws each with the template its box was
+ * measured for. A part missing here draws as an untyped card. */
+let cardTpls = new Map<string, CardTemplate>();
+/** The lines a typed card's name takes (map-layout measures it the same way): two at most, cut with an ellipsis past them. */
+const cardNameLines = (p: PartView) => (measureName(p.name, 'head') * 1.06 + 2 > NAME_ROOM - (p.childIds.length ? TOGGLE_W : 0) ? 2 : 1);
+/** layoutScope's extra: every part a reading spoke of, as a unit and as a row in a group, is a typed card (card-family) of CARD_W
+ * whose height is its near content's, once; its pins are the relation ends a model portMap row ties to a pin. A list item keeps its
+ * one line; a part no reading spoke of keeps the untyped card. */
+function typedRoom(o: Opened, tpls?: Map<string, CardTemplate>): (id: string, face: Face) => number | TypedCard {
+  const said = relationLines(o.project);
   return (id, face) => {
-    const p = byId.get(id), r = p?.reading; if (!p || !r || face === 'item') return 0;
-    const t = typedOf(r), gap = face === 'unit' ? 3 : 2;
-    let px = r.typeRead ? TYPE_H + gap : 0;
-    // map-layout keeps a state line only for a part with a status, a state or a repeated name (its measure's extra).
-    if (p.status === 'plan' && !r.state && (names.get(p.name) ?? 0) < 2) px += gap + (face === 'unit' ? 2 : 0) + LINE_H;
-    // Whether the card is typed does not change with the zoom level (its width stays UNIT_W); only its lines do.
-    if (face !== 'unit' || (!r.typeRead && !typedLines(budgetOf(t, r, 1, 'none', 'detail'), bodyKind(t)).length)) return px;
-    const kids = p.childIds.length > 0, entry = entryKind(entryCountsOf(p, r), shownMost(t, r));
-    return { oneLine: cardOneLine, room: (nameLines, chipsLine) => {
-      const b = budgetOf(t, r, nameLines, kids ? (chipsLine ? 'line' : 'name') : 'none', cardLevel, entry); budgets?.set(id, b);
-      return px + typedPx(b, bodyKind(t), gap);
+    const p = partOf(o, id), r = p?.reading; if (!p || !r || face === 'item') return 0;
+    const t = cardTemplate(cardFactsOf(o, p, r, said)); tpls?.set(id, t);
+    const pm = (r.portMap ?? []).filter(m => m.program !== true);
+    return { nameRoom: NAME_ROOM - (p.childIds.length ? TOGGLE_W : 0), shape: (nl, planned) => {
+      const hs = cardHeights(t, nl, planned), pins: Record<string, number> = {};
+      for (const m of pm) { const y = hs.pins[`${m.direction}:${m.port}`]; if (y !== undefined) pins[`${m.relationId}|${m.direction}`] = y; }
+      return { h: hs.total, contact: hs.contact, pins };
     } };
   };
 }
-/** Lists drawn on one line: as many names as the card's inner width holds (two, three on a ledger), then '+N'. Fitted once the
- * card has its width (fitTyped), so a name is cut only when not even one fits. A folded port line (outs) carries 내는 것 after
- * 받는 것 on the same line ('⇥ a · b  ⇤ c'); short of room it gives up 내는 것's names first ('⇤ +N'), then 받는 것's. */
-interface FitList { names: string[]; max: number; cells: boolean; outs?: string[] }
-const fitLists = new WeakMap<HTMLElement, FitList>();
-const listText = (names: string[], k: number) => { const rest = names.length - k; return [...names.slice(0, k), ...(rest > 0 ? [`+${rest}`] : [])].join(' · '); };
-const foldText = (ins: string[], k: number, outs: string[], ko: number) => `${listText(ins, k)}  ⇤ ${ko ? listText(outs, ko) : `+${outs.length}`}`;
-function fillNames(el: HTMLElement, names: string[], k: number, cells: boolean) {
-  const rest = names.length - k;
-  if (cells) el.replaceChildren(...names.slice(0, k).map(n => h('span', { class: 'ledger-cell' }, n)), ...(rest > 0 ? [h('span', { class: 'ledger-more' }, `+${rest}`)] : []));
-  else el.textContent = listText(names, k);
-}
-function fitList(el: HTMLElement, names: string[], max: number, cells: boolean): HTMLElement {
-  const k = Math.min(max, names.length); fitLists.set(el, { names, max: k, cells }); fillNames(el, names, k, cells); return el;
-}
-/** The arrow mark's column (.io-mark 14px + 4px gap) and a ledger cell's sides (6px padding a side + its 1px rule). */
-const MARK_W = 18, CELL_SIDES = 13;
-function namesWidth(f: { names: string[]; cells: boolean }, k: number): number {
-  const rest = f.names.length - k, more = rest > 0 ? `+${rest}` : '';
-  if (f.cells) return f.names.slice(0, k).reduce((a, n) => a + measureName(n, 'note') + CELL_SIDES, 0) + (more ? measureName(more, 'note') + CELL_SIDES : 0);
-  return measureName(listText(f.names, k), 'note');
-}
-/** After the cards have their widths: every card's inner width read first, then each list refilled (one layout pass). */
-function fitTyped(world: HTMLElement) {
-  const cards = [...world.querySelectorAll<HTMLElement>('.node-typed')].map(el => {
-    const b = lay.boxes.get(el.closest<HTMLElement>('.node')?.dataset.box ?? '');
-    return { el, w: el.closest<HTMLElement>('.node-text')?.clientWidth || (b ? b.w - 30 : 0) };
-  });
-  for (const { el, w } of cards) el.querySelectorAll<HTMLElement>('.io-text, .ledger').forEach(t => {
-    const f = fitLists.get(t); if (!f || !w) return;
-    const room = w - (f.cells ? 0 : MARK_W);
-    if (f.outs) {
-      const outs = f.outs; let k = f.max, ko = Math.min(2, outs.length);
-      while (measureName(foldText(f.names, k, outs, ko), 'note') > room) { if (ko > 0) ko--; else if (k > 1) k--; else break; }
-      t.textContent = foldText(f.names, k, outs, ko); return;
-    }
-    let k = f.max; while (k > 1 && namesWidth(f, k) > room) k--;
-    fillNames(t, f.names, k, f.cells);
-  });
-}
-const ioLine = (cls: string, mark: string, what: string, names: string[]) => h('span', { class: `node-io ${cls}`, title: `${what} · ${names.join(' · ')}` },
-  h('span', { class: 'io-mark', 'aria-hidden': 'true' }, mark), h('span', { class: 'sr-only' }, `${what} `), fitList(h('span', { class: 'io-text' }), names, 2, false));
-/** 받는 것 and 내는 것 on one line (a long name left room for one port line): ⇥ what it takes, then ⇤ what it hands over. */
-function foldLine(ins: string[], outs: string[]): HTMLElement {
-  const text = h('span', { class: 'io-text' }), k = Math.min(2, ins.length), ko = Math.min(2, outs.length);
-  fitLists.set(text, { names: ins, max: k, cells: false, outs }); text.textContent = foldText(ins, k, outs, ko);
-  return h('span', { class: 'node-io io-in io-fold', title: `받는 것 · ${ins.join(' · ')}\n내는 것 · ${outs.join(' · ')}` },
-    h('span', { class: 'io-mark', 'aria-hidden': 'true' }, '⇥'), h('span', { class: 'sr-only' }, `받는 것 ${ins.join(', ')} · 내는 것 ${outs.join(', ')} `), text);
-}
-/** A unit's typed lines under its operations line: 받는 것, 내는 것, the family's region, one setting; with a budget (the
- * layout's six-line budget for this card), only the lines it kept. */
-function typedBlock(t: Typed, r: PartUnderstanding, budget?: CardBudget, entry?: HTMLElement | null): HTMLElement | null {
-  const lines: HTMLElement[] = [], io = budget?.io ?? (r.inputs.length && r.outputs.length ? 'both' : r.inputs.length ? 'in' : r.outputs.length ? 'out' : 'none');
-  if (io === 'fold') lines.push(foldLine(r.inputs, r.outputs));
-  else if (io !== 'none') { // 'none': no port line recorded, or none kept at this zoom level (개요)
-    if (r.inputs.length && io !== 'out') lines.push(ioLine('io-in', '⇥', '받는 것', r.inputs));
-    if (r.outputs.length && io !== 'in') lines.push(ioLine('io-out', '⇤', '내는 것', r.outputs));
-  }
-  const b = budget && !budget.body ? null : t.body;
-  // A store reads as a ledger: a double rule over the names of its rows' fields (never a count of rows it does not know).
-  if (b?.kind === 'store') lines.push(h('span', { class: 'node-body b-store', ...(b.fields.length ? { title: `행의 필드 · ${b.fields.join(' · ')}` } : {}) },
-    b.fields.length ? fitList(h('span', { class: 'ledger' }), b.fields, 3, true) : h('span', { class: 'ledger blank' }, '행 형식 ?')));
-  else if (b) lines.push(h('span', { class: `node-body b-${b.kind}`, title: b.program ? `${b.text}\n프로그램 · ${PROGRAM_HINT}` : b.text }, b.mark ? h('span', { class: 'body-mark', 'aria-hidden': 'true' }, b.mark) : null, h('span', { class: 'body-text' }, b.text),
-    b.program ? progChip('반복 단위는 이 부분의 설정 칸') : null));
-  if (t.setting && (budget?.set ?? true)) lines.push(h('span', { class: 'node-set', title: `설정 · ${t.setting}` }, `설정 · ${t.setting}`));
-  if (entry) lines.push(entry);
-  return lines.length ? h('span', { class: 'node-typed' }, ...lines) : null;
+const UNLINKED_TIP = '항목 근거 미연결 · 기록이 이 목록의 항목마다 원문 줄을 저장하지 않아 핀·필드 칸으로 그리지 않는다 (값은 패널 구조 탭에서)';
+const CONTACT_TIP = '포트 대응 미기록 · 이 선들은 카드 수준 접점에 붙는다 (모델이 적은 포트 대응 행이 있는 끝만 핀에)';
+/** A typed card's DOM (styles.css .node.card): the head (glyph tile · name · kind word with the lifecycle chip and, for the
+ * overview, the short status), the kind rows, the contract area, the inner line, the sign row and the bottom line. */
+function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, face: Face, extra: { cls: string; title: string; onkeydown: (e: Event) => void; toggle: HTMLElement | null; links: HTMLElement | null; enter: HTMLElement | null; boxH: number }): HTMLElement {
+  const s = r.stateRead, life = lifecycleOf(s?.state, s?.quote?.quote ?? ''), ops = opsCard(s?.state ?? null, s?.when ?? null, opsRef, life);
+  const ev = s ? claimEvidence({ quote: s.quote?.quote ?? '' }) : null, kids = p.childIds.length;
+  // The shape the box was measured for (its near content), written on the card so the zoom's fit reads it without measuring.
+  const nl = cardNameLines(p), hs = cardHeights(t, nl);
+  const tile = h('span', { class: `glyph-tile g-${t.family}`, title: `${FAMILY_WORD[t.family]} · ${t.kind}${t.inner === 'composition' || t.inner === 'both' ? ` · 내부 구성 ${kids}` : ''}` });
+  tile.innerHTML = glyphSvg(t.glyph) + (t.inner === 'composition' || t.inner === 'both' ? `<span class="glyph-badge">${glyphSvg('composition')}</span>` : '');
+  const head = h('div', { class: 'c-head' }, tile,
+    h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name' }, p.name),
+      h('span', { class: 'c-kind' }, h('span', { class: 'c-kind-word' }, `${t.kind}${kids ? ` · 구성 ${kids}` : ''}`),
+        life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null),
+      // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
+      life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short),
+      h('span', { class: 'plan-note' })),
+    extra.toggle);
+  const rows = t.rows.length ? h('div', { class: 'c-rows' }, ...t.rows.map(x => h('div', { class: `c-row${x.blank ? ' blank' : ''}`, title: x.blank ? `${x.label} · 기록에 없음 (이 종류를 정의하는 빈칸)` : `${x.label} · ${x.value}` },
+    h('span', { class: 'c-label' }, x.label), h('span', { class: 'c-val' }, x.value), x.program ? progChip(`${x.label}은 기록에서 프로그램이 옮긴 값`) : null))) : null;
+  const c = t.contract;
+  const contract = c.kind === 'lines'
+    ? h('div', { class: 'c-contract lines' }, ...c.lines.map(l => h('p', { class: 'c-cline', title: l.endsWith('항목 근거 미연결') ? UNLINKED_TIP : '기록이 이 부분의 데이터 입력·출력을 말하지 않았다' }, l)))
+    : h('div', { class: 'c-contract pins', role: 'group', 'aria-label': `${p.name}의 포트 · 모델이 적은 포트 대응` },
+      h('div', { class: 'c-pin-head' }, h('span', {}, c.ins.length ? c.inTitle : ''), h('span', {}, c.outs.length ? c.outTitle : '')),
+      ...Array.from({ length: Math.max(c.ins.length, c.outs.length) }, (_, i) => h('div', { class: 'c-pin-row' },
+        c.ins[i] ? h('span', { class: 'c-pin in', title: `${c.inTitle} · ${c.ins[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('i', { class: 'pin', 'aria-hidden': 'true' }), h('span', { class: 'c-pin-name' }, c.ins[i]!)) : h('span', { class: 'c-pin empty' }),
+        c.outs[i] ? h('span', { class: 'c-pin out', title: `${c.outTitle} · ${c.outs[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('span', { class: 'c-pin-name' }, c.outs[i]!), h('i', { class: 'pin', 'aria-hidden': 'true' })) : h('span', { class: 'c-pin empty' }))),
+      c.unmapped ? h('p', { class: 'c-cline', title: CONTACT_TIP }, `포트 대응 미기록 ${c.unmapped}`) : null);
+  const words = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 });
+  const inner = t.innerLine ? h('div', { class: 'c-inner', title: `${words.join(' · ')}\n지도에서는 기록의 행 순서 · 실행 순서나 반복 범위를 그리지 않는다` }, h('span', { class: 'c-inner-text' }, t.innerLine.text),
+    t.innerLine.program ? h('span', { class: 'sg-chip prog-chip', title: PROGRAM_STEP_HINT }, `+${t.innerLine.program} ${PROGRAM_LABEL}`) : null) : null;
+  const signs = t.signs ? signTabsEl(o, p, r) : null;
+  const open = !kids && words.length && words[0] !== '내부 미상'
+    ? h('button', { type: 'button', class: 'entry-open', title: `동작 열기 · ${words.join(' · ')}\n제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)`, 'aria-label': `${p.name} 내부 보기`, onclick: () => openAction(p.id) }, '내부 보기') : null;
+  const bottom = h('div', { class: 'c-bottom' }, h('span', { class: 'c-ops', title: ops.tip }, ops.text),
+    ev ? h('span', { class: `ev ev-${ev}`, title: `운영 한 줄의 근거 · 기록 작성자의 꼬리표 (${EVIDENCE_HINT[ev]}) · 앱의 판정 아님` }, EVIDENCE_LABEL[ev]) : null,
+    h('span', { class: 'c-entry' }, extra.links, extra.enter, open));
+  return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1}`,
+    'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: extra.title, onkeydown: extra.onkeydown },
+  head, rows, contract, inner, signs ? h('div', { class: 'c-signs' }, signs) : null, bottom);
 }
 
 /* ---------- 동작 열기 (map spec 4): one action, a scale the app decides, three moves back ----------
@@ -1248,26 +1231,6 @@ function conditionsContract(project: Project, id: string): boolean {
 const entryCountsOf = (p: PartView, r: PartUnderstanding): EntryCounts => { const sc = stepCounts(stepsOf(r));
   return { read: true, kids: p.childIds.length, steps: sc.recorded, programSteps: sc.program, inputs: r.inputs.length, outputs: r.outputs.length, fields: r.fields.length, config: r.config.length, state: r.stateVars?.length ?? 0, loop: !!r.loop, unplaced: unplacedCount(signsOf(r).rules, placesOf(r)), conditions: conditionsOf(r).length }; };
 const UNPLACED_TIP = '배치 미정 · 정확한 단계·포트·필드에 놓이지 않은 규칙 (규칙 탭에서 읽기)';
-const PROGRAM_STEPS_TIP = `괄호 안 (+P 프로그램): 기록의 단계 표 행과 따로, 3절 흐름에서 프로그램이 나눈 단계 · ${PROGRAM_HINT}`;
-const entryWord = (w: string) => h('span', { class: `entry-part${w.startsWith('배치 미정') ? ' entry-unplaced' : ''}`, ...(w.startsWith('배치 미정') ? { title: UNPLACED_TIP } : w.endsWith('프로그램)') ? { title: PROGRAM_STEPS_TIP } : {}) }, w);
-/** The most a collapsed card names of each list: its setting line and its region's beat or schedule; three ledger cells. */
-const shownMost = (t: Typed, r: PartUnderstanding): EntryShown => ({ config: (t.setting ? 1 : 0) + (t.used ? 1 : 0), fields: t.body?.kind === 'store' ? Math.min(3, r.fields.length) : 0 });
-/** What the card names under the budget it was drawn with (the setting and the region kept or not at this level). */
-const shownBy = (t: Typed, r: PartUnderstanding, b: CardBudget): EntryShown => ({ config: (b.set && t.setting ? 1 : 0) + (b.body && t.used ? 1 : 0), fields: b.body && t.body?.kind === 'store' ? Math.min(3, r.fields.length) : 0 });
-/** The entry line under a typed card's body: '구성 N' (the way into its composition, as the 안쪽 chip is), '기록된 단계 M', each
- * list the card does not name in full by its total, and 열기; '내부 미상' when its reading names nothing inside. */
-function entryLine(o: Opened, p: PartView, r: PartUnderstanding, t: Typed, b: CardBudget, signs: HTMLElement | null = null): HTMLElement | null {
-  const c = entryCountsOf(p, r), words = entryParts(c, shownBy(t, r, b)); if (!words.length) return null;
-  if (words[0] === '내부 미상') return h('span', { class: `node-entry unknown${signs ? ' with-signs' : ''}` }, h('span', { class: 'entry-text', title: '기록이 이 부분의 받는 것·내는 것·필드·설정·구성·단계를 하나도 말하지 않았다' }, '내부 미상',
-    ...words.slice(1).flatMap(w => [h('span', { class: 'entry-sep', 'aria-hidden': 'true' }, ' · '), entryWord(w)])), signs);
-  const parts: HTMLElement[] = [];
-  words.forEach((w, i) => {
-    if (i) parts.push(h('span', { class: 'entry-sep', 'aria-hidden': 'true' }, ' · '));
-    parts.push(c.kids && i === 0 ? h('button', { type: 'button', class: 'entry-kids', title: `구성 열기 · ‘${p.name}’의 실제 하위 부분 ${c.kids}`, 'aria-label': `${p.name} 구성 열기 · 하위 부분 ${c.kids}`, onclick: () => go(o.key, null, p.id) }, w) : entryWord(w));
-  });
-  return h('span', { class: `node-entry${signs ? ' with-signs' : ''}` }, h('span', { class: 'entry-text', ...(signs ? { title: words.join(' · ') } : {}) }, ...parts),
-    h('button', { type: 'button', class: 'entry-open', title: '동작 열기 · 제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)', 'aria-label': `${p.name} 동작 열기`, onclick: () => openAction(p.id) }, '열기'), signs);
-}
 /** Which part is open and how; the way back (이전 읽기 위치); an opening waiting for its selection; one read back after a reload. */
 let openState: OpenState | null = null, backStack: ReadPlace[] = [], pendingAction: string | null = null, restoreOpen: OpenState | null = null;
 /** The short expansion's place on the map (labels keep off it), and what the detail view was last drawn for. */
@@ -1664,12 +1627,11 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   $('home').hidden = true; $('space').hidden = false; $('ai-pill').hidden = false;
   // A redraw of the structure ends the places held for a drag (holdPlaces) and the hover's peek.
   held = null; $('space').classList.remove('peek', 'state-peek');
-  // The zoom level the cards are drawn at: every relayout until the next redraw keeps it (a drag never changes their lines).
-  opsRef = opsDay(o); laidKey = levelKey(camera.k); cardLevel = zoomLevel(camera.k); cardOneLine = camera.k < Z_MID;
+  // A new view reads its first tier without hysteresis (card-budget zoomTier); the cards' boxes do not depend on it.
+  opsRef = opsDay(o); if (cameraMode !== 'keep') tier = null;
   relayout(o);
   const world = $('world'), view = o.view;
   // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
-  // (Not when the zoom level a view just opened at redraws it: the cards then take their level's height in place.)
   const was = cameraMode === 'keep' && !world.hidden && performance.now() - lastFresh > 600 ? beforeRedraw(world) : null;
   if (cameraMode !== 'keep') lastFresh = performance.now();
   world.replaceChildren();
@@ -1763,35 +1725,26 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     } else {
       // A folded part reads its inside: latest record anywhere under it.
       const last = b.kids ? subtreeRecords(view, p.id)[0]?.at ?? null : p.lastAt, meta = metaLine(p, last), face = b.face ?? 'row';
-      // A folded group reads by its name and its count (the way in); its note reads in the pane. A part without an inside keeps
-      // its own first sentence.
-      const note = face === 'unit' && !b.kids && !cardBudgets.has(p.id) ? mapLead(view, p.id) : '', box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1, alias = aliasOf(view, p.id);
-      // What readings said the part is (units and rows; a list item keeps its one line): the operations line takes the state
-      // line's place (the records' own status stays in its tip), the ladder beside it as before.
-      const r = face === 'item' ? null : p.reading, typed = r ? typedOf(r) : null, ops = r ? opsOf(r) : null, said = ops?.full ?? meta;
-      // A typed card with an inside carries its group chips at the end of its name line, or on a line of their own under the
-      // body (card-budget chips); never beside the operations line, which keeps the card's width.
-      const chipsAt: ChipsAt = b.kids && face === 'unit' ? cardBudgets.get(p.id)?.chips ?? 'none' : 'none';
-      // The entry line (spec 4) under the body: a card with an inside reads its way in there ('구성 N'); its chips keep the rest.
-      const budget = cardBudgets.get(p.id), signsAt = face === 'unit' && r ? budget?.signs ?? 'none' : 'none', signsEl = signsAt !== 'none' && r ? signTabsEl(o, p, r) : null;
-      const entryEl = face === 'unit' && typed && r && budget?.entry ? entryLine(o, p, r, typed, budget, signsAt === 'entry' ? signsEl : null) : null, kidsIn = !!entryEl?.querySelector('.entry-kids');
-      // The tabs on a row of their own when there is no entry line (the card's bottom edge), else at the entry line's right.
-      const bottomEl = entryEl ?? (signsAt === 'line' && signsEl ? h('span', { class: 'node-entry signs-only' }, signsEl) : null);
-      const chips = (cls: string) => h('span', { class: `node-chips ${cls}` }, linksChip(p.id), kidsIn ? null : enterButton(p), cls === 'own-line' && signsAt === 'chips' ? signsEl : null), nameEl = h('span', { class: 'node-name' }, p.name);
-      const opsEl = ops ? h('span', { class: 'meta-text ops', title: `${ops.tip}${meta ? `
-기록 · ${meta}` : ''}` }, ops.full) : null;
-      if (opsEl && ops) opsFit.set(opsEl, ops);
-      world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${p.status === 'plan' && p.reading?.state ? ` rs-${p.reading.state}` : ''}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${typed ? ` typed f-${typed.family}` : ''}${said || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
-        title: `${of ? `${of} › ` : ''}${p.name}${alias ? ` · ${alias}` : ''}`, onkeydown: keySelect(p.id) },
+      const box = lay.boxes.get(b.container), onTint = box?.kind === 'frame' && box.depth % 2 === 1, alias = aliasOf(view, p.id);
+      const title = `${of ? `${of} › ` : ''}${p.name}${alias ? ` · ${alias}` : ''}`;
+      // A part a reading spoke of, as a unit or as a row in a group: its typed card (map design v3 3), the box its template was
+      // measured for. A list item keeps its one line.
+      const tpl = face === 'item' ? undefined : cardTpls.get(p.id);
+      if (tpl && p.reading) {
+        world.append(cardEl(o, p, p.reading, tpl, face, { cls: `${onTint ? 'on-tint ' : ''}s-${p.status}${recentAt(last) ? ' fresh' : ''}`, title, onkeydown: keySelect(p.id),
+          toggle: b.kids ? toggleButton(p, false) : null, links: b.kids ? linksChip(p.id) : null, enter: b.kids ? enterButton(p) : null, boxH: b.h }));
+        continue;
+      }
+      // An untyped card (no reading): its name, its own first sentence on a unit without an inside, and its state line.
+      const note = face === 'unit' && !b.kids ? mapLead(view, p.id) : '', nameEl = h('span', { class: 'node-name' }, p.name);
+      world.append(h('div', { class: `node ${face}${onTint ? ' on-tint' : ''} s-${p.status}${recentAt(last) ? ' fresh' : ''}${b.kids ? ' has-kids' : ''}${meta || of ? '' : ' bare'}`, 'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0',
+        title, onkeydown: keySelect(p.id) },
         b.kids ? toggleButton(p, false) : null,
-        h('span', { class: 'node-text' }, r?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[r.typeRead.type]) : null,
-          chipsAt === 'name' ? h('span', { class: 'node-headline' }, nameEl, chips('at-name')) : nameEl,
+        h('span', { class: 'node-text' }, nameEl,
           note ? h('span', { class: 'node-note' }, note) : null,
-          said ? h('span', { class: 'node-meta' }, ladder(view, p), opsEl ?? h('span', { class: 'meta-text' }, said)) : alias ? h('span', { class: 'node-meta owner alias' }, h('span', { class: 'meta-text' }, alias)) : of ? h('span', { class: 'node-meta owner' }, h('span', { class: 'meta-text' }, `${of} 안`)) : null,
-          face === 'unit' && typed && r ? typedBlock(typed, r, budget, bottomEl) : null,
-          chipsAt === 'line' ? chips('own-line') : null,
+          meta ? h('span', { class: 'node-meta' }, ladder(view, p), h('span', { class: 'meta-text' }, meta)) : alias ? h('span', { class: 'node-meta owner alias' }, h('span', { class: 'meta-text' }, alias)) : of ? h('span', { class: 'node-meta owner' }, h('span', { class: 'meta-text' }, `${of} 안`)) : null,
           h('span', { class: 'plan-note' })),
-        b.kids && chipsAt === 'none' ? linksChip(p.id) : null, b.kids && chipsAt === 'none' ? enterButton(p) : null));
+        b.kids ? linksChip(p.id) : null, b.kids ? enterButton(p) : null));
     }
   }
   // The title of this map: what the scope is for, in its own first sentence. The rest of that text (where it comes from, what
@@ -1821,7 +1774,6 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   world.querySelectorAll('.edge.inner').forEach(g => top.append(g));
   if (was) morphFrom = was.lines;
   positionWorld();
-  fitTyped(world); fitOps(world);
   morphFrom = null;
   if (was) afterRedraw(world, was);
   drawScenario();
@@ -1841,6 +1793,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   if (cameraMode === 'keep') applyCamera();
   else if (saved) { camera = { ...saved }; applyCamera(); }
   else fitView(false);
+  fitCards();
   if (planOverlay) planView.overlay();
   applyReadMarks();
   if (openState) syncOpenSoon();
@@ -2187,7 +2140,9 @@ function renderRecent() {
 }
 
 /* ---------- camera ---------- */
-const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6;
+/** The wheel and the buttons zoom between ZOOM_MIN and ZOOM_MAX; only 전체 보기 goes further out, down to the dot map (FIT_MIN, map
+ * design v3 5.1), and a zoom from there keeps on from where it is. */
+const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6, FIT_MIN = 0.2;
 /** The chip scale the verbs were last placed at, and the frame that re-places them after a zoom. */
 let placedInv = 1, relabel = 0;
 /** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
@@ -2210,15 +2165,13 @@ function applyCamera(animate = false) {
   // removed from the page or its layout.
   const sp = $('space');
   sp.classList.toggle('z-mid', camera.k < Z_MID); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
-  // The zoom level (개요 · 중간 · 상세): what a typed card keeps. The cards take their level's height and the lines their new
-  // routes in one redraw, once the zoom has crossed a level's edge (never on every step of a wheel).
-  const lv = zoomLevel(camera.k);
-  sp.classList.toggle('lv-overview', lv === 'overview'); sp.classList.toggle('lv-mid', lv === 'mid'); sp.classList.toggle('lv-detail', lv === 'detail');
-  if (opened && laidKey && levelKey(camera.k) !== laidKey && !relevel) relevel = window.setTimeout(() => {
-    relevel = 0;
-    if (!opened || $('space').hidden || levelKey(camera.k) === laidKey) return;
-    renderSpace('keep'); if (selected) markSelection(selected);
-  }, 120); // a timer, not a frame: a wheel settles first, and a hidden page still redraws
+  // The zoom tier (점 지도 · 개요 · 중간 · 가까이, map design v3 5.1): what a typed card shows inside its box, and the on-screen
+  // floors of its type (5.2). The boxes, the lines and their ends stay where they are: nothing is laid out again for a zoom.
+  tier = zoomTier(camera.k, tier);
+  for (const t of ['dots', 'far', 'mid', 'near'] as const) sp.classList.toggle(`tier-${t}`, tier === t);
+  const T = tierText(camera.k, tier), px = (n: number) => `${n.toFixed(2)}px`;
+  for (const [v, n] of [['title', T.title], ['title-lh', T.titleLh], ['kind', T.kind], ['kind-lh', T.kindLh], ['row', T.row], ['row-lh', T.rowLh], ['label', T.label], ['bottom', T.bottom], ['glyph', T.glyph], ['gap', T.gap]] as const) sp.style.setProperty(`--t-${v}`, px(n));
+  if (!fitFrame) fitFrame = requestAnimationFrame(fitCards);
   sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
   // Chips on the lines (verbs, counts) grow as the map shrinks, up to 1.5×, so they stay readable; their places are found
   // again when the scale changed enough to matter.
@@ -2238,7 +2191,7 @@ function fitView(explicit: boolean, animate = false) {
   const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
   const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = lay.bounds;
   const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
-  const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(OPEN_MIN, fit);
+  const k = explicit ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
   // The whole view sits in the middle of the free area, both ways: the title and the parts together. A reading pane opened
   // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
   const mw = B.w * k, mh = B.h * k, free = w - mw;
@@ -2248,7 +2201,7 @@ function fitView(explicit: boolean, animate = false) {
   applyCamera(animate);
 }
 function zoomAt(k: number, cx: number, cy: number, animate = false) {
-  const nk = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, k));
+  const nk = Math.min(ZOOM_MAX, Math.max(Math.min(ZOOM_MIN, camera.k), k));
   camera = { k: nk, x: cx - (cx - camera.x) * (nk / camera.k), y: cy - (cy - camera.y) * (nk / camera.k) };
   applyCamera(animate);
 }

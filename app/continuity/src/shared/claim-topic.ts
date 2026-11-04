@@ -20,11 +20,13 @@ export const STATE_WORD: Record<PartState, string> = { running: '돌고 있음',
 export const MODE_LABEL: Record<RelationMode, string> = { design: '설계', observed: '관찰' };
 /** map-reading.8: the type word a card shows (small, over the name) and what a line is said to carry. */
 export const TYPE_LABEL: Record<PartType, string> = { collector: '수집기', compute: '계산', ai: 'AI 판단', loop: '루프·엔진', timer: '타이머·일정', actor: '집행·외부 호출', store: '보관소', person: '사람', session: '세션', external: '외부 시스템' };
-/** The five silhouettes a card can have, from far away: a processing card (a collector, a computation, an AI judgement, an actor
- * with its effect at the exit), a store (a ledger), a loop (a frame with an inside), a schedule, a participant outside the
- * program (a person, a session, an external system). A part without a type word is a neutral processing card. */
-export type PartFamily = 'process' | 'store' | 'loop' | 'timer' | 'participant';
-export const FAMILY_OF: Record<PartType, PartFamily> = { collector: 'process', compute: 'process', ai: 'process', actor: 'process', loop: 'loop', timer: 'timer', store: 'store', person: 'participant', session: 'participant', external: 'participant' };
+/** A card's family (map design v3 3.1), from the type word alone, never from a name or an inside: a participant (a person, a
+ * session, an external system); a process (a collector, a computation, an actor, a loop or engine, and an AI judgement: it takes
+ * inputs and hands over a verdict); a store (a ledger); a trigger or gate (a timer or schedule). A part with no type word is
+ * neutral (card-family familyOf). An inside (steps, a composition) is a capability joined to the family (card-family innerOf),
+ * never a family of its own. */
+export type PartFamily = 'participant' | 'process' | 'store' | 'trigger';
+export const FAMILY_OF: Record<PartType, PartFamily> = { collector: 'process', compute: 'process', ai: 'process', actor: 'process', loop: 'process', timer: 'trigger', store: 'store', person: 'participant', session: 'participant', external: 'participant' };
 export const CHANNEL_LABEL: Record<Channel, string> = { data: '데이터', control: '제어', uses: '참조' };
 
 const WITHDRAWN = /철회|폐기|채택하지 않|채택 안|취소했|거뒀|되돌렸|더는 .*않/;

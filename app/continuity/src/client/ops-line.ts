@@ -53,3 +53,25 @@ export function opsLines(state: OpsState | null, when: string | null, ref: strin
   const short = when ? opsWhen(when, ref) : null;
   return { full: opsText(state, short), brief: opsText(state, short, true), tip: opsText(state, when?.trim() || null) };
 }
+
+/** The words of an operations state without its time, as a card's bottom line and its short status read them (map design v3 3.2,
+ * 5.4): 「보고」 is part of the words, never shortened away ('가동 보고', never '가동'). A lifecycle state (폐기, 미구현 or 설계만, the
+ * card's chip) reads as what it is: a report of that state. */
+export function opsWord(state: OpsState | null, life: string | null = null): string {
+  if (state === null) return '운영 기록 없음';
+  switch (state) {
+    case 'running': return '가동 보고';
+    case 'working': return '작업 중 보고';
+    case 'stopped': return '멈춤 보고';
+    case 'unbuilt': return `${life ?? '미구현'} 보고`;
+    case 'retired': return `${life ?? '폐기'} 보고`;
+    default: return '운영 기록 모름';
+  }
+}
+/** A card's bottom line (map design v3 3.2): the state as a report with the record's time ('가동 보고 · 08:01Z'), without the
+ * panel's 「현재 가동 여부 미확인」 (the panel head and the map's basis line say it once); the tip keeps the time as written. */
+export function opsCard(state: OpsState | null, when: string | null, ref: string | null, life: string | null = null): { text: string; short: string; tip: string } {
+  const word = opsWord(state, life), at = state !== null && when ? opsWhen(when, ref) : null;
+  const full = state !== null && when?.trim() ? `${word} · ${when.trim()}` : word;
+  return { text: at ? `${word} · ${at}` : word, short: word, tip: state === 'running' ? `${full} · 현재 가동 여부 미확인` : full };
+}

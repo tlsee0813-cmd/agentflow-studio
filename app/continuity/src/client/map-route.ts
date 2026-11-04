@@ -21,7 +21,17 @@ function sideOf(a: Box, b: Box, byId: Map<string, Box>): Side {
   if (a.x < b.x + b.w && b.x < a.x + a.w) return 'v';
   return b.x + b.w / 2 > a.x + a.w / 2 ? 'r' : 'l';
 }
-const mid = (x: Box) => (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2);
+/** Where a side's lines gather: a group's head row, a typed card's card-level contact point (map design v3 3.6: the contract
+ * area's middle), else the box's middle. */
+const mid = (x: Box) => (x.kind === 'frame' ? x.y + x.head / 2 : x.contact !== undefined ? x.y + x.contact : x.y + x.h / 2);
+/** The pin a line's end is tied to (map design v3 3.6, principle 9): only a model-written portMap row ties a relation end to a pin
+ * (the card's pins by '<relationId>|out' at the line's start, '|in' at its end). A port that only shares the payload's name is
+ * never a pin for the line. A line drawing several relations takes the pin when one of them is tied. */
+export function pinOf(box: Box, e: Edge, end: 'a' | 'b'): number | undefined {
+  if (!box.pins || e.key.startsWith('sum:')) return undefined;
+  for (const id of e.ids) { const y = box.pins[`${id}|${end === 'a' ? 'out' : 'in'}`]; if (y !== undefined) return box.y + y; }
+  return undefined;
+}
 
 /** Ports for every line end: on each side of each box, the lines that leave there, spread along the side (a group's head row)
  * by their other end's height, centred on the side's middle. One line keeps the middle.
@@ -42,6 +52,13 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: 
     sides.set(e.key, { a: sa, b: sb, e });
   }
   const put = (key: string, end: 'a' | 'b', y: number) => { const port = out.get(key) ?? {}; port[end] = y; out.set(key, port); };
+  // An end tied to a pin stands at the pin and never moves; the side's other lines spread round its contact point.
+  const pinned = new Set<string>();
+  for (const [k, list] of [...at]) {
+    const box = boxes.get(k.split('|')[0]!)!, free: End[] = [];
+    for (const p of list) { const e = sides.get(p.key)!.e, y = pinOf(box, e, p.end); if (y === undefined) free.push(p); else { put(p.key, p.end, y); pinned.add(`${p.key}|${p.end}`); } }
+    if (free.length) at.set(k, free); else at.delete(k);
+  }
   for (const [k, list] of at) {
     const box = boxes.get(k.split('|')[0]!)!, room = (box.kind === 'frame' ? box.head : box.h) - 14, n = list.length;
     if (n < 2) { put(list[0]!.key, list[0]!.end, mid(box)); continue; }
@@ -62,7 +79,7 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: 
   };
   const onSide = (k: string, y: number) => { const box = boxes.get(k.split('|')[0]!)!, h = box.kind === 'frame' ? box.head : box.h; return y >= box.y + PORT_MIN && y <= box.y + h - PORT_MIN; };
   // Moving one end from y to to keeps clear of the side's other ports: none between the two heights or within PORT_MIN of to.
-  const canMove = (k: string, key: string, from: number, to: number) => onSide(k, to) && at.get(k)!.every(p => {
+  const canMove = (k: string, key: string, from: number, to: number) => onSide(k, to) && (at.get(k) ?? []).every(p => {
     if (p.key === key) return true;
     const y = out.get(p.key)![p.end]!; return y < Math.min(from, to) - PORT_MIN + 0.01 || y > Math.max(from, to) + PORT_MIN - 0.01;
   });
@@ -72,8 +89,8 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: 
     const A = boxes.get(e.from)!, B = boxes.get(e.to)!;
     // The end on the quieter side moves first (a lone line's port is free to move); else the line's target.
     const tries: ['a' | 'b', string, number, number][] = [['b', sb, yb, ya], ['a', sa, ya, yb]];
-    if (at.get(sa)!.length < at.get(sb)!.length) tries.reverse();
-    const hit = tries.find(([, k, from, to]) => canMove(k, e.key, from, to) && straightFree(A, B, to));
+    if ((at.get(sa)?.length ?? 0) < (at.get(sb)?.length ?? 0)) tries.reverse();
+    const hit = tries.find(([end, k, from, to]) => !pinned.has(`${e.key}|${end}`) && canMove(k, e.key, from, to) && straightFree(A, B, to));
     if (hit) port[hit[0]] = hit[3];
   }
   return out;
