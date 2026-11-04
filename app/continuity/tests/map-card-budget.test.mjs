@@ -198,12 +198,19 @@ test('entry words with map-reading.9: 기록된 단계 M, 유지 상태 S, and a
 });
 
 test('loopBody: the record\'s repeat unit first, else the first beat-like setting, 반복 단위 ? only when both are missing', () => {
-  assert.deepEqual(loopBody('호가 틱마다', ['j1_cadence 60 s', '618df374']), { text: '반복 · 호가 틱마다', used: null }, 'the unit stands; the beat stays for the setting line');
-  assert.deepEqual(loopBody(null, ['618df374', 'j1_cadence 60 s']), { text: '반복 · j1_cadence 60 s', used: 'j1_cadence 60 s' });
-  assert.deepEqual(loopBody(undefined, ['감시 주기 0.2 s']), { text: '반복 · 감시 주기 0.2 s', used: '감시 주기 0.2 s' });
-  assert.deepEqual(loopBody(null, ['618df374', '카드 폭 240']), { text: '반복 단위 ?', used: null }, 'no unit, no beat: the blank says so');
-  assert.deepEqual(loopBody('', []), { text: '반복 단위 ?', used: null });
+  assert.deepEqual(loopBody('호가 틱마다', ['j1_cadence 60 s', '618df374']), { text: '반복 · 호가 틱마다', used: null, program: false }, 'the unit stands; the beat stays for the setting line');
+  assert.deepEqual(loopBody(null, ['618df374', 'j1_cadence 60 s']), { text: '반복 · j1_cadence 60 s', used: 'j1_cadence 60 s', program: false });
+  assert.deepEqual(loopBody(undefined, ['감시 주기 0.2 s']), { text: '반복 · 감시 주기 0.2 s', used: '감시 주기 0.2 s', program: false });
+  assert.deepEqual(loopBody(null, ['618df374', '카드 폭 240']), { text: '반복 단위 ?', used: null, program: false }, 'no unit, no beat: the blank says so');
+  assert.deepEqual(loopBody('', []), { text: '반복 단위 ?', used: null, program: false });
   assert.ok(CADENCE.test('60 s 폴링') && CADENCE.test('매 00:30Z') && !CADENCE.test('618df374'));
+});
+
+test('loopBody (map-reading.13): a program unit carries the program mark; a beat the card takes from the settings never does', () => {
+  assert.deepEqual(loopBody('j1_cadence 60 s', ['j1_cadence 60 s'], true), { text: '반복 · j1_cadence 60 s', used: null, program: true }, 'the program filled the unit from the cadence setting');
+  assert.deepEqual(loopBody('호가 틱마다', [], false), { text: '반복 · 호가 틱마다', used: null, program: false }, 'the model\x27s unit');
+  assert.deepEqual(loopBody(null, ['j1_cadence 60 s'], true), { text: '반복 · j1_cadence 60 s', used: 'j1_cadence 60 s', program: false }, 'no unit read: the setting as written, never marked');
+  assert.deepEqual(loopBody(null, [], true), { text: '반복 단위 ?', used: null, program: false });
 });
 
 test('sign tabs (spec 5) share the entry line\'s row at its right, or take that row alone; they are never dropped for room', () => {

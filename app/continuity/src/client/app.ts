@@ -10,9 +10,9 @@ import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace
   grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits, type GrammarMark } from './scenario-view.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
-import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, paneSections, structureOpen, structureSummary, structureConditions, type DisputedItem, type HistoryEntry } from './pane-view.js';
+import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, paneSections, structureOpen, structureSummary, structureConditions, structureKeep, type DisputedItem, type HistoryEntry } from './pane-view.js';
 import { recordLabel } from '../shared/record-source.js';
-import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, SavedCamera } from '../shared/types.js';
+import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, SavedCamera } from '../shared/types.js';
 import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, type PartFamily } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
@@ -31,6 +31,7 @@ import { typedBudget, typedLines, typedPx, zoomLevel, entryKind, entryParts, loo
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
+import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
@@ -897,7 +898,14 @@ function fitOps(world: HTMLElement) {
 const Z_MID = 0.705;
 const levelKey = (k: number) => `${zoomLevel(k)}|${k < Z_MID ? 1 : 0}`;
 let cardLevel: ZoomLevel = 'detail', cardOneLine = false, laidKey = '', relevel = 0, lastFresh = 0;
-type BodyRegion = { kind: 'store'; fields: string[] } | { kind: 'loop' | 'timer' | 'actor'; mark: string | null; text: string };
+/** program (map-reading.13): a loop's unit the program filled from the part's own cadence setting (the line carries 「프로그램」). */
+type BodyRegion = { kind: 'store'; fields: string[] } | { kind: 'loop' | 'timer' | 'actor'; mark: string | null; text: string; program?: boolean };
+/** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
+const progChip = (what?: string) => h('span', { class: 'sg-chip prog-chip', title: what ? `${PROGRAM_HINT} · ${what}` : PROGRAM_HINT }, PROGRAM_LABEL);
+/** The loop line in its parts (line-view loopSegments), joined by ' · ', each item the program filled followed by its chip. */
+const loopNodes = (segs: { text: string; program: boolean }[]): (string | HTMLElement)[] =>
+  segs.flatMap((x, i) => [...(i ? [' · '] : []), x.text, ...(x.program ? [' ', progChip()] : [])]);
+const loopSegs = (r: PartUnderstanding) => (r.loop ? loopSegments(r.loop, r.config, r.conditions ?? [], UNSAID) : []);
 /** used: the setting the family's region already names (a loop's beat, a timer's schedule); the setting line shows another. */
 interface Typed { family: PartFamily | 'neutral'; body: BodyRegion | null; setting: string | null; used: string | null }
 function typedOf(r: PartUnderstanding): Typed {
@@ -905,7 +913,7 @@ function typedOf(r: PartUnderstanding): Typed {
   let body: BodyRegion | null = null, used: string | null = null;
   if (family === 'store') body = { kind: 'store', fields: r.fields };
   // A loop's frame names the unit the record gives for its repeat (map-reading.9), else its beat among the settings.
-  else if (family === 'loop') { const lb = loopBody(r.loop?.unit, cfg); used = lb.used; body = { kind: 'loop', mark: null, text: lb.text }; }
+  else if (family === 'loop') { const lb = loopBody(r.loop?.unit, cfg, programLoopItems(r.loop, cfg, r.conditions ?? []).unit); used = lb.used; body = { kind: 'loop', mark: null, text: lb.text, program: lb.program }; }
   else if (family === 'timer') { used = cfg[0] ?? null; body = { kind: 'timer', mark: '⏱︎', text: used ?? '일정 ?' }; }
   else if (t === 'actor') body = { kind: 'actor', mark: null, text: r.outputs[0] ? `효과 ▸ ${r.outputs[0]}` : '효과 ?' };
   // Other kinds draw no region of their own: their first setting reads on the setting line instead.
@@ -1066,7 +1074,7 @@ function signSection(o: Opened, part: PartView): HTMLElement | null {
       h('ul', { class: 'sg-fields' },
         field(v.scope.text, v.scope.hint, v.scope.blank),
         ...(v.anchorsBlank ? [field(v.anchorsBlank, RULE_BLANK_HINT.anchors)] : v.anchors.map((a, i) => h('li', { class: `sg-anchor${a.nowhere ? ' sg-blank' : ''}`, title: a.nowhere ? RULE_BLANK_HINT.nowhere : `이 지도의 자리 · ${placeWords(a.places)}` },
-          h('span', { class: 'sg-key' }, '적용 위치'), h('span', { class: 'sg-chip', title: ANCHOR_HINT[a.kind] }, a.label),
+          h('span', { class: 'sg-key' }, '적용 위치'), h('span', { class: `sg-chip${a.program ? ' prog-chip' : ''}`, title: a.program ? `${PROGRAM_HINT} · 규칙과 낱말을 나누는 조건 행에서 이은 자리 (후보)` : ANCHOR_HINT[a.kind] }, a.label),
           h('span', { class: 'sg-val' }, a.nowhere ? `${RULE_BLANKS.nowhere} · ${a.text}` : a.text), condChip(a.quote), q(`sign|anchor|${key}|${i}`, a.quote, '적용 위치 근거')))),
         ...(v.enforceBlank ? [field(v.enforceBlank, RULE_BLANK_HINT.enforce)] : v.enforce.map((e, i) => h('li', { class: `sg-enforce k-${e.kind}${e.kind === 'none' || e.kind === 'unknown' ? ' sg-blank' : ''}`, title: `${ENFORCER_HINT[e.kind]}${e.kind === 'none' || e.kind === 'unknown' ? `\n${e.text}` : ''}` },
           h('span', { class: 'sg-key' }, '보장'), h('span', { class: 'sg-val' }, e.line), e.quote ? q(`sign|enforce|${key}|${i}`, e.quote, '보장 근거') : null))),
@@ -1174,7 +1182,8 @@ function typedBlock(t: Typed, r: PartUnderstanding, budget?: CardBudget, entry?:
   // A store reads as a ledger: a double rule over the names of its rows' fields (never a count of rows it does not know).
   if (b?.kind === 'store') lines.push(h('span', { class: 'node-body b-store', ...(b.fields.length ? { title: `행의 필드 · ${b.fields.join(' · ')}` } : {}) },
     b.fields.length ? fitList(h('span', { class: 'ledger' }), b.fields, 3, true) : h('span', { class: 'ledger blank' }, '행 형식 ?')));
-  else if (b) lines.push(h('span', { class: `node-body b-${b.kind}`, title: b.text }, b.mark ? h('span', { class: 'body-mark', 'aria-hidden': 'true' }, b.mark) : null, h('span', { class: 'body-text' }, b.text)));
+  else if (b) lines.push(h('span', { class: `node-body b-${b.kind}`, title: b.program ? `${b.text}\n프로그램 · ${PROGRAM_HINT}` : b.text }, b.mark ? h('span', { class: 'body-mark', 'aria-hidden': 'true' }, b.mark) : null, h('span', { class: 'body-text' }, b.text),
+    b.program ? progChip('반복 단위는 이 부분의 설정 칸') : null));
   if (t.setting && (budget?.set ?? true)) lines.push(h('span', { class: 'node-set', title: `설정 · ${t.setting}` }, `설정 · ${t.setting}`));
   if (entry) lines.push(entry);
   return lines.length ? h('span', { class: 'node-typed' }, ...lines) : null;
@@ -1261,7 +1270,10 @@ function actionBody(p: PartView, detail: boolean, cellSign: (field: string) => H
         return h('li', { title: does ? `${x} — ${does}` : x }, h('span', { class: 'xp-n', 'aria-hidden': 'true' }, String(i + 1)), h('span', { class: 'xp-step' }, x), does ? h('span', { class: 'xp-does' }, does) : null); }))
       : sec.kind === 'cells' ? h('div', { class: 'xp-cells' }, ...sec.items.map(x => { const sign = cellSign(x); return h('span', { class: `ledger-cell${sign ? ' has-sign' : ''}`, 'data-field': x }, x, sign); }))
         : sec.kind === 'words' ? h('p', { class: 'xp-words' }, ...sec.items.flatMap((x, i) => [i ? h('span', { class: 'xp-dot', 'aria-hidden': 'true' }, ' · ') : null, h('span', { class: 'xp-word' }, x)]).filter((x): x is HTMLElement => !!x))
-          : h('ul', { class: 'xp-lines' }, ...sec.items.map(x => h('li', {}, x)))));
+          // The loop line and the kept state carry the 「프로그램」 chip on what the program filled (map-reading.13).
+          : sec.key === 'loop' && r.loop ? h('ul', { class: 'xp-lines' }, h('li', {}, ...loopNodes(loopSegs(r))))
+            : sec.key === 'stateVars' ? h('ul', { class: 'xp-lines' }, ...sec.items.map((x, i) => h('li', {}, x, isProgram((r.stateVars ?? [])[i]) ? ' ' : null, isProgram((r.stateVars ?? [])[i]) ? progChip('유지 상태의 이름만') : null)))
+              : h('ul', { class: 'xp-lines' }, ...sec.items.map(x => h('li', {}, x)))));
 }
 /** The short expansion's content: the type word and the name as on the card, its operations line, then every list whole. */
 function shortContent(p: PartView): HTMLElement[] {
@@ -1472,8 +1484,8 @@ function renderDetail(id: string) {
     chain.stray.length ? h('p', { class: 'dv-none', title: chain.stray.map(m => `${m.port} · ${m.step}`).join('\n') }, `포트·단계를 찾지 못한 대응 ${chain.stray.length}`) : null) : null;
   const keepEl = loop || vars.length ? h('section', { class: 'xp-sec dv-keep' },
     h('h4', { class: 'xp-title' }, loop && vars.length ? '반복 · 유지 상태' : loop ? '반복' : '유지 상태'),
-    loop ? h('p', { class: 'dv-loop' }, loopLine(loop)) : null,
-    vars.length ? h('ul', { class: 'xp-lines dv-vars' }, ...vars.map(v => h('li', { ...(v.scope ? { title: `범위 · ${v.scope}` } : {}) }, stateVarLine(v)))) : null) : null;
+    loop ? h('p', { class: 'dv-loop', title: loopLine(loop) }, ...loopNodes(loopSegs(r!))) : null,
+    vars.length ? h('ul', { class: 'xp-lines dv-vars' }, ...vars.map(v => h('li', { ...(v.scope ? { title: `범위 · ${v.scope}` } : {}) }, stateVarLine(v), isProgram(v) ? ' ' : null, isProgram(v) ? progChip('유지 상태의 이름만') : null))) : null) : null;
   const refCard = (far: string, out: boolean) => {
     const q = partOf(o, far), qr = q?.reading, mine = ends.filter(e => e.far === far && e.out === out);
     return h('button', { type: 'button', class: 'dv-ref', role: 'listitem', 'data-part-ref': far, 'data-ref': `${out ? 'o' : 'i'}|${far}`,
@@ -1636,11 +1648,13 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // the change plan or a map of a few lines draws each line. Both sets are drawn; .rest-sum on the space shows one of them.
   restSums = sums = lay.edges.length > 6 ? summaryEdges(lay.boxes, lay.edges) : [];
   const relInfo = relationLines(o.project), present = new Set<Channel>();
-  lineWords = new Map(); lineChans = new Map();
+  lineWords = new Map(); lineChans = new Map(); lineTypes = new Map();
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:'), ch = edgeChannel(e, relInfo);
     if (ch) present.add(ch);
     lineWords.set(e.key, lineWord(e, ch, relInfo)); lineChans.set(e.key, ch);
+    // map-reading.13: a data line whose relations hand over one format artifact with its fields draws its label as a type chip.
+    if (ch === 'data') { const fields = edgeFields(e.ids, relInfo); if (fields.length) lineTypes.set(e.key, { name: relInfo.get(e.ids[0]!)!.payload!, fields }); }
     const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key });
     // No text on the map: the meaning shows on hover (tip) and in the selected part's 관련 부분.
     // A plain relation ends in the same dot at both ends: it is drawn, not directed. Data ends in a filled head, control and
@@ -1975,6 +1989,10 @@ function placeLineLabels() {
     const e = lay.edges.find(x => x.key === g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
     const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
     if (on && seenSel.has(selKey(e))) continue;
+    // A line carrying a format artifact's fields reads as its type chip where one of its forms finds room; else as its verb.
+    const tp = fan ? undefined : lineTypes.get(e.key);
+    if (tp) { const at = placeTypeChip(box, e, tp, edgePts(e.key, path), 'long', r => clear(r) && !lineUnder(r, e.key, shown), on);
+      if (at) { blocks.push(at); if (on) seenSel.add(selKey(e)); continue; } }
     const verb = `${wordOf(e)}${!fan && e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
     // The selection's line says what it hands over (the head of its note) where its runs have room; the verb alone otherwise.
     // (Not when the line's own label already says the same words, as a payload often does.)
@@ -2037,6 +2055,37 @@ function restWord(e: Edge): string {
   if (lineChans.get(e.key) === 'data' && w === (REL_LABEL[e.kind] ?? e.kind) && e.notes.length === 1 && !plannedNote(e.notes[0]!)) w = noteHead(e.notes[0]!) || w;
   return `${w}${e.ids.length > 1 ? ` ${e.ids.length}` : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
 }
+/** A line's type chip (map spec 2.4, 타입 칩 = 산출물 이름): the artifact's name and up to three of its fields, one cell each, '+N'
+ * for the rest (line-view typeChipForms), in an accent outline; a click picks the line (its fields read in the pane under 데이터 계약). */
+function typeChipEl(e: Edge, tp: { name: string; fields: string[] }, on = false): HTMLElement {
+  return h('button', { type: 'button', tabindex: '-1', class: `edge-label type-chip k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}`, 'data-type-chip': e.key,
+    title: `데이터 계약 · ${tp.name} · ${tp.fields.length} 필드
+${tp.fields.join(' · ')}
+눌러서 읽기면에 필드`, onclick: (ev: Event) => { ev.stopPropagation(); pickLine(e); } });
+}
+function fillTypeChip(chip: HTMLElement, f: ChipForm) {
+  chip.setAttribute('aria-label', chipText(f));
+  chip.replaceChildren(h('span', { class: 'tc-name' }, f.name), ...f.cells.map(c => h('span', { class: 'tc-cell' }, c)), ...(f.more ? [h('span', { class: 'tc-more' }, `+${f.more}`)] : []));
+}
+/** Places a line's type chip at the first place its widest fitting form finds (the verb's places and rules), or none (null: the
+ * caller sets the plain verb instead). */
+function placeTypeChip(box: HTMLElement, e: Edge, tp: { name: string; fields: string[] }, pts: Point[], prefer: 'long' | 'end' | 'start', free: (r: Rect) => boolean, on: boolean): Rect | null {
+  const chip = typeChipEl(e, tp, on), inv = labelInv(); box.append(chip);
+  for (const form of typeChipForms(tp.name, tp.fields)) {
+    fillTypeChip(chip, form);
+    const spot = labelSpots(pts, chip.offsetWidth * inv, chip.offsetHeight * inv, prefer).find(free);
+    if (spot) { chip.style.left = `${spot.x}px`; chip.style.top = `${spot.y}px`; return spot; }
+  }
+  chip.remove(); return null;
+}
+/** A line picked on the map (its line or its type chip): the part it leaves is selected, and that relation's pane row reads its
+ * whole block (넘기는 것 · 박자 · 방식 · 채널 · 데이터 계약 · 원문). */
+function pickLine(e: Edge) {
+  const o = opened; if (!o) return;
+  const ghost = e.from.startsWith('ghost:'), from = ghost ? e.from.slice(6) : e.from;
+  pickedLine = { rels: [...e.ids], part: from };
+  if (from === selected) refreshReading(); else go(o.key, from, ghost ? partOf(o, from)?.parentId ?? null : scope);
+}
 /** Labels at rest: each on a straight run of its own line with room for it and 8px of line on each side (the longest level
  * run first), else beside the line just short of the part it points to; never on a corner, over another line (where lines
  * cross), a part, a head or the title. Two that would touch keep the one with the better place (the first line on a tie),
@@ -2047,13 +2096,16 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
   const spots: (LabelSpot & { el: HTMLElement })[] = [], hidden: SVGGElement[] = [], shown = shownLines(), inv = labelInv();
   for (const g of lines) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
-    const label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, restWord(e));
-    box.append(label);
-    const w = label.offsetWidth * inv, hh = label.offsetHeight * inv, pts = edgePts(e.key, path);
-    const free = (r: Rect) => clear(r) && !lineUnder(r, e.key, shown);
-    const run = labelSpots(pts, w, hh, 'long', REST_PAD).filter(free).slice(0, 10);
-    const port = portSpots(pts, w, hh).filter(r => free(r) && !polylineHitsRect(pts, r, 1));
-    const mine = [...run, ...port];
+    const pts = edgePts(e.key, path), free = (r: Rect) => clear(r) && !lineUnder(r, e.key, shown);
+    const spotsFor = (el: HTMLElement) => { const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
+      return [...labelSpots(pts, w, hh, 'long', REST_PAD).filter(free).slice(0, 10), ...portSpots(pts, w, hh).filter(r => free(r) && !polylineHitsRect(pts, r, 1))]; };
+    // A type chip (map-reading.13) takes its widest form that has a place; with none it gives way to the plain label.
+    let label: HTMLElement | null = null, mine: Rect[] = [];
+    const tp = lineTypes.get(e.key);
+    if (tp) { const chip = typeChipEl(e, tp); box.append(chip);
+      for (const form of typeChipForms(tp.name, tp.fields)) { fillTypeChip(chip, form); mine = spotsFor(chip); if (mine.length) break; }
+      if (mine.length) label = chip; else chip.remove(); }
+    if (!label) { label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}` }, restWord(e)); box.append(label); mine = spotsFor(label); }
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
     // Better places first, across all labels: every label's first place before any label's second.
     mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i, el: label }));
@@ -2187,7 +2239,7 @@ let sheetOpen = false;
 function select(partId: string | null) {
   if (openState && openState.part !== partId) closeOpen(false); // an opening belongs to its part: another selection closes it
   const changed = selected !== partId;
-  if (changed) { editing = false; composerOpen = false; if (ask && !ask.controller) ask = null; sheetOpen = !!pendingRecord; pickedStep = null; if (signOpen && signOpen.part !== partId) { signOpen = null; signFocus = false; markSignTabs(); } }
+  if (changed) { editing = false; composerOpen = false; if (ask && !ask.controller) ask = null; sheetOpen = !!pendingRecord; pickedStep = null; if (pickedLine && pickedLine.part !== partId) pickedLine = null; if (signOpen && signOpen.part !== partId) { signOpen = null; signFocus = false; markSignTabs(); } }
   if (!!selected !== !!partId) recentPeek = false;
   if (partId) scopeReading = false;
   selected = partId;
@@ -2418,7 +2470,8 @@ function rulesStrip(o: Opened): HTMLElement | null {
     h('p', { class: 'rules-head' }, h('button', { type: 'button', class: 'link-button rules-part', title: `‘${gr.name}’ 선택`, onclick: () => goPart(o, gr.part) }, gr.name), h('small', {}, String(gr.rows.length))),
     h('ul', { class: 'rules-rows' }, ...gr.rows.map(x => h('li', {}, h('button', { type: 'button', class: `rules-row k-${x.kind}`, 'data-rule-part': gr.part,
       title: `${gr.name}의 규칙 · ${RULE_ROW_LABEL[x.kind]}\n${x.claim.text}\n눌러서 읽기면의 규칙에서 범위·적용 위치·보장`, onclick: () => openRuleAt(o, gr.part, claimKey(x.claim)) },
-      h('span', { class: `rules-kind${x.kind === 'unplaced' ? ' entry-unplaced' : ''}` }, RULE_ROW_LABEL[x.kind]), h('span', { class: 'rules-text' }, x.claim.text)))))))));
+      h('span', { class: `rules-kind${x.kind === 'unplaced' ? ' entry-unplaced' : ''}` }, RULE_ROW_LABEL[x.kind]), h('span', { class: 'rules-text' }, x.claim.text),
+      ruleHasProgram(x.claim) ? progChip('적용 위치') : null))))))));
   return el;
 }
 /** A part chosen from the title (a rule's part may be outside the view): in this view when it is drawn or inside it, else in its parent's. */
@@ -2756,22 +2809,35 @@ function renderLens() {
   // handed over (its payload, how often, designed or seen), else the stored note (the reason of that relation); a line drawn from
   // a folded part summarises its inside, so its row also names the inner end. A row and its line on the map light each other.
   const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1)!.from.selected : null;
-  const handed = relationPayloads(o.project);
+  const handed = relationPayloads(o.project), lineSaid = relationLines(o.project);
+  // The picked line's block (map-reading.13, line-view lineFacts): 넘기는 것, 박자 (or 박자 미기재), 방식, 채널, the format artifact's
+  // fields under 데이터 계약 · N 필드 (one cell each, with the artifact's name), and the line of the record that read it.
+  const isPicked = (x: End) => pickedLine?.part === part.id && pickedLine.rels.includes(x.r.id);
+  const lineBlock = (rel: string) => { const s = lineSaid.get(rel);
+    const facts = lineFacts({ payload: s?.payload ?? null, cadence: s?.cadence ?? null, mode: s?.mode ?? null, channel: s?.channel ?? null, fields: s?.fields ?? [] });
+    const c = contractList(s?.payload ?? null, s?.fields ?? []);
+    return h('div', { class: 'line-block', 'data-line-block': rel, role: 'group', 'aria-label': '이 선이 말하는 것' },
+      h('ul', { class: 'lb-facts' }, ...facts.map(x => h('li', { class: x.blank ? 'stp-blank' : '', 'data-fact': x.key }, x.text))),
+      c ? h('div', { class: 'lb-contract' }, h('p', { class: 'lb-head', title: '선이 나르는 형식 산출물의 필드 · 기록이 적은 그대로 (타입·단위·필수는 기록이 싣지 않음)' }, c.head, h('small', {}, ` · ${c.name}`)),
+        h('div', { class: 'xp-cells' }, ...c.cells.map(x => h('span', { class: 'ledger-cell' }, x)))) : null,
+      s?.quote ? h('p', { class: 'lb-cite' }, quoteCite(JSON.stringify(['line', rel]), s.quote, '이 선')) : h('p', { class: 'lb-cite stp-blank' }, '읽은 원문 줄 없음 · 사람이 그린 선'));
+  };
   const port = (x: End) => {
     const far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
     // The scope itself is this scope's boundary, not a place outside it.
     const where = farRep === x.far ? null : x.far === scope ? '이 범위' : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
     const came = x.far === cameFrom, read = handed.get(x.r.id), revised = revisedLine(o, x.r.id), verb = x.r.kind === 'flow' ? null : relLabel(x.r.kind, x.out);
-    const line = read?.payload ? `${read.payload}${read.cadence ? ` (${read.cadence})` : ''}${read.mode ? ` · ${MODE_LABEL[read.mode]}` : ''}` : x.r.note;
-    return h('li', {}, h('button', { type: 'button', class: `port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${verb ? ` · ${verb}` : ''}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
+    const picked = isPicked(x), line = picked ? x.r.note : read?.payload ? `${read.payload}${read.cadence ? ` (${read.cadence})` : ''}${read.mode ? ` · ${MODE_LABEL[read.mode]}` : ''}` : x.r.note;
+    return h('li', { ...(picked ? { class: 'picked' } : {}) }, h('button', { type: 'button', class: `port${came ? ' came' : ''}${picked ? ' picked' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${verb ? ` · ${verb}` : ''}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
       h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name),
         verb ? h('span', { class: 'port-kind' }, REL_LABEL[x.r.kind] ?? x.r.kind) : null, came ? h('span', { class: 'port-came' }, '출발') : null),
       near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null,
-      line || revised ? h('span', { class: 'port-note', 'data-rel-note': x.r.id, ...(read?.payload && x.r.note ? { title: x.r.note } : {}) }, `${line}${revised ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null));
+      line || revised ? h('span', { class: 'port-note', 'data-rel-note': x.r.id, ...(read?.payload && x.r.note ? { title: x.r.note } : {}) }, `${line}${revised ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null),
+      picked ? lineBlock(x.r.id) : null);
   };
   // Under 이유 the lines read as a compact list (the full ports with their steps are the detail view's): a group per direction.
   const portGroup = (label: string, hint: string, list: End[]) => list.length ? h('div', { class: 'lens-ports why-group' }, h('h4', { title: hint }, label, h('small', {}, String(list.length))),
-    h('ul', {}, ...list.slice(0, 8).map(port)), list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${list.length - 8}개 더 · 전체 읽기`) : null) : null;
+    h('ul', {}, ...[...list.slice(0, 8), ...list.slice(8).filter(isPicked)].map(port)), list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${list.length - 8}개 더 · 전체 읽기`) : null) : null;
   const ports = [portGroup('받는 것', '다른 부분이 이 부분에 넘겨주는 것', ends.filter(x => x.r.kind === 'flow' && !x.out)),
     portGroup('내는 것', '이 부분이 다른 부분에 넘겨주는 것', ends.filter(x => x.r.kind === 'flow' && x.out)),
     portGroup('함께', '필요로 함 · 함께 씀 · 관련', relationGroups(ends.filter(x => x.r.kind !== 'flow')).flatMap(g => g.list))];
@@ -2835,6 +2901,7 @@ function renderLens() {
       status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '이 부분에 대해 묻기') : null));
   l.hidden = false;
   clampNotes(l, o, part.id);
+  if (pickedLine?.part === part.id) requestAnimationFrame(() => l.querySelector<HTMLElement>('[data-line-block]')?.scrollIntoView({ block: 'nearest' }));
   if (signFocus && signOpen?.part === part.id) {
     signFocus = false; const kind = signOpen.kind, pick = signPick;
     requestAnimationFrame(() => { const at = l.querySelector<HTMLElement>(`#lens-signs [data-sign-focus="${kind}"]`) ?? l.querySelector<HTMLElement>('#lens-signs h3'); at?.scrollIntoView({ block: 'nearest' }); at?.focus({ preventScroll: true });
@@ -2868,6 +2935,7 @@ function outLines(o: Opened, id: string): OutLine[] {
 function insideSections(o: Opened, part: PartView): HTMLElement[] {
   const r = part.reading; if (!r) return [];
   const steps = stepsOf(r), loop = r.loop ?? null, vars = r.stateVars ?? [], out: HTMLElement[] = [];
+  const keep = structureKeep(loop, vars, r.config, conditionsOf(r), UNSAID);
   const pm = r.portMap ?? [];
   if (steps.length) {
     const lines = outLines(o, part.id);
@@ -2888,7 +2956,7 @@ function insideSections(o: Opened, part: PartView): HTMLElement[] {
           cons!.list.length ? h('ul', { class: 'stp-cons' }, ...cons!.list.map(c => h('li', {}, h('button', { type: 'button', class: 'link-button', title: `${partOf(o, c.far)?.name ?? '부분'}${toParticle(partOf(o, c.far)?.name ?? '부분')} 가기`, onclick: () => go(o.key, c.far) },
             partOf(o, c.far)?.name ?? '부분'), c.port ? h('small', {}, ` · ${c.port}`) : null))) : h('p', { class: 'stp-blank' }, '나가는 선 없음'),
           h('p', { class: 'stp-label' }, '실패·재개'),
-          h('p', { class: loop?.stop || loop?.resume ? 'stp-line' : 'stp-blank' }, loop?.stop || loop?.resume ? `정지 ${loop.stop ?? UNSAID} · 재개 ${loop.resume ?? UNSAID}` : '실패 대응 미제공')) : null);
+          h('p', { class: loop?.stop || loop?.resume ? 'stp-line' : 'stp-blank' }, ...(loop?.stop || loop?.resume ? loopNodes(keep.loop!.slice(1)) : ['실패 대응 미제공']))) : null);
     };
     out.push(h('section', { class: 'lens-ports lens-steps' }, h('h3', { title: '기록의 단계 표, 행의 순서대로. 단계 사이의 순서·분기는 읽지 않았다.' }, '안의 단계', h('small', {}, String(steps.length))),
       h('ol', { class: 'stp-list' }, ...r.steps.map(item))));
@@ -2901,11 +2969,12 @@ function insideSections(o: Opened, part: PartView): HTMLElement[] {
         h('small', { class: `stp-cond-at${x.step === null ? ' stp-blank' : ''}`, title: x.step === null ? '조건의 말이 이 부분의 어느 단계도 이름으로 짚지 않음' : '조건의 말이 이 단계를 이름으로 짚음' }, x.step === null ? CONDITION_BLANK : `단계 ‘${x.step}’`),
         quoteCite(JSON.stringify(['condition', part.id, x.condition.at, x.index]), x.condition.quote, `조건 ${x.condition.when}`))))));
   }
+  // map-reading.13: what the program filled carries 「프로그램」 (pane-view structureKeep), never read as the model's.
   if (loop) out.push(h('section', { class: 'lens-ports lens-loop' }, h('h3', {}, '반복'),
-    h('p', { class: 'stp-line' }, h('span', {}, loopLine(loop)), quoteCite(JSON.stringify(['loop', part.id, loop.at]), loop.quote, '반복'))));
+    h('p', { class: 'stp-line' }, h('span', {}, ...loopNodes(keep.loop!)), quoteCite(JSON.stringify(['loop', part.id, loop.at]), loop.quote, '반복'))));
   if (vars.length) out.push(h('section', { class: 'lens-ports lens-vars' }, h('h3', {}, '유지 상태', h('small', {}, String(vars.length))),
-    h('ul', { class: 'stp-vars' }, ...vars.map(v => h('li', {}, h('span', { class: 'stp-var' }, v.name, v.scope ? h('small', {}, ` · ${v.scope}`) : null),
-      h('span', { class: 'stp-var-rw' }, `읽음 ${v.readBy.length ? v.readBy.join(', ') : UNSAID} · 바꿈 ${v.changedBy.length ? v.changedBy.join(', ') : UNSAID}`))))));
+    h('ul', { class: 'stp-vars' }, ...keep.vars.map(v => h('li', {}, h('span', { class: 'stp-var' }, v.name, v.scope ? h('small', {}, ` · ${v.scope}`) : null, v.program ? ' ' : null, v.program ? progChip('유지 상태의 이름만 · 범위·읽음·바꿈은 기록에 없음') : null),
+      h('span', { class: 'stp-var-rw' }, v.rw))))));
   return out;
 }
 /** Where the part lives, as the records name it: the files, folders or units readings gave it and the places its current claims
@@ -2926,17 +2995,25 @@ function relationPayloads(project: Project): Map<string, ReadingRelation> {
 }
 /** What each relation's line carries and says (map-reading.7–8): per relation, the channel, payload and cadence of the newest
  * reading that names each (readings are oldest first); chAt orders the channels of different relations by their reading. */
-interface LineSaid { channel: Channel | null; chAt: number; payload: string | null; cadence: string | null }
+/** map-reading.13: also how the record has it (mode), the fields of the format artifact it carries (the newest reading that names
+ * any) and the line of the newest reading that read it (its quote). */
+interface LineSaid { channel: Channel | null; chAt: number; payload: string | null; cadence: string | null; mode: RelationMode | null; fields: string[]; quote: ReadingQuote | null; at: string | null }
 function relationLines(project: Project): Map<string, LineSaid> {
   const out = new Map<string, LineSaid>();
   project.readings.forEach((r, i) => {
     if (isMapReading(r)) for (const x of r.relations) {
-      const cur = out.get(x.relationId) ?? { channel: null, chAt: -1, payload: null, cadence: null };
-      out.set(x.relationId, { channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: x.payload ?? cur.payload, cadence: x.cadence ?? cur.cadence });
+      const cur = out.get(x.relationId) ?? { channel: null, chAt: -1, payload: null, cadence: null, mode: null, fields: [], quote: null, at: null };
+      out.set(x.relationId, { channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: x.payload ?? cur.payload, cadence: x.cadence ?? cur.cadence,
+        mode: x.mode ?? cur.mode, fields: x.payloadFields?.length ? [...x.payloadFields] : cur.fields, quote: x.quote ?? cur.quote, at: r.at });
     }
   });
   return out;
 }
+/** The type chip of each drawn line that carries a format artifact's fields (line-view edgeFields), by line key: its name and fields. */
+let lineTypes = new Map<string, { name: string; fields: string[] }>();
+/** The line picked on the map (its line or its type chip): its relations and the part selected for it; the pane's row of that
+ * relation then reads its whole block (넘기는 것 · 박자 · 방식 · 채널 · 데이터 계약 · 원문). Another selection drops it. */
+let pickedLine: { rels: string[]; part: string } | null = null;
 /** A line's channel: the newest reading's for any relation it draws; else by kind (a flow hands data over; a need or a shared
  * use refers). A plain relation has no direction, so it keeps its dots and no channel. */
 function edgeChannel(e: Edge, said: Map<string, LineSaid>): Channel | null {
@@ -4488,8 +4565,7 @@ function bindCanvas() {
     }
     // A click on a line (no move) selects the part the line leaves; on empty canvas it clears the selection.
     if (!d.moved && d.mode === 'pan' && d.edge) {
-      const edge = edgeOf(d.edge), from = edge && (edge.from.startsWith('ghost:') ? edge.from.slice(6) : edge.from);
-      if (edge && from && from !== selected) go(o.key, from, edge.from.startsWith('ghost:') ? partOf(o, from)?.parentId ?? null : scope);
+      const edge = edgeOf(d.edge); if (edge) pickLine(edge);
       return;
     }
     if (!d.moved && selected) go(o.key);

@@ -2316,3 +2316,22 @@ button:disabled { opacity: .5; cursor: default; }
 .panel-body > :is(.lens-origin, .lens-why, .lens-history, .lens-sources, .lens-where) { margin-top: var(--s-4); }
 .lens-why .sec-related { margin: 0; padding: 0; border: 0; }
 .sheet-changes .changes { margin: 2px 0 0; }
+
+/* map-reading.13: a value the program carried over from the record wears 「프로그램」 (the 명시/해석 chip's style, never the model's) */
+.prog-chip { display: inline-block; height: 16px; vertical-align: 1px; font-weight: 400; cursor: help; }
+.node-body .prog-chip { flex: none; height: 14px; margin-left: 4px; padding: 0 3px; font-size: 10px; line-height: 12px; vertical-align: 0; }
+/* A line's type chip (spec 2.4: 타입 칩 = 산출물 이름): the artifact's name and up to three fields in cells, the accent outline */
+.edge-label.type-chip { display: inline-flex; align-items: center; gap: 0; padding: 0 6px; border: 1px solid var(--accent-line); border-radius: 8px; background: var(--bg); color: var(--text-2); font-family: inherit; line-height: 14px; cursor: pointer; pointer-events: auto; }
+.edge-label.type-chip.on, .edge-label.type-chip:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.type-chip .tc-name { font-weight: var(--fw-name); }
+.type-chip .tc-cell, .type-chip .tc-more { margin-left: 5px; padding-left: 5px; border-left: 1px solid var(--accent-line); font-weight: 400; color: var(--text-3); }
+.type-chip .tc-more { color: var(--text-4); }
+/* The picked line's block in the pane: 넘기는 것 · 박자 · 방식 · 채널, the data contract's fields, the quote */
+.port.picked { background: var(--accent-soft); }
+.line-block { margin: 2px 0 6px 20px; padding: 6px 8px; border-left: 2px solid var(--accent-line); font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.lb-facts { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0 10px; }
+.lb-contract { margin-top: 4px; }
+.lb-head { margin: 0 0 3px; font-size: 11.5px; color: var(--text-3); }
+.lb-head small { color: var(--text-4); }
+.lb-contract .xp-cells { display: flex; flex-wrap: wrap; gap: 3px; }
+.lb-cite { margin: 4px 0 0; }

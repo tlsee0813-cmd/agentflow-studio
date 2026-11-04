@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, noteTime,
-  disputeSection, withDisputes, DISPUTE_KEY, DISPUTE_HEAD, HANDOVER_END, ROLE_KEY, HISTORY_SHOWN } from '../dist/public/client/pane-view.js';
+  disputeSection, withDisputes, structureKeep, DISPUTE_KEY, DISPUTE_HEAD, HANDOVER_END, ROLE_KEY, HISTORY_SHOWN } from '../dist/public/client/pane-view.js';
 
 const C = (x) => ({ kind: 'reported', text: '', record: 'R1', quote: 'q', about: null, topic: null, evidence: null, when: null, where: null, before: null, ...x });
 const memory = () => { const m = new Map(); return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), m }; };
@@ -153,4 +153,17 @@ test('구조: the summary counts the conditions after the steps; each condition 
   assert.equal(rows[0].condition, conds[0], 'the row keeps its condition (its quote chip reads its row)');
   assert.deepEqual(structureConditions([], steps), []);
   assert.deepEqual(structureConditions(conds.slice(0, 1), []).map(x => x.step), [null], 'no steps: every condition 단계 미상');
+});
+
+test('구조 (map-reading.13): what the program filled in the loop and the kept state carries the program mark, the rest reads as before', () => {
+  const conds = [{ when: 'quota.used >= quota.limit', then: 'QUOTA_REACHED, 오늘 조회 멈춤', else: null }];
+  const k = structureKeep({ unit: 'collect_cadence 300 s', stop: 'QUOTA_REACHED, 오늘 조회 멈춤', resume: null, program: true },
+    [{ name: 'quota.used', scope: null, readBy: [], changedBy: [], program: true }, { name: 'cursor', scope: 'sqlite', readBy: ['수집'], changedBy: ['저장'], program: false }],
+    ['collect_cadence 300 s'], conds);
+  assert.deepEqual(k.loop.map(x => [x.text, x.program]), [['반복 collect_cadence 300 s', true], ['정지 QUOTA_REACHED, 오늘 조회 멈춤', true], ['재개 미상', false]]);
+  assert.deepEqual(k.vars.map(v => [v.name, v.scope, v.rw, v.program]), [['quota.used', null, '읽음 미상 · 바꿈 미상', true], ['cursor', 'sqlite', '읽음 수집 · 바꿈 저장', false]]);
+  const model = structureKeep({ unit: '틱', stop: null, resume: null }, [{ name: 's', scope: null, readBy: [], changedBy: [] }], [], []);
+  assert.deepEqual(model.loop.map(x => x.program), [false, false, false], 'a loop an earlier reading wrote is the model\'s');
+  assert.equal(model.vars[0].program, false);
+  assert.equal(structureKeep(null, [], [], []).loop, null);
 });

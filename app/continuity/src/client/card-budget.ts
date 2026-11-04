@@ -59,11 +59,13 @@ export function entryParts(c: EntryCounts, shown: EntryShown): string[] {
 export const CADENCE = /\d\s*(ms|s|sec|m|min|h|d)\b|\d\s*(초|분|시간|일)|간격|주기|마다|매\s?\S|interval|every|cadence|tick|cron|poll|period/i;
 /** A loop card's one structural line (spec 2.1, 반복 단위를 머리에): the unit the record gives for its repeat (map-reading.9
  * loop.unit) first, else the first setting that reads as a beat ('반복 · 60 s'), else '반복 단위 ?'. used: the setting the line
- * already names (the setting line then shows another); none while the unit stands. Never a beat made up from a name. */
-export function loopBody(unit: string | null | undefined, config: readonly string[]): { text: string; used: string | null } {
-  if (unit) return { text: `반복 · ${unit}`, used: null };
+ * already names (the setting line then shows another); none while the unit stands. Never a beat made up from a name.
+ * program (map-reading.13): the unit is the program's (line-view programLoopItems); the line then carries the 「프로그램」 chip. A
+ * beat the card itself takes from the settings is never marked: it is the setting as written, not a loop the reading gave. */
+export function loopBody(unit: string | null | undefined, config: readonly string[], program = false): { text: string; used: string | null; program: boolean } {
+  if (unit) return { text: `반복 · ${unit}`, used: null, program };
   const used = config.find(c => CADENCE.test(c)) ?? null;
-  return { text: used ? `반복 · ${used}` : '반복 단위 ?', used };
+  return { text: used ? `반복 · ${used}` : '반복 단위 ?', used, program: false };
 }
 
 /** The map's zoom levels (spec 4, 세 확대 단계): 개요 (overview), 중간 (mid) and 상세 (detail). */

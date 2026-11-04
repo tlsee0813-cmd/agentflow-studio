@@ -15,6 +15,7 @@
  * them reads '자리 없음' and is never placed by guess. Pure: no
  * DOM, so each rule is tested on its own. */
 import { claimTopic, claimEvidence, claimWhen, EVIDENCE_LABEL } from '../shared/claim-topic.js';
+import { isProgram, PROGRAM_LABEL } from './line-view.js';
 import type { ClaimKind, ClaimTopic, EvidenceGrade, PartType, RuleScope, ReadingAnchor, ReadingEnforcer, ReadingQuote, WithdrawalKind, GateKind, AnchorKind, EnforcerKind } from '../shared/types.js';
 
 /** What a sign reads from a claim (a CurrentClaim carries all of it). */
@@ -163,7 +164,9 @@ export const ENFORCER_HINT: Record<EnforcerKind, string> = {
 export interface RuleView {
   legacy: boolean;
   scope: { text: string; blank: boolean; hint: string };
-  anchors: { text: string; kind: AnchorKind; label: string; quote: ReadingQuote; places: PlaceRef[]; nowhere: boolean }[];
+  /** program (map-reading.11): the program put this place there (a condition row sharing words with the rule); its label is then
+   * 「프로그램」, never 명시/해석 (the model did not say it). */
+  anchors: { text: string; kind: AnchorKind; label: string; quote: ReadingQuote; places: PlaceRef[]; nowhere: boolean; program: boolean }[];
   /** '적용 위치 미해결' when the rule carries no anchor (or an earlier reading wrote it). */
   anchorsBlank: string | null;
   enforce: { kind: EnforcerKind; text: string; line: string; quote: ReadingQuote | null }[];
@@ -186,7 +189,7 @@ export function ruleView(c: RuleClaim, places: PartPlaces, partName = '이 부�
     : scope === 'part' ? { text: '범위 · 부분 전체', blank: false, hint: '이 부분 전체에 미치는 규칙' }
       : scope === 'project' ? { text: '범위 · 프로젝트 전체', blank: false, hint: '프로젝트 전체 원칙 (기록이 그렇게 말함)' }
         : { text: `범위 · ${named} ‘${name}’${p.scopeFound ? '' : ` · ${RULE_BLANKS.nowhere}`}`, blank: !p.scopeFound, hint: p.scopeFound ? `이 부분의 ${named} ‘${name}’에 미치는 규칙` : RULE_BLANK_HINT.nowhere };
-  const anchors = p.anchors.map(({ anchor: a, places: ps }) => ({ text: a.text, kind: a.kind, label: ANCHOR_LABEL[a.kind], quote: a.quote, places: ps, nowhere: !ps.length }));
+  const anchors = p.anchors.map(({ anchor: a, places: ps }) => ({ text: a.text, kind: a.kind, label: isProgram(a) ? PROGRAM_LABEL : ANCHOR_LABEL[a.kind], quote: a.quote, places: ps, nowhere: !ps.length, program: isProgram(a) }));
   const devices = c.enforcedBy ?? [];
   const enforce = devices.map(e => ({ kind: e.kind, text: e.text, line: e.kind === 'none' || e.kind === 'unknown' ? ENFORCER_LABEL[e.kind] : `${ENFORCER_LABEL[e.kind]} · ${e.text}`, quote: e.quote }));
   return { legacy: false, scope: sc, anchors, anchorsBlank: anchors.length ? null : RULE_BLANKS.anchors, enforce, enforceBlank: devices.length ? null : RULE_BLANKS.enforce,

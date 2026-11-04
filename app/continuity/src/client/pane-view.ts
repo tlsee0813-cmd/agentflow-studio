@@ -10,6 +10,7 @@
 import { TOPIC_ORDER, claimTopic, claimEvidence, claimWhen } from '../shared/claim-topic.js';
 import type { ClaimKind, ClaimTopic, EvidenceGrade, ReadingQuote } from '../shared/types.js';
 import { conditionPlacement, conditionLines, type ConditionLike, type ChainStep } from './steps-view.js';
+import { loopSegments, isProgram, type LoopLike, type ConditionLike as LineCondition } from './line-view.js';
 
 /** What the pane reads of a claim (a CurrentClaim or a history claim carries all of it). */
 export interface PaneClaim {
@@ -218,4 +219,13 @@ export function structureConditions<T extends ConditionLike>(conditions: readonl
   for (const [k, list] of conditionPlacement(conditions, steps).steps) for (const x of list) at.set(x.index, k);
   return conditions.map((condition, index) => { const k = at.get(index);
     return { index, condition, text: conditionLines(condition).join(' · '), step: k === undefined ? null : steps[k]!.name }; });
+}
+/** 구조's 반복 and 유지 상태 (map-reading.9, with map-reading.13's program marks): the loop line in its three parts, each with whether
+ * the program filled it (line-view loopSegments), and each kept state with what reads and changes it ('미상' when not said) and
+ * whether the program put it there (a program state names nothing but itself). */
+export interface StructureKeep { loop: { key: 'unit' | 'stop' | 'resume'; text: string; program: boolean }[] | null; vars: { name: string; scope: string | null; rw: string; program: boolean }[] }
+export function structureKeep(loop: LoopLike | null | undefined, vars: readonly { name: string; scope: string | null; readBy: readonly string[]; changedBy: readonly string[]; program?: boolean }[],
+  config: readonly string[], conditions: readonly LineCondition[], unsaid = '미상'): StructureKeep {
+  return { loop: loop ? loopSegments(loop, config, conditions, unsaid) : null,
+    vars: vars.map(v => ({ name: v.name, scope: v.scope, rw: `읽음 ${v.readBy.length ? v.readBy.join(', ') : unsaid} · 바꿈 ${v.changedBy.length ? v.changedBy.join(', ') : unsaid}`, program: isProgram(v) })) };
 }
