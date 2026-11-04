@@ -45,12 +45,76 @@ export function loopBody(unit: string | null | undefined, config: readonly strin
   return { text: used ? `반복 · ${used}` : '반복 단위 ?', used, program: false };
 }
 
-/** The map's zoom levels (spec 4, 세 확대 단계): 개요 (overview), 중간 (mid) and 상세 (detail). */
+/* ---------- zoom tiers (map design v3 5.1–5.4) ----------
+ * The tier is the map's, one for every card, decided by the card's projected width on screen p = 272 × k (what a card can really
+ * hold is its screen width): 점 지도 below 82 (k < 0.30: glyphs, and names only of what is selected or focused), 개요 82–159
+ * (title, kind and short status only: 54% is here, p = 147), 중간 160–239 (the head, one or two kind rows that fit, the inner line
+ * and the bottom line), 가까이 from 240 (everything). Crossing an edge needs 6px more on screen than the edge (and leaving it 6px
+ * less), so a wheel that settles near an edge does not flicker; the first view's tier is read without it. The card's box never
+ * changes with the tier (5.3): the tier and the scale only choose what is shown inside it (tierFit). */
+export type ZoomTier = 'dots' | 'far' | 'mid' | 'near';
+/** The base card width the tiers are read against, and the edges on the screen card width, with their hysteresis. */
+export const TIER_W = 272, TIER_DOTS = 82, TIER_FAR = 160, TIER_NEAR = 240, TIER_HYST = 6;
+const TIERS: readonly ZoomTier[] = ['dots', 'far', 'mid', 'near'], EDGES = [TIER_DOTS, TIER_FAR, TIER_NEAR] as const;
+/** The tier at camera scale k; prev: the tier shown now (null for a first view, read without hysteresis). */
+export function zoomTier(k: number, prev: ZoomTier | null = null): ZoomTier {
+  const p = TIER_W * k;
+  let i = prev ? TIERS.indexOf(prev) : -1;
+  if (i < 0) return p < TIER_DOTS ? 'dots' : p < TIER_FAR ? 'far' : p < TIER_NEAR ? 'mid' : 'near';
+  while (i < 3 && p >= EDGES[i]! + TIER_HYST) i++;
+  while (i > 0 && p < EDGES[i - 1]! - TIER_HYST) i--;
+  return TIERS[i]!;
+}
+/** The map's zoom levels as the way back and the tests name them: 개요 (dots and far), 중간 and 상세 (near), on the same edges. */
 export type ZoomLevel = 'overview' | 'mid' | 'detail';
-/** The zoom shown in the map's tools (a whole percent) up to which each level holds: 개요 to 55%, 중간 to 85%, 상세 above. */
-export const OVERVIEW_MAX = 55, MID_MAX = 85;
-/** The level for a camera scale, read as the percent the zoom tool shows (70% is 중간, 55% is 개요, 86% is 상세). */
 export function zoomLevel(k: number): ZoomLevel {
-  const pct = Math.round(k * 100);
-  return pct <= OVERVIEW_MAX ? 'overview' : pct <= MID_MAX ? 'mid' : 'detail';
+  const t = zoomTier(k);
+  return t === 'near' ? 'detail' : t === 'mid' ? 'mid' : 'overview';
+}
+
+/** The sizes a tier draws a card's text at, in map pixels (5.2): the name max(15, 14/k) on lines of max(20, 18/k), the kind word
+ * and a row's label max(12, 12/k) on lines of max(16, 16/k), a row's value max(13, 12/k) on rows of max(20, 16/k): so on screen a
+ * title is never under 14px on 18px lines, body text never under 12px on 16px lines. At 가까이 the lines keep their own heights
+ * (the scale is at least 0.88 there, the type grows a hair inside them). The glyph tile reads 24px on screen at 개요. */
+export interface TierText { title: number; titleLh: number; kind: number; kindLh: number; row: number; rowLh: number; label: number; bottom: number; glyph: number; gap: number }
+export function tierText(k: number, tier: ZoomTier): TierText {
+  const at = (base: number, screen: number) => Math.max(base, screen / Math.max(k, 0.05)), near = tier === 'near';
+  return { title: at(15, 14), titleLh: near ? 20 : at(20, 18), kind: at(12, 12), kindLh: near ? 16 : at(16, 16), row: at(13, 12), rowLh: near ? 20 : at(20, 16), label: at(12, 12),
+    bottom: near ? 28 : at(28, 20), glyph: tier === 'far' || tier === 'dots' ? at(20, 24) : 20, gap: near ? 16 : 8 };
+}
+/** What a card holds at its near tier (card-family cardHeights): its name lines, kind rows, contract area, inner line, sign row
+ * and whole height (map px). */
+export interface CardShapeIn { nameLines: number; rows: number; contract: number; inner: number; signs: number; total: number;
+  /** 1 when the card's short status reads on a line of its own at 개요 (a card with a lifecycle chip says it in the kind line). */
+  status?: number }
+/** What a card shows at a tier: its name lines, the kind line, the short status line (개요), how many kind rows, and whether the
+ * contract area, the inner line, the sign row and the bottom line are drawn. */
+export interface CardFit { nameLines: number; kind: boolean; status: boolean; rows: number; contract: boolean; inner: boolean; signs: boolean; bottom: boolean }
+/** The card's padding above and below (map px), as card-family draws it. */
+const FIT_PAD = 12 * 2 + 2;
+/** What fits a card's fixed box at a tier and scale (5.2–5.4): what does not fit is hidden, never shrunk or overlapped. 가까이 shows
+ * everything (the box was made for it). 중간 keeps the head, then the bottom line, the inner line, at most two kind rows and the sign
+ * row, each only while its scaled lines fit; never the contract area (its pins and names hide; the lines' ends stay). 개요 and the
+ * dot map keep the head only: two name lines, else one, and the kind line with the short status when it fits. */
+export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier): CardFit {
+  const nl = Math.min(2, Math.max(1, c.nameLines));
+  if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, contract: true, inner: c.inner > 0, signs: c.signs > 0, bottom: true };
+  const T = tierText(k, tier);
+  let room = c.total - FIT_PAD;
+  const take = (h: number) => { if (room >= h) { room -= h; return true; } return false; };
+  // The head: one name line always; at 개요 then the kind line and the short status line (title, kind and short status, 5.4),
+  // and a second name line when there is still room (a name that kept one line at 가까이 may need two at the larger type here).
+  room -= T.titleLh;
+  if (tier !== 'mid') {
+    const kind = take(T.kindLh), status = !!c.status && take(T.kindLh), names = take(T.titleLh) ? 2 : 1;
+    return { nameLines: names, kind, status, rows: 0, contract: false, inner: false, signs: false, bottom: false };
+  }
+  // 중간: the kind line, the bottom line (it says the status) under the head's gap, then a second name line, the inner line, one or
+  // two kind rows and the sign row, each while it fits.
+  const kind = take(T.kindLh); room -= T.gap;
+  const bottom = take(T.bottom), names = take(T.titleLh) ? 2 : 1, inner = c.inner > 0 && take(Math.max(24, T.rowLh + 4));
+  // The rows' block keeps its 12px after the last row.
+  let rows = 0; while (rows < Math.min(2, c.rows) && take(T.rowLh + (rows ? 0 : 12))) rows++;
+  const signs = c.signs > 0 && take(Math.max(24, T.rowLh + 4));
+  return { nameLines: names, kind, status: false, rows, contract: false, inner, signs, bottom };
 }

@@ -29,7 +29,7 @@ import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
-import { zoomLevel, entryParts, type EntryCounts } from './card-budget.js';
+import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
 import { cardTemplate, cardHeights, lifecycleOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
@@ -880,12 +880,25 @@ function opsOf(r: PartUnderstanding): { full: string; brief: string; tip: string
 /** The day an operations line's time is read against: the newest map reading's basis time, else today (UTC, as records write Z). */
 let opsRef: string | null = null;
 const opsDay = (o: Opened) => [...o.project.readings].reverse().find(isMapReading)?.basisAt ?? new Date().toISOString().slice(0, 10);
-/* The map's zoom levels (card-budget zoomLevel, spec 4): 개요 keeps a typed card's head, 중간 its kind rows and its bottom line
- * too, 상세 everything (styles.css lv-*). Below Z_MID an untyped card's name reads on one line (styles.css z-mid). A typed card's
- * box is the same at every level (card-family cardHeights). */
+/* The map's zoom tiers (card-budget zoomTier, map design v3 5): one for the whole map, by the card's projected width with ±6px of
+ * hysteresis. A typed card's box, its contact point and its pins never change with the tier or the scale (5.3): no relayout on a
+ * zoom; the tier and the scale only choose what is shown inside each box (tierFit, fitCards) and the type's on-screen floors
+ * (tierText, the --t-* sizes). Below Z_MID an untyped card's name reads on one line (styles.css z-mid). */
 const Z_MID = 0.705;
-const levelKey = (k: number) => `${zoomLevel(k)}|${k < Z_MID ? 1 : 0}`;
-let laidKey = '', relevel = 0, lastFresh = 0;
+let tier: ZoomTier | null = null, fitFrame = 0, lastFresh = 0;
+/** Every typed card shows what fits its own box at the tier and scale (card-budget tierFit): writes only (each card's shape was
+ * written on it when drawn), so it runs once per frame of a zoom. */
+function fitCards() {
+  fitFrame = 0;
+  const t = tier ?? zoomTier(camera.k), k = camera.k;
+  document.querySelectorAll<HTMLElement>('#world .node.card[data-shape]').forEach(el => {
+    const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0] = el.dataset.shape!.split(',').map(Number);
+    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status }, k, t);
+    el.style.setProperty('--nl', String(f.nameLines)); el.dataset.fitRows = String(f.rows);
+    el.classList.toggle('fit-nokind', !f.kind); el.classList.toggle('fit-nocontract', !f.contract); el.classList.toggle('fit-noinner', !f.inner);
+    el.classList.toggle('fit-nosigns', !f.signs); el.classList.toggle('fit-nobottom', !f.bottom); el.classList.toggle('fit-status', f.status);
+  });
+}
 /** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
 const progChip = (what?: string) => h('span', { class: 'sg-chip prog-chip', title: what ? `${PROGRAM_HINT} · ${what}` : PROGRAM_HINT }, PROGRAM_LABEL);
 /** map-reading.14: a step the program cut from the 3절 chain (steps-view stepFace), and a port → step correspondence it made. */
@@ -1150,16 +1163,19 @@ const UNLINKED_TIP = '항목 근거 미연결 · 기록이 이 목록의 항목�
 const CONTACT_TIP = '포트 대응 미기록 · 이 선들은 카드 수준 접점에 붙는다 (모델이 적은 포트 대응 행이 있는 끝만 핀에)';
 /** A typed card's DOM (styles.css .node.card): the head (glyph tile · name · kind word with the lifecycle chip and, for the
  * overview, the short status), the kind rows, the contract area, the inner line, the sign row and the bottom line. */
-function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, face: Face, extra: { cls: string; title: string; onkeydown: (e: Event) => void; toggle: HTMLElement | null; links: HTMLElement | null; enter: HTMLElement | null }): HTMLElement {
+function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, face: Face, extra: { cls: string; title: string; onkeydown: (e: Event) => void; toggle: HTMLElement | null; links: HTMLElement | null; enter: HTMLElement | null; boxH: number }): HTMLElement {
   const s = r.stateRead, life = lifecycleOf(s?.state, s?.quote?.quote ?? ''), ops = opsCard(s?.state ?? null, s?.when ?? null, opsRef, life);
   const ev = s ? claimEvidence({ quote: s.quote?.quote ?? '' }) : null, kids = p.childIds.length;
+  // The shape the box was measured for (its near content), written on the card so the zoom's fit reads it without measuring.
+  const nl = cardNameLines(p), hs = cardHeights(t, nl);
   const tile = h('span', { class: `glyph-tile g-${t.family}`, title: `${FAMILY_WORD[t.family]} · ${t.kind}${t.inner === 'composition' || t.inner === 'both' ? ` · 내부 구성 ${kids}` : ''}` });
   tile.innerHTML = glyphSvg(t.glyph) + (t.inner === 'composition' || t.inner === 'both' ? `<span class="glyph-badge">${glyphSvg('composition')}</span>` : '');
   const head = h('div', { class: 'c-head' }, tile,
     h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name' }, p.name),
       h('span', { class: 'c-kind' }, h('span', { class: 'c-kind-word' }, `${t.kind}${kids ? ` · 구성 ${kids}` : ''}`),
-        life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null,
-        life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short)),
+        life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null),
+      // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
+      life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short),
       h('span', { class: 'plan-note' })),
     extra.toggle);
   const rows = t.rows.length ? h('div', { class: 'c-rows' }, ...t.rows.map(x => h('div', { class: `c-row${x.blank ? ' blank' : ''}`, title: x.blank ? `${x.label} · 기록에 없음 (이 종류를 정의하는 빈칸)` : `${x.label} · ${x.value}` },
@@ -1168,7 +1184,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const contract = c.kind === 'lines'
     ? h('div', { class: 'c-contract lines' }, ...c.lines.map(l => h('p', { class: 'c-cline', title: l.endsWith('항목 근거 미연결') ? UNLINKED_TIP : '기록이 이 부분의 데이터 입력·출력을 말하지 않았다' }, l)))
     : h('div', { class: 'c-contract pins', role: 'group', 'aria-label': `${p.name}의 포트 · 모델이 적은 포트 대응` },
-      h('div', { class: 'c-pin-head' }, h('span', {}, c.inTitle), h('span', {}, c.outTitle)),
+      h('div', { class: 'c-pin-head' }, h('span', {}, c.ins.length ? c.inTitle : ''), h('span', {}, c.outs.length ? c.outTitle : '')),
       ...Array.from({ length: Math.max(c.ins.length, c.outs.length) }, (_, i) => h('div', { class: 'c-pin-row' },
         c.ins[i] ? h('span', { class: 'c-pin in', title: `${c.inTitle} · ${c.ins[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('i', { class: 'pin', 'aria-hidden': 'true' }), h('span', { class: 'c-pin-name' }, c.ins[i]!)) : h('span', { class: 'c-pin empty' }),
         c.outs[i] ? h('span', { class: 'c-pin out', title: `${c.outTitle} · ${c.outs[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('span', { class: 'c-pin-name' }, c.outs[i]!), h('i', { class: 'pin', 'aria-hidden': 'true' })) : h('span', { class: 'c-pin empty' }))),
@@ -1182,7 +1198,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const bottom = h('div', { class: 'c-bottom' }, h('span', { class: 'c-ops', title: ops.tip }, ops.text),
     ev ? h('span', { class: `ev ev-${ev}`, title: `운영 한 줄의 근거 · 기록 작성자의 꼬리표 (${EVIDENCE_HINT[ev]}) · 앱의 판정 아님` }, EVIDENCE_LABEL[ev]) : null,
     h('span', { class: 'c-entry' }, extra.links, extra.enter, open));
-  return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${cardNameLines(p)}`,
+  return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1}`,
     'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: extra.title, onkeydown: extra.onkeydown },
   head, rows, contract, inner, signs ? h('div', { class: 'c-signs' }, signs) : null, bottom);
 }
@@ -1609,12 +1625,11 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   $('home').hidden = true; $('space').hidden = false; $('ai-pill').hidden = false;
   // A redraw of the structure ends the places held for a drag (holdPlaces) and the hover's peek.
   held = null; $('space').classList.remove('peek', 'state-peek');
-  // The zoom level the cards are drawn at: every relayout until the next redraw keeps it (a drag never changes their lines).
-  opsRef = opsDay(o); laidKey = levelKey(camera.k);
+  // A new view reads its first tier without hysteresis (card-budget zoomTier); the cards' boxes do not depend on it.
+  opsRef = opsDay(o); if (cameraMode !== 'keep') tier = null;
   relayout(o);
   const world = $('world'), view = o.view;
   // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
-  // (Not when the zoom level a view just opened at redraws it: the cards then take their level's height in place.)
   const was = cameraMode === 'keep' && !world.hidden && performance.now() - lastFresh > 600 ? beforeRedraw(world) : null;
   if (cameraMode !== 'keep') lastFresh = performance.now();
   world.replaceChildren();
@@ -1715,7 +1730,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
       const tpl = face === 'item' ? undefined : cardTpls.get(p.id);
       if (tpl && p.reading) {
         world.append(cardEl(o, p, p.reading, tpl, face, { cls: `${onTint ? 'on-tint ' : ''}s-${p.status}${recentAt(last) ? ' fresh' : ''}`, title, onkeydown: keySelect(p.id),
-          toggle: b.kids ? toggleButton(p, false) : null, links: b.kids ? linksChip(p.id) : null, enter: b.kids ? enterButton(p) : null }));
+          toggle: b.kids ? toggleButton(p, false) : null, links: b.kids ? linksChip(p.id) : null, enter: b.kids ? enterButton(p) : null, boxH: b.h }));
         continue;
       }
       // An untyped card (no reading): its name, its own first sentence on a unit without an inside, and its state line.
@@ -1776,6 +1791,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   if (cameraMode === 'keep') applyCamera();
   else if (saved) { camera = { ...saved }; applyCamera(); }
   else fitView(false);
+  fitCards();
   if (planOverlay) planView.overlay();
   applyReadMarks();
   if (openState) syncOpenSoon();
@@ -2122,7 +2138,9 @@ function renderRecent() {
 }
 
 /* ---------- camera ---------- */
-const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6;
+/** The wheel and the buttons zoom between ZOOM_MIN and ZOOM_MAX; only 전체 보기 goes further out, down to the dot map (FIT_MIN, map
+ * design v3 5.1), and a zoom from there keeps on from where it is. */
+const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6, FIT_MIN = 0.2;
 /** The chip scale the verbs were last placed at, and the frame that re-places them after a zoom. */
 let placedInv = 1, relabel = 0;
 /** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
@@ -2145,15 +2163,13 @@ function applyCamera(animate = false) {
   // removed from the page or its layout.
   const sp = $('space');
   sp.classList.toggle('z-mid', camera.k < Z_MID); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
-  // The zoom level (개요 · 중간 · 상세): what a typed card keeps. The cards take their level's height and the lines their new
-  // routes in one redraw, once the zoom has crossed a level's edge (never on every step of a wheel).
-  const lv = zoomLevel(camera.k);
-  sp.classList.toggle('lv-overview', lv === 'overview'); sp.classList.toggle('lv-mid', lv === 'mid'); sp.classList.toggle('lv-detail', lv === 'detail');
-  if (opened && laidKey && levelKey(camera.k) !== laidKey && !relevel) relevel = window.setTimeout(() => {
-    relevel = 0;
-    if (!opened || $('space').hidden || levelKey(camera.k) === laidKey) return;
-    renderSpace('keep'); if (selected) markSelection(selected);
-  }, 120); // a timer, not a frame: a wheel settles first, and a hidden page still redraws
+  // The zoom tier (점 지도 · 개요 · 중간 · 가까이, map design v3 5.1): what a typed card shows inside its box, and the on-screen
+  // floors of its type (5.2). The boxes, the lines and their ends stay where they are: nothing is laid out again for a zoom.
+  tier = zoomTier(camera.k, tier);
+  for (const t of ['dots', 'far', 'mid', 'near'] as const) sp.classList.toggle(`tier-${t}`, tier === t);
+  const T = tierText(camera.k, tier), px = (n: number) => `${n.toFixed(2)}px`;
+  for (const [v, n] of [['title', T.title], ['title-lh', T.titleLh], ['kind', T.kind], ['kind-lh', T.kindLh], ['row', T.row], ['row-lh', T.rowLh], ['label', T.label], ['bottom', T.bottom], ['glyph', T.glyph], ['gap', T.gap]] as const) sp.style.setProperty(`--t-${v}`, px(n));
+  if (!fitFrame) fitFrame = requestAnimationFrame(fitCards);
   sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
   // Chips on the lines (verbs, counts) grow as the map shrinks, up to 1.5×, so they stay readable; their places are found
   // again when the scale changed enough to matter.
@@ -2173,7 +2189,7 @@ function fitView(explicit: boolean, animate = false) {
   const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
   const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = lay.bounds;
   const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
-  const k = explicit ? Math.max(ZOOM_MIN, fit) : Math.max(OPEN_MIN, fit);
+  const k = explicit ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
   // The whole view sits in the middle of the free area, both ways: the title and the parts together. A reading pane opened
   // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
   const mw = B.w * k, mh = B.h * k, free = w - mw;
@@ -2183,7 +2199,7 @@ function fitView(explicit: boolean, animate = false) {
   applyCamera(animate);
 }
 function zoomAt(k: number, cx: number, cy: number, animate = false) {
-  const nk = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, k));
+  const nk = Math.min(ZOOM_MAX, Math.max(Math.min(ZOOM_MIN, camera.k), k));
   camera = { k: nk, x: cx - (cx - camera.x) * (nk / camera.k), y: cy - (cy - camera.y) * (nk / camera.k) };
   applyCamera(animate);
 }

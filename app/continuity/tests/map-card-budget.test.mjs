@@ -3,7 +3,7 @@
 // its height its near content's from card-family, once, with its contact point and its pins on the box.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { zoomLevel, entryKind, entryParts, loopBody, CADENCE, OVERVIEW_MAX, MID_MAX } from '../dist/public/client/card-budget.js';
+import { zoomLevel, zoomTier, tierText, tierFit, entryKind, entryParts, loopBody, CADENCE, TIER_W, TIER_DOTS, TIER_FAR, TIER_NEAR, TIER_HYST } from '../dist/public/client/card-budget.js';
 import { cardTemplate, cardHeights, NAME_ROOM } from '../dist/public/client/card-family.js';
 import { createProject, addArea, addChildArea } from '../dist/public/shared/domain.js';
 import { studioView } from '../dist/public/shared/studio.js';
@@ -61,11 +61,66 @@ test('layoutScope: the change preview\'s lines under a typed card\'s name add to
   assert.equal(after.boxes.get(b).h, before.boxes.get(b).h);
 });
 
-// The three zoom levels (spec 4): 개요 to 55% shown, 중간 to 85%, 상세 above; read as the percent the zoom tool shows.
-test('zoom levels: 개요 ≤ 55%, 중간 56–85%, 상세 > 85% (as the zoom tool shows the percent)', () => {
-  assert.equal(OVERVIEW_MAX, 55); assert.equal(MID_MAX, 85);
-  for (const [k, lv] of [[0.4, 'overview'], [0.45, 'overview'], [0.55, 'overview'], [0.554, 'overview'], [0.556, 'mid'], [0.6, 'mid'], [0.7, 'mid'], [0.85, 'mid'],
-    [0.854, 'mid'], [0.856, 'detail'], [0.9, 'detail'], [1, 'detail'], [1.6, 'detail']]) assert.equal(zoomLevel(k), lv, String(k));
+// The zoom tiers (map design v3 5.1): by the card's projected width p = 272 × k: 점 지도 < 82, 개요 < 160, 중간 < 240, 가까이 from 240,
+// with ±6px of hysteresis on the screen width; a first view reads its tier without it.
+const kOf = p => p / TIER_W;
+test('zoom tiers: p 81/82, 159/160, 239/240 on a first view; 54% is 개요 (p = 147), 77% 중간, 100% 가까이', () => {
+  assert.equal(TIER_W, 272); assert.deepEqual([TIER_DOTS, TIER_FAR, TIER_NEAR, TIER_HYST], [82, 160, 240, 6]);
+  for (const [p, t] of [[81.8, 'dots'], [82.2, 'far'], [159.8, 'far'], [160.2, 'mid'], [239.8, 'mid'], [240.2, 'near']]) assert.equal(zoomTier(kOf(p)), t, `p ${p}`);
+  for (const [k, t] of [[0.25, 'dots'], [0.4, 'far'], [0.54, 'far'], [0.6, 'mid'], [0.77, 'mid'], [0.89, 'near'], [1, 'near'], [1.6, 'near']]) assert.equal(zoomTier(k), t, `k ${k}`);
+  // The way back's level reads the same edges.
+  for (const [k, lv] of [[0.25, 'overview'], [0.54, 'overview'], [0.59, 'mid'], [0.77, 'mid'], [0.89, 'detail'], [1, 'detail']]) assert.equal(zoomLevel(k), lv, String(k));
+});
+test('zoom tiers: crossing an edge needs 6px more on screen, leaving it 6px less (hysteresis)', () => {
+  // Going in from 개요: 160–165 stays 개요, 166 enters 중간.
+  assert.equal(zoomTier(kOf(160.2), 'far'), 'far'); assert.equal(zoomTier(kOf(165.9), 'far'), 'far'); assert.equal(zoomTier(kOf(166.2), 'far'), 'mid');
+  // Going out from 중간: down to 154 stays 중간, below it 개요.
+  assert.equal(zoomTier(kOf(159), 'mid'), 'mid'); assert.equal(zoomTier(kOf(154.2), 'mid'), 'mid'); assert.equal(zoomTier(kOf(153.9), 'mid'), 'far');
+  assert.equal(zoomTier(kOf(245), 'mid'), 'mid'); assert.equal(zoomTier(kOf(246.2), 'mid'), 'near');
+  assert.equal(zoomTier(kOf(235), 'near'), 'near'); assert.equal(zoomTier(kOf(233.9), 'near'), 'mid');
+  assert.equal(zoomTier(kOf(80), 'far'), 'far'); assert.equal(zoomTier(kOf(75.9), 'far'), 'dots'); assert.equal(zoomTier(kOf(87), 'dots'), 'dots'); assert.equal(zoomTier(kOf(88.2), 'dots'), 'far');
+  // A big jump crosses every edge it passes, each by its own margin.
+  assert.equal(zoomTier(1, 'dots'), 'near'); assert.equal(zoomTier(0.2, 'near'), 'dots'); assert.equal(zoomTier(kOf(200), 'dots'), 'mid');
+});
+
+// On-screen floors (5.2): a title never under 14px on 18px lines, body never under 12px on 16px lines; at 가까이 the lines keep
+// their own heights. What does not fit a card's fixed box is hidden, never shrunk; the box itself never changes with the zoom.
+test('tierText: the screen floors hold at every scale; 가까이 keeps the line heights', () => {
+  for (const k of [0.2, 0.3, 0.42, 0.54, 0.6, 0.77, 0.87]) {
+    const t = tierText(k, zoomTier(k));
+    assert.ok(t.title * k >= 14 - 1e-9 && t.titleLh * k >= 18 - 1e-9, `title at ${k}`);
+    assert.ok(t.kind * k >= 12 - 1e-9 && t.kindLh * k >= 16 - 1e-9 && t.row * k >= 12 - 1e-9 && t.rowLh * k >= 16 - 1e-9, `body at ${k}`);
+  }
+  const near = tierText(1, 'near'); assert.deepEqual([near.title, near.titleLh, near.kindLh, near.row, near.rowLh, near.bottom], [15, 20, 16, 13, 20, 28]);
+  assert.equal(tierText(0.9, 'near').titleLh, 20, 'the lines keep their heights at 가까이');
+  assert.ok(tierText(0.54, 'far').glyph * 0.54 >= 24 - 1e-9, 'the glyph reads 24px on screen at 개요');
+});
+const shape = (x = {}) => ({ nameLines: 1, rows: 3, contract: 32, inner: 24, signs: 24, total: 264, status: 1, ...x });
+test('tierFit: 54% shows title, kind and short status only; 77% the head, the bottom line and the rows that fit; 100% everything', () => {
+  const far = tierFit(shape(), 0.54, 'far');
+  assert.deepEqual({ ...far, nameLines: undefined }, { nameLines: undefined, kind: true, status: true, rows: 0, contract: false, inner: false, signs: false, bottom: false });
+  assert.ok(far.nameLines >= 1);
+  const mid = tierFit(shape(), 0.77, 'mid');
+  assert.equal(mid.kind, true); assert.equal(mid.bottom, true); assert.equal(mid.contract, false, 'the pins and names hide at 중간');
+  assert.ok(mid.rows >= 1 && mid.rows <= 2, 'one or two kind rows');
+  assert.equal(mid.status, false, 'the bottom line says the status at 중간');
+  assert.deepEqual(tierFit(shape(), 1, 'near'), { nameLines: 1, kind: true, status: false, rows: 3, contract: true, inner: true, signs: true, bottom: true });
+  // A small box at a small scale: the second name line and the status give way before the first line; nothing overflows.
+  const tiny = tierFit(shape({ total: 136, rows: 0, inner: 0, signs: 0 }), 0.42, 'far');
+  assert.equal(tiny.nameLines, 1);
+  // The dot map keeps the head's fit too (its names show only for what is selected or focused, styles.css).
+  assert.equal(tierFit(shape(), 0.25, 'dots').bottom, false);
+});
+test('tierFit: what is shown always fits the box (screen line floors × lines ≤ the box), at every tier and scale', () => {
+  const PAD = 26;
+  for (const total of [136, 144, 168, 192, 208, 264, 420]) for (const k of [0.2, 0.3, 0.42, 0.54, 0.59, 0.6, 0.66, 0.77, 0.87]) {
+    const t = zoomTier(k), T = tierText(k, t), f = tierFit(shape({ total, rows: 3, status: 1 }), k, t);
+    if (t === 'near') continue;
+    let used = PAD + f.nameLines * T.titleLh + (f.kind ? T.kindLh : 0) + (f.status ? T.kindLh : 0);
+    if (t === 'mid') used += T.gap + (f.bottom ? T.bottom : 0) + (f.inner ? Math.max(24, T.rowLh + 4) : 0) + (f.rows ? f.rows * T.rowLh + 12 : 0) + (f.signs ? Math.max(24, T.rowLh + 4) : 0);
+    // The first name line is always kept, even in a box too small for it at this scale (it is cut, never shrunk).
+    if (f.nameLines > 1 || f.kind || f.bottom) assert.ok(used <= total + 1e-6, JSON.stringify({ total, k, f, used }));
+  }
 });
 
 // The entry words (spec 4, 열기): '구성 N · 기록된 단계 M · 설정 K · 필드 F' in totals, or '내부 미상' when the reading names nothing

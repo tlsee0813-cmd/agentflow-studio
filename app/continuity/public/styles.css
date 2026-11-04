@@ -444,9 +444,9 @@ button:disabled { opacity: .5; cursor: default; }
 .node.card.life :is(.c-row, .c-cline, .c-inner, .c-ops) { color: var(--text-3); }
 .node.card.life .c-label { color: var(--text-3); }
 /* The head: the glyph tile, the name and the kind line; a card with an inside keeps its fold toggle at the head's right. */
-.c-head { flex: none; display: flex; align-items: flex-start; gap: 8px; min-width: 0; padding-bottom: 16px; }
-.glyph-tile { position: relative; flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--fam-bg); color: var(--fam-ink); }
-.glyph-tile > svg { width: 16px; height: 16px; }
+.c-head { flex: none; display: flex; align-items: flex-start; gap: 8px; min-width: 0; padding-bottom: var(--t-gap, 16px); }
+.glyph-tile { position: relative; flex: none; display: grid; place-items: center; width: var(--t-glyph, 20px); height: var(--t-glyph, 20px); border-radius: calc(var(--t-glyph, 20px) * .3); background: var(--fam-bg); color: var(--fam-ink); }
+.glyph-tile > svg { width: calc(var(--t-glyph, 20px) * .8); height: calc(var(--t-glyph, 20px) * .8); }
 .glyph-tile .glyph-badge { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 11px; height: 11px; border-radius: 3px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); color: var(--text-3); }
 .glyph-tile .glyph-badge > svg { width: 9px; height: 9px; }
 .glyph-tile.g-participant { --fam-bg: #efeefa; --fam-ink: #4b44a8; }
@@ -455,50 +455,50 @@ button:disabled { opacity: .5; cursor: default; }
 .glyph-tile.g-trigger { --fam-bg: #f8f0e3; --fam-ink: #87560f; }
 .glyph-tile.g-neutral { --fam-bg: #f1f1ef; --fam-ink: #5a5d64; }
 .c-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.node.card .c-name { font-size: 15px; line-height: 20px; font-weight: var(--fw-name); letter-spacing: -.012em; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: var(--nl, 2); -webkit-box-orient: vertical; overflow: hidden; }
-.c-kind { display: flex; align-items: center; gap: 6px; min-width: 0; height: 16px; font-size: 12px; line-height: 16px; font-weight: var(--fw-meta); color: var(--text-4); white-space: nowrap; overflow: hidden; }
+.node.card .c-name { font-size: var(--t-title, 15px); line-height: var(--t-title-lh, 20px); font-weight: var(--fw-name); letter-spacing: -.012em; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: var(--nl, 2); -webkit-box-orient: vertical; overflow: hidden; }
+.c-kind { display: flex; align-items: center; gap: 6px; min-width: 0; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-meta); color: var(--text-4); white-space: nowrap; overflow: hidden; }
 .c-kind-word { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.c-life { flex: none; padding: 0 5px; border: 1px solid var(--line-essential); border-radius: 6px; font-size: 11.5px; line-height: 14px; font-weight: var(--fw-name); color: var(--text-2); }
+.c-life { flex: none; padding: 0 5px; border: 1px solid var(--line-essential); border-radius: 6px; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); font-weight: var(--fw-name); color: var(--text-2); }
 /* The short status (5.4) reads only where the card shows nothing under its head. */
-.c-short { display: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); }
-.c-short::before { content: '· '; color: var(--text-4); }
+.c-short { display: none; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); }
 .c-head > .toggle { flex: none; margin: -2px -6px 0 0; }
 /* Kind rows (3.3): a label column (12/500, ≤80px) and the value (13/420, one line); the defining blank a quiet 「?」 over a 1px
    rule, no weight, no colour (3.5). */
 .c-rows { flex: none; display: flex; flex-direction: column; padding-bottom: 12px; }
-.c-row { display: flex; align-items: center; gap: 8px; min-width: 0; height: 20px; font-size: 13px; line-height: 20px; font-weight: var(--fw-body); color: var(--text-2); white-space: nowrap; }
-.c-label { flex: none; max-width: 80px; min-width: 52px; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: var(--fw-meta); color: var(--text-4); }
+.c-row { display: flex; align-items: center; gap: 8px; min-width: 0; height: var(--t-row-lh, 20px); font-size: var(--t-row, 13px); line-height: var(--t-row-lh, 20px); font-weight: var(--fw-body); color: var(--text-2); white-space: nowrap; }
+.c-label { flex: none; max-width: 80px; min-width: 52px; overflow: hidden; text-overflow: ellipsis; font-size: var(--t-label, 12px); font-weight: var(--fw-meta); color: var(--text-4); }
 .c-val { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .c-row .prog-chip { flex: none; }
-.c-row.blank .c-val { color: var(--text-4); font-size: 12px; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+.c-row.blank .c-val { color: var(--text-4); font-size: var(--t-label, 12px); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
 /* The contract area (3.3): today one count line ('받는 것 3 · 내는 것 2 · 항목 근거 미연결'), or the pin rows of the ports a model
    portMap row ties to a line: 「받는 것」·「내는 것」 over two columns, a 5px pin on the card's edge, a 24px row. */
 .c-contract { flex: none; display: flex; flex-direction: column; }
 .c-contract.lines { padding: 8px 0; }
-.c-cline { margin: 0; height: 16px; font-size: 12px; line-height: 16px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-cline { margin: 0; height: 16px; font-size: var(--t-kind, 12px); line-height: 16px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .c-contract.pins { padding-bottom: 8px; }
-.c-pin-head { display: flex; justify-content: space-between; height: 16px; font-size: 12px; line-height: 16px; font-weight: var(--fw-meta); color: var(--text-4); }
+.c-pin-head { display: flex; justify-content: space-between; height: 16px; font-size: var(--t-kind, 12px); line-height: 16px; font-weight: var(--fw-meta); color: var(--text-4); }
 .c-pin-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 24px; height: 24px; align-items: center; }
-.c-pin { position: relative; display: flex; align-items: center; min-width: 0; font-size: 13px; line-height: 18px; color: var(--text-2); white-space: nowrap; }
+.c-pin { position: relative; display: flex; align-items: center; min-width: 0; font-size: var(--t-row, 13px); line-height: 18px; color: var(--text-2); white-space: nowrap; }
 .c-pin.out { justify-content: flex-end; }
 .c-pin-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .c-pin .pin { position: absolute; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: var(--edge-spine); }
 .c-pin.in .pin { left: calc(-1 * var(--c-pad) - 3px); }
 .c-pin.out .pin { right: calc(-1 * var(--c-pad) - 3px); }
 /* The inner line (a part with recorded steps): their count in the record's row order, the loop's unit when it has one. */
-.c-inner { flex: none; display: flex; align-items: center; gap: 6px; min-width: 0; height: 24px; font-size: 12px; line-height: 16px; color: var(--text-3); white-space: nowrap; border-top: 1px solid var(--hair-2); }
+.c-inner { flex: none; display: flex; align-items: center; gap: 6px; min-width: 0; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); font-size: var(--t-kind, 12px); line-height: 16px; color: var(--text-3); white-space: nowrap; border-top: 1px solid var(--hair-2); }
 .c-inner-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.c-signs { flex: none; display: flex; align-items: center; height: 24px; min-width: 0; }
+.c-signs { flex: none; display: flex; align-items: center; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); min-width: 0; }
 .c-signs .node-signs { margin-left: 0; }
+.node.card .c-signs .sign-tab { height: auto; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
 /* The bottom line (3.2): the operations report with its time ('가동 보고 · 08:01Z') and the author's tag of its line, then the way
    in at the right (내부 보기, or 구성 N › with its 연결 N). Pinned to the card's bottom at every height. */
-.c-bottom { flex: none; display: flex; align-items: center; gap: 6px; height: 28px; margin-top: auto; min-width: 0; font-size: 12px; line-height: 16px; white-space: nowrap; }
+.c-bottom { flex: none; display: flex; align-items: center; gap: 6px; height: var(--t-bottom, 28px); margin-top: auto; min-width: 0; font-size: var(--t-kind, 12px); line-height: 16px; white-space: nowrap; }
 .c-ops { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); font-weight: var(--fw-meta); font-variant-numeric: tabular-nums; }
-.node.card .c-bottom .ev { flex: none; background: none; border-color: var(--line-strong); color: var(--text-3); font-size: 11.5px; }
+.node.card .c-bottom .ev { flex: none; background: none; border-color: var(--line-strong); color: var(--text-3); font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
 .c-entry { flex: none; display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
-.c-entry .entry-open { height: 20px; padding: 0 5px; border: 0; border-radius: 4px; background: none; font-size: 12px; line-height: 20px; font-weight: var(--fw-name); color: var(--accent); }
+.c-entry .entry-open { height: auto; padding: 0 5px; border: 0; border-radius: 4px; background: none; font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-name); color: var(--accent); }
 .c-entry .entry-open:hover { background: var(--accent-soft); color: var(--accent-strong); }
-.c-entry :is(.enter, .frame-links) { border-color: transparent; background: none; font-size: 12px; color: var(--text-3); }
+.c-entry :is(.enter, .frame-links) { border-color: transparent; background: none; font-size: var(--t-kind, 12px); color: var(--text-3); }
 .c-entry .enter:hover { color: var(--accent); }
 .node.card .plan-note:empty { display: none; }
 .space.dim .node.card:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) :is(.c-row, .c-val, .c-cline, .c-inner, .c-ops, .c-kind) { color: var(--text-4); }
@@ -1591,11 +1591,16 @@ button:disabled { opacity: .5; cursor: default; }
 .node-name { -webkit-line-clamp: 3; }
 /* Below 70%: no notes or state lines; each name on one line across its card, a little larger (--grow ≤ 1.25). */
 .space.z-mid .node:not(.typed) :is(.node-note, .node-meta), .space.z-mid .frame-head .frame-note { display: none; }
-/* A typed card by zoom level (app.ts zoomLevel, spec 4): 개요 its type word, name and operations line; 중간 also what it takes
-   and hands over; 상세 everything. The layout gives each level its height; these hold while a level's redraw is on its way. */
-/* A typed card at 개요 keeps its head (the short status in its kind line) and at 중간 its rows and bottom line: the box stays. */
-.space.lv-overview .node.card > :not(.c-head), .space.lv-mid .node.card > .c-contract { visibility: hidden; }
-.space.lv-overview .node.card .c-short { display: block; }
+/* A typed card by zoom tier (map design v3 5, app.ts fitCards): its box never changes; what does not fit it at the tier and the
+   scale is hidden (fit-*), never shrunk. 개요 and the dot map read the head only, the kind line with the short status (5.4); the
+   dot map keeps the glyph and names only what is selected, cited or focused. */
+.node.card.fit-nokind .c-kind, .node.card.fit-nocontract .c-contract, .node.card.fit-noinner .c-inner, .node.card.fit-nosigns .c-signs, .node.card.fit-nobottom .c-bottom { display: none; }
+.node.card[data-fit-rows="0"] .c-rows { display: none; }
+.node.card[data-fit-rows="1"] .c-row:nth-child(n+2), .node.card[data-fit-rows="2"] .c-row:nth-child(n+3) { display: none; }
+.space:is(.tier-far, .tier-dots) .node.card.fit-status .c-short { display: block; }
+.space:is(.tier-far, .tier-dots) .node.card .plan-note { display: none; }
+.space.tier-dots .node.card { background: var(--surface); }
+.space.tier-dots .node.card:not(.selected):not(.cited):not(:focus-visible):not(:hover) .c-title { visibility: hidden; }
 .space.z-mid .node .node-text { justify-content: center; align-self: stretch; }
 .space.z-mid :is(.node:not(.card) .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .space.z-mid .node:not(.card) .node-name { font-size: calc(13.5px * var(--grow)); }
