@@ -424,8 +424,11 @@ export const LINES_CORRECTION_USD = 0.07;
 // sentence), a store reader's half never takes the writer's condition, P1-02 / P2-02 / P5-03 / P6-01 / P6-02 rows land as steps,
 // conditions and settings of their part, one part-table row or a list item planned as several parts is list-split, a v4 or v5
 // C-SUMMARY sentence draws no line (unrecorded). Each segment sent carries the closed key set of the B, F and E IDs it cites (keys).
-export const PIPELINE_RECIPE = 'first-map-divided.45';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.45';
+// .46 (map-reading.19 kept): the v5 fold takes any row ID of one to three capitals and digits unique within its table (a prefix outside
+// the table's own form said quietly), C-DROP takes away a row by its written ID, a later text for a page replaces the earlier one (latest
+// wins, by paste order); the base and page requests name every table's row-ID form, list every obligation by table, and stop at page 20.
+export const PIPELINE_RECIPE = 'first-map-divided.46';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.46';
 /** .45 (RECORD_ASKS_V5_KO.md 12.4 (d)): the key sets beside a stage's INPUT: for each v5 record, the B, F and E IDs its own text cites
  * (each B with its name and one-line responsibility, F with its path, E with its grade and source), a closed set; nothing for an ask with
  * no v5 record (its stage inputs stay as .44 sent them). */

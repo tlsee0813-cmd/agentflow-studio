@@ -5,14 +5,17 @@
  * claims, conditions and file-map rows to the rows their own quotes stand on. */
 import { readRecordTables, recordRefs, rowsOf, fixedWord, STEP_REF, IMPLEMENTATION_WORDS, TYPE_WORDS, GROUP_WORDS, CADENCE_WORDS, CROSS_WORDS, STATUS_DIMENSIONS,
   STATUS_VALUES, DEVICE_WORDS, ENTRY_WORDS, TOGETHER_WORDS, SELECT_WORDS, DONE_WORDS, DATA_WORDS, WRITE_WORDS, WITHDRAW_WORDS, PHASE_WORDS, ROLE_WORDS,
-  WITHDRAW_WORDS_V5, TOGETHER_WORDS_V5, SCOPE_WORDS, FOUND_WORDS, NATURE_WORDS, CHECK_WORDS, V4_TYPE_FAMILY, readFamily, roleType, foldPages, partRefs, loopRefs,
+  WITHDRAW_WORDS_V5, TOGETHER_WORDS_V5, SCOPE_WORDS, FOUND_WORDS, NATURE_WORDS, CHECK_WORDS, V4_TYPE_FAMILY, readFamily, roleType, foldPages, partRefs, loopRefs, rowKey,
   type TableRow, type RecordTables, type FoldedRecord, type FoldRow, type Cite } from './record-table.js';
 import type { PartState, PartType, PartImplementation, ReadingStatusClaim, ReadingProjectStatus, ReadingRecordLoop, ReadingMembers, GroupAxis, ReadingVariant,
   ReadingEntryPoint, ReadingContract, ReadingStepBranch, ReadingActor, ActorKind, ReadingContractChange, ReadingShippedIn, WithdrawalMethod, ReadingDecider,
   ConditionPhase, ReadingCoverage, ReadingArtifact, ReadingProfileTable, ReadingRecordExtra, ReadingRecordDiagnostic, ReadingFocus, EnforcerKind, CadenceKind,
   CrossKind, StatusDimension, ClaimTopic, RecordFamily, FamilyReason, ClaimNature, FoundBy, StatusScopeKind, VariantTogether, ReadingPage, ReadingObligation,
   ReadingPageEnd, ReadingCheck, ReadingDefault, ReadingPartState } from './types.js';
+import { RECORD_DIAGNOSTIC_CATEGORIES } from './types.js';
 import { secretLike } from './secret.js';
+/** Recipe .46: the fold's own categories (page-replaced, row-id-prefix, drop-ambiguous) are never stored (map-reading.19 keeps its list). */
+const STORED_DIAGNOSTICS: ReadonlySet<string> = new Set(RECORD_DIAGNOSTIC_CATEGORIES);
 
 /** A quote of a row: where it stands in the excerpt sent ([from, to) of the ask's record text), cut at 600 (the stored bound). */
 export interface Record43Quote { record: string; quote: string; from: number; to: number }
@@ -370,7 +373,7 @@ const opt = (s: string | undefined, n: number): string | null => { const t = sai
  * Never past MAP6_NEW_PARTS new parts. Returns the parts added. */
 export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: (q: Record43Quote) => boolean; maxNew: number }): Part43[] {
   // Review N5: the parts of the latest v5 record only (a record of an earlier basis no longer stands: a part its newer pages dropped stays out).
-  const f = latestFold45(ctx.texts, foldPages([...ctx.texts].map(([record, { text }]) => ({ record, text })))); if (!f) return [];
+  const f = latestFold45(ctx.texts, foldPages([...ctx.texts].map(([record, { text }]) => ({ record, text })), 'newest-first')); if (!f) return [];
   const added: Part43[] = [], plainOf = (b: Part43) => plain(bare(b.name ?? ''));
   let fresh = ctx.parts.filter(b => /^new:/.test(b.ref)).length;
   const rows = (f.rows.get('C-PART') ?? []).flatMap(r => {
@@ -380,7 +383,7 @@ export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: 
     return ctx.onMaterial(q) ? [] : [{ r, name, q }];
   });
   // Any row the ID stood on (a row 교체 later replaced) is the ID's too.
-  const stood = (r: FoldRow) => f.history.get(r.id) ?? [r];
+  const stood = (r: FoldRow) => f.history.get(rowKey(r.table, r.id)) ?? [r];
   const within = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => x.from !== undefined && x.to !== undefined && stood(r).some(h => x.record === h.record && h.row.from <= x.from! && x.to! <= h.row.to + 1);
   const onRow = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => stood(r).some(h => overlaps(x, { record: h.record, from: h.row.from, to: h.row.to }));
   const taken = (id: string) => ctx.parts.some(b => b.recordRef === id);
@@ -435,7 +438,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     return ctx.onMaterial(q) ? null : q;
   };
   const rowQ = (r: FoldRow) => quoteOf(r.record, r.row.from, r.row.to);
-  const folds = foldPages([...texts].map(([record, { text }]) => ({ record, text })));
+  const folds = foldPages([...texts].map(([record, { text }]) => ({ record, text })), 'newest-first');
   const latest = latestFold45(texts, folds);
   const cites6 = (c: readonly Cite[]) => c.filter(x => ![x.source, x.place, x.quote].some(w => w && secretLike(w))).slice(0, RECORD43_MAX.cites).map(x => ({ ...x, ref: cut(x.ref, 12), source: x.source ? cut(x.source, 120) : null, place: x.place ? cut(x.place, 80) : null, quote: x.quote ? cut(x.quote, 200) : null }));
   for (const f of folds) {
@@ -445,7 +448,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     for (const r of f.rows.get('C-PART') ?? []) {
       let b = byRef(r.id); const q = rowQ(r); if (!q) continue;
       if (!b) {
-        b = parts.find(x => !x.recordRef && x.name !== null && (x.basis ?? []).some(y => (f.history.get(r.id) ?? [r]).some(h => overlaps(y, { record: h.record, from: h.row.from, to: h.row.to }))));
+        b = parts.find(x => !x.recordRef && x.name !== null && (x.basis ?? []).some(y => (f.history.get(rowKey(r.table, r.id)) ?? [r]).some(h => overlaps(y, { record: h.record, from: h.row.from, to: h.row.to }))));
         if (!b) continue;
         b.recordRef = r.id; const t = roleType(r.row.byColumn['표현군·역할'] ?? ''); b.type = t as PartType | null; b.typeQuote = t ? q : null;
         const impl = fixedWord(r.row.byColumn['구현 상태'] ?? '', IMPLEMENTATION_WORDS); b.implementation = impl?.value ?? null; b.implementationQuote = impl?.value ? q : null;
@@ -466,7 +469,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
       if (items.length) b.members = { count: items.length, ordered: null, items: [...new Set(items)].slice(0, RECORD43_MAX.members), quote: q };
     }
     // Cites of the steps, claims and lines on v5 rows (record43 gave lines theirs).
-    const rowAt = (q: { record: string; from?: number; to?: number }) => [...f.byId.values()].find(r => overlaps(q, { record: r.record, from: r.row.from, to: r.row.to }));
+    const rowAt = (q: { record: string; from?: number; to?: number }) => [...f.byKey.values()].find(r => overlaps(q, { record: r.record, from: r.row.from, to: r.row.to }));
     for (const b of parts) {
       for (const s of b.steps ?? []) { const r = s.recordRef ? f.byId.get(s.recordRef) : undefined; if (r) s.cites = cites6(r.cites); }
       for (const c of b.claims) { const r = rowAt(c); if (r) c.cites = cites6(r.cites); }
@@ -506,8 +509,8 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
         const rq = read ? rowQ(read) : null, scope = read ? said(read.row.byColumn['값']) : null, gap = unread ? said(unread.row.byColumn['값']) : null;
         if (rq && scope && !r43.basisScope) r43.basisScope = { text: cut(`${scope}${gap ? ` · 못 읽음: ${gap}` : ''}`, 200), quote: rq };
       }
-      for (const d of f.diagnostics) if (r43.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && d.from < d.to && texts.has(d.record))
-        r43.recordDiagnostics.push({ category: d.category, table: d.table, column: null, record: d.record, from: d.from, to: d.to });
+      for (const d of f.diagnostics) if (r43.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && d.from < d.to && texts.has(d.record) && STORED_DIAGNOSTICS.has(d.category))
+        r43.recordDiagnostics.push({ category: d.category as ReadingRecordDiagnostic['category'], table: d.table, column: null, record: d.record, from: d.from, to: d.to });
     }
     if (f !== latest) continue;
     out.level = f.level;
