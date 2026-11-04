@@ -45,7 +45,7 @@ test('S2 order: one number per span in 구조\'s reading order — head, 하는 
   assert.deepEqual(book.groups.map(g => g.section), ['role', 'caution', 'contract', 'behaviour', 'rules', 'links', 'where', 'other']);
   assert.deepEqual(book.groups.find(g => g.section === 'contract').items.map(x => x.n), [4, 5, 11], 'a chain row is filed under 계약, in number order');
   assert.deepEqual(ITEM_ORDER, ['role', 'caution', 'contract', 'behaviour', 'rules', 'links', 'where', 'other']);
-  assert.equal(ITEM_TITLE.links, '연결'); assert.equal(ITEM_TITLE.other, '그 밖의 기록된 말');
+  assert.equal(ITEM_TITLE.links, '안쪽 · 연결'); assert.equal(ITEM_TITLE.contract, '받는 것 · 내는 것'); assert.equal(ITEM_TITLE.other, '그 밖의 기록된 말');
   assert.equal(book.thing.get('step:4').section, 'behaviour');
 });
 
