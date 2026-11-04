@@ -11,7 +11,7 @@ import type { StudioView, RelationView } from '../shared/studio.js';
 /** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
 export const FRAME_MIN_W = 228;
 /** NODE_W: a row's width (long names widen it). NODE_H: the least height of a unit card. */
-export const NODE_W = 200, NODE_H = 52, UNIT_W = 240, PAD = 14, GAP = 8, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
+export const NODE_W = 200, NODE_H = 52, UNIT_W = 240, CARD_W = 272, PAD = 14, GAP = 8, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
 /** Head of a group inside a region: one line, or two when the name needs them (names never shrink). */
 export const HEAD = 34, HEAD_2 = 52;
 /** A planned change line under a part's name in the preview (12px). */
@@ -27,11 +27,13 @@ export const LIST_GAP = 18, LIST_ROW_GAP = 2;
 /** Between an open group and a sibling: a lane wide enough for a line to pass between them. */
 export const FRAME_GUTTER = 40;
 export interface Point { x: number; y: number }
-/** layoutScope's extra for a unit the readings typed: room(nameLines, chipsLine) is the room its typed lines need past the
- * name's lines (chipsLine: a card with an inside whose name does not keep one line beside its group chips carries them on a
- * line of their own, its name then measured across the card). oneLine: the name is drawn on one line at this zoom (styles.css
- * z-mid), so the card is as high as one name line. */
-export interface TypedCard { room: (nameLines: number, chipsLine: boolean) => number; oneLine?: boolean }
+/** layoutScope's extra for a part the readings typed (map design v3 3.3, 5.3): a card of CARD_W, as a unit and as a row inside a
+ * group alike, whose name takes one line or two in nameRoom (the name's room beside the glyph, and the fold toggle when it has an
+ * inside). shape(nameLines, planned) is its whole height for those lines (planned: the change preview's lines under the name),
+ * once, at the near tier's content (the zoom never changes it), with its card-level contact point and its pins (from the card's
+ * top; pins by '<relationId>|in' or '<relationId>|out', the relation ends a model portMap row ties to a pin). */
+export interface CardShape { h: number; contact: number; pins: Record<string, number> }
+export interface TypedCard { nameRoom: number; shape: (nameLines: number, planned: number) => CardShape }
 export type Positions = Record<string, Record<string, Point>>;
 export const ROOT = 'root';
 export type Face = 'unit' | 'row' | 'item';
@@ -43,7 +45,10 @@ export interface Box { id: string; x: number; y: number; w: number; h: number; k
   /** Nodes: unit (a direct child of the scope), row (inside a group) or item (in a list). Frames: depth 0 is a region. */
   face?: Face;
   /** Frames whose children read as a list. */
-  list?: boolean }
+  list?: boolean;
+  /** A typed card (TypedCard): from its top, where a line meets it when no pin is tied to that line's end (the card-level contact
+   * point), and the pins tied to relation ends ('<relationId>|in' / '|out'). */
+  contact?: number; pins?: Record<string, number> }
 /** agg: at least one end is drawn by a folded ancestor (a summary of inner relations, not a relation of that ancestor). */
 export interface Edge { key: string; from: string; to: string; kind: RelationView['kind']; notes: string[]; ids: string[]; agg: boolean;
   /** A line of the scope's spine: the longest directed chain of its parts, drawn on one line (see layoutScope). */
@@ -55,7 +60,7 @@ export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: Gh
    * on one line. Empty when no two parts are so linked. */
   spine: string[] }
 
-interface Measure { w: number; h: number; ox: number; oy: number; head: number }
+interface Measure { w: number; h: number; ox: number; oy: number; head: number; contact?: number; pins?: Record<string, number> }
 export const ghostId = (id: string) => `ghost:${id}`;
 /** The head over the scope's own boundary end (see placeEnds). */
 export const SELF_HEAD = '이 범위';
@@ -196,8 +201,8 @@ export function isListGroup(v: StudioView, container: string | null): boolean {
  * A unit the readings typed may answer with a TypedCard instead: it is drawn at UNIT_W with its typed lines in place of its
  * note (map spec 2.1: the note reads on selection), and its room is asked with the lines its name takes there. */
 export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>, aspect = 1.6, extra?: (id: string, face: Face) => number | TypedCard): ScopeLayout {
-  const more = (id: string, face: Face, nameLines = 1, chipsLine = false) => { const x = extra?.(id, face); return Math.max(0, typeof x === 'number' ? x : x ? x.room(nameLines, chipsLine) : 0); };
-  const typedCard = (id: string) => { const x = extra?.(id, 'unit'); return x && typeof x === 'object' ? x : null; };
+  const more = (id: string, face: Face) => { const x = extra?.(id, face); return typeof x === 'number' ? Math.max(0, x) : 0; };
+  const typedCard = (id: string, face: Face = 'unit') => { const x = extra?.(id, face); return x && typeof x === 'object' ? x : null; };
   const byId = new Map(v.parts.map(p => [p.id, p]));
   const kidsOf = (id: string | null) => (id ? byId.get(id)?.childIds ?? [] : v.roots);
   const open = (id: string, depth: number) => depth < 12 && kidsOf(id).length > 0 && expanded(id, depth);
@@ -485,30 +490,27 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       // room is measured with them, so a name that fits on one line is not given a second, empty one.
       const w = nodeWidth(p.name, kids, measureText, extraW), room = w - (kids ? chrome : ITEM_SIDES), nl = lines(p.name, 'item', room, 3), pl = nodeLines(id, room);
       m = { w, h: Math.max(14 + (nl + extra) * 17, pl ? 14 + nl * 17 + 2 + pl * PLAN_LINE : 0), ox: 0, oy: 0, head: 0, face: 'item' };
+    } else if (typedCard(id, depth === 0 ? 'unit' : 'row')) {
+      // A typed card (unit or row alike): CARD_W wide, its name on one line or two, its height its near content's (fixed).
+      const face: Face = depth === 0 ? 'unit' : 'row', t = typedCard(id, face)!, need = measureText(p.name, 'head') * 1.06 + 2;
+      const nl = need > t.nameRoom ? 2 : 1, pl = nodeLines(id, t.nameRoom), s = t.shape(nl, pl ? 3 + pl * PLAN_LINE : 0);
+      m = { w: CARD_W, h: s.h, ox: 0, oy: 0, head: 0, face, contact: s.contact, pins: s.pins };
     } else if (depth === 0) {
       // A folded group reads by its name and count; its note is the selection's. A part without an inside keeps its sentence.
-      const typed = typedCard(id), note = kids || typed ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
-      let w = note || typed ? UNIT_W : NODE_W;
+      const note = kids ? '' : mapLead(v, id), need = measureText(p.name, 'head') * 1.1 + 6;
+      let w = note ? UNIT_W : NODE_W;
       // A folded group's name keeps one line when a card up to NODE_MAX_W holds it beside its count and the way in.
       if (kids && need > w - chrome && need <= NODE_MAX_W - chrome) w = Math.ceil(need) + chrome;
       if (need > (w - chrome) * 2) w = Math.min(NODE_MAX_W + 40, Math.ceil(need / 2) + chrome);
       // Lines break between words: a name on two lines keeps its longest word whole ('JSContext.eval', never 'JSContext.eva|l').
       const word = Math.max(0, ...p.name.split(/\s+/).map(x => measureText(x, 'head') * 1.1));
       if (need > w - chrome && word > w - chrome) w = Math.min(NODE_MAX_W + 40, Math.max(w, Math.ceil(word) + chrome + 4));
-      let nl = need > w - chrome ? (need > (w - chrome) * 2 ? 3 : 2) : 1, chipsLine = false;
-      const ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
-      // A typed card with an inside whose name does not keep one line beside its group chips: the chips take a line of their own
-      // under the body and the name the card's width without them (the fold toggle stays). Drawn on one line, a name keeps them.
-      if (typed && kids && !typed.oneLine && nl > 1) {
-        const room = w - (chrome - 62 - extraW); chipsLine = true;
-        nl = need > room ? (need > room * 2 ? 3 : 2) : 1;
-      }
-      if (typed?.oneLine) nl = 1;
-      m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0) + more(id, 'unit', nl, chipsLine), ox: 0, oy: 0, head: 0, face: 'unit' };
+      const nl = need > w - chrome ? (need > (w - chrome) * 2 ? 3 : 2) : 1, ll = lines(note, 'note', w - chrome), pl = nodeLines(id, w - chrome);
+      m = { w, h: Math.max(NODE_H, 24 + nl * 20 + (ll ? 2 + ll * 17 : 0) + extra * 19, pl ? 24 + nl * 20 + 3 + pl * PLAN_LINE : 0) + more(id, 'unit'), ox: 0, oy: 0, head: 0, face: 'unit' };
     } else {
       // Planned lines keep the row's own padding (10 above and below): this row only, for one line as for two.
       const w = nodeWidth(p.name, kids, measureText, extraW), nl = lines(p.name, 'node', w - chrome, 3), pl = nodeLines(id, w - chrome);
-      m = { w, h: Math.max(20 + (nl + extra) * 18, pl ? 20 + nl * 18 + 2 + pl * PLAN_LINE : 0) + more(id, 'row', nl), ox: 0, oy: 0, head: 0, face: 'row' };
+      m = { w, h: Math.max(20 + (nl + extra) * 18, pl ? 20 + nl * 18 + 2 + pl * PLAN_LINE : 0) + more(id, 'row'), ox: 0, oy: 0, head: 0, face: 'row' };
     }
     memo.set(id, m); return m;
   }
@@ -516,7 +518,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const place = (id: string, anchor: Point, rel: Point, depth: number, container: string | null) => {
     const m = measure(id, depth, container), kids = kidsOf(id).length, isOpen = open(id, depth);
     boxes.set(id, { id, x: anchor.x + m.ox, y: anchor.y + m.oy, w: m.w, h: m.h, kind: isOpen ? 'frame' : 'node', depth, container: container ?? ROOT, kids, rel, head: m.head,
-      ...(isOpen ? { list: listOf(id) } : { face: m.face ?? 'row' }) });
+      ...(isOpen ? { list: listOf(id) } : { face: m.face ?? 'row', ...(m.contact !== undefined ? { contact: m.contact, pins: m.pins ?? {} } : {}) }) });
     if (!isOpen) return;
     const { at } = anchors(id, depth + 1);
     // One column of rows fills the group's width, so a region widened for its name or note keeps an even edge.
@@ -634,7 +636,7 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
   const rims: Rect[] = all.filter(o => o.kind === 'frame' && o !== a && o !== b && (within(a, o) || within(b, o)));
   const segFree = (x1: number, y1: number, x2: number, y2: number, m = LANE_CLEAR) => !blocks.some(o => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m) && (m < 0 || offRims(rims, x1, y1, x2, y2, m));
   const free = (pts: Point[]) => pts.every((p, i) => !i || segFree(pts[i - 1]!.x, pts[i - 1]!.y, p.x, p.y, -1));
-  const portY = (x: Box, p?: number) => p ?? (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2);
+  const portY = (x: Box, p?: number) => p ?? (x.kind === 'frame' ? x.y + x.head / 2 : x.contact !== undefined ? x.y + x.contact : x.y + x.h / 2);
   // One end holds the other (a group and a part or group inside it): the line leaves the group under its head and runs down the
   // group's own margin to the side of the inner end (its head row when it is a group), so it never crosses a head or the parts
   // between them. Reversed when the inner end is where the line starts.
