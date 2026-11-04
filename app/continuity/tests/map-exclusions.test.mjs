@@ -21,9 +21,17 @@ function fixture(text = '실제 기능은 파일을 저장합니다.\n예제 조
   return { p, inp, spans, claim, part, reply };
 }
 const errors = reply => M.setAside(reply).map(e => [e.path, e.rule]);
+/** A stored map-reading.14 entry in the exact shape of .13: the .14 keys of its parts (fileRoles), steps and port-map rows (program)
+ * removed. */
+function stripFourteen(r) {
+  for (const p of r.parts) { delete p.fileRoles; for (const s of p.steps ?? []) delete s.program; }
+  for (const m of r.portMap ?? []) delete m.program;
+  return r;
+}
 /** A stored map-reading.13 entry in the exact shape of .12: the .13 keys of its loops, kept states (program) and relations
  * (payloadFields) removed. */
 function stripThirteen(r) {
+  stripFourteen(r);
   for (const p of r.parts) { if (p.loop) delete p.loop.program; for (const s of p.stateVars ?? []) delete s.program; }
   for (const x of r.relations) delete x.payloadFields;
   return r;
@@ -110,7 +118,7 @@ test('F2 a 1087-character citation with the sole supporting sentence last is exc
     assert.deepEqual(got.parts[0].claims.map(c => c.key), ['s1']);
     assert.deepEqual(errors(got), [['parts[0].claims[1].at', 'length']]);
     const applied = M.applyReading(f.p, f.inp, got, meta()), x = applied.reading.exclusions[0];
-    assert.equal(applied.reading.version, 'map-reading.13');
+    assert.equal(applied.reading.version, 'map-reading.14');
     assert.deepEqual([x.path, x.rule, x.category, x.record, x.from, x.to], ['parts[0].claims[1].at', 'length', null, f.p.pasted[0].id, 0, 1087]);
     assert.match(x.explanation, /600/);
     assert.ok(!JSON.stringify(x).includes(support));
@@ -302,7 +310,7 @@ test('map-reading.7: a map.6 reply with every new field is read, applied, stored
   assert.deepEqual(got.parts[0].claims.map(sevenOf), [['withdrawn', 'file', '11-02 23:04Z', 'server/engine.mjs', '옛 결정 원문'], ['status', null, null, null, null]]);
   assert.deepEqual([got.parts[0].state, got.parts[0].stateWhen, got.parts[0].files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_seven_full'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.stateQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a claim');
   assert.deepEqual([save.state, save.stateWhen, save.files], ['running', '11-02 22:10Z', ['server/engine.mjs', 'public/']]);
@@ -355,7 +363,7 @@ test('map-reading.7 lenient: a wrong field sets aside its claim or relation, and
   assert.deepEqual(seven.parts[0].claims.map(c => c.key), ['s1']);
   assert.deepEqual([seven.parts[0].state, seven.parts[0].stateWhen, seven.parts[0].files], [null, null, ['x/']]);
   assert.deepEqual(errors(seven), [['parts[0].claims[1].topic', 'contract'], ['parts[0].state', 'contract']]);
-  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.13');
+  assert.equal(M.applyReading(g.p, g.inp, seven, meta('R_seven_map7')).reading.version, 'map-reading.14');
 });
 
 test('map-reading.7 strict: plain map.6 refuses a reply with any wrong new field', () => {
@@ -379,7 +387,7 @@ test('map-reading.7: a reply without any new field still validates and stores ev
   r.parts.push({ ref: 'new:read', name: '읽기', parent: null, role: '파일 읽기', roleAbout: null, roleReplaces: null, basis: [f.at[2]], claims: [f.claim('s3', f.at[2])] });
   r.relations = [{ from: 'new:save', to: 'new:read', kind: 'flow', note: '', at: f.at[0] }];
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_seven_plain'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   for (const p of applied.reading.parts) {
     assert.deepEqual([p.state, p.stateWhen, p.stateQuote, p.files], [null, null, null, []]);
     for (const c of p.claims) assert.deepEqual(sevenOf(c), [null, null, null, null, null]);
@@ -427,7 +435,7 @@ test('map-reading.8: a map.6 reply with every new field is read, applied, stored
   assert.deepEqual(eightOf(got.parts[1]), [null, [], [], [], []]);
   assert.deepEqual([got.relations[0].channel, got.basisAt, got.basisVersion], ['data', '2026-11-03T09:01:03Z', '라이브 618df374']);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_eight_full'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   const [save, read] = applied.reading.parts, claim = save.claims[0];
   assert.deepEqual(save.typeQuote, { record: claim.record, quote: claim.quote, from: claim.from, to: claim.to }, 'anchored where it stands, like a state');
   assert.deepEqual(eightOf(save), ['store', ['review 행', 'policy 행'], ['e=1 행'], ['watch', 'allowed_side'], ['24 h 만료']]);
@@ -488,7 +496,7 @@ test('map-reading.8 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.8: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_eight_plain'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   assert.deepEqual([applied.reading.basisAt, applied.reading.basisVersion], [null, null]);
   for (const p of applied.reading.parts) assert.deepEqual([p.type, p.typeQuote, ...eightOf(p).slice(1)], [null, null, [], [], [], []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -599,7 +607,7 @@ test('map-reading.9: a map.6 reply with steps, a loop, kept state and a port map
   assert.deepEqual(nineOf(got.parts[1]), [[['읽기', '파일을 읽는다', []]], null, []]);
   assert.deepEqual(rowsOf(got.portMap), [[0, 'e=1 행', '저장', 'out'], [0, '저장 파일', '읽기', 'in']]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_nine_full'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   const [stored, read] = applied.reading.parts, line = applied.reading.relations[0];
   assert.deepEqual(nineOf(stored), [save[0], save[1], save[2].map(s => ({ ...s, program: false }))], 'map-reading.13: a kept state the model gave is no program state');
   assert.deepEqual(stored.steps[0].quote, stored.typeQuote, 'a step stands on its own row, anchored where it stands');
@@ -678,7 +686,7 @@ test('map-reading.9 strict: plain map.6 refuses a reply with any wrong new field
 test('map-reading.9: a reply without any new field stores every key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_nine_plain'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   assert.deepEqual(applied.reading.portMap, []);
   for (const p of applied.reading.parts) assert.deepEqual([p.steps, p.loop, p.stateVars], [[], null, []]);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
@@ -741,7 +749,7 @@ test('map-reading.10: a map.6 reply with a rule\'s scope, places and devices, a 
   assert.deepEqual(got.parts[0].claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
   assert.deepEqual(got.parts[1].claims.map(tenOf), [UNSAID10, project]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_ten_full'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   const [stored, read] = applied.reading.parts;
   assert.deepEqual(stored.claims.map(tenOf), [[null, null, [], [], 'design', null], UNSAID10, rule, [null, null, [], [], null, 'dev']]);
   assert.deepEqual(read.claims.map(tenOf), [UNSAID10, project]);
@@ -831,7 +839,7 @@ test('map-reading.10 strict: plain map.6 refuses a reply with any wrong new clai
 test('map-reading.10: a reply without any new claim field stores every claim key as not said', () => {
   const f = firstMap(), r = structuredClone(f.reply); r.parts[0].claims.splice(1, 1);
   const applied = M.applyReading(f.p, f.inp, M.validateMapReply(r, f.ask), meta('R_ten_plain'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   for (const p of applied.reading.parts) for (const c of p.claims) assert.deepEqual(tenOf(c), UNSAID10);
   const u = M.partUnderstanding(applied.project, applied.reading.parts[0].areaId);
   assert.deepEqual([u.rules, u.withdrawals, u.gates], [[], [], []]);
@@ -956,7 +964,7 @@ test('map-reading.11: a rule with no place gets at most two condition rows of it
 
 test('map-reading.11 storage: every anchor says program (true only on an inferred place); a .10 entry keeps its shape and refuses the key', () => {
   const f = koru34(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(structuredClone(f.reply), f.ask), meta('R_eleven'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   const [engine, card] = applied.reading.parts;
   // .35: the model's stated place on a condition row its rule row does not write is stored as read: inferred, never program.
   assert.deepEqual(engine.claims.map(c => c.anchors.map(a => [a.kind, a.text, a.program])), [[['inferred', 'not 1 <= stop <= 250', true]], [], [], [['inferred', '엔진 · not 1 <= stop <= 250', false]]]);
@@ -1023,7 +1031,7 @@ test('map-reading.12: a map.6 reply with condition rows is read, applied, stored
   assert.equal(M.setAside(got).length, 0);
   assert.deepEqual([condOf(got.parts[0]), condOf(got.parts[1])], [CONDITIONS12, []]);
   const applied = M.applyReading(f.p, f.inp, got, meta('R_twelve_full'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   const [stored, read] = applied.reading.parts;
   assert.deepEqual([condOf(stored), read.conditions], [CONDITIONS12, []]);
   assert.deepEqual(stored.conditions[0].quote, stored.typeQuote, 'a condition row stands on its own row, anchored where it stands');
@@ -1099,7 +1107,7 @@ test('map-reading.13: a map.6 reply with format fields is read, applied and stor
   assert.equal(M.setAside(got).length, 0);
   assert.deepEqual([got.relations[0].payloadFields, got.parts[0].loop.program, got.parts[0].stateVars[0].program], [['order_id', 'amount'], undefined, undefined], 'an unasked key is passed over');
   const applied = M.applyReading(f.p, f.inp, got, meta('R_thirteen_full'));
-  assert.equal(applied.reading.version, 'map-reading.13');
+  assert.equal(applied.reading.version, 'map-reading.14');
   const [stored] = applied.reading.parts;
   assert.deepEqual([stored.loop.program, stored.stateVars.map(s => s.program), applied.reading.relations.map(r => r.payloadFields)], [false, [false], [['order_id', 'amount']]]);
   assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
@@ -1147,4 +1155,62 @@ test('map-reading.13 storage is exact: a loop or kept state without program, a p
   assert.match(M.explainExclusion('relations[0].payloadFields', 'contract', 'payload-fields'), /연결은 남겼어요/);
   assert.match(M.explainExclusion('relations[0].cadence', 'contract', 'cadence'), /그 칸을 진단에 남겼어요/);
   assert.match(M.explainExclusion('relations[1]', 'contract', 'dup-line'), /뒤의 겹친 연결을 제외했어요/);
+});
+
+// ---- map-reading.14 (pipeline .39): every stored part holds its 「파일 지도」 rows (fileRoles), every step and every port-map row says
+// whether the program put it there. Exact storage; a .13 entry keeps its shape. ----
+function fourteenReply(f) {
+  const r = thirteenReply(f);
+  r.parts[0].fileRoles = [{ path: ' src/save.ts ', role: '파일 저장', at: f.at[0] }, { path: 'src/check.ts', role: '확인', at: f.at[2] }];
+  return r;
+}
+test('map-reading.14: a map.6 reply with file-map rows is read, applied and stored with every part, step and port-map row in the .14 shape; the model cannot mark its own steps or rows program', () => {
+  const f = firstMap(), forged = fourteenReply(f);
+  forged.parts[0].steps[0].program = true; forged.portMap[0].program = true;
+  const got = M.validateMapReply(forged, f.ask);
+  assert.equal(M.setAside(got).length, 0);
+  assert.deepEqual([got.parts[0].fileRoles.map(x => [x.path, x.role]), got.parts[0].steps[0].program, got.portMap[0].program], [[['src/save.ts', '파일 저장'], ['src/check.ts', '확인']], undefined, undefined], 'an unasked key is passed over');
+  const applied = M.applyReading(f.p, f.inp, got, meta('R_fourteen_full'));
+  assert.equal(applied.reading.version, 'map-reading.14');
+  const [first, second] = applied.reading.parts;
+  assert.deepEqual([first.fileRoles.map(x => x.path), second.fileRoles, first.steps.map(s => s.program), applied.reading.portMap.map(m => m.program)], [['src/save.ts', 'src/check.ts'], [], [false, false], [false, false]]);
+  assert.deepEqual(parseProject(S.serializeProject(applied.project)).readings.at(-1), applied.reading);
+  assert.deepEqual(M.partUnderstanding(applied.project, first.areaId).fileRoles.map(x => [x.path, x.role]), [['src/save.ts', '파일 저장'], ['src/check.ts', '확인']]);
+  // Plain map.6 refuses a wrong list or row whole; the lenient readings leave the list or the row out alone (file-role).
+  for (const bad of ['x', Array.from({ length: 13 }, (_, i) => ({ path: `p${i}`, role: 'r', at: f.at[0] })), [{ path: 'p', role: '', at: f.at[0] }], [{ path: 'p', role: 'r', at: 'N01.99' }],
+    [{ path: 'p', role: 'r', at: f.at[0] }, { path: 'p', role: 's', at: f.at[2] }]]) {
+    const r = fourteenReply(f); r.parts[0].fileRoles = bad;
+    assert.throws(() => M.validateMapReply(r, f.ask), undefined, JSON.stringify(bad).slice(0, 40));
+  }
+  const one = fourteenReply(f); one.parts[0].fileRoles[1].role = '가'.repeat(81);
+  const divided = M.validateMapReply(one, f.ask, { setAside: true });
+  assert.deepEqual([divided.parts[0].fileRoles.map(x => x.path), M.readingExclusions(divided).filter(e => e.category === 'file-role').map(e => e.path)], [['src/save.ts'], ['parts[0].fileRoles[1]']]);
+  const many = fourteenReply(f); many.parts[0].fileRoles = Array.from({ length: 13 }, (_, i) => ({ path: `p${i}`, role: 'r', at: f.at[0] }));
+  assert.deepEqual(M.readingExclusions(M.validateMapReply(many, f.ask, { setAside: true })).filter(e => e.category === 'file-role').map(e => e.path), ['parts[0].fileRoles']);
+  assert.match(M.explainExclusion('parts[0].fileRoles[1]', 'contract', 'file-role'), /파일 역할 행/);
+  assert.match(M.explainExclusion('parts[1].claims[0]', 'contract', 'dup-claim'), /같은 원문 구간을 이미 인용/);
+});
+
+test('map-reading.14 storage is exact: a part without fileRoles, a wrong or repeated row, a step or port-map row without program, a program step that does or uses something, and a .14 key on a .13 reading are refused; a .13 entry keeps its shape', () => {
+  const f = firstMap(), applied = M.applyReading(f.p, f.inp, M.validateMapReply(fourteenReply(f), f.ask), meta('R_fourteen_store'));
+  const raw = S.serializeProject(applied.project);
+  for (const mutate of [r => { delete r.parts[0].fileRoles; }, r => { r.parts[0].fileRoles = null; }, r => { r.parts[0].fileRoles[1].path = r.parts[0].fileRoles[0].path; },
+    r => { r.parts[0].fileRoles[0].role = '가'.repeat(81); }, r => { r.parts[0].fileRoles[0].path = '가'.repeat(121); }, r => { delete r.parts[0].fileRoles[0].quote; },
+    r => { r.parts[0].fileRoles = Array.from({ length: 13 }, (_, i) => ({ ...r.parts[0].fileRoles[0], path: `p${i}` })); },
+    r => { delete r.parts[0].steps[0].program; }, r => { r.parts[0].steps[0].program = 'yes'; }, r => { r.parts[0].steps[0].program = true; },
+    r => { delete r.portMap[0].program; }, r => { r.portMap[0].program = 1; }, r => { r.version = 'map-reading.13'; }]) {
+    const bad = JSON.parse(raw); mutate(bad.readings.at(-1));
+    assert.throws(() => parseProject(JSON.stringify(bad)), undefined, String(mutate));
+    assert.throws(() => validateProject(bad), undefined, String(mutate));
+  }
+  // The program's own items stand: a step that does and uses nothing, a port-map row.
+  const program = JSON.parse(raw), r14 = program.readings.at(-1);
+  Object.assign(r14.parts[0].steps[1], { program: true }); r14.portMap[0].program = true;
+  assert.equal(r14.parts[0].steps[1].does, null); assert.deepEqual(r14.parts[0].steps[1].uses, []);
+  assert.deepEqual(validateProject(program), program);
+  const old = JSON.parse(raw); old.readings.at(-1).version = 'map-reading.13'; stripFourteen(old.readings.at(-1));
+  assert.deepEqual(validateProject(old), old, 'a map-reading.13 entry keeps its exact shape');
+  const excluded = (path, category) => ({ path, rule: 'contract', category, explanation: '-', record: null, from: null, to: null });
+  const ok = JSON.parse(raw); ok.readings.at(-1).exclusions = [excluded('parts[0].fileRoles[1]', 'file-role'), excluded('parts[0].fileRoles', 'file-role'), excluded('parts[1].claims[0]', 'dup-claim')];
+  assert.deepEqual(validateProject(ok), ok, 'a .14 reading may say where a file-map row or a duplicate claim stood');
 });

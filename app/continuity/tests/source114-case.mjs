@@ -29,7 +29,7 @@ export function mapWithRequest({ D, M, C, S, studioView, emptyBundle }) {
   // This fixture represents a historical project.13 reading. Keep its original .5 shape as production writes .6 and now .10 (whose
   // reading, claim, part and relation keys an earlier reading never has).
   const five = ({ exclusions: _exclusions, basisAt: _ba, basisVersion: _bv, portMap: _pm, ...r }) => ({ ...r, version: 'map-reading.5',
-    parts: r.parts.map(({ state: _s, stateWhen: _w, stateQuote: _q, files: _f, type: _y, typeQuote: _yq, inputs: _i, outputs: _o, fields: _d, config: _g, steps: _st, loop: _lp, stateVars: _sv, conditions: _cd, ...x }) => ({ ...x, claims: x.claims.map(({ topic: _t, evidence: _e, when: _n, where: _h, before: _b, scope: _sc, scopeName: _sn, anchors: _an, enforcedBy: _eb, withdrawalKind: _wk, gate: _ga, ...c }) => c) })),
+    parts: r.parts.map(({ state: _s, stateWhen: _w, stateQuote: _q, files: _f, type: _y, typeQuote: _yq, inputs: _i, outputs: _o, fields: _d, config: _g, steps: _st, loop: _lp, stateVars: _sv, conditions: _cd, fileRoles: _fr, ...x }) => ({ ...x, claims: x.claims.map(({ topic: _t, evidence: _e, when: _n, where: _h, before: _b, scope: _sc, scopeName: _sn, anchors: _an, enforcedBy: _eb, withdrawalKind: _wk, gate: _ga, ...c }) => c) })),
     relations: r.relations.map(({ payload: _p, cadence: _c, mode: _m, channel: _n, ...x }) => x) });
   p = { ...p, readings: p.readings.map(five) };
   const area = p.space.areas[0].id;

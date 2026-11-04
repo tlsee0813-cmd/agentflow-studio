@@ -2,7 +2,7 @@
 // Neither the blueprint nor extraction notes are source evidence. The final map still cites the original ask.
 import { ApiError } from '../../server/errors.mjs';
 import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusions, anchorDowngrades, attachExclusions, explainExclusion, versionLike, DIVIDED_EXCLUSIONS_MAX, MAP6_NEW_PARTS, MAP6_RELATIONS, MAP6_CLAIMS, PART_LIST_MAX, FIELD_ITEM_MAX, fileKeys,
-  artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt, conditionRows } from '../dist/public/shared/map-reading.js';
+  artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt, conditionRows, fileMapRows, programPortMap, carriesQuery, contentWords } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
@@ -44,7 +44,7 @@ export const BLUEPRINT_CORRECTIONS_PER_PART_MAX = 4;
 export const BLUEPRINT_GLOBAL_KINDS = Object.freeze(['condition', 'correction', 'uncertain', 'material', 'relation', 'request']);
 const NEW = /^new:[a-z0-9_-]{1,24}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
-const SAFE_VALIDATION_PATH = /^(?:reply|summary|parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(?:\[\d{1,3}\])?(?:\.(?:ref|name|parent|role|roleAbout|roleAboutAt|roleReplaces|basis|claims|kind|text|at|about|aboutAt|replaces|key|from|to|note|target|targets|statement|parts|record|quote|what|stance|why|requestId|itemId|topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|unit|stop|resume|does|uses|scope|readBy|changedBy|port|step|direction|relation|scopeName|anchors|enforcedBy|withdrawalKind|gate|conditions|when|then|else|payloadFields)(?:\[\d{1,3}\])?)*$/;
+const SAFE_VALIDATION_PATH = /^(?:reply|summary|parts|relations|candidates|gaps|matches|material|basisAt|basisVersion|portMap)(?:\[\d{1,3}\])?(?:\.(?:ref|name|parent|role|roleAbout|roleAboutAt|roleReplaces|basis|claims|kind|text|at|about|aboutAt|replaces|key|from|to|note|target|targets|statement|parts|record|quote|what|stance|why|requestId|itemId|topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|unit|stop|resume|does|uses|scope|readBy|changedBy|port|step|direction|relation|scopeName|anchors|enforcedBy|withdrawalKind|gate|conditions|when|then|else|payloadFields|fileRoles|path)(?:\[\d{1,3}\])?)*$/;
 const SAFE_VALIDATION_RULES = new Set(['contract', 'reference', 'length', 'duplicate-key', 'duplicate-target', 'settled-and-open',
   'material-evidence', 'source-kind', 'condition-form', 'condition-source', 'condition-length']);
 // map-reading.ts ContractGuard: the fixed categories a rule 'contract' refusal names. Nothing else of error.target is ever read.
@@ -64,7 +64,9 @@ const SAFE_CONTRACT_CATEGORIES = new Set(['shape', 'keys', 'text', 'count', 'new
   // map-reading.12 (.36): a part's condition row; .36: a store part on another's place, a line no record row backs.
   'condition', 'store-dup', 'unrecorded',
   // map-reading.13 (.37): a relation's format fields; .37: a line read twice.
-  'payload-fields', 'dup-line']);
+  'payload-fields', 'dup-line',
+  // map-reading.14 (.39): a part's file-map role row; .39: a claim quoting a range another part's claim quotes.
+  'file-role', 'dup-claim']);
 /** Fixed path/rule (and, for rule 'contract', its fixed guard category) of a refusal; null for anything else. */
 export function safeValidation(error) {
   try {
@@ -104,7 +106,7 @@ export const MAP_BLUEPRINT_PROMPT = `너는 프로젝트 지도의 전역 설계
 parts는 기록이 그린 흐름의 단계를 잃지 않을 만큼 보통5~36개, 총36개 이하(첫 지도는 새 부분도 36개까지). 첫 지도에서 기록의 부분 표 행과 산출물 표의 저장소 행을 모두 세울 자리가 있으면 모두 부분으로 세운다. 기능 책임으로 묶고 파일·함수·항목마다 펼치지 않는다.
 기록의 부분 표(현황 보고의 「부분」 표, 설계 기록의 「부분 유형」 표)의 모든 행은 부분으로 세우거나, 그 행을 흡수한 부분의 focus에 원문 이름과 상태 그대로(예: 「기분 층: 미구현」) 적는다. 흡수는 기록의 묶음 표(부모 이름 | 자식 이름들)가 그 행의 부모로 적은 부분에만 하고, 묶음 표에 부모가 없는 행은 다른 부분에 흡수하지 않고 부분으로 세운다. 연결 표(보내는 부분 | 받는 부분)에 자기 행이 있는 단위는 부모가 있어도 흡수하지 않고 부분으로 세운다(흡수하면 그 연결이 자기 고리가 되어 지도에서 사라진다). 부분의 name은 그 표 행의 첫 칸 이름을 글자 그대로 쓰고, 그 부분이 내는 파일·산출물 이름으로 바꾸지 않는다(「facts-refresh」 행을 「calendar.json」으로 부르지 않는다). 미구현·폐기·모름 행도 그 상태의 부분으로 세우고, 두 기록의 표가 같은 이름으로 부르는 단위는 한 부분이다. 기록의 산출물 표(이름 | 필드 | 만드는 부분 | 읽는 부분 | 있는 곳)에서 「있는 곳」이 파일·큐·경로인 행(review.jsonl, policy.jsonl, state.jsonl, texture-events.jsonl, cards-*.jsonl, plan.jsonl, LEDGER.jsonl 같은)은 모두 저장소 부분 후보이며 그 행의 이름 그대로 세우고 focus에 「저장소: 필드 …」를 적는다. 같은 파일의 이어진 행은 한 부분이다. 저장소 부분은 「있는 곳」 하나에 하나다: 「있는 곳」이 부분 표의 저장소 행 이름(「orders 테이블」, 「관리자 세션」)이거나 그 행의 칸이 적은 곳(「events 큐 | Redis 스트림 events·events:dlq」의 「Redis 스트림 events」·「Redis 스트림 events:dlq」)이면 그 산출물 행을 새 부분으로 세우지 않고 그 저장소 부분에 접으며, 「있는 곳」이 같은 행 여럿(orders 행·shipments 행·tracking_events 행이 모두 「orders 테이블」)도 한 저장소 부분에 접는다. 접은 행의 이름과 필드는 그 저장소의 focus에 「저장소: orders 행(id·status …)·shipments 행(…)」처럼 적고, 그 행의 흐름은 그 저장소 ref로 쓴다(「new:worker → new:orders_table: shipments 행」). 「있는 곳」이 폴더(「/var/lib/koru-desk/cards/」)이면 행의 파일마다 따로 세운다. 「있는 곳」이 HTTP·메모리·외부 검사(GitHub 검사)이면 저장소 부분도 그 산출물의 부분도 세우지 않고 만드는 쪽 → 읽는 쪽 relation 항목 하나로 쓴다. 같은 「있는 곳」에 저장소 부분을 둘 세우면 설계는 한 번 다시 쓰게 되고(store-dup), 그래도 남은 겹친 저장소는 그 연결과 함께 지도에서 빠진다. 그 흐름은 「만드는 쪽 ref → 저장소 ref: 행 이름」과 「저장소 ref → 읽는 쪽 ref: 행 이름」 두 relation 항목으로 쓰고, 읽는 쪽이 그 파일을 자기 박자(루프·타이머)로 읽는다고 기록이 적으면 만드는 쪽 → 읽는 쪽 직통 항목을 쓰지 않는다. 연결 행·화살표가 넘기는 것으로 적은 파일 이름은 기록의 산출물 표에 그 파일의 행이 있을 때만 그 저장소 부분을 거친다. 연결 행의 「넘기는 것」 칸은 산출물 이름 목록 하나이며 부분이 아니다: 산출물 표에 행이 없는 이름(「fee_policy·calendar.json」의 calendar.json)은 부분으로 세우지 않고 그 연결의 relation 항목에 칸 그대로 둔다(「new:facts_refresh → new:engine: fee_policy·calendar.json」). 만드는 부분과 읽는 부분이 같은 산출물 행도 「있는 곳」이 부분 표의 저장소 부분이면(「관리자 세션 키 | 주문 API | 주문 API | 관리자 세션」, 「processed_events 행 | 결제 웹훅 수신기 | 결제 웹훅 수신기 | orders 테이블」) 「그 부분 ref → 저장소 ref」 쓰기와 「저장소 ref → 그 부분 ref」 읽기 두 relation 항목을 쓴다(쓰지 않으면 그 저장소가 선 없는 섬이 된다). 부분 36개 안에서 고를 때는 관계가 있는 단위·사람·저장소를 먼저 세우고, 만드는 부분과 읽는 부분이 같고 「있는 곳」이 부분 표의 저장소 부분이 아닌 산출물(posture.json·counter.jsonl·J1 답 같은 자기 파일·메모리)은 그 부분의 focus에 두며, 관계가 없는 미구현·폐기·모름 단위부터 가장 가까운 부분의 focus로 보낸다.
 기록이 스스로 구성 목록(돌아가는 것의 표, 유닛 목록)·층 번호·「A → B」 흐름을 제시하면 그 단위로 부분을 나누고, 화살표의 양 끝이 서로 다른 부분이 되게 한다. 「A·B와 C」처럼 서로 다른 유닛을 한 이름에 묶어야 하면 나눈다. 기록이 묶음 이름과 구성원을 함께 밝히면(예: 「정보 층(달력·카드·질감)」, 1a·1b·1c 같은 번호) 그 묶음을 부모 부분으로 두고 구성원을 자식으로 둔다. 미구현·폐기된 구성원은 부분으로 세울 자리가 없을 때만 같은 묶음 부분의 focus에 적는다. 원문이 「X의 입력」이라 부른 것은 X의 자식으로 두지 말고 X 옆 부분으로 두어 X로 가는 관계로 잇는다. parent는 원문이 「A(B·C)」처럼 B를 A 안에 직접 열거할 때만 쓴다. 목적·설계 사상만 말하고 다른 부분과 주고받는 것이 없는 내용은 부분으로 만들지 않고 가장 가까운 부분의 focus로 보낸다. 기존 ref는 INPUT.parts에 있는 ID만, name은 사용자의 기존 이름과 글자 그대로 같아야 하고 parent도 원래 parentId와 같아야 한다. 새 ref는 ^new:[a-z0-9_-]{1,24}$이며 중복하지 않는다. parent는 실제 기존 부분 또는 이 계획의 부분 ref나 null이며 자기 자신·순환·없는 부모를 쓰지 않는다. 포함 근거가 없으면 null이다. name60자 이하. focus는 320자 안에 쓴다(480자를 넘으면 설계 전체가 거절된다). 긴 목록은 이름만 남기고 설명을 줄인다.
-global은64개 이하(그중 relation 항목 48개까지), text240자 이하. 뒤의 조건·정정·철회·미구현·모름, 내포 예제 범위, 관계 방향, 요청·prior 귀속을 누락하지 않는다. kind=relation 항목은 원문의 화살표·「A가 B를 읽는다」·보고와 지시의 전달마다 「from ref → to ref: 넘기는 것(원문 이름)」 형식으로 하나씩 쓰고 at에 그 줄을 둔다(흐름 뼈대이며 증거가 아니다). 원문이 「읽기만」「보고 읽기」「한 줄 지시」「잔고로 노출 조절」처럼 적은 읽기와 제어도 그 문장이 있을 때만 화살표로 잇는다(예: 성적표 → 사람, 엔진 → 감시, 사람 → 엔진). 흐름도의 끝까지 따라가 한 부분에서 나가는 화살표(예: 엔진 → journal·outcomes → 경주 행 → 성적표)도 relation 항목으로 세운다. 부분은 원문의 표·목록이 이름 붙인 단위(유닛·생산자·사람)로만 세우고, 흐름 그림의 중간 산출(journal·outcomes 같은 기록)은 부분이 아니라 그것을 내는 단위의 focus에 남기며 그 화살표는 단위 사이의 relation으로 쓴다. 원문이 서로 다른 생산자로 적은 둘(예: 라이브 엔진의 경주 행과 종이 재생의 경주 행)을 한 부분에 합치지 않는다. 사람(소유자)과 그 지시를 받는 세션·감독자가 원문에 따로 적혀 있으면 따로 둔다. 앞으로 하겠다는 지시·계획은 관계가 아니라 그 부분의 want로만 두고 relation 항목으로 쓰지 않는다. [모름]의 각 줄은 그것이 가리키는 부분에 하나씩 uncertain 항목으로 두고 「→ ref」로 맡긴다. 정정·철회·모름 항목과 condition·request 항목의 text 끝에는 그것을 맡을 부분 ref를 「→ new:x」로 하나만 적는다. 기록의 철회·변경, 실제 변화, 오류, 지켜야 할 것, 모르는 것, 가장 자신 없는 것 표의 행은 그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다(「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며, 그것을 대신한 감시를 맡은 부분이 아니다). 「전체」 행만 원문이 그 규칙이 제약한다고 적은 부분에 둔다. 한 항목은 원문 표 행 하나다: 철회·정정·규칙·모름·가장 자신 없는 것·다음 관문 표의 행마다 항목 하나를 쓰고 at에 그 행 하나를 둔다(그 행이 가리키는 다른 기록의 한 줄은 함께 둘 수 있다). 여러 행을 한 항목에 묶지 않는다(묶은 항목은 앞의 행만 주장이 되고 나머지 행이 사라진다). global 자리가 모자라면 그 행을 맡을 부분의 at에 그 행을 두어 맡긴다. 한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다). 맡긴 항목의 표 행마다 그 부분의 주장 하나가 되며, 어느 주장도 인용하지 않은 행은 진단에 남는다. relation 항목은 48개까지만 쓴다. 기록의 연결 표(보내는 부분 | 받는 부분)의 모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다. 소유자가 정한 요구사항은 규칙을 전달받는 세션이 아니라 그 규칙이 제약하는 부분(돈 경로 → 엔진, 지출 → 카드 러너, 노출 → 사람)에 둔다. 운영 함정·환경 사실(예: coreutils 차이, 거래소 지연 몰림)은 원문이 그 영향을 받는다고 이름 붙인 부분의 focus에 두고, 그것을 감시·보고하는 부분에 두지 않으며, 받는 부분이 원문에 없으면 아무 부분에나 붙이지 않는다. 원문 표의 단위와 저장소가 부분 36개를 넘으면 관계가 없는 자식부터 부모 부분의 focus에 원문 이름과 상태 그대로(예: 「변경 구상(plan-view): 돌고 있음 [추정]」) 넣고, 관계가 있는 단위와 사람은 부분으로 남긴다. 요구·구상·보고·검사 보고·제공 자료를 구별하고 작성자의 보고를 앱이 확인한 사실로 올리지 않는다. 같은 이름만으로 다른 대상·판본을 합치지 않는다. 사용자 이름·부모·직접 바로잡은 역할을 보존한다. 원문이 명시한 범위만 정정하고 도착 순서로 앞 주장을 철회하지 않는다.
+global은64개 이하(그중 relation 항목 48개까지), text240자 이하. 뒤의 조건·정정·철회·미구현·모름, 내포 예제 범위, 관계 방향, 요청·prior 귀속을 누락하지 않는다. kind=relation 항목은 원문의 화살표·「A가 B를 읽는다」·보고와 지시의 전달마다 「from ref → to ref: 넘기는 것(원문 이름)」 형식으로 하나씩 쓰고 at에 그 줄을 둔다(흐름 뼈대이며 증거가 아니다). 원문이 「읽기만」「보고 읽기」「한 줄 지시」「잔고로 노출 조절」처럼 적은 읽기와 제어도 그 문장이 있을 때만 화살표로 잇는다(예: 성적표 → 사람, 엔진 → 감시, 사람 → 엔진). 흐름도의 끝까지 따라가 한 부분에서 나가는 화살표(예: 엔진 → journal·outcomes → 경주 행 → 성적표)도 relation 항목으로 세운다. 부분은 원문의 표·목록이 이름 붙인 단위(유닛·생산자·사람)로만 세우고, 흐름 그림의 중간 산출(journal·outcomes 같은 기록)은 부분이 아니라 그것을 내는 단위의 focus에 남기며 그 화살표는 단위 사이의 relation으로 쓴다. 원문이 서로 다른 생산자로 적은 둘(예: 라이브 엔진의 경주 행과 종이 재생의 경주 행)을 한 부분에 합치지 않는다. 사람(소유자)과 그 지시를 받는 세션·감독자가 원문에 따로 적혀 있으면 따로 둔다. 앞으로 하겠다는 지시·계획은 관계가 아니라 그 부분의 want로만 두고 relation 항목으로 쓰지 않는다. [모름]의 각 줄은 그것이 가리키는 부분에 하나씩 uncertain 항목으로 두고 「→ ref」로 맡긴다. 정정·철회·모름 항목과 condition·request 항목의 text 끝에는 그것을 맡을 부분 ref를 「→ new:x」로 하나만 적는다. 기록의 철회·변경, 실제 변화, 오류, 지켜야 할 것, 모르는 것, 가장 자신 없는 것 표의 행은 그 행의 「부분 이름」 칸(없으면 첫 칸)이 이름 붙인 부분에 맡긴다(「엔진 | 매일 FLAT 재시작 | 채택 안 함」은 → 엔진이며, 그것을 대신한 감시를 맡은 부분이 아니다). 「전체」 행만 원문이 그 규칙이 제약한다고 적은 부분에 둔다. 한 항목은 원문 표 행 하나다: 철회·정정·규칙·모름·가장 자신 없는 것·다음 관문 표의 행마다 항목 하나를 쓰고 at에 그 행 하나를 둔다(그 행이 가리키는 다른 기록의 한 줄은 함께 둘 수 있다). 여러 행을 한 항목에 묶지 않는다(묶은 항목은 앞의 행만 주장이 되고 나머지 행이 사라진다). global 자리가 모자라면 그 행을 맡을 부분의 at에 그 행을 두어 맡긴다. 한 부분에 맡기는 항목 수는 줄이지 않는다(첫 지도의 부분은 주장을 20개까지 쓴다). 맡긴 항목의 표 행마다 그 부분의 주장 하나가 되며, 어느 주장도 인용하지 않은 행은 진단에 남는다. relation 항목은 48개까지만 쓴다. 기록의 연결 표(보내는 부분 | 받는 부분)의 모든 행은 relation 항목 하나(저장소를 거치면 둘)로 빠짐없이 쓴다. 소유자가 정한 요구사항은 규칙을 전달받는 세션이 아니라 그 규칙이 제약하는 부분(돈 경로 → 엔진, 지출 → 카드 러너, 노출 → 사람)에 둔다. 운영 함정·환경 사실(예: coreutils 차이, 거래소 지연 몰림)은 원문이 그 영향을 받는다고 이름 붙인 부분의 focus에 두고, 그것을 감시·보고하는 부분에 두지 않으며, 받는 부분이 원문에 없으면 아무 부분에나 붙이지 않는다. 원문 표의 단위와 저장소가 부분 36개를 넘으면 관계가 없는 자식부터 부모 부분의 focus에 원문 이름과 상태 그대로(예: 「변경 구상(plan-view): 돌고 있음 [추정]」) 넣고, 관계가 있는 단위와 사람은 부분으로 남긴다. 요구·구상·보고·검사 보고·제공 자료를 구별하고 작성자의 보고를 앱이 확인한 사실로 올리지 않는다. 같은 이름만으로 다른 대상·판본을 합치지 않는다. 사용자 이름·부모·직접 바로잡은 역할을 보존한다. 원문이 명시한 범위만 정정하고 도착 순서로 앞 주장을 철회하지 않는다. 「한 줄 요약」 문장은 material이 아니며, 꼬리표 밖에서 이름이 하나만 나오는 부분에 맡기고(꼬리표 안의 보고자가 아니다) 부분 이름이 둘 이상·없음이거나 프로젝트를 정의하는 문장은 어느 부분에도 맡기지 않는다.
 모든 at는 원래 INPUT.records에 실제 있는 구간 별칭1~8개다. 범위 문자열·인용 복사·새 별칭·현재 지도나 요청의 ID를 at로 쓰지 않는다. 서로 떨어진 별칭은 단서 위치 목록이며 이어 붙인 인용이 아니다. basis/note의 사용자 기재 정보를 원문 조건으로 만들지 않는다. 실제 부분이 없으면 parts=[]로 두며 빈 틀을 만들지 않는다. 설계 자체는 원문 증거도 구현 사실도 아니다.`;
 export const BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT;
 // Keep the first-map prompt and its cache identity unchanged. Only later map.7 planning registers current-claim obligations.
@@ -287,6 +289,22 @@ export function connectionRows(ask) {
   }
   return rows.filter(([from, to]) => from && to);
 }
+/** .39: the same rows with their 넘기는 것 cell as written ('' where the table has none), as [sender, receiver, payload]. */
+export function connectionPayloadRows(ask) {
+  const rows = [];
+  for (const { text } of askRecords(ask).values()) {
+    let columns = null;
+    for (const raw of text.split('\n')) {
+      const line = raw.trim();
+      if (!line.startsWith('|')) { columns = null; continue; }
+      const cells = line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+      if (!columns) { const from = cells.findIndex(c => /보내는\s*부분/.test(c)), to = cells.findIndex(c => /받는\s*부분/.test(c)); columns = from >= 0 && to >= 0 ? [from, to, cells.findIndex(c => /넘기는\s*것/.test(c))] : false; continue; }
+      if (columns === false || cells.every(cell => !cell || /^:?-{2,}:?$/.test(cell))) continue;
+      rows.push([plainName(cells[columns[0]] ?? ''), plainName(cells[columns[1]] ?? ''), columns[2] >= 0 ? cells[columns[2]] ?? '' : '']);
+    }
+  }
+  return rows.filter(([from, to]) => from && to);
+}
 /** .30: the first cells of the records' part tables and artifact table ("2. 산출물"): the names a part may carry. */
 const ARTIFACT_TABLE = /^산출물/;
 const tableNames = ask => new Set([...sectionRows(ask, PART_TABLE), ...sectionRows(ask, ARTIFACT_TABLE)].map(cells => plainName(cells[0] ?? '')).filter(Boolean));
@@ -377,10 +395,22 @@ export const factRows = ask => tableRowsUnder(ask, FACT_TABLE).map(({ record, fr
  * given names (loosely compared, two characters or more): the name standing first in the sentence outside its bracketed tags, else
  * the first one its tags name; null when none. The .37 web map lost the status report's three summary sentences (가게 14곳, 베타
  * 3주째·누적 3,912건, b71f2d40 승인 대기) with no record: they were no row of any table the plan counts. */
+/* .39 (the subject rule, plan-claims and uncited alike): a sentence's home is its subject, a part named outside its bracketed tags,
+ * never the reporter its tag names (the .38 web plan hung N02.08 and N02.09 on 운영 담당자 and 개발 세션 for their tags). A sentence
+ * naming two parts or more outside its tags, or the project itself (the first word of its name), or none, defines the project: it is no
+ * part's row (name null, project true) and the summary receives it (readingDiagnostics, unbacked). The .38 KORU N02.07 「바이낸스 … 엔진
+ * 하나로 하는 단타 유기체다」 was counted as 바이낸스's row. */
 const SUMMARY_SECTION = /^한\s*줄\s*요약/;
 export function summarySentences(ask, names) {
   const out = [], wanted = [...new Set((Array.isArray(names) ? names : []).filter(n => typeof n === 'string').map(plainName).filter(n => n.length >= 2))];
-  const first = hay => wanted.map(n => [n, hay.indexOf(n)]).filter(([, i]) => i >= 0).sort((a, b) => a[1] - b[1] || b[0].length - a[0].length)[0]?.[0] ?? null;
+  // The project itself: its whole name, or its first word when that word is Latin (「KORU 구조 실험」 → koru; 「주문 배송 웹앱 시험」 whole).
+  const projectName = plainName(typeof ask?.project?.name === 'string' ? ask.project.name : ''), head = projectName.split(' ')[0] ?? '';
+  const project = text => (projectName.length >= 2 && text.includes(projectName)) || (/^[a-z][a-z0-9_-]{2,}$/.test(head) && text.includes(head));
+  // The names standing in a text, by where they first stand (a name inside a longer name standing at the same place is that name).
+  const hits = hay => {
+    const found = wanted.map(n => [n, hay.indexOf(n)]).filter(([, i]) => i >= 0).sort((a, b) => a[1] - b[1] || b[0].length - a[0].length);
+    return found.filter(([n, i]) => !found.some(([m, j]) => m !== n && m.length > n.length && j <= i && i + n.length <= j + m.length)).map(([n]) => n);
+  };
   for (const [record, { text, spans }] of askRecords(ask)) {
     if (!spans) continue;
     const body = []; let open = false, offset = 0;
@@ -393,8 +423,9 @@ export function summarySentences(ask, names) {
     if (!body.length) continue;
     for (const s of spans) {
       if (!body.some(b => s.from < b.to && b.from < s.to)) continue;
-      const sentence = text.slice(s.from, s.to), tags = sentence.match(/\[[^\]]*\]/g) ?? [];
-      out.push({ record, from: s.from, to: s.to, text: sentence.replace(/\s+/g, ' ').trim(), name: first(plainName(sentence.replace(/\[[^\]]*\]/g, ' '))) ?? first(plainName(tags.join(' '))) });
+      const sentence = text.slice(s.from, s.to), bare = plainName(sentence.replace(/\[[^\]]*\]/g, ' ')), named = hits(bare);
+      const whole = named.length !== 1 || project(bare);
+      out.push({ record, from: s.from, to: s.to, text: sentence.replace(/\s+/g, ' ').trim(), name: whole ? null : named[0], project: whole });
     }
   }
   return out;
@@ -622,21 +653,39 @@ export function loopRows(ask, parts) {
  * relation item that only such a line draws, and a plan relation item resting on no line a relation may stand on (unrecordedAt: a part
  * row's 「하는 일」, the KORU owner → ARM and the web 알림톡 대행사 → 고객), is no missing line: it is named under lines-set-aside with
  * its category and counted in neither connections nor plan-relations (the .36 global first passes paid their correction for them). */
-/** .38: a condition row's 참이면 that is a code outcome: a constant (STOP_NOT_RESIDENT, QUOTA_REACHED) or an HTTP status (401, 503). */
-const CODE_OUTCOME = /\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b|\b[A-Z]{3,}\b|\b[45]\d\d\b/;
+/** .38 read a condition row's 참이면 that is any code outcome (a constant, an HTTP status); .39: a condition row's 참이면 that refuses or denies: a 4xx status with a ROLE·REQUIRED·FORBIDDEN code, a NOT_ code (STOP_NOT_RESIDENT,
+ * POSITION_NOT_FLAT), or 쉼·거부·차단. A feature-flag or state check (503 CHECKOUT_DISABLED, 기다림) expects no code device. */
+export const REFUSAL_OUTCOME = /\b4\d\d\b[^|]*?\b[A-Z0-9_]*(?:ROLE|REQUIRED|FORBIDDEN)[A-Z0-9_]*\b|\b[A-Z0-9_]*NOT_[A-Z0-9_]+\b|쉼|거부|차단/;
+const cellNames39 = cell => String(cell).split(/[·,/]/).map(plainName).filter(Boolean);
 /* .38 (diagnostic only): portmap-missing, a data line from a store part to a part with steps that no port-map row names (by refs and
  * payload; the .37 web map went from two rows to none, unseen); anchor-enforce, a rule claim placed on a 「조건·거부·분기」 row whose
  * 참이면 is a code outcome while no code device keeps it (the .37 web map's admin rule: anchors on the order API's 401·403 rows,
  * enforcedBy 장치 미상), named by the part, the claim's key and the row (nothing is added: the render prompt asks for the device). */
 // readParts: the checked reply's parts (with the program's places, each anchor by its quote), for anchor-enforce; the wire's otherwise.
-export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [], asideLines = [], portMap = null, readParts = null }) {
+/* .39 (R1–R3): portmap-missing reads both sides of a data line, store → stepped reader and stepped writer → store (and any other data
+ * line the program can tie to a step, writer side on outbound lines included), and splits what is missing in two: 「모델이 비움 ·
+ * 프로그램이 채움」 (programPortMap of map-reading.ts makes the row when the wire is read) and 「원문이 단계를 대지 않음」 (no step the
+ * records name: information, not counted). expected counts the sides the records tie to a step (the model's rows and the program's),
+ * actual the model's. readPortMap: the checked reply's rows (the program's marked program), read when given; readParts carry the
+ * program's steps. anchor-enforce names a rule only where a code outcome is a refusal (REFUSAL_OUTCOME) or where its place is a 「파일
+ * 지도」 row of its own part; a code device (a condition row or a file-map row of the same part on its line) keeps it. */
+export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [], asideLines = [], portMap = null, readParts = null, readPortMap = null }) {
   const issues = [];
   try {
     const claims = (Array.isArray(parts) ? parts : []).flatMap(part => Array.isArray(part?.claims) ? part.claims : []).filter(claim => claim && typeof claim === 'object');
     const said = claims.map(claim => typeof claim.text === 'string' ? claim.text : '').join('\n');
     const sentences = typeof summary === 'string' ? summary.split(/(?<=[.!?。])\s+|\n+/).map(s => s.trim()).filter(s => s.length >= 8) : [];
     const unbacked = sentences.filter(s => !Array.from({ length: s.length - 7 }, (_, i) => s.slice(i, i + 8)).some(run => said.includes(run))).length;
-    if (claims.length && unbacked) issues.push({ path: 'summary', rule: 'unbacked', expected: 0, actual: unbacked });
+    // .39: a 「한 줄 요약」 sentence that defines the project (summarySentences: two parts or more, the project, or no part outside its
+    // tags) is no part's row: the summary receives it, sharing an 8-character run with it (its tags left out); one it does not is named.
+    const flat = typeof summary === 'string' ? summary.replace(/\s+/g, ' ') : '';
+    const partNames = (Array.isArray(parts) ? parts : []).flatMap(part => typeof part?.name === 'string' ? [part.name] : []);
+    const unreflected = summarySentences(ask, partNames).filter(s => s.project).filter(s => {
+      const t = s.text.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
+      return !Array.from({ length: Math.max(0, t.length - 7) }, (_, i) => t.slice(i, i + 8)).some(run => flat.includes(run));
+    });
+    if ((claims.length && unbacked) || unreflected.length) issues.push({ path: 'summary', rule: 'unbacked', expected: 0, actual: (claims.length ? unbacked : 0) + unreflected.length,
+      ...(unreflected.length ? { names: unreflected.slice(0, 12).map(s => `한 줄 요약(프로젝트): ${opening(s.text)}`) } : {}) });
     // .31: the other side: the records' change, defect and withdrawal rows no claim quotes, by the part each names.
     if (claims.length) {
       const facts = uncitedFacts(ask, parts);
@@ -666,17 +715,31 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
     const list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === 'object'), byRef = new Map(list.map(part => [part.ref, part]));
     if (Array.isArray(relations)) {
       const rows = Array.isArray(portMap) ? portMap.filter(m => m && typeof m === 'object') : [];
-      const due = relations.flatMap((r, i) => r && typeof r === 'object' && r.channel === 'data' && byRef.get(r.from)?.type === 'store' && Array.isArray(byRef.get(r.to)?.steps) && byRef.get(r.to).steps.length ? [[i, r]] : []);
-      const unmapped = due.filter(([i]) => !rows.some(m => m.relation === i));
-      if (unmapped.length) issues.push({ path: 'portMap', rule: 'portmap-missing', expected: due.length, actual: due.length - unmapped.length,
-        names: unmapped.slice(0, 12).map(([, r]) => `${r.from} → ${r.to}${typeof r.payload === 'string' ? `: ${r.payload}` : ''}`) });
+      const stepParts = (Array.isArray(readParts) ? readParts : list).filter(p => p && typeof p === 'object'), stepRef = new Map(stepParts.map(p => [p.ref, p]));
+      const partOf = ref => stepRef.get(ref) ?? byRef.get(ref), stepped = ref => Array.isArray(partOf(ref)?.steps) && partOf(ref).steps.length > 0, store = ref => partOf(ref)?.type === 'store';
+      const nameOf = ref => byRef.get(ref)?.name ?? stepRef.get(ref)?.name ?? (Array.isArray(ask?.parts) ? ask.parts.find(x => x.id === ref)?.name : null) ?? '';
+      const lines = relations.map(r => r && typeof r === 'object' ? r : {});
+      const model = rows.map(m => ({ relation: m.relation, direction: m.direction === 'out' ? 'out' : 'in' }));
+      const program = Array.isArray(readPortMap) ? readPortMap.filter(m => m && m.program === true)
+        : programPortMap(ask, stepParts.map(p => ({ ...p, name: nameOf(p.ref) })), lines, model, nameOf);
+      const same = (m, i, side) => m.relation === i && (m.direction ?? 'in') === side;
+      const sides = lines.flatMap((r, i) => r.channel !== 'data' ? [] : [['in', r.to, r.from], ['out', r.from, r.to]].flatMap(([side, end, peer]) =>
+        stepped(end) && (store(peer) || program.some(m => same(m, i, side)) || model.some(m => same(m, i, side))) ? [[i, side, r]] : []));
+      const label = (r) => `${r.from} → ${r.to}${typeof r.payload === 'string' ? `: ${r.payload}` : ''}`;
+      const byModel = sides.filter(([i, side]) => model.some(m => same(m, i, side))), filled = sides.filter(([i, side]) => !model.some(m => same(m, i, side)) && program.some(m => same(m, i, side)));
+      const unnamed = sides.filter(([i, side]) => !model.some(m => same(m, i, side)) && !program.some(m => same(m, i, side)));
+      const names = [...filled.map(([, , r]) => `모델이 비움 · 프로그램이 채움: ${label(r)}`), ...unnamed.map(([, , r]) => `원문이 단계를 대지 않음: ${label(r)}`)];
+      if (names.length) issues.push({ path: 'portMap', rule: 'portmap-missing', expected: byModel.length + filled.length, actual: byModel.length, names: names.slice(0, 12) });
     }
     const texts = askRecords(ask), where = alias => {
       if (typeof alias !== 'string' || !alias.includes('.')) return null;
       const record = alias.slice(0, alias.indexOf('.')), source = texts.get(record), range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
       return range ? { record, from: range.from, to: range.to } : null;
     };
-    const coded = conditionRows(ask).filter(row => CODE_OUTCOME.test(row.then)), unkept = [];
+    // .39: only a refusal is a rule's device (the .38 web 「!flags.isOn → 503 CHECKOUT_DISABLED」 is a switch, not the person's rule).
+    const coded = conditionRows(ask).filter(row => REFUSAL_OUTCOME.test(row.then)), unkept = [];
+    // .39 (R5): a place on a 「파일 지도」 row of the rule's own part (the KORU spending cap's C/calls.py 「지출 상한 CL 20·DS 5 USD」).
+    const files = fileMapRows(ask);
     const placeOf = anchor => typeof anchor?.at === 'string' ? where(anchor.at)
       : anchor?.quote && typeof anchor.quote.record === 'string' && Number.isSafeInteger(anchor.quote.from) && Number.isSafeInteger(anchor.quote.to) ? anchor.quote : null;
     for (const part of (Array.isArray(readParts) ? readParts : list).filter(p => p && typeof p === 'object')) for (const claim of Array.isArray(part.claims) ? part.claims : []) {
@@ -684,6 +747,9 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
       for (const anchor of Array.isArray(claim.anchors) ? claim.anchors : []) {
         const at = placeOf(anchor), row = at && coded.find(c => c.record === at.record && c.from < at.to && at.from < c.to);
         if (row) { unkept.push(`${part.ref} ${claim.key ?? '?'}: ${row.at} ${row.condition} → ${row.then}`); break; }
+        const own = plainName(typeof part.name === 'string' ? part.name : byRef.get(part.ref)?.name ?? '');
+        const file = at && own && files.find(f => f.record === at.record && f.from < at.to && at.from < f.to && cellNames39(f.part).includes(own));
+        if (file) { unkept.push(`${part.ref} ${claim.key ?? '?'}: ${file.at} ${file.path} → ${file.role}`); break; }
       }
     }
     if (unkept.length) issues.push({ path: 'parts', rule: 'anchor-enforce', expected: null, actual: unkept.length, names: unkept.slice(0, 12) });
@@ -707,8 +773,22 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
         if (!!a && !!b && (joinedAll(a, b) || [...stores].some(s => joinedAll(a, s) && joinedAll(s, b)))) { asideRows++; noteAside(a, b, asideOf(a, b)); return false; }
         return true;
       });
+      // .39 (web R8): a drawn row whose 넘기는 것 the wire carries nowhere (no line's payload or payloadFields holds it, or every one of its
+      // 「·」 names with its parentheses left off) was merged away (the .38 web 주문 API → 결제사 lost payon.refund into the session line):
+      // named 「from → to: 넘기는 것 「…」 없음」 and counted as missing. Read only when the wire writes payloads at all.
+      const carried = lines.flatMap(r => [typeof r.payload === 'string' ? r.payload : '', ...(Array.isArray(r.payloadFields) ? r.payloadFields : [])]).filter(x => typeof x === 'string').map(plainName).filter(Boolean);
+      // A cell naming files is carried by any line naming those files (a store's write and read lines carry 「review.jsonl 행」).
+      const carriedFiles = new Set(carried.flatMap(fileKeys));
+      const present = cell => { const whole = plainName(cell), items = splitOutside(cell.replace(/\([^)]*\)/g, ' ')).filter(x => x.length >= 2), files = fileKeys(cell);
+        return carried.some(p => p.includes(whole)) || (items.length > 0 && items.every(item => carried.some(p => p.includes(item)))) || (files.length > 0 && files.every(k => carriedFiles.has(k))); };
+      const missed = new Set(missing.map(([from, to]) => `${from}\u0000${to}`));
+      const merged = carried.length ? connectionPayloadRows(ask).filter(([from, to, payload]) => {
+        const a = refOf.get(from), b = refOf.get(to);
+        return !!payload.trim() && !/^[—–-]+$/.test(payload.trim()) && !missed.has(`${from}\u0000${to}`) && !!a && !!b && through(a, b) && !present(payload);
+      }) : [];
       // .31: the rows without a line are named (the records' own cells, loosely compared), so the one correction can draw them.
-      if (rows.length - asideRows && missing.length) issues.push({ path: 'relations', rule: 'connections', expected: rows.length - asideRows, actual: rows.length - asideRows - missing.length, names: missing.slice(0, 12).map(([from, to]) => `${from} → ${to}`) });
+      if (rows.length - asideRows && (missing.length || merged.length)) issues.push({ path: 'relations', rule: 'connections', expected: rows.length - asideRows, actual: rows.length - asideRows - missing.length - merged.length,
+        names: [...missing.map(([from, to]) => `${from} → ${to}`), ...merged.map(([from, to, payload]) => `${from} → ${to}: 넘기는 것 「${payload}」 없음`)].slice(0, 12) });
       // .31: the plan's relation items (「from ref → to ref: …」) between two rendered parts that no relation draws, directly or
       // through one store part holding a file the item names (any store when it names none), named by their refs (the .30 run lost
       // five of 39 at the global stage, with no exclusion: the model did not write them).
@@ -886,7 +966,7 @@ export function fragmentSetAside(value, group, ask, blueprint) {
 /** .30: the fixed reasons of a stage's set-aside items as a stage record keeps them (never a position or an explanation). */
 export const stageSetAside = exclusions => exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX).map(x => ({ path: x.path, rule: x.rule, category: x.category ?? null }));
 /** .25: the optional fields of map-reading.7 (map-reading.ts), by the place a set-aside names or by its contract category. */
-const FIELD_PATH = /(\.(topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|conditions|payloadFields)|\.payloadFields\[\d+\]|^basis(At|Version)|\.(steps|stateVars|conditions)\[\d+\](\.at)?|\.loop\.(unit|stop|resume|at)|^portMap(\[\d+\](\.at)?)?|\.claims\[\d+\]\.(scope|scopeName|anchors|enforcedBy|withdrawalKind|gate)|\.claims\[\d+\]\.(anchors|enforcedBy)\[\d+\](\.at)?)$/;
+const FIELD_PATH = /(\.(topic|evidence|when|where|before|state|stateAt|stateWhen|files|payload|cadence|mode|type|typeAt|inputs|outputs|fields|config|channel|steps|loop|stateVars|conditions|payloadFields|fileRoles)|\.payloadFields\[\d+\]|^basis(At|Version)|\.(steps|stateVars|conditions|fileRoles)\[\d+\](\.at)?|\.loop\.(unit|stop|resume|at)|^portMap(\[\d+\](\.at)?)?|\.claims\[\d+\]\.(scope|scopeName|anchors|enforcedBy|withdrawalKind|gate)|\.claims\[\d+\]\.(anchors|enforcedBy)\[\d+\](\.at)?)$/;
 const FIELD_CATEGORIES = new Set(['topic', 'evidence', 'when', 'where', 'before', 'state', 'state-at', 'state-when', 'files', 'payload', 'cadence', 'mode',
   'type', 'type-at', 'inputs', 'outputs', 'fields', 'config', 'channel', 'basis-at', 'basis-version',
   // .29: the program's own reading of a quoted line refuses a first pass the same way (render: wrong-part; global: via-store, sender).
@@ -898,7 +978,9 @@ const FIELD_CATEGORIES = new Set(['topic', 'evidence', 'when', 'where', 'before'
   // .36 (map-reading.12): a part's condition row (render).
   'condition',
   // .37 (map-reading.13): a relation's format fields (global).
-  'payload-fields']);
+  'payload-fields',
+  // .39 (map-reading.14): a part's file-map role row (render).
+  'file-role']);
 // The global stage owns the relations, (.28) the reply's basis time and version, and (.30) the port map.
 const PARTS_SCOPE = /^parts\[/, RELATIONS_SCOPE = /^(relations\[|basis(At|Version)$|portMap(\[|$))/;
 /** Refuses with the first set-aside of an optional field inside scope: its fixed path, rule and (rule 'contract') category. */
@@ -953,8 +1035,9 @@ function withoutSetAside(raw, exclusions) {
     else if ((m = /^parts\[(\d{1,3})\]\.steps\[(\d{1,4})\]\.uses\[(\d{1,4})\]$/.exec(x.path))) mark(`parts.${m[1]}.steps.${m[2]}.uses`, Number(m[3]));
     // .30 (map-reading.9): a step or a kept state is left out at its index, a wrong list or loop (or its line) is written null, a
     // loop's own item is written null in the loop; a port-map row is left out, a wrong port map written null.
-    else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|conditions)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(`parts.${m[1]}.${m[2]}`, Number(m[3]));
-    else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|loop|conditions)(?:\.at)?$/.exec(x.path))) blank(Number(m[1]), [m[2]]);
+    // .39 (map-reading.14): and a file-map role row, or a wrong list of them.
+    else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|conditions|fileRoles)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(`parts.${m[1]}.${m[2]}`, Number(m[3]));
+    else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|loop|conditions|fileRoles)(?:\.at)?$/.exec(x.path))) blank(Number(m[1]), [m[2]]);
     else if ((m = /^parts\[(\d{1,3})\]\.loop\.(unit|stop|resume)$/.exec(x.path))) blank(Number(m[1]), [`loop.${m[2]}`]);
     else if ((m = /^portMap\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark('portMap', Number(m[1]));
     else if (x.path === 'portMap') top.add('portMap');
@@ -988,7 +1071,7 @@ function withoutSetAside(raw, exclusions) {
       return out;
     });
     if (Array.isArray(part?.steps)) part.steps = part.steps.map((step, j) => drop.has(`parts.${i}.steps.${j}.uses`) && step && Array.isArray(step.uses) ? { ...step, uses: keep(`parts.${i}.steps.${j}.uses`, step.uses) } : step);
-    for (const key of ['basis', 'claims', 'steps', 'stateVars', 'conditions', 'files', 'inputs', 'outputs', 'fields', 'config']) if (Array.isArray(part?.[key])) part[key] = keep(`parts.${i}.${key}`, part[key]);
+    for (const key of ['basis', 'claims', 'steps', 'stateVars', 'conditions', 'fileRoles', 'files', 'inputs', 'outputs', 'fields', 'config']) if (Array.isArray(part?.[key])) part[key] = keep(`parts.${i}.${key}`, part[key]);
     for (const key of unsaid.get(i) ?? []) {
       if (!part || typeof part !== 'object') continue;
       const [own, inner] = key.split('.');
@@ -1138,7 +1221,7 @@ export function finalDiagnostics(fragments, global, ask, blueprint) {
     // .35: what was set aside on a row lands its plan unit; the places the reading took as inferred are named (anchor-kind).
     let downgrades = [], read = null;
     try { read = validateMapReply(wire, ask); downgrades = anchorDowngrades(read).map(x => `${x.ref} ${x.key ?? "?"}: ${x.text}`); } catch { downgrades = []; }
-    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades, asideLines, portMap: wire.portMap ?? null, readParts: read?.parts ?? null });
+    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades, asideLines, portMap: wire.portMap ?? null, readParts: read?.parts ?? null, readPortMap: read?.portMap ?? null });
     const refs = new Set(wire.parts.map(part => part.ref)), coverage = blueprintCoverage({ parts: blueprint.parts.filter(part => refs.has(part.ref)) }, ask);
     if (coverage && coverage.covered < coverage.rows) found.push({ path: 'parts', rule: 'coverage', expected: coverage.rows, actual: coverage.covered, names: coverage.missing });
     if (folds.length) found.push({ path: 'parts', rule: 'store-dup', expected: 0, actual: folds.length, names: folds });
@@ -1301,6 +1384,14 @@ export function mapStageIssues(value, error, context = null) {
         if (!c || typeof c !== 'object' || Array.isArray(c) || !words(c.when, 80, true) || !words(c.then, 60, true) || !words(c.else, 60) || typeof c.at !== 'string') add(`${at}.conditions[${j}]`, 'contract', null, null, 'condition');
       });
     }
+    // .39 (map-reading.14): the file-map rows ({ path 120, role 80, at }, up to twelve), each by its own bounds.
+    if (said(part, 'fileRoles')) {
+      if (!Array.isArray(part.fileRoles)) add(`${at}.fileRoles`, 'contract', null, null, 'file-role');
+      else if (part.fileRoles.length > PART_LIST_MAX.fileRoles) add(`${at}.fileRoles`, 'count', PART_LIST_MAX.fileRoles, part.fileRoles.length);
+      else part.fileRoles.forEach((f, j) => {
+        if (!f || typeof f !== 'object' || Array.isArray(f) || !words(f.path, 120, true) || !words(f.role, 80, true) || typeof f.at !== 'string') add(`${at}.fileRoles[${j}]`, 'contract', null, null, 'file-role');
+      });
+    }
   };
   const count = (items, maximum, path) => { if (Array.isArray(items) && items.length > maximum) add(path, 'count', maximum, items.length); };
   const length = (text, maximum, path) => { if (typeof text === 'string' && text.length > maximum) add(path, 'length', maximum, text.length); };
@@ -1331,7 +1422,9 @@ export function mapStageIssues(value, error, context = null) {
         }
         fixed(relation, 'channel', CHANNELS, path, 'channel');
         // .36: a first map's control line carrying an artifact of the records' artifact table (its channel alone is set aside).
-        if (firstAsk && relation?.channel === 'control' && carriesArtifact(context.ask, nameOf(relation.from), nameOf(relation.to), typeof relation.payload === 'string' ? relation.payload : null))
+        // .39: or a query or a response between an artifact row's maker and reader (택배사 조회).
+        if (firstAsk && relation?.channel === 'control' && (carriesArtifact(context.ask, nameOf(relation.from), nameOf(relation.to), typeof relation.payload === 'string' ? relation.payload : null)
+          || carriesQuery(context.ask, nameOf(relation.from), nameOf(relation.to), typeof relation.payload === 'string' ? relation.payload : null)))
           add(`${path}.channel`, 'contract', null, null, 'channel');
       }
       // .30: the port map's rows (a relation index among the relations, a port and a step of 40, in or out).
