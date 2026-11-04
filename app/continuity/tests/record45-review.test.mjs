@@ -19,6 +19,7 @@ const page = n => readFileSync(new URL(`./fixtures/record45/page${n}.txt`, impor
 function ofPages(texts) {
   let project = D.createProject();
   for (const t of texts) project = D.pasteRecord(project, t, null).project;
+  project = { ...project, pasted: project.pasted.map((r, i) => ({ ...r, at: new Date(Date.UTC(2026, 10, 5, 9, 0, i)).toISOString() })) };
   const input = M.buildMapAsk(project, studioView(project), [], undefined, M.MAP6_SCHEMA), spans = input.ask.records.flatMap(r => r.spans);
   const at = head => { const hit = spans.filter(s => s.t.startsWith(head)); if (hit.length !== 1) throw new Error(`span ${head}: ${hit.length}`); return hit[0].s; };
   return { ask: input.ask, at };

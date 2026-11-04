@@ -407,10 +407,11 @@ export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: 
   }
   return added;
 }
-/** The fold the latest of the texts belongs to (the last text's page): the v5 record that stands now. */
+/** The fold the newest of the texts belongs to: the v5 record that stands now. The ask lists its records newest first (N01 the newest,
+ * buildMapAsk), so the fold with a page in the earliest-listed record. (Review N5: the .45 pass took the last-listed one, the oldest.) */
 function latestFold45(texts: Texts, folds: FoldedRecord[]): FoldedRecord | null {
-  const order = [...texts.keys()]; let best: FoldedRecord | null = null, at = -1;
-  for (const f of folds) for (const p of f.pages) { const i = order.indexOf(p.record); if (i > at) { at = i; best = f; } }
+  const order = [...texts.keys()]; let best: FoldedRecord | null = null, at = Infinity;
+  for (const f of folds) for (const p of f.pages) { const i = order.indexOf(p.record); if (i >= 0 && i < at) { at = i; best = f; } }
   return best;
 }
 /** The family a v3 or v4 part's type word gives (the generic tail of record45: a part no v5 or v4 row gave a family). */
