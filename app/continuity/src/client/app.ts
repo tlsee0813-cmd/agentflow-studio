@@ -10,7 +10,7 @@ import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace
   grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits, type GrammarMark } from './scenario-view.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
-import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, paneSections, structureOpen, structureSummary, structureConditions, structureKeep, type DisputedItem, type HistoryEntry } from './pane-view.js';
+import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, paneSections, structureOpen, structureSummary, structureConditions, structureKeep, whereRows, fileRoleOf, enforcePlace, type DisputedItem, type HistoryEntry } from './pane-view.js';
 import { recordLabel } from '../shared/record-source.js';
 import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, SavedCamera } from '../shared/types.js';
 import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, type PartFamily } from '../shared/claim-topic.js';
@@ -29,7 +29,7 @@ import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeN
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
 import { typedBudget, typedLines, typedPx, zoomLevel, entryKind, entryParts, loopBody, TYPE_H, LINE_H, type CardBudget, type ChipsAt, type BodyKind, type ZoomLevel, type EntryKind, type EntryCounts, type EntryShown } from './card-budget.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
-import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
+import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines } from './ops-line.js';
@@ -902,6 +902,9 @@ let cardLevel: ZoomLevel = 'detail', cardOneLine = false, laidKey = '', relevel 
 type BodyRegion = { kind: 'store'; fields: string[] } | { kind: 'loop' | 'timer' | 'actor'; mark: string | null; text: string; program?: boolean };
 /** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
 const progChip = (what?: string) => h('span', { class: 'sg-chip prog-chip', title: what ? `${PROGRAM_HINT} · ${what}` : PROGRAM_HINT }, PROGRAM_LABEL);
+/** map-reading.14: a step the program cut from the 3절 chain (steps-view stepFace), and a port → step correspondence it made. */
+const stepChip = () => h('span', { class: 'sg-chip prog-chip', title: PROGRAM_STEP_HINT }, PROGRAM_LABEL);
+const portChip = (side: 'step' | 'pane', port: string) => h('span', { class: `sg-chip prog-chip${side === 'step' ? ' dv-prog-port' : ''}`, title: `포트 ‘${port}’ · ${PROGRAM_PORT_HINT}` }, side === 'step' ? PROGRAM_LABEL : PROGRAM_PORT_LABEL);
 /** The loop line in its parts (line-view loopSegments), joined by ' · ', each item the program filled followed by its chip. */
 const loopNodes = (segs: { text: string; program: boolean }[]): (string | HTMLElement)[] =>
   segs.flatMap((x, i) => [...(i ? [' · '] : []), x.text, ...(x.program ? [' ', progChip()] : [])]);
@@ -1066,6 +1069,10 @@ function signSection(o: Opened, part: PartView): HTMLElement | null {
   const saidLine = (c: CurrentClaim, kind: SignKind) => { const rs = ruleSaid(c);
     return h('p', { class: 'sg-said' }, said(rs.when, !!claimWhen(c), 'cl-when'), h('span', { 'aria-hidden': 'true' }, '·'), said(rs.where, !!c.where, 'cl-where'), rs.evidence ? h('span', { class: 'ev' }, rs.evidence) : null, cite(c, kind)); };
   const q = (key: string, quote: ReadingQuote, what: string) => quoteCite(key, quote, what);
+  // map-reading.14: a code enforcement resting on a 파일 지도 row names that file as its place (pane-view enforcePlace).
+  const enforceAt = (e: { kind: string; quote: ReadingQuote | null }) => { const f = enforcePlace(e, r.fileRoles ?? []); if (!f) return null;
+    return h('span', { class: 'sg-chip sg-place', title: `보장 자리 · 파일 지도 행의 파일
+${f.path} · ${f.role}` }, f.path); };
   // A rule (spec 5.1): its reach, its places (each with 명시/해석 and its quote, '자리 없음' for one naming no place of this part)
   // and what keeps it, each field one line; a blank as its own words. A rule an earlier reading wrote keeps its old blanks.
   const ruleItem = (c: CurrentClaim) => { const v = ruleView(c, places, part.name), key = claimKey(c);
@@ -1077,7 +1084,7 @@ function signSection(o: Opened, part: PartView): HTMLElement | null {
           h('span', { class: 'sg-key' }, '적용 위치'), h('span', { class: `sg-chip${a.program ? ' prog-chip' : ''}`, title: a.program ? `${PROGRAM_HINT} · 규칙과 낱말을 나누는 조건 행에서 이은 자리 (후보)` : ANCHOR_HINT[a.kind] }, a.label),
           h('span', { class: 'sg-val' }, a.nowhere ? `${RULE_BLANKS.nowhere} · ${a.text}` : a.text), condChip(a.quote), q(`sign|anchor|${key}|${i}`, a.quote, '적용 위치 근거')))),
         ...(v.enforceBlank ? [field(v.enforceBlank, RULE_BLANK_HINT.enforce)] : v.enforce.map((e, i) => h('li', { class: `sg-enforce k-${e.kind}${e.kind === 'none' || e.kind === 'unknown' ? ' sg-blank' : ''}`, title: `${ENFORCER_HINT[e.kind]}${e.kind === 'none' || e.kind === 'unknown' ? `\n${e.text}` : ''}` },
-          h('span', { class: 'sg-key' }, '보장'), h('span', { class: 'sg-val' }, e.line), e.quote ? q(`sign|enforce|${key}|${i}`, e.quote, '보장 근거') : null))),
+          h('span', { class: 'sg-key' }, '보장'), h('span', { class: 'sg-val' }, e.line), enforceAt(e), e.quote ? q(`sign|enforce|${key}|${i}`, e.quote, '보장 근거') : null))),
         ...(v.design ? [field(v.design, RULE_BLANK_HINT.design)] : []), ...(v.check ? [field(v.check, RULE_BLANK_HINT.check)] : []))); };
   // A gate (spec 5.2): 실행 관문 or 개발 관문 as the contract says it; one an earlier reading wrote was told by its words (추정).
   const gateItem = (c: CurrentClaim) => { const g = gateKind(c);
@@ -1211,9 +1218,12 @@ function conditionsContract(project: Project, id: string): boolean {
   }
   return false;
 }
-const entryCountsOf = (p: PartView, r: PartUnderstanding): EntryCounts => ({ read: true, kids: p.childIds.length, steps: stepsOf(r).length, inputs: r.inputs.length, outputs: r.outputs.length, fields: r.fields.length, config: r.config.length, state: r.stateVars?.length ?? 0, loop: !!r.loop, unplaced: unplacedCount(signsOf(r).rules, placesOf(r)), conditions: conditionsOf(r).length });
+// map-reading.14: the steps the program cut from the 3절 chain count apart ('기록된 단계 M (+P 프로그램)').
+const entryCountsOf = (p: PartView, r: PartUnderstanding): EntryCounts => { const sc = stepCounts(stepsOf(r));
+  return { read: true, kids: p.childIds.length, steps: sc.recorded, programSteps: sc.program, inputs: r.inputs.length, outputs: r.outputs.length, fields: r.fields.length, config: r.config.length, state: r.stateVars?.length ?? 0, loop: !!r.loop, unplaced: unplacedCount(signsOf(r).rules, placesOf(r)), conditions: conditionsOf(r).length }; };
 const UNPLACED_TIP = '배치 미정 · 정확한 단계·포트·필드에 놓이지 않은 규칙 (규칙 탭에서 읽기)';
-const entryWord = (w: string) => h('span', { class: `entry-part${w.startsWith('배치 미정') ? ' entry-unplaced' : ''}`, ...(w.startsWith('배치 미정') ? { title: UNPLACED_TIP } : {}) }, w);
+const PROGRAM_STEPS_TIP = `괄호 안 (+P 프로그램): 기록의 단계 표 행과 따로, 3절 흐름에서 프로그램이 나눈 단계 · ${PROGRAM_HINT}`;
+const entryWord = (w: string) => h('span', { class: `entry-part${w.startsWith('배치 미정') ? ' entry-unplaced' : ''}`, ...(w.startsWith('배치 미정') ? { title: UNPLACED_TIP } : w.endsWith('프로그램)') ? { title: PROGRAM_STEPS_TIP } : {}) }, w);
 /** The most a collapsed card names of each list: its setting line and its region's beat or schedule; three ledger cells. */
 const shownMost = (t: Typed, r: PartUnderstanding): EntryShown => ({ config: (t.setting ? 1 : 0) + (t.used ? 1 : 0), fields: t.body?.kind === 'store' ? Math.min(3, r.fields.length) : 0 });
 /** What the card names under the budget it was drawn with (the setting and the region kept or not at this level). */
@@ -1266,8 +1276,9 @@ function actionBody(p: PartView, detail: boolean, cellSign: (field: string) => H
     steps: detail ? [] : stepsOf(r), loop: detail ? null : r.loop, stateVars: detail ? [] : r.stateVars ?? [], conditions: detail ? [] : conditionsOf(r) }).map(sec =>
     h('section', { class: `xp-sec x-${sec.key}`, ...(sec.key === 'exits' ? { title: '기록의 조건·거부·분기 행 · 조건 → 그때의 결과 · 전부와 아니면의 결과는 내부 상세에서' } : {}) },
       h('h4', { class: 'xp-title' }, sec.title, sec.key === 'loop' ? null : h('small', {}, String(sec.total ?? sec.items.length))),
-      sec.kind === 'steps' ? h('ol', { class: 'xp-steps' }, ...sec.items.map((x, i) => { const does = sec.subs?.[i] ?? null;
-        return h('li', { title: does ? `${x} — ${does}` : x }, h('span', { class: 'xp-n', 'aria-hidden': 'true' }, String(i + 1)), h('span', { class: 'xp-step' }, x), does ? h('span', { class: 'xp-does' }, does) : null); }))
+      sec.kind === 'steps' ? h('ol', { class: 'xp-steps' }, ...sec.items.map((x, i) => { const does = sec.subs?.[i] ?? null, prog = sec.programs?.[i] === true;
+        return h('li', { title: prog ? `${x}\n${PROGRAM_LABEL} · ${PROGRAM_STEP_HINT}` : does ? `${x} — ${does}` : x }, h('span', { class: 'xp-n', 'aria-hidden': 'true' }, String(i + 1)), h('span', { class: 'xp-step' }, x),
+          prog ? stepChip() : null, does ? h('span', { class: 'xp-does' }, does) : null); }))
       : sec.kind === 'cells' ? h('div', { class: 'xp-cells' }, ...sec.items.map(x => { const sign = cellSign(x); return h('span', { class: `ledger-cell${sign ? ' has-sign' : ''}`, 'data-field': x }, x, sign); }))
         : sec.kind === 'words' ? h('p', { class: 'xp-words' }, ...sec.items.flatMap((x, i) => [i ? h('span', { class: 'xp-dot', 'aria-hidden': 'true' }, ' · ') : null, h('span', { class: 'xp-word' }, x)]).filter((x): x is HTMLElement => !!x))
           // The loop line and the kept state carry the 「프로그램」 chip on what the program filled (map-reading.13).
@@ -1417,7 +1428,7 @@ function renderDetail(id: string) {
     fb.failure ? h('li', { class: 'dv-port blank fr-blank', title: `${where === 'exit' ? '이 효과 출구' : '이 보관소의 쓰기 접점'}에서 실패했을 때의 대응을 기록이 말하지 않았다 (없다는 뜻이 아님)` }, FAILURE_BLANK) : null,
     fb.recovery ? h('li', { class: 'dv-port blank fr-blank', title: `${where === 'exit' ? '이 효과 출구' : '이 보관소의 쓰기 접점'}이 멈춘 뒤 어떻게 복구·재개하는지 기록이 말하지 않았다 (없다는 뜻이 아님)` }, RECOVERY_BLANK) : null].filter((x): x is HTMLLIElement => !!x);
   // The inside (spec 4): the steps in the record's row order, each port with the steps the record maps it to, or its blank.
-  const steps = r ? stepsOf(r) : [];
+  const steps = r ? stepsOf(r) : [], counts = stepCounts(steps), fileRoles = r?.fileRoles ?? [];
   // map-reading.12: each condition row on the step its when (else its then) names (steps-view conditionPlacement, the rule chips'
   // name rule), else apart under the steps (자리 없는 조건, 단계 미상); a run gate's exits come from them (before .12 from the step's
   // own words).
@@ -1468,18 +1479,27 @@ function renderDetail(id: string) {
     const on = pickedStep?.part === id && pickedStep.name === s.name, sign = signChip(ds?.steps.get(s.index), `단계 ‘${s.name}’`), dec = decisions.filter(x => x.d.index === s.index);
     // A run gate that takes its exits from the condition rows lists this step's conditions itself (no second list on the box).
     const own = dec.some(x => x.d.source === 'conditions') ? [] : cp.steps.get(s.index) ?? [];
-    return h('li', { class: `${sign ? 'has-sign' : ''}${dec.length ? ' decision' : ''}`.trim() }, sign, h('button', { type: 'button', class: `dv-step${on ? ' on' : ''}${dec.length ? ' decision' : ''}`, 'data-step': String(s.index), 'aria-pressed': String(on),
-      title: [`${s.index + 1}. ${s.name}`, s.does, s.uses.length ? `씀 · ${s.uses.join(', ')}` : null, s.ins.length ? `들어오는 포트 · ${s.ins.join(', ')}` : null, s.outs.length ? `나가는 포트 · ${s.outs.join(', ')}` : null, '눌러서 읽기면에 이 단계'].filter(Boolean).join('\n'),
+    // map-reading.14: a program step is a name only (stepFace: the chip, no does / uses area); a program port → step line ends at
+    // the box with the chip (in at the head's start, out at its end); a uses item naming a 파일 지도 file shows its role on hover.
+    const face = stepFace(s), progIn = chain.links.filter(l => l.step === s.index && l.direction === 'in' && linkFace(l).chipAt), progOut = chain.links.filter(l => l.step === s.index && l.direction === 'out' && linkFace(l).chipAt);
+    const useRole = (u: string) => fileRoleOf(u, fileRoles);
+    return h('li', { class: `${sign ? 'has-sign' : ''}${dec.length ? ' decision' : ''}`.trim() }, sign, h('button', { type: 'button', class: `dv-step${on ? ' on' : ''}${dec.length ? ' decision' : ''}${face.program ? ' program' : ''}`, 'data-step': String(s.index), 'aria-pressed': String(on),
+      title: [`${s.index + 1}. ${s.name}`, face.hint ? `${PROGRAM_LABEL} · ${face.hint}` : null, face.does, face.uses.length ? `씀 · ${face.uses.map(u => { const f = useRole(u); return f ? `${u} (${f.role})` : u; }).join(', ')}` : null,
+        s.ins.length ? `들어오는 포트 · ${s.ins.join(', ')}` : null, s.outs.length ? `나가는 포트 · ${s.outs.join(', ')}` : null,
+        ...[...progIn, ...progOut].map(l => `포트 ‘${l.port}’ 대응 · ${PROGRAM_PORT_HINT}`), '눌러서 읽기면에 이 단계'].filter(Boolean).join('\n'),
       onclick: () => pickStep(id, s.name) },
-      h('span', { class: 'dv-step-head' }, h('span', { class: 'dv-step-n', 'aria-hidden': 'true' }, String(s.index + 1)), h('span', { class: 'dv-step-name' }, s.name),
-        dec.length ? h('span', { class: 'dv-diamond', role: 'img', 'aria-label': '판정 단계' }) : null),
-      s.does ? h('span', { class: 'dv-step-does' }, s.does) : null,
-      s.uses.length ? h('span', { class: 'dv-uses' }, ...s.uses.map(u => h('span', { class: 'dv-use', title: u }, u))) : null,
+      h('span', { class: 'dv-step-head' }, ...progIn.map(l => portChip('step', l.port)), h('span', { class: 'dv-step-n', 'aria-hidden': 'true' }, String(s.index + 1)), h('span', { class: 'dv-step-name' }, s.name),
+        face.program ? stepChip() : null, dec.length ? h('span', { class: 'dv-diamond', role: 'img', 'aria-label': '판정 단계' }) : null,
+        progOut.length ? h('span', { class: 'dv-prog-out' }, ...progOut.map(l => portChip('step', l.port))) : null),
+      face.does ? h('span', { class: 'dv-step-does' }, face.does) : null,
+      face.uses.length ? h('span', { class: 'dv-uses' }, ...face.uses.map(u => { const f = useRole(u);
+        return h('span', { class: `dv-use${f ? ' has-role' : ''}`, title: f ? `${u}\n파일 지도 · ${f.path} · ${f.role}\n원문: “${f.quote.quote}”` : u }, u); })) : null,
       own.length ? h('span', { class: 'dv-conds', role: 'list', 'aria-label': '조건 출구' }, ...own.map(condEl)) : null), ...dec.map(gateAt));
   };
   const loop = r?.loop ?? null, vars = r?.stateVars ?? [];
   const chainEl = steps.length ? h('section', { class: 'xp-sec x-steps dv-chain' },
-    h('h4', { class: 'xp-title', title: '기록 표의 행 순서. 단계 사이의 순서·분기는 기록에서 읽지 않아 단계끼리 잇지 않는다.' }, '기록된 단계', h('small', {}, String(steps.length))),
+    h('h4', { class: 'xp-title', title: `기록 표의 행 순서. 단계 사이의 순서·분기는 기록에서 읽지 않아 단계끼리 잇지 않는다.${counts.program ? `\n+${counts.program} 프로그램 · ${PROGRAM_STEP_HINT}` : ''}` }, '기록된 단계',
+      h('small', {}, counts.program ? `${counts.recorded} (+${counts.program} 프로그램)` : String(steps.length))),
     h('ol', { class: 'dv-steps' }, ...chain.rows.map(stepBox)), condsApart,
     chain.stray.length ? h('p', { class: 'dv-none', title: chain.stray.map(m => `${m.port} · ${m.step}`).join('\n') }, `포트·단계를 찾지 못한 대응 ${chain.stray.length}`) : null) : null;
   const keepEl = loop || vars.length ? h('section', { class: 'xp-sec dv-keep' },
@@ -1536,7 +1556,7 @@ function renderDetail(id: string) {
   // (out), in the channel of the line it maps (the first one when several reach the same port and step).
   stepLinks = chain.links.map((l: ChainLink) => {
     const e = ends.find(x => l.relationIds.includes(x.rel.id));
-    return { port: `${l.direction === 'out' ? 'o' : 'i'}|n:${l.port}`, step: l.step, out: l.direction === 'out', ch: e ? e.ch : 'data' as Channel | null, plain: e?.rel.kind === 'related' };
+    return { port: `${l.direction === 'out' ? 'o' : 'i'}|n:${l.port}`, step: l.step, out: l.direction === 'out', ch: e ? e.ch : 'data' as Channel | null, plain: e?.rel.kind === 'related', program: linkFace(l).dashed };
   });
   v.hidden = false; $('space').classList.add('detail-open');
   const vp = $('viewport'); if (!vp.inert) { vp.inert = true; vp.dataset.detailInert = '1'; }
@@ -1590,11 +1610,12 @@ function drawDetailLines() {
     const P = port.getBoundingClientRect(), S = step.getBoundingClientRect(), py = P.top + Math.min(P.height / 2, 12) - by, sy = S.top + Math.min(S.height / 2, 14) - by;
     const [x1, y1, x2, y2] = l.out ? [S.right - bx, sy, P.left - bx, py] : [P.right - bx, py, S.left - bx, sy];
     const mx = (x1 + x2) / 2;
-    inl.append(svg('path', { class: `dv-line in-step${l.ch ? ` c-${l.ch}` : ''}${l.plain ? ' plain' : ''}`, d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, ...(l.plain ? {} : { 'marker-end': l.ch === 'data' ? 'url(#dv-arrow)' : 'url(#dv-open)' }) }));
+    inl.append(svg('path', { class: `dv-line in-step${l.ch ? ` c-${l.ch}` : ''}${l.plain ? ' plain' : ''}${l.program ? ' program' : ''}`, d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, ...(l.plain ? {} : { 'marker-end': l.ch === 'data' ? 'url(#dv-arrow)' : 'url(#dv-open)' }) }));
   }
 }
 /** The detail view's links inside the boundary (steps-view detailChain): port key, step index, direction and channel. */
-let stepLinks: { port: string; step: number; out: boolean; ch: Channel | null; plain: boolean }[] = [];
+/** program (map-reading.14): the program made the correspondence: the line is dashed, its chip on the step box's end. */
+let stepLinks: { port: string; step: number; out: boolean; ch: Channel | null; plain: boolean; program: boolean }[] = [];
 /** The step read in the pane (a click on a step box in the detail view or on a step in the pane), for one part; another
  * selection clears it. */
 let pickedStep: { part: string; name: string } | null = null;
@@ -2941,24 +2962,28 @@ function insideSections(o: Opened, part: PartView): HTMLElement[] {
     const lines = outLines(o, part.id);
     const item = (s: (typeof r.steps)[number], i: number) => {
       const on = pickedStep?.part === part.id && pickedStep.name === s.name;
-      const ins = pm.filter(m => m.direction === 'in' && m.step === s.name).map(m => m.port), outsTo = pm.filter(m => m.direction === 'out' && m.step === s.name).map(m => m.port);
+      // map-reading.14: a program step is a name only (stepFace), a port only the program mapped to it reads 「프로그램 대응」.
+      const sp = stepPorts(s.name, pm), face = stepFace(s), fr = r.fileRoles ?? [];
+      const portWords = (mark: string, list: typeof sp.ins) => list.length ? [h('span', { 'aria-hidden': 'true' }, `${mark} `), ...list.flatMap((x, k) => [k ? ', ' : null, x.port, x.program ? ' ' : null, x.program ? portChip('pane', x.port) : null])] : [];
       const cons = on ? stepConsumers(s.name, pm, lines) : null;
       return h('li', { class: `stp-step${on ? ' on' : ''}` },
         h('div', { class: 'stp-top' },
           h('button', { type: 'button', class: 'stp-pick', 'aria-expanded': String(on), title: on ? '이 단계 접기' : '이 단계 읽기 · 소비자와 실패·재개', onclick: () => pickStep(part.id, s.name) },
             h('span', { class: 'stp-n', 'aria-hidden': 'true' }, String(i + 1)), h('span', { class: 'stp-name' }, s.name)),
+          face.program ? stepChip() : null,
           quoteCite(JSON.stringify(['step', part.id, s.at, s.name]), s.quote, `단계 ${s.name}`)),
-        s.does ? h('p', { class: 'stp-does' }, s.does) : null,
-        s.uses.length ? h('ul', { class: 'where-chips stp-uses', 'aria-label': '쓰는 것' }, ...s.uses.map(u => h('li', { class: 'wh', title: u }, u))) : null,
+        face.does ? h('p', { class: 'stp-does' }, face.does) : null,
+        face.uses.length ? h('ul', { class: 'where-chips stp-uses', 'aria-label': '쓰는 것' }, ...face.uses.map(u => { const f = fileRoleOf(u, fr); return h('li', { class: 'wh', title: f ? `${u}
+파일 지도 · ${f.path} · ${f.role}` : u }, u); })) : null,
         on ? h('div', { class: 'stp-more' },
-          ins.length || outsTo.length ? h('p', { class: 'stp-ports' }, [ins.length ? `⇥ ${[...new Set(ins)].join(', ')}` : '', outsTo.length ? `⇤ ${[...new Set(outsTo)].join(', ')}` : ''].filter(Boolean).join('  ')) : null,
+          sp.ins.length || sp.outs.length ? h('p', { class: 'stp-ports' }, ...portWords('⇥', sp.ins), sp.ins.length && sp.outs.length ? '  ' : null, ...portWords('⇤', sp.outs)) : null,
           h('p', { class: 'stp-label' }, cons!.mapped ? '소비자 · 이 단계에서 나가는 선' : '소비자 · 이 부분에서 나가는 선 (이 단계와의 대응은 기록에 없음)'),
           cons!.list.length ? h('ul', { class: 'stp-cons' }, ...cons!.list.map(c => h('li', {}, h('button', { type: 'button', class: 'link-button', title: `${partOf(o, c.far)?.name ?? '부분'}${toParticle(partOf(o, c.far)?.name ?? '부분')} 가기`, onclick: () => go(o.key, c.far) },
             partOf(o, c.far)?.name ?? '부분'), c.port ? h('small', {}, ` · ${c.port}`) : null))) : h('p', { class: 'stp-blank' }, '나가는 선 없음'),
           h('p', { class: 'stp-label' }, '실패·재개'),
           h('p', { class: loop?.stop || loop?.resume ? 'stp-line' : 'stp-blank' }, ...(loop?.stop || loop?.resume ? loopNodes(keep.loop!.slice(1)) : ['실패 대응 미제공']))) : null);
     };
-    out.push(h('section', { class: 'lens-ports lens-steps' }, h('h3', { title: '기록의 단계 표, 행의 순서대로. 단계 사이의 순서·분기는 읽지 않았다.' }, '안의 단계', h('small', {}, String(steps.length))),
+    out.push(h('section', { class: 'lens-ports lens-steps' }, h('h3', { title: '기록의 단계 표, 행의 순서대로. 단계 사이의 순서·분기는 읽지 않았다.' }, '안의 단계', h('small', {}, stepCounts(steps).program ? `${stepCounts(steps).recorded} (+${stepCounts(steps).program} 프로그램)` : String(steps.length))),
       h('ol', { class: 'stp-list' }, ...r.steps.map(item))));
   }
   const conds = conditionsOf(r);
@@ -2980,12 +3005,16 @@ function insideSections(o: Opened, part: PartView): HTMLElement[] {
 /** Where the part lives, as the records name it: the files, folders or units readings gave it and the places its current claims
  * name (each once, up to eight, written as the record wrote them), then the sessions behind it. Left out when there is nothing. */
 function whereSection(project: Project, part: PartView): HTMLElement | null {
-  const places: string[] = [];
-  for (const f of [...(part.reading?.files ?? []), ...(part.reading?.claims ?? []).map(c => c.where)]) if (f && !places.includes(f)) places.push(f);
+  // map-reading.14: a file a 파일 지도 row gives a role reads '경로 · 역할' with its row (pane-view whereRows); the rest as chips.
+  const w = whereRows([...(part.reading?.files ?? []), ...(part.reading?.claims ?? []).map(c => c.where)], part.reading?.fileRoles ?? []);
   const sessions = sessionsLine(project, part.id);
-  if (!places.length && !sessions) return null;
+  if (!w.roles.length && !w.plain.length && !sessions) return null;
   return h('section', { class: 'lens-where' }, h('h3', {}, '어디에'),
-    places.length ? h('ul', { class: 'where-chips' }, ...places.slice(0, 8).map(f => h('li', { class: 'wh', title: f }, f))) : null, sessions);
+    w.roles.length ? h('ul', { class: 'where-roles', 'aria-label': '파일 지도' }, ...w.roles.map(f => h('li', { class: 'wr', title: `파일 지도 · ${f.path}
+역할 · ${f.role}` },
+      h('span', { class: 'wh wr-path' }, f.path), h('span', { class: 'wr-sep', 'aria-hidden': 'true' }, '·'), h('span', { class: 'wr-role' }, f.role),
+      quoteCite(JSON.stringify(['file', part.id, f.path]), f.quote, `파일 ${f.path}`)))) : null,
+    w.plain.length ? h('ul', { class: 'where-chips' }, ...w.plain.map(f => h('li', { class: 'wh', title: f }, f))) : null, sessions);
 }
 /** What readings said each relation hands over (map-reading.7): per relation, the newest reading's line that names a payload. */
 function relationPayloads(project: Project): Map<string, ReadingRelation> {

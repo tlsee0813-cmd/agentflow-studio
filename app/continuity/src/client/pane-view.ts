@@ -9,7 +9,7 @@
  * is not at hand still reads in a rail of its own (its record named as not found), never without one. */
 import { TOPIC_ORDER, claimTopic, claimEvidence, claimWhen } from '../shared/claim-topic.js';
 import type { ClaimKind, ClaimTopic, EvidenceGrade, ReadingQuote } from '../shared/types.js';
-import { conditionPlacement, conditionLines, type ConditionLike, type ChainStep } from './steps-view.js';
+import { conditionPlacement, conditionLines, conditionOfQuote, type ConditionLike, type ChainStep, type QuoteLike } from './steps-view.js';
 import { loopSegments, isProgram, type LoopLike, type ConditionLike as LineCondition } from './line-view.js';
 
 /** What the pane reads of a claim (a CurrentClaim or a history claim carries all of it). */
@@ -228,4 +228,51 @@ export function structureKeep(loop: LoopLike | null | undefined, vars: readonly 
   config: readonly string[], conditions: readonly LineCondition[], unsaid = '미상'): StructureKeep {
   return { loop: loop ? loopSegments(loop, config, conditions, unsaid) : null,
     vars: vars.map(v => ({ name: v.name, scope: v.scope, rw: `읽음 ${v.readBy.length ? v.readBy.join(', ') : unsaid} · 바꿈 ${v.changedBy.length ? v.changedBy.join(', ') : unsaid}`, program: isProgram(v) })) };
+}
+
+/* ---------- 어디에 with the 파일 지도 (map-reading.14 fileRoles) ----------
+ * A part's 「파일 지도」 rows give a file its role (역할 한 줄): 어디에 lists each such file as '경로 · 역할' with its row's quote, and
+ * the files and places without a role as chips, as before. A path is the same path with backquotes, the spacing around it, a leading './', a
+ * trailing '/' and the slash direction aside (case kept). The detail view's step box shows on hover the role of a file its uses
+ * name; a rule's 보장 line whose code enforcement rests on a 파일 지도 row names that file as its place. Never matched by guess. */
+export interface FileRoleLike { path: string; role: string; quote: QuoteLike }
+export const pathKey = (p: string): string => p.replace(/`/g, '').trim().replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '');
+/** At most this many files and places without a role read as chips (as before). */
+export const WHERE_SHOWN = 8;
+/** The 어디에 rows: roles (the files a 파일 지도 row gives a role: the part's files and places in their order first, then the other
+ * rows in theirs) and plain (the files and places without a role, each once, up to max, as before). */
+export function whereRows<T extends FileRoleLike>(places: readonly (string | null | undefined)[], fileRoles: readonly T[], max = WHERE_SHOWN): { roles: T[]; plain: string[] } {
+  const byKey = new Map<string, T>();
+  for (const f of fileRoles) { const k = pathKey(f.path); if (k && !byKey.has(k)) byKey.set(k, f); }
+  const roles: T[] = [], plain: string[] = [];
+  for (const p of places) {
+    if (!p) continue;
+    const f = byKey.get(pathKey(p));
+    if (f) { if (!roles.includes(f)) roles.push(f); } else if (!plain.includes(p)) plain.push(p);
+  }
+  for (const f of byKey.values()) if (!roles.includes(f)) roles.push(f);
+  return { roles, plain: plain.slice(0, max) };
+}
+/** The 파일 지도 row a step's uses item names: the item is the path, or holds it whole (not as a piece of a longer name: no letter,
+ * digit, '_', '-', '/' or '.' joined to it, a sentence's closing '.' aside); the longest path wins. null when none. */
+export function fileRoleOf<T extends FileRoleLike>(item: string, fileRoles: readonly T[]): T | null {
+  const w = pathKey(item); let best: T | null = null, len = 2;
+  const joined = (c: string) => /[\w\-/.]/.test(c);
+  for (const f of fileRoles) {
+    const k = pathKey(f.path); if (k.length <= len) continue;
+    if (w === k) { best = f; len = k.length; continue; }
+    for (let at = w.indexOf(k); at >= 0; at = w.indexOf(k, at + 1)) {
+      const before = at > 0 ? w[at - 1]! : '', after = w[at + k.length] ?? '', next = w[at + k.length + 1] ?? '';
+      if (before && joined(before)) continue;
+      if (after && joined(after) && !(after === '.' && !joined(next))) continue;
+      best = f; len = k.length; break;
+    }
+  }
+  return best;
+}
+/** The place of a rule's 보장 line: a code enforcement whose quote is one of the part's 파일 지도 rows (the same record and words,
+ * spacing aside, and the same span when both carry one) names that row's file. null otherwise (another kind, or no such row). */
+export function enforcePlace<T extends FileRoleLike>(e: { kind: string; quote: QuoteLike | null }, fileRoles: readonly T[]): T | null {
+  if (e.kind !== 'code' || !e.quote) return null;
+  return fileRoles[conditionOfQuote(e.quote, fileRoles)] ?? null;
 }

@@ -167,3 +167,47 @@ test('구조 (map-reading.13): what the program filled in the loop and the kept 
   assert.equal(model.vars[0].program, false);
   assert.equal(structureKeep(null, [], [], []).loop, null);
 });
+
+/* ---------- map-reading.14: 어디에 with the 파일 지도 ---------- */
+import { whereRows, fileRoleOf, enforcePlace, pathKey, WHERE_SHOWN } from '../dist/public/client/pane-view.js';
+test('어디에: each file a 파일 지도 row gives a role as 경로 · 역할 (the part\'s files first), the rest as chips as before', () => {
+  const q = (t, from) => ({ record: 'P1', quote: t, from, to: from + t.length });
+  const roles = [
+    { path: 'engine/rung.py', role: 'rung 고르기', quote: q('| engine/rung.py | rung 고르기 |', 100) },
+    { path: 'engine/read.py', role: 'review 행 읽기', quote: q('| engine/read.py | review 행 읽기 |', 140) },
+    { path: 'state/policy.db', role: '정책 저장', quote: q('| state/policy.db | 정책 저장 |', 180) },
+  ];
+  const w = whereRows(['`engine/read.py`', 'review.jsonl', 'engine/rung.py', null, 'review.jsonl', 'docs/'], roles);
+  assert.deepEqual(w.roles.map(f => f.path), ['engine/read.py', 'engine/rung.py', 'state/policy.db'], 'the files\' order first, then the other rows');
+  assert.deepEqual(w.plain, ['review.jsonl', 'docs/'], 'files without a role stay chips, each once');
+  assert.deepEqual(whereRows(['a', 'b'], []), { roles: [], plain: ['a', 'b'] }, 'no 파일 지도: as before');
+  assert.deepEqual(whereRows([], roles).roles.length, 3, 'rows on their own still list');
+  assert.equal(whereRows(Array.from({ length: 12 }, (_, i) => `f${i}`), []).plain.length, WHERE_SHOWN);
+  assert.equal(pathKey(' `./engine/read.py/` '), 'engine/read.py');
+  assert.equal(pathKey('engine\\read.py'), 'engine/read.py');
+});
+
+test('a step\'s uses item names a 파일 지도 file: the path itself or held whole; never a piece of a longer name', () => {
+  const roles = [{ path: 'engine/read.py', role: 'review 행 읽기', quote: { record: 'P1', quote: 'x' } }, { path: 'read.py', role: '짧은 것', quote: { record: 'P1', quote: 'y' } }];
+  assert.equal(fileRoleOf('engine/read.py', roles)?.role, 'review 행 읽기');
+  assert.equal(fileRoleOf('`engine/read.py`', roles)?.role, 'review 행 읽기');
+  assert.equal(fileRoleOf('engine/read.py의 read_rows 함수', roles)?.role, 'review 행 읽기', 'held whole, the longest path wins');
+  assert.equal(fileRoleOf('engine/read.py:read_rows', roles)?.role, 'review 행 읽기');
+  assert.equal(fileRoleOf('see engine/read.py.', roles)?.role, 'review 행 읽기', 'a sentence\'s closing dot');
+  assert.equal(fileRoleOf('read.py', roles)?.role, '짧은 것');
+  assert.equal(fileRoleOf('engine/read.pyc', roles), null, 'a longer name');
+  assert.equal(fileRoleOf('myengine/read.py', roles), null, 'engine/read.py joined to a letter, read.py to a slash: neither');
+  assert.equal(fileRoleOf('J1', roles), null);
+  assert.equal(fileRoleOf('engine/read.py', []), null);
+});
+
+test('보장: a code enforcement resting on a 파일 지도 row names that file as its place; any other kind or row names none', () => {
+  const row = { record: 'P1', quote: '| engine/gate.py | LINE_STALE 거절 |', from: 200, to: 233 };
+  const roles = [{ path: 'engine/gate.py', role: 'LINE_STALE 거절', quote: row }];
+  assert.equal(enforcePlace({ kind: 'code', quote: { ...row, quote: '| engine/gate.py |  LINE_STALE 거절 |' } }, roles)?.path, 'engine/gate.py', 'spacing aside');
+  assert.equal(enforcePlace({ kind: 'code', quote: { record: 'P1', quote: row.quote } }, roles)?.path, 'engine/gate.py', 'no span: the words decide');
+  assert.equal(enforcePlace({ kind: 'gate', quote: row }, roles), null, 'not a code enforcement');
+  assert.equal(enforcePlace({ kind: 'code', quote: null }, roles), null);
+  assert.equal(enforcePlace({ kind: 'code', quote: { record: 'P1', quote: '다른 줄' } }, roles), null);
+  assert.equal(enforcePlace({ kind: 'code', quote: { ...row, from: 10, to: 43 } }, roles), null, 'the same words elsewhere');
+});

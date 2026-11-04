@@ -69,16 +69,17 @@ export const OPEN_MAP: Rect = { x: -1e6, y: -1e6, w: 2e6, h: 2e6 };
 /* ---------- what opening shows ---------- */
 /** A step a part records (map-reading.9 steps[]): its name, what it does (null: the row says nothing) and the files, functions or
  * models it uses. The order between steps is not read (no relation between steps): a list keeps the record's row order. */
-export interface ActionStep { name: string; does: string | null; uses: string[] }
+export interface ActionStep { name: string; does: string | null; uses: string[]; program?: boolean }
 /** How a part repeats (map-reading.9 loop): each of unit, stop and resume as written, null when the record does not say. */
 export interface ActionLoop { unit: string | null; stop: string | null; resume: string | null }
 /** A state a part keeps (map-reading.9 stateVars): where it holds and the steps or parts that read and change it. */
 export interface ActionStateVar { name: string; scope: string | null; readBy: string[]; changedBy: string[] }
 /** One section of an opened part, in reading order: the lists as the reading named them, each whole. cells: a ledger's fields
  * (one cell each); lines: one item per line (settings, the loop line, kept state); words: names in a row (ports); steps: a
- * numbered list, each step on one line (its name, then what it does in subs, the same index; null when the row says nothing). */
+ * numbered list, each step on one line (its name, then what it does in subs, the same index; null when the row says nothing;
+ * programs: whether the program cut it from the 3절 chain, map-reading.14: it has no does then). */
 /** total: how many the section stands for when its lines show fewer (분기 출구: the conditions behind a '+N' line). */
-export interface ActionSection { key: 'inputs' | 'outputs' | 'loop' | 'steps' | 'exits' | 'stateVars' | 'fields' | 'config' | 'state'; title: string; kind: 'words' | 'cells' | 'lines' | 'steps'; items: string[]; subs?: (string | null)[]; total?: number }
+export interface ActionSection { key: 'inputs' | 'outputs' | 'loop' | 'steps' | 'exits' | 'stateVars' | 'fields' | 'config' | 'state'; title: string; kind: 'words' | 'cells' | 'lines' | 'steps'; items: string[]; subs?: (string | null)[]; programs?: boolean[]; total?: number }
 /** A condition row of a part (map-reading.12 conditions[]): its condition, what follows when it holds and when not (null). */
 export interface ActionCondition { when: string; then: string; else: string | null }
 export interface ActionContent { inputs: string[]; outputs: string[]; fields: string[]; config: string[]; state: string | null; steps?: ActionStep[]; loop?: ActionLoop | null; stateVars?: ActionStateVar[]; conditions?: ActionCondition[] }
@@ -103,7 +104,8 @@ export function actionSections(c: ActionContent): ActionSection[] {
   if (c.inputs.length) out.push({ key: 'inputs', title: '받는 것', kind: 'words', items: [...c.inputs] });
   if (c.outputs.length) out.push({ key: 'outputs', title: '내는 것', kind: 'words', items: [...c.outputs] });
   if (c.loop) out.push({ key: 'loop', title: '반복', kind: 'lines', items: [loopLine(c.loop)] });
-  if (c.steps?.length) out.push({ key: 'steps', title: '기록된 단계', kind: 'steps', items: c.steps.map(s => s.name), subs: c.steps.map(s => s.does) });
+  if (c.steps?.length) out.push({ key: 'steps', title: '기록된 단계', kind: 'steps', items: c.steps.map(s => s.name), subs: c.steps.map(s => (s.program === true ? null : s.does)),
+    ...(c.steps.some(s => s.program === true) ? { programs: c.steps.map(s => s.program === true) } : {}) });
   if (c.conditions?.length) out.push({ key: 'exits', title: '분기 출구', kind: 'lines', items: exitLines(c.conditions), total: c.conditions.length });
   if (c.stateVars?.length) out.push({ key: 'stateVars', title: '유지 상태', kind: 'lines', items: c.stateVars.map(stateVarLine) });
   if (c.fields.length) out.push({ key: 'fields', title: '행의 필드', kind: 'cells', items: [...c.fields] });

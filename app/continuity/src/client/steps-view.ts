@@ -9,12 +9,15 @@ import { ruleSigns, placeName, type RuleClaim } from './signs-view.js';
 export const UNMAPPED_IN = '진입 단계 미상', UNMAPPED_OUT = '출구 단계 미상';
 export const unmappedMark = (direction: 'in' | 'out') => (direction === 'in' ? UNMAPPED_IN : UNMAPPED_OUT);
 
-export interface ChainStep { name: string; does: string | null; uses: string[] }
-/** One explicit correspondence of a line to a port and a step at this part (the part's own rows of portMap). */
-export interface ChainMapRow { relationId: string; port: string; step: string; direction: 'in' | 'out' }
+/** program (map-reading.14): a step the program cut from the part's own 3절 arrow chain (name only: it does nothing and uses nothing as read). */
+export interface ChainStep { name: string; does: string | null; uses: string[]; program?: boolean }
+/** One explicit correspondence of a line to a port and a step at this part (the part's own rows of portMap). program
+ * (map-reading.14): a row the program put there (the one step of that end the records tie to the other end). */
+export interface ChainMapRow { relationId: string; port: string; step: string; direction: 'in' | 'out'; program?: boolean }
 /** A link drawn inside the boundary: from an input port to a step (in), or from a step to an output port (out); relationIds are
- * the lines the record maps through it (several lines may reach the same port and step: one link). */
-export interface ChainLink { port: string; step: number; direction: 'in' | 'out'; relationIds: string[] }
+ * the lines the record maps through it (several lines may reach the same port and step: one link). program: true only when every
+ * row through it is the program's (a row the reading itself wrote makes it the model's). */
+export interface ChainLink { port: string; step: number; direction: 'in' | 'out'; relationIds: string[]; program?: boolean }
 /** A port on the boundary: the steps it is mapped to (indexes into rows), and its blank when it is mapped to none. */
 export interface ChainPort { port: string; direction: 'in' | 'out'; steps: number[]; mark: string | null }
 /** A step box: its place in the record's list (index), and the ports mapped into it and out of it. */
@@ -25,15 +28,15 @@ export interface DetailChain { rows: ChainRow[]; ports: { in: ChainPort[]; out: 
 /** The detail chain: steps in the record's order, every port of each side with its mapped steps or its blank, the links (one per
  * port and step and direction) and the rows that could not be placed. inputs and outputs are the boundary's named ports. */
 export function detailChain(steps: readonly ChainStep[], portMap: readonly ChainMapRow[], inputs: readonly string[], outputs: readonly string[]): DetailChain {
-  const rows: ChainRow[] = steps.map((s, index) => ({ name: s.name, does: s.does, uses: [...s.uses], index, ins: [], outs: [] }));
+  const rows: ChainRow[] = steps.map((s, index) => ({ name: s.name, does: s.does, uses: [...s.uses], ...(s.program === true ? { program: true } : {}), index, ins: [], outs: [] }));
   const at = new Map(rows.map(r => [r.name, r.index] as const));
   const links: ChainLink[] = [], stray: ChainMapRow[] = [];
   for (const m of portMap) {
     const step = at.get(m.step), names = m.direction === 'in' ? inputs : outputs;
     if (step === undefined || !names.includes(m.port)) { stray.push({ ...m }); continue; }
     const had = links.find(l => l.port === m.port && l.step === step && l.direction === m.direction);
-    if (had) { if (!had.relationIds.includes(m.relationId)) had.relationIds.push(m.relationId); continue; }
-    links.push({ port: m.port, step, direction: m.direction, relationIds: [m.relationId] });
+    if (had) { if (!had.relationIds.includes(m.relationId)) had.relationIds.push(m.relationId); if (m.program !== true) delete had.program; continue; }
+    links.push({ port: m.port, step, direction: m.direction, relationIds: [m.relationId], ...(m.program === true ? { program: true } : {}) });
     const row = rows[step]!; (m.direction === 'in' ? row.ins : row.outs).push(m.port);
   }
   const side = (names: readonly string[], direction: 'in' | 'out'): ChainPort[] => names.map(port => {
@@ -41,6 +44,42 @@ export function detailChain(steps: readonly ChainStep[], portMap: readonly Chain
     return { port, direction, steps: mapped, mark: mapped.length ? null : unmappedMark(direction) };
   });
   return { rows, ports: { in: side(inputs, 'in'), out: side(outputs, 'out') }, links, stray };
+}
+
+/* ---------- what the program put inside (map-reading.14) ----------
+ * A program step (steps[].program: a piece of the part's own 3절 arrow chain where the records give it no 4절 row) draws its box
+ * with the 「프로그램」 chip and no does / uses area: it is a name only, never the model's reading of what the step does. A program
+ * port-map row (portMap[].program) draws its port → step line dashed with the chip at the step end, and the pane's step view
+ * says 「프로그램 대응」 beside the port. */
+export const PROGRAM_STEP_HINT = '3절 흐름에서 프로그램이 나눈 단계 · 모델 답 아님';
+export const PROGRAM_PORT_LABEL = '프로그램 대응';
+export const PROGRAM_PORT_HINT = '기록이 이 선의 그쪽 끝에 묶은 단계가 하나뿐이라 프로그램이 이은 포트 대응 · 모델 답 아님';
+/** A step box's face: the chip (program) and what it does and uses; a program step shows neither (whatever it carries). */
+export function stepFace(s: ChainStep): { program: boolean; does: string | null; uses: string[]; hint: string | null } {
+  return s.program === true ? { program: true, does: null, uses: [], hint: PROGRAM_STEP_HINT } : { program: false, does: s.does, uses: [...s.uses], hint: null };
+}
+/** A port → step line inside the boundary: dashed with the chip at its step end when the program made the correspondence. */
+export function linkFace(l: Pick<ChainLink, 'program'>): { dashed: boolean; chipAt: 'step' | null } {
+  return l.program === true ? { dashed: true, chipAt: 'step' } : { dashed: false, chipAt: null };
+}
+/** The ports a step is mapped to on each side (the pane's step view), each once, with whether only the program mapped it. */
+export interface StepPort { port: string; program: boolean }
+export function stepPorts(step: string, portMap: readonly ChainMapRow[]): { ins: StepPort[]; outs: StepPort[] } {
+  const side = (direction: 'in' | 'out'): StepPort[] => {
+    const out: StepPort[] = [];
+    for (const m of portMap) {
+      if (m.direction !== direction || m.step !== step) continue;
+      const had = out.find(x => x.port === m.port);
+      if (had) { if (m.program !== true) had.program = false; } else out.push({ port: m.port, program: m.program === true });
+    }
+    return out;
+  };
+  return { ins: side('in'), outs: side('out') };
+}
+/** How many steps the record wrote (its 4절 rows) and how many the program cut from the 3절 chain. */
+export function stepCounts(steps: readonly { program?: boolean }[]): { recorded: number; program: number } {
+  const program = steps.filter(s => s.program === true).length;
+  return { recorded: steps.length - program, program };
 }
 
 /** A relation leaving the part (a line from it, or from inside it, to a part outside): its id and the part at the far end. */

@@ -2335,3 +2335,18 @@ button:disabled { opacity: .5; cursor: default; }
 .lb-head small { color: var(--text-4); }
 .lb-contract .xp-cells { display: flex; flex-wrap: wrap; gap: 3px; }
 .lb-cite { margin: 4px 0 0; }
+/* map-reading.14: a step the program cut from the 3절 chain is a name only (the 「프로그램」 chip, no does / uses); a port → step line
+   the program made is dashed, its chip at the step box's end (in: the head's start, out: its end); the pane says 「프로그램 대응」 */
+.dv-line.program { stroke-dasharray: 5 4; }
+.dv-step-head .prog-chip, .xp-steps .prog-chip, .stp-top .prog-chip, .stp-ports .prog-chip { flex: none; height: 14px; padding: 0 3px; font-size: 10px; line-height: 12px; vertical-align: 0; align-self: center; }
+.dv-prog-out { flex: none; display: inline-flex; gap: 3px; margin-left: auto; align-self: center; }
+.dv-use.has-role { cursor: help; }
+/* 어디에 with the 파일 지도: each file a row gives a role as 경로 · 역할 with its row; files without one stay chips */
+.where-roles { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.where-roles .wr { display: flex; align-items: baseline; gap: 6px; min-width: 0; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.where-roles .wr-path { flex: 0 1 auto; max-width: 55%; }
+.where-roles .wr-sep { flex: none; color: var(--text-4); }
+.where-roles .wr-role { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.where-roles .q-cite { flex: none; }
+/* a rule's 보장 line: the 파일 지도 file a code enforcement rests on, as its place */
+.sg-chip.sg-place { max-width: 220px; overflow: hidden; text-overflow: ellipsis; background: var(--code-soft); color: var(--code-text); border-color: transparent; cursor: help; }

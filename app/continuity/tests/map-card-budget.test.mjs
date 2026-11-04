@@ -260,3 +260,14 @@ test('entry words with conditions: 조건 K after 기록된 단계; alone they m
   }
   assert.equal(typedBudget(1, true, true, true, true, 'none', 'overview', entryKind(counts({ conditions: 3 }), most)).entry, false, '개요 keeps no entry line');
 });
+
+test('entry words (map-reading.14): the steps the program cut from the 3절 chain count apart, 기록된 단계 M (+P 프로그램)', () => {
+  const most = { config: 1, fields: 3 };
+  assert.deepEqual(entryParts(counts({ kids: 2, steps: 3, programSteps: 2 }), most), ['구성 2', '기록된 단계 3 (+2 프로그램)']);
+  assert.deepEqual(entryParts(counts({ steps: 3, programSteps: 0 }), most), ['기록된 단계 3'], 'none of the program\'s: as before');
+  assert.deepEqual(entryParts(counts({ steps: 4 }), most), ['기록된 단계 4'], 'an earlier caller with no programSteps');
+  // Only program steps: the record wrote none of its own, and the part is not 내부 미상.
+  assert.equal(entryKind(counts({ programSteps: 3 }), most), 'some');
+  assert.deepEqual(entryParts(counts({ programSteps: 3 }), most), ['기록된 단계 0 (+3 프로그램)']);
+  assert.deepEqual(entryParts(counts({ programSteps: 1, unplaced: 1, conditions: 2 }), most), ['기록된 단계 0 (+1 프로그램)', '조건 2', '배치 미정 1']);
+});

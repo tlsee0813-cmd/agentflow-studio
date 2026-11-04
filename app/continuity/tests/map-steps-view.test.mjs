@@ -192,3 +192,46 @@ test('conditionOfQuote: a rule anchor whose row is a condition row (same record 
   assert.equal(conditionOfQuote({ record: 'P2', quote: '| A | B |', from: 10, to: 19 }, conds), -1);
   assert.equal(conditionOfQuote({ record: 'P1', quote: '| A |' }, conds), -1);
 });
+
+/* ---------- map-reading.14: what the program put inside ---------- */
+import { stepFace, linkFace, stepPorts, stepCounts, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL } from '../dist/public/client/steps-view.js';
+test('a program step is a name only: the chip and no does / uses area, whatever it carries; a model step reads as before', () => {
+  assert.equal(PROGRAM_STEP_HINT, '3절 흐름에서 프로그램이 나눈 단계 · 모델 답 아님');
+  assert.deepEqual(stepFace({ name: '정렬', does: null, uses: [], program: true }), { program: true, does: null, uses: [], hint: PROGRAM_STEP_HINT });
+  assert.deepEqual(stepFace({ name: '정렬', does: '무언가', uses: ['x.py'], program: true }), { program: true, does: null, uses: [], hint: PROGRAM_STEP_HINT }, 'never the model\'s does on a program box');
+  assert.deepEqual(stepFace({ name: '행 읽기', does: 'review.jsonl 새 행을 읽는다', uses: ['engine/read.py'] }), { program: false, does: 'review.jsonl 새 행을 읽는다', uses: ['engine/read.py'], hint: null });
+  assert.deepEqual(stepFace({ name: '행 읽기', does: null, uses: [], program: false }).program, false);
+  // The chain keeps the flag on its rows (only when true: an earlier reading's rows keep their exact shape).
+  const c = detailChain([{ name: '정렬', does: null, uses: [], program: true }, ...steps], [], inputs, outputs);
+  assert.equal(c.rows[0].program, true);
+  assert.equal('program' in c.rows[1], false);
+  assert.deepEqual(stepCounts(c.rows), { recorded: 3, program: 1 });
+  assert.deepEqual(stepCounts(steps), { recorded: 3, program: 0 });
+  assert.deepEqual(stepCounts([]), { recorded: 0, program: 0 });
+});
+
+test('a program port-map row: its link is dashed with the chip at the step end; a row the reading wrote for the same link makes it the model\'s', () => {
+  const rows = [...pm, { relationId: 'R1', port: '정책 기동', step: '판단', direction: 'in', program: true }];
+  const c = detailChain(steps, rows, inputs, outputs);
+  const prog = c.links.find(l => l.port === '정책 기동');
+  assert.deepEqual(prog, { port: '정책 기동', step: 1, direction: 'in', relationIds: ['R1'], program: true });
+  assert.deepEqual(linkFace(prog), { dashed: true, chipAt: 'step' });
+  assert.deepEqual(linkFace(c.links[0]), { dashed: false, chipAt: null });
+  assert.equal('program' in c.links[0], false, 'a model link keeps its exact shape');
+  // The same port and step mapped again by the reading itself: one link, the model's.
+  const both = detailChain(steps, [...rows, { relationId: 'R7', port: '정책 기동', step: '판단', direction: 'in' }], inputs, outputs);
+  const l = both.links.find(x => x.port === '정책 기동');
+  assert.deepEqual(l.relationIds, ['R1', 'R7']);
+  assert.equal(linkFace(l).dashed, false);
+  // Model first, then the program's: still the model's.
+  const first = detailChain(steps, [{ relationId: 'R7', port: '정책 기동', step: '판단', direction: 'in' }, { relationId: 'R1', port: '정책 기동', step: '판단', direction: 'in', program: true }], inputs, outputs);
+  assert.equal(linkFace(first.links[0]).dashed, false);
+});
+
+test('the pane\'s step view: each mapped port once per side, 「프로그램 대응」 only where the program alone mapped it', () => {
+  assert.equal(PROGRAM_PORT_LABEL, '프로그램 대응');
+  const rows = [...pm, { relationId: 'R1', port: '정책 기동', step: '판단', direction: 'in', program: true }, { relationId: 'R8', port: '판단 행', step: '판단', direction: 'out', program: true }];
+  assert.deepEqual(stepPorts('판단', rows), { ins: [{ port: '정책 기동', program: true }], outs: [{ port: '판단 행', program: false }] }, 'R3 (the reading\'s) and R8 (the program\'s) reach 판단 행: the model\'s');
+  assert.deepEqual(stepPorts('행 읽기', rows), { ins: [{ port: 'review 행', program: false }], outs: [] });
+  assert.deepEqual(stepPorts('없는 단계', rows), { ins: [], outs: [] });
+});
