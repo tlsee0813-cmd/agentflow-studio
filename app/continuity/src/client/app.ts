@@ -45,7 +45,7 @@ import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramE
 import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
-import { recordAskNodes, continuationNode } from './record-asks.js';
+import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { splitRecordChunks } from '../shared/record-table.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -4966,7 +4966,7 @@ function mapBlock(): HTMLElement | null {
     // The design record and the scenario record (with this map's ID ledger): pasted back like any other record; the scenario
     // record is read as a path by the app alone (scenario-record.ts) when it is pasted.
     // .43: a pasted 기록 v4 whose completion table leaves tables offers its continuation (record-asks.ts).
-    ...[continuationNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title))].filter((x): x is HTMLElement => !!x),
+    ...[pageNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title)), continuationNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title))].filter((x): x is HTMLElement => !!x),
     h('p', { class: 'fine rm-ask rm-records' }, ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title)), ' · ',
       askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario),
       ' — 기록 요청은 지금 상태와 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 붙이면 앱이 AI 없이 지금 지도의 ID 대장과 맞춰 길로 읽어, 제목 아래 ‘시나리오’ 줄에서 지도 위에 보여요.'));
