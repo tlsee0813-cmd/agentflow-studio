@@ -2575,7 +2575,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
   // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
   return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
-    steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 12), conditions: conditions.slice(0, 24), fileRoles: fileRoles.slice(0, 12), rules, withdrawals, gates, revised, roleBasisRevised };
+    steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 24), conditions: conditions.slice(0, 24), fileRoles: fileRoles.slice(0, 12), rules, withdrawals, gates, revised, roleBasisRevised };
 }
 
 /* ---------- evidence a later record took back ---------- */

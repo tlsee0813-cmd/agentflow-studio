@@ -21,6 +21,8 @@ export const PROGRAM_HINT = '기록에서 프로그램이 옮긴 값 · 모델 �
 export const isProgram = (x: { program?: boolean } | null | undefined): boolean => x?.program === true;
 /** A rule carries a place the program put there (map-reading.11 anchors[].program). */
 export const ruleHasProgram = (c: { anchors?: readonly { program?: boolean }[] }): boolean => (c.anchors ?? []).some(isProgram);
+/** A rule carries a code device the program put there (map-reading.15 enforcedBy[].program, a refusal condition row's code). */
+export const ruleHasProgramEnforce = (c: { enforcedBy?: readonly { kind: string; program?: boolean }[] }): boolean => (c.enforcedBy ?? []).some(e => e.kind === 'code' && isProgram(e));
 
 export interface LoopLike { unit: string | null; stop: string | null; resume: string | null; program?: boolean }
 export interface ConditionLike { then: string; else: string | null }

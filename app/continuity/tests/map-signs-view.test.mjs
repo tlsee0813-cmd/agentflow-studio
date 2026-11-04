@@ -232,3 +232,32 @@ test('projectRuleList: project rules and unplaced rules counted across parts, ea
   assert.deepEqual(RULE_ROW_LABEL, { project: '프로젝트 전체', part: '부분 전체', unplaced: '배치 미정' });
   assert.deepEqual(projectRuleList([]), { project: 0, unplaced: 0, groups: [] });
 });
+
+/* ---------- map-reading.15: a code enforcement the program put there (enforcedBy[].program) ---------- */
+import { RULE_DESIGN_PROGRAM } from '../dist/public/client/signs-view.js';
+import { ruleHasProgramEnforce, PROGRAM_LABEL } from '../dist/public/client/line-view.js';
+
+test('a program code enforcement keeps 코드 · text with the 프로그램 flag, answers 설계 대응 as 「프로그램 대응」 and never 설계 대응 미상', () => {
+  const prog = { kind: 'code', text: '403 ROLE_REQUIRED', quote: Q('| 주문 API | action'), program: true };
+  const v = ruleView(T({ topic: 'rule', scope: 'part', enforcedBy: [prog] }), places);
+  assert.deepEqual(v.enforce.map(e => [e.line, e.program]), [['코드 · 403 ROLE_REQUIRED', true]]);
+  assert.equal(v.design, null, 'no 설계 대응 미상 for a program code entry');
+  assert.equal(v.designProgram, '프로그램 대응');
+  assert.equal(RULE_DESIGN_PROGRAM, '프로그램 대응');
+  assert.equal(v.check, '확인 검사 미상');
+  // The model's own code device beside it answers 설계 대응 itself: no 프로그램 대응 line; only the program entry is flagged.
+  const both = ruleView(T({ scope: 'part', enforcedBy: [{ kind: 'code', text: 'LINE_STALE에서 거절', quote: Q('LINE_STALE') }, prog] }), places);
+  assert.deepEqual([both.enforce.map(e => e.program), both.design, both.designProgram], [[false, true], null, null]);
+  // 기록상 미설계 the record said is the record's answer: the program's code device does not speak over it.
+  const none = ruleView(T({ scope: 'part', enforcedBy: [{ kind: 'none', text: '설계 없음', quote: Q('n') }, prog] }), places);
+  assert.deepEqual([none.design, none.designProgram], [null, null]);
+  // The flag counts only on a code device, and a model code device (program absent or false) keeps its old row.
+  const odd = ruleView(T({ scope: 'part', enforcedBy: [{ kind: 'gate', text: '운영 관문 2', quote: Q('g'), program: true }, { kind: 'code', text: 'X', quote: Q('x'), program: false }] }), places);
+  assert.deepEqual([odd.enforce.map(e => e.program), odd.design, odd.designProgram], [[false, false], null, null]);
+  const only = ruleView(T({ scope: 'part', enforcedBy: [{ kind: 'unknown', text: '장치 미상', quote: null }] }), places);
+  assert.deepEqual([only.design, only.designProgram], ['설계 대응 미상', null]);
+  assert.equal(ruleView(C({ topic: 'rule' }), places).designProgram, null, 'an earlier reading keeps its three blanks');
+  // The project rule list's row carries the chip by the same flag.
+  assert.equal(PROGRAM_LABEL, '프로그램');
+  assert.deepEqual([ruleHasProgramEnforce({ enforcedBy: [prog] }), ruleHasProgramEnforce({ enforcedBy: [{ ...prog, program: false }] }), ruleHasProgramEnforce({ enforcedBy: [{ ...prog, kind: 'gate' }] }), ruleHasProgramEnforce({})], [true, false, false, false]);
+});

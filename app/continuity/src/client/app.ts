@@ -31,9 +31,9 @@ import { typedBudget, typedLines, typedPx, zoomLevel, entryKind, entryParts, loo
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
-import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
+import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines } from './ops-line.js';
-import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
+import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -1084,7 +1084,9 @@ ${f.path} · ${f.role}` }, f.path); };
           h('span', { class: 'sg-key' }, '적용 위치'), h('span', { class: `sg-chip${a.program ? ' prog-chip' : ''}`, title: a.program ? `${PROGRAM_HINT} · 규칙과 낱말을 나누는 조건 행에서 이은 자리 (후보)` : ANCHOR_HINT[a.kind] }, a.label),
           h('span', { class: 'sg-val' }, a.nowhere ? `${RULE_BLANKS.nowhere} · ${a.text}` : a.text), condChip(a.quote), q(`sign|anchor|${key}|${i}`, a.quote, '적용 위치 근거')))),
         ...(v.enforceBlank ? [field(v.enforceBlank, RULE_BLANK_HINT.enforce)] : v.enforce.map((e, i) => h('li', { class: `sg-enforce k-${e.kind}${e.kind === 'none' || e.kind === 'unknown' ? ' sg-blank' : ''}`, title: `${ENFORCER_HINT[e.kind]}${e.kind === 'none' || e.kind === 'unknown' ? `\n${e.text}` : ''}` },
-          h('span', { class: 'sg-key' }, '보장'), h('span', { class: 'sg-val' }, e.line), enforceAt(e), e.quote ? q(`sign|enforce|${key}|${i}`, e.quote, '보장 근거') : null))),
+          h('span', { class: 'sg-key' }, '보장'), h('span', { class: 'sg-val' }, e.line), e.program ? progChip('거부 조건 행의 코드 보장') : null, enforceAt(e), e.quote ? q(`sign|enforce|${key}|${i}`, e.quote, '보장 근거') : null))),
+        // map-reading.15: only the program's code device answers 설계 대응 — the line says 「프로그램 대응」, never 설계 대응 미상 and never nothing.
+        ...(v.designProgram ? [h('li', { class: 'sg-design-prog', title: RULE_DESIGN_PROGRAM_HINT }, h('span', { class: 'sg-key' }, '설계 대응'), h('span', { class: 'sg-chip prog-chip' }, v.designProgram))] : []),
         ...(v.design ? [field(v.design, RULE_BLANK_HINT.design)] : []), ...(v.check ? [field(v.check, RULE_BLANK_HINT.check)] : []))); };
   // A gate (spec 5.2): 실행 관문 or 개발 관문 as the contract says it; one an earlier reading wrote was told by its words (추정).
   const gateItem = (c: CurrentClaim) => { const g = gateKind(c);
@@ -2492,7 +2494,7 @@ function rulesStrip(o: Opened): HTMLElement | null {
     h('ul', { class: 'rules-rows' }, ...gr.rows.map(x => h('li', {}, h('button', { type: 'button', class: `rules-row k-${x.kind}`, 'data-rule-part': gr.part,
       title: `${gr.name}의 규칙 · ${RULE_ROW_LABEL[x.kind]}\n${x.claim.text}\n눌러서 읽기면의 규칙에서 범위·적용 위치·보장`, onclick: () => openRuleAt(o, gr.part, claimKey(x.claim)) },
       h('span', { class: `rules-kind${x.kind === 'unplaced' ? ' entry-unplaced' : ''}` }, RULE_ROW_LABEL[x.kind]), h('span', { class: 'rules-text' }, x.claim.text),
-      ruleHasProgram(x.claim) ? progChip('적용 위치') : null))))))));
+      ruleHasProgram(x.claim) ? progChip('적용 위치') : null, ruleHasProgramEnforce(x.claim) ? progChip('보장 · 코드') : null))))))));
   return el;
 }
 /** A part chosen from the title (a rule's part may be outside the view): in this view when it is drawn or inside it, else in its parent's. */

@@ -169,12 +169,20 @@ export interface RuleView {
   anchors: { text: string; kind: AnchorKind; label: string; quote: ReadingQuote; places: PlaceRef[]; nowhere: boolean; program: boolean }[];
   /** '적용 위치 미해결' when the rule carries no anchor (or an earlier reading wrote it). */
   anchorsBlank: string | null;
-  enforce: { kind: EnforcerKind; text: string; line: string; quote: ReadingQuote | null }[];
+  /** program (map-reading.15): a code device the program put there (from a refusal condition row where a place of the rule
+   * stands); its line keeps '코드 · …' and the view adds the 「프로그램」 chip after it. */
+  enforce: { kind: EnforcerKind; text: string; line: string; quote: ReadingQuote | null; program: boolean }[];
   /** '보장 위치 미확인' when the reading said nothing of what keeps it. */
   enforceBlank: string | null;
   /** '설계 대응 미상' unless a code device (or the record's own 기록상 미설계) answers it; '확인 검사 미상' unless a gate does. */
   design: string | null; check: string | null;
+  /** '프로그램 대응' (RULE_DESIGN_PROGRAM) when only a program code device answers 설계 대응 (map-reading.15): the line says so
+   * instead of nothing, so the correspondence never reads as the model's. null otherwise. */
+  designProgram: string | null;
 }
+/** The 설계 대응 line when only the program's code device answers it (map-reading.15). */
+export const RULE_DESIGN_PROGRAM = '프로그램 대응';
+export const RULE_DESIGN_PROGRAM_HINT = '설계 대응 · 이 규칙의 자리에 선 거부 조건 행에서 프로그램이 이은 코드 보장 · 모델 답 아님';
 /** One rule's row: its scope ('범위 · 부분 전체', '범위 · 단계 ‘X’', '범위 · 포트 ‘X’', '범위 · 필드 ‘X’', '범위 · 프로젝트 전체', or
  * '범위 미정'; a named scope found nowhere adds '자리 없음'), its places (each anchor with 명시/해석 and its quote; '자리 없음' for one
  * that names no place of the part) and what keeps it ('코드 · …', '관문 · …', '사람 · …', '기록상 미설계', '장치 미상'). partName:
@@ -182,7 +190,7 @@ export interface RuleView {
 export function ruleView(c: RuleClaim, places: PartPlaces, partName = '이 부분'): RuleView {
   const p = rulePlacement(c, places);
   if (p.legacy) return { legacy: true, scope: { text: `범위 · ‘${partName}’ 전체 · 세부 접점 미정`, blank: false, hint: RULE_BLANK_HINT.legacy }, anchors: [], anchorsBlank: RULE_BLANKS.anchors,
-    enforce: [], enforceBlank: null, design: RULE_BLANKS.design, check: RULE_BLANKS.check };
+    enforce: [], enforceBlank: null, design: RULE_BLANKS.design, check: RULE_BLANKS.check, designProgram: null };
   const scope = c.scope ?? null, name = c.scopeName?.trim() ?? '';
   const named = scope === 'step' ? '단계' : scope === 'port' ? '포트' : '필드';
   const sc = scope === null ? { text: RULE_BLANKS.scope, blank: true, hint: RULE_BLANK_HINT.scope }
@@ -191,9 +199,12 @@ export function ruleView(c: RuleClaim, places: PartPlaces, partName = '이 부�
         : { text: `범위 · ${named} ‘${name}’${p.scopeFound ? '' : ` · ${RULE_BLANKS.nowhere}`}`, blank: !p.scopeFound, hint: p.scopeFound ? `이 부분의 ${named} ‘${name}’에 미치는 규칙` : RULE_BLANK_HINT.nowhere };
   const anchors = p.anchors.map(({ anchor: a, places: ps }) => ({ text: a.text, kind: a.kind, label: isProgram(a) ? PROGRAM_LABEL : ANCHOR_LABEL[a.kind], quote: a.quote, places: ps, nowhere: !ps.length, program: isProgram(a) }));
   const devices = c.enforcedBy ?? [];
-  const enforce = devices.map(e => ({ kind: e.kind, text: e.text, line: e.kind === 'none' || e.kind === 'unknown' ? ENFORCER_LABEL[e.kind] : `${ENFORCER_LABEL[e.kind]} · ${e.text}`, quote: e.quote }));
+  const enforce = devices.map(e => ({ kind: e.kind, text: e.text, line: e.kind === 'none' || e.kind === 'unknown' ? ENFORCER_LABEL[e.kind] : `${ENFORCER_LABEL[e.kind]} · ${e.text}`, quote: e.quote, program: e.kind === 'code' && isProgram(e) }));
+  // A program code device answers 설계 대응 too (map-reading.15), but says 「프로그램 대응」 unless the model's own device answers it.
+  const modelDesign = enforce.some(e => (e.kind === 'code' && !e.program) || e.kind === 'none'), programDesign = enforce.some(e => e.program);
   return { legacy: false, scope: sc, anchors, anchorsBlank: anchors.length ? null : RULE_BLANKS.anchors, enforce, enforceBlank: devices.length ? null : RULE_BLANKS.enforce,
-    design: devices.some(e => e.kind === 'code' || e.kind === 'none') ? null : RULE_BLANKS.design, check: devices.some(e => e.kind === 'gate') ? null : RULE_BLANKS.check };
+    design: modelDesign || programDesign ? null : RULE_BLANKS.design, check: devices.some(e => e.kind === 'gate') ? null : RULE_BLANKS.check,
+    designProgram: !modelDesign && programDesign ? RULE_DESIGN_PROGRAM : null };
 }
 /** Who said it and where, as the record wrote it: its time, its place and its evidence tag; blanks say so. */
 export function ruleSaid(c: SignClaim): { when: string; where: string; evidence: string | null } {

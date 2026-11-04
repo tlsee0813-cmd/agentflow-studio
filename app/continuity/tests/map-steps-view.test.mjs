@@ -235,3 +235,22 @@ test('the pane\'s step view: each mapped port once per side, 「프로그램 대
   assert.deepEqual(stepPorts('행 읽기', rows), { ins: [{ port: 'review 행', program: false }], outs: [] });
   assert.deepEqual(stepPorts('없는 단계', rows), { ins: [], outs: [] });
 });
+
+test('map-reading.15: twenty port-map rows (the stored cap is 24) all link, nothing assumes twelve', () => {
+  const many = Array.from({ length: 10 }, (_, i) => ({ name: `단계 ${i + 1}`, does: null, uses: [] }));
+  const ins = Array.from({ length: 10 }, (_, i) => `입력 ${i + 1}`), outs = Array.from({ length: 10 }, (_, i) => `출력 ${i + 1}`);
+  // Each step takes one input and gives one output; the even rows are the program's.
+  const rows = Array.from({ length: 20 }, (_, k) => { const i = k >> 1, dir = k % 2 ? 'out' : 'in';
+    return { relationId: `R${k + 1}`, port: dir === 'in' ? ins[i] : outs[i], step: many[i].name, direction: dir, ...(i % 2 ? {} : { program: true }) }; });
+  const c = detailChain(many, rows, ins, outs);
+  assert.equal(c.links.length, 20);
+  assert.deepEqual(c.stray, []);
+  assert.deepEqual(c.links.map(l => l.relationIds[0]), rows.map(r => r.relationId));
+  assert.deepEqual([...c.ports.in, ...c.ports.out].map(p => [p.steps.length, p.mark]), Array(20).fill([1, null]));
+  assert.deepEqual(c.rows.map(r => [r.ins, r.outs]), many.map((_, i) => [[ins[i]], [outs[i]]]));
+  assert.deepEqual(c.links.map(l => linkFace(l).dashed), rows.map(r => r.program === true));
+  assert.deepEqual(c.links.slice(-2).map(l => [l.port, l.step, l.direction]), [['입력 10', 9, 'in'], ['출력 10', 9, 'out']], 'rows past twelve still reach their steps');
+  assert.deepEqual(stepPorts('단계 10', rows), { ins: [{ port: '입력 10', program: false }], outs: [{ port: '출력 10', program: false }] });
+  assert.deepEqual(stepPorts('단계 9', rows), { ins: [{ port: '입력 9', program: true }], outs: [{ port: '출력 9', program: true }] });
+  assert.deepEqual(stepConsumers('단계 10', rows, rows.map(r => ({ relationId: r.relationId, far: `P${r.relationId}` }))), { mapped: true, list: [{ relationId: 'R20', far: 'PR20', port: '출력 10' }] });
+});
