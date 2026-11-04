@@ -196,6 +196,21 @@ export const MAP7_SCHEMA = 'studio.map.7' as const;
  * naming a version-control or CI event (VCS_EVENT: PR마다, 커밋마다, 배포 때) is left null (loop). Stored as map-reading.15: every rule
  * device with program (true or false; a program device is code on its row), up to 24 port-map rows, and a program step's does may hold its
  * name's tail (it still uses nothing). Earlier entries keep their shape. */
+/* map-reading.16 (pipeline .41, from the blind judging of the .40 CLI map (a CLI and a nightly batch, 18/20 with design 13/18 and new
+ * fields 3/8: its inbox stood as five stores, its commands lost their last steps and exit codes under the caps, its program port row put a
+ * lookup on a write line, its hand-kept rules kept 장치 미상, its cursor loop and the attempt·complete·cursor states stood nowhere) and of the
+ * .40 KORU map (a 「전체」 rule written twice, a store taking a nested row's fields, a card runner's sha lost with a restated claim). The
+ * reply's contract widens: a part takes sixteen steps and twelve settings (PART_LIST_MAX). Places: a 있는 곳 under a part-table store's
+ * name (「inbox 폴더 pos/」) is that store's (storePrefix), and a store holds the files of the rows its place holds (via-store, sender);
+ * .xlsx, .sqlite, .toml and .tsv name files. After a reply is read the program itself adds, each marked program (the model cannot write one;
+ * the same reading of the same records adds the same ones): to a rule the model left to unknown alone, with no place, whose row's 누가
+ * 정했나 cell names a person and which the records say people keep, the person device { person, that cell, that row } (programPerson); to a
+ * part whose loop has no unit and one of whose steps goes page by page, that step's words as its unit (programCursor) and a cursor
+ * condition's else as its stop; to a part, each variable its conditions read that its own 설정·상태 cell or a step row names, by name
+ * (programStateCandidates). The program's port rows leave out a step whose verb runs against its store line (stepVerb: a lookup on a write
+ * line, a write on a read line; PortSide.crossed). Validation (the divided first map): a restated claim carrying a sha nothing else of the
+ * reply carries stays (soleVersion); a store's fields holding a nested group's head set aside the group's inner names (fields). Stored as
+ * map-reading.16: sixteen steps and twelve settings, and a program device may be a person on its row. Earlier entries keep their shape. */
 /** A first map: nothing of the map, no request and no prior is sent (map.7 is never one). */
 export const firstAsk = (ask: Pick<MapAsk, 'parts' | 'requests' | 'priors'>): boolean => ask.parts.length === 0 && (ask.requests ?? []).length === 0 && (ask.priors ?? []).length === 0;
 /** A reply refused for a contradiction or a wrong reference it holds: where (path), which rule and what it names (an alias,
@@ -248,7 +263,9 @@ export const MAP6_RELATIONS = 48;
 /** map-reading.9: the bounds of a part's lists (map-reading.8 stored six inputs, six outputs, twelve fields and four settings). */
 /** map-reading.15 (pipeline .40): a reading's port-map rows, the program's beside the model's twelve (PART_LIST_MAX.portMap bounds the reply). */
 export const PORTMAP_MAX = 24;
-export const PART_LIST_MAX = Object.freeze({ files: 6, inputs: 8, outputs: 8, fields: 24, config: 8, steps: 12, stateVars: 8, portMap: 12, conditions: 24, payloadFields: 24, fileRoles: 12 });
+/** map-reading.16 (pipeline .41): sixteen steps (the CLI commands draw 13–14 rows, their exit and write steps last) and twelve settings (stored
+ * map-reading.15 and earlier hold twelve and eight). */
+export const PART_LIST_MAX = Object.freeze({ files: 6, inputs: 8, outputs: 8, fields: 24, config: 12, steps: 16, stateVars: 8, portMap: 12, conditions: 24, payloadFields: 24, fileRoles: 12 });
 /* Pipeline .29 (the divided first map): the program's own reading of a quoted passage, never of the model's words. */
 /** A name as the record and the map write it, compared loosely (Unicode form, emphasis marks, spacing, case). */
 const plainName = (s: string): string => s.normalize('NFC').replace(/[*`]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -257,7 +274,9 @@ const tableRows = (text: string): string[][] => text.split('\n').map(l => l.trim
   .map(l => l.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim()));
 /** The names one cell lists ("엔진·종이 생산자"). */
 const cellNames = (cell: string): string[] => cell.split(/[·,/]/).map(plainName).filter(Boolean);
-const FILE_END = /\.(jsonl?|json|md|csv|gz)\b/i, STEM = /^[a-z0-9_]+(?:-[a-z0-9_]+)*/i;
+/* Pipeline .41: a spreadsheet, an SQLite file and a TOML file are files too (the CLI record's pos-YYYYMMDD.xlsx, ledger.sqlite,
+ * salesrec.toml: the .40 sender check read the POS file's store as holding no file and set aside its line alone of four alike). */
+const FILE_END = /\.(jsonl?|json|md|csv|tsv|xlsx?|sqlite|toml|gz)\b/i, STEM = /^[a-z0-9_]+(?:-[a-z0-9_]+)*/i;
 /** The files a text names, each as its stem and ending ("/var/…/review.jsonl" and "review.jsonl 행" → review.jsonl,
  * "cards-{CX,CL,DS}.jsonl" → cards.jsonl, "SHEET-<날>.md" → sheet.md); an ending without a stem (".jsonl.active") names none. */
 export function fileKeys(text: string): string[] {
@@ -270,6 +289,8 @@ export function fileKeys(text: string): string[] {
   }
   return keys;
 }
+/** Pipeline .41: a version token standing alone: 7 to 40 hex characters with a digit and a letter (the plan's VERSION_TOKEN). */
+export const VERSION_WORD = /(?<![0-9a-z])(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?![0-9a-z])/gi;
 /** A setting that is a version (a commit sha bare or inside the words, "sha …", 판본, 명세 <hex>): versions are claims, not config. */
 export const versionLike = (s: string): boolean => (/^[0-9a-f]{7,40}$/i.test(s.trim()) && /[a-f]/i.test(s))
   || /(?:^|[^0-9a-z])(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}(?![0-9a-z])/i.test(s)
@@ -435,6 +456,31 @@ export const sharedItems = (cell: string): string[] => splitOutside(cell, ',').f
     && head.every(x => { const w = x.split(/\s+/); return !w.includes(tail) && !CLASS_NOUNS.includes(w.at(-1)!) && !actWord(w.at(-1)!); });
   return shares ? [...head.map(x => `${x} ${noun}`), last] : items;
 });
+/** Pipeline .41 (R3, from the blind judging of the .40 CLI map, whose 「종료 코드 0·3·4·5·6」 became five orphans 「0」「3」「4」「5」「6」 and
+ * lost 3 and 5 under the settings cap): a 「·」 list whose later pieces are bare (a number, or one token of two characters or fewer) and whose
+ * first piece ends in such a token is one item. */
+const BARE_PIECE = /^(?:\d+|[^\s·,]{1,2})$/;
+export const bareList = (pieces: readonly string[]): boolean => pieces.length >= 2 && pieces.slice(1).every(x => BARE_PIECE.test(x.trim()))
+  && BARE_PIECE.test((pieces[0] ?? '').trim().split(/\s+/).at(-1) ?? '');
+/** Pipeline .41: a design cell's items: split on 「,」 then 「·」 outside parentheses (each trimmed, empty ones and 「—」 left out), a bare
+ * 「·」 list (bareList) kept as one item. */
+export const listItems = (cell: string): string[] => splitOutside(cell, ',').flatMap(group => { const pieces = splitOutside(group, '·'); return bareList(pieces) ? [pieces.join('·')] : pieces; })
+  .filter(s => !/^[—–-]+$/.test(s));
+/** Pipeline .41 (R3): whether two settings name the same thing by whole tokens (split on white space, 「·」, 「,」, 「=」, 「:」 and brackets):
+ * one's tokens all stand among the other's, a side made of bare tokens only (a number, two characters or fewer) matching only itself
+ * (「window_days 3」 does not hold 「3」), and a shorter side holding only some of the longer side's numbers holds none of it (「종료 코드 0」
+ * does not hold 「종료 코드 0·3·4·5·6」). */
+const settingTokens = (s: string): string[] => plainName(s).split(/[\s·,=:()（）[\]{}]+|\.(?!\d)/).filter(Boolean);
+export function sameSetting(a: string, b: string): boolean {
+  const x = settingTokens(a), y = settingTokens(b); if (!x.length || !y.length) return false;
+  if (x.join(' ') === y.join(' ')) return true;
+  const bare = (t: string[]) => t.every(w => BARE_PIECE.test(w));
+  if (bare(x) || bare(y)) return false;
+  // A token stands in a list as itself or as the head of a longer token not going on with a digit (「20」 of 「20배」, never of 「200」).
+  const has = (list: string[], w: string) => list.some(t => t === w || (w.length >= 2 && t.startsWith(w) && !/^\d/.test(t.slice(w.length))));
+  const within = (small: string[], big: string[]) => small.every(w => has(big, w)) && big.filter(w => /^\d+$/.test(w)).every(w => small.includes(w));
+  return within(x, y) || within(y, x);
+}
 /* Pipeline .36: the records' artifact table (「산출물」) as the program reads it, for the stores a reading draws (one per place), the
  * lines that carry an artifact and the stores a reading leaves without a line. Never the model's words. */
 const PART_TABLE_TS = /^부분(\s*유형)?(\s*\(표\))?$/, ARTIFACT_TABLE_TS = /^산출물/, STEP_TABLE = /^안의\s*단계/;
@@ -454,6 +500,16 @@ const cellParts = (cell: string): string[] => /\[모름\]/.test(cell) ? [] : cel
 export const placeItems = (cell: string): string[] => {
   const items = splitOutside(cell.replace(/\[[^\]]*\]/g, ' '), '·,'), head = (items[0] ?? '').split(/\s+/);
   return items.length > 1 && head.length > 1 && items.slice(1).every(x => !/\s/.test(x)) ? [items[0]!, ...items.slice(1).map(x => `${head.slice(0, -1).join(' ')} ${x}`)] : items;
+};
+/** Pipeline .41 (R1, from the blind judging of the .40 CLI map, whose 「inbox 폴더 pos/」 stood as four file stores beside the 「inbox 폴더」
+ * store): a 있는 곳 (loosely compared) under a part-table store's name: the name and a space or a slash after it (「inbox 폴더 pos/」), or
+ * the name's first Latin word (three letters or more) and a slash (「inbox/pos/」). That store holds the row's place, so a part made of the
+ * row folds into it (store-dup); the folder rule's file stores stand only where no part-table store names the folder. */
+export const storePrefix = (where: string, store: string): boolean => {
+  if (!where || !store || where === store) return false;
+  if (where.startsWith(`${store} `) || where.startsWith(`${store}/`) || where.startsWith(`${store}\\`)) return true;
+  const head = /^[a-z][a-z0-9_-]{2,}/.exec(store)?.[0];
+  return !!head && head !== store && (where.startsWith(`${head}/`) || where.startsWith(`${head}\\`));
 };
 const placeCache = new WeakMap<MapAsk, { rows: ArtifactRow[]; held: Map<string, Set<string>> }>();
 function readPlaces(ask: MapAsk): { rows: ArtifactRow[]; held: Map<string, Set<string>> } {
@@ -479,10 +535,13 @@ function readPlaces(ask: MapAsk): { rows: ArtifactRow[]; held: Map<string, Set<s
   // The places each name holds: an artifact row of its name, a place its name is, or a place its own part-table row writes.
   const held = new Map<string, Set<string>>();
   const add = (n: string, place: string) => { const set = held.get(n) ?? new Set<string>(); set.add(place); held.set(n, set); };
+  // Pipeline .41: the store names of the part tables (a row whose 유형 cell says 저장소·store·큐·테이블), for a 있는 곳 that starts with one.
+  const storeNames = new Set(partRows.flatMap(r => { const t = column(r.header, /유형/); return t > 0 && /저장소|store|큐|queue|테이블/i.test(r.cells[t] ?? '') ? [plainName(r.cells[0] ?? '')] : []; }).filter(Boolean));
   for (const row of rows) if (row.store) {
     add(plainName(row.name), row.place);
     const w = plainName(row.where); if (cells.has(w)) add(w, row.place);
     for (const [n, set] of cells) if (set.has(w)) add(n, row.place);
+    for (const n of storeNames) if (storePrefix(w, n)) add(n, row.place);
   }
   const out = { rows, held }; placeCache.set(ask, out); return out;
 }
@@ -640,7 +699,19 @@ function designChain(ask: MapAsk, name: string): { pieces: string[]; outs: strin
 /** Pipeline .40: one data line's side as the program reads it: the steps of its stepped end the records tie to the other end (hits, by
  * index), the pieces of the end's 3절 chain that would and are no step of it (chain), and the port when exactly one step is tied. Every
  * side whose other end is a store is listed (hits [] when none is tied), any other side only when a step is tied. */
-export interface PortSide { relation: number; direction: 'in' | 'out'; hits: number[]; chain: string[]; port: string | null }
+export interface PortSide { relation: number; direction: 'in' | 'out'; hits: number[]; chain: string[]; port: string | null;
+  /** Pipeline .41 (R6): the steps tied by name whose verb runs against the line (a reader's step on a writer → store line, a writer's on a
+   * store → reader line), left out of hits. */
+  crossed: number[] }
+/** Pipeline .41 (R6, from the blind judging of the .40 CLI map, whose program row put ingest's 「중복 파일」 (「sha256으로 ingest_files 조회」)
+ * on its ingest → ledger write line): a step's verb class by its name, does and uses: read (조회·읽기·확인·SELECT·exists·scan·has_·seen …),
+ * write (쓰기·저장·기록·INSERT·append·XADD·write·rewrite·replace …), both or none. */
+const READ_STEP = /조회|읽기|읽는다|읽어|읽음|확인|\bselect\b|exists|seen|scan|lookup|fetch|load|(?:^|[._\s(])(?:get|read|has|find|query)(?:_|\b)/i;
+const WRITE_STEP = /쓰기|쓴다|저장|기록|갱신|바꿔치기|insert|append|xadd|write|upsert|update|publish|replace|rewrite|(?:^|[._\s(])(?:put|save|set|add)(?:_|\b)/i;
+export const stepVerb = (s: { name: string; does?: string | null; uses?: readonly string[] }): 'read' | 'write' | 'both' | 'none' => {
+  const text = `${s.name} ${s.does ?? ''} ${(s.uses ?? []).join(' ')}`, r = READ_STEP.test(text), w = WRITE_STEP.test(text);
+  return r && w ? 'both' : r ? 'read' : w ? 'write' : 'none';
+};
 export function portSides(ask: MapAsk, parts: readonly PortPart[], relations: readonly PortLine[], nameOf: (ref: string) => string = ref => parts.find(p => p.ref === ref)?.name ?? ''): PortSide[] {
   const byRef = new Map(parts.map(p => [p.ref, p])), out: PortSide[] = [], rows = artifactRows(ask);
   relations.forEach((line, relation) => {
@@ -650,7 +721,7 @@ export function portSides(ask: MapAsk, parts: readonly PortPart[], relations: re
       const steps = end?.steps ?? []; if (!end || !peer || !steps.length) continue;
       const peerName = nameOf(peer.ref), endName = nameOf(end.ref); if (!peerName || !endName) continue;
       const { stems, keys, stream } = partStems(ask, peer, peerName), store = peer.type === 'store';
-      const stripped = plainName(peerName).replace(/\.(?:jsonl?|json|md|csv|gz)\b/g, '').replace(/\s+/g, ' ').trim();
+      const stripped = plainName(peerName).replace(/\.(?:jsonl?|json|md|csv|tsv|xlsx?|sqlite|toml|gz)\b/g, '').replace(/\s+/g, ' ').trim();
       const own = store ? storeRows(ask, peerName, line.payload) : [];
       const rowNames = own.map(r => plainName(r.name)), rowStems = [...new Set([...stems, ...own.flatMap(r => stemOf(r.name) ?? [])])];
       const rowKeys = own.flatMap(r => /^[a-z][a-z0-9]*_(?:id|no)$/i.test(r.fields[0] ?? '') ? [r.fields[0]!.toLowerCase()] : []);
@@ -672,6 +743,9 @@ export function portSides(ask: MapAsk, parts: readonly PortPart[], relations: re
           || payloadTokens.some(t => plainName(`${s.name} ${s.does ?? ''}`).includes(t));
       };
       let hits = steps.flatMap((s, i) => tiedBy(s) ? [i] : []);
+      // Pipeline .41 (R6): on a store line a step reads on the reader's side and writes on the writer's; one running against it is left out.
+      const crossed: number[] = [];
+      if (store) hits = hits.filter(i => { const v = stepVerb(steps[i]!), wrong = direction === 'out' ? v === 'read' : v === 'write'; if (wrong) crossed.push(i); return !wrong; });
       // The writer's 3절 chain: its last piece where the design row's 내는 산출물 names this store (alone, or the piece a bare write).
       const chainOut: string[] = [];
       if (store && direction === 'out' && !hits.length) {
@@ -698,7 +772,7 @@ export function portSides(ask: MapAsk, parts: readonly PortPart[], relations: re
         for (const tier of tiers) { const inter = pool.filter(x => tier.includes(x)); if (inter.length === 1) { port = inter[0]!; break; } if (inter.length > 1) pool = inter; }
         if (port && (port.length > 40 || steps[hits[0]!]!.name.length > 40)) port = null;
       }
-      if (hits.length || chainOut.length || store) out.push({ relation, direction, hits, chain: chainOut, port });
+      if (hits.length || chainOut.length || store) out.push({ relation, direction, hits, chain: chainOut, port, crossed });
     }
   });
   return out;
@@ -885,10 +959,92 @@ export function ruleConditionRows(ask: MapAsk, name: string): (ConditionRow & { 
 export const PROGRAM_ANCHORS_MAX = 2;
 /** Pipeline .34: a line saying the record does not know whether a device is code or an operational judgement (모름/추정 about it). */
 const MECHANISM_UNKNOWN = (t: string): boolean => /모름|모른다|추정/.test(t) && ((/코드/.test(t) && /운영|판단|사람|수동/.test(t)) || /장치|집행/.test(t));
+/** Pipeline .41 (R4): the names of the parts the records type as a person (a part-table row whose 유형 cell says 사람 or person), with
+ * the given names (the reply's person parts), loosely compared. */
+export function personNames(ask: MapAsk, extra: readonly string[] = []): Set<string> {
+  const out = new Set(extra.map(plainName));
+  for (const r of rowsUnder(askRecords(ask), PART_TABLE_TS)) { const t = column(r.header, /유형/); if (t > 0 && /사람|person/i.test(r.cells[t] ?? '')) out.add(plainName(r.cells[0] ?? '')); }
+  out.delete(''); return out;
+}
+/** Pipeline .41 (R4): words compared for a hand-kept rule: Latin runs of three letters or more, Hangul runs of two or more and numbers with
+ * the unit after them (「28일」, 「3일에는」 → 「3일」), a trailing particle left off; 다음·모든 … left out. */
+const looseTokens = (t: string): Set<string> => new Set((t.normalize('NFC').toLowerCase().match(/[0-9]+[가-힣a-z%]*|[a-z]{3,}|[가-힣]{2,}/g) ?? [])
+  .map(w => /^[가-힣0-9]/.test(w) ? unparticled(w) : w).filter(w => w.length >= 2 && !STOP_WORDS.has(w)));
+const HAND_KEPT = /문서에만|손으로|수동/, CHANGE_TABLE = /실제\s*(?:로\s*)?(?:바뀐|변화)/;
+/** Pipeline .41 (R4): the person a 「지켜야 할 것」 row's rule is kept by, for the program's person device: the row the claim quotes, whose
+ * 누가 정했나 cell (its bracketed tags left out) starts with a person's name, whose part is a person or which a 「실제 변화」 row saying
+ * 문서에만·손으로·수동 shares two words with (looseTokens); never a row saying it does not know whether the device is code. The cell as
+ * written (80) and the row's alias; null otherwise. */
+export function programPerson(ask: MapAsk, claim: { record: string; from?: number; to?: number }, persons: ReadonlySet<string>): { text: string; at: string } | null {
+  if (claim.from === undefined || claim.to === undefined || !persons.size) return null;
+  const texts = askRecords(ask), row = rowsUnder(texts, RULE_TABLE).find(r => r.record === claim.record && r.from < claim.to! && claim.from! < r.to);
+  if (!row) return null;
+  const partAt = column(row.header, /부분/, 0), whoAt = column(row.header, /누가/); if (whoAt < 0 || whoAt === partAt) return null;
+  const who = (row.cells[whoAt] ?? '').trim(), bare = plainName(who.replace(/\[[^\]]*\]/g, ' '));
+  if (!who || ![...persons].some(n => bare === n || bare.startsWith(`${n} `) || bare.startsWith(`${n}·`) || bare.startsWith(`${n},`))) return null;
+  if (MECHANISM_UNKNOWN(row.cells.join(' '))) return null;
+  const rule = row.cells.filter((_, i) => i !== partAt && i !== whoAt).join(' '), words = looseTokens(rule);
+  const byHand = persons.has(plainName(row.cells[partAt] ?? '')) || rowsUnder(texts, CHANGE_TABLE).some(r => {
+    const said = r.cells.join(' '); return HAND_KEPT.test(said) && [...looseTokens(said)].filter(w => words.has(w)).length >= 2;
+  });
+  const at = byHand ? lineAlias(row.record, texts.get(row.record)?.spans ?? null, row.from, row.to) : null;
+  return at ? { text: who.length <= 80 ? who : `${who.slice(0, 79)}…`, at } : null;
+}
+/** Pipeline .41 (R9): a step saying its part goes on page by page, in this order: 페이지마다, 다음 페이지가 없을 때까지, next_cursor (or
+ * cursor마다, 커서마다), 다음 페이지; its name or does (whichever says it, 60) as the unit, on the step's row. */
+const CURSOR_STEP = [/페이지마다/, /다음\s*페이지가\s*없을\s*때까지/, /next_cursor|cursor\s*마다|커서마다/i, /다음\s*페이지/];
+export function programCursor<Q>(steps: readonly { name: string; does: string | null; quote: Q }[]): { unit: string; quote: Q } | null {
+  for (const re of CURSOR_STEP) for (const s of steps) {
+    const hit = [s.name, s.does ?? ''].find(t => re.test(t));
+    if (hit) return { unit: hit.length <= 60 ? hit : `${hit.slice(0, 59)}…`, quote: s.quote };
+  }
+  return null;
+}
+/** Pipeline .41 (R9): the variables a condition reads, as written: a dotted name (conditionVariables), a subscript (「line['attempt']」, its
+ * key the leaf), a get key (「body.get('next_cursor')」 → next_cursor) and a bare name of an attempt, retry, cursor or count; each with its
+ * root (the name before the dot or bracket; null for a bare or get key). */
+const STATE_NAME = /attempt|retry|cursor|count/i;
+/** Pipeline .41 (R9): the leaves a kept state goes by (an attempt, a retry, a cursor, a count, completeness, an offset, a sequence, a page, what is
+ * left); a status or a value field (order.status, refund.status) is the row's, never the part's state. */
+const STATE_LEAF = /attempt|retry|cursor|count|complete|offset|seq|page|left/i;
+export function conditionKeys(when: string): { name: string; leaf: string; root: string | null }[] {
+  const out: { name: string; leaf: string; root: string | null }[] = [], add = (name: string, leaf: string, root: string | null) => { if (!out.some(x => x.name === name)) out.push({ name, leaf, root }); };
+  for (const m of when.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\s*\[\s*['"]([A-Za-z_][A-Za-z0-9_]*)['"]\s*\]/g)) add(m[0].replace(/\s+/g, ''), m[2]!, m[1]!);
+  for (const m of when.matchAll(/\b([A-Za-z_][A-Za-z0-9_]*)\.get\(\s*['"]([A-Za-z_][A-Za-z0-9_]*)['"]/g)) add(m[2]!, m[2]!, m[1]!);
+  for (const v of conditionVariables(when)) add(v, v.split('.').at(-1)!, v.split('.')[0]!);
+  const bare = when.replace(/'[^']*'|"[^"]*"/g, ' ');
+  // A bare name in capitals (MAX_ATTEMPTS) is a constant, never a kept state.
+  for (const m of bare.matchAll(/(?<![A-Za-z0-9_.\]])([A-Za-z_][A-Za-z0-9_]*)(?![A-Za-z0-9_.([])/g)) if (STATE_NAME.test(m[1]!) && !/^[A-Z][A-Z0-9_]*$/.test(m[1]!)) add(m[1]!, m[1]!, null);
+  return out;
+}
+/** Pipeline .41 (R9): the roots naming settings, arguments, errors and modules, never kept state (cfg.match.tolerance_won, args.force). */
+const NOT_STATE_ROOTS = new Set(['cfg', 'config', 'conf', 'args', 'argv', 'opts', 'options', 'settings', 'env', 'os', 'sys', 'self', 'this', 'e', 'r', 'err', 'json', 'path', 'math', 're']);
+/** Pipeline .41 (R9): the program's kept-state names of a part: each variable its conditions read (conditionKeys; 40 or fewer) whose leaf,
+ * as a whole word, its own 「부분별 설계」 row's 설정·상태 cell or one of its step rows names; never one rooted at a setting, argument or
+ * error, a call path one of its steps uses, a leaf one of its settings names, or a state the part keeps already. */
+export function programStateCandidates(ask: MapAsk, partName: string, part: { conditions?: readonly { when: string }[]; steps?: readonly { name: string; does: string | null; uses: readonly string[]; quote: { quote: string } }[]; config?: readonly string[]; stateVars?: readonly { name: string }[] }): string[] {
+  if (!partName || !(part.conditions ?? []).length) return [];
+  const own = plainName(partName), design = rowsUnder(askRecords(ask), DESIGN_TABLE).find(r => plainName(r.cells[column(r.header, /이름/, 0)] ?? '') === own);
+  const cells = design ? design.header.flatMap((h, i) => /설정|상태/.test(h) ? [design.cells[i] ?? ''] : []) : [];
+  const steps = (part.steps ?? []).map(s => `${s.quote.quote} ${s.name} ${s.does ?? ''}`), uses = (part.steps ?? []).flatMap(s => s.uses.map(plainName));
+  const word = (hay: string, w: string) => new RegExp(`(?<![a-z0-9_])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![a-z0-9_])`, 'i').test(hay);
+  const out: string[] = [], kept = (part.stateVars ?? []).map(s => plainName(s.name));
+  for (const key of (part.conditions ?? []).flatMap(c => conditionKeys(c.when))) {
+    const leaf = key.leaf.toLowerCase();
+    if (!STATE_LEAF.test(leaf)) continue;
+    if (key.name.length > 40 || (key.root && NOT_STATE_ROOTS.has(key.root.toLowerCase())) || out.includes(key.name)) continue;
+    if (key.name.includes('.') && uses.some(u => u.includes(plainName(key.name)))) continue;
+    if ((part.config ?? []).some(c => word(c, leaf))) continue;
+    if (kept.some(k => k === plainName(key.name) || k.split(/[\s.]/).includes(leaf))) continue;
+    if (cells.some(c => word(c, leaf)) || steps.some(t => word(t, leaf))) out.push(key.name);
+  }
+  return out;
+}
 /** Pipeline .31: a clock time in a loop unit (a timer's schedule, never its loop). */
 const CLOCK = /\d{1,2}:\d{2}Z?/;
 /** Pipeline .36: a loop unit is a time or event unit: a number, a unit word or 마다·주기·폴링 (「없으면 다시 읽기」 is a resume sentence). */
-export const LOOP_UNIT = /\d|마다|주기|폴링|매분|매초|매시|매일|tick|박자|\b(?:ms|sec|s|min|h)\b/i;
+// Pipeline .41 (R9): a page unit too (「next_cursor면 다음 페이지」, 「다음 페이지가 없을 때까지」).
+export const LOOP_UNIT = /\d|마다|주기|폴링|매분|매초|매시|매일|tick|박자|페이지|cursor|커서|\b(?:ms|sec|s|min|h)\b/i;
 /** Pipeline .30: the words of each state as a record writes it, for a claim that only says its part's state again. */
 const STATE_SAID: Record<PartState, RegExp> = { running: /돌고\s*있|가동\s*중/, working: /작업\s*중|진행\s*중/, unbuilt: /미구현|설계만/, stopped: /멈|정지/, retired: /폐기|삭제/, unknown: /모름|모른다|확인하지\s*못|알\s*수\s*없|미확인/ };
 /** At most this many earlier matches go as priors, within PRIOR_BYTES (records keep the rest of MAP_BYTES). */
@@ -1356,6 +1512,24 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   };
   // pipeline .35: each claim's raw index (a claim set aside after the parts are read names it) and the places read as inferred.
   const rawClaimAt = new Map<MapReplyClaim, number>(), loweredOf = new Map<MapReplyClaim, string[]>();
+  // Pipeline .41 (KORU (11), from the blind judging of the .40 KORU map, whose card runner lost 5d31b880 with its restated N02.20 claim): a
+  // claim set aside as restate keeps its place when it carries a version token (a sha) nothing else of the reply carries: no other claim's
+  // words (text, about, when, where, before), no setting, file, file-map row or role's about of any part (read on the reply as sent).
+  const rawClaim = new Map<MapReplyClaim, unknown>();
+  const soleVersion = (c: MapReplyClaim): boolean => {
+    const tokens = [c.text, c.about, c.when, c.where, c.before].filter((x): x is string => typeof x === 'string').join(' ').match(VERSION_WORD) ?? [];
+    if (!tokens.length) return false;
+    const own = rawClaim.get(c), raw = Array.isArray((value as { parts?: unknown }).parts) ? (value as { parts: unknown[] }).parts : [];
+    const strings = (v: unknown): string[] => typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(strings) : [];
+    const carried = raw.flatMap(p => {
+      if (!p || typeof p !== 'object') return [];
+      const x = p as Record<string, unknown>;
+      return [...strings(x.roleAbout), ...strings(x.files), ...strings(x.config),
+        ...(Array.isArray(x.fileRoles) ? x.fileRoles.flatMap(r => r && typeof r === 'object' ? strings([(r as Record<string, unknown>).path, (r as Record<string, unknown>).role]) : []) : []),
+        ...(Array.isArray(x.claims) ? x.claims.flatMap(k => k && typeof k === 'object' && k !== own ? strings(['text', 'about', 'when', 'where', 'before'].map(n => (k as Record<string, unknown>)[n])) : []) : [])];
+    }).join(' | ').toLowerCase();
+    return tokens.some(t => !carried.includes(t.toLowerCase()));
+  };
   // Pipeline .40: the steps whose name lost its parenthesised tail (stepTail), by part ref, the name as written and as kept.
   const renamed: { ref: string; from: string; to: string }[] = [];
   const part = (p: Record<string, unknown>, pi: number): MapReplyPart => {
@@ -1551,7 +1725,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const kept = lowered.filter(x => anchors.some(a => a.text === x && a.kind === 'inferred'));
       if (kept.length) loweredOf.set(read, kept);
       return read;
-    }); if (got) { claimAt.set(got, j); rawClaimAt.set(got, j); } return got; }).filter((x): x is MapReplyClaim => x !== null);
+    }); if (got) { claimAt.set(got, j); rawClaimAt.set(got, j); rawClaim.set(got, c); } return got; }).filter((x): x is MapReplyClaim => x !== null);
     // divided (pipeline .34): a new part whose every claim was set aside stays on its basis with no claim (each claim's reason is
     // kept); before .34 the reading was refused with the first of them, and a correction reply doing so ended the whole run (the
     // first .34 KORU run: 소유자's one claim quoted ARM's rule row, wrong-part). A render's first pass still refuses such a part
@@ -1762,6 +1936,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       if (divided && conditions.length) {
         claims = claims.filter(c => {
           const again = c.from !== undefined && c.to !== undefined && conditions.some(k => k.quote.record === c.record && k.quote.from! < c.to! && c.from! < k.quote.to!);
+          if (again && soleVersion(c)) return true;
           if (again) aside.push(new MapReplyError(`parts[${pi}].claims[${claimAt.get(c)}]`, 'contract', 'restate'));
           return !again;
         });
@@ -1773,6 +1948,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         const stateWords = STATE_SAID[state], sq = stateQuote;
         claims = claims.filter(c => {
           const again = c.topic === 'status' && c.record === sq.record && c.from === sq.from && c.to === sq.to && stateWords.test(c.text);
+          if (again && soleVersion(c)) return true;
           if (again) aside.push(new MapReplyError(`parts[${pi}].claims[${claimAt.get(c)}]`, 'contract', 'restate'));
           return !again;
         });
@@ -1783,6 +1959,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         const said33 = [...steps.map(x => x.does ?? ''), typeof p.role === 'string' ? p.role : ''].map(plainName).filter(Boolean);
         claims = claims.filter(c => {
           const words = plainName(c.text).replace(/[.。]$/, ''), again = !!words && said33.some(w => w.includes(words));
+          if (again && soleVersion(c)) return true;
           if (again) aside.push(new MapReplyError(`parts[${pi}].claims[${claimAt.get(c)}]`, 'contract', 'restate'));
           return !again;
         });
@@ -1823,7 +2000,10 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   const relationAt = new Map<number, number>(); let relationsRead = 0;
   // pipeline .32 (divided): the files the records' artifact tables list, and those a store part of this reading holds.
   const tableFiles = divided ? artifactFiles([...texts.values()].map(t => t.text)) : null;
-  const stored = new Set(divided ? outParts.filter(b => b.type === 'store').flatMap(storeKeys) : []);
+  // pipeline .41: a store part also holds the files of the artifact rows its place holds by the records' tables (heldPlaces: the 「inbox 폴더
+  // pos/」 rows folded into 「inbox 폴더」), whatever its outputs list.
+  const heldKeys = (b: MapReplyPart): string[] => { const places = heldPlaces(ask, b.name ?? parts.get(b.ref)?.name ?? ''); return [...storeKeys(b), ...(places.size ? artifactRows(ask).filter(r => r.store && places.has(r.place)).flatMap(r => fileKeys(r.name)) : [])]; };
+  const stored = new Set(divided ? outParts.filter(b => b.type === 'store').flatMap(heldKeys) : []);
   // pipeline .36 (divided): whether a record draws a connection table, and the rows a line may stand on (connection, artifact,
   // part-design and inner-step rows), read once when first needed.
   let flowRows: { table: boolean; rows: { record: string; from: number; to: number }[] } | undefined;
@@ -1876,10 +2056,10 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const s7 = said7 as { payload: string | null; mode: RelationMode | null; channel: Channel | null }, pair = [byRef.get(r.from as string), byRef.get(r.to as string)];
       // pipeline .32: when a record draws an artifact table, only a file it gives a row (or a store of this reading holds) asks its store.
       const files = (s7.channel === 'data' && s7.payload ? fileKeys(s7.payload) : []).filter(k => !tableFiles || tableFiles.has(k) || stored.has(k));
-      need(files.every(k => pair.some(b => b?.type === 'store' && storeKeys(b).includes(k))), `relations[${i}]`, 'via-store');
+      need(files.every(k => pair.some(b => b?.type === 'store' && heldKeys(b).includes(k))), `relations[${i}]`, 'via-store');
       const sender = pair[0];
       need(!['unbuilt', 'retired'].includes(sender?.state ?? '') || s7.mode === 'design', `relations[${i}]`, 'sender');
-      const own = plainName(sender?.name ?? ''), holds = (text: string) => sender?.type === 'store' && fileKeys(text).some(k => storeKeys(sender).includes(k));
+      const own = plainName(sender?.name ?? ''), holds = (text: string) => sender?.type === 'store' && fileKeys(text).some(k => heldKeys(sender).includes(k));
       for (const line of lineSenders(q.quote)) {
         const x = refByName.get(line.name); if (!x || x === r.from) continue;
         // pipeline .30: the reader's own row (what it receives, 「달력·지난 24 h LEDGER」) places a store sending to it, whatever the
@@ -1990,6 +2170,30 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       }
     }
   }
+  // Pipeline .41 (KORU (9), from the blind judging of the .40 KORU map, whose cards store took the inner names of its 「card(카드 안)」 row
+  // beside its own 「card」 field): a store's fields keep one level. A row the store holds that stands inside another (its name has a
+  // parenthesis, or its 있는 곳 ends in 「 안」) and a field item written 「card(side·watch·…)」 are a group under their head; a fields list
+  // holding the head (「card」 or 「card(…)」) sets aside each inner name of it that no row of its own level lists, at its own index (fields).
+  if (divided) {
+    const rows41 = artifactRows(ask), nestedRow = (r: ArtifactRow) => /[(（]/.test(r.name) || /\s안$/.test(r.where.trim());
+    for (const [pi, p] of entries) {
+      const b = byRef.get(p.ref as string); if (!b || b.type !== 'store' || !(b.fields ?? []).length) continue;
+      const places = heldPlaces(ask, b.name ?? parts.get(b.ref)?.name ?? ''); if (!places.size) continue;
+      const held = rows41.filter(r => r.store && places.has(r.place)), groups = new Map<string, Set<string>>();
+      const group = (head: string, names: string[]) => { if (head) groups.set(head, new Set([...(groups.get(head) ?? []), ...names.map(plainName)])); };
+      for (const r of held) {
+        if (nestedRow(r)) group(plainName(r.name.replace(/[(（].*$/, '')), r.fields);
+        for (const f of r.fields) { const m = /^([^(（]+)[(（](.+)[)）]$/.exec(f.trim()); if (m) group(plainName(m[1]!), splitOutside(m[2]!, '·')); }
+      }
+      if (!groups.size) continue;
+      const flat = new Set(held.filter(r => !nestedRow(r)).flatMap(r => r.fields.filter(f => !/[(（]/.test(f)).map(plainName)));
+      const names = (b.fields ?? []).map(plainName), inner = new Set<string>();
+      for (const [head, set] of groups) if (names.some(n => n === head || n.startsWith(`${head}(`) || n.startsWith(`${head} (`))) for (const x of set) if (x !== head && !flat.has(x)) inner.add(x);
+      if (!inner.size) continue;
+      (Array.isArray(p.fields) ? p.fields as unknown[] : []).forEach((x, j) => { if (typeof x === 'string' && inner.has(plainName(x))) aside.push(new MapReplyError(`parts[${pi}].fields[${j}]`, 'contract', 'fields')); });
+      b.fields = (b.fields ?? []).filter(x => !inner.has(plainName(x)));
+    }
+  }
   // pipeline .35 (divided): a status or how claim quoting a connection-table row (「보내는 부분 | 받는 부분」)
   // that a relation of this reply quotes too says the line again (the .34 map's s305): set aside (restate) at its raw index.
   if (divided) {
@@ -1998,6 +2202,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     const piOf = new Map(built.map(([pi, b]) => [b, pi]));
     for (const b of outParts) b.claims = b.claims.filter(c => {
       const again = (c.topic === 'status' || c.topic === 'how') && links.some(l => meets(c, l) && lines.some(x => meets(x, l)));
+      if (again && soleVersion(c)) return true;
       if (again) aside.push(new MapReplyError(`parts[${piOf.get(b)}].claims[${rawClaimAt.get(c)}]`, 'contract', 'restate'));
       return !again;
     });
@@ -2254,6 +2459,20 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       if (onMaterial(quote) || kept.length >= 4) continue;
       c.enforcedBy = [...kept, { kind: 'code', text: row.then.length <= 80 ? row.then : `${row.then.slice(0, 79)}…`, quote, program: true }];
     }
+    // map-reading.16 (pipeline .41, R4: the .40 CLI map kept 장치 미상 on the month-end install ban and the bank certificate rule, both kept
+    // by hand): a rule the model left to unknown alone, with no place, whose 「지켜야 할 것」 row's 누가 정했나 cell names a person and which
+    // the records say people keep (its own part is a person, or a 「실제 변화」 row sharing two words with it says 문서에만·손으로·수동) gets
+    // { person, that cell (80), that row, program: true }, the unknown giving way. Never where the record does not know whether the device
+    // is code or an operational judgement; never on material. The model's devices are never changed otherwise.
+    const persons = personNames(ask, outParts.flatMap(b => b.type === 'person' && b.name ? [b.name] : []));
+    if (persons.size) for (const b of outParts) for (const c of b.claims) {
+      const devices = c.enforcedBy ?? [];
+      if (c.topic !== 'rule' || !devices.length || devices.some(e => e.kind !== 'unknown') || (c.anchors ?? []).length) continue;
+      const got = programPerson(ask, c, persons); if (!got) continue;
+      let quote: MapReplyQuote; try { quote = cite(got.at); } catch { continue; }
+      if (onMaterial(quote)) continue;
+      c.enforcedBy = [{ kind: 'person', text: got.text, quote, program: true }];
+    }
     for (const b of outParts) {
       const name = b.name ?? parts.get(b.ref)?.name ?? '';
       if (!b.loop) {
@@ -2285,6 +2504,28 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // map-reading.15 (pipeline .40): a piece's parenthesised tail is the step's does (「plan 행」 does 「실패면 FALLBACK」), named by step-name.
       b.steps = got.map((s): MapReplyStep => ({ name: s.name, does: s.does, uses: [], quote, program: true }));
       for (const s of got) if (s.does !== null) renamed.push({ ref: b.ref, from: s.written, to: s.name });
+    }
+    // map-reading.16 (pipeline .41, R9: the .40 CLI map's 샵링크 플러그인 kept no loop beside its 「next_cursor면 다음 페이지」 step, and no
+    // part kept the attempt, complete or cursor its conditions read): a part whose loop has no unit (none, or the model's with unit null)
+    // and one of whose steps says it goes on page by page (programCursor: 페이지마다, 다음 페이지가 없을 때까지, next_cursor, 다음 페이지) gets
+    // that step's words as its unit on that step's row, and a stop from the else of a condition reading the cursor or the next page; then
+    // each variable a condition of the part reads (programStateCandidates: a dotted name, a subscript or get key, an attempt·retry·cursor·
+    // count name; its leaf an attempt, retry, cursor, count, completeness, offset, sequence, page or what is left) that its own 설정·상태 cell or one of its step rows names is a kept state by name. Each marked program; the type, state and
+    // material rules of the program's loop hold; the model's own items are never changed.
+    for (const b of outParts) {
+      const name = b.name ?? parts.get(b.ref)?.name ?? '';
+      if (b.state !== 'retired' && b.state !== 'unbuilt' && (!b.type || LOOP_TYPES.includes(b.type)) && (!b.loop || b.loop.unit === null)) {
+        const got = programCursor(b.steps ?? []);
+        if (got && !onMaterial(got.quote)) {
+          const stop = (b.conditions ?? []).find(x => /cursor|next_page|다음\s*페이지/i.test(x.when) && typeof x.else === 'string')?.else ?? null;
+          b.loop = b.loop ? { ...b.loop, unit: got.unit, stop: b.loop.stop ?? stop, program: true } : { unit: got.unit, stop, resume: null, quote: got.quote, program: true };
+        }
+      }
+      for (const v of programStateCandidates(ask, name, b)) {
+        const list = b.stateVars ?? [];
+        if (list.length >= PART_LIST_MAX.stateVars) break;
+        b.stateVars = [...list, { name: v, scope: null, readBy: [], changedBy: [], program: true }];
+      }
     }
     const nameOfRef = (ref: string) => byRef.get(ref)?.name ?? parts.get(ref)?.name ?? '';
     // map-reading.15 (pipeline .40): the program's rows run past the model's twelve, to PORTMAP_MAX in all (the .39 web map's twelve model
@@ -2842,7 +3083,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     if (q.from === undefined || q.to === undefined) return { record: source.id, quote: q.quote };
     return { record: source.id, quote: q.quote, from: source.from + q.from, to: source.from + q.to };
   };
-  // map-reading.7 (every map.6–7 reply; stored as map-reading.15): each optional field is stored, null (files: []) when the reply did not say it, so the
+  // map-reading.7 (every map.6–7 reply; stored as map-reading.16): each optional field is stored, null (files: []) when the reply did not say it, so the
   // stored shape is exact. A part's state stands on its own passage like a claim: one inside material or already read is not kept.
   const claimOf = (c: MapReplyClaim): ReadingClaim => ({ kind: c.kind, text: c.text, ...real(c), about: c.about, replaces: c.replaces ? input.claims.get(c.replaces)! : null,
     ...(six ? { topic: c.topic ?? null, evidence: c.evidence ?? null, when: c.when ?? null, where: c.where ?? null, before: c.before ?? null,
@@ -2950,7 +3191,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     const holds = !!cur && !cur.excluded && !cur.replacedBy && !!cur.target && sameTarget(cur.target, ref!.target) && cur.correction === ref!.correction;
     return { ...rest, replaces: holds ? { reading: ref!.reading, index: ref!.index } : null };
   });
-  const reading: MapReading = { version: six ? 'map-reading.15' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+  const reading: MapReading = { version: six ? 'map-reading.16' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
     ...(six ? { basisAt: reply.basisAt ?? null, basisVersion: reply.basisVersion ?? null, portMap } : {}),
     records: [...input.records.values()].map(r => { const shift = four ? 0 : texts.get(r.id)?.shift ?? 0;
       return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) }; }),

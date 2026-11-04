@@ -1,0 +1,129 @@
+salesrec 설계 기록 v1 (검토 세션, 2026-11-04 03:0xZ; 코드는 git show로 설치본 sha 4c1e9a7b(v0.9.0)를 읽음)
+
+경로 약속: E = C:/Users/[가림]/salesrec git 4c1e9a7b:src/salesrec/ · I = git 4c1e9a7b:src/salesrec/ingest.py · P = git 4c1e9a7b:src/salesrec/plugins/shoplink/ · N = git 4c1e9a7b:src/salesrec/nightly.py · R = git 4c1e9a7b:src/salesrec/reconcile.py · Q = git 4c1e9a7b:src/salesrec/retry.py · O = git 4c1e9a7b:ops/ · S = git 4c1e9a7b:scripts/ · D = C:/Users/[가림]/salesrec/docs/
+
+1. 부분 유형
+| 이름 | 유형 | 한 줄 |
+|---|---|---|
+| 소유자 | 사람 | 개발·설치 [파일: D/RUNBOOK.md] |
+| 경리 담당자 | 사람 | 파일 넣기·보고서 확인 [파일: D/RUNBOOK.md] |
+| 개발 세션 | 세션 | 구현·STATUS [파일: D/STATUS.md] |
+| 검토 세션 | 세션 | 평가·자문 [추정] |
+| ingest 명령 | 계산 | 호출 한 번에 파일을 넣고 종료 코드로 끝남 [파일: I] |
+| 샵링크 플러그인 | 수집기 | 페이지 단위 조회 [파일: P/client.py] |
+| 야간 배치 | 계산 | 한 번 실행에 대상일 하루, 종료 코드로 끝남 [파일: N] |
+| 작업 스케줄러 작업 | 타이머·일정 | 매일 02:30(로컬) [파일: O/SalesRecNightly.xml] |
+| ledger.sqlite | 행 파일·저장소 | SQLite 표 다섯 [파일: E/schema.sql] |
+| retry-queue.jsonl | 행 파일·저장소 | 실패 페이지 한 줄씩 [파일: Q] |
+| report-YYYYMMDD.xlsx | 행 파일·저장소 | 대상일 보고서 [파일: E/report.py] |
+| inbox 폴더 | 행 파일·저장소 | 원천별 폴더 넷 [파일: E/inbox.py] |
+| salesrec.toml | [모름] | 설정 파일(아홉 유형에 없음) [파일: salesrec.example.toml] |
+| 릴리스 관문 | 계산 | pytest·smoke·태그 [파일: S/release.ps1] |
+| 매장 POS | 외부 시스템 | XLSX 내보내기 [파일: E/mapping/pos.toml] |
+| 마켓원 | 외부 시스템 | 정산 CSV [파일: E/mapping/market.toml] |
+| 샵링크 API | 외부 시스템 | 주문 REST API [파일: P/client.py] |
+| 기업뱅킹 | 외부 시스템 | 거래내역 CSV [파일: E/mapping/bank.toml] |
+| Slack | 외부 시스템 | incoming webhook [파일: E/slack.py] |
+| 시트 업로더 | 계산 | 폐기 [파일: S/old/sheets_upload.py] |
+| 은행 API 연동 | 수집기 | 미구현 [파일: D/BANK-API.md] |
+| ledger 백업 | [모름] | 코드·설정에 없음 [모름] |
+
+2. 산출물
+| 이름 | 필드 | 만드는 부분 | 읽는 부분 | 있는 곳 | 꼬리표 |
+|---|---|---|---|---|---|
+| pos-YYYYMMDD.xlsx | 영수증번호·판매일시·품목코드·수량·판매금액·할인·결제수단·카드승인번호·고객명 | 매장 POS | ingest 명령 | inbox 폴더 pos/ | [파일: E/mapping/pos.toml] |
+| market-YYYYMMDD.csv | 주문번호·결제일·정산예정일·상품명·판매가·수수료·정산액·구매자명·연락처 | 경리 담당자 | ingest 명령 | inbox 폴더 market/ | [파일: E/mapping/market.toml] |
+| bank-YYYYMMDD.csv | 거래일시·적요·입금액·출금액·잔액·거래점 | 경리 담당자 | ingest 명령 | inbox 폴더 bank/ | [파일: E/mapping/bank.toml] |
+| 샵링크 주문 페이지 | orders(order_id·paid_at·status·total·discount·refund_total·buyer_name)·next_cursor·page | 샵링크 API | 샵링크 플러그인 | HTTP | [파일: P/client.py] |
+| shoplink-YYYYMMDD-pNNN.json | page·cursor·fetched_at·body | 샵링크 플러그인 | ingest 명령 | inbox 폴더 shoplink/ | [파일: P/client.py save_page] |
+| retry-queue.jsonl 행 | source·target_date·cursor·page·attempt·last_status·queued_at | 샵링크 플러그인·야간 배치 | 야간 배치 | retry-queue.jsonl | [파일: Q] |
+| sales 행 | sale_id·source·source_ref·kst_date·sold_at·amount·fee·net·pay_method·settle_due·file_sha | ingest 명령 | 야간 배치 | ledger.sqlite | [파일: E/schema.sql] |
+| bank_tx 행 | tx_id·kst_date·posted_at·memo·deposit·withdrawal·file_sha | ingest 명령 | 야간 배치 | ledger.sqlite | [파일: E/schema.sql] |
+| ingest_files 행 | file_sha·path·source·rows_ok·rows_rejected·ingested_at·run_id | ingest 명령 | ingest 명령 | ledger.sqlite | [파일: E/schema.sql] |
+| matches 행 | match_id·kst_date·bank_tx_id·sale_ids·diff_won·kind·status | 야간 배치 | 야간 배치 | ledger.sqlite | [파일: E/schema.sql] |
+| runs 행 | run_id·target_date·attempt·started_at·finished_at·exit_code·complete·dry_run | 야간 배치 | 야간 배치 | ledger.sqlite | [파일: E/schema.sql] |
+| rejects-YYYYMMDD.csv | file·line·source·reason·raw | ingest 명령 | 야간 배치 | C:/salesrec/rejects/ | [파일: E/validate.py] |
+| report-YYYYMMDD.xlsx | 요약·맞춤·불일치·확인 필요·rejects·run_id·complete·generated_at | 야간 배치 | 경리 담당자 | OneDrive/회사공유/매출대조/ | [파일: E/report.py SHEETS] |
+| 슬랙 요약 | target_date·sales_total·bank_total·matched·unmatched·needs_review·complete·exit_code | 야간 배치 | Slack | HTTP | [파일: E/slack.py] |
+| 설정 값 | paths.inbox·paths.data·paths.report·match.tolerance_won·match.window_days·ingest.reject_ratio_abort·sources.enabled·shoplink.rps·shoplink.max_attempts·slack.webhook | 소유자 | ingest 명령·샵링크 플러그인·야간 배치 | salesrec.toml | [파일: salesrec.example.toml] |
+| smoke 결과 | case·expected_rows·actual_rows·diff | 릴리스 관문 | 소유자 | 콘솔 | [파일: S/release.ps1] |
+
+3. 부분별 설계
+| 이름 | 받는 산출물 | 안의 단계 | 내는 산출물 | 설정 | 꼬리표 |
+|---|---|---|---|---|---|
+| ingest 명령 | pos-YYYYMMDD.xlsx·market-YYYYMMDD.csv·bank-YYYYMMDD.csv·shoplink-YYYYMMDD-pNNN.json·설정 값 | 4절 | sales 행·bank_tx 행·ingest_files 행·rejects-YYYYMMDD.csv | --source pos/market/shoplink/bank/all, --date, --dry-run, --reprocess, encoding_fallback cp949, max_file_mb 50, reject_ratio_abort 0.2 | [파일: I] |
+| 샵링크 플러그인 | 샵링크 주문 페이지·설정 값 | 토큰 버킷 대기 → GET /v2/orders(date, cursor) → 429·5xx면 큐 append → 페이지 JSON 저장 → next_cursor면 다음 페이지 | shoplink-YYYYMMDD-pNNN.json·retry-queue.jsonl 행 | rps 2, page_size 100, timeout_s 15, base_url [가림]/v2 | [파일: P/client.py] |
+| 야간 배치 | retry-queue.jsonl 행·sales 행·bank_tx 행·rejects-YYYYMMDD.csv·설정 값 | 4절 | matches 행·runs 행·retry-queue.jsonl 행·report-YYYYMMDD.xlsx·슬랙 요약 | --date(기본 어제 KST), --force, --dry-run, --data, max_attempts 5, tolerance_won 1000, window_days 3, 종료 코드 0·3·4·5·6 | [파일: N] |
+| 작업 스케줄러 작업 | — | 트리거 → 동작 salesrec nightly | — | 매일 02:30(로컬 KST), 실패 시 10분 뒤 다시 시작 최대 3회, 실행 중이면 새로 시작 안 함, 시간 제한 2시간 | [파일: O/SalesRecNightly.xml] |
+| 릴리스 관문 | — | pytest -q → salesrec nightly --dry-run --data samples/2026-10-01~03 → expected 비교 → git tag | smoke 결과 | samples/expected/*.json, 표본 사흘 | [파일: S/release.ps1] |
+
+4. 안의 단계
+| 부분 이름 | 순번 | 단계 이름 | 하는 일 한 줄 | 쓰는 파일·함수·모델 | 조건·분기 | 꼬리표 |
+|---|---|---|---|---|---|---|
+| ingest 명령 | 1 | 인자 읽기 | 옵션 해석 | cli.ingest | 틀리면 typer 사용법 오류 종료 2 | [파일: E/cli.py] |
+| ingest 명령 | 2 | 설정 읽기 | salesrec.toml | config.load | 없으면 CONFIG_MISSING 종료 1 | [파일: E/config.py] |
+| ingest 명령 | 3 | 실행 잠금 | salesrec.lock 잡기 | lock.acquire | 잡혀 있으면 ALREADY_RUNNING 종료 6 | [파일: E/lock.py] |
+| ingest 명령 | 4 | 원천 고르기 | 켜진 원천 중 --source | sources.select | 꺼져 있으면 SOURCE_DISABLED 건너뜀 | [파일: I] |
+| ingest 명령 | 5 | 샵링크 받기 | shoplink면 대상일 페이지 받기 | shoplink.fetch_day | 실패 페이지는 큐로 | [파일: P/client.py] |
+| ingest 명령 | 6 | 파일 찾기 | inbox/<원천>/*-YYYYMMDD.* | inbox.scan | 없으면 NO_FILE, 다음 원천 | [파일: E/inbox.py] |
+| ingest 명령 | 7 | 중복 파일 | sha256으로 ingest_files 조회 | seen_files | 있으면 SKIP_DUPLICATE_FILE(--reprocess면 다시) | [파일: I] |
+| ingest 명령 | 8 | 읽기 | xlsx·csv·json 읽기 | readers.read_xlsx·read_csv·read_json | utf-8 실패면 cp949, 그다음 ENCODING_ERROR | [파일: E/readers.py] |
+| ingest 명령 | 9 | 열 매핑 | 원천 열 → 공통 열 | normalize.map_columns·mapping/<원천>.toml | 필수 열 없으면 MISSING_COLUMN | [파일: E/normalize/map.py] |
+| ingest 명령 | 10 | 개인정보 열 제거 | 고객명·구매자명·연락처·buyer_name 버림 | normalize.pii.strip(이번에 안 읽음) | [모름] | [모름] |
+| ingest 명령 | 11 | 행 검증 | 날짜·금액·KST 날짜 | validate.row | 실패 행은 rejects로(DATE_PARSE·NEGATIVE_AMOUNT·DATE_OUT_OF_RANGE) | [파일: E/validate.py] |
+| ingest 명령 | 12 | 거부 비율 | 파일의 거부 행 비율 | validate.ratio | 0.2 넘으면 REJECT_RATIO_ABORT, 파일 안 넣음 | [파일: E/validate.py] |
+| ingest 명령 | 13 | 쓰기 | 한 트랜잭션 INSERT | ledger.write_rows | dry-run이면 건너뜀, 잠기면 LEDGER_LOCKED 종료 4 | [파일: E/ledger.py] |
+| ingest 명령 | 14 | 출력 | 원천별 넣음·거부·건너뜀 표 | cli.print_summary | 실패한 원천이 있으면 종료 5 | [파일: E/cli.py] |
+| 야간 배치 | 1 | 대상일 | --date 없으면 어제(KST) | nightly.target_date | — | [파일: N] |
+| 야간 배치 | 2 | 실행 기록 | run_id nightly-YYYYMMDD-N으로 runs INSERT | runs.start | 대상일이 이미 complete면 ALREADY_COMPLETE 종료 0 | [파일: N] |
+| 야간 배치 | 3 | 수집 | ingest 명령을 같은 프로세스로 호출 | ingest.run_ingest | 원천 실패는 기록만 | [파일: N] |
+| 야간 배치 | 4 | 재시도 | 큐 줄마다 다시 요청 | retry.drain·shoplink.fetch_page | attempt 5면 GAVE_UP으로 줄 남김, dry-run이면 건너뜀 | [파일: Q] |
+| 야간 배치 | 5 | 큐 다시 쓰기 | 남은 줄만 임시 파일에 써서 바꿔치기 | retry.rewrite | 잠금 없음 | [파일: Q] |
+| 야간 배치 | 6 | 은행 파일 확인 | 대상일 bank_tx 확인 | ledger.has_bank | 없으면 BANK_MISSING 종료 3 | [파일: N] |
+| 야간 배치 | 7 | 대조 | salesrec reconcile 서브커맨드를 같은 프로세스에서 호출 | reconcile.run | — | [파일: R] |
+| 야간 배치 | 8 | 1:1 맞추기 | 정산예정일 ±window_days 금액 비교 | reconcile.match_exact | 차액이 허용치를 넘으면 다음 후보 | [파일: R] |
+| 야간 배치 | 9 | 묶음 맞추기 | 한 입금 = 여러 판매의 합 | reconcile.match_bundle | 조합이 둘 이상이면 NEEDS_REVIEW | [파일: R] |
+| 야간 배치 | 10 | matches 쓰기 | 대상일 matches 지우고 INSERT | ledger.replace_matches | dry-run이면 건너뜀, 잠기면 LEDGER_LOCKED 종료 4 | [파일: E/ledger.py] |
+| 야간 배치 | 11 | 보고서 | 시트 다섯 쓰기 | report.write_xlsx·openpyxl | dry-run이면 콘솔 표만, 같은 이름이면 -2·-3, 큐가 남으면 complete false | [파일: E/report.py] |
+| 야간 배치 | 12 | 슬랙 | 요약 한 줄, 실패해도 finally에서 보냄 | slack.post | 실패면 SLACK_FAILED, 종료 코드 그대로 | [파일: E/slack.py] |
+| 야간 배치 | 13 | 끝 | runs 갱신 | runs.finish | 큐가 남으면 종료 5 PARTIAL | [파일: N] |
+
+5. 조건·거부·분기
+| 부분 이름 | 조건 | 참이면 | 거짓이면 | 꼬리표 |
+|---|---|---|---|---|
+| ingest 명령 | sha in seen_files and not args.reprocess | SKIP_DUPLICATE_FILE | 다음 | [파일: I] |
+| ingest 명령 | not ok(validate.row 결과) | rejects-YYYYMMDD.csv에 줄 | 행 넣기 | [파일: E/validate.py] |
+| ingest 명령 | bad / total > cfg.ingest.reject_ratio_abort | REJECT_RATIO_ABORT | 넣기 | [파일: E/validate.py] |
+| ingest 명령 | args.dry_run | 쓰지 않고 「DRY-RUN」 표만 | ledger.write_rows | [파일: I] |
+| ingest 명령 | isinstance(e, sqlite3.OperationalError) and 'locked' in str(e) | LEDGER_LOCKED 종료 4 | 다시 raise, 종료 1 | [파일: E/ledger.py] |
+| 샵링크 플러그인 | not bucket.take() | 1/rps 초 기다림 | 요청 | [파일: P/bucket.py] |
+| 샵링크 플러그인 | r.status_code == 429 or r.status_code >= 500 | retry-queue.jsonl에 append(attempt 1) | 페이지 저장 | [파일: P/client.py] |
+| 샵링크 플러그인 | body.get('next_cursor') | 다음 페이지 | 끝 | [파일: P/client.py] |
+| 야간 배치 | prev and prev.complete and not args.force | ALREADY_COMPLETE 종료 0 | 다음 | [파일: N] |
+| 야간 배치 | line['attempt'] >= cfg.shoplink.max_attempts | GAVE_UP, 줄 남김 | 다시 요청(실패면 attempt+1) | [파일: Q] |
+| 야간 배치 | not ledger.has_bank(day) | BANK_MISSING 종료 3 | 대조 | [파일: N] |
+| 야간 배치 | abs(sale.net - tx.deposit) > cfg.match.tolerance_won | 다음 후보 | MATCHED | [파일: R] |
+| 야간 배치 | len(combos) > 1 | NEEDS_REVIEW | 하나면 MATCHED_BUNDLE, 없으면 UNMATCHED | [파일: R] |
+| 야간 배치 | queue_left > 0 | complete=False, 슬랙 「[부분]」, 종료 5 | complete=True | [파일: N] |
+| 야간 배치 | path.exists() | report-YYYYMMDD-2.xlsx처럼 번호 | 그 이름 | [파일: E/report.py] |
+| 릴리스 관문 | Compare-Object $actual $expected | SMOKE_DIFF 중단 | git tag | [파일: S/release.ps1] |
+
+6. 파일 지도
+| 경로 | 속한 부분 | 역할 한 줄 | 꼬리표 |
+|---|---|---|---|
+| E/cli.py | ingest 명령 | ingest·nightly·reconcile·report·retry 서브커맨드 | [파일: E/cli.py] |
+| I·E/inbox.py·readers.py·lock.py·normalize/map.py | ingest 명령 | 파일 찾기·읽기·잠금·열 매핑 | [파일: I] |
+| E/normalize/pii.py | ingest 명령 | 개인정보 열 제거(이번에 안 읽음) | [모름] |
+| E/validate.py | ingest 명령 | 행 검증·거부 비율 | [파일: E/validate.py] |
+| E/ledger.py·schema.sql | ledger.sqlite | 표 다섯·쓰기·has_bank | [파일: E/schema.sql] |
+| P/client.py·bucket.py | 샵링크 플러그인 | 호출·토큰 버킷·페이지 저장 | [파일: P/client.py] |
+| Q | retry-queue.jsonl | append(플러그인)·drain·rewrite(야간 배치) | [파일: Q] |
+| N·E/report.py·slack.py | 야간 배치 | 단계 순서·runs·종료 코드·보고서·슬랙 | [파일: N] |
+| R | 야간 배치 | 대조(reconcile 서브커맨드도 이 파일) | [파일: R] |
+| O/SalesRecNightly.xml | 작업 스케줄러 작업 | 내보낸 작업 정의 | [파일: O/SalesRecNightly.xml] |
+| salesrec.example.toml | salesrec.toml | 설정 예시(사무실 PC 실제 파일은 이번에 안 읽음) | [파일: salesrec.example.toml] |
+| S/release.ps1·tests/·samples/ | 릴리스 관문 | 관문 스크립트·시험·표본 사흘 | [파일: S/release.ps1] |
+| S/old/sheets_upload.py | 시트 업로더 | 폐기 사본 | [파일: S/old/sheets_upload.py] |
+| D/DECISIONS.md·RUNBOOK.md·INCIDENT-1102.md·STATUS.md | 개발 세션 | 결정·절차·사건 | [파일: D/] |
+
+생략한 것: 없음

@@ -440,7 +440,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const fifteen=version==='map-reading.15',fourteen=fifteen||version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    const sixteen=version==='map-reading.16',fifteen=sixteen||version==='map-reading.15',fourteen=fifteen||version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[])]);ensure(r.version==='map-reading.1'||two);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
@@ -454,14 +454,16 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       obj(p,['areaId','created','role','roleAbout','roleReplaces','basis','claims',...(seven?['state','stateWhen','stateQuote','files']:[]),...(eight?['type','typeQuote','inputs','outputs','fields','config']:[]),...(nine?['steps','loop','stateVars']:[]),...(twelve?['conditions']:[]),...(fourteen?['fileRoles']:[])]);if(p.roleAbout!==null){ensure(p.role!==null);text(p.roleAbout,80);}
       // map-reading.8: the record's own type word with its passage (none: both null), and the part's interface, fields and settings.
       // map-reading.9 holds eight inputs and outputs, 24 fields and eight settings; a map-reading.8 entry keeps its six, twelve and four.
+      // map-reading.16 (pipeline .41): twelve settings.
       // Pipeline .31: a map-reading.9 field item may run to 60 (40 before; every earlier entry still reads).
       const unique=(v:unknown)=>ensure(new Set(v as unknown[]).size===(v as unknown[]).length);
       if(eight){ensure(p.type===null||PART_TYPES.includes(p.type as never));if(p.type===null)ensure(p.typeQuote===null);else quote(p.typeQuote);
-        for(const [k,n,len] of [['inputs',nine?8:6,60],['outputs',nine?8:6,60],['fields',nine?24:12,nine?60:40],['config',nine?8:4,80]] as const){list(p[k],n);for(const f of p[k] as unknown[])text(f,len);unique(p[k]);}}
+        for(const [k,n,len] of [['inputs',nine?8:6,60],['outputs',nine?8:6,60],['fields',nine?24:12,nine?60:40],['config',sixteen?12:nine?8:4,80]] as const){list(p[k],n);for(const f of p[k] as unknown[])text(f,len);unique(p[k]);}}
       // map-reading.9: the part's steps (each on its row), its loop (at least one of unit, stop, resume, on its line) and kept state.
       if(nine){
         // map-reading.14: every step says whether the program put it there (a program step does nothing and uses nothing).
-        list(p.steps,12);for(const s of p.steps as unknown[]){obj(s,['name','does','uses','quote',...(fourteen?['program']:[])]);text(s.name,40);if(s.does!==null)text(s.does,120);list(s.uses,4);for(const u of s.uses as unknown[])text(u,60);unique(s.uses);quote(s.quote);
+        // map-reading.16 (pipeline .41): sixteen steps (earlier entries twelve).
+        list(p.steps,sixteen?16:12);for(const s of p.steps as unknown[]){obj(s,['name','does','uses','quote',...(fourteen?['program']:[])]);text(s.name,40);if(s.does!==null)text(s.does,120);list(s.uses,4);for(const u of s.uses as unknown[])text(u,60);unique(s.uses);quote(s.quote);
           // map-reading.15: a program step's does may hold its name's parenthesised tail (it still uses nothing).
           if(fourteen)ensure(typeof s.program==='boolean'&&(!s.program||(fifteen||s.does===null)&&(s.uses as unknown[]).length===0));}
         unique((p.steps as {name:unknown}[]).map(s=>s.name));
@@ -496,9 +498,10 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
           // map-reading.11: every place says whether the program put it there (a program candidate is always inferred).
           list(c.anchors,4);for(const a of c.anchors as unknown[]){obj(a,['kind','text','quote',...(eleven?['program']:[])]);ensure(ANCHOR_KINDS.includes(a.kind as never));text(a.text,80);quote(a.quote);if(eleven)ensure(typeof a.program==='boolean'&&(!a.program||a.kind==='inferred'));}
           ensure(new Set((c.anchors as {text:string;quote:{record:string;from:number;to:number}}[]).map(a=>JSON.stringify([a.text,a.quote.record,a.quote.from,a.quote.to]))).size===(c.anchors as unknown[]).length);
-          // map-reading.15: every device says whether the program put it there (a program device is code, on its row).
+          // map-reading.15: every device says whether the program put it there (a program device is code, on its row). map-reading.16: or a
+          // person (a hand-kept rule's 누가 정했나 cell), on its row.
           list(c.enforcedBy,4);for(const e of c.enforcedBy as unknown[]){obj(e,['kind','text','quote',...(fifteen?['program']:[])]);ensure(ENFORCER_KINDS.includes(e.kind as never));text(e.text,80);if(e.quote===null)ensure(e.kind==='unknown');else quote(e.quote);
-            if(fifteen)ensure(typeof e.program==='boolean'&&(!e.program||e.kind==='code'&&e.quote!==null));}
+            if(fifteen)ensure(typeof e.program==='boolean'&&(!e.program||(e.kind==='code'||sixteen&&e.kind==='person')&&e.quote!==null));}
           const devices=c.enforcedBy as {kind:string;text:string}[],rank=(k:string)=>k==='none'?1:k==='unknown'?0:2,top=Math.max(-1,...devices.map(e=>rank(e.kind)));
           ensure(new Set(devices.map(e=>JSON.stringify([e.kind,e.text]))).size===devices.length&&devices.every(e=>rank(e.kind)===2||rank(e.kind)===top));
           ensure(c.topic==='rule'||c.scope===null&&(c.anchors as unknown[]).length===0&&devices.length===0);

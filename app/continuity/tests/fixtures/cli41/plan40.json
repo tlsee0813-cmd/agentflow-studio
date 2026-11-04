@@ -1,0 +1,824 @@
+{
+ "parts": [
+  {
+   "ref": "new:owner",
+   "name": "소유자",
+   "parent": null,
+   "at": [
+    "N01.07",
+    "N02.13",
+    "N02.73",
+    "N02.95",
+    "N02.96"
+   ],
+   "focus": "1인 개발자이며 우선순위·사무실 PC 설치·설정 관리를 맡는 사람. 운영 상태는 개발 세션의 보고다. 월말 28일~다음 달 3일 설치 금지는 문서상 제약이며, 태그·설치는 릴리스 관문 통과 뒤에만 한다."
+  },
+  {
+   "ref": "new:accountant",
+   "name": "경리 담당자",
+   "parent": null,
+   "at": [
+    "N01.08",
+    "N02.14",
+    "N02.94"
+   ],
+   "focus": "마켓원·기업뱅킹 CSV를 내려받아 inbox에 넣고 평일 아침 보고서의 불일치·확인 필요 건을 확인하는 사람. 은행 거래내역 다운로드는 이 담당자만 하며 인증서를 사무실 PC 밖으로 옮기지 않는다."
+  },
+  {
+   "ref": "new:development",
+   "name": "개발 세션",
+   "parent": null,
+   "at": [
+    "N01.09",
+    "N01.125",
+    "N02.15",
+    "N02.64"
+   ],
+   "focus": "구현·릴리스 준비·STATUS 작성 담당 세션. 결정·절차·사건 문서와 소유자에게 보내는 STATUS 한 줄·설치 요청을 맡는다. 개발 세션의 운영 보고는 검토 세션의 직접 확인과 구별한다."
+  },
+  {
+   "ref": "new:review",
+   "name": "검토 세션",
+   "parent": null,
+   "at": [
+    "N01.01",
+    "N01.10",
+    "N02.01",
+    "N02.05",
+    "N02.16"
+   ],
+   "focus": "평가·자문 담당. 설계 기록은 git show로 설치본 4c1e9a7b(v0.9.0)를 읽은 범위다. 현황 보고의 노트북 main은 두 커밋 앞선 e83f20d5다. 사무실 PC·Slack에는 접속하지 않았으며 수정·검사 실행 0은 작성자의 진술이다. 가져온 시각을 원문 판본 시각으로 삼지 않는다."
+  },
+  {
+   "ref": "new:ingest",
+   "name": "ingest 명령",
+   "parent": null,
+   "at": [
+    "N01.93",
+    "N01.94",
+    "N01.95",
+    "N01.96",
+    "N01.97",
+    "N02.87",
+    "N02.88",
+    "N02.89"
+   ],
+   "focus": "호출 한 번의 인자·설정·실행 잠금·원천 선택·수집·파일 탐색·해시 중복 검사·읽기·열 매핑·개인정보 제거·행 검증·거부 비율·트랜잭션 쓰기·요약 종료 흐름. --reprocess 예외와 dry-run 무쓰기 규칙을 구별한다. 원천별 sales·bank_tx·ingest_files와 rejects를 내며 날짜 형식 버그·개인정보 제거 미확인 범위를 보존한다."
+  },
+  {
+   "ref": "new:shoplink_plugin",
+   "name": "샵링크 플러그인",
+   "parent": "new:ingest",
+   "at": [
+    "N02.18",
+    "N02.38",
+    "N01.98",
+    "N01.99",
+    "N01.100",
+    "N02.80",
+    "N02.90",
+    "N02.108"
+   ],
+   "focus": "ingest 명령에 속한 페이지 수집기. 토큰 버킷 대기→주문 요청→429·5xx 큐 append→페이지 JSON 저장→next_cursor 순서이며 초당 2회 제한, 페이지 100건을 보존한다. 429 후 3회 재시도하고 버리던 방식은 큐 이관·야간 최대 5회로 변경됐다. 밤마다 평균 429 58회는 개발 세션 보고다."
+  },
+  {
+   "ref": "new:nightly",
+   "name": "야간 배치",
+   "parent": null,
+   "at": [
+    "N01.101",
+    "N01.102",
+    "N01.103",
+    "N01.104",
+    "N01.105",
+    "N01.106",
+    "N01.107",
+    "N02.89"
+   ],
+   "focus": "한 실행에 대상일 하루를 처리한다. 대상일·runs 시작→ingest 호출→큐 재시도·재쓰기→은행 확인→1:1·묶음 대조→matches 교체→보고서→finally 슬랙→runs 종료 흐름. 기본 어제 KST, 허용치 1000원·기간 ±3일·최대 시도 5를 보존한다. dry-run 무쓰기, 잠금 종료 4, 큐 잔존 부분 종료 5와 보고서 중복 번호를 구별한다."
+  },
+  {
+   "ref": "new:scheduler",
+   "name": "작업 스케줄러 작업",
+   "parent": null,
+   "at": [
+    "N01.14",
+    "N01.58",
+    "N02.20",
+    "N02.71",
+    "N02.81"
+   ],
+   "focus": "사무실 PC의 SalesRec Nightly 일정과 실행 제어. 시작은 16:00Z(KST 01:00)에서 17:30Z(KST 02:30)로 변경됐다. 실패 시 10분 뒤 최대 3회 재시작, 실행 중 중복 시작 금지, 제한 2시간은 내보낸 작업 정의의 설계 범위다."
+  },
+  {
+   "ref": "new:ledger",
+   "name": "ledger.sqlite",
+   "parent": null,
+   "at": [
+    "N02.21",
+    "N01.38",
+    "N01.39",
+    "N01.40",
+    "N01.41",
+    "N01.42",
+    "N02.105",
+    "N02.97"
+   ],
+   "focus": "저장소: sales 행(sale_id·net 등)·bank_tx 행(tx_id·deposit 등)·ingest_files 행(file_sha·rows_ok·rows_rejected 등)·matches 행(match_id·bank_tx_id·sale_ids·diff_won·status 등)·runs 행(run_id·target_date·attempt·exit_code·complete·dry_run 등). 필드 전체는 각 원문 행 범위. OneDrive 밖 이동 미완료; 고객 이름·전화번호 저장 금지."
+  },
+  {
+   "ref": "new:retry_queue",
+   "name": "retry-queue.jsonl",
+   "parent": null,
+   "at": [
+    "N01.16",
+    "N01.37",
+    "N01.118",
+    "N02.22",
+    "N02.74",
+    "N02.104"
+   ],
+   "focus": "저장소: retry-queue.jsonl 행(source·target_date·cursor·page·attempt·last_status·queued_at). 플러그인 append와 야간 배치 drain·rewrite가 같은 파일을 사용한다. 설치본에는 쓰기 잠금이 없고, 재발 방지 요청에 따른 잠금 수정은 e83f20d5에만 있으며 미설치다."
+  },
+  {
+   "ref": "new:report",
+   "name": "report-YYYYMMDD.xlsx",
+   "parent": null,
+   "at": [
+    "N01.17",
+    "N01.44",
+    "N02.23",
+    "N02.58",
+    "N02.60"
+   ],
+   "focus": "저장소: 필드 요약·맞춤·불일치·확인 필요·rejects·run_id·complete·generated_at. OneDrive/회사공유/매출대조/의 대상일 보고서이며 야간 배치가 만들고 경리 담당자가 평일 아침 읽는다. 같은 이름의 -2·-3 판본과 완결·부분 표시를 보존한다."
+  },
+  {
+   "ref": "new:inbox",
+   "name": "inbox 폴더",
+   "parent": null,
+   "at": [
+    "N01.18",
+    "N02.24",
+    "N02.43",
+    "N02.46",
+    "N02.50",
+    "N02.52"
+   ],
+   "focus": "C:/salesrec/inbox/ 아래 pos·market·shoplink·bank 원자료 수신 위치. 폴더의 파일은 산출물별 저장소로 따로 둔다. POS 자동 내보내기, 경리 담당자 CSV 넣기, 플러그인 페이지 저장과 ingest의 원천 넷 탐색 흐름을 보존한다."
+  },
+  {
+   "ref": "new:config",
+   "name": "salesrec.toml",
+   "parent": null,
+   "at": [
+    "N02.25",
+    "N01.46",
+    "N01.47",
+    "N01.122",
+    "N02.69",
+    "N02.82"
+   ],
+   "focus": "저장소: 설정 값(paths.inbox·paths.data·paths.report·match.tolerance_won·match.window_days·ingest.reject_ratio_abort·sources.enabled·shoplink.rps·shoplink.max_attempts·slack.webhook). 소유자 관리 파일. 허용치는 요청에 따라 500→1000으로 변경됐다. 예시 파일과 읽지 않은 사무실 PC 실제 파일을 구별한다."
+  },
+  {
+   "ref": "new:release_gate",
+   "name": "릴리스 관문",
+   "parent": null,
+   "at": [
+    "N02.26",
+    "N01.59",
+    "N01.108",
+    "N02.83",
+    "N02.96",
+    "N02.109",
+    "N02.113",
+    "N01.48"
+   ],
+   "focus": "pytest 전부→표본 사흘 nightly dry-run→expected 비교→태그 관문. 차이는 SMOKE_DIFF 중단. v0.9.0 최초 통과 보고는 --data 오타로 0행 통과한 것으로 정정됐고 10-28 재통과도 개발 세션 보고다. 부분 환불 표본은 없다. want: e83f20d5 통과 시 11-04 v0.9.1 태그·설치. 콘솔 smoke 결과(case·expected_rows·actual_rows·diff)는 소유자에게 간다."
+  },
+  {
+   "ref": "new:pos",
+   "name": "매장 POS",
+   "parent": null,
+   "at": [
+    "N01.21",
+    "N02.27",
+    "N02.43"
+   ],
+   "focus": "외부 매장 시스템. 매일 14:10Z(KST 23:10) POS XLSX를 자동 내보내는 것으로 경리 담당자가 보고했다."
+  },
+  {
+   "ref": "new:market",
+   "name": "마켓원",
+   "parent": null,
+   "at": [
+    "N01.22",
+    "N02.28",
+    "N02.44"
+   ],
+   "focus": "외부 판매자센터의 정산 CSV 제공 원천. 경리 담당자가 평일 오후 내려받는다. 정산예정일 형식의 재변경 가능성은 미확인이다."
+  },
+  {
+   "ref": "new:shoplink_api",
+   "name": "샵링크 API",
+   "parent": null,
+   "at": [
+    "N01.23",
+    "N01.35",
+    "N02.29",
+    "N02.49",
+    "N02.90"
+   ],
+   "focus": "외부 주문 REST API. HTTP 주문 페이지는 orders(order_id·paid_at·status·total·discount·refund_total·buyer_name)·next_cursor·page를 담는다. 페이지 100건, 초당 2회 제한과 하루 호출 한도 미확인을 구별한다. HTTP 산출물은 별도 저장소로 세우지 않는다."
+  },
+  {
+   "ref": "new:banking",
+   "name": "기업뱅킹",
+   "parent": null,
+   "at": [
+    "N01.24",
+    "N02.30",
+    "N02.45"
+   ],
+   "focus": "외부 은행 거래내역 CSV 제공 시스템. 경리 담당자가 평일 08:30Z 전에 내려받는 현재 경로이며, 미구현인 은행 API 연동과 구별한다."
+  },
+  {
+   "ref": "new:slack",
+   "name": "Slack",
+   "parent": null,
+   "at": [
+    "N01.25",
+    "N01.45",
+    "N02.31",
+    "N02.59",
+    "N02.61"
+   ],
+   "focus": "외부 #매출대조 incoming webhook과 소유자 알림 경로. HTTP 슬랙 요약 필드는 target_date·sales_total·bank_total·matched·unmatched·needs_review·complete·exit_code다. 검토 세션은 채널에 직접 접속하지 않았다."
+  },
+  {
+   "ref": "new:sheets_uploader",
+   "name": "시트 업로더",
+   "parent": null,
+   "at": [
+    "N01.26",
+    "N01.124",
+    "N02.32",
+    "N02.70",
+    "N02.78"
+   ],
+   "focus": "폐기. 회사 구글 계정에 연동하지 말라는 10-12 요청으로 서비스 계정의 구글 시트 업로드를 폐기했고, xlsx 파일과 슬랙 요약만 남겼다. scripts/old/sheets_upload.py는 보관 사본이다."
+  },
+  {
+   "ref": "new:bank_api",
+   "name": "은행 API 연동",
+   "parent": null,
+   "at": [
+    "N01.27",
+    "N02.33",
+    "N02.116"
+   ],
+   "focus": "미구현. docs/BANK-API.md 초안만 있다. want: 기업뱅킹 오픈API 이용 신청 승인 시 설계 착수. 승인·착수 시점은 모름이며 현재 CSV 다운로드를 구현된 API 수집으로 바꾸어 읽지 않는다."
+  },
+  {
+   "ref": "new:ledger_backup",
+   "name": "ledger 백업",
+   "parent": null,
+   "at": [
+    "N01.28",
+    "N02.34"
+   ],
+   "focus": "모름. ledger.sqlite 백업은 코드·설정에서 확인되지 않았다는 기록이며, 백업 부재가 확인된 것은 아니다. OneDrive 버전 기록 의존 여부와 보존 기간도 확인 대상이다."
+  },
+  {
+   "ref": "new:pos_file",
+   "name": "pos-YYYYMMDD.xlsx",
+   "parent": null,
+   "at": [
+    "N01.32",
+    "N02.43"
+   ],
+   "focus": "저장소: 필드 영수증번호·판매일시·품목코드·수량·판매금액·할인·결제수단·카드승인번호·고객명. inbox 폴더 pos/의 POS 원자료 파일. 매장 POS가 만들고 ingest가 읽으며 개인정보가 포함된 원자료와 ledger 저장 범위를 구별한다."
+  },
+  {
+   "ref": "new:market_file",
+   "name": "market-YYYYMMDD.csv",
+   "parent": null,
+   "at": [
+    "N01.33",
+    "N02.46"
+   ],
+   "focus": "저장소: 필드 주문번호·결제일·정산예정일·상품명·판매가·수수료·정산액·구매자명·연락처. inbox 폴더 market/의 파일이며 산출물 표상 만드는 부분은 경리 담당자, 읽는 부분은 ingest 명령이다."
+  },
+  {
+   "ref": "new:bank_file",
+   "name": "bank-YYYYMMDD.csv",
+   "parent": null,
+   "at": [
+    "N01.34",
+    "N02.46"
+   ],
+   "focus": "저장소: 필드 거래일시·적요·입금액·출금액·잔액·거래점. inbox 폴더 bank/의 파일이며 경리 담당자가 넣고 ingest 명령이 읽는다."
+  },
+  {
+   "ref": "new:shoplink_file",
+   "name": "shoplink-YYYYMMDD-pNNN.json",
+   "parent": null,
+   "at": [
+    "N01.36",
+    "N02.50"
+   ],
+   "focus": "저장소: 필드 page·cursor·fetched_at·body. inbox 폴더 shoplink/에 플러그인이 페이지마다 저장하고 ingest 명령이 읽는 원자료 JSON이다."
+  },
+  {
+   "ref": "new:rejects",
+   "name": "rejects-YYYYMMDD.csv",
+   "parent": null,
+   "at": [
+    "N01.43",
+    "N01.73"
+   ],
+   "focus": "저장소: 필드 file·line·source·reason·raw. C:/salesrec/rejects/에 ingest가 남기고 야간 배치가 읽는다. DATE_PARSE·NEGATIVE_AMOUNT·DATE_OUT_OF_RANGE 등 검증 실패 행과 원자료를 보존한다."
+  }
+ ],
+ "global": [
+  {
+   "kind": "relation",
+   "text": "new:pos → new:pos_file: pos-YYYYMMDD.xlsx 자동 내보내기",
+   "at": [
+    "N01.32",
+    "N02.43"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:pos_file → new:inbox: pos-YYYYMMDD.xlsx 자동 내보내기",
+   "at": [
+    "N02.43"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:pos_file → new:ingest: pos-YYYYMMDD.xlsx",
+   "at": [
+    "N01.32"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:market → new:accountant: 정산 CSV 내려받기(판매자센터)",
+   "at": [
+    "N02.44"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:banking → new:accountant: 그날 거래내역 CSV 내려받기",
+   "at": [
+    "N02.45"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:accountant → new:market_file: market-YYYYMMDD.csv",
+   "at": [
+    "N01.33",
+    "N02.46"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:market_file → new:inbox: market-YYYYMMDD.csv·bank-YYYYMMDD.csv 넣기의 market-YYYYMMDD.csv",
+   "at": [
+    "N02.46"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:market_file → new:ingest: market-YYYYMMDD.csv",
+   "at": [
+    "N01.33"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:accountant → new:bank_file: bank-YYYYMMDD.csv",
+   "at": [
+    "N01.34",
+    "N02.46"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:bank_file → new:inbox: market-YYYYMMDD.csv·bank-YYYYMMDD.csv 넣기의 bank-YYYYMMDD.csv",
+   "at": [
+    "N02.46"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:bank_file → new:ingest: bank-YYYYMMDD.csv",
+   "at": [
+    "N01.34"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:scheduler → new:nightly: salesrec nightly 시작",
+   "at": [
+    "N02.47",
+    "N01.58"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:nightly → new:ingest: 원천 넷 수집 호출(같은 프로세스)",
+   "at": [
+    "N02.48",
+    "N01.79"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:shoplink_api → new:shoplink_plugin: 샵링크 주문 페이지·주문 페이지(100건씩)",
+   "at": [
+    "N01.35",
+    "N02.49"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:shoplink_plugin → new:shoplink_file: shoplink-YYYYMMDD-pNNN.json",
+   "at": [
+    "N01.36",
+    "N02.50"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:shoplink_file → new:inbox: shoplink-YYYYMMDD-pNNN.json",
+   "at": [
+    "N02.50"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:shoplink_file → new:ingest: shoplink-YYYYMMDD-pNNN.json",
+   "at": [
+    "N01.36"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:shoplink_plugin → new:retry_queue: retry-queue.jsonl 행・429·5xx 난 페이지 줄 append",
+   "at": [
+    "N01.37",
+    "N02.51"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:inbox → new:ingest: 원천 넷의 원자료 파일",
+   "at": [
+    "N02.52"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:ingest → new:ledger: sales 행·bank_tx 행·ingest_files 행",
+   "at": [
+    "N01.38",
+    "N01.39",
+    "N01.40",
+    "N02.53"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:ledger → new:ingest: ingest_files 행(sha256 중복 파일 조회)",
+   "at": [
+    "N01.40",
+    "N01.69"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:retry_queue → new:nightly: retry-queue.jsonl 행・남은 페이지 줄",
+   "at": [
+    "N01.37",
+    "N02.54"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:nightly → new:retry_queue: retry-queue.jsonl 행・처리된 줄을 뺀 큐 다시 쓰기",
+   "at": [
+    "N01.37",
+    "N01.81",
+    "N02.55"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:ledger → new:nightly: 대상일 sales 행·bank_tx 행 및 matches 행·runs 행",
+   "at": [
+    "N01.38",
+    "N01.39",
+    "N01.41",
+    "N01.42",
+    "N02.56"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:nightly → new:ledger: matches 행·runs 행",
+   "at": [
+    "N01.41",
+    "N01.42",
+    "N02.57"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:ingest → new:rejects: rejects-YYYYMMDD.csv",
+   "at": [
+    "N01.43"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:rejects → new:nightly: rejects-YYYYMMDD.csv",
+   "at": [
+    "N01.43"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:nightly → new:report: report-YYYYMMDD.xlsx・요약·맞춤·불일치·확인 필요·rejects 시트",
+   "at": [
+    "N01.44",
+    "N02.58"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:report → new:accountant: report-YYYYMMDD.xlsx・공유 폴더에서 열어 불일치·확인 필요 건 보기",
+   "at": [
+    "N01.44",
+    "N02.60"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:nightly → new:slack: 슬랙 요약・요약 한 줄(합계·건수·완결 여부·종료 코드)",
+   "at": [
+    "N01.45",
+    "N02.59"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:slack → new:owner: #매출대조 알림",
+   "at": [
+    "N02.61"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:owner → new:config: 설정 값・허용치·원천 켜기 바꾸기",
+   "at": [
+    "N01.46",
+    "N02.62"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:config → new:ingest: 설정 값",
+   "at": [
+    "N01.46",
+    "N01.47"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:config → new:shoplink_plugin: 설정 값",
+   "at": [
+    "N01.46",
+    "N01.47"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:config → new:nightly: 설정 값",
+   "at": [
+    "N01.46",
+    "N01.47"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:release_gate → new:owner: smoke 결과・pytest·smoke 결과",
+   "at": [
+    "N01.48",
+    "N02.63"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:development → new:owner: STATUS 한 줄·설치 요청",
+   "at": [
+    "N02.64"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:ingest → new:shoplink_plugin: shoplink.fetch_day로 대상일 페이지 받기",
+   "at": [
+    "N01.67"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:nightly → new:shoplink_plugin: retry.drain·shoplink.fetch_page로 큐 줄마다 다시 요청",
+   "at": [
+    "N01.80"
+   ]
+  },
+  {
+   "kind": "relation",
+   "text": "new:release_gate → new:nightly: salesrec nightly --dry-run --data samples/2026-10-01~03",
+   "at": [
+    "N01.59"
+   ]
+  },
+  {
+   "kind": "request",
+   "text": "10-06 소유자의 설치 전 변경 확인 요청에 따라 --dry-run이 추가되어 쓰지 않고 표만 출력한다. 확인 근거는 기록에 적힌 git log 7a21c3e0다 → new:ingest",
+   "at": [
+    "N02.68"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "개인정보 열 제거 단계는 고객명·구매자명·연락처·buyer_name을 버린다고 적었으나 normalize.pii.strip은 이번에 읽지 않았고 조건·꼬리표가 [모름]이다 → new:ingest",
+   "at": [
+    "N01.72"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "파일 지도에서도 E/normalize/pii.py의 개인정보 열 제거는 이번에 읽지 않은 [모름] 범위다 → new:ingest",
+   "at": [
+    "N01.114"
+   ]
+  },
+  {
+   "kind": "material",
+   "text": "경리 담당자 보고: 10-27 마켓원 정산예정일이 2026.10.27 형식으로 바뀌어 10-27~11-02 파일 다섯 개 2,316행 중 388행(16.8%)이 DATE_PARSE로 rejects에 갔다. 수정 e83f20d5는 미설치 → new:ingest",
+   "at": [
+    "N02.103"
+   ]
+  },
+  {
+   "kind": "request",
+   "text": "소유자 보고의 후속 계획: v0.9.1 설치 뒤 세 밤 동안 마켓원 DATE_PARSE 거부가 0이면 10-27~11-02 파일 다섯 개를 --reprocess로 다시 넣는다. 예정 11-07이며 완료 사실이 아니다 → new:ingest",
+   "at": [
+    "N02.115"
+   ]
+  },
+  {
+   "kind": "correction",
+   "text": "10-21 소유자의 전날 은행 파일로 맞추지 말라는 요청에 따라 전날 파일 대체를 철회하고 BANK_MISSING 종료 3으로 변경했다 → new:nightly",
+   "at": [
+    "N02.72"
+   ]
+  },
+  {
+   "kind": "correction",
+   "text": "대상일 은행 파일 부재 시 전날 파일로 대조하던 옛 결정을 철회했다. 지금은 대조하지 않고 BANK_MISSING 종료 3이다 → new:nightly",
+   "at": [
+    "N02.79"
+   ]
+  },
+  {
+   "kind": "condition",
+   "text": "소유자 규칙: 대상일 은행 파일이 없으면 대조하지 않고 종료 코드 3으로 끝낸다 → new:nightly",
+   "at": [
+    "N02.91"
+   ]
+  },
+  {
+   "kind": "condition",
+   "text": "소유자 규칙: 차액이 허용치를 넘는 입금은 맞춤으로 보지 않는다 → new:nightly",
+   "at": [
+    "N02.92"
+   ]
+  },
+  {
+   "kind": "condition",
+   "text": "소유자 규칙: 재시도 큐가 남으면 보고서를 「부분」으로 표시하고 슬랙에도 부분이라고 쓴다 → new:nightly",
+   "at": [
+    "N02.93"
+   ]
+  },
+  {
+   "kind": "material",
+   "text": "INCIDENT 기록: 11-02 첫 실행은 429 312회·큐 186줄 뒤 17:41:12Z ledger 잠금 종료 4, 보고서 없이 슬랙 실패 알림. 17:51:05Z 재시도는 종료 5·큐 41줄. 11-03 00:40Z 소유자 수동 3차 실행으로 큐 0·report-20261102-2.xlsx 완결, 총 7시간 10분 → new:nightly",
+   "at": [
+    "N02.101",
+    "N02.102"
+   ]
+  },
+  {
+   "kind": "material",
+   "text": "개발 세션 보고: 주말·휴일 대상일에는 은행 파일이 없어 BANK_MISSING 종료 3이 반복됐다(10-03부터 10번). 월요일에 소유자가 --date로 다시 실행한다 → new:nightly",
+   "at": [
+    "N02.106"
+   ]
+  },
+  {
+   "kind": "material",
+   "text": "경리 담당자 보고: 묶음 입금 NEEDS_REVIEW 27건이 확인을 기다리며, 확인 결과를 ledger에 되돌리는 명령은 없다 → new:nightly",
+   "at": [
+    "N02.107"
+   ]
+  },
+  {
+   "kind": "condition",
+   "text": "다음 관문 규칙: 그날 입금의 불일치 비율이 5%를 넘으면 경리 담당자는 그 보고서로 마감하지 않고 소유자를 부른다 → new:nightly",
+   "at": [
+    "N02.114"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "11-03 17:30Z 실행의 report-20261103.xlsx가 완결인지는 모른다. STATUS는 종료 0만 적었으며 공유 폴더 보고서 「요약」 시트로 확인해야 한다 → new:nightly",
+   "at": [
+    "N02.121"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "사무실 PC가 v0.9.0(4c1e9a7b)이라는 것은 STATUS 인용이며 pipx list로 직접 확인하지 않았다 → new:nightly",
+   "at": [
+    "N02.130"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "백업 존재 여부, OneDrive 버전 기록 의존 여부와 보존 기간은 모른다. 확인 위치는 사무실 PC OneDrive 설정이다 → new:ledger_backup",
+   "at": [
+    "N02.120"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "17:51:05Z 두 번째 시도가 작업의 「다시 시작」 설정 때문인지 소유자 수동 실행인지 모른다. 사무실 PC 작업 스케줄러 기록으로 확인해야 한다 → new:scheduler",
+   "at": [
+    "N02.122"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "사무실 PC salesrec.toml의 실제 설정 값은 모른다. 저장소에는 salesrec.example.toml만 있으며 실제 PC 파일을 확인해야 한다 → new:config",
+   "at": [
+    "N02.123"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "하루 호출 한도는 모른다. 문서에 있는 것은 초당 2회뿐이며 개발자 문서·계약으로 확인해야 한다 → new:shoplink_api",
+   "at": [
+    "N02.124"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "정산예정일 형식이 다시 바뀔지는 모른다. 마켓원 판매자센터 공지로 확인해야 한다 → new:market",
+   "at": [
+    "N02.125"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "11-02 ledger 잠금 원인이 OneDrive 동기화라는 것은 INCIDENT의 짐작이며 로그로 확인하지 않았다 → new:ledger",
+   "at": [
+    "N02.129"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "두 쓰는 쪽이 겹치면 큐 줄이 사라질 수 있다. 186→41→0의 줄 수 감소가 모두 정상 처리 결과인지는 자신 없는 추정이다 → new:retry_queue",
+   "at": [
+    "N02.131"
+   ]
+  },
+  {
+   "kind": "uncertain",
+   "text": "설계 기록은 salesrec.toml을 설정 파일이라고 하면서 아홉 유형에 없다는 이유로 유형을 [모름]으로 적었다. 파일의 운영 상태와 유형 분류 불확실성을 구별한다 → new:config",
+   "at": [
+    "N01.19"
+   ]
+  }
+ ]
+}
