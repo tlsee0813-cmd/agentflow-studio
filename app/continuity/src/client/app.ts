@@ -1794,10 +1794,12 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
         h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) },
           toggleButton(p, true),
           // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width.
-          h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })),
-          // An open container keeps its own loop's badges on its head (4.1 'both', 4.3: each layer its own); its steps read in 동작.
-          isContainerPart(o, p.id) && p.reading?.loop ? h('span', { class: 'frame-loop', title: `반복 · 기록의 글자 그대로\n단위 ${p.reading.loop.unit ?? '미상'} · 정지 ${p.reading.loop.stop ?? '미상'}\n단계는 동작 열기에서 (구성과 동작은 다른 층)` },
-            h('span', { class: `w-badge${p.reading.loop.unit ? '' : ' blank'}` }, p.reading.loop.unit ?? '반복 단위 ?'), h('span', { class: `w-badge stop${p.reading.loop.stop ? '' : ' blank'}` }, p.reading.loop.stop ? `정지 · ${p.reading.loop.stop}` : '정지 조건 ?')) : null,
+          // An open container keeps its own loop's badges on its head, after its name and giving way before it (4.1 'both', 4.3:
+          // each layer its own); its steps read in 동작.
+          h('span', { class: 'frame-title' }, isContainerPart(o, p.id) && p.reading?.loop
+            ? h('span', { class: 'frame-name-row' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'frame-loop', title: `반복 · 기록의 글자 그대로\n단위 ${p.reading.loop.unit ?? '미상'} · 정지 ${p.reading.loop.stop ?? '미상'}\n단계는 동작 열기에서 (구성과 동작은 다른 층)` },
+              h('span', { class: `w-badge${p.reading.loop.unit ? '' : ' blank'}` }, p.reading.loop.unit ?? '반복 단위 ?'), h('span', { class: `w-badge stop${p.reading.loop.stop ? '' : ' blank'}` }, p.reading.loop.stop ? `정지 · ${p.reading.loop.stop}` : '정지 조건 ?')))
+            : h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })),
           h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
           linksChip(p.id), enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
     } else {

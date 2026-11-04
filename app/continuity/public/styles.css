@@ -530,8 +530,9 @@ button:disabled { opacity: .5; cursor: default; }
 .w-state { height: 26px; margin-top: 0; padding-top: 6px; border-top: 1px solid var(--line-deco, var(--hair-2)); font-size: 11.5px; line-height: 19px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .space.lens-start .c-well .w-rail { border-color: var(--text-2); }
 /* An open container's head keeps its loop's badges (4.1 'both'): after the name, giving way before it. */
-.frame-loop { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; overflow: hidden; }
-.frame-head:has(.frame-loop) > .frame-title { flex: 0 0 auto; max-width: 62%; }
+.frame-name-row { display: flex; align-items: center; min-width: 0; }
+.frame-name-row > .frame-name { flex: 0 0 auto; max-width: 100%; }
+.frame-loop { flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; overflow: hidden; }
 .frame-loop .w-badge { max-width: 140px; } .frame-loop .w-badge.stop { flex: 0 1 auto; }
 .c-signs { flex: none; display: flex; align-items: center; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); min-width: 0; }
 .c-signs .node-signs { margin-left: 0; }
