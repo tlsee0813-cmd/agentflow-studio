@@ -81,6 +81,30 @@ export function mergeByChannel<E extends MergeEdge>(edges: readonly E[], chanOf:
   }
   return [...out.values()];
 }
+/** Two summary strokes of one pair, one channel and one drawn style that run opposite ways, drawn as one stroke with a head at each
+ * end (S8): on a busy map a folded group's lines to and from the same parts otherwise run side by side down one gap (nanoGPT .43
+ * v4: fourteen runs beside 「로컬 Python 프로세스」), and the gap holds only so many tracks TRACK_GAP apart. Only data and control
+ * (each has a head that says its direction); a reference, a shared use and a plain relation keep their own strokes. The pair's
+ * key is the same whichever way it is found ('sum:<lo>|<hi>|<channel>|<head>|both', lo and hi the two ends in id order), from 'lo' to
+ * 'hi'; back holds the relations that run from hi to lo. keep: pair keys that stay paired even when one direction is gone (the
+ * summary beside a selection keeps the strokes drawn at rest). Only summary strokes ('sum:' keys made stable by mergeByChannel). */
+export function pairWays<E extends MergeEdge & { both?: boolean; back?: string[] }>(edges: readonly E[], keep: ReadonlySet<string> = new Set()): E[] {
+  const restOf = (e: E) => { const pre = `sum:${e.from}|${e.to}|`; return e.key.startsWith(pre) ? e.key.slice(pre.length) : null; };
+  const byKey = new Map(edges.map(e => [e.key, e])), done = new Set<string>(), out: E[] = [];
+  for (const e of edges) {
+    if (done.has(e.key)) continue;
+    const rest = restOf(e);
+    if (!rest || !/^(data|control)\|/.test(rest) || e.from === e.to) { out.push(e); continue; }
+    const lo = e.from < e.to ? e.from : e.to, hi = lo === e.from ? e.to : e.from, pk = `sum:${lo}|${hi}|${rest}|both`;
+    const rev = byKey.get(`sum:${e.to}|${e.from}|${rest}`);
+    if (!rev && !keep.has(pk)) { out.push(e); continue; }
+    done.add(e.key); if (rev) done.add(rev.key);
+    const fwd = e.from === lo ? e : rev, bwd = e.from === lo ? rev : e, base = (fwd ?? bwd)!;
+    out.push({ ...base, key: pk, from: lo, to: hi, ids: [...(fwd?.ids ?? []), ...(bwd?.ids ?? [])], back: [...(bwd?.ids ?? [])],
+      notes: [...(fwd?.notes ?? []), ...(bwd?.notes ?? [])], agg: !!(fwd?.agg || bwd?.agg), both: true, ...(fwd?.spine || bwd?.spine ? { spine: true } : {}) });
+  }
+  return out;
+}
 /** The label of a stroke holding several relations that hand over different things: 'a · b +N' (the first two named payloads,
  * then how many relations more); one name when they all hand over the same; null when none names one. */
 export function multiWord(payloads: readonly (string | null)[], clip = (t: string) => t): string | null {
@@ -111,7 +135,12 @@ export interface LineBadge {
   /** How many of the stroke's relations carry such words. */
   n: number;
   /** The words are a reference the record left unresolved ('위 두 줄과 같음'): shown as written, muted, never resolved here. */
-  unresolved: boolean }
+  unresolved: boolean;
+  /** The wording the badge leads with: the first that says more than 「한 번」 (S8), else the first. */
+  lead?: string;
+  /** Cadence words that are all the record's bare 「한 번」 (S8): low information, so at the overview and the middle tier the badge
+   * folds into a small tick on the line (its words in the tip); nearer and selected it reads as written. */
+  quiet?: boolean }
 /** Badge words at most this long whole on a selected line (6.2: ≤24 of the record's characters), then an ellipsis. */
 export const BADGE_FULL = 24;
 /** A badge with no room for its words reads this many of them, then an ellipsis (its whole words in the tip). */
@@ -137,11 +166,14 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
     const unresolved = kind !== 'optional' && words.every(isRelativeRef);
     const tip = `${word} · 기록의 글자 그대로${unresolved ? ' · 기록 안의 상대 참조 (풀지 않음)' : ''}\n${words.map(w => `“${w}”`).join('\n')}${rels.length > 1 ? `\n관계 ${rels.length}개 중 ${said.length}개가 적음` : ''}${mode ? `\n${mode.slice(3)}` : ''}`;
     if (kind === 'optional') return { kind, short: '선택', full: `선택${mode}`, tip, words, n: said.length, unresolved: false };
-    const first = words[0]!, others = words.length - 1, part = said.length < rels.length;
+    // S8: a stroke whose words include more than the bare 「한 번」 leads with the first that does ('항목마다 외 2', not '한 번 외 2');
+    // the words themselves and their count are the record's, only their order on the badge changes.
+    const told = kind === 'cadence' ? words.filter(w => !isOnceWord(w)) : words, quiet = kind === 'cadence' && !told.length;
+    const first = told[0] ?? words[0]!, others = words.length - 1, part = said.length < rels.length;
     const short = others ? `${first} 외 ${others}` : part ? `${first} (${said.length}/${rels.length})` : first;
     const head = kind === 'condition' ? '조건 · ' : '';
     const full = `${head}${cut(first, BADGE_FULL)}${others ? ` 외 ${others}` : part ? ` (${said.length}/${rels.length})` : ''}${mode}`;
-    return { kind, short, full, tip, words, n: said.length, unresolved };
+    return { kind, short, full, tip, words, n: said.length, unresolved, lead: first, quiet };
   }
   return null;
 }
@@ -151,11 +183,22 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
 export function badgeForms(b: LineBadge, on: boolean, tier: ZoomTier | null = null): string[] {
   const fallback = b.kind === 'cadence' ? BADGE_GLYPH : b.kind === 'condition' ? '조건' : '선택';
   if (b.kind === 'optional') return ['선택'];
+  // S8: a bare 「한 번」 says little: at rest below 가까이 it is no badge (quietMark: a tick on the line, its words in the tip).
+  if (quietAt(b, on, tier)) return [];
   if (b.kind === 'cadence' && !on && (tier === 'far' || tier === 'dots')) return [BADGE_GLYPH];
-  const first = b.words[0] ?? '', others = b.words.length - 1;
+  const first = b.lead ?? b.words[0] ?? '', others = b.words.length - 1;
   const clipped = others ? `${cut(first, BADGE_CLIP - 1)} 외 ${others}` : cut(first, BADGE_CLIP);
   return [...new Set([...(on ? [b.full] : []), b.short, clipped, fallback])];
 }
+/** The record's bare 「한 번」 (CADENCE_WORDS 'once', and the same said as 1회 or once): a cadence word that says only that the line
+ * flows once. Any word with more in it ('prepare 한 번', '시작 시 한 번', '끝에 한 번', '실행마다 1회') says more and is never quiet. */
+export const isOnceWord = (t: string): boolean => /^(한\s?번|1\s?회|once)\.?$/i.test(t.replace(/\s+/g, ' ').trim());
+/** Whether a badge folds into the quiet tick (S8): cadence words that are all a bare 「한 번」, at rest, at the overview, the dot map
+ * or the middle tier (the full words read near and on a selected line, and in the pane). A condition is never quiet. */
+export const quietAt = (b: Pick<LineBadge, 'kind' | 'quiet'>, on: boolean, tier: ZoomTier | null): boolean =>
+  b.kind === 'cadence' && !!b.quiet && !on && (tier === 'far' || tier === 'dots' || tier === 'mid');
+/** The quiet tick's tip: what it stands for, then the badge's own tip (the words as written). */
+export const quietTip = (b: Pick<LineBadge, 'tip'>): string => `한 번 · 가까이 보거나 선을 고르면 글자로\n${b.tip}`;
 /** Badges that found no place of their own on one part's side gather in one marker: '+N' (each line's words in its tip). */
 export const overflowMark = (n: number): string => `+${n}`;
 

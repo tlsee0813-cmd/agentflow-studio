@@ -2866,3 +2866,34 @@ details.pn-unlinked > summary { cursor: pointer; font-size: 12px; line-height: 1
 details.pn-unlinked > summary small { color: var(--text-4); font-variant-numeric: tabular-nums; }
 details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .fn-marks.fn-group { margin-left: 6px; font-weight: 500; }
+
+/* ---------- S8 · groups read as groups, quieter cadence, two-way lines, lens topics ---------- */
+/* A folded group (a part with children) is a stack of cards: two offset sheets behind it (its own shadow, outside its box, so no
+   box, port or label moves), so it never reads as one part of unknown type. Its kind line names the axis and the count
+   (실행 위치 · 부분 5), its 안에 row the first parts by name. A group the record says is where things run (실행 위치) takes a region's
+   face: the regions' neutral ground, round corners and the place pin. */
+:root { --grp-sheet: var(--surface); --grp-sheet-line: var(--line-strong); --grp-place-bg: #eef0f3; --grp-place-line: #cdd2d9; }
+:root[data-theme="dark"] { --grp-place-bg: #22252b; --grp-place-line: #3a3e46; }
+@media (prefers-color-scheme: dark) { :root[data-theme="auto"]:not([data-theme="light"]) { --grp-place-bg: #22252b; --grp-place-line: #3a3e46; } }
+.node.card.grp { box-shadow: 4px 4px 0 -1px var(--grp-sheet), 4px 4px 0 0 var(--grp-sheet-line), 8px 8px 0 -1px var(--grp-sheet), 8px 8px 0 0 var(--grp-sheet-line); }
+.node.card.grp:hover { box-shadow: 4px 4px 0 -1px var(--grp-sheet), 4px 4px 0 0 var(--grp-sheet-line), 8px 8px 0 -1px var(--grp-sheet), 8px 8px 0 0 var(--grp-sheet-line), 0 6px 14px -6px rgba(17,24,39,.18); }
+.node.card.grp.selected, .node.card.grp.selected:hover { box-shadow: 0 0 0 1px var(--accent), 4px 4px 0 -1px var(--grp-sheet), 4px 4px 0 0 var(--accent), 8px 8px 0 -1px var(--grp-sheet), 8px 8px 0 0 var(--accent); }
+.node.card.grp.gx-place { --grp-sheet: var(--grp-place-bg); --grp-sheet-line: var(--grp-place-line); background: var(--grp-place-bg); border-color: var(--grp-place-line); border-radius: 14px; }
+.node.card.grp.gx-place .c-head { background: none; box-shadow: inset 0 -1px 0 var(--grp-place-line); }
+.space:is(.tier-far, .tier-dots) .node.card.grp.gx-place:not(.life) { background: var(--grp-place-bg); }
+.node.card.grp .c-kind-word.grp-word { color: var(--text-2); font-weight: 560; }
+.node.card .c-row.c-members .c-label { color: var(--text-3); }
+.node.card .c-row.c-members .c-val { min-width: 0; color: var(--text); font-weight: 520; overflow: hidden; text-overflow: ellipsis; }
+.node.card[data-fit-rows="3"] .c-rows > .c-row:nth-child(n+4) { display: none; }
+/* A bare 「한 번」 at rest below 가까이 (6.2, S8): no badge, one small tick across the line near where it leaves (a tally of one); its
+   words in the tip, as written on a selected line, nearer and in the pane. Sized in screen pixels (scale(--inv) set inline). */
+.edge-once { position: absolute; width: 12px; height: 14px; pointer-events: auto; cursor: help; transform-origin: 50% 50%; }
+.edge-once::before { content: ""; position: absolute; left: 5px; top: 2px; width: 2px; height: 10px; border-radius: 1px; background: var(--edge-spine); }
+.edge-once.beside::before { background: var(--edge-soft); }
+.edge-once.lg-dim, .edge-once.lg-fade { opacity: .3; }
+/* A summary stroke that runs both ways (S8): one stroke with a head at each end; its count chip says ⇄ and, in its tip, how many
+   relations run each way. */
+.edge-count.both { pointer-events: auto; cursor: help; }
+/* A lens steps back the cards it is not about (view-lens lensOffTopic): faded, never hidden or moved; a selected card, its partners
+   and a legend pick read at full strength. */
+.space .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { opacity: .42; }

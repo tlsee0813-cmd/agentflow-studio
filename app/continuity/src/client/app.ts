@@ -26,21 +26,21 @@ import { requestResults, frozenRequests, displayAbout, captureRequestReading, re
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type RelationView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { groupAxis, filedUnder, AXIS_WORD, SHELF_TITLE, SHELF_TIP, OUTSIDE_TITLE, OUTSIDE_TIP, BOUNDARY_TITLE, BOUNDARY_TIP } from './map-regions.js';
+import { groupAxis, groupWordOf, recordedAxis, filedUnder, SHELF_TITLE, SHELF_TIP, OUTSIDE_TITLE, OUTSIDE_TIP, BOUNDARY_TITLE, BOUNDARY_TIP } from './map-regions.js';
 import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, unionRect, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
-import { cardTemplate, cardHeights, lifecycleOf, kindLabel, structuralOf, nameBreaks, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
+import { cardTemplate, cardHeights, groupTip, groupKind, lifecycleOf, kindLabel, structuralOf, nameBreaks, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, stateText as wellStateText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, isRelativeRef, overflowMark, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
-import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, isRelativeRef, overflowMark, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
@@ -907,8 +907,8 @@ function fitCards() {
   fitFrame = 0;
   const t = tier ?? zoomTier(camera.k), k = camera.k;
   document.querySelectorAll<HTMLElement>('#world .node.card[data-shape]').forEach(el => {
-    const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0, vals = 0, blank = 0] = el.dataset.shape!.split(',').map(Number);
-    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status, vals, blank }, k, t);
+    const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0, vals = 0, blank = 0, members = 0] = el.dataset.shape!.split(',').map(Number);
+    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status, vals, blank, members }, k, t);
     el.style.setProperty('--nl', String(f.nameLines)); el.dataset.fitRows = String(f.rows); el.dataset.fitVals = String(f.vals);
     el.classList.toggle('fit-nokind', !f.kind); el.classList.toggle('fit-nocontract', !f.contract); el.classList.toggle('fit-noinner', !f.inner);
     el.classList.toggle('fit-nosigns', !f.signs); el.classList.toggle('fit-nobottom', !f.bottom); el.classList.toggle('fit-status', f.status);
@@ -1146,7 +1146,10 @@ function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<str
   }
   const sg = signsOf(r), type = r.typeRead?.type ?? null, steps = stepsOf(r), conds = conditionsOf(r) ?? [];
   const fb = failureBlanks(type, [...r.claims.flatMap(c => [c.text, c.before]), ...steps.flatMap(s => [s.name, s.does]), r.loop?.stop, r.loop?.resume]);
-  return { type, config: r.config, inputs: r.inputs, outputs: r.outputs, fields: r.fields, loop: r.loop ?? null, loopProgram: programLoopItems(r.loop, r.config, conds),
+  // A group (S8): its parts by name in the record's order, and what kind of group it is (the record's 묶음 뜻 first).
+  const gw = p.childIds.length ? groupWordOf(o.view, p.id, recordedAxis(o.project, p.id)) : null;
+  return { members: p.childIds.map(name), groupAxis: gw?.axis ?? null, groupWord: gw?.word ?? null, groupRecorded: !!gw?.recorded,
+    type, config: r.config, inputs: r.inputs, outputs: r.outputs, fields: r.fields, loop: r.loop ?? null, loopProgram: programLoopItems(r.loop, r.config, conds),
     steps, conditions: conds, stateVars: r.stateVars?.length ?? 0, fileRoles: r.fileRoles?.length ?? 0,
     personRules: sg.rules.filter(x => (x.enforcedBy ?? []).some(e => e.kind === 'person')).length, children: p.childIds.length,
     controlIn: uniq(controlIn), controlOut: uniq(controlOut), dataIn: uniq(dataIn), dataInCadence: uniq(cadence), writers: writers.size, readers: readers.size,
@@ -1258,14 +1261,18 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const ev = s ? claimEvidence({ quote: s.quote?.quote ?? '' }) : null, kids = p.childIds.length;
   // The shape the box was measured for (its near content), written on the card so the zoom's fit reads it without measuring.
   const nl = cardNameLines(p), hs = cardHeights(t, nl);
-  const tile = h('span', { class: `glyph-tile g-${t.family}`, title: `${FAMILY_WORD[t.family]} · ${t.kind}${t.inner === 'composition' || t.inner === 'both' ? ` · 내부 구성 ${kids}` : ''}` });
-  tile.innerHTML = glyphSvg(t.glyph) + (t.inner === 'composition' || t.inner === 'both' ? `<span class="glyph-badge">${glyphSvg('composition')}</span>` : '');
+  // A group (S8) reads as a group: an untyped one's tile is its axis glyph (a place pin, or the composition squares) with no badge
+  // over it; a typed one keeps its type's glyph and the composition badge.
+  const grp = t.group, typedGroup = !!grp && !!r.typeRead?.type;
+  const tile = h('span', { class: `glyph-tile g-${t.family}`, title: `${grp && !typedGroup ? '묶음' : FAMILY_WORD[t.family]} · ${t.kind}${!grp && (t.inner === 'composition' || t.inner === 'both') ? ` · 내부 구성 ${kids}` : ''}` });
+  tile.innerHTML = glyphSvg(t.glyph) + ((t.inner === 'composition' || t.inner === 'both') && (!grp || typedGroup) ? `<span class="glyph-badge">${glyphSvg('composition')}</span>` : '');
   // A recorded loop on the card (a container's well, or a loop the record gives): the ↻ tab at the head's right, at every tier.
   const loopTab = r.loop ? h('span', { class: 'c-loop-tab', title: `반복 · 기록된 반복${r.loop.unit ? ` · 단위 ${r.loop.unit}` : ' · 단위 미상'}${r.loop.stop ? ` · 정지 ${r.loop.stop}` : ''}`, 'aria-label': '반복이 기록된 부분' }, '↻') : null;
-  const neutralTip = t.structural ? `${t.kind} · 기록이 이 부분의 종류를 말하지 않았다 · 기록된 안쪽(단계·반복)만 구조로 그린다 (종류를 짐작하지 않음)` : '유형 미상 · 기록이 이 부분의 종류를 말하지 않았다 (패널 구조 탭에서)';
+  const neutralTip = grp ? groupTip(t, typedGroup)
+    : t.structural ? `${t.kind} · 기록이 이 부분의 종류를 말하지 않았다 · 기록된 안쪽(단계·반복)만 구조로 그린다 (종류를 짐작하지 않음)` : '유형 미상 · 기록이 이 부분의 종류를 말하지 않았다 (패널 구조 탭에서)';
   const head = h('div', { class: 'c-head' }, tile,
     h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name' }, ...breakable(p.name)),
-      h('span', { class: 'c-kind' }, h('span', { class: `c-kind-word${t.family === 'neutral' ? ' unknown' : ''}`, ...(t.family === 'neutral' ? { title: neutralTip } : {}) }, `${t.kind}${kids ? ` · 구성 ${kids}` : ''}`),
+      h('span', { class: 'c-kind' }, h('span', { class: `c-kind-word${t.family === 'neutral' && !grp ? ' unknown' : ''}${grp ? ' grp-word' : ''}`, ...(t.family === 'neutral' || grp ? { title: neutralTip } : {}) }, t.kind),
         life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null,
         extra.filed ? h('span', { class: 'c-filed', title: `원문 분류 · 기록이 이 부분을 「${extra.filed}」 묶음 아래에만 두었다 (실행 위치의 근거가 아님)` }, `원문 분류: ${extra.filed}`) : null),
       // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
@@ -1274,7 +1281,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
     loopTab, extra.toggle);
   // The kind's one defining blank reads last (it never shows below 가까이, so the rows above it keep their places when it hides).
   const ordered = [...t.rows.filter(x => !x.blank), ...t.rows.filter(x => x.blank)];
-  const rows = ordered.length ? h('div', { class: 'c-rows' }, ...ordered.map(x => h('div', { class: `c-row${x.blank ? ' blank' : ''}`, title: x.blank ? `${x.label} · 기록에 없음 (이 종류를 정의하는 빈칸)` : `${x.label} · ${x.value}${x.unlinked ? `\n${UNLINKED_TIP}` : ''}` },
+  const rows = ordered.length ? h('div', { class: 'c-rows' }, ...ordered.map(x => h('div', { class: `c-row${x.blank ? ' blank' : ''}${x.members ? ' c-members' : ''}`, title: x.blank ? `${x.label} · 기록에 없음 (이 종류를 정의하는 빈칸)` : x.members && grp ? `이 묶음 안의 부분 ${grp.names.length} · 기록의 묶음 그대로\n${grp.names.join(' · ')}\n펼치기(⌄) 또는 안쪽 ›에서 그 자리를 본다` : `${x.label} · ${x.value}${x.unlinked ? `\n${UNLINKED_TIP}` : ''}` },
     h('span', { class: 'c-label' }, x.label), h('span', { class: `c-val${x.unlinked ? ' unl' : ''}` }, x.value), x.program ? progChip(`${x.label}은 기록에서 프로그램이 옮긴 값`) : null))) : null;
   const c = t.contract;
   // List values by name (0.1, the owner's decision): muted, each name under a dotted rule whose tip says it has no line of its own;
@@ -1303,7 +1310,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const bottom = h('div', { class: 'c-bottom' }, h('span', { class: 'c-ops', title: ops.tip }, ops.text),
     ev ? h('span', { class: `ev ev-${ev}`, title: `운영 한 줄의 근거 · 기록 작성자의 꼬리표 (${EVIDENCE_HINT[ev]}) · 앱의 판정 아님` }, EVIDENCE_LABEL[ev]) : null,
     h('span', { class: 'c-entry' }, extra.links, extra.enter, open));
-  return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1},${c.kind === 'values' ? c.rows.length : 0},${t.rows.some(x => x.blank) ? 1 : 0}`,
+  return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1},${c.kind === 'values' ? c.rows.length : 0},${t.rows.some(x => x.blank) ? 1 : 0},${t.rows[0]?.members ? 1 : 0}`,
     'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: extra.title, onkeydown: extra.onkeydown },
   head, rows, contract, inner, well, signs ? h('div', { class: 'c-signs' }, signs) : null, bottom);
 }
@@ -1760,7 +1767,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     // dashed with an open head, a reference dotted from its ear to a small V, a shared use dotted with ears, a plain relation
     // sparse dots with a dot at both ends); a planned, corrected or summary line keeps its kind's dash.
     const st = lineStyle(e.kind, ch);
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''} s-${st.stroke}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}${badge ? ' badged' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key, 'data-head': st.head, 'data-start': st.start });
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''} s-${st.stroke}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}${badge ? ' badged' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key, 'data-head': st.head, 'data-start': e.both ? st.head : st.start });
     g.append(svg('path', { class: 'edge-line' }), svg('path', { class: 'edge-hit' }));
     edges.append(g);
   }
@@ -1808,7 +1815,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     }
     const p = partOf(o, b.id)!, of = owner(p);
     if (b.kind === 'frame') {
-      const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, axis = groupAxis(view, p.id), shelf = axis === 'lifecycle';
+      const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, axis0 = groupAxis(view, p.id), shelf = axis0 === 'lifecycle';
+      // The record's 묶음 뜻 names the group first (S8: 실행 위치 reads only from a record), else the app's reading of its children.
+      const gw = shelf ? null : groupWordOf(view, p.id, recordedAxis(o.project, p.id)), axis = shelf ? axis0 : gw?.axis ?? null;
       const note = region && !shelf ? mapLead(view, p.id) : '', named = of ? `${of} › ${p.name}` : p.name;
       world.append(h('div', { class: `frame ${region ? 'region' : 'group'}${shelf ? ' shelf' : ''}${axis ? ` ax-${axis}` : ''} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id },
         h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: shelf ? `${SHELF_TIP}\n원문 분류: ${p.name}` : named, onkeydown: keySelect(p.id) },
@@ -1818,9 +1827,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
           // An open container keeps its own loop's badges on its head, after its name and giving way before it (4.1 'both', 4.3:
           // each layer its own); its steps read in 동작.
           h('span', { class: 'frame-title' }, isContainerPart(o, p.id) && p.reading?.loop && !shelf
-            ? h('span', { class: 'frame-name-row' }, h('span', { class: 'frame-name' }, axis ? h('span', { class: 'frame-axis' }, AXIS_WORD[axis]) : null, p.name), h('span', { class: 'frame-loop', title: `반복 · 기록의 글자 그대로\n단위 ${p.reading.loop.unit ?? '미상'} · 정지 ${p.reading.loop.stop ?? '미상'}\n단계는 동작 열기에서 (구성과 동작은 다른 층)` },
+            ? h('span', { class: 'frame-name-row' }, h('span', { class: 'frame-name' }, gw ? h('span', { class: 'frame-axis' }, gw.word) : null, p.name), h('span', { class: 'frame-loop', title: `반복 · 기록의 글자 그대로\n단위 ${p.reading.loop.unit ?? '미상'} · 정지 ${p.reading.loop.stop ?? '미상'}\n단계는 동작 열기에서 (구성과 동작은 다른 층)` },
               h('span', { class: `w-badge${p.reading.loop.unit ? '' : ' blank'}` }, p.reading.loop.unit ?? '반복 단위 ?'), h('span', { class: `w-badge stop${p.reading.loop.stop ? '' : ' blank'}` }, p.reading.loop.stop ? `정지 · ${p.reading.loop.stop}` : '정지 조건 ?')))
-            : h('span', { class: 'frame-name' }, axis && !shelf ? h('span', { class: 'frame-axis' }, AXIS_WORD[axis]) : null, shelf ? SHELF_TITLE : p.name), h('span', { class: 'plan-note' })),
+            : h('span', { class: 'frame-name' }, gw ? h('span', { class: 'frame-axis' }, gw.word) : null, shelf ? SHELF_TITLE : p.name), h('span', { class: 'plan-note' })),
           h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
           linksChip(p.id), enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
     } else {
@@ -2197,6 +2206,15 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     // the line's first runs from the port it leaves, clear of parts, heads, the title, the labels and badges set so far (other
     // lines too when it can). Never the bare word 박자: the words read in the tip.
     const forms = badgeForms(b, on, tier);
+    // S8: a bare 「한 번」 at rest below 가까이 is no badge: one small tick across the line just past the port it leaves (a tally of
+    // one), its words in the tip. It sits on the line itself and takes no label's place.
+    if (!forms.length) {
+      const d0 = Math.min(len * 0.5, 14 * inv), a = path.getPointAtLength(d0), c = path.getPointAtLength(Math.min(len, d0 + 2 * inv));
+      const ang = (Math.atan2(c.y - a.y, c.x - a.x) * 180) / Math.PI;
+      el.className = `edge-once${beside ? ' beside' : ''}`; el.removeAttribute('data-badge'); el.dataset.once = e.key; el.title = quietTip(b); el.textContent = '';
+      el.style.left = `${a.x - 6}px`; el.style.top = `${a.y - 7}px`; el.style.transform = `scale(${inv}) rotate(${ang.toFixed(1)}deg)`;
+      continue;
+    }
     let spot: Rect | null = null;
     for (const text of forms) {
       el.textContent = text; el.classList.toggle('glyph', text === BADGE_GLYPH); el.classList.toggle('short', text !== forms[0]);
@@ -2235,7 +2253,10 @@ function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect
   for (const g of gs) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2) continue;
     // The verb with the count ('넘겨줌 3'): a bare number on a line reads as nothing in particular.
-    const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}` }, `${REL_LABEL[e.kind] ?? e.kind} ${e.ids.length}`); box.append(chip);
+    // A two-way stroke (S8) says so before its verb and how many run each way in its tip.
+    const nm = (id: string) => (opened ? partOf(opened, id)?.name ?? '부분' : '부분'), back = e.both ? e.back?.length ?? 0 : 0;
+    const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}${e.both ? ' both' : ''}`, ...(e.both ? { title: `양쪽으로 · 관계 ${e.ids.length}\n${nm(e.from)} → ${nm(e.to)} ${e.ids.length - back}\n${nm(e.to)} → ${nm(e.from)} ${back}` } : {}) },
+      `${e.both ? '⇄ ' : ''}${REL_LABEL[e.kind] ?? e.kind} ${e.ids.length}`); box.append(chip);
     const inv = labelInv(), w = chip.offsetWidth * inv, hh = chip.offsetHeight * inv;
     // On a straight run of its own line, clear of corners, parts and other lines; a count with no such place is left off.
     const spot = labelSpots(edgePts(e.key, path), w, hh, 'long').find(r => off(r) && !lineUnder(r, e.key, shown)) ?? null;
@@ -2932,10 +2953,12 @@ function syncMarks(k: number) {
   if (Math.abs(k - marksAt) < 0.005) return; marksAt = k;
   document.querySelectorAll<SVGMarkerElement>('#world marker.mk').forEach(m => { const px = Number(m.dataset.px) / k; m.setAttribute('markerWidth', px.toFixed(2)); m.setAttribute('markerHeight', px.toFixed(2)); });
 }
-/** The summary lines of a busy map in the line grammar: one per pair of groups, direction and channel. */
-function sumLines(o: Opened, list: Edge[]): Edge[] {
+/** The summary lines of a busy map in the line grammar: one per pair of groups, direction and channel; a pair that runs both ways
+ * is one stroke with a head at each end (S8, line-grammar pairWays). keep: the two-way strokes drawn at rest (a selection's summary
+ * keeps their keys, so a stroke left holding one direction is still the one drawn). */
+function sumLines(o: Opened, list: Edge[], keep: ReadonlySet<string> = new Set()): Edge[] {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
-  return mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true);
+  return pairWays(mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true), keep);
 }
 /** A badge chosen: that visit in the pane (a part selected before steps back, as choosing another part would), the map unmoved. */
 function selectVisit(id: string | null) {
@@ -3193,8 +3216,11 @@ function setRail(on: boolean) {
  * is not a status: no colour says more than the words. */
 function kindLine(c: PaneCtx): HTMLElement {
   const u = c.u, t = u?.typeRead ?? null, s = u?.stateRead ?? null;
-  const filed = filedUnder(c.o.view, c.part.id);
+  const filed = filedUnder(c.o.view, c.part.id), gw = c.part.childIds.length ? groupWordOf(c.o.view, c.part.id, recordedAxis(c.o.project, c.part.id)) : null;
   const kind0 = t ? h('span', { class: 'lens-kind', ...(t.quote ? { title: `종류 · 기록의 말 “${t.quote.quote}”` } : {}) }, TYPE_LABEL[t.type])
+    // S8: an untyped group says what kind of group it is (its 묶음 뜻) and how many parts it holds, never 「유형 미상」.
+    : gw ? h('span', { class: 'lens-kind', title: gw.recorded ? `묶음 뜻 「${gw.word}」 · 기록의 글자 · 종류 단어는 기록에 없음` : `묶음 뜻 「${gw.word}」 · 안의 부분들로 읽음 · 종류 단어는 기록에 없음` }, groupKind(null, gw.word, c.part.childIds.length))
+    : u && c.part.childIds.length ? h('span', { class: 'lens-kind', title: '묶음 · 묶음 뜻과 종류 단어는 기록에 없음' }, groupKind(null, null, c.part.childIds.length))
     : u ? h('span', { class: 'lens-kind blank', title: structuralOf(null, stepsOf(u).length, !!u.loop) ? '기록이 이 부분의 종류를 말하지 않았어요 · 기록된 단계·반복만 있어요 (종류를 짐작하지 않음)' : '기록이 이 부분의 종류를 말하지 않았어요' }, kindLabel(null, stepsOf(u).length, !!u.loop)) : null;
   // 「원문 분류: 폐기」 (map design v3 2.2): the lifecycle group the record placed the part under, kept beside its kind word.
   const kind = kind0 && filed ? h('span', { class: 'lens-kind-wrap' }, kind0, h('span', { class: 'lens-filed', title: `${SHELF_TIP}` }, ` · 원문 분류: ${filed}`)) : kind0;
@@ -3920,12 +3946,16 @@ function applyLegendMarks() {
   const world = $('world'), m = legendMarks(legend, legendNow, { parts, lines: lensLinesOf() });
   world.querySelectorAll('.lg-pick, .lg-dim, .lg-hide, .lg-fade').forEach(el => el.classList.remove('lg-pick', 'lg-dim', 'lg-hide', 'lg-fade'));
   const mark = (set: Set<string>, cls: string) => { for (const x of set) {
-    if (x.startsWith('line:')) { const k = CSS.escape(x.slice(5)); world.querySelectorAll(`.edge[data-key="${k}"], .edge-label[data-key="${k}"], .edge-badge[data-badge="${k}"]`).forEach(el => el.classList.add(cls)); }
+    if (x.startsWith('line:')) { const k = CSS.escape(x.slice(5)); world.querySelectorAll(`.edge[data-key="${k}"], .edge-label[data-key="${k}"], .edge-badge[data-badge="${k}"], .edge-once[data-once="${k}"]`).forEach(el => el.classList.add(cls)); }
     else world.querySelector(`[data-box="${CSS.escape(x)}"]`)?.classList.add(cls); } };
   mark(m.fade, 'lg-fade'); mark(m.dim, 'lg-dim'); mark(m.hide, 'lg-hide'); mark(m.picked, 'lg-pick');
   // A 「+N」 marker of gathered badges steps back or hides with the lines it gathers only when all of them do.
   world.querySelectorAll<HTMLElement>('.edge-badge.b-more').forEach(el => { const from = el.dataset.badgeMore ?? '';
     if (m.hide.has(from)) el.classList.add('lg-hide'); else if (m.fade.has(from) || m.dim.has(from)) el.classList.add('lg-fade'); });
+  // S8 (critique 9): a lens steps back the cards it is not about (view-lens lensOffTopic), so switching lens changes what the map
+  // says at a glance; nothing moves, nothing hides.
+  const o = opened, off = o ? lensOffTopic(viewLens, [...lay.boxes.values()].filter(b => b.kind === 'node').map(b => ({ id: b.id, family: cardTpls.get(b.id)?.family ?? 'neutral', loop: !!partOf(o, b.id)?.reading?.loop })), lensLinesOf()) : new Set<string>();
+  world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => el.classList.toggle('lens-off', off.has(el.dataset.box!)));
 }
 /** Pointing at a legend item: after ~150 ms its parts and lines keep an outline until the pointer leaves (7.2: no blinking). */
 function legendHover(item: LegendItem | null) {
@@ -4133,7 +4163,7 @@ function markSelection(partId: string | null) {
   // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
   // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
   const scLines = new Set([...document.querySelectorAll<SVGGElement>('#world .edge.sc-path')].map(g => g.dataset.key!));
-  sums = me || scLines.size ? (opened ? sumLines(opened, restSummary(lay.boxes, lay.edges, e => (!!me && (e.from === me || e.to === me)) || path.lines.has(e.key) || scLines.has(e.key))) : []) : restSums;
+  sums = me || scLines.size ? (opened ? sumLines(opened, restSummary(lay.boxes, lay.edges, e => (!!me && (e.from === me || e.to === me)) || path.lines.has(e.key) || scLines.has(e.key)), new Set(restSums.filter(x => x.both).map(x => x.key))) : []) : restSums;
   markLines();
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   syncLineMode();

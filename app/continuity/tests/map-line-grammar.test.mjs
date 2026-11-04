@@ -41,14 +41,14 @@ test('LINE-3 the badge comes only from what the reading wrote of when the line f
   assert.equal(lineBadge([{ cadence: '   ' }]), null);
   // The record's words as written: a condition it put in the cadence column reads as it is.
   const b = lineBadge([{ cadence: "init_from='resume'", mode: 'design' }]);
-  assert.deepEqual(b, { kind: 'cadence', short: "init_from='resume'", full: "init_from='resume' · 설계", tip: "박자 · 기록의 글자 그대로\n“init_from='resume'”\n설계", words: ["init_from='resume'"], n: 1, unresolved: false });
+  assert.deepEqual(b, { kind: 'cadence', short: "init_from='resume'", full: "init_from='resume' · 설계", tip: "박자 · 기록의 글자 그대로\n“init_from='resume'”\n설계", words: ["init_from='resume'"], n: 1, unresolved: false, lead: "init_from='resume'", quiet: false });
   // Never parsed: '명령마다' stays the words, no beat kind is made of '마다'.
   assert.equal(lineBadge([{ cadence: '명령마다' }]).short, '명령마다');
   // A selected badge says at most 24 of the record's characters, then an ellipsis.
   const long = lineBadge([{ cadence: '가'.repeat(40) }]);
   assert.equal(long.full, `${'가'.repeat(23)}…`);
   // S7: a stroke of several relations reads the record's own words: the first and how many other wordings, or how many say any.
-  assert.deepEqual(lineBadge([{ cadence: '명령마다' }, { cadence: '끝에 1회' }]), { kind: 'cadence', short: '명령마다 외 1', full: '명령마다 외 1', tip: '박자 · 기록의 글자 그대로\n“명령마다”\n“끝에 1회”\n관계 2개 중 2개가 적음', words: ['명령마다', '끝에 1회'], n: 2, unresolved: false });
+  assert.deepEqual(lineBadge([{ cadence: '명령마다' }, { cadence: '끝에 1회' }]), { kind: 'cadence', short: '명령마다 외 1', full: '명령마다 외 1', tip: '박자 · 기록의 글자 그대로\n“명령마다”\n“끝에 1회”\n관계 2개 중 2개가 적음', words: ['명령마다', '끝에 1회'], n: 2, unresolved: false, lead: '명령마다', quiet: false });
   assert.equal(lineBadge([{ cadence: '명령마다' }, {}]).short, '명령마다 (1/2)');
   assert.equal(lineBadge([{ cadence: '명령마다' }, { cadence: '명령마다' }]).short, '명령마다', 'the same words on every relation read once');
   // Once the contract carries them, a condition outranks an optional mark, which outranks cadence words.

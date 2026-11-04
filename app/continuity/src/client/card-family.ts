@@ -52,6 +52,28 @@ export function kindLabel(type: PartType | null | undefined, steps: number, loop
   if (steps > 0) return `유형 미기록 · 단계 ${steps}`;
   return loop ? '유형 미기록 · 반복' : '유형 미상';
 }
+/** A group's kind line (display slice S8): a group is never 「유형 미상」. Untyped, it says what kind of group it is in the record's
+ * word (실행 위치 · 구성 · 참여자 · 외부, or the app's own reading of its children; 묶음 when neither says) and how many parts it holds:
+ * 「실행 위치 · 부분 5」. Typed, the type word first, then the axis and the count: 「계산 · 구성 2」 (as before for a composition). */
+export function groupKind(type: PartType | null | undefined, axisWord: string | null | undefined, children: number): string {
+  return type ? `${TYPE_LABEL[type]} · ${axisWord ?? '구성'} ${children}` : `${axisWord ?? '묶음'} · 부분 ${children}`;
+}
+/** The glyph of an untyped group: a place pin for a group the record says is where things run (실행 위치), else the composition
+ * squares; a typed group keeps its type's glyph (with the composition badge). */
+export const groupGlyph = (axis: string | null | undefined): GlyphKey => (axis === 'place' ? 'place' : 'composition');
+/** A group's 안에 row: the names of its first parts (the record's order), then how many more. */
+export const MEMBER_NAMES = 3;
+export function membersRow(names: readonly string[]): CardRow | null {
+  const xs = names.filter(Boolean); if (!xs.length) return null;
+  return { label: '안에', value: listValue(xs, MEMBER_NAMES), members: true };
+}
+/** A group card's tip: its kind line, whether the record named what kind of group it is or the app read it from its children, whether
+ * it named a type, and every part in it by name. */
+export function groupTip(t: Pick<CardTemplate, 'kind' | 'group'>, typed: boolean): string {
+  const g = t.group; if (!g) return t.kind;
+  const how = !g.word ? '묶음 뜻 미기록' : g.recorded ? `묶음 뜻 「${g.word}」 · 기록의 글자` : `묶음 뜻 「${g.word}」 · 안의 부분들로 읽음 (기록의 묶음 뜻 없음)`;
+  return `${t.kind}\n${how}${typed ? '' : '\n기록이 이 묶음의 종류 단어를 말하지 않았다 (종류를 짐작하지 않음)'}\n안에 ${g.names.length}: ${g.names.join(' · ')}`;
+}
 /** The lifecycle chip (3.7): the record's state word for a part that is retired or not built ('폐기', '미구현'; '설계만' when the
  * line it rests on says so); null for any other state. Never a move to another group, never a colour. */
 export function lifecycleOf(state: PartState | null | undefined, quote = ''): string | null {
@@ -95,10 +117,15 @@ export interface CardFacts {
   signs?: boolean;
   /** Something the record says of the part reads as failure handling (an actor's 실패 대응 is then not a blank). */
   failureSaid?: boolean;
+  /** A group's parts by name, in the record's order, and what kind of group it is (map-regions groupWordOf: the axis key and its
+   * word); absent for a part with no children. */
+  members?: readonly string[]; groupAxis?: string | null; groupWord?: string | null; groupRecorded?: boolean;
 }
 /** A kind row; unlinked: its value comes from a list the record keeps without a line per item (config, inputs, outputs), drawn
  * muted under a dotted rule (UNLINKED_TIP), never as structure. */
-export interface CardRow { label: string; value: string; program?: boolean; blank?: boolean; unlinked?: boolean }
+export interface CardRow { label: string; value: string; program?: boolean; blank?: boolean; unlinked?: boolean;
+  /** A group's 안에 row (its first parts by name, from the record's grouping): never a kind row, never unlinked. */
+  members?: boolean }
 /** A row of list values shown by name (the first names, then how many more): every name is unlinked (UNLINKED_TIP). */
 export interface ValueRow { label: string; names: string[]; more: number }
 export type CardContract =
@@ -117,6 +144,9 @@ export interface CardTemplate {
   /** An untyped part with recorded steps or a loop (structuralOf): drawn with the structural outline, its kind line naming what is
    * recorded (kindLabel). */
   structural: boolean;
+  /** A part with children (display slice S8): drawn as a group (a stack of cards, a place's region face), its kind line the axis
+   * and the count (groupKind), its 안에 row the first parts' names; null for any other card. */
+  group: { axis: string | null; word: string | null; names: string[]; recorded: boolean } | null;
 }
 
 /** The most kind rows a card holds (the blank slot included), the most pins a side holds. */
@@ -234,8 +264,12 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   const ws = f.steps.map(s => ({ name: s.name ?? '', program: s.program === true }));
   const well = f.loop && isContainer(ws, f.loop)
     ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], stateVars: f.stateVars ?? 0, open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
-  return { family: familyOf(f.type), inner, glyph: f.type ?? 'neutral', kind: kindLabel(f.type, recorded || f.steps.length, !!f.loop), rows: kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs,
-    structural: structuralOf(f.type, f.steps.length, !!f.loop) };
+  // A group (S8): what kind of group in its kind line, its first parts in an 안에 row before the kind rows; never 「유형 미상」.
+  const kids = f.children ?? 0, group = kids > 0 ? { axis: f.groupAxis ?? null, word: f.groupWord ?? null, names: [...(f.members ?? [])], recorded: !!f.groupRecorded } : null;
+  const mr = group ? membersRow(group.names) : null;
+  return { family: familyOf(f.type), inner, glyph: f.type ?? (group ? groupGlyph(group.axis) : 'neutral'),
+    kind: group ? groupKind(f.type, group.word, kids) : kindLabel(f.type, recorded || f.steps.length, !!f.loop), rows: mr ? [mr, ...kindRows(f)] : kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs,
+    structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group };
 }
 
 /* ---------- heights (map design v3 3.8, 5.3, 9.5): as styles.css draws them at the near tier ---------- */

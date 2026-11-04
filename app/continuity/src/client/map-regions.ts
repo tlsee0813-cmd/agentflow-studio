@@ -14,7 +14,7 @@
  *   system is not sent out). Bands are a placement preference of the automatic arrangement only: a place the person set wins, and
  *   nothing is banded when it would leave the middle empty. */
 import type { StudioView, PartView } from '../shared/studio.js';
-import type { PartType } from '../shared/types.js';
+import { isMapReading, type PartType, type Project, type ReadingPart } from '../shared/types.js';
 
 export type GroupAxis = 'participants' | 'boundary' | 'lifecycle' | 'composition' | null;
 export type Band = 'outside' | 'boundary' | 'shelf';
@@ -71,6 +71,33 @@ export function bandsOf(v: StudioView, ids: readonly string[]): Map<string, Band
     else if (t === 'external') out.set(id, 'boundary');
   }
   return out.size >= ids.length ? new Map() : out;
+}
+
+/* ---------- a group as the record names it (display slice S8) ---------- */
+/** The axes a record's C-GROUP 「묶음 뜻」 column gives a parent (map-reading.18 groupAxis; 목록 is a list, not an axis). */
+export type RecordedAxis = Exclude<GroupAxisRead, 'members'>;
+type GroupAxisRead = NonNullable<ReadingPart['groupAxis']>;
+/** The record's own words for those axes (record-table GROUP_WORDS, the column's fixed words), read on a group's card and head. */
+export const RECORD_AXIS_WORD: Record<RecordedAxis, string> = { place: '실행 위치', composition: '구성', participants: '참여자', boundary: '외부' };
+/** The axis the newest map reading that names one gives this part as a parent (its 「묶음 뜻」 with the row it rests on); null when no
+ * reading names one, or names 목록 (a list group: its rows, not an axis). The record wins over the app's own reading (2.3-3). */
+export function recordedAxis(project: Pick<Project, 'readings'>, id: string): RecordedAxis | null {
+  for (let i = project.readings.length - 1; i >= 0; i--) {
+    const r = project.readings[i]!; if (!isMapReading(r)) continue;
+    const a = r.parts.find(x => x.areaId === id)?.groupAxis;
+    if (a && a !== 'members') return a;
+  }
+  return null;
+}
+/** What a group is, as its card and head say it: the record's axis in the record's word when one is written, else the axis the app
+ * reads from its children (groupAxis; 실행 위치 never, only a record says where something runs), else none. A part with no children
+ * is no group (null). */
+export interface GroupWord { axis: RecordedAxis | Exclude<GroupAxis, null>; word: string; recorded: boolean }
+export function groupWordOf(v: StudioView, id: string, recorded: RecordedAxis | null): GroupWord | null {
+  const g = v.parts.find(p => p.id === id); if (!g || !g.childIds.length) return null;
+  if (recorded) return { axis: recorded, word: RECORD_AXIS_WORD[recorded], recorded: true };
+  const a = groupAxis(v, id);
+  return a ? { axis: a, word: AXIS_WORD[a], recorded: false } : null;
 }
 
 /** The group a part sits under when that group is a lifecycle group (its 「원문 분류」, 2.2): the group's name, else null. */
