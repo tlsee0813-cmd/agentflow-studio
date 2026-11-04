@@ -9,8 +9,8 @@ import { chunk } from './fixtures/record43/wire.mjs';
 test('ASK-v4-1 the request names the 23 common tables and 19 supplementary tables with their header rows from the parser\'s own table definitions, the five sentences against invention, and the record ID twice', () => {
   const ask = R.recordAskV4('AF4-12345678');
   assert.ok(ask.startsWith('[AgentFlow 기록 요청 v4.1]'));
-  assert.equal(T.COMMON_TABLES.length, 23); assert.equal(T.PROFILE_TABLES.length, 19);
-  for (const t of T.COMMON_TABLES) { assert.ok(ask.includes(`\n${t.id} ${t.title}\n`), t.id); if (t.columns.length) assert.ok(ask.includes(`\n${T.headerLine(t)}\n`), t.id); }
+  assert.equal(T.V4_TABLES.length, 23); assert.equal(T.PROFILE_TABLES.length, 19);
+  for (const t of T.V4_TABLES) { assert.ok(ask.includes(`\n${t.id} ${t.title}\n`), t.id); if (t.columns.length) assert.ok(ask.includes(`\n${T.headerLine(t)}\n`), t.id); }
   for (const t of T.PROFILE_TABLES) assert.ok(ask.includes(`\n${t.id} ${t.title} (${t.rows}행): ${t.columns.slice(0, -2).join(' | ')} — `), t.id);
   for (const s of R.NO_INVENTION) assert.ok(ask.includes(s));
   assert.equal(ask.split('AF4-12345678').length - 1, 2);
@@ -21,7 +21,7 @@ test('ASK-v4-1 the request names the 23 common tables and 19 supplementary table
   assert.ok(ask.includes('LC_ALL=C.UTF-8 wc -m') && ask.includes('[=]') && ask.includes('「|a|b|」') && ask.includes('이어쓰기는 여러 번이어도 괜찮다') && ask.includes('고른 보충 표 ID'));
   assert.ok(ask.includes('릴리스 없음') && ask.includes('이슈 본문 미확인(#번호)') && ask.includes('단계 미기록(함수 이름)') && ask.includes(' 봇 /'));
   // Every row the request asks for parses: the parser knows each header row as written.
-  for (const t of [...T.COMMON_TABLES, ...T.PROFILE_TABLES]) if (t.columns.length) {
+  for (const t of [...T.V4_TABLES, ...T.PROFILE_TABLES]) if (t.columns.length) {
     const rec = T.readRecordTables(`〔기록 AF4-1 · 덩이 1 · 기준 abc1234〕 x 기록 v4\n${t.id} ${t.title}\n${T.headerLine(t)}\n|${'---|'.repeat(t.columns.length)}`);
     assert.deepEqual(rec.diagnostics, [], t.id);
   }

@@ -11,7 +11,7 @@ import { stateLabel } from './map-reading.js';
 import type { ReadingEntry } from './types.js';
 import { isMapReading } from './types.js';
 import { claimTopic } from './claim-topic.js';
-import { TABLE_DEFS, COMMON_TABLES, PROFILE_TABLES, headerLine, splitRecordChunks, readRecordTables, recordVersion, fixedWord, DONE_WORDS, CHUNK_HEAD, type TableDef } from './record-table.js';
+import { TABLE_DEFS, V4_TABLES, PROFILE_TABLES, headerLine, splitRecordChunks, readRecordTables, recordVersion, fixedWord, DONE_WORDS, CHUNK_HEAD, type TableDef } from './record-table.js';
 
 /** The tags the report marks its sentences with; the map reads [실행] as checked and [보고] as reported. */
 export const REPORT_TAGS = ['[파일: 경로]', '[보고: 출처·날짜]', '[실행: 명령]', '[추정]', '[모름]'] as const;
@@ -224,7 +224,7 @@ const profileLine = (t: TableDef): string => `${t.id} ${t.title} (${t.rows}행):
 const PROFILE_GROUPS: readonly [string, string][] = [['P1', '요청·명령 처리 — 무엇을 받아 어떤 순서로 처리하고 어떻게 끝나나'], ['P2', '계약·확장 — 소비자가 무엇에 의존하며 어디를 바꿔 끼울 수 있나'],
   ['P3', '자료 변환·산출물 — 무엇이 어떤 형태로 바뀌고 어디에 남나'], ['P4', '상태·반응 — 무엇을 기억하며 어떤 사건에 어떻게 바뀌나'], ['P5', '작업 실행·조정 — 무엇이 언제 실행되며 겹침·실패·반복을 어떻게 다루나'],
   ['P6', '자원·배치·변경 — 어떤 환경·설정·경계 아래에서 제공되고 유지되나']];
-const CHUNK1 = COMMON_TABLES.filter(t => t.chunk === 1).map(t => t.id), CHUNK2 = COMMON_TABLES.filter(t => t.chunk === 2).map(t => t.id);
+const CHUNK1 = V4_TABLES.filter(t => t.chunk === 1).map(t => t.id), CHUNK2 = V4_TABLES.filter(t => t.chunk === 2).map(t => t.id);
 const PROFILE_HEAD = '보충 표 — 고른 것만\n공통 표만으로 설명이 모자란 곳의 표만 고른다. 초점 밖의 표도 고를 수 있고, 한 묶음의 표를 다 쓸 필요는 없다. 덩이 2의 C-FILES 다음에, 자리가 남는 만큼 중요한 표부터 쓰고 나머지는 C-DONE에 「분량상 이월」. 행 상한은 한 덩이에 싣는 상한이다. 머리 줄은 아래 열 목록 뒤에 「행 ID | 근거」를 붙인 것이다(「| 열 | … | 행 ID | 근거 |」). 첫 열이 그 표가 처음 정하는 것의 ID면 그 행의 행 ID를 그대로 쓰고, 다른 표의 것을 가리키면 그 ID를 쓴다(사슬 ID는 그 사슬 첫 행의 행 ID). 가리킬 부모 표를 고르지 않았으면(P6-01 없이 P6-02, P4-01 없이 P4-02) 그 칸에 원래 키나 상태 이름을 그대로 쓴다.\n정확히 센 목록만 「총 N개」라고 쓴다. 「개수 + 처음·끝」은 같은 모양의 반복 자료에만 쓰고, 중간의 분기·권한 검사·오류 처리·우선순위 예외를 감추는 압축에는 쓰지 마. 싣지 못한 목록은 총수·고른 기준·나머지 위치를 남긴다.\n흔히 놓치는 것도 해당 표에 쓴다: 앱 수명(전경·배경·복귀)·권한·오프라인, 실행 문맥 사이의 메시지, 인터럽트·시간 제한, 패키지 경계·릴리스 단위, 트랜잭션·격리·내구성 시점, 중간 표현·증분 무효화, 전달·순서 보장·역압력, 계획과 적용의 차이.';
 const profileBlock = (): string => [PROFILE_HEAD, ...PROFILE_GROUPS.flatMap(([g, title]) => [`${g} ${title}`, ...PROFILE_TABLES.filter(t => t.id.startsWith(`${g}-`)).map(profileLine)])].join('\n');
 /** The chunk head a session writes (one form for the request and every continuation). */
@@ -294,12 +294,12 @@ export function continuationAsk(texts: readonly string[]): ContinuationPlan | nu
   const written = new Set(own.flatMap(x => x.t.tables.filter(t => t.header.length || t.none || t.body.length).map(t => t.id)));
   const left = (s: string) => !!s && !/^[—–-]+$/.test(s.trim());
   const want: { id: string; state: string; included: string; remaining: string; order: number }[] = [];
-  const order = (id: string, c: number) => c * 100 + Math.max(0, [...COMMON_TABLES, ...PROFILE_TABLES].findIndex(t => t.id === id));
+  const order = (id: string, c: number) => c * 100 + Math.max(0, [...V4_TABLES, ...PROFILE_TABLES].findIndex(t => t.id === id));
   for (const [id, d] of done) if ((d.state === 'partial' || d.state === 'deferred' || (d.state === 'done' && left(d.remaining))) && TABLE_DEFS.has(id))
     want.push({ id, state: DONE_LABEL[d.state]!, included: d.included, remaining: left(d.remaining) ? d.remaining : '표 전체', order: order(id, d.chunk) });
   const has2 = own.some(x => x.t.chunk!.chunk >= 2);
   if (!has2) for (const id of CHUNK2) if (!want.some(w => w.id === id)) want.push({ id, state: '덩이 2 없음', included: '—', remaining: '표 전체', order: order(id, 2) });
-  for (const t of COMMON_TABLES) if ((t.chunk === 1 || has2 && t.chunk === 2) && t.id !== 'C-DONE' && !done.has(t.id) && !written.has(t.id) && !want.some(w => w.id === t.id))
+  for (const t of V4_TABLES) if ((t.chunk === 1 || has2 && t.chunk === 2) && t.id !== 'C-DONE' && !done.has(t.id) && !written.has(t.id) && !want.some(w => w.id === t.id))
     want.push({ id: t.id, state: DONE_LABEL.missing!, included: '—', remaining: '표 전체', order: order(t.id, t.chunk) });
   const focus = own.map(x => x.t.focus).find(Boolean);
   for (const id of focus?.tables ?? []) if (!written.has(id) && !done.has(id) && !want.some(w => w.id === id)) want.push({ id, state: '초점 줄에 고름', included: '—', remaining: '표 전체', order: order(id, 2) });
@@ -535,7 +535,7 @@ function checkRecordV4(text: string): ReportCheck {
   const ids = new Set(chunks.map(c => c.recordId).filter(Boolean));
   if (ids.size > 1) missing.push('같은 기록 ID');
   if (seen.has(1) && !seen.has(2) && !pieces.some(p => readRecordTables(p).awaitsNext)) missing.push('덩이 2');
-  for (const def of COMMON_TABLES) if (def.id !== 'C-DONE' && (def.chunk === 1 ? seen.has(1) : def.chunk === 2 && seen.has(2)) && !written.has(def.id) && !listed.has(def.id)) missing.push(def.id);
+  for (const def of V4_TABLES) if (def.id !== 'C-DONE' && (def.chunk === 1 ? seen.has(1) : def.chunk === 2 && seen.has(2)) && !written.has(def.id) && !listed.has(def.id)) missing.push(def.id);
   return { kind: 'record-v4', chunks, chars: text.length, tagged, untagged, passesUnrun, missing, cut };
 }
 /** The check in one quiet line, and the line to paste back into the AI chat when something should be written again. */
