@@ -440,7 +440,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const fourteen=version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    const fifteen=version==='map-reading.15',fourteen=fifteen||version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
     obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[])]);ensure(r.version==='map-reading.1'||two);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
@@ -462,7 +462,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       if(nine){
         // map-reading.14: every step says whether the program put it there (a program step does nothing and uses nothing).
         list(p.steps,12);for(const s of p.steps as unknown[]){obj(s,['name','does','uses','quote',...(fourteen?['program']:[])]);text(s.name,40);if(s.does!==null)text(s.does,120);list(s.uses,4);for(const u of s.uses as unknown[])text(u,60);unique(s.uses);quote(s.quote);
-          if(fourteen)ensure(typeof s.program==='boolean'&&(!s.program||s.does===null&&(s.uses as unknown[]).length===0));}
+          // map-reading.15: a program step's does may hold its name's parenthesised tail (it still uses nothing).
+          if(fourteen)ensure(typeof s.program==='boolean'&&(!s.program||(fifteen||s.does===null)&&(s.uses as unknown[]).length===0));}
         unique((p.steps as {name:unknown}[]).map(s=>s.name));
         // map-reading.13: every loop and kept state says whether the program put it there (a program state names nothing but itself).
         if(p.loop!==null){obj(p.loop,['unit','stop','resume','quote',...(thirteen?['program']:[])]);for(const k of ['unit','stop','resume'] as const)if(p.loop[k]!==null)text(p.loop[k],60);ensure(p.loop.unit!==null||p.loop.stop!==null||p.loop.resume!==null);quote(p.loop.quote);if(thirteen)ensure(typeof p.loop.program==='boolean');}
@@ -495,7 +496,9 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
           // map-reading.11: every place says whether the program put it there (a program candidate is always inferred).
           list(c.anchors,4);for(const a of c.anchors as unknown[]){obj(a,['kind','text','quote',...(eleven?['program']:[])]);ensure(ANCHOR_KINDS.includes(a.kind as never));text(a.text,80);quote(a.quote);if(eleven)ensure(typeof a.program==='boolean'&&(!a.program||a.kind==='inferred'));}
           ensure(new Set((c.anchors as {text:string;quote:{record:string;from:number;to:number}}[]).map(a=>JSON.stringify([a.text,a.quote.record,a.quote.from,a.quote.to]))).size===(c.anchors as unknown[]).length);
-          list(c.enforcedBy,4);for(const e of c.enforcedBy as unknown[]){obj(e,['kind','text','quote']);ensure(ENFORCER_KINDS.includes(e.kind as never));text(e.text,80);if(e.quote===null)ensure(e.kind==='unknown');else quote(e.quote);}
+          // map-reading.15: every device says whether the program put it there (a program device is code, on its row).
+          list(c.enforcedBy,4);for(const e of c.enforcedBy as unknown[]){obj(e,['kind','text','quote',...(fifteen?['program']:[])]);ensure(ENFORCER_KINDS.includes(e.kind as never));text(e.text,80);if(e.quote===null)ensure(e.kind==='unknown');else quote(e.quote);
+            if(fifteen)ensure(typeof e.program==='boolean'&&(!e.program||e.kind==='code'&&e.quote!==null));}
           const devices=c.enforcedBy as {kind:string;text:string}[],rank=(k:string)=>k==='none'?1:k==='unknown'?0:2,top=Math.max(-1,...devices.map(e=>rank(e.kind)));
           ensure(new Set(devices.map(e=>JSON.stringify([e.kind,e.text]))).size===devices.length&&devices.every(e=>rank(e.kind)===2||rank(e.kind)===top));
           ensure(c.topic==='rule'||c.scope===null&&(c.anchors as unknown[]).length===0&&devices.length===0);
@@ -516,7 +519,8 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
     // map-reading.9: each port-map row names a relation of this reading, the part at its end by direction (in: the receiver, out: the
     // sender) as this reading kept it, an input or output name and a step of that part, once each, on its own passage.
     // map-reading.14: every row says whether the program put it there.
-    if(nine){list(r.portMap,12);const rows=new Set<string>();for(const m of r.portMap as unknown[]){obj(m,['relationId','areaId','port','step','direction','quote',...(fourteen?['program']:[])]);if(fourteen)ensure(typeof m.program==='boolean');
+    // map-reading.15: up to 24 rows (the program's beside the model's twelve).
+    if(nine){list(r.portMap,fifteen?24:12);const rows=new Set<string>();for(const m of r.portMap as unknown[]){obj(m,['relationId','areaId','port','step','direction','quote',...(fourteen?['program']:[])]);if(fourteen)ensure(typeof m.program==='boolean');
       ensure(m.direction==='in'||m.direction==='out');text(m.port,40);text(m.step,40);quote(m.quote);
       const line=(r.relations as {relationId:unknown;from:unknown;to:unknown}[]).find(x=>x.relationId===m.relationId);ensure(!!line&&m.areaId===(m.direction==='in'?line!.to:line!.from));
       const part=(r.parts as {areaId:unknown;steps:{name:unknown}[];inputs:unknown[];outputs:unknown[]}[]).find(x=>x.areaId===m.areaId);

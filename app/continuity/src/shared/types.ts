@@ -280,8 +280,11 @@ export interface ReadingClaim {
  * on every anchor of such an entry: true when the program, not the model, put it there (a candidate by shared words between the rule
  * and a condition row of its part's 「조건·거부·분기」 table, always inferred; the UI labels it 프로그램 후보); absent before .11. */
 export interface ReadingAnchor { kind: AnchorKind; text: string; quote: ReadingQuote; program?: boolean }
-/** map-reading.10: a device keeping a rule, as written (80), with the line that names it (null only for 'unknown'). */
-export interface ReadingEnforcer { kind: EnforcerKind; text: string; quote: ReadingQuote | null }
+/** map-reading.10: a device keeping a rule, as written (80), with the line that names it (null only for 'unknown'). map-reading.15
+ * (pipeline .40): program, on every device of such an entry: true when the program, not the model, put it there (the code device of a
+ * 「조건·거부·분기」 row whose 참이면 refuses, where a place of the rule stands; always code on that row; the UI labels it 프로그램); absent
+ * before .15. */
+export interface ReadingEnforcer { kind: EnforcerKind; text: string; quote: ReadingQuote | null; program?: boolean }
 export interface ReadingPart {
   areaId: string;
   /** This reading added the part; its name and parent as added (a later rename or move by the person is theirs). */
@@ -375,7 +378,7 @@ export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION
    * record/from/to; only on parts[i].inputs[j] and parts[i].outputs[j]. Exclusions without it keep their exact shape. */
   value?: string }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14' | 'map-reading.15'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -397,7 +400,8 @@ export interface MapReading {
   /** map-reading.9: the record's explicit correspondences of a line to a port and a step (parts carry steps, loop and stateVars).
    * map-reading.10: claims carry scope, scopeName, anchors, enforcedBy, withdrawalKind and gate. map-reading.11: each anchor carries
    * program (the program's candidate or the model's place). map-reading.12: parts carry conditions. map-reading.13: loops and kept
-   * states carry program, relations payloadFields. map-reading.14: parts carry fileRoles, steps and port-map rows program. */
+   * states carry program, relations payloadFields. map-reading.14: parts carry fileRoles, steps and port-map rows program. map-reading.15:
+   * rule devices carry program, a reading holds up to 24 port-map rows and a program step's does may hold its name's tail. */
   portMap?: ReadingPortMap[];
 }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
@@ -458,7 +462,7 @@ export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at
   /** The pasted record read, and the ledger version (the map reading id) the record was read against (null: no map reading). */
   record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15';
 export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;

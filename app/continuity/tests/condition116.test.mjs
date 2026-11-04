@@ -76,7 +76,7 @@ test('116-2 a lawful map.7 reply: each condition is its record\'s exact passage 
   assert.deepEqual(reply.matches.map(m => m.record), [al.report, al.code, al.check, al.report]);
   const applied = M.applyReading(p, inp, reply, meta('R_116-apply')), saved = parseProject(S.serializeProject(applied.project));
   assert.deepEqual(saved, applied.project, 'project14 reads it back the same'); assert.equal(saved.schemaVersion, 'idea015.project.14');
-  assert.equal(applied.reading.version, 'map-reading.14'); assert.equal(applied.reading.prompt, 'm7-000000000116');
+  assert.equal(applied.reading.version, 'map-reading.15'); assert.equal(applied.reading.prompt, 'm7-000000000116');
   assert.deepEqual(parseBackup(S.serializeBackup(saved, null)).project, saved, 'a backup keeps it');
   const stored = JSON.stringify(saved.readings.at(-1));
   assert.ok(!stored.includes('aboutAt') && !stored.includes('roleAboutAt'), 'no wire key is stored');
@@ -232,7 +232,7 @@ test('116-7 standard provider jobs: a map.7 job is bound to m7 (m6 refused for i
     assert.equal(prov.seen.length, 1); assert.equal(prov.seen[0].system, P.map7Prompt(inp.ask));
     assert.equal(v.result.prompt, m7); assert.deepEqual(v.result.wire, K.replyFor7(inp.ask, inp.records), 'the raw wire is kept');
     const back = J.decodeMapInput(v.input), applied = M.applyReading(p, back, M.validateMapReply(v.result.wire, back.ask), meta('R_116-job', v.result.prompt));
-    const saved = parseProject(S.serializeProject(applied.project)); assert.equal(saved.readings.at(-1).version, 'map-reading.14');
+    const saved = parseProject(S.serializeProject(applied.project)); assert.equal(saved.readings.at(-1).version, 'map-reading.15');
     assert.equal(saved.readings.at(-1).parts.find(x => !x.created).claims[0].about, K.COND_CRLF);
     // An old client's later map.6 job with m6 is still taken.
     const six = later(M.MAP6_SCHEMA), y = await submission(six.inp, six.p, m6, 'deepseek-flash', 'E_cond0116-04');
@@ -286,7 +286,7 @@ test('116-9 CLI map7-later: a later job bound to m7 and MAP7_PROMPT runs one chi
     assert.equal(v.state, 'ready', JSON.stringify(v.error));
     assert.deepEqual([v.execution.scope, v.execution.promptKind, v.execution.promptSha256, v.execution.askSha256], ['map7-later', 'later7', sha(P.map7Prompt(inp.ask)), sha(JSON.stringify(inp.ask))]);
     const back = J.decodeMapInput(v.input), applied = M.applyReading(p, back, M.validateMapReply(v.result.wire, back.ask), meta('R_116-cli', v.result.prompt));
-    assert.equal(parseProject(S.serializeProject(applied.project)).readings.at(-1).version, 'map-reading.14');
+    assert.equal(parseProject(S.serializeProject(applied.project)).readings.at(-1).version, 'map-reading.15');
     // A refused wire is failed with the structured detail; one child each, no retry.
     const bad = K.replyFor7(inp.ask, inp.records); bad.parts[1].claims[0].aboutAt = K.piece(inp.ask, K.aliases(inp.ask, inp.records).code, 'export function');
     writeFileSync(join(s.ctl, 'reply-2.json'), JSON.stringify(bad));
@@ -341,7 +341,7 @@ test('116-10 browser capability: m7 only beside m6 and as an exact id; later ask
   };
   const base = { ai: 'deepseek', model: 'x', access: 'open' }, c = later();
   const n = await runOnce({ ...base, map: { model: 'deepseek-flash', prompt: m6, laterPrompt: m7 } }, c.p, [c.rq]);
-  assert.deepEqual([n.sent.ask.schemaVersion, n.sent.system === P.map7Prompt(n.sent.ask), n.reading.prompt, n.reading.version], ['studio.map.7', true, m7, 'map-reading.14']);
+  assert.deepEqual([n.sent.ask.schemaVersion, n.sent.system === P.map7Prompt(n.sent.ask), n.reading.prompt, n.reading.version], ['studio.map.7', true, m7, 'map-reading.15']);
   assert.equal(n.reading.parts.find(x => !x.created).claims[0].about, K.COND_CRLF);
   const o = await runOnce({ ...base, map: { model: 'deepseek-flash', prompt: m6 } }, c.p, [c.rq]);
   assert.deepEqual([o.sent.ask.schemaVersion, o.sent.system === P.MAP6_PROMPT, o.reading.prompt], ['studio.map.6', true, m6], 'an old server: map.6 as before');
@@ -370,7 +370,7 @@ test('116-11 a lawful ready6 written by the pre116 producer is recovered by this
     w.run.resume(); await until(() => w.run.state().ready, 'found ready');
     await w.run.applyReady(); await until(() => w.done.length === 1, 'applied');
     const reading = w.done[0].reading;
-    assert.deepEqual([reading.version, reading.prompt, reading.hash], ['map-reading.14', manifest.job.prompt, manifest.job.askHash], 'read with its saved map.6 input and m6 prompt');
+    assert.deepEqual([reading.version, reading.prompt, reading.hash], ['map-reading.15', manifest.job.prompt, manifest.job.askHash], 'read with its saved map.6 input and m6 prompt');
     assert.equal(reading.parts[0].claims[0].about, 'release/2.4 브랜치', 'an old plain about string keeps its map.6 meaning');
     assert.equal(calls, 0, 'no second call'); assert.deepEqual(parseProject(S.serializeProject(w.cur.project)), w.cur.project);
     await until(async () => (await jcall(handle, 'GET', `/${manifest.job.id}`, manifest.job.cap)).acked === 'applied', 'acknowledged');
