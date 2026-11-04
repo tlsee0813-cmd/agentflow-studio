@@ -2879,6 +2879,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .node.card.grp:hover { box-shadow: 4px 4px 0 -1px var(--grp-sheet), 4px 4px 0 0 var(--grp-sheet-line), 8px 8px 0 -1px var(--grp-sheet), 8px 8px 0 0 var(--grp-sheet-line), 0 6px 14px -6px rgba(17,24,39,.18); }
 .node.card.grp.selected, .node.card.grp.selected:hover { box-shadow: 0 0 0 1px var(--accent), 4px 4px 0 -1px var(--grp-sheet), 4px 4px 0 0 var(--accent), 8px 8px 0 -1px var(--grp-sheet), 8px 8px 0 0 var(--accent); }
 .node.card.grp.gx-place { --grp-sheet: var(--grp-place-bg); --grp-sheet-line: var(--grp-place-line); background: var(--grp-place-bg); border-color: var(--grp-place-line); border-radius: 14px; }
+.node.card.grp.gx-place.selected { border-color: var(--accent); }
 .node.card.grp.gx-place .c-head { background: none; box-shadow: inset 0 -1px 0 var(--grp-place-line); }
 .space:is(.tier-far, .tier-dots) .node.card.grp.gx-place:not(.life) { background: var(--grp-place-bg); }
 .node.card.grp .c-kind-word.grp-word { color: var(--text-2); font-weight: 560; }
