@@ -1148,8 +1148,10 @@ function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<str
   const fb = failureBlanks(type, [...r.claims.flatMap(c => [c.text, c.before]), ...steps.flatMap(s => [s.name, s.does]), r.loop?.stop, r.loop?.resume]);
   // A group (S8): its parts by name in the record's order, and what kind of group it is (the record's 묶음 뜻 first).
   const gw = p.childIds.length ? groupWordOf(o.view, p.id, recordedAxis(o.project, p.id)) : null;
+  // Recipe .45 (map-reading.19): the record family, role word and 미정 reason the newest reading gives the part.
+  const fr = r.familyRead ?? null, family = fr ? { family: fr.family, role: fr.role, reason: fr.reason, unclear: fr.unclear } : null;
   return { members: p.childIds.map(name), groupAxis: gw?.axis ?? null, groupWord: gw?.word ?? null, groupRecorded: !!gw?.recorded,
-    type, config: r.config, inputs: r.inputs, outputs: r.outputs, fields: r.fields, loop: r.loop ?? null, loopProgram: programLoopItems(r.loop, r.config, conds),
+    type, family, config: r.config, inputs: r.inputs, outputs: r.outputs, fields: r.fields, loop: r.loop ?? null, loopProgram: programLoopItems(r.loop, r.config, conds),
     steps, conditions: conds, stateVars: r.stateVars?.length ?? 0, fileRoles: r.fileRoles?.length ?? 0,
     personRules: sg.rules.filter(x => (x.enforcedBy ?? []).some(e => e.kind === 'person')).length, children: p.childIds.length,
     controlIn: uniq(controlIn), controlOut: uniq(controlOut), dataIn: uniq(dataIn), dataInCadence: uniq(cadence), writers: writers.size, readers: readers.size,
@@ -1276,6 +1278,8 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
       h('span', { class: 'c-kind' }, h('span', { class: `c-kind-word${t.family === 'neutral' && !grp ? ' unknown' : ''}${grp ? ' grp-word' : ''}`, ...(t.family === 'neutral' || grp ? { title: neutralTip } : {}) }, t.kind),
         life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null,
         maint ? h('span', { class: 'c-life', title: `유지 방침 · 기록의 상태 표 (${maintQuote ? `“${maintQuote}”` : '원문 줄 없음'})` }, maint) : null,
+        // Recipe .45: a part the record could not give a family (「미정: 이유」), or a v4 type word whose family is unclear.
+        t.undecided ? h('span', { class: 'c-life c-undecided', title: `표현군 · ${r.familyRead?.quote ? `“${r.familyRead.quote.quote}”` : '원문 줄 없음'} · 모양은 기록된 안쪽(단계·반복·묶음)으로만 정함` }, t.undecided) : null,
         extra.filed ? h('span', { class: 'c-filed', title: `원문 분류 · 기록이 이 부분을 「${extra.filed}」 묶음 아래에만 두었다 (실행 위치의 근거가 아님)` }, `원문 분류: ${extra.filed}`) : null),
       // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
       life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short),

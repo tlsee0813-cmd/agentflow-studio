@@ -26,11 +26,31 @@ import { isContainer, containerBody, wellHeight, type Well } from './container-v
 export type CardFamily = PartFamily | 'neutral';
 /** The family's word (the glyph tile's title). */
 export const FAMILY_WORD: Record<CardFamily, string> = { participant: '참여자', process: '처리', store: '저장', trigger: '촉발·관문', neutral: '중립' };
-/** The family of a part: its type word's, else neutral. The rest of the arguments are accepted and never read: an inside, steps
- * or a loop never change a family (they are the capability, innerOf). */
-export function familyOf(type: PartType | null | undefined, _steps = 0, _loop = false, _children = 0): CardFamily {
-  return type ? FAMILY_OF[type] : 'neutral';
+/** The family of a part (recipe .45): its record family first (map-reading.19 part.family: C-PART 표현군, a v4 or v3 type word read through
+ * the unambiguous words only), a gate in the trigger family's tint (its glyph its own, gateGlyph); else its type word's; else neutral (a
+ * 미정 part, a part of no family or type). Given a type alone, the type word's. The rest of the arguments are accepted and never read: an
+ * inside, steps or a loop never change a family (they are the capability, innerOf). */
+export interface FamilyFacts { family?: string | null; type?: PartType | null }
+export function familyOf(x: PartType | FamilyFacts | null | undefined, _steps = 0, _loop = false, _children = 0): CardFamily {
+  if (x && typeof x === 'object') {
+    if (x.family === 'gate') return 'trigger';
+    if (x.family === 'participant' || x.family === 'process' || x.family === 'store' || x.family === 'trigger') return x.family;
+    return x.type ? FAMILY_OF[x.type] : 'neutral';
+  }
+  return x ? FAMILY_OF[x] : 'neutral';
 }
+/** Recipe .45: the 미정 reasons (3.2) as the chip says them. */
+export const UNDECIDED_WORD: Readonly<Record<string, string>> = { thin: '책임 설명 부족', mixed: '서로 다른 역할 혼재', scope: '대상 범위 불명확' };
+/** The family facts a card carries (map-reading.19 familyRead): the family, its role word, 미정's reason, whether a type word's family is unclear. */
+export interface CardFamilyFacts { family: string | null; role: string | null; reason: string | null; unclear: boolean }
+/** The 「미정: 이유」 chip of a part the record could not give a family (3.2, 3.4), 「대응 불명확」 for a v4 word kept as written; null otherwise. */
+export function undecidedChip(f: CardFamilyFacts | null | undefined): string | null {
+  if (!f || f.family) return null;
+  if (f.unclear) return `대응 불명확: ${f.role ?? '유형 낱말'}`;
+  return f.reason ? `미정: ${UNDECIDED_WORD[f.reason] ?? f.reason}` : '미정';
+}
+/** A gate's own glyph in the trigger family's tint; any other family keeps its type's glyph. */
+export const gateGlyph = (f: CardFamilyFacts | null | undefined, type: PartType | null | undefined): GlyphKey | null => f?.family === 'gate' ? 'gate' : type ?? null;
 /** What a part holds inside, as a capability (4.1): its steps as an action well ('steps': a loop type with one recorded step, or a
  * type that may repeat with two steps and a recorded loop), its steps as a plain list ('list': two steps or more and no loop; no
  * order or repeat is given to them), its composition ('composition': it has children), both, or nothing. */
@@ -93,6 +113,8 @@ export function maintenanceOf(claims: readonly { dimension: string; value: strin
  * counted by channel). Every list as the record has it. */
 export interface CardFacts {
   type: PartType | null;
+  /** Recipe .45 (map-reading.19): the part's record family, role word and 미정 reason (familyRead); absent before. */
+  family?: CardFamilyFacts | null;
   config: readonly string[]; inputs: readonly string[]; outputs: readonly string[]; fields: readonly string[];
   loop: { unit: string | null; stop: string | null; resume: string | null } | null;
   /** Which loop items the program filled (line-view programLoopItems); each such row carries the 「프로그램」 chip. */
@@ -154,6 +176,8 @@ export interface CardTemplate {
   /** A part with children (display slice S8): drawn as a group (a stack of cards, a place's region face), its kind line the axis
    * and the count (groupKind), its 안에 row the first parts' names; null for any other card. */
   group: { axis: string | null; word: string | null; names: string[]; recorded: boolean } | null;
+  /** Recipe .45: the 「미정: 이유」 (or 「대응 불명확」) chip of a part with no record family; null for any other card. */
+  undecided?: string | null;
 }
 
 /** The most kind rows a card holds (the blank slot included), the most pins a side holds. */
@@ -274,9 +298,13 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   // A group (S8): what kind of group in its kind line, its first parts in an 안에 row before the kind rows; never 「유형 미상」.
   const kids = f.children ?? 0, group = kids > 0 ? { axis: f.groupAxis ?? null, word: f.groupWord ?? null, names: [...(f.members ?? [])], recorded: !!f.groupRecorded } : null;
   const mr = group ? membersRow(group.names) : null;
-  return { family: familyOf(f.type), inner, glyph: f.type ?? (group ? groupGlyph(group.axis) : 'neutral'),
-    kind: group ? groupKind(f.type, group.word, kids) : kindLabel(f.type, recorded || f.steps.length, !!f.loop), rows: mr ? [mr, ...kindRows(f)] : kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs,
-    structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group };
+  // Recipe .45: the record family first (a gate keeps the trigger tint with its own glyph); the kind line says the role word the record
+  // wrote beside the family (「처리 · 실행 조정」 reads 「실행 조정」), or 「미정: 이유」 for a part the record could not give a family.
+  const fam = f.family ?? null, chip = undecidedChip(fam), role = fam?.family && fam.role ? fam.role : null;
+  return { family: familyOf({ family: fam?.family ?? null, type: f.type }), inner, glyph: gateGlyph(fam, f.type) ?? (group ? groupGlyph(group.axis) : 'neutral'),
+    kind: group ? groupKind(f.type, group.word, kids) : role && !f.type ? role : chip && !f.type ? chip : kindLabel(f.type, recorded || f.steps.length, !!f.loop),
+    rows: mr ? [mr, ...kindRows(f)] : kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs,
+    structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group, undecided: chip };
 }
 
 /* ---------- heights (map design v3 3.8, 5.3, 9.5): as styles.css draws them at the near tier ---------- */

@@ -6,7 +6,8 @@
 import type { PartType } from '../shared/types.js';
 
 /** A glyph's key: a part type, the neutral square for a part with no type word, or the composition badge. */
-export type GlyphKey = PartType | 'neutral' | 'composition' | 'place';
+// Recipe .45: and a gate (관문 family: a barrier arm across a path), drawn in the trigger family's tint (map-reading.19 family gate).
+export type GlyphKey = PartType | 'neutral' | 'composition' | 'place' | 'gate';
 
 /** The SVG body of each glyph (the shapes inside a 16×16 viewBox). */
 export const GLYPH: Record<GlyphKey, string> = {
@@ -24,6 +25,7 @@ export const GLYPH: Record<GlyphKey, string> = {
   screen: '<rect x="2" y="3" width="12" height="8" rx="1.5"/><path d="M6 13.5h4M8 11v2.5"/>',
   automation: '<rect x="5" y="2.5" width="6" height="5" rx="1"/><path d="M2.5 11h9M9.5 9l2 2-2 2M2.5 13.5h11"/>',
   neutral: '<rect x="3.5" y="3.5" width="9" height="9" rx="2"/>',
+  gate: '<path d="M3 13.5V4.5M13 13.5V4.5M3 7.5h10M5.5 7.5l2-3M9.5 7.5l2-3"/>',
   composition: '<rect x="2.5" y="2.5" width="11" height="11" rx="2"/><rect x="5" y="5" width="3" height="3" rx=".6"/><rect x="8.5" y="8.5" width="2.5" height="2.5" rx=".6"/>',
   // Display slice S8: a group the record says is where things run (실행 위치): a place pin over the ground it stands on.
   place: '<path d="M8 10.5S4.5 7.6 4.5 5.4a3.5 3.5 0 0 1 7 0C11.5 7.6 8 10.5 8 10.5z"/><circle cx="8" cy="5.4" r="1.1"/><path d="M3 13.5h10"/>'

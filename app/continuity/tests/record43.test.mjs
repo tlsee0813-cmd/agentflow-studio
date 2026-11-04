@@ -12,7 +12,7 @@ import { validateProject } from '../dist/public/shared/validation.js';
 import * as B from '../server/map-blueprint.mjs';
 import * as P from '../server/map-pipeline.mjs';
 import { ofChunks, wire43 } from './fixtures/record43/wire.mjs';
-import { goldenReadings, stripNew, normalizeIds } from './fixtures/koru43/golden.mjs';
+import { goldenReadings, stripNew, stripFamily, normalizeIds } from './fixtures/koru43/golden.mjs';
 import { stripEighteen } from './strip18.mjs';
 
 const mods = { D, M, studioView };
@@ -23,14 +23,14 @@ const head = q => q?.quote.slice(0, 20) ?? null;
 
 test('.43 golden: the KORU 11-03 v3 status and design records (and the R4 hand-kept rules) read as .42 read them: same parts, claims, relations, loops and devices; only a rule\'s decidedBy is new', () => {
   const now = goldenReadings({ D, M, studioView, B }), then = JSON.parse(readFileSync(new URL('./fixtures/koru43/golden42.json', import.meta.url), 'utf8'));
-  assert.deepEqual(normalizeIds(stripNew(now)), normalizeIds(stripNew(then)));
+  assert.deepEqual(normalizeIds(stripFamily(stripNew(now))), normalizeIds(stripNew(then)));
   // The hand-kept rules keep their person device, on the same row with the same words.
   const devices = r => r.stored.parts.flatMap(p => p.claims.flatMap(c => (c.enforcedBy ?? []).map(e => [e.kind, e.text, e.program])));
   assert.deepEqual(devices(now.r4), devices(then.r4));
   assert.deepEqual(devices(now.r4).filter(d => d[0] === 'person'), [['person', '소유자 10-24 [파일: docs/RUNBOOK.md]', true], ['person', '소유자 10-02 [파일: docs/RUNBOOK.md]', true]]);
   // decidedBy is stored for a v3 rule row's 누가 정했나·언제 (the device stays the .42 one).
   assert.deepEqual(now.r4.stored.parts[0].claims.map(c => c.decidedBy?.text), ['소유자 10-24', '소유자 10-30', '소유자 09-29']);
-  assert.ok(Object.values(now).every(x => x.stored.version === 'map-reading.18'));
+  assert.ok(Object.values(now).every(x => x.stored.version === 'map-reading.19'));
 });
 
 test('.43 parts: C-PART type (화면, 빌드·배포 자동화 too), 구현 상태, row ID and list items; C-GROUP 묶음 뜻; C-STATUS claims; the state derived (running only from 운영 상태 「실행 중」)', () => {
@@ -105,7 +105,7 @@ test('.43 the reading\'s own fields: basis scope, focus (never a fact), gates ch
   assert.deepEqual(read.recordExtras.map(t => [t.table, t.header]), [['C-FOO', ['무엇', '근거']]]);
   assert.deepEqual(byName(read, '북마크 저장소').fileRoles.map(r => r.runtime), [true]);
   const applied = M.applyReading(f.project, f.input, read, meta('R_record43', '4'));
-  assert.equal(applied.reading.version, 'map-reading.18');
+  assert.equal(applied.reading.version, 'map-reading.19');
   assert.deepEqual(validateProject(applied.project), applied.project);
   const stored = applied.reading, engine = stored.parts.find(p => p.recordRef === 'B03');
   assert.deepEqual([engine.loops.length, engine.variants.length, stored.coverage.length, stored.recordDiagnostics.length], [1, 2, 8, 3]);
@@ -122,7 +122,7 @@ test('.43 the reading\'s own fields: basis scope, focus (never a fact), gates ch
 });
 
 test('.43 recipe and table prompts: first-map-divided.43; the plan prompt and render rules name the v4 table IDs; the plan reasons at medium by default', () => {
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.44', 'later-map-divided.44']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.45', 'later-map-divided.45']);
   assert.ok(B.MAP_BLUEPRINT_PROMPT.includes('C-STEP 행 ID B03:S02의 B03은 C-PART 행 ID다'));
   assert.ok(P.RENDER_RULES.includes('C-RULE의 지키는 장치·장치 위치 열') && P.RENDER_RULES.includes('screen(화면)·automation(빌드·배포 자동화)'));
   assert.ok(P.GLOBAL_RULES.includes('C-SUMMARY 두 문장'));

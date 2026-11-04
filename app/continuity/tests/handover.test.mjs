@@ -32,7 +32,7 @@ test('handover carries earlier exclusion history without treating it as a curren
   };
   let p = read(D.pasteRecord(original.p, '예약 버튼을 표시했어요.', null).project, true);
   const excluded = p.readings.at(-1).exclusions[0];
-  assert.equal(p.readings.at(-1).version, 'map-reading.18'); assert.equal(excluded.rule, 'contract');
+  assert.equal(p.readings.at(-1).version, 'map-reading.19'); assert.equal(excluded.rule, 'contract');
   p = read(D.pasteRecord(p, '예약 버튼에 도움말도 표시했어요.', null).project, false);
   p = parseProject(JSON.stringify(p));
   assert.deepEqual(p.readings.at(-1).exclusions, []);

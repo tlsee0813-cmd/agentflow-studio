@@ -4,7 +4,7 @@
  * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
  * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
 import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap, type ReadingCondition, type ReadingFileRole, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS, type RuleScope, type AnchorKind, type EnforcerKind, type WithdrawalKind, type GateKind,
-  type ReadingRecordLoop, type ReadingVariant, type ReadingStatusClaim, type ReadingDecider, type ReadingActor, type ReadingContractChange, type ReadingShippedIn, type WithdrawalMethod, type ConditionPhase, type ReadingStepBranch, type CrossKind, type CadenceKind } from './types.js';
+  type ReadingRecordLoop, type ReadingVariant, type ReadingStatusClaim, type ReadingDecider, type ReadingActor, type ReadingContractChange, type ReadingShippedIn, type WithdrawalMethod, type ConditionPhase, type ReadingStepBranch, type CrossKind, type CadenceKind, type ReadingCite, type FoundBy, type ClaimNature } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading } from './domain.js';
@@ -14,7 +14,7 @@ import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, PARTTYPE_TABLE, type TableRow } from './record-table.js';
-import { record43, actorsOf, variantGloss, glossVariants, type Reading43, type Part43, type Line43 } from './record-reading.js';
+import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -280,7 +280,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // through another part already draws (set aside by the server).
   | 'decider' | 'product-merge' | 'product-shortcut'
   // pipeline .44: a claim on a change row naming a person another change row gives as its actor and its own row does not.
-  | 'actor';
+  | 'actor'
+  // Recipe .45 (13.7d): a part splitting one part-table row (a list row, a contributors row) or a C-GROUP 목록 item written as a part.
+  | 'list-split';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -1288,14 +1290,17 @@ export interface MapReplyClaim { kind: ClaimKind; text: string; record: string; 
    * line stands (a device's quote null only for unknown). */
   scope?: RuleScope | null; scopeName?: string | null; anchors?: MapReplyAnchor[]; enforcedBy?: MapReplyEnforcer[]; withdrawalKind?: WithdrawalKind | null; gate?: GateKind | null;
   /** map-reading.18 (pipeline .43): set by the validator's own pass only (record-reading.ts), never read from a reply. */
-  decidedBy?: ReadingDecider | null; actors?: ReadingActor[]; mergedWhen?: string | null; contractChange?: ReadingContractChange | null; shippedIn?: ReadingShippedIn | null; withdrawalMethod?: WithdrawalMethod | null }
+  decidedBy?: ReadingDecider | null; actors?: ReadingActor[]; mergedWhen?: string | null; contractChange?: ReadingContractChange | null; shippedIn?: ReadingShippedIn | null; withdrawalMethod?: WithdrawalMethod | null;
+  /** map-reading.19 (recipe .45): set by the validator's own pass only (record45), never read from a reply. */
+  cites?: ReadingCite[]; foundBy?: FoundBy | null }
 /** map-reading.10: a place a rule applies with the quote of the line placing it; a device keeping it with the quote of its line.
  * map-reading.11: program is set by the validator's own pass only (a candidate it adds), never read from a reply. */
 export interface MapReplyAnchor { kind: AnchorKind; text: string; quote: MapReplyQuote; program?: true }
 /** map-reading.15: program is set by the validator's own pass only (a refusal row's code device), never read from a reply. */
 export interface MapReplyEnforcer { kind: EnforcerKind; text: string; quote: MapReplyQuote | null; program?: true }
 /** map-reading.18 (pipeline .43): the part fields the program reads from a v4 record's tables (record-reading.ts), never from a reply. */
-type MapReplyPart43 = Pick<ReadingPart, 'recordRef' | 'implementation' | 'implementationQuote' | 'members' | 'groupAxis' | 'groupAxisQuote' | 'statusClaims' | 'loops' | 'variants' | 'entries' | 'contracts'>;
+type MapReplyPart43 = Pick<ReadingPart, 'recordRef' | 'implementation' | 'implementationQuote' | 'members' | 'groupAxis' | 'groupAxisQuote' | 'statusClaims' | 'loops' | 'variants' | 'entries' | 'contracts'
+  | 'family' | 'familyRole' | 'familyReason' | 'familyQuote' | 'familyUnclear' | 'added' | 'states' | 'cites'>;
 /** map.6: the undecided statement a candidate keeps (attribution, holds), exact where it stands in the excerpt. */
 export interface MapReplyStatement { key: string; kind: ClaimKind; text: string; about: string | null; record: string; quote: string; from: number; to: number }
 export type MapReplyMatch = (RequestMatch | RequestMatch3) & { from?: number; to?: number };
@@ -1328,7 +1333,9 @@ export interface MapReplyStep { name: string; does: string | null; uses: string[
    * from the record (never read from a reply); absent where the row has none. */
   when?: string;
   /** map-reading.18 (pipeline .43): set by the validator's own pass only (the step's C-STEP row), never read from a reply. */
-  recordRef?: string | null; loopIds?: string[]; alt?: { group: string; branch: string } | null; branch?: ReadingStepBranch[]; model?: string | null }
+  recordRef?: string | null; loopIds?: string[]; alt?: { group: string; branch: string } | null; branch?: ReadingStepBranch[]; model?: string | null;
+  /** map-reading.19: set by the validator's own pass only (the step's v5 C-STEP row's cites). */
+  cites?: ReadingCite[] }
 /** map-reading.17 (pipeline .42, from the blind judging of the .41 HTTP-library map, whose 4절 조건·분기 column (runWhen, synchronous,
  * maxRedirects === 0 …) had no slot in a step and stood only in the quote): the 조건·분기 cell of a step's own 「안의 단계」 row, as
  * written (120, cut with 「…」), or null for a dash, an empty cell, a table without the column or no such row. */
@@ -1360,7 +1367,9 @@ export interface MapReply {
     /** map.6–7 (map-reading.13): the fields of the format artifact the line carries ([] when not said). */
     payloadFields?: string[];
     /** map-reading.18 (pipeline .43): set by the validator's own pass only (the line's C-LINK row). */
-    when?: string | null; optional?: boolean; variantRef?: string | null; crosses?: CrossKind | null; cadenceKind?: CadenceKind | null; payloadRef?: string | null; via?: string | null; member?: string | null }[];
+    when?: string | null; optional?: boolean; variantRef?: string | null; crosses?: CrossKind | null; cadenceKind?: CadenceKind | null; payloadRef?: string | null; via?: string | null; member?: string | null;
+    /** map-reading.19: set by the validator's own pass only (the line's v5 C-LINK row). */
+    claimNature?: ClaimNature | null; cites?: ReadingCite[] }[];
   candidates: { text: string; parts: string[]; record: string | null; quote: string | null; at?: { from: number; to: number } | null; target?: CandidateTarget; statement?: MapReplyStatement | null }[];
   gaps: string[];
   matches?: MapReplyMatch[];
@@ -1372,6 +1381,9 @@ export interface MapReply {
   /** map-reading.18 (pipeline .43): the reading's own fields the program reads from v4 records (record-reading.ts), never from a reply. */
   basisScope?: Reading43['basisScope']; focus?: Reading43['focus']; projectStatus?: Reading43['projectStatus']; gatesNone?: Reading43['gatesNone']; coverage?: Reading43['coverage'];
   artifacts?: Reading43['artifacts']; profileTables?: Reading43['profileTables']; recordExtras?: Reading43['recordExtras']; recordDiagnostics?: Reading43['recordDiagnostics'];
+  /** map-reading.19 (recipe .45): the reading's own fields the program reads from v5 records (record45), never from a reply. */
+  level?: Reading45['level']; pages?: Reading45['pages']; obligations?: Reading45['obligations']; pageEnds?: Reading45['pageEnds']; checks?: Reading45['checks']; defaults?: Reading45['defaults'];
+  firstLines?: Reading45['firstLines'];
 }
 /** The excerpt each record of a request stands for: its text, and its span.2 pieces when it was sent as pieces. */
 const askTexts = new WeakMap<MapAsk, Map<string, { text: string; spans: Span[] | null }>>();
@@ -1547,6 +1559,7 @@ const exclusionExplanation = (e: MapReplyError): string => {
     // map-reading.12: one condition row of a part; pipeline .36: a store part on a place another store part holds (with its lines), a
     // line no record row backs, the channel of a control line carrying an artifact.
     : e.rule === 'contract' && e.target === 'condition' ? '부분의 조건 행 하나가 규칙에 맞지 않거나 그 부분의 「조건·거부·분기」 행에서 찾을 수 없어 그 조건만 제외했어요.'
+    : e.rule === 'contract' && e.target === 'list-split' ? '부분 표의 한 행(목록·기여자 목록)이나 묶음 표의 목록 항목을 따로 세운 부분이어서 그 부분과 연결을 제외했어요. 그 행은 부분 하나이고 항목은 목록으로 남아요.'
     : e.rule === 'contract' && e.target === 'store-dup' ? '같은 「있는 곳」을 이미 다른 저장소 부분이 맡고 있어 겹친 저장소 부분과 그 연결을 제외했어요. 다른 부분으로 다시 잇지 않았어요.'
     : e.rule === 'contract' && e.target === 'unrecorded' ? '기록의 연결 표·산출물·부분별 설계·안의 단계 행이나 화살표 줄이 아닌 줄에서 만든 연결이어서 제외했어요.'
     // pipeline .38: the channel alone is written null; the line stays.
@@ -2340,7 +2353,11 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // inner-step table or on an arrow line; one on any other line (the .35 KORU owner → ARM on the owner's part row, 「잔고 입출금으로
       // 노출 조절」) is no line the records draw (unrecorded).
       const flow = flowLines();
-      if (flow.table) need(flow.rows.some(l => q.record === l.record && q.from !== undefined && q.to !== undefined && q.from < l.to && l.from < q.to) || lineSenders(q.quote).some(l => l.row === null), `relations[${i}]`, 'unrecorded');
+      // Recipe .45 (13.7e): a v4 or v5 record's C-SUMMARY sentences are no line the record draws, an arrow in them included (its C-LINK rows
+      // are; a game map's summary 「A → B」 drew a line no row has). A v3 summary's arrow chain stays as .42 read it.
+      const inSummary = q.from !== undefined && q.to !== undefined && (readRecordTables(texts.get(q.record)?.text ?? '').byId.get('C-SUMMARY') ?? [])
+        .some(t => t.dialect !== 'v3' && t.body.some(b => b.from < q.to! && q.from! < b.to));
+      if (flow.table) need(flow.rows.some(l => q.record === l.record && q.from !== undefined && q.to !== undefined && q.from < l.to && l.from < q.to) || !inSummary && lineSenders(q.quote).some(l => l.row === null), `relations[${i}]`, 'unrecorded');
       // pipeline .36: a control line carrying an artifact of the artifact table (the .35 web map's payment session, webhook, invoice and
       // notification lines) is data by the record. Pipeline .38: only its channel is left out (relations[i].channel, channel, written
       // null) and the line stays, as a wrong channel word's does (the .37 web map lost 주문 API → 결제사 payon.refund, its only refund line).
@@ -2904,9 +2921,15 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   // map-reading.18 (pipeline .43, RECORD_ASKS_V4_KO.md 4.3–4.6): the program's reading of the records' v4 tables (record-reading.ts): parts'
   // 구현 상태, status claims and state, loops, variants, entries (with a consumer's control line), contracts; steps', lines', claims', conditions'
   // and file-map rows' fields; every rule's decider (a v3 rule's devices stay as read); the reading's own fields.
+  const onRecordMaterial = (q: { record: string; from: number; to: number }) => material.some(m => m.record === q.record && m.from < q.to && q.from < m.to);
+  // Recipe .45 (map-reading.19, RECORD_ASKS_V5_KO.md 8.3): a first map's v5 parts are the program's: a C-PART row no part of the reply takes
+  // becomes a part of its own before record43 reads the rows (record45Parts), within the first map's new parts.
+  if (six && ask.schemaVersion === MAP6_SCHEMA) record45Parts({ texts, parts: outParts as unknown as Part43[], onMaterial: onRecordMaterial, maxNew: MAP6_NEW_PARTS });
   const read43: Reading43 | null = six ? record43({ texts, parts: outParts as unknown as Part43[], relations: relations as unknown as Line43[], nameOf: ref => parts.get(ref)?.name ?? '',
-    onMaterial: q => material.some(m => m.record === q.record && m.from < q.to && q.from < m.to), maxLines: ask.schemaVersion === MAP6_SCHEMA ? MAP6_RELATIONS : 12 }) : null;
-  const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}), ...(four ? { material } : {}), ...(six ? { basisAt, basisVersion, portMap, ...read43 } : {}) };
+    onMaterial: onRecordMaterial, maxLines: ask.schemaVersion === MAP6_SCHEMA ? MAP6_RELATIONS : 12 }) : null;
+  // Recipe .45: the v5 pass (families, roles, C-STATE rows, list items, cites; the reading's level, pages, obligations, checks, defaults).
+  const read45: Reading45 | null = six ? record45({ texts, parts: outParts as unknown as Part43[], relations: relations as unknown as Line43[], read43, onMaterial: onRecordMaterial }) : null;
+  const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}), ...(four ? { material } : {}), ...(six ? { basisAt, basisVersion, portMap, ...read43, ...read45 } : {}) };
   // Words the model wrote (never the quotes, which are the person's own records) must not look like a key.
   // map.7 names the first such place (the same strings, the same rule).
   const written: [string, string][] = [['summary', reply.summary], ...gaps.map((g, k): [string, string] => [`gaps[${k}]`, g]),
@@ -3096,6 +3119,9 @@ export interface PartUnderstanding {
   files: string[];
   /** map-reading.8: the type the newest reading that said one gives the part, in the record's own word, with the line that says it. */
   typeRead: { type: PartType; quote: ReadingQuote | null; at: string } | null;
+  /** map-reading.19 (recipe .45): the family the newest reading that said one gives the part (C-PART 표현군, or a type word read through the
+   * unambiguous words), its role word, 미정's reason and whether the word's family is unclear; null when no reading said one. */
+  familyRead?: { family: NonNullable<ReadingPart['family']> | null; role: string | null; reason: NonNullable<ReadingPart['familyReason']> | null; unclear: boolean; quote: ReadingQuote | null; at: string } | null;
   /** map-reading.8: what the part receives and hands over, the fields of its rows and its settings, as readings named them (newest
    * reading first, each once; inputs and outputs up to eight, fields 24, settings eight). */
   inputs: string[]; outputs: string[]; fields: string[]; config: string[];
@@ -3128,7 +3154,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   const others: PartUnderstanding['others'] = []; let roleBasis: ReadingQuote[] = [];
   let corrected: PartUnderstanding['corrected'] = null;
   const all: CurrentClaim[] = [], replaced = new Set<string>();
-  let stateRead: PartUnderstanding['stateRead'] = null, typeRead: PartUnderstanding['typeRead'] = null; const files: string[] = [], inputs: string[] = [], outputs: string[] = [], fields: string[] = [], config: string[] = [];
+  let stateRead: PartUnderstanding['stateRead'] = null, typeRead: PartUnderstanding['typeRead'] = null, familyRead: PartUnderstanding['familyRead'] = null; const files: string[] = [], inputs: string[] = [], outputs: string[] = [], fields: string[] = [], config: string[] = [];
   // A later reading's names go first in its own order; one an earlier reading also named moves up with it.
   const steps: PartUnderstanding['steps'] = [], stateVars: ReadingStateVar[] = [], portMap: PartUnderstanding['portMap'] = []; let loop: PartUnderstanding['loop'] = null;
   const conditions: PartUnderstanding['conditions'] = [], fileRoles: ReadingFileRole[] = [];
@@ -3141,6 +3167,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     // The newest reading that gives a state (or a type) wins (readings are oldest first); the lists gather, newest first, each once.
     if (part.state) stateRead = { state: part.state, when: part.stateWhen ?? null, quote: part.stateQuote ?? null, at: r.at };
     if (part.type) typeRead = { type: part.type, quote: part.typeQuote ?? null, at: r.at };
+    if (part.familyQuote) familyRead = { family: part.family ?? null, role: part.familyRole ?? null, reason: part.familyReason ?? null, unclear: part.familyUnclear === true, quote: part.familyQuote, at: r.at };
     gather(files, part.files); gather(inputs, part.inputs); gather(outputs, part.outputs); gather(fields, part.fields); gather(config, part.config);
     // map-reading.9: the newest reading's steps and kept state go first by name; its loop wins; its port-map rows go first.
     if (part.steps?.length) { const own = part.steps.map(s => ({ ...s, at: r.at })); steps.splice(0, steps.length, ...own, ...steps.filter(s => !own.some(x => x.name === s.name))); }
@@ -3190,7 +3217,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
   // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
   // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, recordLoops, variants, statusClaims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
+  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, recordLoops, variants, statusClaims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, familyRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
     steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 24), conditions: conditions.slice(0, 24), fileRoles: fileRoles.slice(0, 12), rules, withdrawals, gates, revised, roleBasisRevised };
 }
 
@@ -3478,7 +3505,9 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
       withdrawalKind: c.withdrawalKind ?? null, gate: c.gate ?? null,
       // map-reading.18 (pipeline .43): who decided a rule and a v4 change's or withdrawal's fields, each on its own row (record-reading.ts).
       decidedBy: c.decidedBy && usable(c.decidedBy.quote) ? { text: c.decidedBy.text, when: c.decidedBy.when, quote: real(c.decidedBy.quote) } : null, actors: (c.actors ?? []).map(a => ({ ...a })),
-      mergedWhen: c.mergedWhen ?? null, contractChange: c.contractChange ? { ...c.contractChange } : null, shippedIn: c.shippedIn ? { ...c.shippedIn } : null, withdrawalMethod: c.withdrawalMethod ?? null } : {}) });
+      mergedWhen: c.mergedWhen ?? null, contractChange: c.contractChange ? { ...c.contractChange } : null, shippedIn: c.shippedIn ? { ...c.shippedIn } : null, withdrawalMethod: c.withdrawalMethod ?? null,
+      // map-reading.19 (recipe .45): the cites of the v5 row the claim stands on, and a change's 찾은 길 (record45, record43).
+      cites: structuredClone(c.cites ?? []), foundBy: c.foundBy ?? null } : {}) });
   const stateOf = (x: MapReplyPart): Pick<ReadingPart, 'state' | 'stateWhen' | 'stateQuote' | 'files' | 'type' | 'typeQuote' | 'inputs' | 'outputs' | 'fields' | 'config' | 'steps' | 'loop' | 'stateVars' | 'conditions' | 'fileRoles'
     | 'recordRef' | 'implementation' | 'implementationQuote' | 'members' | 'groupAxis' | 'groupAxisQuote' | 'statusClaims' | 'loops' | 'variants' | 'entries' | 'contracts'> => {
     if (!six) return {};
@@ -3491,7 +3520,9 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
       // map-reading.14: every step says whether the program put it there.
       steps: (x.steps ?? []).filter(s => usable(s.quote)).map(s => ({ name: s.name, does: s.does, uses: [...s.uses], quote: real(s.quote), program: s.program === true, when: s.when ?? null,
         // map-reading.18: the step's C-STEP row ID, loops, branch group, clauses and model (record-reading.ts).
-        recordRef: s.recordRef ?? null, loopIds: [...s.loopIds ?? []], alt: s.alt ? { ...s.alt } : null, branch: (s.branch ?? []).map(b => ({ ...b, to: [...b.to] })), model: s.model ?? null })),
+        recordRef: s.recordRef ?? null, loopIds: [...s.loopIds ?? []], alt: s.alt ? { ...s.alt } : null, branch: (s.branch ?? []).map(b => ({ ...b, to: [...b.to] })), model: s.model ?? null,
+        // map-reading.19: the step's v5 row's cites.
+        cites: structuredClone(s.cites ?? []) })),
       // map-reading.13: every loop and kept state says whether the program put it there.
       loop: x.loop && usable(x.loop.quote) ? { unit: x.loop.unit, stop: x.loop.stop, resume: x.loop.resume, quote: real(x.loop.quote), program: x.loop.program === true } : null,
       stateVars: (x.stateVars ?? []).map(s => ({ name: s.name, scope: s.scope, readBy: [...s.readBy], changedBy: [...s.changedBy], program: s.program === true })),
@@ -3505,15 +3536,25 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // map-reading.18 (pipeline .43): what the program read from v4 tables is stored only on its own fresh rows (one inside material or already
   // read is not kept), every key present (null or [] for a v3 record).
   const fresh = <T extends { quote: ReadingQuote }>(list: readonly T[] | undefined): T[] => (list ?? []).filter(x => usable(x.quote)).map(x => ({ ...structuredClone(x), quote: real(x.quote) }));
-  function part43(x: MapReplyPart): Pick<ReadingPart, 'recordRef' | 'implementation' | 'implementationQuote' | 'members' | 'groupAxis' | 'groupAxisQuote' | 'statusClaims' | 'loops' | 'variants' | 'entries' | 'contracts'> {
+  function part43(x: MapReplyPart): Pick<ReadingPart, 'recordRef' | 'implementation' | 'implementationQuote' | 'members' | 'groupAxis' | 'groupAxisQuote' | 'statusClaims' | 'loops' | 'variants' | 'entries' | 'contracts'
+    | 'family' | 'familyRole' | 'familyReason' | 'familyQuote' | 'familyUnclear' | 'added' | 'states' | 'cites'> {
     const impl = !!x.implementation && !!x.implementationQuote && usable(x.implementationQuote), axis = !!x.groupAxis && !!x.groupAxisQuote && usable(x.groupAxisQuote);
+    // map-reading.19 (recipe .45): a family stands on its row like a type (one inside material or already read is not kept).
+    const fam = !!x.familyQuote && usable(x.familyQuote) && (x.family !== null && x.family !== undefined || !!x.familyRole || !!x.familyReason);
     return { recordRef: x.recordRef ?? null, implementation: impl ? x.implementation! : null, implementationQuote: impl ? real(x.implementationQuote!) : null,
       members: x.members && usable(x.members.quote) ? { count: x.members.count, ordered: x.members.ordered, items: [...x.members.items], quote: real(x.members.quote) } : null,
       groupAxis: axis ? x.groupAxis! : null, groupAxisQuote: axis ? real(x.groupAxisQuote!) : null, statusClaims: fresh(x.statusClaims), loops: fresh(x.loops), variants: fresh(x.variants),
-      entries: fresh(x.entries), contracts: fresh(x.contracts) };
+      entries: fresh(x.entries), contracts: fresh(x.contracts),
+      family: fam ? x.family ?? null : null, familyRole: fam ? x.familyRole ?? null : null, familyReason: fam ? x.familyReason ?? null : null, familyQuote: fam ? real(x.familyQuote!) : null,
+      familyUnclear: fam && x.familyUnclear === true, added: x.added === true, states: fresh(x.states), cites: structuredClone(x.cites ?? []) };
   }
-  const line43 = (r: MapReply['relations'][number]): Pick<ReadingRelation, 'when' | 'optional' | 'variantRef' | 'crosses' | 'cadenceKind' | 'payloadRef' | 'via' | 'member'> => ({
-    when: r.when ?? null, optional: r.optional === true, variantRef: r.variantRef ?? null, crosses: r.crosses ?? null, cadenceKind: r.cadenceKind ?? null, payloadRef: r.payloadRef ?? null, via: r.via ?? null, member: r.member ?? null });
+  const line43 = (r: MapReply['relations'][number]): Pick<ReadingRelation, 'when' | 'optional' | 'variantRef' | 'crosses' | 'cadenceKind' | 'payloadRef' | 'via' | 'member' | 'claimNature' | 'cites'> => ({
+    when: r.when ?? null, optional: r.optional === true, variantRef: r.variantRef ?? null, crosses: r.crosses ?? null, cadenceKind: r.cadenceKind ?? null, payloadRef: r.payloadRef ?? null, via: r.via ?? null, member: r.member ?? null,
+    claimNature: r.claimNature ?? null, cites: structuredClone(r.cites ?? []) });
+  // map-reading.19 (recipe .45): the v5 record's level, pages, obligations, C-END rows, C-CHECK rows, C-HEAD defaults and first lines.
+  const reading45 = (): Pick<MapReading, 'level' | 'pages' | 'obligations' | 'pageEnds' | 'checks' | 'defaults' | 'firstLines'> => ({
+    level: reply.level ?? null, pages: structuredClone(reply.pages ?? []), obligations: structuredClone(reply.obligations ?? []), pageEnds: fresh(reply.pageEnds), checks: fresh(reply.checks),
+    defaults: fresh(reply.defaults), firstLines: [...reply.firstLines ?? []] });
   const reading43 = (): Pick<MapReading, 'basisScope' | 'focus' | 'projectStatus' | 'gatesNone' | 'coverage' | 'artifacts' | 'profileTables' | 'recordExtras' | 'recordDiagnostics'> => ({
     basisScope: reply.basisScope && usable(reply.basisScope.quote) ? { text: reply.basisScope.text, quote: real(reply.basisScope.quote) } : null,
     focus: reply.focus && usable(reply.focus.quote) ? { ...structuredClone(reply.focus), quote: real(reply.focus.quote) } : null,
@@ -3603,8 +3644,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     const holds = !!cur && !cur.excluded && !cur.replacedBy && !!cur.target && sameTarget(cur.target, ref!.target) && cur.correction === ref!.correction;
     return { ...rest, replaces: holds ? { reading: ref!.reading, index: ref!.index } : null };
   });
-  const reading: MapReading = { version: six ? 'map-reading.18' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
-    ...(six ? { basisAt: reply.basisAt ?? null, basisVersion: reply.basisVersion ?? null, portMap, ...reading43() } : {}),
+  const reading: MapReading = { version: six ? 'map-reading.19' : four ? 'map-reading.4' : three ? 'map-reading.3' : withRequests ? 'map-reading.2' : 'map-reading.1', id: meta.id, at: meta.at, model: meta.model, prompt: meta.prompt, hash: meta.hash,
+    ...(six ? { basisAt: reply.basisAt ?? null, basisVersion: reply.basisVersion ?? null, portMap, ...reading43(), ...reading45() } : {}),
     records: [...input.records.values()].map(r => { const shift = four ? 0 : texts.get(r.id)?.shift ?? 0;
       return shift ? { id: r.id, from: r.from + shift, to: r.to + shift, total: texts.get(r.id)!.raw.length } : { id: r.id, from: r.from, to: r.to, total: r.total, ...(four ? { digest: textDigest(r.text) } : {}) }; }),
     ...(six ? { exclusions: (EXCLUSIONS.get(reply) ?? []).map(x => { const source = x.record ? input.records.get(x.record) : null;

@@ -378,16 +378,24 @@ export function readRecordTables(text: string): RecordTables {
 /** A data row as the passes read it: its record, table and place; its cells and header as the v3 passes read them (the v4 columns a
  * v3 pass names under their v3 names: C-STEP's 부분 이름 from its 행 ID B03:S02, C-RULE without who decided and what keeps it, C-PART
  * without its 행 ID, C-DATA's 있는 곳 without its 쓰기 방식), and its cells by column. */
-export interface TableRow { record: string; id: string; dialect: 'v4' | 'v3'; from: number; to: number; cells: string[]; header: string[];
-  byColumn: Readonly<Record<string, string>>; row: RecordRow; table: RecordTable }
+/* Recipe .45: a v5 row (dialect 'v5') is one of its record's folded current rows (foldPages); its byColumn is the v4 view of it (the
+ * v4 column names, a 「부분」 cell's B IDs read as the parts' names, a 담당 F's F IDs as their paths, C-LINK's 설계/관찰 from its 주장 성격 and
+ * cites, C-LOOP's 몸통 단계 ID from the C-STEP rows that name the loop, C-SRC as C-FILES), so every v4 pass reads it as it reads a v4 row;
+ * its own cells stay on row (row.byColumn) and fold. */
+export interface TableRow { record: string; id: string; dialect: 'v5' | 'v4' | 'v3'; from: number; to: number; cells: string[]; header: string[];
+  byColumn: Readonly<Record<string, string>>; row: RecordRow; table: RecordTable; fold?: FoldRow; folded?: FoldedRecord }
 type Texts = Iterable<[string, { text: string }]>;
 const rowsCache = new WeakMap<object, Map<string, TableRow[]>>();
 /** A record group's own references (4.4 ID 약속): a part's 행 ID (B03) → its name, by recordId (a chunk head's), else by record. */
 export interface RecordRefs { parts: Map<string, string>; group: string }
-const groupOf = (record: string, t: RecordTables): string => t.chunk ? `id:${t.chunk.recordId}` : `record:${record}`;
+const groupOf = (record: string, t: RecordTables): string => t.page ? `v5:${t.page.recordId}@${t.page.basis}` : t.chunk ? `id:${t.chunk.recordId}` : `record:${record}`;
 export function recordRefs(texts: Texts): Map<string, RecordRefs> {
   const byGroup = new Map<string, Map<string, string>>(), out = new Map<string, RecordRefs>();
-  const all = [...texts].map(([record, { text }]) => [record, readRecordTables(text)] as const);
+  const list = [...texts], all = list.map(([record, { text }]) => [record, readRecordTables(text)] as const);
+  for (const f of foldPages(list.map(([record, { text }]) => ({ record, text })))) {
+    const parts = new Map<string, string>(); byGroup.set(`v5:${f.key}`, parts);
+    for (const r of f.rows.get('C-PART') ?? []) { const name = (r.row.byColumn['이름'] ?? '').trim(); if (name) parts.set(r.id, name); }
+  }
   for (const [record, t] of all) {
     const g = groupOf(record, t), parts = byGroup.get(g) ?? new Map<string, string>(); byGroup.set(g, parts);
     for (const table of t.byId.get('C-PART') ?? []) if (table.dialect === 'v4') for (const r of table.rows) {
@@ -419,15 +427,77 @@ export function rowsOf(texts: Texts & object, ids: readonly string[]): TableRow[
   const hit = memo?.get(key); if (hit) return hit;
   const want = new Set(ids), refs = ids.includes('C-STEP') ? recordRefs(texts) : undefined, out: TableRow[] = [];
   for (const [record, { text }] of texts) for (const table of readRecordTables(text).tables) {
-    // Recipe .45: a v5 table is read through its folded record (v5Rows), never row by row here.
+    // Recipe .45: a v5 table is read through its folded record (below), never row by row here.
     if (!want.has(table.id) || table.dialect === 'v5') continue;
     for (const row of table.rows) {
       const view = table.dialect === 'v4' ? v3View(table.id, row, table.header, refs?.get(record)) : { cells: row.cells.map(x => x.text), header: table.header };
       out.push({ record, id: table.id, dialect: table.dialect, from: row.from, to: row.to, cells: view.cells, header: view.header, byColumn: row.byColumn, row, table });
     }
   }
+  // Recipe .45: every v5 record's current rows of those tables (C-FILES is C-SRC), each in its v4 view.
+  const v5refs = refs ?? recordRefs(texts);
+  for (const f of foldPages([...texts].map(([record, { text }]) => ({ record, text })))) for (const id of ids) {
+    const source = id === 'C-FILES' ? 'C-SRC' : id;
+    for (const r of f.rows.get(source) ?? []) {
+      const view = v5View(f, r), header = [...(TABLE_DEFS.get(id)?.columns ?? Object.keys(view))];
+      const row: RecordRow = { from: r.row.from, to: r.row.to, byColumn: view, extra: {}, cells: header.map(h => ({ text: view[h] ?? '', raw: view[h] ?? '', from: r.row.from, to: r.row.to })) };
+      const v3 = v3View(id, row, header, v5refs.get(r.record));
+      out.push({ record: r.record, id, dialect: 'v5', from: r.row.from, to: r.row.to, cells: v3.cells, header: v3.header, byColumn: view, row, table: r.source, fold: r, folded: f });
+    }
+  }
   if (!memo) { memo = new Map(); rowsCache.set(texts, memo); }
   memo.set(key, out); return out;
+}
+/** The v4 type word of a v5 role whose type is clear (ROLE_TYPES), for the v4 passes; '' for any other role. */
+const V4_WORD_OF: Readonly<Record<string, string>> = { person: '사람', external: '외부 시스템', session: '세션', store: '행 파일·저장소', ai: 'AI 판단', timer: '타이머·일정', compute: '계산',
+  collector: '수집기', actor: '집행·외부 호출', screen: '화면', automation: '빌드·배포 자동화' };
+export const roleType = (cell: string): string | null => { const f = readFamily(cell); return f.ok && f.role ? fixedWord(f.role, ROLE_TYPES)?.value ?? null : null; };
+/** A v5 row read as a v4 row (see TableRow): B IDs in a cell as their parts' names (「B07: 통로」 as 「푸시 발송기: 통로」), F IDs as paths. */
+export function v5View(f: FoldedRecord, r: FoldRow): Record<string, string> {
+  const c = r.row.byColumn, nameOf = (id: string) => (f.byId.get(id)?.table === 'C-PART' ? (f.byId.get(id)!.row.byColumn['이름'] ?? '').trim() : '') || id;
+  const names = (cell: string | undefined) => (cell ?? '').replace(/(?<![A-Za-z0-9])B\d{1,3}(?!\d)(?!:[SL]\d)/g, id => nameOf(id));
+  const paths = (cell: string | undefined) => (cell ?? '').replace(/(?<![A-Za-z0-9])F\d{1,3}(?!\d)/g, id => f.ledger.files.get(id)?.path || id);
+  const base: Record<string, string> = { ...c };
+  switch (r.table) {
+    case 'C-PART': { const t = roleType(c['표현군·역할'] ?? ''); return { 이름: c['이름'] ?? '', 유형: t ? V4_WORD_OF[t] ?? '' : '', '하는 일 한 줄': c['하는 일 한 줄'] ?? '', '담당 파일·폴더': paths(c['담당 F']).replace(/\s*\+\s*/g, '·'), '구현 상태': c['구현 상태'] ?? '', '행 ID': r.id, 근거: c['근거'] ?? '', '표현군·역할': c['표현군·역할'] ?? '' }; }
+    case 'C-GROUP': {
+      const list = fixedWord(c['묶음 뜻'] ?? '', GROUP_WORDS)?.value === 'members';
+      const kids = list ? (c['자식들'] ?? '').split(/\s*·\s*(?=B\d{1,3}\s*:)|\s+·\s+/).map(x => x.replace(/^B\d{1,3}\s*:\s*/, '').trim()).filter(Boolean).join('·') : names(c['자식들']);
+      return { '부모 이름': names(c['부모']), '자식 이름들': kids, '묶음 뜻': c['묶음 뜻'] ?? '', 근거: c['근거'] ?? '', '행 ID': r.id };
+    }
+    case 'C-LINK': {
+      const nature = fixedWord(c['주장 성격'] ?? '', NATURE_WORDS)?.value ?? null;
+      // 12.2: observed only when the line claims a run seen and cites a run-grade E; defined relations are designs.
+      const mode = nature === 'defined' ? '설계' : nature === 'run-observed' && r.cites.some(x => x.grade === 'run') ? '관찰' : '';
+      return { ...base, '보내는 부분': names(c['보내는 부분']), '받는 부분': names(c['받는 부분']), '설계/관찰': mode };
+    }
+    case 'C-LOOP': {
+      const body = (f.rows.get('C-STEP') ?? []).filter(s => loopRefs(s.row.byColumn['소속 반복']).includes(r.id)).map(s => s.id);
+      return { ...base, '소유 부분': names(c['소유 부분']), '부모 반복 ID': c['부모 반복'] ?? '', '몸통 단계 ID': body.join(' ') };
+    }
+    case 'C-STEP': return { ...base, '쓰는 파일·함수': paths(c['쓰는 함수']), '소속 반복 ID': c['소속 반복'] ?? '' };
+    case 'C-DATA': {
+      const shared = /^\s*공유\s*[:：]\s*(.+)$/.exec(c['만드는 부분'] ?? '') ?? /^\s*공유\s*[:：]\s*(.+)$/.exec(c['읽는 부분'] ?? '');
+      return shared ? { ...base, '만드는 부분': '', '읽는 부분': '', '공유 부분': names(shared[1]) } : { ...base, '만드는 부분': names(c['만드는 부분']), '읽는 부분': names(c['읽는 부분']) };
+    }
+    case 'C-STATUS': return { ...base, 대상: names(c['대상']) };
+    case 'C-CHANGE': {
+      const actor = said5(c['관련 주체·역할']) ?? (f.head.get('기본 행위자')?.row.byColumn['값'] ?? '');
+      return { ...base, '바뀐 부분': names(c['바뀐 부분']), '관련 주체·역할': actor };
+    }
+    case 'C-ENTRY': return { ...base, '소유 부분': names(c['소유 부분']), '소비자·호출 주체': names(c['소비자·호출 주체']) };
+    case 'C-VARIANT': return { ...base, '구현 부분': names(c['구현 부분']) };
+    case 'C-CONTRACT': return { ...base, '제공 부분': names(c['제공 부분']), '외부 소비자': names(c['외부 소비자']) };
+    case 'C-SRC': {
+      const role = said5(c['역할']) ?? '', unread = fixedWord(c['읽음'] ?? '', READ_WORDS)?.value === 'unread', run = /\(\s*실행\s*시\s*\)/.test(role);
+      return { 경로: `${c['경로'] ?? ''}${run ? ' (실행 시)' : ''}`, '속한 부분': names(c['속한 부분']), '역할 한 줄': `${role.replace(/\s*\(\s*실행\s*시\s*\)/, '')}${unread ? ' (이번에 안 읽음)' : ''}`.trim(), 근거: '' };
+    }
+    default: {
+      if ('부분' in c) base['부분'] = names(c['부분']);
+      if (/^P\d-\d{2}$/.test(r.table)) for (const [k, v] of Object.entries(c)) if (k !== '행 ID' && k !== '근거') base[k] = names(v);
+      return base;
+    }
+  }
 }
 /** The same for plain texts (the record's own text, with no alias): each by its index. */
 export const rowsOfTexts = (texts: Iterable<string>, ids: readonly string[]): TableRow[] => rowsOf([...texts].map((text, i) => [`#${i}`, { text }] as [string, { text: string }]), ids);
@@ -627,6 +697,8 @@ export interface FoldedRecord { recordId: string; basis: string; title: string; 
   pages: FoldPage[]; held: FoldPage[]; conflicts: FoldPage[];
   /** The current rows by table (first appearance order) and by ID; C-HEAD by its 항목. */
   rows: Map<string, FoldRow[]>; byId: Map<string, FoldRow>; head: Map<string, FoldRow>; ledger: Ledger;
+  /** Every row an ID has stood on, replaced ones first (a basis quoting a row 교체 later replaced still names that ID). */
+  history: Map<string, FoldRow[]>;
   summary: { text: string; record: string; from: number; to: number; cites: Cite[] }[];
   ends: PageEnd[]; declared: { page: number; level: 0 | 1 | 2 | null }[]; nexts: { page: number; text: string }[];
   reservations: { id: string; name: string; page: number }[]; deleted: Set<string>; extras: FoldRow[];
@@ -674,7 +746,7 @@ function foldGroup(key: string, srcs: (FoldPage & { t: RecordTables; index: numb
   let expect = 1;
   for (const n of [...byN.keys()].sort((a, b) => a - b)) { const s = byN.get(n)!; if (n === expect && !held.length) { folded.push(s); expect++; } else held.push(s); }
   if (held.length) d('page-gap', held[0]!.record, held[0]!.n, null, `쪽 ${expect}`, held[0]!.from, held[0]!.headTo);
-  const rows = new Map<string, FoldRow[]>(), byId = new Map<string, FoldRow>(), head = new Map<string, FoldRow>(), deleted = new Set<string>(), extras: FoldRow[] = [];
+  const rows = new Map<string, FoldRow[]>(), byId = new Map<string, FoldRow>(), head = new Map<string, FoldRow>(), deleted = new Set<string>(), extras: FoldRow[] = [], history = new Map<string, FoldRow[]>();
   const summary: FoldedRecord['summary'] = [], ends: PageEnd[] = [], declared: FoldedRecord['declared'] = [], nexts: FoldedRecord['nexts'] = [];
   const states = new Map<string, TableState>(), replacedE = new Map<string, FoldRow>();
   const listOf = (table: string) => { let l = rows.get(table); if (!l) { l = []; rows.set(table, l); } return l; };
@@ -685,11 +757,11 @@ function foldGroup(key: string, srcs: (FoldPage & { t: RecordTables; index: numb
       if (!had) d('replace-unknown', r.record, r.page, r.table, r.id, r.row.from, r.row.to);
       else { const l = listOf(had.table); l.splice(l.indexOf(had), 1, r); if (r.table === 'C-EVID' && !replacedE.has(r.id)) replacedE.set(r.id, had); }
       if (!had) listOf(r.table).push(r);
-      byId.set(r.id, r); return;
+      byId.set(r.id, r); history.set(r.id, [...history.get(r.id) ?? [], r]); return;
     }
     if (had) { d('duplicate-id', r.record, r.page, r.table, r.id, r.row.from, r.row.to); extras.push(r); return; }
     if (r.mark === 'add') d('part-added', r.record, r.page, r.table, r.id, r.row.from, r.row.to);
-    byId.set(r.id, r); listOf(r.table).push(r);
+    byId.set(r.id, r); listOf(r.table).push(r); history.set(r.id, [r]);
   };
   for (const s of folded) {
     if (s.prev !== (s.n === 1 ? null : s.n - 1)) d('page-prev', s.record, s.n, null, `앞 쪽 ${s.prev ?? '—'}`, s.from, s.headTo);
@@ -799,7 +871,7 @@ function foldGroup(key: string, srcs: (FoldPage & { t: RecordTables; index: numb
     if (e.written.some(x => !there.has(x)) || [...there].some(x => !e.written.includes(x))) d('end-mismatch', e.record, e.page, e.table, null, e.from, e.to);
   }
   const record: FoldedRecord = { recordId: srcs[0]!.t.pages[srcs[0]!.index]!.recordId, basis: srcs[0]!.basis, title: srcs[0]!.title, key,
-    pages: folded.map(page), held: held.map(page), conflicts, rows, byId, head, ledger, summary, ends, declared, nexts, reservations, deleted, extras, states, diagnostics, level: 0, obligations: [] };
+    pages: folded.map(page), held: held.map(page), conflicts, rows, byId, history, head, ledger, summary, ends, declared, nexts, reservations, deleted, extras, states, diagnostics, level: 0, obligations: [] };
   const lv = recordLevel(record); record.level = lv.level; record.obligations = lv.obligations;
   const said = declared.at(-1)?.level;
   if (said !== undefined && said !== null && said !== lv.level && folded.length) { const s = folded.at(-1)!; d('level-mismatch', s.record, s.n, 'C-END', `${said}≠${lv.level}`, s.from, s.headTo); }
@@ -849,4 +921,22 @@ export function recordLevel(f: Pick<FoldedRecord, 'rows' | 'byId' | 'states' | '
   const q1Fix = out.some(o => o.kind === 'fix' && !!o.table && Q1_TABLES.includes(o.table) && (o.text.startsWith('표현군') || /칸 수|행 ID|행 없음/.test(o.text)));
   const level1 = settled(Q1_TABLES) && !q1Fix, level2 = level1 && settled(Q2_TABLES) && !out.some(o => !o.candidate);
   return { level: level2 ? 2 : level1 ? 1 : 0, obligations: out.slice(0, 200) };
+}
+
+/* ---------- The key set a segment carries (12.4 (d)): only the B, F and E IDs its own text cites, as a closed set. ---------- */
+/** A segment's keys: each B it cites with its name and one-line responsibility, each F with its path (and 읽음), each E with its grade and
+ * source, as the folded record has them; an ID the record does not hold is left out (the segment's own text says it as written). */
+export interface KeySet { record: string; parts: { id: string; name: string; does: string | null }[]; files: { id: string; path: string; read: string | null }[];
+  evidence: { id: string; grade: string | null; source: string | null }[] }
+const cut5 = (s: string, n: number) => { const t = s.replace(/\s+/g, ' ').trim(); return t.length <= n ? t : `${t.slice(0, n - 1)}…`; };
+/** The keys of the text cited within record (a whole page, or a piece of it a segment carries); null for a record of no v5 fold or a
+ * text citing none of its IDs. */
+export function segmentKeys(inputs: Iterable<{ record: string; text: string }>, record: string, cited: string): KeySet | null {
+  const f = foldPages(inputs).find(x => x.pages.some(p => p.record === record) || x.held.some(p => p.record === record)); if (!f) return null;
+  const ids = [...new Set(cited.match(/(?<![A-Za-z0-9])[BFE]\d{1,3}(?![\d])/g) ?? [])];
+  const parts = ids.filter(id => id.startsWith('B') && f.byId.get(id)?.table === 'C-PART').map(id => { const c = f.byId.get(id)!.row.byColumn;
+    return { id, name: cut5(c['이름'] ?? '', 60), does: said5(c['하는 일 한 줄']) ? cut5(c['하는 일 한 줄']!, 80) : null }; });
+  const files = ids.filter(id => id.startsWith('F') && f.ledger.files.has(id)).map(id => { const x = f.ledger.files.get(id)!; return { id, path: cut5(x.path, 120), read: x.read }; });
+  const evidence = ids.filter(id => id.startsWith('E') && f.ledger.evidence.has(id)).map(id => { const x = f.ledger.evidence.get(id)!; return { id, grade: x.grade, source: x.source ? cut5(x.source, 80) : null }; });
+  return parts.length || files.length || evidence.length ? { record, parts, files, evidence } : null;
 }
