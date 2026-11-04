@@ -90,7 +90,9 @@ export interface CardShapeIn { nameLines: number; rows: number; contract: number
   /** The rows of list values shown by name in the contract area (0 when the area holds pins, which hide below 가까이). */
   vals?: number;
   /** 1 when one of the kind rows is the defining blank 「?」 (drawn last; never shown below 가까이). */
-  blank?: number }
+  blank?: number;
+  /** 1 when the first row is a group's 안에 row (S8): at 중간 it reads before the bottom line. */
+  members?: number }
 /** What a card shows at a tier: its name lines, the kind line, the short status line (개요), how many kind rows and value rows,
  * and whether the contract area, the inner line, the sign row and the bottom line are drawn. */
 export interface CardFit { nameLines: number; kind: boolean; status: boolean; rows: number; vals: number; contract: boolean; inner: boolean; signs: boolean; bottom: boolean }
@@ -117,13 +119,15 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier): CardFit {
   // 중간: the kind line, the bottom line (it says the status) under the head's gap, then a second name line, the inner line, the
   // kind rows but the blank, the value rows and the sign row, each while it fits.
   const kind = take(T.kindLh); room -= T.gap;
+  // Each block of rows keeps its space after its last row (three quarters of the head gap: 12 at 가까이, 6 here, styles.css).
+  const after = T.gap * 0.75, said = Math.max(0, c.rows - (c.blank ? 1 : 0));
+  // A group's 안에 row (S8, its first row) reads before the bottom line: what belongs to the group is what a folded group says.
+  let rows = c.members && said > 0 && take(T.rowLh + after) ? 1 : 0;
   // A name that took two lines at 가까이 keeps its second line first; one that kept one line there takes a second (the larger type
   // here may wrap it) only with the room the rows leave, so the body is never left empty for a line the name may not need.
   const bottom = take(T.bottom); let names = nl >= 2 && take(T.titleLh) ? 2 : 1;
   const inner = c.inner > 0 && take(Math.max(24, T.rowLh + 4));
-  // Each block of rows keeps its space after its last row (three quarters of the head gap: 12 at 가까이, 6 here, styles.css).
-  const after = T.gap * 0.75;
-  let rows = 0; const said = Math.max(0, c.rows - (c.blank ? 1 : 0)); while (rows < said && take(T.rowLh + (rows ? 0 : after))) rows++;
+  while (rows < said && take(T.rowLh + (rows ? 0 : after))) rows++;
   let vals = 0; const all = c.vals ?? 0; while (rows === said && vals < all && take(T.rowLh + (vals ? 0 : after))) vals++;
   const signs = c.signs > 0 && take(Math.max(24, T.rowLh + 4));
   if (names === 1 && take(T.titleLh)) names = 2;

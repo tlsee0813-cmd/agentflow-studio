@@ -41,6 +41,19 @@ export function lensLook(id: LensId): LensLook {
     default: return { lines: { data: 1, control: 1, uses: 1, related: 1 }, lift: [], badges: true, rails: false, ops: false };
   }
 }
+/** The cards a lens is not about (S8, critique 9: switching lens barely changed the map): they step back (styles.css .lens-off,
+ * never hidden, never moved; a selected card and its partners stay). 데이터 이동 is about the ends of data lines and the stores; 시작과
+ * 반복 about the ends of control lines, triggers and gates, and the parts with a recorded loop. 구성과 역할, 상태와 공백 and 시나리오
+ * are about every card (시나리오 marks its own path). A lens that is about none of the drawn cards steps none back: the map never
+ * goes blank for want of a topic. */
+export function lensOffTopic(id: LensId, parts: readonly Pick<LensPart, 'id' | 'family' | 'loop'>[], lines: readonly Pick<LensLine, 'channel' | 'from' | 'to'>[]): Set<string> {
+  if (id !== 'data' && id !== 'start') return new Set();
+  const want: Channel = id === 'data' ? 'data' : 'control', ends = new Set<string>();
+  for (const l of lines) if (l.channel === want) { ends.add(l.from); ends.add(l.to); }
+  const about = (p: Pick<LensPart, 'id' | 'family' | 'loop'>) => ends.has(p.id) || (id === 'data' ? p.family === 'store' : p.family === 'trigger' || p.loop);
+  const off = new Set(parts.filter(p => !about(p)).map(p => p.id));
+  return off.size >= parts.length ? new Set() : off;
+}
 /** The classes a lens puts on the map's space (styles.css reads them): its own, and one per lifted family. */
 export const lensClasses = (id: LensId): string[] => [`lens-${id}`, ...lensLook(id).lift.map(f => `lens-lift-${f}`)];
 

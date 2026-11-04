@@ -65,7 +65,10 @@ export interface Edge { key: string; from: string; to: string; kind: RelationVie
   /** A line of the scope's spine: the longest directed chain of its parts, drawn on one line (see layoutScope). */
   spine?: boolean;
   /** The faces its two ends take (absent: both sides). The router keeps a top or a bottom only for a route of few turns. */
-  faces?: { a: PortFace; b: PortFace } }
+  faces?: { a: PortFace; b: PortFace };
+  /** A summary stroke that holds both directions between its two ends (line-grammar pairWays, S8): a head at each end; back: the
+   * relations that run from its 'to' to its 'from'. */
+  both?: boolean; back?: string[] }
 /** heads: over each run of outside partners that belong to the same place, that place once ('밖 · 확장 실행과 연결'). */
 export interface GhostHead { key: string; x: number; y: number; w: number; h: number; text: string }
 export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: GhostHead[]; bounds: { x: number; y: number; w: number; h: number };
