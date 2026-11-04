@@ -476,6 +476,15 @@ export function footMarks<T extends { n: number; grade: EvidenceGrade | null }>(
   const first = u[0]!, more = u.length - 1;
   return [{ text: first.grade ? `〔${EVIDENCE_LABEL[first.grade]}·${first.n} +${more}〕` : `〔${first.n} +${more}〕`, item: first, more }];
 }
+/** Footnotes of one group of rows (a list under one heading): an item cited by two rows or more is marked once, at the group's
+ * heading ('〔파일·2〕' once, not on eight rows); a row keeps the items only it cites. head: the hoisted numbers in number order;
+ * rows: what each row keeps, in its own order. A group of one row keeps its marks where they are. */
+export function hoistMarks(rows: readonly (readonly number[])[]): { head: number[]; rows: number[][] } {
+  const seen = new Map<number, number>();
+  for (const r of rows) for (const n of new Set(r)) seen.set(n, (seen.get(n) ?? 0) + 1);
+  const head = [...seen].filter(([, k]) => k >= 2).map(([n]) => n).sort((a, b) => a - b), up = new Set(head);
+  return { head, rows: rows.map(r => r.filter(n => !up.has(n))) };
+}
 /** 근거 분류 (8.5): the author's tag in words, kept apart from the app's own check (there is none: a tag is what the writing session
  * marked, never verified here). */
 const GRADE_WORDS: Record<EvidenceGrade, string> = { file: '작성 세션이 파일을 읽었다고 표시', run: '작성 세션이 직접 실행했다고 표시', report: '작성 세션이 다른 세션·문서·사람의 말을 옮겼다고 표시', guess: '작성 세션의 판단이라고 표시', unknown: '작성 세션이 모른다고 남김' };

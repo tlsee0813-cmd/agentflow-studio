@@ -20,6 +20,14 @@
   /* map design v3 9.1: a retired or unbuilt card one step lower, and the solid outline of what carries meaning (a lifecycle card, a
      trigger's top edge, a store's spine). */
   --surface-off: #eceae4; --line-essential: #8d8a82;
+  /* map design v3 9.3 · S7: a family's colours — the glyph tile's face and line (bg · ink), the head strip and the card's face at the
+     overview (strip, fainter than the tile, 5.4), and the family's outline accent (edge: a store's spine, a trigger's top edge and
+     wedge, a loop's tab and frame). Tints only: never a status, never on a line, a chip or the selection. */
+  --fam-participant-bg: #efeefa; --fam-participant-ink: #4b44a8; --fam-participant-strip: #f7f6fd; --fam-participant-edge: #aaa5dc;
+  --fam-process-bg: #edf1f7; --fam-process-ink: #34506e; --fam-process-strip: #f6f8fb; --fam-process-edge: #9db0c6;
+  --fam-store-bg: #eaf4ee; --fam-store-ink: #2f6a4f; --fam-store-strip: #f4f9f6; --fam-store-edge: #8dbca3;
+  --fam-trigger-bg: #f8f0e3; --fam-trigger-ink: #87560f; --fam-trigger-strip: #fcf8f1; --fam-trigger-edge: #d1aa70;
+  --fam-neutral-bg: #f1f1ef; --fam-neutral-ink: #5a5d64; --fam-neutral-strip: #ffffff; --fam-neutral-edge: #a9aaae;
   /* The ladder a part's records climb: a request, a report of work, a check. Reported is not checked: amber, then green. */
   --rung-off: #e4e7ec; --rung-ask: #667085; --rung-report: #f79009; --rung-check: #12b76a;
   /* Status tints: a soft fill and a darker text of the same hue, for chips and short messages (text on its own soft at 4.5:1+). */
@@ -45,6 +53,25 @@
   --download: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.5v7.5M4.75 6.9 8 10.1l3.25-3.2M3 13h10'/%3E%3C/svg%3E");
   --dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='3.5' cy='8' r='1.35'/%3E%3Ccircle cx='8' cy='8' r='1.35'/%3E%3Ccircle cx='12.5' cy='8' r='1.35'/%3E%3C/svg%3E");
   color-scheme: light;
+}
+/* The family colours for a dark surface (map design v3 9.2–9.3). The Studio itself has no dark theme yet (9.2: new work; its
+   surfaces stay light under a dark system setting), so these apply only once the page opts in: data-theme="dark", or "auto" with a
+   dark system setting. Never under a light card. */
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"]:not([data-theme="light"]) {
+    --fam-participant-bg: #2a2840; --fam-participant-ink: #b6afff; --fam-participant-strip: #222034; --fam-participant-edge: #5d5891;
+    --fam-process-bg: #232b36; --fam-process-ink: #a3bbd8; --fam-process-strip: #1e242d; --fam-process-edge: #50627a;
+    --fam-store-bg: #1f2e27; --fam-store-ink: #92d3b0; --fam-store-strip: #1b2621; --fam-store-edge: #4c7a62;
+    --fam-trigger-bg: #33291b; --fam-trigger-ink: #e9bb6c; --fam-trigger-strip: #2a2218; --fam-trigger-edge: #8a6a3a;
+    --fam-neutral-bg: #2a2b2e; --fam-neutral-ink: #b6b9bf; --fam-neutral-strip: #1b1d21; --fam-neutral-edge: #63666c;
+  }
+}
+:root[data-theme="dark"] {
+  --fam-participant-bg: #2a2840; --fam-participant-ink: #b6afff; --fam-participant-strip: #222034; --fam-participant-edge: #5d5891;
+  --fam-process-bg: #232b36; --fam-process-ink: #a3bbd8; --fam-process-strip: #1e242d; --fam-process-edge: #50627a;
+  --fam-store-bg: #1f2e27; --fam-store-ink: #92d3b0; --fam-store-strip: #1b2621; --fam-store-edge: #4c7a62;
+  --fam-trigger-bg: #33291b; --fam-trigger-ink: #e9bb6c; --fam-trigger-strip: #2a2218; --fam-trigger-edge: #8a6a3a;
+  --fam-neutral-bg: #2a2b2e; --fam-neutral-ink: #b6b9bf; --fam-neutral-strip: #1b1d21; --fam-neutral-edge: #63666c;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; overflow: hidden; }
@@ -313,6 +340,8 @@ button:disabled { opacity: .5; cursor: default; }
 .edge-label.on { max-width: none; background: var(--accent-soft); color: var(--accent-strong); }
 /* Chips keep their screen size whatever the zoom (--inv = 1/k, applyCamera); placed by their scaled size, from their top-left. */
 .edge-label, .edge-count, .edge-badge { transform: scale(var(--inv, 1)); transform-origin: 0 0; }
+/* Line labels follow the zoom a little (11–14px on screen, line-grammar labelPx, --linv): never heavier than a card's name. */
+.edge-label { transform: scale(var(--linv, var(--inv, 1))); }
 .edge-label.said { font-weight: 500; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
 .edge-label.on.said { max-width: none; }
 /* A line's text badge (6.2): what the record wrote of when it flows, its words as written, 12px on a 16px chip (20px selected,
@@ -472,11 +501,11 @@ button:disabled { opacity: .5; cursor: default; }
 .glyph-tile > svg { width: calc(var(--t-glyph, 20px) * .8); height: calc(var(--t-glyph, 20px) * .8); }
 .glyph-tile .glyph-badge { position: absolute; right: -4px; bottom: -4px; display: grid; place-items: center; width: 11px; height: 11px; border-radius: 3px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); color: var(--text-3); }
 .glyph-tile .glyph-badge > svg { width: 9px; height: 9px; }
-.glyph-tile.g-participant { --fam-bg: #efeefa; --fam-ink: #4b44a8; }
-.glyph-tile.g-process { --fam-bg: #edf1f7; --fam-ink: #34506e; }
-.glyph-tile.g-store { --fam-bg: #eaf4ee; --fam-ink: #2f6a4f; }
-.glyph-tile.g-trigger { --fam-bg: #f8f0e3; --fam-ink: #87560f; }
-.glyph-tile.g-neutral { --fam-bg: #f1f1ef; --fam-ink: #5a5d64; }
+.glyph-tile.g-participant { --fam-bg: var(--fam-participant-bg); --fam-ink: var(--fam-participant-ink); }
+.glyph-tile.g-process { --fam-bg: var(--fam-process-bg); --fam-ink: var(--fam-process-ink); }
+.glyph-tile.g-store { --fam-bg: var(--fam-store-bg); --fam-ink: var(--fam-store-ink); }
+.glyph-tile.g-trigger { --fam-bg: var(--fam-trigger-bg); --fam-ink: var(--fam-trigger-ink); }
+.glyph-tile.g-neutral { --fam-bg: var(--fam-neutral-bg); --fam-ink: var(--fam-neutral-ink); }
 .c-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .node.card .c-name { font-size: var(--t-title, 15px); line-height: var(--t-title-lh, 20px); font-weight: 600; letter-spacing: -.012em; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: var(--nl, 2); -webkit-box-orient: vertical; overflow: hidden; }
 .c-kind { display: flex; align-items: center; gap: 6px; min-width: 0; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-meta); color: var(--text-3); white-space: nowrap; overflow: hidden; }
@@ -1882,12 +1911,12 @@ button:disabled { opacity: .5; cursor: default; }
 /* The full reading keeps the passage's first stretch under each line. */
 .claim .cl-quote { min-width: 0; quotes: "“" "”"; font-size: 12px; line-height: 17px; color: var(--text-3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
 /* The lens head: the record's state word (a dot in the state's colour, its grade and when it was said), else the ladder. */
-.lens-state { margin: 6px 0 0; display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
-.lens-state .dot { margin-top: 6px; }
-.lens-state.st-running .dot { background: var(--ok); } .lens-state.st-working .dot { background: var(--busy); }
-.lens-state.st-unbuilt .dot { background: var(--text-4); } .lens-state.st-retired .dot { background: var(--warn); }
-.lens-state.st-stopped .dot { background: var(--text-4); box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 2.75px var(--warn); }
-.lens-state.st-unknown .dot { background: none; border: 1px dashed var(--text-4); }
+.pane-state { margin: 6px 0 0; display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.pane-state .dot { margin-top: 6px; }
+.pane-state.st-running .dot { background: var(--ok); } .pane-state.st-working .dot { background: var(--busy); }
+.pane-state.st-unbuilt .dot { background: var(--text-4); } .pane-state.st-retired .dot { background: var(--warn); }
+.pane-state.st-stopped .dot { background: var(--text-4); box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 2.75px var(--warn); }
+.pane-state.st-unknown .dot { background: none; border: 1px dashed var(--text-4); }
 /* The lens head: the ladder and what it says. */
 /* A store's writers and readers, counted from adopted relations (map spec 2.4): one quiet line under the state. */
 .lens-store { margin: 4px 0 0; font-size: 12px; line-height: 16px; color: var(--text-3); font-variant-numeric: tabular-nums; }
@@ -2542,12 +2571,12 @@ button:disabled { opacity: .5; cursor: default; }
 .pane-head { border-bottom: 0; padding-bottom: 6px; }
 .pane-head .visit-line { margin: 6px 0 0; max-width: 100%; }
 .pane-head .lens-ladder { flex-wrap: wrap; }
-.lens-state .lk-line { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.pane-state .lk-line { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .lens-kind { font-weight: var(--fw-name); color: var(--text); }
 .lens-kind.blank { font-weight: var(--fw-meta); color: var(--text-3); }
 .lk-sep { margin: 0 5px; color: var(--text-4); }
 .lens-ops-at { color: var(--text-4); font-size: 12px; }
-.lens-state > .ev { flex: none; align-self: center; }
+.pane-state > .ev { flex: none; align-self: center; }
 .pane-tabs { flex: none; display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .pane-tab { position: relative; height: 36px; padding: 0 10px; border: 0; background: none; font-size: 13px; font-weight: var(--fw-name); color: var(--text-3); font-variant-numeric: tabular-nums; }
 .pane-tab:first-child { margin-left: -10px; }
@@ -2744,3 +2773,96 @@ li:has(> .port + .fn-marks) > :not(.port):not(.fn-marks) { grid-column: 1 / -1; 
 li > .port + .fn-marks { margin: 0; padding-top: 6px; }
 .dispute-form .df-reason input { flex: none; width: 14px; height: 14px; margin: 0; padding: 0; border: 0; accent-color: var(--accent); }
 .dispute-form > input[type="text"] { flex: none; height: 28px; }
+
+/* ---------- S7 · kind by structure, badges, labels by tier, the legend and the pane (map design v3 3.1, 5.4, 5.5, 6.2, 7.2, 8.3) ---------- */
+/* Each family's colours on the card (the tile reads them too). */
+.node.card { --c-pl: var(--c-pad); --c-pt: 12px; --fam-strip: var(--fam-neutral-strip); --fam-edge: var(--fam-neutral-edge); }
+.node.card.f-participant { --fam-bg: var(--fam-participant-bg); --fam-ink: var(--fam-participant-ink); --fam-strip: var(--fam-participant-strip); --fam-edge: var(--fam-participant-edge); }
+.node.card.f-process { --fam-bg: var(--fam-process-bg); --fam-ink: var(--fam-process-ink); --fam-strip: var(--fam-process-strip); --fam-edge: var(--fam-process-edge); }
+.node.card.f-store { --fam-bg: var(--fam-store-bg); --fam-ink: var(--fam-store-ink); --fam-strip: var(--fam-store-strip); --fam-edge: var(--fam-store-edge); --c-pl: calc(var(--c-pad) - 3px); }
+.node.card.f-trigger { --fam-bg: var(--fam-trigger-bg); --fam-ink: var(--fam-trigger-ink); --fam-strip: var(--fam-trigger-strip); --fam-edge: var(--fam-trigger-edge); }
+/* The head strip: the family's faint tint behind the glyph, the name and the kind line, edge to edge, a hairline under it. It takes
+   exactly the room the head had (negative margins against the card's padding), so no card's box or contact point moves. */
+.node.card .c-head { margin: calc(-1 * var(--c-pt)) calc(-1 * var(--c-pad)) 6px calc(-1 * var(--c-pl)); padding: var(--c-pt) var(--c-pad) calc(var(--t-gap, 16px) - 6px) var(--c-pl); background: var(--fam-strip); box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--fam-edge) 35%, transparent); }
+.node.card.f-neutral .c-head { box-shadow: none; }
+/* Silhouettes (3.1), kept at every zoom: a participant is round-ended with a round glyph tile; a process is a plain rectangle under
+   its strip; a store has its spine in the family's edge and a double rule under its head; a trigger or gate has square top corners
+   under a heavier top edge and a wedge on its left edge (where it starts things); a neutral part has no strip. */
+.node.card.f-participant { border-radius: 22px; }
+.node.card.f-participant .glyph-tile { border-radius: 50%; }
+.node.card.f-store { border-left-color: var(--fam-edge); }
+.node.card.f-store .c-head { box-shadow: 0 3px 0 -2px var(--surface), 0 4px 0 -2px var(--fam-edge); }
+.node.card.f-trigger { border-top-color: var(--fam-edge); border-top-width: 3px; padding-top: 10px; --c-pt: 10px; }
+.node.card.f-trigger::before { content: ""; position: absolute; left: 0; top: 16px; border: 6px solid transparent; border-left: 7px solid var(--fam-edge); pointer-events: none; }
+/* An untyped part whose record keeps steps or a loop: a structural double frame (it has an inside), its kind line naming what is
+   recorded (「유형 미기록 · 단계 N」); never a family it was not given. */
+.node.card.structural { border-color: var(--line-essential); box-shadow: 0 1px 2px rgb(15 23 42 / 6%), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--fam-neutral-edge); }
+.node.card.structural:hover { box-shadow: 0 1px 2px rgb(15 23 42 / 6%), 0 4px 10px -4px rgba(17,24,39,.14), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--fam-neutral-edge); }
+.node.card.structural.selected, .node.card.structural.selected:hover { box-shadow: 0 0 0 1px var(--accent), 0 4px 12px -6px rgba(51,88,255,.4), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--fam-neutral-edge); }
+.node.card.structural .c-kind-word.unknown { color: var(--text-3); }
+/* A loop container (its well): framed in its family's edge; the ↻ tab reads on every card with a recorded loop, at every tier. */
+.node.card.has-well:not(.selected) { border-color: var(--fam-edge); }
+.c-loop-tab { flex: none; align-self: flex-start; display: inline-grid; place-items: center; min-width: 20px; height: 18px; margin: 1px 0 0; padding: 0 4px; border: 1px solid var(--fam-edge, var(--line-strong)); border-radius: 9px; background: var(--surface); color: var(--fam-ink, var(--text-2)); font-size: var(--t-kind, 12px); line-height: 16px; font-weight: 600; }
+.node.card.has-kids .c-loop-tab { margin-right: 2px; }
+/* The overview and the dot map (5.4): the card's face is its family's faint tint, so a silhouette reads as a mass. */
+.space:is(.tier-far, .tier-dots) .node.card:not(.life) { background: var(--fam-strip); }
+.space:is(.tier-far, .tier-dots) .node.card:not(.life) .c-head { background: none; box-shadow: none; }
+.space:is(.tier-far, .tier-dots) .node.card.f-neutral:not(.life) { background: var(--surface); }
+/* Names break at a separator or between words (app breakable: a <wbr> after · / . _ - : ,), never inside a word. */
+.node.card .c-name, .ghost-name, .ghost-head { overflow-wrap: break-word; }
+.port-top strong { flex: 0 1 auto; min-width: min(7em, 55%); word-break: keep-all; overflow-wrap: break-word; }
+.chain-what { flex: 1 1 0; }
+
+/* Badges (6.2): the record's own words; a relative reference it left unresolved is muted as written; a badge with no room reads its
+   rhythm glyph; badges a part's side had no room for gather in one 「+N」. Each carries its words in its tip. */
+.edge-badge { pointer-events: auto; cursor: help; }
+.edge-badge.unres { color: var(--text-4); border-color: var(--line); background: var(--surface-2); font-weight: 420; }
+.edge-badge.glyph { min-width: 16px; justify-content: center; padding: 0 3px; font-size: 11px; color: var(--text-3); }
+.edge-badge.b-more { color: var(--text-3); border-color: var(--line-strong); background: var(--surface-2); font-variant-numeric: tabular-nums; }
+.tip-badge-w { color: var(--text-2); }
+.edge-label.brief { max-width: 132px; }
+
+/* The legend (7.2): folded to one chip when it would cover cards (or on request); a picked item stands out and the rest of the map
+   steps back; 그것만 hides what the item does not stand for. */
+.line-key.legend { width: 280px; overflow-x: hidden; }
+.line-key.legend.folded { width: auto; max-width: min(440px, calc(100% - 32px)); padding: 0; overflow: hidden; border-radius: 999px; }
+.lg-chip { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: none; font-size: 12px; font-weight: var(--fw-meta); color: var(--text-2); white-space: nowrap; }
+.lg-chip:hover { background: var(--chip); }
+.lg-chip-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lg-chip-state { flex: none; color: var(--accent-strong); }
+.lg-chip-v { flex: none; font-size: 10px; color: var(--text-3); }
+.lg-head { position: relative; padding-right: 30px; }
+.lg-fold { position: absolute; right: 0; top: -2px; width: 24px; height: 24px; padding: 0; border: 0; border-radius: var(--r-sm); background: none; font-size: 11px; color: var(--text-3); }
+.lg-fold:hover { background: var(--chip); color: var(--text); }
+.lg-row.m-solo .lg-item { border-color: var(--text-3); color: var(--text); font-weight: var(--fw-name); }
+.lg-row.m-out .lg-item { color: var(--text-4); }
+.lg-menu { margin-left: 8px; min-width: 0; }
+.lg-act { white-space: nowrap; min-width: 0; }
+.lg-act kbd { flex: none; white-space: nowrap; }
+.space .node.lg-pick, .space .ghost.lg-pick, .space .frame.lg-pick { box-shadow: 0 0 0 2px var(--accent), 0 0 0 6px var(--accent-soft); }
+.space .edge.lg-pick .edge-line { stroke: var(--accent); --lw: 2.5; opacity: 1; }
+.space .node.lg-fade, .space .ghost.lg-fade { opacity: .35; }
+.space .edge.lg-fade .edge-line { opacity: .18; }
+.edge-label.lg-fade, .edge-badge.lg-fade, .edge-count.lg-fade { opacity: .35; }
+.lg-badge { min-width: 16px; text-align: center; font-size: 11px; }
+
+/* The pane's 구조 (8.3): 「선택한 선」 over it while a line is picked; 받는 것 · 내는 것 once; one footnote per group; the unlinked
+   values once, folded, at the end. */
+.pn-line { margin: 0 0 var(--s-4); padding: 10px 12px 8px; border: 1px solid var(--accent-line); border-radius: var(--r-md); background: var(--accent-soft); }
+.pl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pn-line > .pl-head > h3 { margin: 0; display: flex; align-items: baseline; gap: 6px; font: 590 12px/16px var(--font); color: var(--accent-strong); }
+.pn-line > .pl-head > h3 small { font-weight: 500; color: var(--text-3); }
+.pl-clear { flex: none; font-size: 12px; }
+.pl-rel + .pl-rel { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--accent-line); }
+.pl-title { margin: 6px 0 4px; font-size: 14px; line-height: 20px; color: var(--text); word-break: keep-all; overflow-wrap: break-word; }
+.pl-title strong { font-weight: var(--fw-name); }
+.pl-arrow { color: var(--text-3); }
+.pl-ch { font-size: 12.5px; color: var(--text-3); }
+.pn-line .line-block { margin: 0; }
+.lb-facts .unres { color: var(--text-4); }
+.pn-above { margin: 2px 0 6px; font-size: 12px; line-height: 16px; color: var(--text-4); }
+details.pn-unlinked { display: block; margin-top: var(--s-4); padding: 6px 10px; }
+details.pn-unlinked > summary { cursor: pointer; font-size: 12px; line-height: 18px; color: var(--text-4); }
+details.pn-unlinked > summary small { color: var(--text-4); font-variant-numeric: tabular-nums; }
+details.pn-unlinked[open] > summary { margin-bottom: 4px; }
+.fn-marks.fn-group { margin-left: 6px; font-weight: 500; }

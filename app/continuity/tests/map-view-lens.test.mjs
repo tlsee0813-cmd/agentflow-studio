@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, stepLens, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, lensKey, readLensRecord, writeLensRecord } from '../dist/public/client/view-lens.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, stepLens, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, covers, lensKey, readLensRecord, writeLensRecord } from '../dist/public/client/view-lens.js';
 
 const part = (id, family, extra = {}) => ({ id, family, type: null, short: '운영 기록 없음', loop: false, unlinked: false, unmapped: 0, ...extra });
 const line = (key, channel, extra = {}) => ({ key, channel, badge: false, from: 'a', to: 'b', ...extra });
@@ -60,10 +60,12 @@ test('LENS-4 the legend as a filter: click selects (again lets go), the menu dim
   const m = legendMarks(s, items);
   assert.deepEqual([...m.picked], ['p2']); assert.deepEqual([...m.dim].sort(), ['p1', 'p4']); assert.deepEqual([...m.hide], ['p3']);
   const solo = legendApply(s, { do: 'solo', id: 'family-store' }, items);
-  assert.equal(solo.picked, 'family-store');
-  assert.deepEqual(Object.keys(solo.mode).sort(), ['family-participant', 'family-process', 'family-trigger']);
-  assert.ok(Object.values(solo.mode).every(v => v === 'hide'));
+  assert.equal(solo.picked, 'family-store'); assert.equal(solo.solo, 'family-store');
+  assert.deepEqual(solo.mode, { 'family-process': 'dim', 'family-trigger': 'hide' }, 'solo is its own state: the other items keep theirs');
+  assert.equal(legendHead(solo, items), '그것만 · 저장 · 숨김 1 · 흐림 1');
+  assert.equal(legendApply(solo, { do: 'solo', id: 'family-store' }, items).solo, null, 'solo again: everything back');
   assert.deepEqual(legendApply(solo, { do: 'all' }, items).mode, {}, '모두 보기');
+  assert.equal(legendApply(solo, { do: 'all' }, items).solo, null);
   assert.deepEqual(legendApply(solo, { do: 'clear' }, items), NO_FILTER, 'Esc');
   assert.equal(legendHead(NO_FILTER), '');
   // A line item marks its lines by key.
@@ -82,7 +84,9 @@ test('LENS-5 keys: Alt+1…5 pick a lens, [ and ] step, nothing else (Ctrl, plai
 
 test('LENS-6 the view record per map: lens and legend kept, a broken or missing record reads as the default', () => {
   const raw = writeLensRecord(null, 'map-a', { lens: 'state', legend: { picked: 'short-폐기', mode: { unlinked: 'hide', x: 'dim' } } });
-  assert.deepEqual(readLensRecord(raw, 'map-a'), { lens: 'state', legend: { picked: 'short-폐기', mode: { unlinked: 'hide', x: 'dim' } } });
+  assert.deepEqual(readLensRecord(raw, 'map-a'), { lens: 'state', legend: { picked: 'short-폐기', mode: { unlinked: 'hide', x: 'dim' }, solo: null } });
+  const soloed = writeLensRecord(null, 'm', { lens: 'data', legend: { picked: 'badge', mode: {}, solo: 'badge' } });
+  assert.equal(readLensRecord(soloed, 'm').legend.solo, 'badge', 'solo is kept with the map');
   assert.deepEqual(readLensRecord(raw, 'map-b'), { lens: 'compose', legend: NO_FILTER });
   assert.deepEqual(readLensRecord('{oops', 'map-a'), { lens: 'compose', legend: NO_FILTER });
   assert.deepEqual(readLensRecord(JSON.stringify({ 'map-a': { lens: 'odd', legend: { mode: { a: 'gone' } } } }), 'map-a'), { lens: 'compose', legend: NO_FILTER });
@@ -99,4 +103,57 @@ test('LENS-7 switching lens or using the legend never lays out, routes or re-pla
     const b = body(fn);
     for (const call of ['renderSpace(', 'relayout(', 'layoutScope(', 'routeEdges(', 'positionWorld(', 'placeEdgeLabels(', 'placeLineLabels(', 'fitView(', 'applyCamera(']) assert.ok(!b.includes(call), `${fn} calls ${call}`);
   }
+});
+
+// S7 (critique 7): 그것만 hides what its item does not stand for (a part no item lists included), never the matching ones; a plain
+// click gives a visible emphasis (the rest of the map steps back); a folded legend is one chip.
+const WL = [line('d1', 'data', { badge: true, from: 'p1', to: 'p2' }), line('d2', 'data', { from: 'p2', to: 'p4' }), line('c1', 'control', { badge: true, from: 'p3', to: 'p1' }),
+  line('u1', 'uses', { from: 'p4', to: 'p5' }), line('r1', null, { from: 'p5', to: 'p1' }), line('sum:x', 'data', { sum: true, badge: true, from: 'p1', to: 'p2' })];
+const WORLD = { parts: PARTS.map(p => p.id), lines: WL };
+
+test('LENS-8 solo shows its item alone: the badge lines stay though 데이터 선 is hidden; unrelated parts and lines are hidden', () => {
+  const items = legendItems('data', PARTS, WL);
+  let s = legendApply(NO_FILTER, { do: 'hide', id: 'line-data' }, items);
+  s = legendApply(s, { do: 'solo', id: 'badge' }, items);
+  const m = legendMarks(s, items, WORLD);
+  assert.deepEqual([...m.picked].sort(), ['line:c1', 'line:d1', 'line:sum:x'], 'the soloed lines, outlined');
+  assert.ok(!m.hide.has('line:d1') && !m.hide.has('line:sum:x'), 'a badge line also under the hidden 데이터 선 stays shown');
+  assert.deepEqual([...m.hide].sort(), ['line:d2', 'line:r1', 'line:u1', 'p4', 'p5'], 'everything the badge item does not stand for, p4 and p5 (in no item) included');
+  assert.deepEqual([...m.dim].sort(), ['p1', 'p2', 'p3'], 'the parts the soloed lines join stay, as context');
+  assert.equal(m.fade.size, 0);
+  // A family solo keeps the lines between its own parts.
+  const ci = legendItems('compose', PARTS, WL);
+  const fam = legendMarks(legendApply(NO_FILTER, { do: 'solo', id: 'family-process' }, ci), ci, { parts: PARTS.map(p => p.id), lines: [...WL, line('pp', 'data', { from: 'p1', to: 'p4' })] });
+  assert.ok(!fam.hide.has('p1') && !fam.hide.has('p4') && !fam.hide.has('line:pp'));
+  assert.ok(fam.hide.has('p2') && fam.hide.has('line:d1'));
+});
+
+test('LENS-9 a plain click is visible: the picked targets outlined, everything else steps back (never hidden); the picked never dimmed by another item', () => {
+  const items = legendItems('compose', PARTS, WL);
+  const m = legendMarks(legendApply(NO_FILTER, { do: 'pick', id: 'family-store' }, items), items, WORLD);
+  assert.deepEqual([...m.picked], ['p2']);
+  assert.ok(!m.fade.has('p2'));
+  assert.deepEqual([...m.fade].filter(x => !x.startsWith('line:')).sort(), ['p1', 'p3', 'p4', 'p5']);
+  assert.equal(m.hide.size, 0, 'a pick hides nothing');
+  // A picked line keeps the parts it joins out of the fade.
+  const start = legendItems('start', PARTS, WL), lm = legendMarks(legendApply(NO_FILTER, { do: 'pick', id: 'line-control' }, start), start, WORLD);
+  assert.ok(!lm.fade.has('p3') && !lm.fade.has('p1') && lm.fade.has('p4'));
+  // An element the picked item stands for is never dimmed or hidden by another item.
+  const data = legendItems('data', PARTS, WL), both = legendMarks({ picked: 'line-data', mode: { badge: 'hide' }, solo: null }, data, WORLD);
+  assert.ok(both.picked.has('line:d1') && !both.hide.has('line:d1'));
+  assert.ok(both.hide.has('line:c1'), 'a badge line the picked item does not stand for stays hidden');
+  // Without the world (as before S7), the items' own targets are the universe.
+  assert.ok(legendMarks(legendApply(NO_FILTER, { do: 'pick', id: 'family-store' }, items), items).fade.has('p1'));
+});
+
+test('LENS-10 the folded legend is one chip (lens and first items with counts); it folds when, opened, it would cover a card', () => {
+  const items = legendItems('compose', PARTS, LINES);
+  assert.equal(legendChip('compose', items), '구성 · 참여자 1 · 처리 2 · +2');
+  assert.equal(legendChip('data', legendItems('data', PARTS, LINES), 4), '데이터 · 데이터 선 2 · 저장 1 · 박자·조건 배지 (기록의 글자) 2 · 포트 대응 미기록 2');
+  assert.equal(legendChip('scenario', []), '시나리오');
+  const box = { x: 16, y: 500, w: 280, h: 200 };
+  assert.equal(covers(box, [{ x: 400, y: 100, w: 272, h: 200 }]), false);
+  assert.equal(covers(box, [{ x: 200, y: 650, w: 272, h: 200 }]), true);
+  assert.equal(covers(box, [{ x: 299, y: 500, w: 10, h: 10 }]), true, 'within the 4px margin');
+  assert.equal(covers(box, []), false);
 });

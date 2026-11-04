@@ -42,6 +42,16 @@ export function innerOf(type: PartType | null | undefined, steps: number, loop: 
 }
 /** The kind word under a card's name. */
 export const kindWord = (type: PartType | null | undefined): string => (type ? TYPE_LABEL[type] : '유형 미상');
+/** A part whose record names no type but records an inside of its own (steps, or a loop): its structure is a fact of the record,
+ * so the card draws it (a structural outline) and says what is recorded — never a type made up for it. */
+export const structuralOf = (type: PartType | null | undefined, steps: number, loop: boolean): boolean => !type && (steps > 0 || loop);
+/** The kind line: the type word; for an untyped part with an inside of its own, 「유형 미기록 · 단계 N」 (or 「유형 미기록 · 반복」 for a
+ * loop with no step recorded); 「유형 미상」 otherwise. */
+export function kindLabel(type: PartType | null | undefined, steps: number, loop: boolean): string {
+  if (type) return TYPE_LABEL[type];
+  if (steps > 0) return `유형 미기록 · 단계 ${steps}`;
+  return loop ? '유형 미기록 · 반복' : '유형 미상';
+}
 /** The lifecycle chip (3.7): the record's state word for a part that is retired or not built ('폐기', '미구현'; '설계만' when the
  * line it rests on says so); null for any other state. Never a move to another group, never a colour. */
 export function lifecycleOf(state: PartState | null | undefined, quote = ''): string | null {
@@ -104,6 +114,9 @@ export interface CardTemplate {
    * middle tiers keep; null for any other card. */
   well: Well | null;
   signs: boolean;
+  /** An untyped part with recorded steps or a loop (structuralOf): drawn with the structural outline, its kind line naming what is
+   * recorded (kindLabel). */
+  structural: boolean;
 }
 
 /** The most kind rows a card holds (the blank slot included), the most pins a side holds. */
@@ -221,7 +234,8 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   const ws = f.steps.map(s => ({ name: s.name ?? '', program: s.program === true }));
   const well = f.loop && isContainer(ws, f.loop)
     ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], stateVars: f.stateVars ?? 0, open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
-  return { family: familyOf(f.type), inner, glyph: f.type ?? 'neutral', kind: kindWord(f.type), rows: kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs };
+  return { family: familyOf(f.type), inner, glyph: f.type ?? 'neutral', kind: kindLabel(f.type, recorded || f.steps.length, !!f.loop), rows: kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs,
+    structural: structuralOf(f.type, f.steps.length, !!f.loop) };
 }
 
 /* ---------- heights (map design v3 3.8, 5.3, 9.5): as styles.css draws them at the near tier ---------- */
@@ -255,6 +269,11 @@ export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): Ca
   }
   const pinRows = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H : contract;
   return { head, rows, contract, inner, signs, bottom: BOTTOM_H, total, contact: top + pinRows / 2, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
+}
+/** A name in the pieces it may break between (a line break opportunity after each separator: · / . _ - : , and the spaces it has):
+ * an identifier breaks at 'CancelToken·|signal', 'train.|py', never 'adapter|s'. Joined, the pieces are the name. */
+export function nameBreaks(name: string): string[] {
+  return name.split(/(?<=[·/._\-:,])(?=\S)/).filter(s => s.length > 0);
 }
 /** The lines a name takes on the card: one, or two (the most drawn; a longer name is cut with an ellipsis, its whole in the tip). */
 export function nameLinesOf(need: number, kids: boolean): 1 | 2 {
