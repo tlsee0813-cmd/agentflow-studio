@@ -125,17 +125,140 @@ test('dispute chip title and the handover section: each time and reason; the sec
   assert.equal(withDisputes(doc, []), doc);
   assert.equal(withDisputes('짧은 글', sec).split('\n')[2], DISPUTE_HEAD);
 });
-/* ---------- cycle 6: one order for the lens and the full reading ---------- */
-import { paneSections, structureOpen, PANE_ORDER, PANE_TITLE } from '../dist/public/client/pane-view.js';
+/* ---------- map design v3 (slice S1): the panel's tabs, 구조's order, the way in, the width ---------- */
+import { PANE_TABS, tabLabel, entryTab, tabKeyMove, STRUCTURE_ORDER, STRUCTURE_TITLE, structureSections, jumpChips, foldRows, PANE_SHOWN, behaviourSummary, cautionRows,
+  unlinkedNames, listLabels, kindLead, evidenceList, evidenceCount, spanKey, EVIDENCE_ORDER, UNLINKED_HEAD, paneDefault, paneWidthFor, dragWidth, readPaneWidth, writePaneWidth,
+  PANE_WIDTH_KEY, PANE_MIN, PANE_MAX } from '../dist/public/client/pane-view.js';
 
-test('paneSections: the lens and the full reading lay their sections out in one order (원문 → 이유 → 이력 → 출처 묶음 → 어디에), absent ones left out; 구조 folded', () => {
-  assert.deepEqual(PANE_ORDER.map(k => PANE_TITLE[k]), ['원문', '이유', '이력', '출처 묶음', '어디에']);
-  assert.deepEqual(paneSections({ where: 'W', sources: 'S', why: 'Y', history: 'H', origin: 'O' }), ['O', 'Y', 'H', 'S', 'W']);
-  assert.deepEqual(paneSections({ where: 'W', origin: null, why: 'Y', history: undefined }), ['Y', 'W']);
-  assert.deepEqual(paneSections({}), []);
-  assert.equal(structureOpen(false, false), false);
-  assert.equal(structureOpen(true, false), true);
-  assert.equal(structureOpen(false, true), true);
+test('S1 tabs: 구조 | 근거 | 이력 as data, in that order; only the counted tabs carry their count above zero', () => {
+  assert.deepEqual(PANE_TABS.map(t => [t.key, t.label]), [['structure', '구조'], ['evidence', '근거'], ['history', '이력']]);
+  const [s, e, hi] = PANE_TABS;
+  assert.equal(tabLabel(s, 9), '구조', '구조 has no count');
+  assert.equal(tabLabel(e, 18), '근거 18');
+  assert.equal(tabLabel(e, 0), '근거');
+  assert.equal(tabLabel(hi, 6), '이력 6');
+});
+
+test('S1 the way in picks the first tab: a card → 구조, a rule or gate tab → 구조, a change tab or history → 이력, a citation or asking → 근거', () => {
+  assert.equal(entryTab('card'), 'structure');
+  assert.equal(entryTab('sign'), 'structure');
+  assert.equal(entryTab('change'), 'history');
+  assert.equal(entryTab('history'), 'history');
+  assert.equal(entryTab('cite'), 'evidence');
+  assert.equal(entryTab('ask'), 'evidence');
+});
+
+test('S1 ARIA tabs keys: ← → wrap, Home and End go to the ends, other keys do nothing', () => {
+  assert.equal(tabKeyMove('structure', 'ArrowRight'), 'evidence');
+  assert.equal(tabKeyMove('history', 'ArrowRight'), 'structure', 'wraps forward');
+  assert.equal(tabKeyMove('structure', 'ArrowLeft'), 'history', 'wraps back');
+  assert.equal(tabKeyMove('evidence', 'Home'), 'structure');
+  assert.equal(tabKeyMove('evidence', 'End'), 'history');
+  assert.equal(tabKeyMove('evidence', 'Enter'), null);
+  assert.equal(tabKeyMove('evidence', 'ArrowDown'), null);
+  assert.equal(tabKeyMove('evidence', 'ArrowRight', ['structure', 'evidence']), 'structure', 'the tab set is data: another set moves within itself');
+});
+
+test('S1 구조 reads 하는 일 → 확인 필요 → 계약 → 동작 → 규칙과 관문 → 연결 → 어디에; absent sections left out; jump chips only for what is there', () => {
+  assert.deepEqual(STRUCTURE_ORDER.map(k => STRUCTURE_TITLE[k]), ['하는 일', '확인 필요', '계약', '동작', '규칙과 관문', '연결', '어디에']);
+  assert.deepEqual(structureSections({ where: 'W', rules: 'R', contract: 'C', behaviour: 'B', links: 'L' }), ['C', 'B', 'R', 'L', 'W']);
+  assert.deepEqual(structureSections({ where: 'W', contract: null, behaviour: undefined }), ['W']);
+  assert.deepEqual(jumpChips({ where: true, role: true, behaviour: 7, contract: 8, caution: 2, rules: 2, links: true }).map(x => x.text), ['하는 일', '확인 2', '계약 8', '동작 7', '규칙 2', '연결', '어디에']);
+  assert.deepEqual(jumpChips({ role: true, behaviour: 0, where: true }).map(x => [x.key, x.text]), [['role', '하는 일'], ['behaviour', '동작'], ['where', '어디에']], 'a zero count reads the word alone; a missing section has no chip');
+});
+
+test('S1 a long list folds to its first rows; a kept row (the picked line or rule) is shown wherever it stands', () => {
+  const rows = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  assert.deepEqual(foldRows(rows, 3, false), { shown: [1, 2, 3], hidden: 7 });
+  assert.deepEqual(foldRows(rows, 3, false, x => x === 9), { shown: [1, 2, 3, 9], hidden: 6 });
+  assert.deepEqual(foldRows(rows, 3, true), { shown: rows, hidden: 0 });
+  assert.deepEqual(foldRows([1, 2], 3, false), { shown: [1, 2], hidden: 0 });
+  assert.equal(PANE_SHOWN.chain, 3); assert.equal(PANE_SHOWN.caution, 3); assert.equal(PANE_SHOWN.steps, 8); assert.equal(PANE_SHOWN.where, 4);
+});
+
+test('S1 동작 요약: the loop\'s unit and stop (with the program mark), four step names in row order with how many more, or 단계 기록 없음', () => {
+  const steps = ['수집', '판정', '집행', '기록', '보고'].map(name => ({ name })), conds = [{ then: 'LINE_STALE이면 쉼', else: null }];
+  const s = behaviourSummary({ unit: '행마다', stop: 'LINE_STALE이면 쉼', resume: null }, steps, [], conds);
+  assert.deepEqual(s.loop.map(x => x.text), ['반복 행마다', '정지 LINE_STALE이면 쉼'], 'resume is left to 동작');
+  assert.deepEqual(s.steps.map(x => x.name), ['수집', '판정', '집행', '기록']);
+  assert.equal(s.more, 1); assert.equal(s.blank, null);
+  const none = behaviourSummary(null, [], [], []);
+  assert.equal(none.loop, null); assert.deepEqual(none.steps, []); assert.equal(none.blank, '단계 기록 없음');
+  const prog = behaviourSummary({ unit: 'collect_cadence 300 s', stop: null, resume: null, program: true }, [{ name: 'a', program: true }], ['collect_cadence 300 s'], []);
+  assert.deepEqual(prog.loop.map(x => [x.text, x.program]), [['반복 collect_cadence 300 s', true], ['정지 미상', false]]);
+  assert.equal(prog.steps[0].program, true);
+});
+
+test('S1 확인 필요: only what the reading holds — unknown claims, a description resting on a taken-back report, lines on taken-back reports, another description, a replaced report', () => {
+  const claims = [C({ text: '재개 조건을 확인하지 못함', topic: 'unknown' }), C({ text: '가동 중', topic: 'status' })];
+  const rows = cautionRows({ claims, roleBasisRevised: true, revised: true, corrected: null, others: [{ text: '다른 설명', about: 'v2' }] }, 2);
+  assert.deepEqual(rows.map(r => r.kind), ['unknown', 'revised-basis', 'revised-line', 'other-role', 'revised']);
+  assert.equal(rows[0].claim, claims[0]); assert.equal(rows[0].text, '재개 조건을 확인하지 못함');
+  assert.match(rows[2].text, /^선 2개/);
+  assert.equal(rows[3].about, 'v2');
+  assert.deepEqual(cautionRows({ claims: [C({ topic: 'status' })], roleBasisRevised: true, revised: false, corrected: { id: 'x', at: 't' }, others: [] }, 0), [], 'nothing made up; a corrected description has no taken-back basis');
+});
+
+test('S1 항목 근거 미연결: list names a line\'s payload says the same way are that line\'s; the rest read apart, with the kind\'s own words', () => {
+  assert.equal(UNLINKED_HEAD, '항목 근거 미연결 추출값');
+  assert.deepEqual(unlinkedNames(['calendar.json', '잔고 입출금', '`review` 행'], ['Calendar.JSON', 'review 행', null]), ['잔고 입출금']);
+  assert.deepEqual(unlinkedNames(['a'], []), ['a']);
+  assert.deepEqual(listLabels('ai'), { inputs: '맥락', outputs: '반환', fields: '필드', config: '기준' });
+  assert.equal(listLabels('store').fields, '보관하는 칸');
+  assert.equal(listLabels('external').inputs, '우리가 보내는 것');
+  assert.deepEqual(listLabels(null), { inputs: '받는 것', outputs: '내는 것', fields: '필드', config: '설정' });
+});
+
+test('S1 계약\'s first rows by kind come only from what is there (the outside system\'s scope note is fixed)', () => {
+  const none = { exits: [], manualRules: 0, targets: [] };
+  assert.deepEqual(kindLead('external', none).map(x => [x.label, x.text]), [['내부', '기록 범위 밖']]);
+  assert.deepEqual(kindLead('person', none), [], 'no rule kept by hand: no row');
+  assert.deepEqual(kindLead('person', { ...none, manualRules: 2 }).map(x => x.text), ['2']);
+  assert.deepEqual(kindLead('ai', { ...none, exits: ['통과', '거절', '통과', '보류', '재시도', '중단'] }).map(x => x.text), ['통과 · 거절 · 보류 · 재시도 +1']);
+  assert.deepEqual(kindLead('timer', { ...none, targets: ['수집기'] }).map(x => [x.label, x.text]), [['기동하는 것', '수집기']]);
+  assert.deepEqual(kindLead('compute', { exits: ['x'], manualRules: 3, targets: ['y'] }), []);
+});
+
+test('S1 근거 (the S2 seam): entries under 구조\'s section heads in 구조\'s order, every current claim once; the count is the distinct quoted spans', () => {
+  const q = (t, from) => ({ record: 'P1', quote: t, ...(from !== undefined ? { from, to: from + t.length } : {}) });
+  const rule = C({ text: '하루 상한 5만 원', topic: 'rule', quote: 'r', from: 50, to: 51 }), unknown = C({ text: '재개 미상', topic: 'unknown', quote: 'u' }), other = C({ text: '가동 중', topic: 'status', quote: 's' });
+  const groups = evidenceList({
+    roleBasis: [q('설명', 0)], state: { label: '운영 한 줄', quote: q('설명', 0) }, type: { label: '종류 · 루프·엔진', quote: null },
+    relations: [{ id: 'r1', label: '받는 것 · 수집기', quote: q('선', 10) }, { id: 'r2', label: '내는 것 · 성적표', quote: null }],
+    loop: { quote: q('반복', 20) }, steps: [{ name: '판정', quote: q('판정', 30) }], conditions: [{ when: 'LINE_STALE', quote: q('조건', 40) }],
+    portMap: [{ port: 'review', step: '판정', direction: 'in', quote: q('포트', 45) }], fileRoles: [{ path: 'engine.py', quote: q('파일', 60) }],
+    claims: [other, rule, unknown], rules: [rule] });
+  assert.deepEqual(groups.map(g => g.section), ['role', 'caution', 'contract', 'behaviour', 'rules', 'where', 'other']);
+  assert.deepEqual(EVIDENCE_ORDER, ['role', 'caution', 'contract', 'behaviour', 'rules', 'where', 'other']);
+  assert.deepEqual(groups[0].entries.map(e => e.kind), ['role', 'state', 'type']);
+  assert.deepEqual(groups[3].entries.map(e => e.kind), ['loop', 'step', 'condition', 'portmap']);
+  assert.deepEqual(groups.flatMap(g => g.entries.filter(e => e.claim).map(e => e.claim.text)), ['재개 미상', '하루 상한 5만 원', '가동 중'], 'each claim once: unknown under 확인 필요, the rule under 규칙, the rest last');
+  // spans: 설명 (role and state share it), 선, 반복, 판정, 조건, 포트, 파일, the rule's, the unknown's and the other claim's words
+  assert.equal(evidenceCount(groups), 10);
+  assert.equal(spanKey(q('a b', 3)), 'P1|3|6');
+  assert.equal(spanKey({ record: 'P1', quote: ' a  b ' }), 'P1|a b');
+  assert.deepEqual(evidenceList({ roleBasis: [], state: null, type: null, relations: [], loop: null, steps: [], conditions: [], portMap: [], fileRoles: [], claims: [], rules: [] }), []);
+});
+
+test('S1 width: clamp(384px, 29vw, 448px) by default, a dragged width within 360–600 that gives way before the map drops under 480px; kept per browser', () => {
+  assert.equal(paneDefault(1280), 384); assert.equal(Math.round(paneDefault(1440)), 418); assert.equal(paneDefault(1920), 448);
+  assert.equal(paneWidthFor(null, 1440), paneDefault(1440));
+  assert.equal(paneWidthFor(520, 1920), 520);
+  assert.equal(paneWidthFor(900, 1920), PANE_MAX); assert.equal(paneWidthFor(100, 1920), PANE_MIN);
+  assert.equal(paneWidthFor(600, 1000), 520, 'the map keeps 480px');
+  assert.equal(paneWidthFor(600, 800), 384, 'never under the default for the map\'s sake');
+  assert.equal(paneWidthFor(360, 800), 360, 'narrower is always allowed');
+  assert.equal(paneWidthFor(500, 700), 700, 'below 720px the pane is the window');
+  assert.equal(dragWidth(400, 1000, 950), 450, 'dragging left widens');
+  assert.equal(dragWidth(400, 1000, 1200), PANE_MIN); assert.equal(dragWidth(400, 1000, 0), PANE_MAX);
+  const m = memory();
+  assert.equal(readPaneWidth(m), null);
+  assert.ok(writePaneWidth(m, 512.4)); assert.equal(m.getItem(PANE_WIDTH_KEY), '512'); assert.equal(readPaneWidth(m), 512);
+  assert.ok(writePaneWidth(m, null)); assert.equal(readPaneWidth(m), null, 'reset: the default again');
+  m.setItem(PANE_WIDTH_KEY, 'wide'); assert.equal(readPaneWidth(m), null, 'unreadable reads as none');
+  m.setItem(PANE_WIDTH_KEY, '9000'); assert.equal(readPaneWidth(m), PANE_MAX);
+  const blocked = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } };
+  assert.equal(readPaneWidth(blocked), null); assert.equal(writePaneWidth(blocked, 500), false); assert.equal(readPaneWidth(null), null);
 });
 
 /* ---------- map-reading.12: 구조 lists the condition rows ---------- */

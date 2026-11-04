@@ -39,6 +39,14 @@ export function opsText(state: OpsState | null, when: string | null, brief = fal
   }
 }
 
+/** The panel head's operations line (map design v3 8.2): the full form, the record's time as month-day and time ('10-31 16:03Z'),
+ * and for a running report '현재 가동 여부 미확인' (the card keeps its shorter words). '보고' stays in the words themselves: a report
+ * is not a status the app saw. */
+export function opsHead(state: OpsState | null, when: string | null): string {
+  const at = when ? opsWhen(when, null) : null;
+  return state === 'running' ? `가동 보고${at ? ` · ${at}` : ''} · 현재 가동 여부 미확인` : opsText(state, at);
+}
+
 /** What a card draws for its operations line: the full line (time short where the day is known), the brief one used only when
  * the full line overflows, and the tip (the whole line with the time as the record wrote it). */
 export function opsLines(state: OpsState | null, when: string | null, ref: string | null): { full: string; brief: string; tip: string } {

@@ -340,6 +340,8 @@ async function partAndPlan(browser, base) {
   const { ctx, page, errors, sent } = await context(browser, base);
   const before = await stores(page);
   await page.locator(`#world [data-part="${X.area}"]`).first().click();
+  // map design v3 S1: a part's request results read in its 이력 tab (the wide mode keeps the tab).
+  await page.locator('#lens [role=tab][data-tab=history]').click();
   await page.locator('#lens .request-results').waitFor();
   const item = page.locator('#lens .request-item').filter({ has: page.locator(`summary[data-request-focus^='["${X.A.id}"']`) }).first(); await item.locator(':scope > summary').click();
   const opener = item.locator('.request-wide.item'); await opener.focus(); const key = await opener.getAttribute('data-request-focus');

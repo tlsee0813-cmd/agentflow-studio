@@ -176,41 +176,43 @@ async function lateElsewhere(browser, base, real, z) {
   await ctx.close();
 }
 
-/* ---------- L: the lens reads (cycle 5) 원문 (all current claims by record) → 이유 (description, relations 받는 것 · 내는 것 · 함께) → 이력 → 출처 묶음 → where ---------- */
+/* ---------- L: the lens (map design v3 S1) opens on 구조 (jump chips, the chain, then 계약 · 연결 with the relations 받는 것 · 내는 것 · 함께);
+ * every current claim reads under 근거 · 기록별 (one rail per record, cycle 5's 원문) ---------- */
 async function lens(browser, base, z, size) {
   const { ctx, page, errors, sent } = await context(browser, base, size);
   await page.goto(`${base}/`);
   await page.evaluate(SEED, [W, [entry(Z, z.project)]]);
   await reloadAt(page, `#/p/${Z}/${z.power}`);
   await page.locator('#lens-title').filter({ hasText: 'Power supply' }).waitFor(); await settled(page);
+  assert.equal(await page.locator('#lens [role=tab][aria-selected=true]').getAttribute('data-tab'), 'structure', 'a card opens 구조');
   const order = await page.evaluate(() => [...document.querySelectorAll('#lens .lens-body > *')].map(e => e.className));
-  assert.deepEqual(order.slice(0, 2), ['lens-origin', 'lens-why'], `order ${order}`);
-  assert.ok(order.slice(2).every(c => ['lens-history', 'lens-sources', 'lens-where'].includes(c)), `history, sources and where follow: ${order}`);
-  const claims = await page.locator('#lens .lens-origin .claim .cl-text').allTextContents();
-  assert.deepEqual(claims, z.claims, 'every current claim, in its order, in its own words');
-  assert.match(await page.locator('#lens .lens-origin h3 small').textContent(), new RegExp(`말 ${z.claims.length}$`));
-  assert.equal(await page.locator('#lens .lens-origin .claim:visible').count(), z.claims.length, 'none folded away');
-  assert.equal(await page.locator('#lens .lens-origin .claims-more').count(), 0);
-  const geo = await page.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(); const last = [...document.querySelectorAll('#lens .lens-origin .claim')].at(-1).getBoundingClientRect();
-    const ports = [...document.querySelectorAll('#lens .why-group')].map(e => e.getBoundingClientRect());
-    return { claimsTop: r('#lens .lens-origin').top, lastClaimBottom: last.bottom, portsTop: ports[0].top, portsBottom: ports.at(-1).bottom, bodyBottom: r('#lens .lens-body').bottom }; });
-  assert.ok(geo.lastClaimBottom <= geo.portsTop, 'the claims (원문) read before the relations (이유)');
-  // Every citation is the line's number in the pane, in reading order.
-  assert.deepEqual(await page.locator('#lens .lens-origin .cl-cite').allTextContents(), z.claims.map((_, i) => String(i + 1)));
-  // Relations: verb group, direction, real other end and the stored note, each still there.
+  assert.deepEqual(order.slice(0, 2), ['pn-jump', 'pn-chain'], `order ${order}`);
+  assert.ok(order.slice(2).every(c => c.startsWith('pn-sec ')), `구조's sections follow: ${order}`);
+  // Relations: verb group, direction, real other end and the stored note, each still there (계약 and 연결).
   const rows = await page.evaluate(() => [...document.querySelectorAll('#lens .why-group')].map(s => ({ head: s.querySelector('h4').textContent, rows: [...s.querySelectorAll('.port')].map(p => ({ dir: p.querySelector('.port-dir')?.textContent, far: p.querySelector('strong')?.textContent, note: p.querySelector('.port-note')?.textContent })) })));
   const all = rows.flatMap(g => g.rows);
   assert.deepEqual(all.map(x => x.far).sort(), ['Display', 'nRF52840', 'sensors']);
   assert.ok(all.every(x => x.dir && x.note), JSON.stringify(rows));
   assert.equal(all.find(x => x.far === 'Display').note, LONG_NOTE);
+  assert.equal(await page.locator('#lens .lens-origin').count(), 0, 'the claims are not on the first tab');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l-power-${size.join('x')}.png` });
   // The long note reads whole on request, in place.
   const more = page.locator('#lens .lens-ports li', { hasText: 'Display' }).locator('.note-more');
   assert.equal(await more.count(), 1, 'the long note has its whole-text control');
   await more.click(); assert.equal(await more.getAttribute('aria-expanded'), 'true');
+  // 근거 · 기록별: every current claim by the record it quotes (cycle 5's 원문).
+  await page.locator('#lens [role=tab][data-tab=evidence]').click(); await page.locator('#lens [data-ev-view=records]').click();
+  await page.locator('#lens .lens-origin').waitFor();
+  const claims = await page.locator('#lens .lens-origin .claim .cl-text').allTextContents();
+  assert.deepEqual(claims, z.claims, 'every current claim, in its order, in its own words');
+  assert.match(await page.locator('#lens .lens-origin h3 small').textContent(), new RegExp(`말 ${z.claims.length}$`));
+  assert.equal(await page.locator('#lens .lens-origin .claim:visible').count(), z.claims.length, 'none folded away');
+  assert.equal(await page.locator('#lens .lens-origin .claims-more').count(), 0);
+  // Every citation is the line's number in the pane, in reading order.
+  assert.deepEqual(await page.locator('#lens .lens-origin .cl-cite').allTextContents(), z.claims.map((_, i) => String(i + 1)));
   const body = page.locator('#lens .lens-body');
 
-  // A claim's quote and back: same URL, citation button (focused), scroll and camera; the unfolded note stays unfolded.
+  // A claim's quote and back: same URL, the same tab, citation button (focused), scroll and camera; the unfolded note stays unfolded.
   const cite = page.locator('#lens .lens-origin .cl-cite').last();
   await cite.scrollIntoViewIfNeeded(); await cite.focus();
   const scroll0 = await body.evaluate(e => e.scrollTop), url0 = page.url(), camera0 = await page.evaluate(CAMERA), key0 = await cite.getAttribute('data-claim-focus');
@@ -224,8 +226,10 @@ async function lens(browser, base, z, size) {
   const back = page.locator('#lens .lens-origin .cl-cite').last();
   assert.equal(await back.getAttribute('data-claim-focus'), key0);
   assert.ok(await back.evaluate(e => e === document.activeElement), 'the same citation has the focus');
+  assert.equal(await page.locator('#lens [role=tab][aria-selected=true]').getAttribute('data-tab'), 'evidence', 'the same tab');
   assert.ok(Math.abs(await body.evaluate(e => e.scrollTop) - scroll0) <= 1, 'the same scroll');
   await page.waitForTimeout(250); assert.equal(await page.evaluate(CAMERA), camera0, 'the same camera');
+  await page.locator('#lens [role=tab][data-tab=structure]').click();
   assert.equal(await page.locator('#lens .lens-ports li', { hasText: 'Display' }).locator('.note-more').getAttribute('aria-expanded'), 'true');
 
   // Following the supply relation to Display and back: the same part, scroll, relation button and unfolded note.
@@ -234,7 +238,7 @@ async function lens(browser, base, z, size) {
   const scroll1 = await body.evaluate(e => e.scrollTop), url1 = page.url(), camera1 = await page.evaluate(CAMERA);
   await port.click();
   await page.locator('#lens-title').filter({ hasText: 'Display' }).waitFor();
-  assert.ok(['lens-origin', 'lens-why'].includes(await page.locator('#lens .lens-body > *').first().getAttribute('class')));
+  assert.equal(await page.locator('#lens .lens-body > *').first().getAttribute('class'), 'pn-jump', 'the part followed to opens on 구조');
   await page.locator('#lens .visit-line').click();
   await page.locator('#lens-title').filter({ hasText: 'Power supply' }).waitFor(); await page.waitForTimeout(300);
   assert.equal(page.url(), url1);

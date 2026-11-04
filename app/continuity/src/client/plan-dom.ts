@@ -1,6 +1,7 @@
 /* Small DOM helpers shared by the map client and the change-plan view. Attributes only through setAttribute and CSSOM, so the
  * page keeps working under style-src 'self'. */
 import { quoteAt } from '../shared/digest-api.js';
+import { paneWidthFor } from './pane-view.js';
 export const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 export type Child = Node | string | null | undefined | false;
 export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string | boolean | ((e: Event) => void)> = {}, ...children: Child[]): HTMLElementTagNameMap[K] {
@@ -33,8 +34,11 @@ export function ago(at: string | null): string {
   const d = Math.round(hr / 24); if (d === 1) return '어제'; if (d < 7) return `${d}일 전`;
   return new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric' }).format(new Date(t));
 }
-/** One inspector width for a selected part and the change plan (matches .inspector in styles.css). Narrow: the whole width. */
-export const inspectorWidth = () => (window.innerWidth < 720 ? window.innerWidth : Math.min(392, Math.max(336, window.innerWidth * 0.27)));
+/** One inspector width for a selected part and the change plan (matches --insp-w in styles.css: clamp(384px, 29vw, 448px), or the
+ * width the person dragged the pane's edge to, pane-view paneWidthFor). Narrow: the whole width. */
+let draggedWidth: number | null = null;
+export const setInspectorWidth = (w: number | null) => { draggedWidth = w; };
+export const inspectorWidth = () => paneWidthFor(draggedWidth, window.innerWidth);
 /** An AI action on a server that asks for an access code reads as unavailable while no code is given, with the reason beside it;
  * typing a code turns it on in place (syncCodeGates; no re-render, so the caret stays in the field). The action's own other
  * reason to be off (busy, nothing to send) is kept apart in data-off. The request path is unchanged. */

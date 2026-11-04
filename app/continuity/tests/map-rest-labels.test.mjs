@@ -3,7 +3,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { labelSpots, portSpots, polylineHitsRect } from '../dist/public/client/map-labels.js';
-import { opsWhen, opsText, opsLines } from '../dist/public/client/ops-line.js';
+import { opsWhen, opsText, opsLines, opsHead } from '../dist/public/client/ops-line.js';
+
+test('S1 the panel head\'s operations line: the full form with the record\'s month-day and time, 현재 가동 여부 미확인, 보고 kept in the words', () => {
+  assert.equal(opsHead('running', '2026-10-31T16:03:59Z'), '가동 보고 · 10-31 16:03Z · 현재 가동 여부 미확인');
+  assert.equal(opsHead('running', null), '가동 보고 · 현재 가동 여부 미확인');
+  assert.equal(opsHead('stopped', '11-01 09:00Z'), '멈춤 보고 · 11-01 09:00Z');
+  assert.equal(opsHead('working', '어제 저녁'), '작업 중 보고 · 어제 저녁', 'a time written another way reads as written');
+  assert.equal(opsHead(null, null), '운영 기록 없음');
+  assert.equal(opsHead('odd', null), '운영 기록 모름');
+  assert.equal(opsText('running', '08:01Z'), '가동 보고 · 08:01Z · 현재 미확인', 'the card keeps its own words');
+});
 
 test('a label at rest needs its width and 8px of line on each side past the corners; a run without that room gives none', () => {
   const run = len => [{ x: 0, y: 0 }, { x: len, y: 0 }];

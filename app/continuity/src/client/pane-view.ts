@@ -1,5 +1,5 @@
-/* The reading pane after cycle 5 (map spec 11.5, PART_READING 9절), its pure part. With the working structure on the map and the
- * detail view, the pane reads what the records said and why the map drew the part so: 원문 (the part's current claims grouped by
+/* The reading pane, its pure part. Map design v3 (slice S1) lays it out in three tabs (구조 | 근거 | 이력, below): what the part does
+ * and how first, what that rests on and how the reading changed one click away. The evidence pieces from cycle 5 stay: 원문 (the part's current claims grouped by
  * the record they quote, one rail per record, newest record first, each record's claims in topic order), 이력 (every claim a
  * reading said of the part, in time order, with whether it is still current), 출처 묶음 (the records that contributed, how many
  * claims each and the evidence grades present) and the person's 「이 해석이 틀림」 notes, kept apart from the project (a note never
@@ -193,20 +193,188 @@ export function withDisputes(text: string, section: readonly string[]): string {
   return [...lines.slice(0, end), ...section, ...lines.slice(end)].join('\n');
 }
 
-/* ---------- one order for the lens and the full reading (cycle 5, PART_READING 9절) ---------- */
-/** The pane's sections in reading order: 원문 → 이유 → 이력 → 출처 묶음 → 어디에. The lens and the full reading (전체 읽기) both lay
- * their sections out by this, so the two never drift apart. */
-export type PaneSection = 'origin' | 'why' | 'history' | 'sources' | 'where';
-export const PANE_ORDER: readonly PaneSection[] = ['origin', 'why', 'history', 'sources', 'where'];
-export const PANE_TITLE: Record<PaneSection, string> = { origin: '원문', why: '이유', history: '이력', sources: '출처 묶음', where: '어디에' };
-/** The given sections in PANE_ORDER, those absent (null) left out. */
-export function paneSections<T>(by: Partial<Record<PaneSection, T | null | undefined>>): T[] {
-  return PANE_ORDER.flatMap(k => { const v = by[k]; return v === null || v === undefined ? [] : [v]; });
+/* ---------- the panel's three tabs (map design v3 8.1–8.3, slice S1) ----------
+ * 구조 (what the part does and how: a short chain first, then its contract, behaviour, rules and gates, links and where it lives),
+ * 근거 (what the drawing rests on: the records' words by claim or by record, then the records), 이력 (how the reading changed:
+ * withdrawals 이전 → 지금 newest first, every reading's words, the requests' results). The tab set is data: a later 개요 | 동작 |
+ * 근거 | 이력 is a change to PANE_TABS and ENTRY_TAB plus a builder per tab. The lens and its wide mode (넓게 읽기) read the same
+ * tabs in the same order; the wide mode only adds what needs room (the records whole, the answers, the question box). */
+export type PaneTab = 'structure' | 'evidence' | 'history';
+/** counted: the tab's head carries its count ('근거 18': the distinct quoted spans; '이력 6': the readings that spoke of the part). */
+export interface PaneTabDef { key: PaneTab; label: string; hint: string; counted: boolean }
+export const PANE_TABS: readonly PaneTabDef[] = [
+  { key: 'structure', label: '구조', hint: '하는 일 · 계약 · 동작 · 규칙과 관문 · 연결 · 어디에', counted: false },
+  { key: 'evidence', label: '근거', hint: '지금 그린 것이 기대는 기록의 말과 기록 목록 · 수는 인용된 구간 수', counted: true },
+  { key: 'history', label: '이력', hint: '읽기가 바뀌어 온 길: 철회 이전 → 지금, 정리마다 읽은 말 · 수는 이 부분을 읽은 정리 수', counted: true }];
+/** A tab's head: its label, with its count when it has one above zero. */
+export const tabLabel = (t: PaneTabDef, count: number): string => (t.counted && count > 0 ? `${t.label} ${count}` : t.label);
+/** How the panel was reached decides its first tab (8.1): a card → 구조; a card's rule or gate tab → 구조 with 규칙과 관문 focused;
+ * a change tab or a history entry → 이력; a citation → 근거; asking about the part → 근거 (where the answers read). */
+export type PaneEntry = 'card' | 'sign' | 'change' | 'history' | 'cite' | 'ask';
+const ENTRY_TAB: Record<PaneEntry, PaneTab> = { card: 'structure', sign: 'structure', change: 'history', history: 'history', cite: 'evidence', ask: 'evidence' };
+export const entryTab = (e: PaneEntry): PaneTab => ENTRY_TAB[e];
+/** The ARIA tabs keys: ← and → move to the previous and next tab (wrapping), Home and End to the first and last; else null. */
+export function tabKeyMove(current: PaneTab, key: string, tabs: readonly PaneTab[] = PANE_TABS.map(t => t.key)): PaneTab | null {
+  const i = tabs.indexOf(current); if (i < 0 || !tabs.length) return null;
+  if (key === 'ArrowRight') return tabs[(i + 1) % tabs.length]!;
+  if (key === 'ArrowLeft') return tabs[(i - 1 + tabs.length) % tabs.length]!;
+  if (key === 'Home') return tabs[0]!;
+  if (key === 'End') return tabs[tabs.length - 1]!;
+  return null;
 }
-/** 구조 (안의 단계 · 반복 · 유지 상태) under 이유 is folded: open only as the person left it for this part, or while one of its
- * steps is picked (in the detail view or the pane). */
-export const structureOpen = (remembered: boolean, stepPicked: boolean): boolean => remembered || stepPicked;
-/** 구조's summary under its fold: '단계 N · 조건 K · 반복 · 유지 상태 S', each only when the reading names one. */
+
+/* ---------- 구조: its sections in order (8.3) ---------- */
+/** 하는 일 and 확인 필요 read in the first-screen chain (하는 일 → 받는 것 → 동작 요약 → 내는 것 → 확인 필요); the rest follow it. */
+export type StructureSection = 'role' | 'caution' | 'contract' | 'behaviour' | 'rules' | 'links' | 'where';
+export const STRUCTURE_ORDER: readonly StructureSection[] = ['role', 'caution', 'contract', 'behaviour', 'rules', 'links', 'where'];
+export const STRUCTURE_TITLE: Record<StructureSection, string> = { role: '하는 일', caution: '확인 필요', contract: '계약', behaviour: '동작', rules: '규칙과 관문', links: '연결', where: '어디에' };
+const CHIP_WORD: Record<StructureSection, string> = { role: '하는 일', caution: '확인', contract: '계약', behaviour: '동작', rules: '규칙', links: '연결', where: '어디에' };
+/** The given sections in STRUCTURE_ORDER, those absent (null) left out. */
+export function structureSections<T>(by: Partial<Record<StructureSection, T | null | undefined>>): T[] {
+  return STRUCTURE_ORDER.flatMap(k => { const v = by[k]; return v === null || v === undefined ? [] : [v]; });
+}
+/** The jump chips over 구조: one per section that is there (true, or its count), in order, a count only above zero
+ * ('하는 일 · 확인 2 · 계약 8 · 동작 7 · 규칙 2 · 연결 · 어디에'). */
+export function jumpChips(present: Partial<Record<StructureSection, number | true>>): { key: StructureSection; text: string }[] {
+  return STRUCTURE_ORDER.flatMap(key => { const v = present[key]; if (v === undefined) return [];
+    return [{ key, text: typeof v === 'number' && v > 0 ? `${CHIP_WORD[key]} ${v}` : CHIP_WORD[key] }]; });
+}
+/** How many rows a list shows before 「N개 더」: the chain's ports and checks, the contract's rows per direction, the steps and
+ * the other behaviour lists, the rules, the files. */
+export const PANE_SHOWN = { chain: 3, chainSteps: 4, caution: 3, contract: 8, steps: 8, list: 8, rules: 3, where: 4 } as const;
+/** A list folded to max rows unless open; a row keep() holds (the picked line, the picked rule) is shown wherever it stands. */
+export function foldRows<T>(rows: readonly T[], max: number, open: boolean, keep: (x: T) => boolean = () => false): { shown: T[]; hidden: number } {
+  if (open || rows.length <= max) return { shown: [...rows], hidden: 0 };
+  const shown = [...rows.slice(0, max), ...rows.slice(max).filter(keep)];
+  return { shown, hidden: rows.length - shown.length };
+}
+/** 동작 요약 in the chain: the loop's unit and stop (each with whether the program filled it), up to four step names in the record's
+ * row order (not an execution order) with how many more, or '단계 기록 없음' when the reading names no step. */
+export function behaviourSummary(loop: LoopLike | null | undefined, steps: readonly { name: string; program?: boolean }[], config: readonly string[], conditions: readonly LineCondition[],
+  unsaid = '미상', max: number = PANE_SHOWN.chainSteps): { loop: { text: string; program: boolean }[] | null; steps: { name: string; program: boolean }[]; more: number; blank: string | null } {
+  return { loop: loop ? loopSegments(loop, config, conditions, unsaid).filter(x => x.key !== 'resume').map(({ text, program }) => ({ text, program })) : null,
+    steps: steps.slice(0, max).map(s => ({ name: s.name, program: s.program === true })), more: Math.max(0, steps.length - max), blank: steps.length ? null : '단계 기록 없음' };
+}
+
+/** 확인 필요 (8.3 읽기 주의): only what changes how this part reads, from what the reading holds: a claim the record left unknown,
+ * a description whose report was later taken back, lines resting only on reports taken back, another record's description that does
+ * not replace the current one, a report that replaced an earlier one here. Nothing is guessed (a conflict the reading does not say is
+ * not made up here). */
+export type CautionKind = 'unknown' | 'revised-basis' | 'revised-line' | 'other-role' | 'revised';
+export interface CautionRow<T> { key: string; kind: CautionKind; label: string; text: string; hint: string; about: string | null; claim: T | null }
+export function cautionRows<T extends PaneClaim>(u: { claims: readonly T[]; roleBasisRevised: boolean; revised: boolean; corrected?: unknown; others: readonly { text: string; about: string | null }[] }, revisedLines: number): CautionRow<T>[] {
+  const out: CautionRow<T>[] = [];
+  u.claims.forEach((c, i) => { if (claimTopic(c) === 'unknown') out.push({ key: `unknown:${i}`, kind: 'unknown', label: '모름', text: c.text, hint: '기록이 확인하지 못했다고 남긴 것', about: null, claim: c }); });
+  if (u.roleBasisRevised && !u.corrected) out.push({ key: 'revised-basis', kind: 'revised-basis', label: '정정됨', text: '설명의 근거였던 보고는 이후 정정됨', hint: '설명은 그대로 두었지만, 지금의 근거에 기대지 않아요', about: null, claim: null });
+  if (revisedLines > 0) out.push({ key: 'revised-line', kind: 'revised-line', label: '정정됨', text: `선 ${revisedLines}개는 이후 정정된 보고에서만 읽음`, hint: '선은 그대로 그렸지만, 그 근거였던 보고를 뒤의 기록이 거뒀어요', about: null, claim: null });
+  u.others.forEach((x, i) => out.push({ key: `other-role:${i}`, kind: 'other-role', label: '다른 설명', text: x.text, hint: '다른 기록의 설명 · 현재 설명을 대체한다는 근거 없음', about: x.about, claim: null }));
+  if (u.revised) out.push({ key: 'revised', kind: 'revised', label: '정정', text: '이 부분의 앞 보고를 뒤 기록이 대체함', hint: '기록이 앞의 말을 대체한다고 적은 정정이 있어요 · 이력에서 이전 → 지금', about: null, claim: null });
+  return out;
+}
+
+/* ---------- 항목 근거 미연결 추출값: list values without a line of their own ---------- */
+/** inputs · outputs · fields · config are lists of names (types.ts), and stateVars carry no quote: a reading keeps no source line per
+ * item (contract map-reading.16). They read under this quiet head in the section they belong to, never as a cited row. */
+export const UNLINKED_HEAD = '항목 근거 미연결 추출값';
+export const UNLINKED_HINT = '정리가 목록 칸으로 적은 값이에요 · 항목마다 원문 줄을 저장하지 않아 근거가 항목에 연결되지 않아요 (계약 map-reading.16) · 원문은 근거 탭의 기록에서';
+const nameKey = (s: string) => s.replace(/`/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+/** The names no line carries: a name a line's payload says the same way (case, backquotes and spacing aside) is cited by that line. */
+export function unlinkedNames(names: readonly string[], payloads: readonly (string | null | undefined)[]): string[] {
+  const said = new Set(payloads.flatMap(p => (p ? [nameKey(p)] : [])));
+  return names.filter(n => !said.has(nameKey(n)));
+}
+/** The words a kind gives its lists (8.3: an AI judgement's 맥락 · 기준 · 반환, a store's 보관하는 칸, a person's 받는 요청, an outside
+ * system's 우리가 보내는 것 · 우리에게 오는 것); a kind without its own words reads 받는 것 · 내는 것 · 필드 · 설정. */
+export function listLabels(type: string | null): { inputs: string; outputs: string; fields: string; config: string } {
+  const base = { inputs: '받는 것', outputs: '내는 것', fields: '필드', config: '설정' };
+  if (type === 'ai') return { ...base, inputs: '맥락', outputs: '반환', config: '기준' };
+  if (type === 'store') return { ...base, fields: '보관하는 칸' };
+  if (type === 'person') return { ...base, inputs: '받는 요청' };
+  if (type === 'external') return { ...base, inputs: '우리가 보내는 것', outputs: '우리에게 오는 것' };
+  if (type === 'timer') return { ...base, config: '일정·설정' };
+  return base;
+}
+/** The rows a kind reads first in 계약 (8.3), only from what is there: an outside system's inside lies outside the records; a
+ * person's rules kept by hand (devices of kind person); an AI judgement's exits (its condition rows' then); a timer's targets (the
+ * parts its outgoing control lines start). Each rests on rows shown with their own lines elsewhere (or is the fixed scope note). */
+export interface LeadRow { key: string; label: string; text: string; hint: string }
+export function kindLead(type: string | null, d: { exits: readonly string[]; manualRules: number; targets: readonly string[] }): LeadRow[] {
+  const few = (xs: readonly string[]) => { const u = [...new Set(xs)]; return `${u.slice(0, 4).join(' · ')}${u.length > 4 ? ` +${u.length - 4}` : ''}`; };
+  if (type === 'external') return [{ key: 'inside', label: '내부', text: '기록 범위 밖', hint: '외부 시스템의 안은 이 기록들이 다루지 않아요 · 단계가 기록돼 있어도 수만 읽어요' }];
+  if (type === 'person' && d.manualRules) return [{ key: 'manual', label: '손으로 지키는 규칙', text: String(d.manualRules), hint: '보장 장치가 사람인 규칙 · 규칙과 관문에서 각 규칙의 원문 줄' }];
+  if (type === 'ai' && d.exits.length) return [{ key: 'exits', label: '판정 출구', text: few(d.exits), hint: '조건 행의 그때 결과 · 동작의 조건에서 각 행의 원문 줄' }];
+  if (type === 'timer' && d.targets.length) return [{ key: 'targets', label: '기동하는 것', text: few(d.targets), hint: '이 부분에서 나가는 제어 선의 상대 · 계약의 내는 것에서 각 선' }];
+  return [];
+}
+
+/* ---------- 근거: the evidence list (S2 numbers it) ---------- */
+/** What each piece of the drawing rests on, grouped under 구조's section heads in 구조's order (하는 일 → 확인 필요 → 계약 → 동작 →
+ * 규칙과 관문 → 어디에), then the current claims 구조 does not use (그 밖의 기록된 말, in the claims' own order). S2 numbers the
+ * entries (〔등급·n〕, the same span one number) and links 구조's rows to them; this is the seam: one entry per cited thing. */
+export type EvidenceKind = 'role' | 'state' | 'type' | 'relation' | 'loop' | 'step' | 'condition' | 'portmap' | 'fileRole' | 'rule' | 'claim';
+export type EvidenceSection = Exclude<StructureSection, 'links'> | 'other';
+export const EVIDENCE_ORDER: readonly EvidenceSection[] = ['role', 'caution', 'contract', 'behaviour', 'rules', 'where', 'other'];
+export const EVIDENCE_TITLE: Record<EvidenceSection, string> = { role: '하는 일', caution: '확인 필요', contract: '계약', behaviour: '동작', rules: '규칙과 관문', where: '어디에', other: '그 밖의 기록된 말' };
+export interface EvidenceEntry<C> { key: string; section: EvidenceSection; kind: EvidenceKind; label: string; quote: QuoteLike | null; claim: C | null }
+export interface EvidenceGroup<C> { section: EvidenceSection; entries: EvidenceEntry<C>[] }
+export interface EvidenceSource<C> {
+  roleBasis: readonly QuoteLike[]; state: { label: string; quote: QuoteLike | null } | null; type: { label: string; quote: QuoteLike | null } | null;
+  relations: readonly { id: string; label: string; quote: QuoteLike | null }[];
+  loop: { quote: QuoteLike } | null; steps: readonly { name: string; quote: QuoteLike }[]; conditions: readonly { when: string; quote: QuoteLike }[];
+  portMap: readonly { port: string; step: string; direction: 'in' | 'out'; quote: QuoteLike }[]; fileRoles: readonly { path: string; quote: QuoteLike }[];
+  /** The current claims in the pane's order, and those 규칙과 관문 reads (rules, gates, withdrawals). */
+  claims: readonly C[]; rules: readonly C[];
+}
+export function evidenceList<C extends PaneClaim>(s: EvidenceSource<C>): EvidenceGroup<C>[] {
+  const by = new Map<EvidenceSection, EvidenceEntry<C>[]>();
+  const add = (section: EvidenceSection, kind: EvidenceKind, key: string, label: string, quote: QuoteLike | null, claim: C | null = null) => {
+    const l = by.get(section) ?? []; l.push({ key, section, kind, label, quote, claim }); by.set(section, l); };
+  s.roleBasis.forEach((q, i) => add('role', 'role', `role:${i}`, s.roleBasis.length > 1 ? `설명의 원문 ${i + 1}` : '설명의 원문', q));
+  if (s.state) add('role', 'state', 'state', s.state.label, s.state.quote);
+  if (s.type) add('role', 'type', 'type', s.type.label, s.type.quote);
+  const ruled = new Set<C>(s.rules);
+  s.claims.forEach((c, i) => { if (!ruled.has(c) && claimTopic(c) === 'unknown') add('caution', 'claim', `claim:${i}`, c.text, claimQuote(c), c); });
+  for (const r of s.relations) add('contract', 'relation', `relation:${r.id}`, r.label, r.quote);
+  if (s.loop) add('behaviour', 'loop', 'loop', '반복', s.loop.quote);
+  s.steps.forEach((x, i) => add('behaviour', 'step', `step:${i}`, `단계 ${x.name}`, x.quote));
+  s.conditions.forEach((x, i) => add('behaviour', 'condition', `condition:${i}`, `조건 ${x.when}`, x.quote));
+  s.portMap.forEach((x, i) => add('behaviour', 'portmap', `portmap:${i}`, x.direction === 'in' ? `포트 대응 ${x.port} ⇥ ${x.step}` : `포트 대응 ${x.step} ⇤ ${x.port}`, x.quote));
+  s.rules.forEach((c, i) => add('rules', 'rule', `rule:${i}`, c.text, claimQuote(c), c));
+  s.fileRoles.forEach((x, i) => add('where', 'fileRole', `file:${i}`, `파일 ${x.path}`, x.quote));
+  s.claims.forEach((c, i) => { if (!ruled.has(c) && claimTopic(c) !== 'unknown') add('other', 'claim', `claim:${i}`, c.text, claimQuote(c), c); });
+  return EVIDENCE_ORDER.flatMap(section => { const entries = by.get(section); return entries?.length ? [{ section, entries }] : []; });
+}
+const claimQuote = (c: PaneClaim): QuoteLike => ({ record: c.record, quote: c.quote, ...(c.from !== undefined ? { from: c.from } : {}), ...(c.to !== undefined ? { to: c.to } : {}) });
+/** A quoted span: the record and its place when the reading kept one, else the record and the words (spacing aside). */
+export const spanKey = (q: QuoteLike): string => (q.from !== undefined && q.to !== undefined ? `${q.record}|${q.from}|${q.to}` : `${q.record}|${q.quote.replace(/\s+/g, ' ').trim()}`);
+/** The 근거 tab's count: the distinct quoted spans among the entries (the same span cited twice is one; an entry without a line none). */
+export const evidenceCount = (groups: readonly EvidenceGroup<unknown>[]): number => new Set(groups.flatMap(g => g.entries.flatMap(e => (e.quote ? [spanKey(e.quote)] : [])))).size;
+
+/* ---------- the panel's width (8.8) ---------- */
+/** clamp(384px, 29vw, 448px) by default (styles.css --insp-w); dragged by the left edge between 360 and 600, kept per browser. A
+ * dragged width gives way first when the map would be left under 480px (never below the default). Below 720px: the whole window. */
+export const PANE_WIDTH_KEY = 'agentflow.studio.paneWidth.1';
+export const PANE_MIN = 360, PANE_MAX = 600, MAP_MIN = 480, PANE_NARROW = 720;
+export const paneDefault = (vw: number): number => Math.min(448, Math.max(384, vw * 0.29));
+export function paneWidthFor(saved: number | null, vw: number): number {
+  if (vw < PANE_NARROW) return vw;
+  if (saved === null || !Number.isFinite(saved)) return paneDefault(vw);
+  const w = Math.min(PANE_MAX, Math.max(PANE_MIN, Math.round(saved)));
+  return Math.min(w, Math.max(paneDefault(vw), vw - MAP_MIN));
+}
+/** The width while the edge is dragged: the start width plus how far the pointer moved left, within 360–600. */
+export const dragWidth = (start: number, startX: number, x: number): number => Math.round(Math.min(PANE_MAX, Math.max(PANE_MIN, start + startX - x)));
+interface WidthStorage { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem?(k: string): void }
+/** The saved width, or null (none, unreadable, or storage blocked). */
+export function readPaneWidth(storage: WidthStorage | null): number | null {
+  try { const v = storage?.getItem(PANE_WIDTH_KEY); if (!v) return null; const n = Number(v); return Number.isFinite(n) && n > 0 ? Math.min(PANE_MAX, Math.max(PANE_MIN, Math.round(n))) : null; } catch { return null; }
+}
+/** Keeps a width (null: back to the default); false when the browser refused. */
+export function writePaneWidth(storage: WidthStorage | null, w: number | null): boolean {
+  try { if (!storage) return false; if (w === null) { if (storage.removeItem) storage.removeItem(PANE_WIDTH_KEY); else storage.setItem(PANE_WIDTH_KEY, ''); } else storage.setItem(PANE_WIDTH_KEY, String(Math.round(w))); return true; } catch { return false; }
+}
+
+/** 동작's head: '단계 N · 조건 K · 반복 · 유지 상태 S', each only when the reading names one. */
 export function structureSummary(c: { steps: number; conditions: number; loop: boolean; vars: number }): string {
   return [c.steps ? `단계 ${c.steps}` : '', c.conditions ? `조건 ${c.conditions}` : '', c.loop ? '반복' : '', c.vars ? `유지 상태 ${c.vars}` : ''].filter(Boolean).join(' · ');
 }

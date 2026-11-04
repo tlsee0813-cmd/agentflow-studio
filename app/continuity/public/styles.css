@@ -36,7 +36,8 @@
   /* Small labels over sections: a tracked caption, not a heading. */
   --label: 590 11.5px/16px var(--font); --label-track: .03em;
   --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
-  --insp-w: clamp(336px, 27vw, 392px);
+  /* The reading pane (map design v3 8.8): this default, or the width its left edge was dragged to (app.ts sets it inline, 360–600). */
+  --insp-w: clamp(384px, 29vw, 448px);
   --download: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.5v7.5M4.75 6.9 8 10.1l3.25-3.2M3 13h10'/%3E%3C/svg%3E");
   --dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='3.5' cy='8' r='1.35'/%3E%3Ccircle cx='8' cy='8' r='1.35'/%3E%3Ccircle cx='12.5' cy='8' r='1.35'/%3E%3C/svg%3E");
   color-scheme: light;
@@ -1880,8 +1881,8 @@ button:disabled { opacity: .5; cursor: default; }
    The lens keeps its width. The explicit full reading widens to a reading surface over the map, its text in one paragraph-wide
    column; the map stays in view at its left, shown but not used (inert) until the reading closes. Nothing is clamped or cut. */
 .panel.reading { width: clamp(var(--insp-w), 64vw, 900px); }
-.panel.reading :is(.panel-head, .panel-body, .composer) { padding-left: max(24px, calc((100% - 720px) / 2)); }
-.panel.reading :is(.panel-body, .composer) { padding-right: max(24px, calc((100% - 720px) / 2)); }
+.panel.reading :is(.panel-head, .pane-tabs, .panel-body, .composer) { padding-left: max(24px, calc((100% - 720px) / 2)); }
+.panel.reading :is(.pane-tabs, .panel-body, .composer) { padding-right: max(24px, calc((100% - 720px) / 2)); }
 .panel.reading .panel-head { padding-right: max(150px, calc((100% - 720px) / 2)); }
 .panel.reading .panel-path a { max-width: 260px; }
 .panel.reading .panel-head h2 { font-size: 21px; line-height: 28px; }
@@ -2179,9 +2180,9 @@ button:disabled { opacity: .5; cursor: default; }
    Each section a small tracked label over its rows, as the pane's other sections. 원문 groups the claims by the record they
    quote: one vertical rail per record (the record's grouped source mark, map spec 6), its head once (name, kind, time, count),
    the claims without their own topic rule inside it (the rail is the line), each still with its evidence chip and number. */
-.lens-origin, .lens-why, .lens-history, .lens-sources { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--hair); }
-.lens-body > :is(.lens-origin, .lens-why):first-child { margin-top: 0; padding-top: 0; border-top: 0; }
-.lens-origin > h3, .lens-why > h3, .lens-history > h3, .lens-sources > h3 { margin: 0; display: flex; align-items: baseline; gap: 6px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
+.lens-origin, .lens-history, .lens-sources { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--hair); }
+.lens-body > .ev-bar + .lens-origin, :is(.lens-body, .panel-body) > :is(.lens-origin, .lens-history, .lens-sources):first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.lens-origin > h3, .lens-history > h3, .lens-sources > h3 { margin: 0; display: flex; align-items: baseline; gap: 6px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-3); }
 .lens-origin > h3 small, .lens-history > h3 small, .lens-sources > h3 small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
 .src-rails { display: flex; flex-direction: column; gap: var(--s-3); margin-top: 8px; }
 .src-rail { padding-left: 12px; border-left: 2px solid var(--line-strong); display: flex; flex-direction: column; gap: 8px; }
@@ -2196,9 +2197,7 @@ button:disabled { opacity: .5; cursor: default; }
 .src-rail .cg h4 { font-size: 11.5px; color: var(--text-3); }
 .src-rail .cg .claims { margin-top: 4px; gap: 8px; }
 .src-rail .cg .claim { padding-left: 0; border-left: 0; }
-/* 이유: what it does, then why it is drawn so; key words quiet, the lines compact (one group per direction). */
-.lens-why { display: flex; flex-direction: column; gap: 8px; }
-.lens-why > h3 { margin-bottom: -2px; }
+/* 구조's sections (map design v3 8.3): key words quiet, the lines compact (one group per direction). */
 .why-key { flex: none; margin: 0; font-size: 11.5px; color: var(--text-4); }
 .why-key small { font-size: 11px; color: var(--text-4); }
 .why-type, .why-signs { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
@@ -2206,18 +2205,11 @@ button:disabled { opacity: .5; cursor: default; }
 .why-type .cite { margin-left: 0; }
 .why-sign { font-size: 12px; } .why-sign.on { text-decoration: underline; text-underline-offset: 3px; }
 .why-lines { display: flex; flex-direction: column; gap: 2px; }
-.lens-why .lens-ports { margin-top: 0; padding-top: 0; border-top: 0; }
-.lens-why .why-group h4 { margin: 4px 0 0; display: flex; align-items: baseline; gap: 6px; font-size: 11.5px; font-weight: var(--fw-name); color: var(--text-3); }
-.lens-why .why-group h4 small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
-.lens-why .why-group .port { padding-top: 4px; padding-bottom: 4px; }
-.lens-why .why-group .port-where { display: none; }
-.lens-why .frame-rels > h3 { margin: 6px 0 0; font-size: 11.5px; font-weight: var(--fw-name); letter-spacing: 0; color: var(--text-3); }
+.pn-sec .lens-ports { margin-top: 0; padding-top: 0; border-top: 0; }
+.pn-sec .why-group .port { padding-top: 4px; padding-bottom: 4px; }
+.pn-sec .why-group .port-where { display: none; }
 .why-dispute { margin: -4px 0 0; }
 .why-role { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text); word-break: keep-all; }
-.why-structure { border: 1px solid var(--hair); border-radius: var(--r-md); padding: 6px 10px; }
-.why-structure > summary { cursor: pointer; display: flex; align-items: baseline; gap: 8px; font-size: 12px; font-weight: var(--fw-name); color: var(--text-2); }
-.why-structure > summary small { font-weight: 500; color: var(--text-4); }
-.why-structure > .lens-ports { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--hair); }
 /* 이력: oldest first; a line the current reading no longer holds steps back. */
 .hist-more { margin-top: 6px; font-size: 12px; }
 .hist-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -2311,10 +2303,8 @@ button:disabled { opacity: .5; cursor: default; }
 .rules-row:hover { background: var(--chip); color: var(--text); }
 .rules-kind { flex: none; font-size: 11px; color: var(--text-4); }
 .rules-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* The full reading in cycle 5's order (원문 → 이유 → 이력 → 출처 묶음 → 어디에). */
-.panel-body > :is(.lens-origin, .lens-why):first-child { margin-top: 0; padding-top: 0; border-top: 0; }
-.panel-body > :is(.lens-origin, .lens-why, .lens-history, .lens-sources, .lens-where) { margin-top: var(--s-4); }
-.lens-why .sec-related { margin: 0; padding: 0; border: 0; }
+/* The wide mode reads the same tabs (map design v3 8.8). */
+.panel-body > :is(.lens-origin, .lens-history, .lens-sources, .lens-where) { margin-top: var(--s-4); }
 .sheet-changes .changes { margin: 2px 0 0; }
 
 /* map-reading.13: a value the program carried over from the record wears 「프로그램」 (the 명시/해석 chip's style, never the model's) */
@@ -2350,3 +2340,113 @@ button:disabled { opacity: .5; cursor: default; }
 .where-roles .q-cite { flex: none; }
 /* a rule's 보장 line: the 파일 지도 file a code enforcement rests on, as its place */
 .sg-chip.sg-place { max-width: 220px; overflow: hidden; text-overflow: ellipsis; background: var(--code-soft); color: var(--code-text); border-color: transparent; cursor: help; }
+
+/* ---------- map design v3 8 (slice S1): the panel in three tabs, 구조 | 근거 | 이력 ----------
+   A fixed head (where, name, kind word and operations line, a store's or scenario's line, the way back) and the tab row; one
+   tab's body scrolls under them. 구조 opens on a short chain (하는 일 → 받는 것 → 동작 요약 → 내는 것 → 확인 필요) with jump
+   chips over it, then its sections. The lens and the wide mode (넓게 읽기) are the same tabs at two widths. */
+.pane-head { border-bottom: 0; padding-bottom: 6px; }
+.pane-head .visit-line { margin: 6px 0 0; max-width: 100%; }
+.pane-head .lens-ladder { flex-wrap: wrap; }
+.lens-state .lk-line { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.lens-kind { font-weight: var(--fw-name); color: var(--text); }
+.lens-kind.blank { font-weight: var(--fw-meta); color: var(--text-3); }
+.lk-sep { margin: 0 5px; color: var(--text-4); }
+.lens-ops-at { color: var(--text-4); font-size: 12px; }
+.lens-state > .ev { flex: none; align-self: center; }
+.pane-tabs { flex: none; display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.pane-tab { position: relative; height: 36px; padding: 0 10px; border: 0; background: none; font-size: 13px; font-weight: var(--fw-name); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.pane-tab:first-child { margin-left: -10px; }
+.pane-tab:hover { color: var(--text); }
+.pane-tab.on { color: var(--text); }
+.pane-tab.on::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 1px; background: var(--accent); }
+.pane-tab:focus-visible { outline-offset: -2px; border-radius: var(--r-sm); }
+.lens-body[role="tabpanel"] { padding-top: var(--s-3); }
+.panel-body[role="tabpanel"] { padding-top: var(--s-4); }
+/* One line over the body while a long section scrolls past its heading ('동작 · 단계'). */
+.pn-sticky { position: absolute; left: 0; right: 0; z-index: 2; padding: 4px 20px; background: var(--surface); border-bottom: 1px solid var(--hair); font-size: 12px; line-height: 17px; font-weight: var(--fw-name); color: var(--text-3); pointer-events: none; }
+.panel.reading .pn-sticky { padding-left: max(24px, calc((100% - 720px) / 2)); }
+/* The pane's left edge: 8px to hold, 2px to see while held or hovered. */
+.pane-grip { position: absolute; left: 0; top: 0; bottom: 0; width: 8px; z-index: 4; cursor: col-resize; touch-action: none; }
+.pane-grip::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: transparent; transition: background .12s; }
+.pane-grip:hover::after, .pane-grip.on::after, .pane-grip:focus-visible::after { background: var(--accent-line); }
+.pane-grip:focus-visible { outline: none; }
+/* Jump chips: one per section that is there. */
+.pn-jump { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 var(--s-3); }
+.pn-chip { height: 24px; padding: 0 8px; border: 1px solid var(--hair-2); border-radius: 12px; background: var(--surface); font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.pn-chip:hover { border-color: var(--accent-line); color: var(--accent); }
+/* Sections: 20px apart, a quiet head with its count. */
+.pn-sec { margin-top: 20px; padding-top: var(--s-3); border-top: 1px solid var(--hair); display: flex; flex-direction: column; gap: 8px; }
+.pn-sec > h3, .pn-chain h3 { margin: 0; display: flex; align-items: baseline; gap: 6px; font: 590 12px/16px var(--font); color: var(--text-3); }
+.pn-sec > h3 small, .pn-chain h3 small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
+:is(.pn-sec, .pn-chain) :is(h3, h4):focus { outline: none; }
+:is(.pn-sec, .pn-chain) :is(h3, h4):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.pn-sec h4, .pn-chain h4, .why-group h4 { margin: 4px 0 0; display: flex; align-items: baseline; gap: 6px; font-size: 11.5px; line-height: 16px; font-weight: var(--fw-name); color: var(--text-3); }
+.pn-sec h4 small, .pn-chain h4 small, .why-group h4 small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.pn-more { align-self: flex-start; margin-top: 2px; font-size: 12px; }
+.pn-sec .lens-ports .link-button.pn-more { margin-top: 2px; }
+/* The chain: 하는 일, then 받는 것 · 동작 요약 · 내는 것 as compact rows, then 확인 필요. */
+.pn-chain { display: flex; flex-direction: column; gap: 12px; }
+.pn-role { display: flex; flex-direction: column; gap: 6px; }
+.chain-flow { display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 10px; border: 1px solid var(--hair); border-radius: var(--r-md); }
+.chain-row { display: flex; flex-direction: column; gap: 2px; }
+.chain-row > h4 { margin-top: 0; }
+.chain-ports { list-style: none; margin: 0 -8px; padding: 0; }
+.chain-port { padding: 3px 8px; }
+.chain-port .port-top { gap: 6px; }
+.chain-port strong { font-size: 13px; }
+.chain-what { min-width: 0; font-size: 12px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chain-act .stp-line, .chain-act .stp-blank, .chain-steps { margin: 0; font-size: 12.5px; line-height: 18px; }
+.chain-steps { color: var(--text-2); overflow-wrap: anywhere; }
+.chain-steps .cs-sep { color: var(--text-4); }
+.chain-steps small { color: var(--text-4); }
+.pn-caution { display: flex; flex-direction: column; gap: 6px; }
+.pn-cautions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pc { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; font-size: 12.5px; line-height: 18px; color: var(--text); }
+.pc-tag { flex: none; height: 17px; padding: 0 5px; border: 1px solid var(--hair-2); border-radius: 3px; font-size: 11px; line-height: 15px; color: var(--text-3); }
+.pc.k-unknown .pc-tag { border-style: dashed; }
+.pc.k-revised-basis .pc-tag, .pc.k-revised-line .pc-tag { color: var(--change-text); border-color: var(--change-line); }
+.pc-text { min-width: 0; overflow-wrap: anywhere; word-break: keep-all; }
+.pc-about { color: var(--text-4); }
+/* 계약's kind rows and the values without a line of their own (항목 근거 미연결 추출값): quiet, never a cited row. */
+.pn-lead { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.pn-lead li { display: flex; gap: 8px; align-items: baseline; }
+.pn-unlinked { display: flex; flex-direction: column; gap: 4px; padding: 6px 10px 8px; border-radius: var(--r-md); background: var(--surface-2); }
+.pn-unlinked > h4 { margin-top: 0; font-weight: var(--fw-meta); color: var(--text-4); }
+.pu-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.pu-list li { display: flex; gap: 8px; align-items: baseline; }
+.pu-vals { min-width: 0; overflow-wrap: anywhere; }
+.pu-sub { margin: 4px 0 0; font-size: 12px; }
+.pn-unlinked .stp-vars { margin-top: 2px; }
+/* 동작's blocks. */
+.bh-block { display: flex; flex-direction: column; gap: 4px; }
+.bh-block > h4 { margin-top: 0; }
+.bh-block .stp-list, .bh-block .stp-conds { margin-top: 0; }
+.pn-sec .frame-rels > h4 + .fr-verb { margin-top: 2px; }
+.sg-to-history { margin: 0; font-size: 12px; }
+.pn-rules .sg-group + .sg-group { margin-top: 4px; }
+.pn-rules .sg-group > h4 { margin-top: 0; }
+.pn-changes { margin-top: 0; padding-top: 0; border-top: 0; }
+.pn-changes .sg-list { margin-top: 0; }
+/* 근거: the view switch and the since filter, the groups under 구조's section heads. */
+.ev-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 var(--s-3); }
+.ev-view { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: var(--r-pop); }
+.ev-view-b { height: 26px; padding: 0 10px; border: 0; border-radius: var(--r-md); background: none; font-size: 12px; font-weight: var(--fw-name); color: var(--text-3); }
+.ev-view-b.on { background: var(--chip); color: var(--text); }
+.ev-since { height: 26px; margin-left: auto; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); font-size: 12px; color: var(--text-2); }
+.ev-since.on { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
+.ev-group { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--hair); }
+.ev-bar + .ev-group { margin-top: 0; padding-top: 0; border-top: 0; }
+.ev-group > h3, .ev-group > summary { margin: 0; display: flex; align-items: baseline; gap: 6px; font: 590 12px/16px var(--font); color: var(--text-3); }
+.ev-group > h3 small, .ev-group > summary small { font-weight: 500; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.ev-group > summary { cursor: pointer; }
+.ev-group .claims { margin-top: 6px; }
+.ev-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ev-entry { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.ev-label { min-width: 0; overflow-wrap: anywhere; }
+.ev-entry .cl-quote { flex: 1 0 100%; }
+.ev-role { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.ev-role-text { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text); word-break: keep-all; }
+.ev-unlinked { margin: var(--s-3) 0 0; font-size: 12px; line-height: 1.5; color: var(--text-4); }
+.ev-none { margin: 0; font-size: 12.5px; }
+.lens-foot .lens-ask { height: 32px; }

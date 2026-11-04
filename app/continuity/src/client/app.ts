@@ -10,10 +10,12 @@ import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace
   grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits, type GrammarMark } from './scenario-view.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { roleEvidence } from './role-evidence.js';
-import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, paneSections, structureOpen, structureSummary, structureConditions, structureKeep, whereRows, fileRoleOf, enforcePlace, type DisputedItem, type HistoryEntry } from './pane-view.js';
+import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, structureSummary, structureConditions, structureKeep, whereRows, fileRoleOf, enforcePlace, type DisputedItem, type HistoryEntry,
+  PANE_TABS, tabLabel, entryTab, tabKeyMove, STRUCTURE_TITLE, structureSections, jumpChips, PANE_SHOWN, foldRows, behaviourSummary, cautionRows, unlinkedNames, listLabels, kindLead, evidenceList, evidenceCount, EVIDENCE_TITLE, UNLINKED_HEAD, UNLINKED_HINT,
+  PANE_MIN, PANE_MAX, PANE_NARROW, paneWidthFor, dragWidth, readPaneWidth, writePaneWidth, type PaneTab, type StructureSection, type CautionRow, type EvidenceGroup, type EvidenceEntry } from './pane-view.js';
 import { recordLabel } from '../shared/record-source.js';
 import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, SavedCamera } from '../shared/types.js';
-import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, type PartFamily } from '../shared/claim-topic.js';
+import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic, type PartFamily } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
 import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
@@ -25,14 +27,14 @@ import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.j
 import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
-import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
+import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
 import { typedBudget, typedLines, typedPx, zoomLevel, entryKind, entryParts, loopBody, TYPE_H, LINE_H, type CardBudget, type ChipsAt, type BodyKind, type ZoomLevel, type EntryKind, type EntryCounts, type EntryShown } from './card-budget.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
-import { opsLines } from './ops-line.js';
+import { opsLines, opsHead } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { PROJECT_REPORT_ASK, CHAT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { modelLabel } from '../shared/model-label.js';
@@ -447,7 +449,8 @@ function sceneBack() {
  * the person folded or moved meanwhile stays; only the path unfolded to show the visited part closes again (it follows the
  * route). Each visit marks this tab's own history entries, so the browser's Back and the named way back are one and the same,
  * and the same part reached twice is two visits. Memory only: a reload or another project starts with none. */
-type Place = ReadingContext & { key: string; scope: string | null; selected: string | null; camera: { x: number; y: number; k: number } };
+/** tab: the panel's tab it was read in (map design v3 8.1); the way back comes to the same tab. */
+type Place = ReadingContext & { key: string; scope: string | null; selected: string | null; camera: { x: number; y: number; k: number }; tab?: PaneTab };
 let quoteBack: Place | null = null;
 type Visit = { id: string; from: Place; to: string; kind: string; note: string };
 const visitTab = Math.random().toString(36).slice(2, 8);
@@ -459,7 +462,7 @@ function herePlace(): Place | null {
   const body = surface === 'sheet' ? $('panel').querySelector('.panel-body') : surface === 'none' ? null : $('lens').querySelector('.lens-body');
   const active = body?.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
   return { key: o.key, scope, selected, camera: { ...camera }, surface, sheetReturn, scroll: body?.scrollTop ?? 0,
-    requests: body ? captureRequestReading(body) : null, claimFocus: active?.dataset.claimFocus ?? null };
+    requests: body ? captureRequestReading(body) : null, claimFocus: active?.dataset.claimFocus ?? null, ...(selected ? { tab: paneTab } : {}) };
 }
 function readingScene(): Scene | null {
   const p = selected ? herePlace() : null;
@@ -491,10 +494,13 @@ function restoreReading(f: Place): boolean {
   if (f.key !== opened?.key || f.selected !== selected || f.scope !== scope) return false;
   // AF140: while the change plan is open it owns the pane, as select() has it: a part's lens or sheet is never laid back over it.
   if (planView.isOpen()) return false;
+  // The tab it was read in comes back first, so the scroll and the focused citation below are that tab's.
+  const retab = !!f.tab && f.tab !== paneTab && selected === f.selected && (f.surface === 'lens' || f.surface === 'sheet'); if (retab) paneTab = f.tab!;
   if (f.surface === 'sheet' && selected === f.selected) { sheetOpen = true; showReading(false, false); }
   // The same part read in another surface since (A0 summary -> B -> A1 sheet, then two steps back): the summary it left.
   else if (f.surface === 'lens' && selected === f.selected && sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); }
   else if (f.surface === 'scope' && !selected) { scopeReading = true; renderScopeLens(); }
+  else if (retab && f.surface === 'lens') renderLens();
   sheetReturn = f.surface === 'sheet' ? f.sheetReturn : null;
   const body = f.surface === 'sheet' ? $('panel').querySelector('.panel-body') : f.surface === 'none' ? null : $('lens').querySelector('.lens-body');
   if (body) {
@@ -852,16 +858,8 @@ function ladderLine(view: StudioView, p: PartView): HTMLElement {
   const words = check ? (report ? '요청 · 보고 · 확인까지 있음' : '확인한 기록이 있음') : report ? (ask ? '요청과 보고가 있음 · 아직 확인 전' : '했다는 보고가 있음 · 아직 확인 전') : ask ? '요청만 있음 · 보고 전' : '요청·보고·확인 기록이 아직 없음';
   return h('p', { class: 'lens-ladder' }, el, h('span', {}, words));
 }
-/** The lens head's state line (map-reading.7): the state the newest reading that gave one reads for the part, in the record's own
- * word, the grade of the line that says it (the author's tag in that line, when it has one) and when the record says so (else
- * when the reading was made). Never a status the app verified; null when no reading gave one (the ladder line stands instead). */
-function stateLine(p: PartView): HTMLElement | null {
-  const s = p.reading?.stateRead; if (!s) return null;
-  const ev = claimEvidence({ quote: s.quote?.quote ?? '' });
-  const words = [STATE_WORD[s.state], ev ? EVIDENCE_LABEL[ev] : null, s.when ? `${s.when} 기준` : `정리 ${ago(s.at)}`].filter(Boolean).join(' · ');
-  return h('p', { class: `lens-state st-${s.state}`, ...(s.quote ? { title: `기록의 말 · “${s.quote.quote}”` } : {}) },
-    h('i', { class: 'dot', 'aria-hidden': 'true' }), h('span', {}, words));
-}
+/* The panel head's state line (map-reading.7) is kindLine (map design v3 8.2): the type word, the operations line in its full
+ * form and the author's tag of the line that says it; never a status the app verified. */
 /** A part's line on the map: the state only when it says something. 'plan' (no request yet) stays quiet here; the inspector
  * still tells "no records" apart from "a planned note only". */
 function metaLine(p: PartView, last: string | null): string | null {
@@ -981,8 +979,11 @@ function openSign(id: string, kind: SignKind, pick: string | null = null) {
   const o = opened; if (!o || !partOf(o, id)) return;
   if (!pick && signOpen?.part === id && signOpen.kind === kind && selected === id && !sheetOpen) { closeSign(false); return; }
   signOpen = { part: id, kind }; signFocus = true; signPick = pick;
+  // map design v3 8.1/8.3: a rule or gate tab opens 구조 with 규칙과 관문 whole and focused; a change tab opens 이력's change summary.
+  const tab = entryTab(kind === 'change' ? 'change' : 'sign');
   if (lensRail) lensRail = false;
-  if (selected !== id) { go(o.key, id); return; }
+  if (selected !== id) { pendingTab = tab; go(o.key, id); return; }
+  paneTab = tab;
   if (sheetOpen) { sheetOpen = false; editing = false; showReading(false, false); } else renderLens();
   markSignTabs();
 }
@@ -1039,45 +1040,37 @@ function redrawSince() {
   if (selected) refreshReading();
   if (had) document.querySelector<HTMLInputElement>('#world .since-at')?.focus({ preventScroll: true });
 }
-/** The pane's sign section for the selected part: the rules (or gates) with what each leaves blank, or the withdrawals as
- * 이전 | 지금 with their head line and quote, nothing else. With the since filter on, rows after its time are emphasised. */
-function signSection(o: Opened, part: PartView): HTMLElement | null {
-  const st = signOpen, r = part.reading; if (!st || st.part !== part.id || !r) return null;
-  const sg = signsOf(r), f = sinceSpan(o);
-  const mark = (c: CurrentClaim) => (f ? (sinceHit(c, f) ? ' since-hit' : ' since-off') : '');
-  const cite = (c: CurrentClaim, kind: SignKind) => quoteCite(`sign|${kind}|${c.reading}|${c.index}`, { record: c.record, quote: c.quote, ...(c.from !== undefined ? { from: c.from } : {}), ...(c.to !== undefined ? { to: c.to } : {}) }, `${SIGN_LABEL[kind]} 근거`);
+/** 규칙과 관문 (구조, map design v3 8.3 row 5): the rules with what each leaves blank and the gates (spec 5.1–5.2), each field one
+ * line, a blank as its own words. A card's rule or gate tab opens this section in 구조 whole and focuses its group (it is no longer
+ * laid over the pane's top, inventory 6.11); otherwise each group shows its first rows. The withdrawals read 이전 → 지금 in 이력
+ * (changesSection); one line here leads there. With the since filter on, rows after its time are emphasised. */
+function rulesSection(c: PaneCtx): HTMLElement | null {
+  const o = c.o, part = c.part, r = c.u; if (!r) return null;
+  const sg = signsOf(r); if (!sg.rules.length && !sg.gates.length && !sg.changes.length) return null;
+  const f = sinceSpan(o), whole = signOpen?.part === part.id && signOpen.kind !== 'change';
+  const mark = (x: CurrentClaim) => (f ? (sinceHit(x, f) ? ' since-hit' : ' since-off') : '');
+  const cite = (x: CurrentClaim, kind: SignKind) => quoteCite(`sign|${kind}|${x.reading}|${x.index}`, { record: x.record, quote: x.quote, ...(x.from !== undefined ? { from: x.from } : {}), ...(x.to !== undefined ? { to: x.to } : {}) }, `${SIGN_LABEL[kind]} 근거`);
   // Each field one line, the blank as its own explicit words ('적용 위치 미해결'), never an empty cell.
   const field = (text: string, hint: string, blank = true) => h('li', { class: blank ? 'sg-blank' : '', title: hint }, text);
   const said = (text: string, written: boolean, cls: string) => written ? h('span', { class: cls, title: text }, text) : h('span', { class: 'sg-blank' }, text);
-  const close = h('button', { type: 'button', class: 'link-button sg-close', title: '닫기 (Esc)', onclick: () => closeSign(true) }, '닫기');
-  const head = (kind: SignKind, n: number, extra?: HTMLElement | null) => h('h3', { tabindex: '-1', 'data-sign-focus': kind }, `${SIGN_LABEL[kind]}`, h('small', {}, String(n)), extra ?? null);
-  if (st.kind === 'change') {
-    const rows = sg.changes; if (!rows.length) return null;
-    return h('section', { id: 'lens-signs', class: 'lens-signs k-change', 'aria-label': `${part.name}의 변경 비교` }, h('div', { class: 'sg-top' }, head('change', rows.length), close),
-      h('ul', { class: 'sg-list' }, ...rows.map(c => { const x = changeRow(c);
-        return h('li', { class: `sg-change${mark(c)}` }, h('p', { class: 'sg-head', ...(x.guessed ? { title: NATURE_HINT } : { title: '변경 성격은 기록의 철회 종류 (계약)' }) }, x.head, x.guessed ? h('span', { class: 'sg-guess', title: NATURE_HINT }, '추정') : null),
-          h('div', { class: 'sg-compare' },
-            h('div', { class: 'sg-col sg-before' }, h('span', { class: 'sg-col-label' }, '이전'), h('p', { class: x.beforeSaid ? '' : 'sg-blank' }, x.before)),
-            h('div', { class: 'sg-col sg-now' }, h('span', { class: 'sg-col-label' }, '지금'), h('p', {}, x.now))),
-          h('p', { class: 'sg-cite' }, cite(c, 'change'))); })));
-  }
+  const head = (kind: SignKind, n: number) => h('h4', { tabindex: '-1', 'data-sign-focus': kind, 'data-sub': SIGN_LABEL[kind] }, SIGN_LABEL[kind], h('small', {}, String(n)));
   const places = placesOf(r), conds = conditionsOf(r);
   // An anchor whose row is one of the part's condition rows (the same record and words): 「조건」, opening that condition in the detail view.
-  const condChip = (quote: ReadingQuote) => { const j = conditionOfQuote(quote, conds), c = conds[j]; if (!c) return null;
-    return h('button', { type: 'button', class: 'sg-chip sg-cond', 'data-cond': String(j), title: `이 적용 위치의 원문 줄이 조건 행이다 · ${conditionLines(c).join(' · ')}\n눌러서 내부 상세의 그 조건`,
-      'aria-label': `조건 ${c.when} 내부 상세에서 보기`, onclick: () => openCondition(part.id, j) }, '조건'); };
-  const saidLine = (c: CurrentClaim, kind: SignKind) => { const rs = ruleSaid(c);
-    return h('p', { class: 'sg-said' }, said(rs.when, !!claimWhen(c), 'cl-when'), h('span', { 'aria-hidden': 'true' }, '·'), said(rs.where, !!c.where, 'cl-where'), rs.evidence ? h('span', { class: 'ev' }, rs.evidence) : null, cite(c, kind)); };
+  const condChip = (quote: ReadingQuote) => { const j = conditionOfQuote(quote, conds), cd = conds[j]; if (!cd) return null;
+    return h('button', { type: 'button', class: 'sg-chip sg-cond', 'data-cond': String(j), title: `이 적용 위치의 원문 줄이 조건 행이다 · ${conditionLines(cd).join(' · ')}\n눌러서 내부 상세의 그 조건`,
+      'aria-label': `조건 ${cd.when} 내부 상세에서 보기`, onclick: () => openCondition(part.id, j) }, '조건'); };
+  const saidLine = (x: CurrentClaim, kind: SignKind) => { const rs = ruleSaid(x);
+    return h('p', { class: 'sg-said' }, said(rs.when, !!claimWhen(x), 'cl-when'), h('span', { 'aria-hidden': 'true' }, '·'), said(rs.where, !!x.where, 'cl-where'), rs.evidence ? h('span', { class: 'ev' }, rs.evidence) : null, cite(x, kind)); };
   const q = (key: string, quote: ReadingQuote, what: string) => quoteCite(key, quote, what);
   // map-reading.14: a code enforcement resting on a 파일 지도 row names that file as its place (pane-view enforcePlace).
-  const enforceAt = (e: { kind: string; quote: ReadingQuote | null }) => { const f = enforcePlace(e, r.fileRoles ?? []); if (!f) return null;
+  const enforceAt = (e: { kind: string; quote: ReadingQuote | null }) => { const fr = enforcePlace(e, r.fileRoles ?? []); if (!fr) return null;
     return h('span', { class: 'sg-chip sg-place', title: `보장 자리 · 파일 지도 행의 파일
-${f.path} · ${f.role}` }, f.path); };
+${fr.path} · ${fr.role}` }, fr.path); };
   // A rule (spec 5.1): its reach, its places (each with 명시/해석 and its quote, '자리 없음' for one naming no place of this part)
   // and what keeps it, each field one line; a blank as its own words. A rule an earlier reading wrote keeps its old blanks.
-  const ruleItem = (c: CurrentClaim) => { const v = ruleView(c, places, part.name), key = claimKey(c);
-    const placeWords = (ps: { kind: keyof typeof PLACE_LABEL; name: string }[]) => ps.map(x => `${PLACE_LABEL[x.kind]} ‘${x.name}’`).join(', ');
-    return h('li', { class: `sg-rule${mark(c)}${signPick === key ? ' sg-picked' : ''}`, 'data-sign-pick': key }, h('p', { class: 'sg-text' }, c.text), saidLine(c, 'rule'),
+  const ruleItem = (x: CurrentClaim) => { const v = ruleView(x, places, part.name), key = claimKey(x);
+    const placeWords = (ps: { kind: keyof typeof PLACE_LABEL; name: string }[]) => ps.map(y => `${PLACE_LABEL[y.kind]} ‘${y.name}’`).join(', ');
+    return h('li', { class: `sg-rule${mark(x)}${signPick === key ? ' sg-picked' : ''}`, 'data-sign-pick': key }, h('p', { class: 'sg-text' }, x.text), saidLine(x, 'rule'),
       h('ul', { class: 'sg-fields' },
         field(v.scope.text, v.scope.hint, v.scope.blank),
         ...(v.anchorsBlank ? [field(v.anchorsBlank, RULE_BLANK_HINT.anchors)] : v.anchors.map((a, i) => h('li', { class: `sg-anchor${a.nowhere ? ' sg-blank' : ''}`, title: a.nowhere ? RULE_BLANK_HINT.nowhere : `이 지도의 자리 · ${placeWords(a.places)}` },
@@ -1089,18 +1082,47 @@ ${f.path} · ${f.role}` }, f.path); };
         ...(v.designProgram ? [h('li', { class: 'sg-design-prog', title: RULE_DESIGN_PROGRAM_HINT }, h('span', { class: 'sg-key' }, '설계 대응'), h('span', { class: 'sg-chip prog-chip' }, v.designProgram))] : []),
         ...(v.design ? [field(v.design, RULE_BLANK_HINT.design)] : []), ...(v.check ? [field(v.check, RULE_BLANK_HINT.check)] : []))); };
   // A gate (spec 5.2): 실행 관문 or 개발 관문 as the contract says it; one an earlier reading wrote was told by its words (추정).
-  const gateItem = (c: CurrentClaim) => { const g = gateKind(c);
-    return h('li', { class: `sg-rule sg-gate${mark(c)}` }, h('p', { class: 'sg-text' }, c.text), saidLine(c, 'gate'),
+  const gateItem = (x: CurrentClaim) => { const g = gateKind(x);
+    return h('li', { class: `sg-rule sg-gate${mark(x)}` }, h('p', { class: 'sg-text' }, x.text), saidLine(x, 'gate'),
       h('ul', { class: 'sg-fields' }, g.kind ? field(GATE_LABEL[g.kind], GATE_HINT[g.kind], false) : h('li', { class: 'sg-blank', title: GATE_BLANK_HINT }, GATE_BLANK, ' ', h('span', { class: 'sg-guess' }, '추정')))); };
   const groups: HTMLElement[] = [];
   const unplaced = unplacedCount(sg.rules, places), split = gateSplit(sg.gates);
-  if (sg.rules.length) groups.push(h('div', { class: 'sg-group' }, head('rule', sg.rules.length, groups.length ? null : close),
-    unplaced ? h('p', { class: 'sg-split sg-blank', title: '정확한 단계·포트·필드에 놓이지 않은 규칙 (범위가 부분 전체이고 적용 위치가 없거나, 범위 미정이거나, 이름이 이 부분의 자리와 맞지 않음)' }, `배치 미정 ${unplaced}`) : null,
-    h('ul', { class: 'sg-list' }, ...sg.rules.map(ruleItem))));
-  if (sg.gates.length) groups.push(h('div', { class: 'sg-group' }, head('gate', sg.gates.length, groups.length ? null : close),
-    h('p', { class: 'sg-split', title: '실행 관문은 경로 위(지도 카드의 관문 표시), 개발 관문은 경로 밖(여기서만)' }, gateSplitLine(split)),
-    h('ul', { class: 'sg-list' }, ...[...split.run, ...split.dev, ...split.guessed].map(gateItem))));
-  return groups.length ? h('section', { id: 'lens-signs', class: 'lens-signs k-rule', 'aria-label': `${part.name}의 규칙·관문` }, ...groups) : null;
+  if (sg.rules.length) {
+    const fr = folded(c, 'rules', sg.rules, whole ? Infinity : PANE_SHOWN.rules, x => signPick === claimKey(x));
+    groups.push(h('div', { class: 'sg-group' }, head('rule', sg.rules.length),
+      unplaced ? h('p', { class: 'sg-split sg-blank', title: '정확한 단계·포트·필드에 놓이지 않은 규칙 (범위가 부분 전체이고 적용 위치가 없거나, 범위 미정이거나, 이름이 이 부분의 자리와 맞지 않음)' }, `배치 미정 ${unplaced}`) : null,
+      h('ul', { class: 'sg-list' }, ...fr.shown.map(ruleItem)), fr.more));
+  }
+  if (sg.gates.length) {
+    const fg = folded(c, 'gates', [...split.run, ...split.dev, ...split.guessed], whole ? Infinity : PANE_SHOWN.rules);
+    groups.push(h('div', { class: 'sg-group' }, head('gate', sg.gates.length),
+      h('p', { class: 'sg-split', title: '실행 관문은 경로 위(지도 카드의 관문 표시), 개발 관문은 경로 밖(여기서만)' }, gateSplitLine(split)),
+      h('ul', { class: 'sg-list' }, ...fg.shown.map(gateItem)), fg.more));
+  }
+  if (sg.changes.length) groups.push(h('p', { class: 'sg-to-history' }, h('button', { type: 'button', class: 'link-button', title: '철회의 이전 → 지금 비교는 이력 탭에서 · 새것부터', onclick: () => openChanges() },
+    `변경 ${sg.changes.length} · 이력에서 이전 → 지금`, h('span', { 'aria-hidden': 'true' }, ' ›'))));
+  const n = sg.rules.length + sg.gates.length;
+  return secEl('rules', n ? String(n) : null, '', ...groups);
+}
+/** 이력's first part (map design v3 8.7): the part's withdrawals as 이전 | 지금 with their head line and quote, newest reading first
+ * (a correction first, as the pane reads claims). A card's 변경 tab opens 이력 here. */
+function changesSection(c: PaneCtx): HTMLElement | null {
+  const r = c.u; if (!r) return null;
+  const rows = signsOf(r).changes; if (!rows.length) return null;
+  const f = sinceSpan(c.o), mark = (x: CurrentClaim) => (f ? (sinceHit(x, f) ? ' since-hit' : ' since-off') : '');
+  return h('section', { class: 'pn-sec pn-changes', 'data-sec': 'changes', 'aria-labelledby': 'pn-h-changes' },
+    h('h3', { id: 'pn-h-changes', tabindex: '-1', 'data-sign-focus': 'change', 'data-path': '변경 요약', title: '이 부분의 철회 · 이전 → 지금 · 새 정리부터' }, '변경 요약', h('small', {}, String(rows.length))),
+    h('ul', { class: 'sg-list' }, ...rows.map(x => { const v = changeRow(x);
+      return h('li', { class: `sg-change${mark(x)}` }, h('p', { class: 'sg-head', ...(v.guessed ? { title: NATURE_HINT } : { title: '변경 성격은 기록의 철회 종류 (계약)' }) }, v.head, v.guessed ? h('span', { class: 'sg-guess', title: NATURE_HINT }, '추정') : null),
+        h('div', { class: 'sg-compare' },
+          h('div', { class: 'sg-col sg-before' }, h('span', { class: 'sg-col-label' }, '이전'), h('p', { class: v.beforeSaid ? '' : 'sg-blank' }, v.before)),
+          h('div', { class: 'sg-col sg-now' }, h('span', { class: 'sg-col-label' }, '지금'), h('p', {}, v.now))),
+        h('p', { class: 'sg-cite' }, quoteCite(`sign|change|${x.reading}|${x.index}`, { record: x.record, quote: x.quote, ...(x.from !== undefined ? { from: x.from } : {}), ...(x.to !== undefined ? { to: x.to } : {}) }, `${SIGN_LABEL.change} 근거`))); })));
+}
+/** 「변경 K · 이력에서」: 이력 with its change summary in view and focused. */
+function openChanges() {
+  setPaneTab('history');
+  const at = paneBody()?.querySelector<HTMLElement>('[data-sec="changes"] > h3'); if (at) { scrollToHead(at); at.focus({ preventScroll: true }); }
 }
 const bodyKind = (t: Typed): BodyKind => t.body?.kind ?? null;
 /** The budgets of the units the last layout typed (relayout): such a card is drawn with the lines its budget kept and without
@@ -1628,6 +1650,7 @@ function pickStep(part: string, name: string) {
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
   });
   if (opened && selected === part && !sheetOpen && !planView.isOpen()) {
+    paneTab = 'structure'; // the steps read in 구조's 동작
     renderLens();
     requestAnimationFrame(() => $('lens').querySelector<HTMLElement>('.stp-step.on')?.scrollIntoView({ block: 'nearest' }));
   }
@@ -2107,7 +2130,8 @@ function pickLine(e: Edge) {
   const o = opened; if (!o) return;
   const ghost = e.from.startsWith('ghost:'), from = ghost ? e.from.slice(6) : e.from;
   pickedLine = { rels: [...e.ids], part: from };
-  if (from === selected) refreshReading(); else go(o.key, from, ghost ? partOf(o, from)?.parentId ?? null : scope);
+  // The line's block reads in 구조's 계약 (map design v3 8.3), open.
+  if (from === selected) { paneTab = 'structure'; refreshReading(); } else go(o.key, from, ghost ? partOf(o, from)?.parentId ?? null : scope);
 }
 /** Labels at rest: each on a straight run of its own line with room for it and 8px of line on each side (the longest level
  * run first), else beside the line just short of the part it points to; never on a corner, over another line (where lines
@@ -2262,6 +2286,9 @@ let sheetOpen = false;
 function select(partId: string | null) {
   if (openState && openState.part !== partId) closeOpen(false); // an opening belongs to its part: another selection closes it
   const changed = selected !== partId;
+  // The first tab follows the way in (map design v3 8.1): a card → 구조, a sign tab → 구조 or 이력, a record opened from the recent
+  // list → 근거 (where the wide mode lists the records whole).
+  if (changed) { paneTab = pendingRecord ? 'evidence' : pendingTab ?? entryTab('card'); pendingTab = null; }
   if (changed) { editing = false; composerOpen = false; if (ask && !ask.controller) ask = null; sheetOpen = !!pendingRecord; pickedStep = null; if (pickedLine && pickedLine.part !== partId) pickedLine = null; if (signOpen && signOpen.part !== partId) { signOpen = null; signFocus = false; markSignTabs(); } }
   if (!!selected !== !!partId) recentPeek = false;
   if (partId) scopeReading = false;
@@ -2285,7 +2312,7 @@ function select(partId: string | null) {
   }
   if (returnView.isOpen()) { if (changed && !readingCamera) { readingCamera = { ...camera }; mapMoved = false; } readMarks = []; applyReadMarks(); }
   showReading(changed, changed);
-  if (pendingRecord) { const id = pendingRecord; pendingRecord = null; openRecord(id); }
+  if (pendingRecord) { const id = pendingRecord; pendingRecord = null; if (paneTab !== 'evidence' || !sheetOpen) { paneTab = 'evidence'; if (!sheetOpen) openSheet(); else renderPanel(false); } openRecord(id); }
 }
 /** scrollTop: a new selection starts its sheet at the top. move: bring the part into view (a new selection or a new surface). */
 function showReading(scrollTop: boolean, move: boolean) {
@@ -2775,6 +2802,136 @@ function scenarioResult(recordId: string): HTMLElement | null {
         h('details', { class: 'rm-exclusion-debug' }, h('summary', {}, '검사 정보'), h('small', {}, `${d.path} · ${d.rule}${d.category ? ` / ${d.category}` : ''}`)))))) : null);
 }
 
+/* ---------- the panel (map design v3 8.1–8.10, slice S1): one fixed head, three tabs, one body ----------
+ * The head (where the part sits, its name, its kind word and operations line, a store's or a scenario's line, the way back from a
+ * followed line) and the tab row stay; one tab's body scrolls. 구조: a short chain first (하는 일 → 받는 것 → 동작 요약 → 내는 것 →
+ * 확인 필요), then 계약, 동작, 규칙과 관문, 연결, 어디에. 근거: what the drawing rests on, under 구조's sections (주장 순) or by record
+ * (기록별), then the records. 이력: the withdrawals 이전 → 지금 newest first, every reading's words, the requests' results. The lens
+ * and its wide mode (넓게 읽기, #panel.reading) read the same tabs in the same order (pane-view PANE_TABS); the wide mode only adds
+ * what needs room (the records whole and the answers under 근거, the question box at its foot). Values a reading lists without a
+ * line of their own read apart, under 「항목 근거 미연결 추출값」, never as cited rows. */
+let paneTab: PaneTab = 'structure';
+/** The tab a way in chose before the selection changes (another card's sign tab); select() takes it once. */
+let pendingTab: PaneTab | null = null;
+/** 근거's view: 주장 순 (under 구조's sections) or 기록별 (one rail per record, cycle 5's 원문). Memory, this tab. */
+let evidenceView: 'claims' | 'records' = 'claims';
+/** Each tab's scroll per part and surface (memory): coming back to a tab comes back where it was left. */
+const tabScroll = new Map<string, number>();
+/** What one drawing of the panel reads, once: the part, its reading, the surface, its relations by their real ends, where the
+ * selection came from, what the readings say each line carries, its records; cites numbers the claims of the body. */
+interface PaneCtx { o: Opened; part: PartView; u: PartUnderstanding | null; wide: boolean; ends: End[]; cameFrom: string | null; handed: Map<string, ReadingRelation>; lineSaid: Map<string, LineSaid>; records: RecordView[] }
+function paneCtx(o: Opened, part: PartView, wide: boolean): PaneCtx {
+  const came = visitEntry(o) ? visits.at(-1)!.from.selected : null;
+  return { o, part, u: part.reading, wide, ends: relationEnds(o, part.id), cameFrom: came, handed: relationPayloads(o.project), lineSaid: relationLines(o.project), records: subtreeRecords(o.view, part.id) };
+}
+const flowsIn = (c: PaneCtx) => c.ends.filter(x => x.r.kind === 'flow' && !x.out);
+const flowsOut = (c: PaneCtx) => c.ends.filter(x => x.r.kind === 'flow' && x.out);
+const isControl = (c: PaneCtx, x: End) => c.lineSaid.get(x.r.id)?.channel === 'control';
+const paneRoot = () => (sheetOpen ? $('panel') : $('lens'));
+const paneBody = () => paneRoot().querySelector<HTMLElement>(sheetOpen ? '.panel-body' : '.lens-body');
+const scrollKey = (o: Opened, part: string, tab: PaneTab) => `${o.key}|${part}|${sheetOpen ? 'wide' : 'lens'}|${tab}`;
+/** Another tab: the one left keeps its scroll, the new one comes back where it was left; focus goes where asked (its tab). */
+function setPaneTab(tab: PaneTab, focus: string | null = null) {
+  const o = opened; if (!o || !selected) return;
+  const body = paneBody(); if (body) tabScroll.set(scrollKey(o, selected, paneTab), body.scrollTop);
+  paneTab = tab;
+  if (sheetOpen) renderPanel(false); else renderLens();
+  const next = paneBody(); if (next) next.scrollTop = tabScroll.get(scrollKey(o, selected, tab)) ?? 0;
+  if (focus) paneRoot().querySelector<HTMLElement>(focus)?.focus();
+}
+/** A heading brought to the top of the panel's body (8px under it), moving only that body. */
+function scrollToHead(el: HTMLElement) {
+  const body = el.closest<HTMLElement>('.lens-body, .panel-body'); if (!body) return;
+  body.scrollTop += el.getBoundingClientRect().top - body.getBoundingClientRect().top - 8;
+}
+/** A jump chip: its section's heading at the top of the body, and the focus on it. */
+function jumpTo(key: StructureSection) {
+  const head = paneBody()?.querySelector<HTMLElement>(`[data-sec="${key}"] > :is(h3, h4)`); if (!head) return;
+  scrollToHead(head); head.focus({ preventScroll: true });
+}
+/** The tab row (ARIA tabs: ← → between them, Home and End; the selected one is the row's one stop for Tab). */
+function tabRow(c: PaneCtx): HTMLElement {
+  const counts: Record<PaneTab, number> = { structure: 0, evidence: c.u ? evidenceCount(evidenceGroups(c)) : 0, history: c.u?.history.length ?? 0 };
+  const row = h('div', { class: 'pane-tabs', role: 'tablist', 'aria-label': '읽기 탭' }, ...PANE_TABS.map(t => { const on = t.key === paneTab;
+    return h('button', { type: 'button', role: 'tab', id: `pane-tab-${t.key}`, class: `pane-tab${on ? ' on' : ''}`, 'data-tab': t.key, 'aria-selected': String(on), 'aria-controls': 'pane-tabpanel', tabindex: on ? '0' : '-1', title: t.hint,
+      onclick: () => { if (t.key !== paneTab) setPaneTab(t.key, `[role="tab"][data-tab="${t.key}"]`); } }, tabLabel(t, counts[t.key])); }));
+  row.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const next = tabKeyMove(paneTab, e.key); if (!next) return;
+    e.preventDefault(); if (next !== paneTab) setPaneTab(next, `[role="tab"][data-tab="${next}"]`);
+  });
+  return row;
+}
+/** The tab's body (the tab panel): 구조, 근거 or 이력. */
+const tabBody = (c: PaneCtx): HTMLElement[] => (paneTab === 'evidence' ? evidenceTab(c) : paneTab === 'history' ? historyTab(c) : structureTab(c));
+/** A list folded to its first rows, with its own 「N개 더」 · 「접기」 (per part, this tab's memory, as the other folds). */
+const foldKey = (c: PaneCtx, what: string) => `${c.o.key}|${c.part.id}|fold|${what}`;
+function folded<T>(c: PaneCtx, what: string, rows: readonly T[], max: number, keep?: (x: T) => boolean): { shown: T[]; more: HTMLElement | null } {
+  const key = foldKey(c, what), open = lensOpen.has(key), f = foldRows(rows, max, open, keep);
+  if (rows.length <= max || (!open && !f.hidden)) return { shown: f.shown, more: null };
+  return { shown: f.shown, more: h('button', { type: 'button', class: 'link-button pn-more', 'data-more': what, 'aria-expanded': String(open),
+    onclick: () => { if (lensOpen.has(key)) lensOpen.delete(key); else lensOpen.add(key); reread(`[data-more="${what}"]`); } }, open ? '접기' : `${f.hidden}개 더`) };
+}
+/** A 구조 section: its heading (a jump chip's and the sticky path's target) and its rows. */
+function secEl(key: StructureSection, count: string | null, cls: string, ...children: (HTMLElement | null)[]): HTMLElement {
+  return h('section', { class: `pn-sec pn-${key}${cls ? ` ${cls}` : ''}`, 'data-sec': key, 'aria-labelledby': `pn-h-${key}` },
+    h('h3', { id: `pn-h-${key}`, tabindex: '-1', 'data-path': STRUCTURE_TITLE[key] }, STRUCTURE_TITLE[key], count ? h('small', {}, count) : null), ...children);
+}
+/** One line over the body while a long section scrolls past its heading: where the reader is ('동작 · 단계'). */
+const stickyBar = () => h('div', { class: 'pn-sticky', 'aria-hidden': 'true', hidden: true });
+function bindSticky(body: HTMLElement) {
+  const bar = body.parentElement?.querySelector<HTMLElement>(':scope > .pn-sticky'); if (!bar) return;
+  let raf = 0;
+  const update = () => {
+    raf = 0;
+    const top = body.getBoundingClientRect().top; let sec: HTMLElement | null = null;
+    for (const s of body.querySelectorAll<HTMLElement>('.pn-sec[data-sec], .pn-chain [data-sec]')) if (s.getBoundingClientRect().top < top + 1) sec = s;
+    const head = sec?.querySelector<HTMLElement>(':scope > :is(h3, h4)');
+    if (!sec || !head || head.getBoundingClientRect().top >= top) { bar.hidden = true; return; }
+    let sub: string | null = null;
+    for (const x of sec.querySelectorAll<HTMLElement>('[data-sub]')) if (x.getBoundingClientRect().top < top + 28) sub = x.dataset.sub ?? null;
+    bar.textContent = [head.dataset.path ?? '', sub].filter(Boolean).join(' · ');
+    bar.style.top = `${body.offsetTop}px`; bar.hidden = false;
+  };
+  body.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
+}
+
+/* The pane's width (8.8): the left edge drags between 360 and 600px (a double-click, or Home, back to the default), ← → move it by
+ * 16px; kept per browser (pane-view PANE_WIDTH_KEY, try/catch there). A dragged width gives way first when the map would be left
+ * under 480px. The map's area follows (syncMapArea); below 720px the pane takes the window as before. */
+let paneW: number | null = readPaneWidth(kv);
+setInspectorWidth(paneW);
+function syncPaneWidth() {
+  const root = document.documentElement;
+  if (paneW === null || window.innerWidth < PANE_NARROW) root.style.removeProperty('--insp-w');
+  else root.style.setProperty('--insp-w', `${paneWidthFor(paneW, window.innerWidth)}px`);
+}
+syncPaneWidth();
+function setPaneWidth(w: number | null, save: boolean) {
+  paneW = w; setInspectorWidth(w); syncPaneWidth(); syncMapArea();
+  document.querySelectorAll<HTMLElement>('.pane-grip').forEach(g => g.setAttribute('aria-valuenow', String(Math.round(inspW()))));
+  if (save) writePaneWidth(kv, w);
+}
+function paneGrip(): HTMLElement {
+  const grip = h('div', { class: 'pane-grip', role: 'separator', 'aria-orientation': 'vertical', 'aria-label': '읽기면 폭', 'aria-valuemin': String(PANE_MIN), 'aria-valuemax': String(PANE_MAX),
+    'aria-valuenow': String(Math.round(inspW())), tabindex: '0', title: '끌어서 읽기면 폭 조절 · 두 번 누르면 기본 폭' });
+  grip.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || window.innerWidth < PANE_NARROW) return;
+    e.preventDefault();
+    const start = inspW(), x0 = e.clientX; grip.setPointerCapture(e.pointerId); grip.classList.add('on');
+    const move = (ev: PointerEvent) => setPaneWidth(dragWidth(start, x0, ev.clientX), false);
+    const up = () => { grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', up); grip.removeEventListener('pointercancel', up); grip.classList.remove('on'); writePaneWidth(kv, paneW); };
+    grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up);
+  });
+  grip.addEventListener('dblclick', () => setPaneWidth(null, true));
+  grip.addEventListener('keydown', e => {
+    if (e.key === 'Home') { e.preventDefault(); setPaneWidth(null, true); return; }
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault(); setPaneWidth(Math.min(PANE_MAX, Math.max(PANE_MIN, Math.round(inspW()) + (e.key === 'ArrowLeft' ? 16 : -16))), true);
+  });
+  return grip;
+}
+
 /* The lens folds to a narrow rail on request, for this tab (memory only): the map's area takes the window back (paneWidth), the
  * rail keeps the selection's name and the way to open the reading again. Selection, Esc and the sheet work as before. */
 let lensRail = false;
@@ -2786,20 +2943,100 @@ function setRail(on: boolean) {
   if (!on) reveal(selected);
   $('lens').querySelector<HTMLElement>('.rail-toggle')?.focus();
 }
-/** The lens: what the selection is (its whole description as written, with where that description comes from; the map shows
- * only its first sentence), what it is linked to, by verb (each line's real ends), its inside, and the way to sources and
- * edits. */
-function renderLens() {
-  const o = opened!, part = partOf(o, selected)!, l = $('lens'), b = lay.boxes.get(part.id);
-  if (lensRail) {
-    // Folded to a rail: the selection's name, read top to bottom, and the way to open the reading again.
-    l.classList.remove('compare', 'scope-read', 'return-read'); l.classList.add('railed'); readingFor = [];
-    l.replaceChildren(h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 펼치기', 'aria-expanded': 'false', title: `읽기면 펼치기 · ${part.name}`, onclick: () => setRail(false) }, railIcon(false)),
-      h('span', { class: 'rail-name', id: 'lens-title', title: part.name, onclick: () => setRail(false) }, part.name));
-    l.hidden = false; return;
+
+/* ---------- the fixed head (8.2) ---------- */
+/** The kind word and the operations line (8.2-3): the record's type word (or 유형 미상 when a reading names none), then the newest
+ * reading's state in the panel's full form ('가동 보고 · 10-31 16:03Z · 현재 가동 여부 미확인', ops-line opsHead) with the author's
+ * tag of the line that says it (the 근거 chip: a tag, never the app's verdict). No state given: the ladder line as before. A report
+ * is not a status: no colour says more than the words. */
+function kindLine(c: PaneCtx): HTMLElement {
+  const u = c.u, t = u?.typeRead ?? null, s = u?.stateRead ?? null;
+  const kind = t ? h('span', { class: 'lens-kind', ...(t.quote ? { title: `종류 · 기록의 말 “${t.quote.quote}”` } : {}) }, TYPE_LABEL[t.type])
+    : u ? h('span', { class: 'lens-kind blank', title: '기록이 이 부분의 종류를 말하지 않았어요' }, '유형 미상') : null;
+  const sep = () => h('span', { class: 'lk-sep', 'aria-hidden': 'true' }, '·');
+  if (s) {
+    const ev = claimEvidence({ quote: s.quote?.quote ?? '' });
+    return h('p', { class: `lens-state st-${s.state}`, ...(s.quote ? { title: `기록의 말 · “${s.quote.quote}”` } : {}) },
+      h('i', { class: 'dot', 'aria-hidden': 'true' }), h('span', { class: 'lk-line' }, kind, kind ? sep() : null, h('span', { class: 'lens-ops' }, opsHead(s.state, s.when)),
+        s.when ? null : h('small', { class: 'lens-ops-at', title: fullTime(s.at) }, ` · 정리 ${ago(s.at)}`)),
+      ev ? h('span', { class: `ev ev-${ev}`, title: `운영 한 줄의 근거 · 기록 작성자의 꼬리표 (${EVIDENCE_HINT[ev]}) · 앱의 판정 아님` }, EVIDENCE_LABEL[ev]) : null);
   }
-  l.classList.remove('railed');
-  const records = subtreeRecords(o.view, part.id), path = partPath(o.view, part.id).slice(0, -1);
+  const lad = ladderLine(c.o.view, c.part); if (kind) lad.prepend(kind, sep()); return lad;
+}
+function paneHead(c: PaneCtx, tools: HTMLElement): HTMLElement {
+  const { o, part } = c, path = partPath(o.view, part.id).slice(0, -1), w = c.wide;
+  // In scenario mode a part the path does not visit is said to be outside it; the path is not extended to it.
+  const scHere = scView ? scView.visits.filter(v => drawnRep(o, v.areaId) === part.id || v.areaId === part.id) : null;
+  const scLine = scView && scHere ? h('p', { class: `sc-note${scHere.length ? '' : ' sc-out'}` }, ...(scHere.length
+    ? [h('strong', {}, '시나리오의 방문'), ' · ', ...scHere.flatMap((v, i) => [i ? ' · ' : '', h('button', { type: 'button', class: 'link-button', onclick: () => selectVisit(v.id) }, `방문 ${visitNumber(v.id)}`)])]
+    : [h('strong', {}, '현재 시나리오 밖의 요소'), ' · 이 경로는 이 부분을 지나지 않아요'])) : null;
+  const crumbs = path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope), title: x.name }, x.name)]);
+  return h('header', { class: `${w ? 'panel-head' : 'lens-head'} pane-head` },
+    path.length ? h('div', { class: w ? 'panel-path' : 'lens-path' }, ...crumbs) : w ? h('div', { class: 'panel-path' }, h('span', {}, o.project.name)) : null,
+    h('h2', { id: w ? 'panel-title' : 'lens-title', ...(w ? { tabindex: '-1' } : {}) }, part.name),
+    aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
+    kindLine(c), storeLine(o, part), scLine, visitEntry(o), tools);
+}
+
+/* ---------- 구조 (8.3, with the design review's first-screen chain) ---------- */
+function structureTab(c: PaneCtx): HTMLElement[] {
+  const u = c.u, cautions = u ? cautionRows(u, new Set(c.ends.filter(x => revisedLine(c.o, x.r.id)).map(x => x.r.id)).size) : [];
+  const contract = contractSection(c), behaviour = behaviourSection(c), rules = rulesSection(c), links = linksSection(c), where = whereSection(c);
+  const present: Partial<Record<StructureSection, number | true>> = { role: true };
+  if (cautions.length) present.caution = cautions.length;
+  if (contract) present.contract = flowsIn(c).length + flowsOut(c).length || true;
+  if (behaviour) present.behaviour = (u?.steps ?? []).length || true;
+  if (rules && u) { const sg = signsOf(u); present.rules = sg.rules.length + sg.gates.length || true; }
+  if (links) present.links = true;
+  if (where) present.where = true;
+  return [h('nav', { class: 'pn-jump', 'aria-label': '구조의 절로 가기' }, ...jumpChips(present).map(x => h('button', { type: 'button', class: 'pn-chip', 'data-jump': x.key, onclick: () => jumpTo(x.key) }, x.text))),
+    chainBlock(c, cautions, !!behaviour), ...structureSections({ contract, behaviour, rules, links, where })];
+}
+/** The first screen (design review): 하는 일 (its sentences, where they come from) → 받는 것 (three rows) → 동작 요약 (the loop's unit
+ * and stop, the first four steps, or 단계 기록 없음) → 내는 것 (three rows) → 확인 필요 (three rows). Each row leads to its section. */
+function chainBlock(c: PaneCtx, cautions: CautionRow<CurrentClaim>[], behaviour: boolean): HTMLElement {
+  const u = c.u;
+  const ports = (label: string, hint: string, list: End[]) => list.length ? h('div', { class: 'chain-row' }, h('h4', { title: hint }, label, h('small', {}, String(list.length))),
+    h('ul', { class: 'chain-ports' }, ...list.slice(0, PANE_SHOWN.chain).map(x => chainPort(c, x))),
+    list.length > PANE_SHOWN.chain ? h('button', { type: 'button', class: 'link-button pn-more', onclick: () => jumpTo('contract') }, `${list.length - PANE_SHOWN.chain}개 더 · 계약`) : null) : null;
+  let act: HTMLElement | null = null;
+  if (u) {
+    const s = behaviourSummary(u.loop, stepsOf(u), u.config, conditionsOf(u), UNSAID);
+    // Steps the program cut from the 3절 chain keep their 「프로그램」 chip; when every step shown is one, a single chip says so for all.
+    const allProgram = stepsOf(u).length > 0 && stepsOf(u).every(x => x.program === true);
+    act = h('div', { class: 'chain-row chain-act' }, h('h4', { title: '반복의 단위와 정지, 기록의 단계 표 첫 행들 · 행 순서이지 실행 순서가 아니에요' }, '동작 요약'),
+      s.loop ? h('p', { class: 'stp-line' }, ...loopNodes(s.loop)) : null,
+      s.blank ? h('p', { class: 'stp-blank' }, s.blank)
+        : h('p', { class: 'chain-steps' }, ...s.steps.flatMap((x, i) => [i ? h('span', { class: 'cs-sep', 'aria-hidden': 'true' }, ' · ') : null, h('span', { class: 'cs-step' }, x.name), x.program && !allProgram ? ' ' : null, x.program && !allProgram ? stepChip() : null]),
+          s.more ? h('small', {}, ` +${s.more}`) : null, allProgram ? ' ' : null, allProgram ? stepChip() : null),
+      behaviour ? h('button', { type: 'button', class: 'link-button pn-more', onclick: () => jumpTo('behaviour') }, '동작 ›') : null);
+  }
+  const ins = ports('받는 것', '다른 부분이 이 부분에 넘겨주는 것 · 계약에서 전부', flowsIn(c)), outs = ports('내는 것', '이 부분이 다른 부분에 넘겨주는 것 · 계약에서 전부', flowsOut(c));
+  return h('section', { class: 'pn-chain', 'aria-label': '이 부분 한눈에' }, roleBlock(c),
+    ins || act || outs ? h('div', { class: 'chain-flow' }, ins, act, outs) : null, cautions.length ? cautionBlock(c, cautions) : null);
+}
+/** 확인 필요 (8.3 읽기 주의): three rows, the rest folded; a claim row keeps its quote. */
+function cautionBlock(c: PaneCtx, rows: CautionRow<CurrentClaim>[]): HTMLElement {
+  const f = folded(c, 'caution', rows, PANE_SHOWN.caution);
+  const cite = (x: CurrentClaim) => quoteCite(JSON.stringify(['caution', c.part.id, x.reading, x.index]), { record: x.record, quote: x.quote, ...(x.from !== undefined ? { from: x.from } : {}), ...(x.to !== undefined ? { to: x.to } : {}) }, '확인 필요 근거');
+  return h('div', { class: 'pn-caution', 'data-sec': 'caution' },
+    h('h3', { id: 'pn-h-caution', tabindex: '-1', 'data-path': '확인 필요', title: '이 부분을 읽는 방식을 바꾸는 것 · 기록이 말한 것만' }, '확인 필요', h('small', {}, String(rows.length))),
+    h('ul', { class: 'pn-cautions' }, ...f.shown.map(x => h('li', { class: `pc k-${x.kind}`, title: x.hint },
+      h('span', { class: 'pc-tag' }, x.label), h('span', { class: 'pc-text' }, x.text), x.about ? h('small', { class: 'pc-about', title: x.about }, ` · ${displayAbout(x.about)}`) : null,
+      x.claim ? cite(x.claim) : null))), f.more);
+}
+/** 하는 일: the description where it comes from (the lens's block, or the wide mode's with its correction), the person's dispute
+ * chip when there is one (marking it wrong lives in 근거, beside the passages it rests on). */
+function roleBlock(c: PaneCtx): HTMLElement {
+  const u = c.u, desc = c.wide ? wideDesc(c) : lensDesc(c);
+  const rd = u?.role && !u.corrected ? disputeBits(c.part.id, ROLE_KEY, u.role) : null;
+  if (rd?.chip) desc.append(h('p', { class: 'why-dispute cl-meta' }, rd.chip));
+  return h('div', { class: 'pn-role', 'data-sec': 'role' }, h('h3', { id: 'pn-h-role', tabindex: '-1', 'data-path': '하는 일' }, '하는 일'), desc);
+}
+/** The lens's description: its whole description as written, with where that description comes from (the map shows only its first
+ * sentence); the description as records read it on its own line under a plan note or a received summary. */
+function lensDesc(c: PaneCtx): HTMLElement {
+  const { o, part, records } = c, u = part.reading;
   const rest = part.note.replace(/\s+/g, ' ').trim();
   const dot = h('i', { class: `dot s-${part.status}`, 'aria-hidden': 'true' });
   const src = (text: string) => h('p', { class: `lens-src s-${part.status}` }, dot, h('span', {}, text));
@@ -2812,123 +3049,182 @@ function renderLens() {
       rest ? h('p', { class: 'lens-plan' }, h('span', {}, '계획'), rest) : null);
   } else if (rest) {
     // The description is the person's written plan, not a received summary. A state line only when there is something to say
-    // (records, a reported state); "no records yet" and where the text comes from read in the sheet (전체 읽기).
+    // (records, a reported state); "no records yet" and where the text comes from read in the wide mode.
     const state = part.status === 'plan' ? (records.length ? `받은 정리 없음 · 요청 기록 없음 · ${recs}` : '') : `${STATUS_LABEL[part.status]} · ${recs}`;
-    put(desc, rest ? h('p', { class: 'lens-text' }, rest) : null, state ? src(`적어 둔 계획 설명 · ${state}`) : null);
-  } else if (part.reading?.role) {
+    put(desc, h('p', { class: 'lens-text' }, rest), state ? src(`적어 둔 계획 설명 · ${state}`) : null);
+  } else if (u?.role) {
     // Read from records (or corrected by the person): one description, with where it comes from.
-    const u = part.reading;
     put(desc, h('p', { class: 'lens-text' }, u.role), src(u.corrected ? '직접 바로잡은 설명' : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`));
     if (u.roleAbout) desc.lastElementChild?.setAttribute('title', u.roleAbout);
     const basis = roleBasisBlock(o, part.id, u, 'lens'); if (basis) desc.append(basis);
   } else put(desc, src(part.status === 'plan' ? (records.length ? `설명 없음 · 요청 기록 없음 · ${recs}` : part.reading ? '기록에서 읽은 말만 있어요' : '아직 설명도 기록도 없어요') : `${STATUS_LABEL[part.status]} · ${recs} · 받은 정리 없음`));
-  if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(c => h('li', {}, c))));
-  // cycle 5 (PART_READING 9절): 원문 (claims by the record they quote), 이유 (what it does and why it is drawn so), 이력, 출처 묶음.
-  const u = part.reading;
-  const origin = u?.claims.length ? originSection(o, part.id, u) : null;
-  const requested = currentRequestResults(o, part.id);
-  // Lines: real ends, read as what the part takes in and what it hands on (its flows, in then out), then what it is with (needs,
-  // shares, related; each row says its verb). Each row is the real other end and what goes along the line: what a reading said is
-  // handed over (its payload, how often, designed or seen), else the stored note (the reason of that relation); a line drawn from
-  // a folded part summarises its inside, so its row also names the inner end. A row and its line on the map light each other.
-  const ends = relationEnds(o, part.id), entry = visitEntry(o), cameFrom = entry ? visits.at(-1)!.from.selected : null;
-  const handed = relationPayloads(o.project), lineSaid = relationLines(o.project);
-  // The picked line's block (map-reading.13, line-view lineFacts): 넘기는 것, 박자 (or 박자 미기재), 방식, 채널, the format artifact's
-  // fields under 데이터 계약 · N 필드 (one cell each, with the artifact's name), and the line of the record that read it.
-  const isPicked = (x: End) => pickedLine?.part === part.id && pickedLine.rels.includes(x.r.id);
-  const lineBlock = (rel: string) => { const s = lineSaid.get(rel);
-    const facts = lineFacts({ payload: s?.payload ?? null, cadence: s?.cadence ?? null, mode: s?.mode ?? null, channel: s?.channel ?? null, fields: s?.fields ?? [] });
-    const c = contractList(s?.payload ?? null, s?.fields ?? []);
-    return h('div', { class: 'line-block', 'data-line-block': rel, role: 'group', 'aria-label': '이 선이 말하는 것' },
-      h('ul', { class: 'lb-facts' }, ...facts.map(x => h('li', { class: x.blank ? 'stp-blank' : '', 'data-fact': x.key }, x.text))),
-      c ? h('div', { class: 'lb-contract' }, h('p', { class: 'lb-head', title: '선이 나르는 형식 산출물의 필드 · 기록이 적은 그대로 (타입·단위·필수는 기록이 싣지 않음)' }, c.head, h('small', {}, ` · ${c.name}`)),
-        h('div', { class: 'xp-cells' }, ...c.cells.map(x => h('span', { class: 'ledger-cell' }, x)))) : null,
-      s?.quote ? h('p', { class: 'lb-cite' }, quoteCite(JSON.stringify(['line', rel]), s.quote, '이 선')) : h('p', { class: 'lb-cite stp-blank' }, '읽은 원문 줄 없음 · 사람이 그린 선'));
-  };
-  const port = (x: End) => {
-    const far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
-    // The scope itself is this scope's boundary, not a place outside it.
-    const where = farRep === x.far ? null : x.far === scope ? '이 범위' : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
-    const came = x.far === cameFrom, read = handed.get(x.r.id), revised = revisedLine(o, x.r.id), verb = x.r.kind === 'flow' ? null : relLabel(x.r.kind, x.out);
-    const picked = isPicked(x), line = picked ? x.r.note : read?.payload ? `${read.payload}${read.cadence ? ` (${read.cadence})` : ''}${read.mode ? ` · ${MODE_LABEL[read.mode]}` : ''}` : x.r.note;
-    return h('li', { ...(picked ? { class: 'picked' } : {}) }, h('button', { type: 'button', class: `port${came ? ' came' : ''}${picked ? ' picked' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${verb ? ` · ${verb}` : ''}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
-      h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name),
-        verb ? h('span', { class: 'port-kind' }, REL_LABEL[x.r.kind] ?? x.r.kind) : null, came ? h('span', { class: 'port-came' }, '출발') : null),
-      near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null,
-      line || revised ? h('span', { class: 'port-note', 'data-rel-note': x.r.id, ...(read?.payload && x.r.note ? { title: x.r.note } : {}) }, `${line}${revised ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null),
-      picked ? lineBlock(x.r.id) : null);
-  };
-  // Under 이유 the lines read as a compact list (the full ports with their steps are the detail view's): a group per direction.
-  const portGroup = (label: string, hint: string, list: End[]) => list.length ? h('div', { class: 'lens-ports why-group' }, h('h4', { title: hint }, label, h('small', {}, String(list.length))),
-    h('ul', {}, ...[...list.slice(0, 8), ...list.slice(8).filter(isPicked)].map(port)), list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: () => openSheet() }, `${list.length - 8}개 더 · 전체 읽기`) : null) : null;
-  const ports = [portGroup('받는 것', '다른 부분이 이 부분에 넘겨주는 것', ends.filter(x => x.r.kind === 'flow' && !x.out)),
-    portGroup('내는 것', '이 부분이 다른 부분에 넘겨주는 것', ends.filter(x => x.r.kind === 'flow' && x.out)),
-    portGroup('함께', '필요로 함 · 함께 씀 · 관련', relationGroups(ends.filter(x => x.r.kind !== 'flow')).flatMap(g => g.list))];
+  if (part.changes.length) desc.append(h('ul', { class: 'lens-changes' }, ...part.changes.slice(0, 2).map(x => h('li', {}, x))));
+  // The description as records read it, on its own line when a plan note or a received summary stands above it.
+  if (u?.role && (part.summary || part.note.trim())) desc.append(h('p', { class: 'why-role' }, h('span', { class: 'why-key' }, u.corrected ? '직접 바로잡은 설명' : '기록에서 읽은 설명'), ' ', h('span', {}, u.role)));
+  return desc;
+}
+/** The wide mode's description: the received summary or the written plan, then the description as records read it with its
+ * correction form (understoodSection), and every recent change. */
+function wideDesc(c: PaneCtx): HTMLElement {
+  const { o, part, records } = c, now = h('div', { class: 'lens-desc sec-now' });
+  if (part.summary) {
+    const report = records.find(r => r.kind === 'report');
+    now.append(h('p', { class: 'summary' }, part.summary), h('p', { class: 'src' }, `${part.origin ?? '전달받은 정리'}${report ? ` · ${ago(report.at)}` : ''}`));
+    if (part.proposal) now.append(h('div', { class: 'proposal' }, h('strong', {}, '제안 · 아직 반영 안 됨'), h('span', {}, part.proposal)));
+    if (part.note) now.append(h('p', { class: 'note' }, h('span', {}, '계획'), part.note));
+  } else if (part.note) {
+    // The written plan reads as the description; the head's line already says whether records exist.
+    put(now, h('p', { class: 'lead' }, part.note), h('p', { class: 'src' }, '적어 둔 계획 설명 · 받은 정리 아님'),
+      records.length ? h('p', { class: 'summary muted' }, part.childIds.length ? '이 부분 자체에 대한 정리는 아직 없어요. 안의 부분과 기록을 보세요.' : '요청 기록은 있고, 아직 받은 작업 보고는 없어요.') : null);
+  } else if (!part.reading) {
+    put(now, h('p', { class: 'summary muted' }, records.length ? (part.childIds.length ? '이 부분 자체에 대한 정리는 아직 없어요. 안의 부분과 기록을 보세요.' : '요청 기록은 있고, 아직 받은 작업 보고는 없어요.') : '아직 설명도 연결된 기록도 없어요.'));
+  }
+  const understood = understoodSection(o, part); if (understood) now.append(understood);
+  if (part.changes.length) now.append(h('div', { class: 'sheet-changes' }, h('p', { class: 'why-key' }, '최근 변화'), h('ul', { class: 'changes' }, ...part.changes.map(x => h('li', {}, x)))));
+  return now;
+}
+
+/* ---------- a line's rows (계약, the chain, 연결) ---------- */
+const isPicked = (c: PaneCtx, x: End) => pickedLine?.part === c.part.id && pickedLine.rels.includes(x.r.id);
+/** The picked line's block (map-reading.13, line-view lineFacts): 넘기는 것, 박자 (or 박자 미기재), 방식, 채널, the format artifact's
+ * fields under 데이터 계약 · N 필드 (one cell each, with the artifact's name), and the line of the record that read it. */
+function lineBlock(c: PaneCtx, rel: string): HTMLElement {
+  const s = c.lineSaid.get(rel);
+  const facts = lineFacts({ payload: s?.payload ?? null, cadence: s?.cadence ?? null, mode: s?.mode ?? null, channel: s?.channel ?? null, fields: s?.fields ?? [] });
+  const ct = contractList(s?.payload ?? null, s?.fields ?? []);
+  return h('div', { class: 'line-block', 'data-line-block': rel, role: 'group', 'aria-label': '이 선이 말하는 것' },
+    h('ul', { class: 'lb-facts' }, ...facts.map(x => h('li', { class: x.blank ? 'stp-blank' : '', 'data-fact': x.key }, x.text))),
+    ct ? h('div', { class: 'lb-contract' }, h('p', { class: 'lb-head', title: '선이 나르는 형식 산출물의 필드 · 기록이 적은 그대로 (타입·단위·필수는 기록이 싣지 않음)' }, ct.head, h('small', {}, ` · ${ct.name}`)),
+      h('div', { class: 'xp-cells' }, ...ct.cells.map(x => h('span', { class: 'ledger-cell' }, x)))) : null,
+    s?.quote ? h('p', { class: 'lb-cite' }, quoteCite(JSON.stringify(['line', rel]), s.quote, '이 선')) : h('p', { class: 'lb-cite stp-blank' }, '읽은 원문 줄 없음 · 사람이 그린 선'));
+}
+/** A line's row: the real other end and what goes along the line (what a reading said is handed over: its payload, how often,
+ * designed or seen; else the stored note); a line drawn from a folded part summarises its inside, so its row also names the inner
+ * end. A row and its line on the map light each other; the picked line's row carries its block. */
+function portRow(c: PaneCtx, x: End): HTMLElement {
+  const o = c.o, part = c.part, far = partOf(o, x.far)!, near = x.near !== part.id ? partOf(o, x.near)?.name : null, farRep = drawnRep(o, x.far);
+  // The scope itself is this scope's boundary, not a place outside it.
+  const where = farRep === x.far ? null : x.far === scope ? '이 범위' : farRep ? `${partOf(o, farRep)!.name} 안` : partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name;
+  const came = x.far === c.cameFrom, read = c.handed.get(x.r.id), revised = revisedLine(o, x.r.id), verb = x.r.kind === 'flow' ? null : relLabel(x.r.kind, x.out);
+  const picked = isPicked(c, x), line = picked ? x.r.note : read?.payload ? `${read.payload}${read.cadence ? ` (${read.cadence})` : ''}${read.mode ? ` · ${MODE_LABEL[read.mode]}` : ''}` : x.r.note;
+  return h('li', { ...(picked ? { class: 'picked' } : {}) }, h('button', { type: 'button', class: `port${came ? ' came' : ''}${picked ? ' picked' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기${verb ? ` · ${verb}` : ''}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
+    h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name),
+      verb ? h('span', { class: 'port-kind' }, REL_LABEL[x.r.kind] ?? x.r.kind) : null, came ? h('span', { class: 'port-came' }, '출발') : null),
+    near || where ? h('span', { class: 'port-where' }, [near ? `안쪽 ‘${near}’에서` : '', where ? `${where}` : ''].filter(Boolean).join(' · ')) : null,
+    line || revised ? h('span', { class: 'port-note', 'data-rel-note': x.r.id, ...(read?.payload && x.r.note ? { title: x.r.note } : {}) }, `${line}${revised ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null),
+    picked ? lineBlock(c, x.r.id) : null);
+}
+/** A line's row in the chain (and 촉발): one line, the other end and what it carries; the full row reads in 계약. */
+function chainPort(c: PaneCtx, x: End): HTMLElement {
+  const o = c.o, far = partOf(o, x.far)!, read = c.handed.get(x.r.id), came = x.far === c.cameFrom, verb = x.r.kind === 'flow' ? null : relLabel(x.r.kind, x.out);
+  const what = read?.payload ? `${read.payload}${read.cadence ? ` (${read.cadence})` : ''}` : null;
+  return h('li', {}, h('button', { type: 'button', class: `port chain-port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id,
+    title: `${far.name}${toParticle(far.name)} 가기${verb ? ` · ${verb}` : ''}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}${x.r.note ? `\n${x.r.note}` : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
+    h('span', { class: 'port-top' }, h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name),
+      what ? h('span', { class: 'chain-what', title: what }, what) : null, came ? h('span', { class: 'port-came' }, '출발') : null)));
+}
+/** A group of rows per direction, folded at PANE_SHOWN.contract (the picked line always shown). */
+function portGroup(c: PaneCtx, what: string, label: string, hint: string, list: End[]): HTMLElement | null {
+  if (!list.length) return null;
+  const f = folded(c, what, list, PANE_SHOWN.contract, x => isPicked(c, x));
+  return h('div', { class: 'lens-ports why-group' }, h('h4', { title: hint, 'data-sub': label }, label, h('small', {}, String(list.length))),
+    h('ul', {}, ...f.shown.map(x => portRow(c, x))), f.more);
+}
+/** 항목 근거 미연결 추출값: list values the reading keeps without a line of their own (pane-view UNLINKED_HEAD), under a quiet head
+ * inside the section they belong to; never a cited row. */
+function unlinkedGroup(lists: [string, readonly string[]][], extra: (HTMLElement | null)[] = []): HTMLElement | null {
+  const rows = lists.filter(([, l]) => l.length), more = extra.filter((x): x is HTMLElement => !!x);
+  if (!rows.length && !more.length) return null;
+  return h('div', { class: 'pn-unlinked', role: 'group', 'aria-label': UNLINKED_HEAD }, h('h4', { title: UNLINKED_HINT, 'data-sub': '항목 근거 미연결' }, UNLINKED_HEAD),
+    rows.length ? h('ul', { class: 'pu-list' }, ...rows.map(([label, l]) => h('li', {}, h('span', { class: 'why-key' }, label), h('span', { class: 'pu-vals' }, l.join(' · '))))) : null, ...more);
+}
+/** 계약: the kind's first rows (pane-view kindLead), what the part takes in and hands on (each line's full row), then the names the
+ * reading lists that no line carries (a name a line's payload says is that line's row), a store's kept cells first. */
+function contractSection(c: PaneCtx): HTMLElement | null {
+  const { o, u } = c, ins = flowsIn(c), outs = flowsOut(c), type = u?.typeRead?.type ?? null, sg = u ? signsOf(u) : null;
+  const lead = kindLead(type, { exits: u ? conditionsOf(u).map(x => x.then) : [], manualRules: sg ? sg.rules.filter(x => (x.enforcedBy ?? []).some(e => e.kind === 'person')).length : 0,
+    targets: outs.filter(x => isControl(c, x)).map(x => partOf(o, x.far)?.name ?? '').filter(Boolean) });
+  const labels = listLabels(type);
+  const unlinked = unlinkedGroup([[labels.inputs, unlinkedNames(u?.inputs ?? [], ins.map(x => c.handed.get(x.r.id)?.payload))],
+    [labels.outputs, unlinkedNames(u?.outputs ?? [], outs.map(x => c.handed.get(x.r.id)?.payload))], [labels.fields, u?.fields ?? []]]);
+  const leadEl = lead.length ? h('ul', { class: 'pn-lead' }, ...lead.map(x => h('li', { title: x.hint }, h('span', { class: 'why-key' }, x.label), h('span', {}, x.text)))) : null;
+  const inG = portGroup(c, 'in', '받는 것', '다른 부분이 이 부분에 넘겨주는 것', ins), outG = portGroup(c, 'out', '내는 것', '이 부분이 다른 부분에 넘겨주는 것', outs);
+  if (!leadEl && !inG && !outG && !unlinked) return null;
+  const count = ins.length + outs.length ? `받는 것 ${ins.length} · 내는 것 ${outs.length}` : null;
+  return type === 'store' ? secEl('contract', count, '', leadEl, unlinked, inG, outG) : secEl('contract', count, '', leadEl, inG, outG, unlinked);
+}
+/** 연결: what the part is with (needs, shares, related; each row says its verb), an open group's inner parts' links to the outside,
+ * and the explicit way in. */
+function linksSection(c: PaneCtx): HTMLElement | null {
+  const { o, part } = c, b = lay.boxes.get(part.id);
+  const together = portGroup(c, 'with', '함께', '필요로 함 · 함께 씀 · 관련', relationGroups(c.ends.filter(x => x.r.kind !== 'flow')).flatMap(g => g.list));
   // A group drawn open: the lines that touch its frame belong to its inner parts. They read here from those parts, by verb and
   // direction, each row naming the inner part, the outside part and where that one belongs; following one records a visit.
   // Relations between two of its inner parts are drawn inside it and only counted.
   const inner = b?.kind === 'frame' ? insideEnds(o.view, part.id) : null;
   const innerRow = (x: End) => {
     const near = partOf(o, x.near), far = partOf(o, x.far); if (!near || !far) return null;
-    const where = partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name, came = x.far === cameFrom;
+    const where = partPath(o.view, x.far).slice(0, -1).map(q => q.name).join(' › ') || o.project.name, came = x.far === c.cameFrom;
     return h('li', {}, h('button', { type: 'button', class: `port fr-port${came ? ' came' : ''}`, 'data-far': x.far, 'data-rel': x.r.id, title: `${far.name}${toParticle(far.name)} 가기 · ${REL_LABEL[x.r.kind] ?? x.r.kind}${came ? ' · 이 관계를 따라 여기로 왔어요' : ''}`, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far); }, ...lightOn([x.r.id], x.far) },
       h('span', { class: 'port-top' }, h('span', { class: 'fr-near' }, near.name), h('span', { class: 'port-dir', 'aria-hidden': 'true' }, dirMark(x.r.kind, x.out)), h('strong', {}, far.name), came ? h('span', { class: 'port-came' }, '출발') : null),
       h('span', { class: 'port-where' }, `${where} 안`),
       x.r.note ? h('span', { class: 'port-note', 'data-rel-note': x.r.id }, x.r.note) : null));
   };
-  const innerSection = inner && (inner.outside.length || inner.within) ? h('section', { class: 'lens-ports frame-rels', 'aria-label': '안쪽 부분의 바깥 연결' },
-    inner.outside.length ? h('h3', {}, '안쪽 부분의 바깥 연결', h('small', {}, String(inner.outside.length))) : null,
+  const innerSection = inner && (inner.outside.length || inner.within) ? h('div', { class: 'lens-ports frame-rels', role: 'group', 'aria-label': '안쪽 부분의 바깥 연결' },
+    inner.outside.length ? h('h4', { 'data-sub': '안쪽 부분의 바깥 연결' }, '안쪽 부분의 바깥 연결', h('small', {}, String(inner.outside.length))) : null,
     ...relationGroups(inner.outside, '안쪽').flatMap(g => {
-      const list = h('ul', {}, ...g.list.slice(0, 8).map(innerRow));
-      return [h('h4', { class: 'fr-verb' }, g.label, h('small', {}, String(g.list.length))), list,
-        g.list.length > 8 ? h('button', { type: 'button', class: 'link-button', onclick: (e: Event) => { list.replaceChildren(...g.list.map(innerRow).filter((x): x is HTMLLIElement => !!x)); (e.currentTarget as HTMLElement).remove(); clampNotes(list, o, part.id); } }, `${g.list.length - 8}개 더 보기`) : null];
+      const f = folded(c, `inner-${g.label}`, g.list, PANE_SHOWN.list);
+      return [h('h4', { class: 'fr-verb' }, g.label, h('small', {}, String(g.list.length))), h('ul', {}, ...f.shown.map(innerRow)), f.more];
     }),
     inner.within ? h('p', { class: 'fr-within' }, `안에서 서로 ${inner.within}`) : null) : null;
-  // Inside: on the map already when the part is an open frame; else its names, and the explicit way in.
-  const kids = part.childIds.map(id => partOf(o, id)!.name);
+  // Inside: on the map already when the part is an open frame; else its names (the wide mode: each a link), and the explicit way in.
+  const kids = part.childIds.map(id => partOf(o, id)!).filter(Boolean);
   const inside = kids.length && part.id !== scope ? h('div', { class: 'lens-inside' },
-    b?.kind === 'frame' ? null : h('p', {}, h('span', {}, `안쪽 ${kids.length}`), kids.join(' · ')),
+    c.wide ? h('div', { class: 'kids' }, ...kids.map(k => { const m = metaLine(k, k.childIds.length ? subtreeRecords(o.view, k.id)[0]?.at ?? null : k.lastAt);
+      return h('a', { class: `kid s-${k.status}`, href: hashFor(o.key, k.id, scope) }, h('span', {}, k.name), k.childIds.length ? h('small', {}, `안쪽 ${k.childIds.length}`) : null, m ? h('small', {}, m) : null); }))
+      : b?.kind === 'frame' ? null : h('p', {}, h('span', {}, `안쪽 ${kids.length}`), kids.map(k => k.name).join(' · ')),
     h('button', { type: 'button', class: 'go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${kids.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))) : null;
-  const thread = answersOf(o, part.id).length;
+  if (!together && !innerSection && !inside) return null;
+  return secEl('links', null, '', together, innerSection, inside);
+}
+
+/** The lens: the fixed head and tab row, one tab's body, the foot (asking first when the AI is connected, then the wide mode). */
+function renderLens() {
+  const o = opened!, part = partOf(o, selected)!, l = $('lens');
+  if (lensRail) {
+    // Folded to a rail: the selection's name, read top to bottom, and the way to open the reading again.
+    l.classList.remove('compare', 'scope-read', 'return-read'); l.classList.add('railed'); readingFor = [];
+    l.replaceChildren(h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 펼치기', 'aria-expanded': 'false', title: `읽기면 펼치기 · ${part.name}`, onclick: () => setRail(false) }, railIcon(false)),
+      h('span', { class: 'rail-name', id: 'lens-title', title: part.name, onclick: () => setRail(false) }, part.name));
+    l.hidden = false; return;
+  }
+  l.classList.remove('railed');
+  const c = paneCtx(o, part, false), thread = answersOf(o, part.id).length;
   const menuItems = [
-    o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
+    o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = true; paneTab = 'structure'; openSheet(() => document.getElementById('edit-name')?.focus()); } }, '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null,
     o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 새 세션에 넘길 문서를 만들어요', onclick: () => handover.open(part.id, document.querySelector<HTMLElement>('#lens details.more summary')) }, '이 부분 인수인계 문서') : null
   ].filter((x): x is HTMLButtonElement => !!x);
   l.classList.remove('compare', 'scope-read', 'scenario-read'); readingFor = [];
-  // In scenario mode a part the path does not visit is said to be outside it; the path is not extended to it.
-  const scHere = scView ? scView.visits.filter(v => drawnRep(o, v.areaId) === part.id || v.areaId === part.id) : null;
-  const scLine = scView && scHere ? h('p', { class: `sc-note${scHere.length ? '' : ' sc-out'}` }, ...(scHere.length
-    ? [h('strong', {}, '시나리오의 방문'), ' · ', ...scHere.flatMap((v, i) => [i ? ' · ' : '', h('button', { type: 'button', class: 'link-button', onclick: () => selectVisit(v.id) }, `방문 ${visitNumber(v.id)}`)])]
-    : [h('strong', {}, '현재 시나리오 밖의 요소'), ' · 이 경로는 이 부분을 지나지 않아요'])) : null;
-  l.replaceChildren(); put(l, entry,
-    h('header', { class: 'lens-head' },
-      path.length ? h('div', { class: 'lens-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope), title: x.name }, x.name)])) : null,
-      h('h2', { id: 'lens-title' }, part.name),
-      aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
-      stateLine(part) ?? ladderLine(o.view, part),
-      storeLine(o, part), scLine,
-      h('div', { class: 'head-tools' },
-        menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
-        h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
-        h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'))),
-    // cycle 5: an open sign first (where its tab opens it), then 원문 (what each record said, newest record first), 이유 (what it
-    // does, its type, its lines, its signs, its structure folded), 이력 (every reading's words in time order), 출처 묶음, where it
-    // lives, and the change requests' results.
-    h('div', { class: 'lens-body' }, signSection(o, part), ...paneSections({ origin, why: whySection(o, part, desc, ports, innerSection, inside), history: u ? historySection(o, part.id, u) : null,
-      sources: u ? sourcesSection(o, part.id, u) : null, where: whereSection(o.project, part) }), requested),
+  const tools = h('div', { class: 'head-tools' },
+    menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
+    h('button', { type: 'button', class: 'rail-toggle', 'aria-label': '읽기면 접기', 'aria-expanded': 'true', title: '읽기면 접기 · 지도를 넓게 봐요', onclick: () => setRail(true) }, railIcon(true)),
+    h('button', { type: 'button', class: 'close', 'aria-label': '선택 해제', title: '닫기 (Esc)', onclick: () => go(o.key) }, '×'));
+  const body = h('div', { class: 'lens-body', id: 'pane-tabpanel', role: 'tabpanel', 'aria-labelledby': `pane-tab-${paneTab}`, 'data-tab': paneTab }, ...tabBody(c));
+  l.replaceChildren(paneGrip(), paneHead(c, tools), tabRow(c), stickyBar(), body,
     h('footer', { class: 'lens-foot' },
-      h('button', { type: 'button', class: 'lens-more', onclick: () => openSheet() }, records.length ? `기록 전체 읽기 · ${records.length}` : '전체 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›')),
-      status.ai === 'deepseek' ? h('button', { type: 'button', class: 'link-button', onclick: () => { composerOpen = true; openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '이 부분에 대해 묻기') : null));
+      status.ai === 'deepseek' ? h('button', { type: 'button', class: 'primary small lens-ask', onclick: () => { composerOpen = true; paneTab = entryTab('ask'); openSheet(() => document.getElementById(status.access === 'code' && !sessionCode() ? 'access-code' : 'ask-input')?.focus()); } }, '이 부분에 대해 묻기') : null,
+      h('button', { type: 'button', class: 'lens-more', title: '같은 탭을 넓게 읽어요 · 근거 탭에 기록 원문과 정리 결과', onclick: () => openSheet() }, c.records.length ? `넓게 읽기 · 기록 ${c.records.length}` : '넓게 읽기', thread ? ` · 정리 ${thread}` : '', h('span', { 'aria-hidden': 'true' }, ' ›'))));
   l.hidden = false;
-  clampNotes(l, o, part.id);
-  if (pickedLine?.part === part.id) requestAnimationFrame(() => l.querySelector<HTMLElement>('[data-line-block]')?.scrollIntoView({ block: 'nearest' }));
+  clampNotes(l, o, part.id); bindSticky(body);
+  if (pickedLine?.part === part.id && paneTab === 'structure') requestAnimationFrame(() => l.querySelector<HTMLElement>('.pn-contract [data-line-block]')?.scrollIntoView({ block: 'nearest' }));
   if (signFocus && signOpen?.part === part.id) {
     signFocus = false; const kind = signOpen.kind, pick = signPick;
-    requestAnimationFrame(() => { const at = l.querySelector<HTMLElement>(`#lens-signs [data-sign-focus="${kind}"]`) ?? l.querySelector<HTMLElement>('#lens-signs h3'); at?.scrollIntoView({ block: 'nearest' }); at?.focus({ preventScroll: true });
-      if (pick) l.querySelector<HTMLElement>(`#lens-signs [data-sign-pick="${CSS.escape(pick)}"]`)?.scrollIntoView({ block: 'nearest' }); });
+    // Read at the frame from the lens as it then stands (the arrival may have drawn it again meanwhile).
+    requestAnimationFrame(() => { const now = l.querySelector<HTMLElement>('.lens-body'), at = now?.querySelector<HTMLElement>(`[data-sign-focus="${kind}"]`); if (at) { scrollToHead(at); at.focus({ preventScroll: true }); }
+      if (pick) now?.querySelector<HTMLElement>(`[data-sign-pick="${CSS.escape(pick)}"]`)?.scrollIntoView({ block: 'nearest' }); });
   }
 }
 
@@ -2951,22 +3247,30 @@ function outLines(o: Opened, id: string): OutLine[] {
   const holds = (x: string) => { for (let q = partOf(o, x), g = 0; q && g < 64; q = partOf(o, q.parentId), g++) if (q.id === id) return true; return false; };
   return o.view.relations.filter(r => r.kind === 'flow' && holds(r.from) && !holds(r.to)).map(r => ({ relationId: r.id, far: r.to }));
 }
-/** The pane's inside (map-reading.9), between the ports and the topics (PART_READING order): 안의 단계 M, each step with what it
- * does, what it uses and its row's citation; the picked step (a click here or on its box in the detail view) also reads who takes
- * what it hands over (spec 7, 소비자: the lines the record maps out of it, else every line leaving the part, said so) and how the
- * part stops and resumes; then 반복 (one line) and 유지 상태. Nothing when the readings gave none of them. */
-function insideSections(o: Opened, part: PartView): HTMLElement[] {
-  const r = part.reading; if (!r) return [];
-  const steps = stepsOf(r), loop = r.loop ?? null, vars = r.stateVars ?? [], out: HTMLElement[] = [];
-  const keep = structureKeep(loop, vars, r.config, conditionsOf(r), UNSAID);
-  const pm = r.portMap ?? [];
+/** 동작 (map design v3 8.3 row 4; map-reading.9–14): what starts the part (its incoming control lines), how it repeats, stops and
+ * resumes (one line, 「프로그램」 where the program filled it), 안의 단계 (each step with what it does, what it uses and its row's
+ * citation; the picked one also reads who takes what it hands over — spec 7, 소비자 — and how the part stops and resumes), the
+ * condition rows with the step each stands on, the record's port → step correspondences; then, under 「항목 근거 미연결 추출값」, the
+ * state it keeps and its settings (no line of their own). Open by default (cycle 5's fold is retired); long lists fold at eight.
+ * Nothing when the readings gave none of them. */
+function behaviourSection(c: PaneCtx): HTMLElement | null {
+  const { o, part } = c, r = c.u; if (!r) return null;
+  const steps = r.steps ?? [], loop = r.loop ?? null, vars = r.stateVars ?? [], conds = conditionsOf(r), pm = r.portMap ?? [];
+  const keep = structureKeep(loop, vars, r.config, conds, UNSAID), fr = r.fileRoles ?? [];
+  const triggers = flowsIn(c).filter(x => isControl(c, x));
+  const blocks: (HTMLElement | null)[] = [];
+  if (triggers.length) blocks.push(h('div', { class: 'bh-block bh-trigger' }, h('h4', { 'data-sub': '촉발', title: '이 부분을 기동하는 제어 선 (들어오는 것)' }, '촉발', h('small', {}, String(triggers.length))),
+    h('ul', { class: 'chain-ports' }, ...triggers.map(x => chainPort(c, x)))));
+  // map-reading.13: what the program filled carries 「프로그램」 (pane-view structureKeep), never read as the model's.
+  if (loop) blocks.push(h('div', { class: 'bh-block lens-loop' }, h('h4', { 'data-sub': '반복' }, '반복'),
+    h('p', { class: 'stp-line' }, h('span', {}, ...loopNodes(keep.loop!)), quoteCite(JSON.stringify(['loop', part.id, loop.at]), loop.quote, '반복'))));
   if (steps.length) {
     const lines = outLines(o, part.id);
-    const item = (s: (typeof r.steps)[number], i: number) => {
-      const on = pickedStep?.part === part.id && pickedStep.name === s.name;
+    const item = (s: (typeof steps)[number]) => {
+      const i = steps.indexOf(s), on = pickedStep?.part === part.id && pickedStep.name === s.name;
       // map-reading.14: a program step is a name only (stepFace), a port only the program mapped to it reads 「프로그램 대응」.
-      const sp = stepPorts(s.name, pm), face = stepFace(s), fr = r.fileRoles ?? [];
-      const portWords = (mark: string, list: typeof sp.ins) => list.length ? [h('span', { 'aria-hidden': 'true' }, `${mark} `), ...list.flatMap((x, k) => [k ? ', ' : null, x.port, x.program ? ' ' : null, x.program ? portChip('pane', x.port) : null])] : [];
+      const sp = stepPorts(s.name, pm), face = stepFace(s);
+      const portWords = (m: string, list: typeof sp.ins) => list.length ? [h('span', { 'aria-hidden': 'true' }, `${m} `), ...list.flatMap((x, k) => [k ? ', ' : null, x.port, x.program ? ' ' : null, x.program ? portChip('pane', x.port) : null])] : [];
       const cons = on ? stepConsumers(s.name, pm, lines) : null;
       return h('li', { class: `stp-step${on ? ' on' : ''}` },
         h('div', { class: 'stp-top' },
@@ -2980,43 +3284,54 @@ function insideSections(o: Opened, part: PartView): HTMLElement[] {
         on ? h('div', { class: 'stp-more' },
           sp.ins.length || sp.outs.length ? h('p', { class: 'stp-ports' }, ...portWords('⇥', sp.ins), sp.ins.length && sp.outs.length ? '  ' : null, ...portWords('⇤', sp.outs)) : null,
           h('p', { class: 'stp-label' }, cons!.mapped ? '소비자 · 이 단계에서 나가는 선' : '소비자 · 이 부분에서 나가는 선 (이 단계와의 대응은 기록에 없음)'),
-          cons!.list.length ? h('ul', { class: 'stp-cons' }, ...cons!.list.map(c => h('li', {}, h('button', { type: 'button', class: 'link-button', title: `${partOf(o, c.far)?.name ?? '부분'}${toParticle(partOf(o, c.far)?.name ?? '부분')} 가기`, onclick: () => go(o.key, c.far) },
-            partOf(o, c.far)?.name ?? '부분'), c.port ? h('small', {}, ` · ${c.port}`) : null))) : h('p', { class: 'stp-blank' }, '나가는 선 없음'),
+          cons!.list.length ? h('ul', { class: 'stp-cons' }, ...cons!.list.map(x => h('li', {}, h('button', { type: 'button', class: 'link-button', title: `${partOf(o, x.far)?.name ?? '부분'}${toParticle(partOf(o, x.far)?.name ?? '부분')} 가기`, onclick: () => go(o.key, x.far) },
+            partOf(o, x.far)?.name ?? '부분'), x.port ? h('small', {}, ` · ${x.port}`) : null))) : h('p', { class: 'stp-blank' }, '나가는 선 없음'),
           h('p', { class: 'stp-label' }, '실패·재개'),
           h('p', { class: loop?.stop || loop?.resume ? 'stp-line' : 'stp-blank' }, ...(loop?.stop || loop?.resume ? loopNodes(keep.loop!.slice(1)) : ['실패 대응 미제공']))) : null);
     };
-    out.push(h('section', { class: 'lens-ports lens-steps' }, h('h3', { title: '기록의 단계 표, 행의 순서대로. 단계 사이의 순서·분기는 읽지 않았다.' }, '안의 단계', h('small', {}, stepCounts(steps).program ? `${stepCounts(steps).recorded} (+${stepCounts(steps).program} 프로그램)` : String(steps.length))),
-      h('ol', { class: 'stp-list' }, ...r.steps.map(item))));
+    const f = folded(c, 'steps', steps, PANE_SHOWN.steps, s => pickedStep?.part === part.id && pickedStep.name === s.name), n = stepCounts(steps);
+    blocks.push(h('div', { class: 'bh-block lens-steps' }, h('h4', { 'data-sub': '단계', title: '기록의 단계 표, 행의 순서대로. 단계 사이의 순서·분기는 읽지 않았다.' }, '안의 단계', h('small', {}, n.program ? `${n.recorded} (+${n.program} 프로그램)` : String(steps.length))),
+      h('ol', { class: 'stp-list' }, ...f.shown.map(item)), f.more));
   }
-  const conds = conditionsOf(r);
   if (conds.length) {
     // map-reading.12: the condition rows, each with the step it stands on (the detail view's rule) or 단계 미상, and its row.
-    out.push(h('section', { class: 'lens-ports lens-conds' }, h('h3', { title: '기록의 조건·거부·분기 표, 행마다 · 조건 → 그때의 결과 · 아니면의 결과는 기록이 적은 때만' }, '조건', h('small', {}, String(conds.length))),
-      h('ul', { class: 'stp-conds' }, ...structureConditions(conds, steps).map(x => h('li', { 'data-cond': String(x.index) }, h('span', { class: 'stp-cond' }, x.text),
+    const f = folded(c, 'conds', structureConditions(conds, steps), PANE_SHOWN.list);
+    blocks.push(h('div', { class: 'bh-block lens-conds' }, h('h4', { 'data-sub': '조건', title: '기록의 조건·거부·분기 표, 행마다 · 조건 → 그때의 결과 · 아니면의 결과는 기록이 적은 때만' }, '조건', h('small', {}, String(conds.length))),
+      h('ul', { class: 'stp-conds' }, ...f.shown.map(x => h('li', { 'data-cond': String(x.index) }, h('span', { class: 'stp-cond' }, x.text),
         h('small', { class: `stp-cond-at${x.step === null ? ' stp-blank' : ''}`, title: x.step === null ? '조건의 말이 이 부분의 어느 단계도 이름으로 짚지 않음' : '조건의 말이 이 단계를 이름으로 짚음' }, x.step === null ? CONDITION_BLANK : `단계 ‘${x.step}’`),
-        quoteCite(JSON.stringify(['condition', part.id, x.condition.at, x.index]), x.condition.quote, `조건 ${x.condition.when}`))))));
+        quoteCite(JSON.stringify(['condition', part.id, x.condition.at, x.index]), x.condition.quote, `조건 ${x.condition.when}`)))), f.more));
   }
-  // map-reading.13: what the program filled carries 「프로그램」 (pane-view structureKeep), never read as the model's.
-  if (loop) out.push(h('section', { class: 'lens-ports lens-loop' }, h('h3', {}, '반복'),
-    h('p', { class: 'stp-line' }, h('span', {}, ...loopNodes(keep.loop!)), quoteCite(JSON.stringify(['loop', part.id, loop.at]), loop.quote, '반복'))));
-  if (vars.length) out.push(h('section', { class: 'lens-ports lens-vars' }, h('h3', {}, '유지 상태', h('small', {}, String(vars.length))),
-    h('ul', { class: 'stp-vars' }, ...keep.vars.map(v => h('li', {}, h('span', { class: 'stp-var' }, v.name, v.scope ? h('small', {}, ` · ${v.scope}`) : null, v.program ? ' ' : null, v.program ? progChip('유지 상태의 이름만 · 범위·읽음·바꿈은 기록에 없음') : null),
-      h('span', { class: 'stp-var-rw' }, v.rw))))));
-  return out;
+  if (pm.length) {
+    // map-reading.9/14: the record's explicit line → port → step rows; a row only the program made reads 「프로그램 대응」.
+    const f = folded(c, 'portmap', pm, PANE_SHOWN.list);
+    blocks.push(h('div', { class: 'bh-block lens-portmap' }, h('h4', { 'data-sub': '포트 대응', title: '기록이 선을 이 부분의 포트와 단계에 이은 행 · 명시된 대응만' }, '포트 대응', h('small', {}, String(pm.length))),
+      h('ul', { class: 'stp-conds' }, ...f.shown.map(m => h('li', {}, h('span', { class: 'stp-cond' }, m.direction === 'in' ? `⇥ ${m.port} → 단계 ‘${m.step}’` : `단계 ‘${m.step}’ → ${m.port} ⇤`),
+        m.program ? portChip('pane', m.port) : null, quoteCite(JSON.stringify(['portmap', part.id, m.at, m.relationId, m.port, m.step]), m.quote, `포트 대응 ${m.port}`)))), f.more));
+  }
+  const fv = folded(c, 'vars', keep.vars, PANE_SHOWN.list);
+  const varsEl = keep.vars.length ? h('div', { class: 'lens-vars' }, h('p', { class: 'pu-sub' }, h('span', { class: 'why-key' }, '유지 상태'), h('small', {}, ` ${keep.vars.length}`)),
+    h('ul', { class: 'stp-vars' }, ...fv.shown.map(v => h('li', {}, h('span', { class: 'stp-var' }, v.name, v.scope ? h('small', {}, ` · ${v.scope}`) : null, v.program ? ' ' : null, v.program ? progChip('유지 상태의 이름만 · 범위·읽음·바꿈은 기록에 없음') : null),
+      h('span', { class: 'stp-var-rw' }, v.rw)))), fv.more) : null;
+  const unlinked = unlinkedGroup([[listLabels(r.typeRead?.type ?? null).config, r.config]], [varsEl]);
+  if (!blocks.length && !unlinked) return null;
+  return secEl('behaviour', structureSummary({ steps: steps.length, conditions: conds.length, loop: !!loop, vars: vars.length }) || null, '', ...blocks, unlinked);
 }
-/** Where the part lives, as the records name it: the files, folders or units readings gave it and the places its current claims
- * name (each once, up to eight, written as the record wrote them), then the sessions behind it. Left out when there is nothing. */
-function whereSection(project: Project, part: PartView): HTMLElement | null {
+/** 어디에: where the part lives, as the records name it: the 파일 지도 rows as '경로 · 역할' with their row (four, then folded), the
+ * files, folders or units readings gave it and the places its current claims name (each once, up to eight, as written), then the
+ * sessions behind it (one line; the wide mode lists them). Left out when there is nothing. */
+function whereSection(c: PaneCtx): HTMLElement | null {
+  const { o, part } = c;
   // map-reading.14: a file a 파일 지도 row gives a role reads '경로 · 역할' with its row (pane-view whereRows); the rest as chips.
-  const w = whereRows([...(part.reading?.files ?? []), ...(part.reading?.claims ?? []).map(c => c.where)], part.reading?.fileRoles ?? []);
-  const sessions = sessionsLine(project, part.id);
+  const w = whereRows([...(part.reading?.files ?? []), ...(part.reading?.claims ?? []).map(x => x.where)], part.reading?.fileRoles ?? []);
+  const sessions = c.wide ? sessionsSection(o.project, part.id) : sessionsLine(o.project, part.id);
   if (!w.roles.length && !w.plain.length && !sessions) return null;
-  return h('section', { class: 'lens-where' }, h('h3', {}, '어디에'),
-    w.roles.length ? h('ul', { class: 'where-roles', 'aria-label': '파일 지도' }, ...w.roles.map(f => h('li', { class: 'wr', title: `파일 지도 · ${f.path}
-역할 · ${f.role}` },
-      h('span', { class: 'wh wr-path' }, f.path), h('span', { class: 'wr-sep', 'aria-hidden': 'true' }, '·'), h('span', { class: 'wr-role' }, f.role),
-      quoteCite(JSON.stringify(['file', part.id, f.path]), f.quote, `파일 ${f.path}`)))) : null,
-    w.plain.length ? h('ul', { class: 'where-chips' }, ...w.plain.map(f => h('li', { class: 'wh', title: f }, f))) : null, sessions);
+  const f = folded(c, 'where', w.roles, PANE_SHOWN.where);
+  return secEl('where', null, 'lens-where',
+    f.shown.length ? h('ul', { class: 'where-roles', 'aria-label': '파일 지도' }, ...f.shown.map(x => h('li', { class: 'wr', title: `파일 지도 · ${x.path}
+역할 · ${x.role}` },
+      h('span', { class: 'wh wr-path' }, x.path), h('span', { class: 'wr-sep', 'aria-hidden': 'true' }, '·'), h('span', { class: 'wr-role' }, x.role),
+      quoteCite(JSON.stringify(['file', part.id, x.path]), x.quote, `파일 ${x.path}`)))) : null, f.more,
+    w.plain.length ? h('ul', { class: 'where-chips' }, ...w.plain.map(x => h('li', { class: 'wh', title: x }, x))) : null, sessions);
 }
 /** What readings said each relation hands over (map-reading.7): per relation, the newest reading's line that names a payload. */
 function relationPayloads(project: Project): Map<string, ReadingRelation> {
@@ -3100,7 +3415,8 @@ function sessionsSection(project: Project, partId: string): HTMLElement | null {
 /** A session record kept while a part is read (the automatic connection): only its sessions are drawn again, so the scroll, the
  * focus and a form open there stay. A part that had none yet is read again whole. */
 function refreshSessions() {
-  const o = opened; if (!o || !selected || planView.isOpen() || (!sheetOpen && lensRail)) return;
+  // The sessions read in 구조's 어디에; another tab has nothing to change.
+  const o = opened; if (!o || !selected || planView.isOpen() || (!sheetOpen && lensRail) || paneTab !== 'structure') return;
   const cur = document.querySelector(sheetOpen ? '#panel .sec-sessions' : '#lens .lens-sessions'), next = sheetOpen ? sessionsSection(o.project, selected) : sessionsLine(o.project, selected);
   if (cur && next) cur.replaceWith(next); else if (cur || next) refreshReading();
 }
@@ -3243,8 +3559,9 @@ function openRecord(id: string) {
   li.classList.remove('flash'); void li.offsetWidth; li.classList.add('flash');
 }
 
-/** The part inspector reads in one order: name → current description → related parts → what to do → sources. Edits sit in a
- * quiet menu; long sources open one at a time. */
+/** The wide mode (넓게 읽기, map design v3 8.8): the same head, the same tabs in the same order, over the map at a reading width (its
+ * text in one 720px column); only what needs room is added: the name·description form when editing, the description's correction,
+ * the sessions in full, the records whole and the answers under 근거, the question box at the foot. Edits sit in a quiet menu. */
 function renderPanel(scrollTop: boolean) {
   const o = opened!, part = o.view.parts.find(p => p.id === selected)!, panel = $('panel');
   const prevBody = panel.querySelector('.panel-body'), keep = scrollTop ? 0 : prevBody?.scrollTop ?? 0;
@@ -3257,91 +3574,29 @@ function renderPanel(scrollTop: boolean) {
   // the saved part). The question box is not among them: its draft is kept apart (getDraft/setDraft) and is the authority, e.g.
   // emptied once the question is answered.
   const typed = same ? (['edit-name', 'edit-note', 'fix-role'] as const).map(id => document.getElementById(id)).filter((f): f is HTMLInputElement | HTMLTextAreaElement => (f instanceof HTMLInputElement || f instanceof HTMLTextAreaElement) && panel.contains(f)).map(f => [f.id, f.value] as const) : [];
-  const path = partPath(o.view, part.id).slice(0, -1), records = subtreeRecords(o.view, part.id);
-  const state = part.status === 'plan' ? (part.reading?.state ? stateLabel(part.reading) ?? '기록에서 읽음' : records.length ? '요청 기록 없음' : part.note ? '계획 설명만 있음 · 기록 없음' : '기록 없음') : STATUS_LABEL[part.status];
+  const c = paneCtx(o, part, true);
   const menuItems = [
-    o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
+    o.kind !== 'legacy' ? h('button', { type: 'button', role: 'menuitem', onclick: () => { editing = !editing; if (editing) paneTab = 'structure'; renderPanel(false); } }, editing ? '고치기 닫기' : '이름·설명 고치기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', onclick: () => openPartForm(part.id) }, '안에 부분 추가') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '이 부분을 보던 맥락으로 원문을 붙여 넣어요', onclick: () => openPaste(part.id) }, '기록 붙여넣기') : null,
     o.kind === 'saved' ? h('button', { type: 'button', role: 'menuitem', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요 (이 부분은 읽기 맥락일 뿐이에요)', onclick: () => openFile(part.id) }, '코드·검사 자료 추가') : null
   ].filter((x): x is HTMLButtonElement => !!x);
-  const head = h('header', { class: 'panel-head' },
-    h('div', { class: 'panel-path' }, ...path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope) }, x.name)]), path.length ? null : h('span', {}, o.project.name)),
-    h('h2', { id: 'panel-title', tabindex: '-1' }, part.name),
-    h('div', { class: 'panel-chips' }, h('span', { class: `state s-${part.status}` }, h('i', { class: 'dot', 'aria-hidden': 'true' }), state),
-      records.length ? h('span', { class: 'chip plain' }, `기록 ${records.length}${records[0] ? ` · ${ago(records[0].at)}` : ''}`) : null),
-    h('div', { class: 'head-tools' },
-      menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
-      h('button', { type: 'button', class: 'link-button sheet-back', title: '전체 읽기를 닫고 지도와 요약으로 (Esc)', onclick: closeSheet }, '요약으로'),
-      h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×')));
-  const body = h('div', { class: 'panel-body' });
+  const tools = h('div', { class: 'head-tools' },
+    menuItems.length ? h('details', { class: 'more' }, h('summary', { 'aria-label': '이 부분 고치기', title: '고치기' }, '⋯'), h('div', { class: 'more-menu', role: 'menu', onclick: (e: Event) => { ((e.currentTarget as HTMLElement).parentElement as HTMLDetailsElement).open = false; } }, ...menuItems)) : null,
+    h('button', { type: 'button', class: 'link-button sheet-back', title: '넓게 읽기를 닫고 지도와 옆 창으로 (Esc)', onclick: closeSheet }, '요약으로'),
+    h('button', { type: 'button', class: 'close', 'aria-label': '요약으로 돌아가기', title: '요약으로 (Esc)', onclick: closeSheet }, '×'));
+  const body = h('div', { class: 'panel-body', id: 'pane-tabpanel', role: 'tabpanel', 'aria-labelledby': `pane-tab-${paneTab}`, 'data-tab': paneTab });
   if (editing) body.append(editForm(o, part));
-  // cycle 5's order, the lens's (pane-view paneSections): 원문 → 이유 → 이력 → 출처 묶음 → 어디에. The description (and the
-  // description as records read it, with its correction) heads 이유, the related parts are its lines, 구조 folds under it.
-  const now = h('div', { class: 'lens-desc sec-now' });
-  if (part.summary) {
-    const report = records.find(r => r.kind === 'report');
-    now.append(h('p', { class: 'summary' }, part.summary), h('p', { class: 'src' }, `${part.origin ?? '전달받은 정리'}${report ? ` · ${ago(report.at)}` : ''}`));
-    if (part.proposal) now.append(h('div', { class: 'proposal' }, h('strong', {}, '제안 · 아직 반영 안 됨'), h('span', {}, part.proposal)));
-    if (part.note) now.append(h('p', { class: 'note' }, h('span', {}, '계획'), part.note));
-  } else if (part.note) {
-    // The written plan reads as the description; the head's state line already says whether records exist.
-    put(now, h('p', { class: 'lead' }, part.note), h('p', { class: 'src' }, '적어 둔 계획 설명 · 받은 정리 아님'),
-      records.length ? h('p', { class: 'summary muted' }, part.childIds.length ? '이 부분 자체에 대한 정리는 아직 없어요. 안의 부분과 기록을 보세요.' : '요청 기록은 있고, 아직 받은 작업 보고는 없어요.') : null);
-  } else if (!part.reading) {
-    put(now, h('p', { class: 'summary muted' }, records.length ? (part.childIds.length ? '이 부분 자체에 대한 정리는 아직 없어요. 안의 부분과 기록을 보세요.' : '요청 기록은 있고, 아직 받은 작업 보고는 없어요.') : '아직 설명도 연결된 기록도 없어요.'));
-  }
-  const understood = understoodSection(o, part); if (understood) now.append(understood);
-  if (part.changes.length) now.append(h('div', { class: 'sheet-changes' }, h('p', { class: 'why-key' }, '최근 변화'), h('ul', { class: 'changes' }, ...part.changes.map(c => h('li', {}, c)))));
-  // 관련 부분: its inside, then the recorded links with their meaning.
-  const links = relationEnds(o, part.id);
-  let rel: HTMLElement | null = null;
-  if (part.childIds.length || links.length) {
-    rel = h('section', { class: 'sec sec-related' }, h('h3', {}, '관련 부분'));
-    if (part.childIds.length) rel.append(h('p', { class: 'sub' }, `안쪽 ${part.childIds.length}`), h('div', { class: 'kids' }, ...part.childIds.map(id => {
-      const c = o.view.parts.find(x => x.id === id)!, m = metaLine(c, c.childIds.length ? subtreeRecords(o.view, c.id)[0]?.at ?? null : c.lastAt);
-      return h('a', { class: `kid s-${c.status}`, href: hashFor(o.key, id, scope) }, h('span', {}, c.name), c.childIds.length ? h('small', {}, `안쪽 ${c.childIds.length}`) : null, m ? h('small', {}, m) : null);
-    })));
-    if (links.length) rel.append(h('p', { class: 'sub' }, `연결 ${links.length}`), h('ul', { class: 'links' }, ...links.map(({ r, out, near, far }) => {
-      const other = o.view.parts.find(x => x.id === far)!, inner = near !== part.id ? partOf(o, near)?.name : null;
-      const where = [inner ? `안쪽 ‘${inner}’에서` : '', insideScope(o, other.id) ? '' : `${partPath(o.view, other.id).slice(0, -1).map(x => x.name).join(' › ') || o.project.name} 안`].filter(Boolean).join(' · ');
-      return h('li', {}, h('a', { href: hashFor(o.key, other.id, scope), 'data-far': other.id, onclick: (e: Event) => follow(other.id, r, e) },
-        h('span', { class: 'dir', title: dirTitle(r.kind, out) }, dirMark(r.kind, out)), h('strong', {}, other.name), h('span', { class: 'rel-kind' }, REL_LABEL[r.kind] ?? r.kind)),
-        where ? h('span', { class: 'link-where' }, where) : null,
-        r.note || revisedLine(o, r.id) ? h('span', { class: 'link-note' }, `${r.note}${revisedLine(o, r.id) ? REVISED_BASIS : ''}`.replace(/^ · /, '')) : null);
-    })));
-  }
-  // What to do next with this part: going inside is explicit, never a side effect of selecting.
-  const goIn = part.childIds.length && part.id !== scope ? h('div', { class: 'sec-acts' },
-    h('button', { type: 'button', class: 'secondary go-in', onclick: () => go(o.key, null, part.id) }, `안으로 들어가기 · ${part.childIds.length}`, h('span', { 'aria-hidden': 'true' }, ' ›'))) : null;
-  const u = part.reading;
-  body.append(...paneSections({ origin: u?.claims.length ? originSection(o, part.id, u, 'sheet') : null, why: whySection(o, part, now, [rel], null, goIn, true),
-    history: u ? historySection(o, part.id, u) : null, sources: u ? sourcesSection(o, part.id, u) : null, where: whereSection(o.project, part) }));
-  const requested = currentRequestResults(o, part.id); if (requested) body.append(requested);
-  const sessions = sessionsSection(o.project, part.id); if (sessions) body.append(sessions);
-  if (records.length) {
-    const showAll = records.length <= 5, list = h('ol', { class: 'records' }, ...records.slice(0, showAll ? records.length : 4).map(r => recordItem(o, r, r.partId !== part.id)));
-    const sec = h('section', { class: 'sec' }, h('h3', {}, '기록 원문 ', h('small', {}, `개발 도구에서 받은 기록 ${records.length}`)), list);
-    if (!showAll) sec.append(h('button', { type: 'button', class: 'records-more link-button', onclick: (e: Event) => { list.replaceChildren(...records.map(r => recordItem(o, r, r.partId !== part.id))); (e.target as HTMLElement).remove(); } }, `기록 ${records.length - 4}개 더 보기`));
-    body.append(sec);
-  }
-  const thread = answersOf(o, part.id);
-  if (thread.length || (ask && ask.partId === part.id)) {
-    const sec = h('section', { class: 'sec thread', 'aria-live': 'polite' }, h('h3', {}, '정리 결과'));
-    for (const a of thread) sec.append(answerCard(o, a));
-    if (ask && ask.partId === part.id) sec.append(ask.controller
-      ? h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `${status.model ?? 'DeepSeek'}가 기록을 읽고 정리하고 있어요…`, coverageText(ask.coverage) ? h('small', { class: 'scope-note' }, coverageText(ask.coverage)!) : null), h('button', { type: 'button', class: 'link-button', onclick: () => ask?.controller?.abort() }, '취소'))
-      : h('div', { class: 'failed', role: 'alert' }, h('span', {}, ask.error ?? '응답을 받지 못했어요.'), h('button', { type: 'button', class: 'secondary small', onclick: () => send(ask!.intent, ask!.question) }, '다시 시도'), h('button', { type: 'button', class: 'link-button', onclick: () => { ask = null; renderPanel(false); } }, '닫기')));
-    body.append(sec);
-  }
-  panel.replaceChildren(...[visitEntry(o), head, body, composer(o, part)].filter((x): x is HTMLElement => !!x));
+  body.append(...tabBody(c));
+  panel.replaceChildren(paneHead(c, tools), tabRow(c), stickyBar(), body, composer(o, part));
   panel.dataset.read = `${o.key}|${part.id}`;
   for (const [id, v] of typed) { const f = document.getElementById(id); if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && f.value !== v) f.value = v; }
   if (scrollTop) body.scrollTop = 0; else body.scrollTop = keep;
+  bindSticky(body);
   if (caret) {
     const f = document.getElementById(caret.id);
     if ((f instanceof HTMLTextAreaElement || f instanceof HTMLInputElement) && panel.contains(f) && !f.disabled) { f.focus({ preventScroll: true }); try { f.setSelectionRange(caret.start, caret.end, caret.dir ?? 'none'); } catch { /* not a text field */ } f.scrollTop = caret.top; }
-  } else if (mark) [...panel.querySelectorAll<HTMLElement>(`[data-${mark[0].replace(/[A-Z]/g, c => `-${c.toLowerCase()}`)}]`)].find(x => x.dataset[mark[0]] === mark[1])?.focus({ preventScroll: true });
+  } else if (mark) [...panel.querySelectorAll<HTMLElement>(`[data-${mark[0].replace(/[A-Z]/g, ch => `-${ch.toLowerCase()}`)}]`)].find(x => x.dataset[mark[0]] === mark[1])?.focus({ preventScroll: true });
 }
 
 /** AF100: the saves this page made itself (entry and the save number each made), so a job's result is applied on top of this
@@ -4178,43 +4433,104 @@ function originSection(o: Opened, part: string, u: PartUnderstanding, surface: '
   return h('section', { class: 'lens-origin', 'aria-label': `원문 · 기록 ${rails.length}개의 말 ${u.claims.length}개` },
     h('h3', { title: '기록마다 묶은, 이 부분에 대해 기록이 한 말 · 새 기록부터 · 묶음 머리를 누르면 그 기록 원문' }, '원문', h('small', {}, `기록 ${rails.length} · 말 ${u.claims.length}`)), box);
 }
-/** 이유: what the part does (its description and where that comes from, the person's dispute of it), why the map drew it so: its
- * type as the record names it (with the line that says so), its lines in and out with what they carry, its signs (the tabs'
- * counts, each opening its section where the tab does), and its structure folded (the detail view is its primary place). */
-function whySection(o: Opened, part: PartView, desc: HTMLElement, ports: (HTMLElement | null)[], innerSection: HTMLElement | null, inside: HTMLElement | null, roleShown = false): HTMLElement {
-  const u = part.reading;
-  // The description as records read it: in the description block when nothing else stands there, else on its own line under the
-  // plan note or the received summary (the lens shows those first). It can be disputed; the person's own correction cannot.
-  // (The full reading puts it, with its correction form, in the description block itself: roleShown.)
-  const roleInDesc = !!u?.role && !part.summary && !part.note.trim();
-  if (u?.role && !roleInDesc && !roleShown) desc.append(h('p', { class: 'why-role' }, h('span', { class: 'why-key' }, u.corrected ? '직접 바로잡은 설명' : '기록에서 읽은 설명'), ' ', h('span', {}, u.role)));
-  const rd = u?.role && !u.corrected ? disputeBits(part.id, ROLE_KEY, u.role) : null;
-  if (rd && (rd.chip || rd.control)) desc.append(h('p', { class: 'why-dispute cl-meta' }, rd.chip, rd.control), ...(rd.form ? [rd.form] : []));
-  const t = u?.typeRead ?? null;
-  const type = t ? h('p', { class: 'why-type' }, h('span', { class: 'why-key' }, '유형'), h('strong', {}, TYPE_LABEL[t.type]),
-    t.quote ? quoteCite(JSON.stringify(['type', part.id, t.at]), t.quote, '유형 근거') : h('span', { class: 'blank' }, '근거 줄 없음'))
-    : u ? h('p', { class: 'why-type' }, h('span', { class: 'why-key' }, '유형'), h('span', { class: 'blank' }, '유형 미상')) : null;
-  const sg = u ? signsOf(u) : null, tabs = sg ? signTabs(sg) : [];
-  const signs = tabs.length ? h('p', { class: 'why-signs' }, h('span', { class: 'why-key' }, '표지'), ...tabs.map(x => {
-    const on = signOpen?.part === part.id && signOpen.kind === x.kind;
-    return h('button', { type: 'button', class: `link-button why-sign${on ? ' on' : ''}`, 'data-sign': x.kind, 'aria-pressed': String(on), title: `${SIGN_LABEL[x.kind]} ${x.count}개 · 읽기면 위쪽에 열어요`, onclick: () => openSign(part.id, x.kind) }, x.text);
-  })) : null;
-  const lines = ports.filter((x): x is HTMLElement => !!x);
-  const linesBox = lines.length || innerSection ? h('div', { class: 'why-lines' }, h('p', { class: 'why-key' }, '선', h('small', {}, ' 받는 것 · 내는 것 · 함께')), ...lines, innerSection) : null;
-  const structure = u ? structureBlock(o, part) : null;
-  return h('section', { class: 'lens-why', 'aria-label': '이유' },
-    h('h3', { title: '이 부분이 하는 일과, 지도가 이렇게 그린 이유: 유형·선·표지·구조' }, '이유'), desc, type, signs, linesBox, structure, inside);
+/* ---------- 근거 (map design v3 8.5, slice S1; S2 numbers it) ---------- */
+/** The part's evidence entries (pane-view evidenceList): the description's passages, the operations line and the type word, each
+ * line's row, the loop, steps, condition rows and port rows, the rules, gates and withdrawals, the 파일 지도 rows, and the current
+ * claims 구조 does not use. */
+function evidenceGroups(c: PaneCtx): EvidenceGroup<CurrentClaim>[] {
+  const u = c.u; if (!u) return [];
+  const sg = signsOf(u);
+  const label = (x: End) => { const far = partOf(c.o, x.far)?.name ?? '부분', pay = c.handed.get(x.r.id)?.payload;
+    return x.r.kind === 'flow' ? `${x.out ? '내는 것' : '받는 것'} · ${far}${pay ? ` · ${pay}` : ''}` : `함께 · ${REL_LABEL[x.r.kind] ?? x.r.kind} · ${far}`; };
+  return evidenceList<CurrentClaim>({
+    roleBasis: u.corrected ? [] : u.roleBasis,
+    state: u.stateRead ? { label: `운영 한 줄 · ${opsHead(u.stateRead.state, u.stateRead.when)}`, quote: u.stateRead.quote } : null,
+    type: u.typeRead ? { label: `종류 · ${TYPE_LABEL[u.typeRead.type]}`, quote: u.typeRead.quote } : null,
+    relations: c.ends.map(x => ({ id: x.r.id, label: label(x), quote: c.lineSaid.get(x.r.id)?.quote ?? null })),
+    loop: u.loop ? { quote: u.loop.quote } : null, steps: u.steps ?? [], conditions: conditionsOf(u), portMap: u.portMap ?? [], fileRoles: u.fileRoles ?? [],
+    claims: paneSorted(u.claims), rules: [...sg.rules, ...sg.gates, ...sg.changes] });
 }
-/** 구조: the inside the detail view draws (안의 단계 · 반복 · 유지 상태), folded under 이유; open while one of its steps is picked
- * (in the detail view or here), and as the person left it for this part. */
-function structureBlock(o: Opened, part: PartView): HTMLElement | null {
-  const sections = insideSections(o, part); if (!sections.length) return null;
-  const r = part.reading!, steps = stepsOf(r).length, vars = (r.stateVars ?? []).length, conds = conditionsOf(r).length;
-  const key = `${o.key}|${part.id}|structure`, open = structureOpen(lensOpen.has(key), pickedStep?.part === part.id);
-  const fold = h('details', { class: 'why-structure', open }, h('summary', { title: '지도의 내부 상세가 이 구조의 주된 자리예요' },
-    '구조', h('small', {}, structureSummary({ steps, conditions: conds, loop: !!r.loop, vars }))), ...sections);
-  fold.addEventListener('toggle', () => { if (fold.open) lensOpen.add(key); else lensOpen.delete(key); });
-  return fold;
+/** 근거: the view switch (주장 순 | 기록별) with the since filter, then the evidence (under 구조's sections, or one rail per record),
+ * the records it rests on (출처 묶음); the wide mode adds the records whole (기록 원문) and the answers (정리 결과). */
+function evidenceTab(c: PaneCtx): HTMLElement[] {
+  const { o, part, u } = c, out: HTMLElement[] = [];
+  if (u) {
+    out.push(evidenceBar(c));
+    if (evidenceView === 'records') out.push(u.claims.length ? originSection(o, part.id, u, c.wide ? 'sheet' : 'lens') : h('p', { class: 'stp-blank ev-none' }, '이 부분에 대해 기록이 한 지금의 말이 없어요'));
+    else out.push(...evidenceByClaim(c));
+    const src = sourcesSection(o, part.id, u); if (src) out.push(src);
+  } else out.push(h('p', { class: 'stp-blank ev-none' }, '이 부분은 아직 기록에서 읽은 말이 없어요'));
+  if (c.wide) {
+    const records = c.records;
+    if (records.length) {
+      const showAll = records.length <= 5, list = h('ol', { class: 'records' }, ...records.slice(0, showAll ? records.length : 4).map(r => recordItem(o, r, r.partId !== part.id)));
+      const sec = h('section', { class: 'sec ev-records' }, h('h3', {}, '기록 원문 ', h('small', {}, `개발 도구에서 받은 기록 ${records.length}`)), list);
+      if (!showAll) sec.append(h('button', { type: 'button', class: 'records-more link-button', onclick: (e: Event) => { list.replaceChildren(...records.map(r => recordItem(o, r, r.partId !== part.id))); (e.target as HTMLElement).remove(); } }, `기록 ${records.length - 4}개 더 보기`));
+      out.push(sec);
+    }
+    const thread = answersOf(o, part.id);
+    if (thread.length || (ask && ask.partId === part.id)) {
+      const sec = h('section', { class: 'sec thread', 'aria-live': 'polite' }, h('h3', {}, '정리 결과 ', h('small', {}, 'AI 답 · 기록의 말이 아니에요')));
+      for (const a of thread) sec.append(answerCard(o, a));
+      if (ask && ask.partId === part.id) sec.append(ask.controller
+        ? h('div', { class: 'pending' }, h('span', { class: 'spinner', 'aria-hidden': 'true' }), h('span', {}, `${status.model ?? 'DeepSeek'}가 기록을 읽고 정리하고 있어요…`, coverageText(ask.coverage) ? h('small', { class: 'scope-note' }, coverageText(ask.coverage)!) : null), h('button', { type: 'button', class: 'link-button', onclick: () => ask?.controller?.abort() }, '취소'))
+        : h('div', { class: 'failed', role: 'alert' }, h('span', {}, ask.error ?? '응답을 받지 못했어요.'), h('button', { type: 'button', class: 'secondary small', onclick: () => send(ask!.intent, ask!.question) }, '다시 시도'), h('button', { type: 'button', class: 'link-button', onclick: () => { ask = null; renderPanel(false); } }, '닫기')));
+      out.push(sec);
+    }
+  }
+  return out;
+}
+/** 보기: 주장 순 | 기록별, and 「기준 시각 이후」 (the map title's filter, the same state; its time is set on the map title). */
+function evidenceBar(c: PaneCtx): HTMLElement {
+  const views = [['claims', '주장 순', '구조 탭의 절 순서로: 하는 일 · 확인 필요 · 계약 · 동작 · 규칙과 관문 · 어디에 · 그 밖의 기록된 말'], ['records', '기록별', '기록마다 묶은 이 부분의 지금 말 · 새 기록부터 · 묶음 머리를 누르면 그 기록 원문']] as const;
+  return h('div', { class: 'ev-bar' },
+    h('div', { class: 'ev-view', role: 'group', 'aria-label': '근거 보기' }, ...views.map(([v, text, hint]) => h('button', { type: 'button', class: `ev-view-b${evidenceView === v ? ' on' : ''}`, 'aria-pressed': String(evidenceView === v), 'data-ev-view': v, title: hint,
+      onclick: () => { if (evidenceView !== v) { evidenceView = v; reread(`[data-ev-view="${v}"]`); } } }, text))),
+    c.u?.claims.length ? h('button', { type: 'button', class: `ev-since${since.on ? ' on' : ''}`, 'aria-pressed': String(since.on), title: '기준 시각 이후 작성된 말을 강조 (지도 제목의 같은 거름 · 시각은 지도 제목에서)',
+      onclick: () => { since = { ...since, on: !since.on }; saveSince(); renderSpace('keep'); markSelection(selected); reread('.ev-since'); } }, '기준 시각 이후') : null);
+}
+/** 주장 순: the entries under 구조's section heads, each with its passage (a claim as the pane reads claims, with its 틀림 control);
+ * the description's own line heads 하는 일 with its 틀림 control; the claims 구조 does not use fold under 그 밖의 기록된 말 (open when
+ * nothing else is there); the count of the values without a line of their own closes it. */
+function evidenceByClaim(c: PaneCtx): HTMLElement[] {
+  const u = c.u!, part = c.part.id, surface = c.wide ? 'sheet' : 'lens', groups = evidenceGroups(c);
+  let n = 0;
+  const claim = (x: CurrentClaim) => claimItem(part, x, claimTopic(x), u.history, ++n, surface);
+  const entry = (e: EvidenceEntry<CurrentClaim>) => h('li', { class: `ev-entry k-${e.kind}` }, h('span', { class: 'ev-label', title: e.label }, e.label),
+    e.quote ? quoteCite(JSON.stringify(['ev', part, e.key]), e.quote, e.label) : h('span', { class: 'stp-blank' }, e.kind === 'relation' ? '읽은 원문 줄 없음 · 사람이 그린 선' : '원문 줄 없음'),
+    c.wide && e.quote ? h('q', { class: 'cl-quote', title: e.quote.quote }, quoteLine(e.quote.quote)) : null);
+  // The description as read, with the person's 「이 해석이 틀림」 (8.6: beside the passages it rests on).
+  const rd = u.role && !u.corrected ? disputeBits(part, ROLE_KEY, u.role) : null;
+  const roleLine = rd ? h('div', { class: 'ev-role' }, h('p', { class: 'ev-role-text' }, u.role), h('p', { class: 'why-dispute cl-meta' }, rd.chip, rd.control), rd.form) : null;
+  const out: HTMLElement[] = [];
+  if (roleLine && !groups.some(g => g.section === 'role')) out.push(h('section', { class: 'ev-group ev-role-only', 'data-ev': 'role' }, h('h3', {}, EVIDENCE_TITLE.role), roleLine));
+  for (const g of groups) {
+    const head = h('h3', {}, EVIDENCE_TITLE[g.section], h('small', {}, String(g.entries.length)));
+    const claims = g.entries.every(e => e.claim);
+    if (g.section === 'other') {
+      // In topic order, as the pane reads claims (claim-topic TOPIC_ORDER).
+      const list = claimsByTopic(g.entries.map(e => e.claim!)).map(({ topic, list: l }) => h('div', { class: `cg t-${topic}` }, h('h4', { title: TOPIC_HINT[topic] }, TOPIC_LABEL[topic], h('small', {}, String(l.length))), h('ul', { class: 'claims' }, ...l.map(claim))));
+      const key = `${c.o.key}|${part}|ev-other`, fold = h('details', { class: 'ev-group ev-other', 'data-ev': 'other', open: lensOpen.has(key) || groups.length === 1 },
+        h('summary', {}, EVIDENCE_TITLE.other, h('small', {}, ` ${g.entries.length}`)), h('div', { class: 'claim-groups' }, ...list));
+      fold.addEventListener('toggle', () => { if (fold.open) lensOpen.add(key); else lensOpen.delete(key); });
+      out.push(fold); continue;
+    }
+    out.push(h('section', { class: `ev-group ev-${g.section}`, 'data-ev': g.section }, head, g.section === 'role' ? roleLine : null,
+      claims ? h('ul', { class: 'claims' }, ...g.entries.map(e => claim(e.claim!))) : h('ul', { class: 'ev-list' }, ...g.entries.map(entry))));
+  }
+  const unlinked = (u.inputs.length + u.outputs.length + u.fields.length + u.config.length) + (u.stateVars ?? []).length;
+  if (unlinked) out.push(h('p', { class: 'ev-unlinked', title: UNLINKED_HINT }, `${UNLINKED_HEAD} ${unlinked} · 구조 탭의 각 절에 따로 모았어요 · 정리가 목록 칸마다 원문 줄을 저장하지 않음 (map-reading.16)`));
+  if (!out.length) out.push(h('p', { class: 'stp-blank ev-none' }, '이 부분의 읽기가 기댄 원문 줄이 없어요'));
+  return out;
+}
+
+/* ---------- 이력 (map design v3 8.7) ---------- */
+/** 이력: the change summary (withdrawals 이전 → 지금, newest first), every reading's words in time order (historySection), and the
+ * change requests' results. */
+function historyTab(c: PaneCtx): HTMLElement[] {
+  const { o, part, u } = c;
+  const out = [changesSection(c), u ? historySection(o, part.id, u) : null, currentRequestResults(o, part.id)].filter((x): x is HTMLElement => !!x);
+  return out.length ? out : [h('p', { class: 'stp-blank ev-none' }, '이 부분을 읽은 정리가 아직 없어요')];
 }
 /** 이력: every reading's words about the part, oldest first; a withdrawal reads 이전 → 지금, each line its reading and time, and
  * a line the current reading no longer holds says so. Beyond HISTORY_SHOWN the earlier lines fold. */
@@ -4368,8 +4684,7 @@ function understoodSection(o: Opened, part: PartView): HTMLElement | null {
     sec.append(h('p', { class: 'und-role' }, u.role), h('p', { class: 'src', title: u.roleAbout ?? '' }, u.corrected ? `직접 바로잡은 설명 · ${fullTime(u.corrected.at)}` : `기록에서 읽은 설명${u.roleAbout ? ` · ${displayAbout(u.roleAbout)} 기준` : ''}${u.roleBasisRevised ? REVISED_BASIS : ''}`,
       o.kind === 'saved' ? h('button', { type: 'button', class: 'link-button quiet', onclick: () => { fixingRole = { key: o.key, part: part.id }; renderPanel(false); requestAnimationFrame(() => document.getElementById('fix-role')?.focus()); } }, ' 설명 바로잡기') : null));
     const basis = roleBasisBlock(o, part.id, u, 'sheet'); if (basis) sec.append(basis);
-    // Descriptions read later that did not replace this one (no record said it supersedes it) read apart, with their version.
-    for (const x of u.others.slice(0, 2)) sec.append(h('p', { class: 'und-later' }, h('span', { title: x.about ?? '' }, `다른 기록의 설명${x.about ? ` · ${displayAbout(x.about)}` : ''} · 현재 설명을 대체한다는 근거 없음`), x.text));
+    // Descriptions read later that did not replace this one read in 구조's 확인 필요 (pane-view cautionRows), in both modes.
   }
   return sec.childNodes.length ? sec : null;
 }
@@ -4388,6 +4703,7 @@ async function send(intent: AskIntent, question: string | null) {
   const controller = new AbortController();
   ask = { partId, intent, question, controller, error: null, coverage };
   if (intent === 'question') composerOpen = true; // asked from the box: keep it open for a follow-up
+  paneTab = entryTab('ask'); // the answers read under 근거 (map design v3 8.8)
   renderPanel(false); scrollThread();
   try {
     const res = await askStudio(payload, controller.signal, sessionCode());
@@ -4650,7 +4966,7 @@ function bindCanvas() {
     if (e.key === 'Escape' && opened && scope) { const o = opened, from = scope; go(o.key, null, partOf(o, from)?.parentId ?? null); requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-drag="${CSS.escape(from)}"]`)?.focus()); }
   });
   let resize = 0;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncMapArea(); if (openState?.mode === 'detail') drawDetailLines(); if (opened && !selected && !planView.isOpen() && $('lens').hidden && !mapMoved) fitView(false); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resize); resize = requestAnimationFrame(() => { syncPaneWidth(); syncMapArea(); if (openState?.mode === 'detail') drawDetailLines(); if (opened && !selected && !planView.isOpen() && $('lens').hidden && !mapMoved) fitView(false); }); });
 }
 
 /** Hover: a line shows what it means (ends, kind, recorded note) without selecting; a part lights its own lines. */

@@ -77,10 +77,12 @@ async function wide(browser, base) {
   const before = await stores(page);
   await selectPart(page, X.engine); await page.waitForTimeout(250);
   const lensW = await page.locator('#lens').evaluate(e => e.getBoundingClientRect().width), camera0 = await page.evaluate(CAMERA), url0 = page.url();
-  assert.equal(await page.locator('#lens .lens-origin .claim').count(), 13, 'the lens reads every current claim too');
-  // The lens reads (cycle 5) the claims by record under their topics first, each cited by its number in the pane, then 이유 (the description and the relations).
+  // The lens opens on 구조 (map design v3 S1: jump chips, the chain, then its sections); the claims read under 근거 · 기록별, by record
+  // under their topics, each cited by its number in the pane.
   const lensOrder = await page.evaluate(() => [...document.querySelectorAll('#lens .lens-body > *')].map(e => e.className));
-  assert.deepEqual(lensOrder.slice(0, 2), ['lens-origin', 'lens-why'], `order ${lensOrder}`);
+  assert.deepEqual(lensOrder.slice(0, 2), ['pn-jump', 'pn-chain'], `order ${lensOrder}`);
+  await page.locator('#lens [role=tab][data-tab=evidence]').click(); await page.locator('#lens [data-ev-view=records]').click();
+  assert.equal(await page.locator('#lens .lens-origin .claim').count(), 13, 'the lens reads every current claim too');
   assert.deepEqual(await page.locator('#lens .lens-origin .cl-cite').allTextContents(), Array.from({ length: 13 }, (_, i) => String(i + 1)));
   assert.match(await page.locator('#lens .lens-origin .cl-cite').first().getAttribute('title'), /^원문에서 보기 · “[\s\S]+”$/);
   await openSurface(page);
@@ -88,7 +90,7 @@ async function wide(browser, base) {
     return { w: r.width, left: r.left, title: p.querySelector('#panel-title').textContent, path: p.querySelector('.panel-path').textContent, back: !!p.querySelector('.sheet-back'),
       text: role.getBoundingClientRect().width, claims: claims.map(c => c.querySelector('.cl-text').textContent), clamp: claims.some(c => getComputedStyle(c.querySelector('.cl-text')).webkitLineClamp !== 'none' || c.querySelector('.cl-text').scrollHeight > c.querySelector('.cl-text').clientHeight + 1),
       bodyH: p.querySelector('.panel-body').scrollHeight, bodyView: p.querySelector('.panel-body').clientHeight }; });
-  assert.ok(lensW < 400, `the lens keeps its width (${lensW})`);
+  assert.ok(lensW <= 448, `the lens keeps its width (${lensW})`);
   assert.ok(s.w > 700 && s.text >= 640 && s.text <= 720, JSON.stringify(s));
   assert.equal(s.title, 'micro-javascript'); assert.equal(s.path, 'micro-javascript · 140'); assert.ok(s.back);
   // Every current claim, the limitation (read last: newest first) included, in its whole words.
@@ -138,7 +140,7 @@ async function follow(browser, base) {
   await selectPart(page, X.vm); await page.waitForTimeout(250); const lensCam = await page.evaluate(CAMERA);
   await openSurface(page);
   assert.equal(await page.locator('#panel .sec-understood .claims .claim').count(), 2);
-  const body = page.locator('#panel .panel-body'), link = page.locator(`#panel .links a[data-far="${X.evalId}"]`);
+  const body = page.locator('#panel .panel-body'), link = page.locator(`#panel .port[data-far="${X.evalId}"]`);
   await link.scrollIntoViewIfNeeded(); const at = await body.evaluate(e => e.scrollTop), cam = await page.evaluate(CAMERA), url0 = page.url();
   await link.click(); await page.waitForTimeout(400);
   assert.notEqual(page.url(), url0);
@@ -310,11 +312,11 @@ async function historyLocks(browser, base) {
     let found = false;
     for (const id of ids) {
       await page.locator(`#world .node[data-part="${id}"]`).click(); await page.locator('#lens .lens-more').click(); await page.locator('#panel.reading').waitFor();
-      if (await page.locator('#panel .links a[data-far]').count()) { found = true; break; }
+      if (await page.locator('#panel .port[data-far]').count()) { found = true; break; }
       await page.keyboard.press('Escape'); await page.keyboard.press('Escape'); await page.waitForTimeout(100);
     }
     assert.ok(found, 'a part with a relation');
-    await page.locator('#panel .links a[data-far]').first().click(); await page.waitForTimeout(300);
+    await page.locator('#panel .port[data-far]').first().click(); await page.waitForTimeout(300);
     await page.locator('#plan-entry').click(); await page.locator('#plan-strip:not([hidden])').waitFor(); await page.waitForTimeout(200);
     assert.equal((await state()).work, false, 'the change plan reads on the map (comparison, not wide)');
     await page.goBack(); await page.waitForTimeout(400);
