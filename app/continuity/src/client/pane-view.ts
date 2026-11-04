@@ -317,7 +317,7 @@ export function kindLead(type: string | null, d: { exits: readonly string[]; man
 /** What each piece of the drawing rests on, grouped under 구조's section heads in 구조's order (하는 일 → 확인 필요 → 계약 → 동작 →
  * 규칙과 관문 → 어디에), then the current claims 구조 does not use (그 밖의 기록된 말, in the claims' own order). S2 numbers the
  * entries (〔등급·n〕, the same span one number) and links 구조's rows to them; this is the seam: one entry per cited thing. */
-export type EvidenceKind = 'role' | 'state' | 'type' | 'relation' | 'loop' | 'step' | 'condition' | 'portmap' | 'fileRole' | 'rule' | 'claim';
+export type EvidenceKind = 'role' | 'state' | 'type' | 'relation' | 'loop' | 'recordLoop' | 'step' | 'condition' | 'portmap' | 'variant' | 'fileRole' | 'rule' | 'claim';
 export type EvidenceSection = Exclude<StructureSection, 'links'> | 'other';
 export const EVIDENCE_ORDER: readonly EvidenceSection[] = ['role', 'caution', 'contract', 'behaviour', 'rules', 'where', 'other'];
 export const EVIDENCE_TITLE: Record<EvidenceSection, string> = { role: '하는 일', caution: '확인 필요', contract: '받는 것 · 내는 것', behaviour: '동작', conditions: '조건', rules: '규칙과 관문', where: '어디에', other: '그 밖의 기록된 말' };
@@ -398,6 +398,11 @@ export interface ItemsSource<C> {
   /** The lines, each direction in the pane's own order: in (to the part), out (from it), with (needs · shares · related). */
   relations: readonly { id: string; label: string; quote: QuoteLike | null; dir: 'in' | 'out' | 'with'; at?: string | null }[];
   loop: { quote: QuoteLike; at?: string | null } | null; steps: readonly { name: string; quote: QuoteLike; at?: string | null }[]; conditions: readonly { when: string; quote: QuoteLike; at?: string | null }[];
+  /** S9: the record's loop table (C-LOOP rows, cited after the loop line, before the steps) and the part's variants (C-VARIANT rows,
+   * cited in 안쪽 · 연결 after its lines), each in 구조's order; index: the row's place in the reading's own list (the thing
+   * 'recordLoop:i' · 'variant:i' 구조 looks it up by; default its place here); ref: the record's row ID (the note's stable key). */
+  recordLoops?: readonly { index?: number; ref: string; label: string; quote: QuoteLike; at?: string | null }[];
+  variants?: readonly { index?: number; ref: string; label: string; quote: QuoteLike; at?: string | null }[];
   portMap: readonly { port: string; step: string; direction: 'in' | 'out'; quote: QuoteLike; at?: string | null }[];
   /** In 어디에's order (whereRows roles). */
   fileRoles: readonly { path: string; quote: QuoteLike; at?: string | null }[];
@@ -450,7 +455,9 @@ export function evidenceItems<C extends PaneClaim>(s: ItemsSource<C>): EvidenceB
   for (const c of cautions) cite(claimThing(c, `caution:${refOf(c)}`), 'caution', 'claim', c.text, quoteOf(c), refOf(c), c.text, c);
   // 계약, 동작, 규칙과 관문, 연결, 어디에.
   ins.forEach(x => rel(x, 'contract')); outs.forEach(x => rel(x, 'contract'));
-  loop(); s.steps.forEach(step);
+  loop();
+  (s.recordLoops ?? []).forEach((x, k) => { const i = x.index ?? k; cite(`recordLoop:${i}`, 'behaviour', 'recordLoop', x.label, x.quote, `recordLoop:${x.ref}`, x.label, null, x.at ?? null); });
+  s.steps.forEach(step);
   s.conditions.forEach((x, i) => cite(`condition:${i}`, 'behaviour', 'condition', `조건 ${x.when}`, x.quote, `condition:${x.when}`, `조건 ${x.when}`, null, x.at ?? null));
   s.portMap.forEach((x, i) => { const label = x.direction === 'in' ? `포트 대응 ${x.port} ⇥ ${x.step}` : `포트 대응 ${x.step} ⇤ ${x.port}`;
     cite(`portmap:${i}`, 'behaviour', 'portmap', label, x.quote, `portmap:${x.direction}:${x.port}:${x.step}`, label, null, x.at ?? null); });
@@ -461,6 +468,7 @@ export function evidenceItems<C extends PaneClaim>(s: ItemsSource<C>): EvidenceB
     for (const x of s.ruleQuotes?.(c) ?? []) cite(`${t}|${x.key}`, 'rules', 'rule', x.label, x.quote, `${ref}|${x.key}`, `${c.text} · ${x.label}`, null, own);
   });
   s.relations.filter(x => x.dir === 'with').forEach(x => rel(x, 'links'));
+  (s.variants ?? []).forEach((x, k) => { const i = x.index ?? k; cite(`variant:${i}`, 'links', 'variant', x.label, x.quote, `variant:${x.ref}`, x.label, null, x.at ?? null); });
   s.fileRoles.forEach(x => cite(`file:${pathKey(x.path)}`, 'where', 'fileRole', `파일 ${x.path}`, x.quote, `file:${pathKey(x.path)}`, `파일 ${x.path}`, null, x.at ?? null));
   // The rest of the current claims, in topic order (as the pane reads claims).
   const rest = s.claims.filter(c => !ruled.has(c) && !claim.has(c) && !cautions.includes(c));

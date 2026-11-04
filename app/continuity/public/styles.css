@@ -2925,9 +2925,9 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .pn-sec .lens-steps .stp-step > .stp-uses { margin: 0; flex: 0 1 auto; min-width: 0; }
 .pn-sec .lens-steps .stp-step > .stp-does + .stp-uses { margin-left: 0; }
 .pn-sec .lens-steps .stp-step > .stp-uses:first-of-type:not(.stp-does + .stp-uses) { margin-left: 14px; }
-/* 동작's loop line reads as one sentence: its one 「표에서 채움」 mark and its dot follow the words inline. */
-.lens-loop > .stp-line { display: block; }
-.lens-loop > .stp-line > .prog-chip { margin-left: 4px; }
+/* 동작's loop line reads as one sentence: a small 「표에서」 right after each field the program filled, its dot after the words. */
+.lens-loop > .stp-line, .stp-more > .stp-line { display: block; }
+.prog-chip.lf-prog { padding: 0 4px; font-size: 11px; line-height: 15px; }
 /* 동작's loop table (every C-LOOP row), a nested row under the loop it runs in. */
 .pn-loops { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; line-height: 18px; color: var(--text-2); overflow-wrap: anywhere; }
 .pn-loops li.d1 { padding-left: 14px; }

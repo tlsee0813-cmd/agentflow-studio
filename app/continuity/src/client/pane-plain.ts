@@ -3,8 +3,8 @@
  * The words the pane shows for what the record leaves out, for what the program (not the AI) carried over and for the record's own
  * bookkeeping are said in plain Korean here, once ('어느 단계에 해당하는지 기록에 없음', not '적용 위치 미해결'). Nothing is hidden:
  * an unknown stays on screen in plain words; the record's terms keep living in the tips, in 근거 and in the small 「읽는 법」 at the
- * end of 구조. The loop's fields read as one line with one mark for what the program filled (not a chip after each field), the
- * record's loop table (every C-LOOP row) nests under the loop it runs in, and a variant reads by what it is and when it is chosen.
+ * end of 구조. The loop's fields read as one line, a small 「표에서」 right after each field the program filled (never after another
+ * field), the record's loop table (every C-LOOP row) nests under the loop it runs in, and a variant reads by what it is and when it is chosen.
  * No DOM; app.ts renders it. Other surfaces (the cards, the detail view, the handover) keep their own words. */
 import { RULE_BLANKS, RULE_DESIGN_PROGRAM, ANCHOR_LABEL, ENFORCER_LABEL, GATE_BLANK } from './signs-view.js';
 import { programLoopItems, type LoopLike, type ConditionLike } from './line-view.js';
@@ -77,12 +77,27 @@ export function designProgramLine(designProgram: string | null, enforce: readonl
 export const unplacedPlain = (unplaced: number, rules: number): string | null => (unplaced && rules > 1 ? `${unplaced}개는 어느 단계에 붙는지 기록에 없음` : null);
 
 /* ---------- the loop in one line ---------- */
-/** The loop's fields in one compact line ('단위 빈 명령 1회 · 멈춤 끝 또는 측정 실패 · 다시 시작 기록에 없음') with the fields the
- * program filled named once (program: their words, for the one mark's tip), never a mark after each field. */
-export function loopLinePlain(loop: LoopLike, config: readonly string[], conditions: readonly ConditionLike[]): { text: string; program: string[] } {
-  const p = programLoopItems(loop, config, conditions);
-  const text = [`단위 ${loop.unit ?? PLAIN_UNSAID}`, `멈춤 ${loop.stop ?? PLAIN_UNSAID}`, `다시 시작 ${loop.resume ?? PLAIN_UNSAID}`].join(' · ');
-  return { text, program: [p.unit ? '단위' : '', p.stop ? '멈춤' : '', p.resume ? '다시 시작' : ''].filter(Boolean) };
+/** The small mark right after a field the program filled ('단위 빈 명령 1회 「표에서」'): on that field only, never after a field the
+ * program did not fill (contract map-reading.13: a value the program carried over is marked, never read as the model's answer). */
+export const PLAIN_PROGRAM_FIELD = '표에서';
+export type LoopField = 'unit' | 'stop' | 'resume';
+export const LOOP_FIELD_WORD: Record<LoopField, string> = { unit: '단위', stop: '멈춤', resume: '다시 시작' };
+const sameWords = (a: string, b: string) => { const k = (s: string) => s.replace(/`/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); return k(a) === k(b); };
+/** The loop's fields in one compact line ('단위 빈 명령 1회 · 멈춤 끝 또는 측정 실패 · 다시 시작 기록에 없음'), each field with whether
+ * the program filled it (segs: its own 「표에서」 goes right after it, never after another field); program: the filled fields' words.
+ * shown: the record's loop table rows read right under the line: a unit or a stop one of those rows already says is left out of the
+ * line (the table says it; the same words twice is noise); the resume always stays (no row says it). only: the fields to read (the
+ * picked step's 실패·재개 reads the stop and the resume). */
+export function loopLinePlain(loop: LoopLike, config: readonly string[], conditions: readonly ConditionLike[],
+  o: { shown?: readonly { unit: string | null; stop: string | null }[]; only?: readonly LoopField[] } = {}): { text: string; program: string[]; segs: { key: LoopField; text: string; program: boolean }[] } {
+  const p = programLoopItems(loop, config, conditions), rows = o.shown ?? [];
+  const said = (key: 'unit' | 'stop', v: string | null) => !!v && rows.some(r => !!r[key] && sameWords(r[key]!, v));
+  const all: { key: LoopField; text: string; program: boolean }[] = [
+    { key: 'unit', text: `${LOOP_FIELD_WORD.unit} ${loop.unit ?? PLAIN_UNSAID}`, program: p.unit },
+    { key: 'stop', text: `${LOOP_FIELD_WORD.stop} ${loop.stop ?? PLAIN_UNSAID}`, program: p.stop },
+    { key: 'resume', text: `${LOOP_FIELD_WORD.resume} ${loop.resume ?? PLAIN_UNSAID}`, program: p.resume }];
+  const segs = all.filter(x => (!o.only || o.only.includes(x.key)) && !(x.key === 'unit' && said('unit', loop.unit)) && !(x.key === 'stop' && said('stop', loop.stop)));
+  return { text: segs.map(x => x.text).join(' · '), program: segs.filter(x => x.program).map(x => LOOP_FIELD_WORD[x.key]), segs };
 }
 /** The record's loop table (C-LOOP rows) as a tree: each row after the row it runs in (depth 1, 2, ...), the rows whose outer loop
  * is not among them first in their own order; outer: the outer loop named outside this part ('Scheduler'), else null. A cycle of
@@ -117,7 +132,12 @@ export function variantPlain(v: { implementer: string; condition: string | null;
 /* ---------- 「읽는 법」: the few words the pane still uses, at the end of 구조 ---------- */
 export const READING_GUIDE: readonly { term: string; text: string }[] = [
   { term: '• 점', text: '그 줄이 기대는 원문이 있다는 표시예요. 가리키거나 초점을 두면 근거 번호와 원문이 보이고, 누르면 근거 탭의 그 자리로 가요.' },
-  { term: PLAIN_PROGRAM, text: '앱이 기록의 표에서 옮겨 채운 값이에요. AI가 읽어 낸 답이 아니에요.' },
+  { term: `${PLAIN_PROGRAM} · ${PLAIN_PROGRAM_FIELD}`, text: '앱이 기록의 표에서 옮겨 채운 값이에요. AI가 읽어 낸 답이 아니에요. 줄 안의 「표에서」는 바로 앞의 칸만 그렇다는 뜻이에요.' },
   { term: PLAIN_UNSAID, text: '기록이 말하지 않은 것이에요. 없다는 뜻이 아니라, 모른다는 뜻이에요.' },
   { term: '기록에 적힘 · 다른 줄에서 이어 읽음', text: '규칙이 붙는 자리를 기록이 직접 말했는지, 다른 줄에서 이어 읽었는지예요.' },
-  { term: '목록으로만 적힌 값', text: '정리가 목록 칸에만 적은 값이라 줄마다 원문을 짚을 수 없어요.' }];
+  { term: '목록으로만 적힌 값', text: '정리가 목록 칸에만 적은 값이라 줄마다 원문을 짚을 수 없어요. 근거 탭에서도 같은 이름으로 모여 있어요.' }];
+/** One word for the state a part keeps between runs, on 구조 and 근거 alike (the record's term 「유지 상태」 stays in the tips). */
+export const PLAIN_KEPT = '기억하는 값';
+/** 받는 것 · 내는 것 when the reading lists no inputs/outputs item for the part (map-reading.16; its lines attach at the card): with
+ * lines below, the rows read from those lines; with none, a neutral blank. Never 「…의 이름은 기록에 없음」 over rows that name them. */
+export const noPortsPlain = (lines: boolean): string => (lines ? '이 부분이 받는 것·내는 것을 항목으로 적은 기록은 없음 · 아래는 선에서 읽은 것' : '받는 것·내는 것을 적은 기록 없음');

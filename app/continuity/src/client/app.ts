@@ -42,7 +42,7 @@ import { isContainer, makeRoom, foldText, nestedText, branchText, stateText as w
 import { lineStyle, lineBadge, badgeForms, quietTip, isRelativeRef, overflowMark, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
-  READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT } from './pane-plain.js';
+  READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines, opsHead, opsCard } from './ops-line.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
@@ -3112,7 +3112,12 @@ function evidenceBook(o: Opened, part: PartView, ends: End[], handed: Map<string
     ...withs.map(x => ({ id: x.r.id, label: `함께 · ${REL_LABEL[x.r.kind] ?? x.r.kind} · ${far(x)}`, quote: lineSaid.get(x.r.id)?.quote ?? null, dir: 'with' as const, at: lineSaid.get(x.r.id)?.at ?? null }))];
   const where = whereRows([...u.files, ...u.claims.map(x => x.where)], u.fileRoles ?? []);
   const basisAt = (q: ReadingQuote) => u.history.find(x => x.basis.some(b => spanKey(b) === spanKey(q)))?.at ?? null;
+  // S9: the loop table's rows (in 동작's nested order) and the variants (in 안쪽 · 연결) are cited like every other row of 구조.
+  const recLoops = u.recordLoops ?? [];
+  const recordLoops = loopTree(recLoops).map(x => ({ index: recLoops.indexOf(x.loop), ref: x.loop.recordRef, label: `반복 표 · ${loopRowPlain(x.loop, x.outer)}`, quote: x.loop.quote, at: basisAt(x.loop.quote) }));
+  const variants = (u.variants ?? []).map((x, i) => { const v = variantPlain(x); return { index: i, ref: x.recordRef, label: `변형 · ${v.name} · ${v.when}`, quote: x.quote, at: basisAt(x.quote) }; });
   return evidenceItems<CurrentClaim>({
+    recordLoops, variants,
     roleBasis: u.corrected ? [] : u.roleBasis, roleText: u.role, roleAt: basisAt,
     type: u.typeRead ? { label: `종류 · ${TYPE_LABEL[u.typeRead.type]}`, quote: u.typeRead.quote, at: u.typeRead.at } : null,
     state: u.stateRead ? { label: `운영 한 줄 · ${opsHead(u.stateRead.state, u.stateRead.when)}`, quote: u.stateRead.quote, at: u.stateRead.at } : null,
@@ -3177,6 +3182,10 @@ function folded<T>(c: PaneCtx, what: string, rows: readonly T[], max: number, ke
 }
 /** S9: the one mark for a value the program carried over (pane-plain PLAIN_PROGRAM: 「표에서 채움」, the cards' 「프로그램」). */
 const plainChip = (what?: string) => h('span', { class: 'sg-chip prog-chip', title: what ? `${PLAIN_PROGRAM_HINT}\n${what}` : PLAIN_PROGRAM_HINT }, PLAIN_PROGRAM);
+/** B1: the loop's fields in one line, a small 「표에서」 right after each field the program filled (and after no other field). */
+const loopFieldNodes = (segs: readonly { key: LoopField; text: string; program: boolean }[]): (string | HTMLElement)[] =>
+  segs.flatMap((x, i) => [i ? ' · ' : '', h('span', { class: 'lf-text', 'data-loop-field': x.key }, x.text),
+    ...(x.program ? [' ', h('span', { class: 'sg-chip prog-chip lf-prog', 'data-loop-field': x.key, title: `${PLAIN_PROGRAM_HINT}\n${LOOP_FIELD_WORD[x.key]}: 앱이 표에서 채움` }, PLAIN_PROGRAM_FIELD)] : [])]).filter(x => x !== '');
 /** S9 「읽는 법」: the few words the pane still uses, folded at the end of 구조 (its open state this tab's memory). */
 function readingGuide(): HTMLElement {
   const key = 'pane|guide', d = h('details', { class: 'pn-guide', ...(lensOpen.has(key) ? { open: true } : {}) }, h('summary', {}, '읽는 법'),
@@ -3280,11 +3289,12 @@ function kindLine(c: PaneCtx): HTMLElement {
   const typeMark = t ? fnMarks(c, ['type'], '종류', false) : null;
   if (s) {
     return h('p', { class: `pane-state st-${s.state}`, ...(s.quote ? { title: `기록의 말 · “${s.quote.quote}”` } : {}) },
-      h('i', { class: 'dot', 'aria-hidden': 'true' }), h('span', { class: 'lk-line' }, kind, typeMark, kind ? sep() : null, h('span', { class: 'lens-ops' }, opsHead(s.state, s.when)),
+      // N1: the kind word's evidence dot stands between the kind word and what follows; no 「·」 right after it (two dots in a row).
+      h('i', { class: 'dot', 'aria-hidden': 'true' }), h('span', { class: 'lk-line' }, kind, typeMark, kind && !typeMark ? sep() : null, h('span', { class: 'lens-ops' }, opsHead(s.state, s.when)),
         s.when ? null : h('small', { class: 'lens-ops-at', title: fullTime(s.at) }, ` · 정리 ${ago(s.at)}`)),
       fnMarks(c, ['state'], '운영 한 줄', false));
   }
-  const lad = ladderLine(c.o.view, c.part); if (kind) lad.prepend(kind, ...(typeMark ? [typeMark] : []), sep()); return lad;
+  const lad = ladderLine(c.o.view, c.part); if (kind) lad.prepend(kind, ...(typeMark ? [typeMark] : [sep()])); return lad;
 }
 function paneHead(c: PaneCtx, tools: HTMLElement): HTMLElement {
   const { o, part } = c, path = partPath(o.view, part.id).slice(0, -1), w = c.wide;
@@ -3356,7 +3366,7 @@ function unlinkedSection(c: PaneCtx): HTMLElement | null {
   const type = u.typeRead?.type ?? null, labels = listLabels(type);
   const keep = structureKeep(u.loop ?? null, u.stateVars ?? [], u.config, conditionsOf(u), UNSAID);
   const fv = folded(c, 'vars', keep.vars, PANE_SHOWN.list);
-  const varsEl = keep.vars.length ? h('div', { class: 'lens-vars' }, h('p', { class: 'pu-sub', title: '유지 상태 · 이 부분이 실행 사이에 기억하는 값' }, h('span', { class: 'why-key' }, '기억하는 값'), h('small', {}, ` ${keep.vars.length}`)),
+  const varsEl = keep.vars.length ? h('div', { class: 'lens-vars' }, h('p', { class: 'pu-sub', title: '유지 상태 · 이 부분이 실행 사이에 기억하는 값' }, h('span', { class: 'why-key' }, PLAIN_KEPT), h('small', {}, ` ${keep.vars.length}`)),
     h('ul', { class: 'stp-vars' }, ...fv.shown.map(v => h('li', {}, h('span', { class: 'stp-var' }, v.name, v.scope ? h('small', {}, ` · ${v.scope}`) : null, v.program ? ' ' : null, v.program ? plainChip('이름만 · 범위·읽는 곳·바꾸는 곳은 기록에 없음') : null),
       h('span', { class: 'stp-var-rw' }, v.rw.replace(/^읽음 /, '읽는 곳 ').replace(/ · 바꿈 /, ' · 바꾸는 곳 ').replaceAll(UNSAID, PLAIN_UNSAID))))), fv.more) : null;
   const lists: [string, readonly string[]][] = [[labels.inputs, unlinkedNames(u.inputs, flowsIn(c).map(x => c.handed.get(x.r.id)?.payload))],
@@ -3557,7 +3567,8 @@ function contractSection(c: PaneCtx): HTMLElement | null {
   const outG = portGroup(c, 'out', '내는 것', '이 부분이 다른 부분에 넘겨주는 것', outs);
   // The card says nothing when the record names no input or output (map design v3 0.1): the words read here, once.
   const noPorts = u && !u.inputs.length && !u.outputs.length && !(u.portMap ?? []).length
-    ? h('p', { class: 'pn-blank-note', title: '데이터 입력·출력 포트 미기록 · 기록이 이 부분이 받는 것·내는 것을 항목으로 말하지 않았다 · 관계선은 카드 수준 접점에 붙는다' }, '받는 것·내는 것의 이름은 기록에 없음') : null;
+    // B3: the reading lists no inputs/outputs item for this part; the rows below (when there are lines) are read from the lines.
+    ? h('p', { class: 'pn-blank-note', title: '데이터 입력·출력 포트 미기록 · 기록이 이 부분이 받는 것·내는 것을 항목(inputs·outputs)으로 적지 않았다 · 관계선은 카드 수준 접점에 붙는다' }, noPortsPlain(!!(inG || outG))) : null;
   if (!leadEl && !inG && !outG && !noPorts) return null;
   // Each side's own head carries its count; the section's head says nothing more.
   return secEl('contract', null, '', leadEl, noPorts, inG, outG);
@@ -3596,9 +3607,11 @@ function linksSection(c: PaneCtx): HTMLElement | null {
   // Pipeline .44 / S9: the part's variants (C-VARIANT rows: which implementation is used and when), beside its inside, plainly.
   const vs = c.u?.variants ?? [];
   const variants = vs.length ? h('div', { class: 'lens-variants' }, h('h4', { 'data-sub': '변형', title: '같은 자리를 골라 채우는 구현들 (기록의 변형 표)' }, '변형 · 골라 쓰는 구현', h('small', {}, String(vs.length))),
-    h('ul', { class: 'pn-variants' }, ...vs.map(x => { const v = variantPlain(x);
+    h('ul', { class: 'pn-variants' }, ...vs.map((x, i) => { const v = variantPlain(x);
+      // B2: the row's own quiet dot and ⋯, to its C-VARIANT row in 근거 (mouse and keyboard), like every other row of 구조.
       return h('li', { title: `변형 표 ${x.recordRef} · 접점 ${x.interfaceRef}${x.selector.when ? ` · 고르는 때 ${x.selector.when}` : ''}\n원문: “${x.quote.quote}”` },
-        h('span', { class: 'pv-name' }, v.name), h('span', { class: `pv-when${x.condition ? '' : ' sg-blank'}` }, v.when), v.note ? h('small', { class: 'pv-note' }, v.note) : null); }))) : null;
+        h('span', { class: 'pv-name' }, v.name), h('span', { class: `pv-when${x.condition ? '' : ' sg-blank'}` }, v.when), fnMarks(c, [`variant:${i}`], `변형 ${v.name}`),
+        v.note ? h('small', { class: 'pv-note' }, v.note) : null); }))) : null;
   if (!together && !innerSection && !inside && !variants) return null;
   return secEl('links', null, '', together, innerSection, inside, variants);
 }
@@ -3820,12 +3833,14 @@ function behaviourSection(c: PaneCtx): HTMLElement | null {
   const steps = r.steps ?? [], loop = r.loop ?? null, pm = r.portMap ?? [], recLoops = r.recordLoops ?? [], fr = r.fileRoles ?? [];
   const blocks: (HTMLElement | null)[] = [];
   if (loop || recLoops.length) {
-    const ll = loop ? loopLinePlain(loop, r.config, r.conditions ?? []) : null;
     const rows = showLoopRows(recLoops.length, !!loop) ? loopTree(recLoops) : [];
+    // N3: a unit or a stop a table row right under the line already says is left out of the line (the resume always stays).
+    const ll = loop ? loopLinePlain(loop, r.config, r.conditions ?? [], { shown: rows.map(x => x.loop) }) : null;
     blocks.push(h('div', { class: 'bh-block lens-loop' }, h('h4', { 'data-sub': '반복' }, '반복', rows.length ? h('small', {}, String(rows.length)) : null),
-      ll ? h('p', { class: 'stp-line', title: loopLine(loop!) }, h('span', {}, ll.text), ll.program.length ? ' ' : null, ll.program.length ? plainChip(`${ll.program.join('·')}: 앱이 표에서 채움`) : null, fnMarks(c, ['loop'], '반복')) : null,
-      rows.length ? h('ul', { class: 'pn-loops', 'aria-label': '기록의 반복 표' }, ...rows.map(x => h('li', { class: `d${Math.min(x.depth, 3)}`, title: `반복 표 ${x.loop.recordRef}${x.loop.body.length ? ` · 몸통 ${x.loop.body.join(', ')}` : ''}\n원문: “${x.loop.quote.quote}”` },
-        x.depth ? h('span', { class: 'pl-nest', 'aria-hidden': 'true' }, '└ ') : null, loopRowPlain(x.loop, x.outer)))) : null));
+      ll && ll.segs.length ? h('p', { class: 'stp-line', title: loopLine(loop!) }, ...loopFieldNodes(ll.segs), fnMarks(c, ['loop'], '반복')) : null,
+      rows.length ? h('ul', { class: 'pn-loops', 'aria-label': '기록의 반복 표' }, ...rows.map(x => { const i = recLoops.indexOf(x.loop);
+        return h('li', { class: `d${Math.min(x.depth, 3)}`, title: `반복 표 ${x.loop.recordRef}${x.loop.body.length ? ` · 몸통 ${x.loop.body.join(', ')}` : ''}\n원문: “${x.loop.quote.quote}”` },
+          x.depth ? h('span', { class: 'pl-nest', 'aria-hidden': 'true' }, '└ ') : null, loopRowPlain(x.loop, x.outer), fnMarks(c, [`recordLoop:${i}`], `반복 표 ${x.loop.recordRef}`)); })) : null));
   }
   if (steps.length) {
     const lines = outLines(o, part.id);
@@ -3850,7 +3865,9 @@ function behaviourSection(c: PaneCtx): HTMLElement | null {
           cons!.list.length ? h('ul', { class: 'stp-cons' }, ...cons!.list.map(x => h('li', {}, h('button', { type: 'button', class: 'link-button', title: `${partOf(o, x.far)?.name ?? '부분'}${toParticle(partOf(o, x.far)?.name ?? '부분')} 가기`, onclick: () => go(o.key, x.far) },
             partOf(o, x.far)?.name ?? '부분'), x.port ? h('small', {}, ` · ${x.port}`) : null))) : h('p', { class: 'stp-blank' }, '나가는 선 없음'),
           h('p', { class: 'stp-label' }, '실패·재개'),
-          h('p', { class: loop?.stop || loop?.resume ? 'stp-line' : 'stp-blank' }, loop?.stop || loop?.resume ? `멈춤 ${loop.stop ?? PLAIN_UNSAID} · 다시 시작 ${loop.resume ?? PLAIN_UNSAID}` : '실패했을 때의 대응은 기록에 없음')) : null);
+          // B1: each field the program filled keeps its own 「표에서」 here too (the stop the app carried over is never unmarked).
+          loop && (loop.stop || loop.resume) ? h('p', { class: 'stp-line' }, ...loopFieldNodes(loopLinePlain(loop, r.config, r.conditions ?? [], { only: ['stop', 'resume'] }).segs))
+            : h('p', { class: 'stp-blank' }, '실패했을 때의 대응은 기록에 없음')) : null);
     };
     const f = folded(c, 'steps', steps, PANE_SHOWN.steps, s => pickedStep?.part === part.id && pickedStep.name === s.name, '단계'), n = stepCounts(steps);
     blocks.push(h('div', { class: 'bh-block lens-steps' }, h('h4', { 'data-sub': '단계', title: '기록의 단계 표, 행의 순서대로 · 행 순서이지 실행 순서가 아니에요 (단계 사이의 순서·분기는 읽지 않았다)' }, '단계', h('small', {}, n.program ? `${n.recorded} (+${n.program} ${PLAIN_PROGRAM})` : String(steps.length))),
@@ -5301,7 +5318,7 @@ function evidenceItemBody(c: PaneCtx, it: EvidenceItem<CurrentClaim>): HTMLEleme
 function unlinkedEvidence(c: PaneCtx): HTMLElement | null {
   const u = c.u!, labels = listLabels(u.typeRead?.type ?? null), ins = flowsIn(c), outs = flowsOut(c);
   const fields: [string, string, readonly string[], End[]][] = [[labels.inputs, 'inputs', u.inputs, ins], [labels.outputs, 'outputs', u.outputs, outs], [labels.fields, 'fields', u.fields, []],
-    [labels.config, 'config', u.config, []], ['유지 상태', 'stateVars', (u.stateVars ?? []).map(v => v.name), []]];
+    [labels.config, 'config', u.config, []], [PLAIN_KEPT, 'stateVars', (u.stateVars ?? []).map(v => v.name), []]];
   const rows = fields.filter(([, , l]) => l.length);
   if (!rows.length) return null;
   const n = rows.reduce((a, [, , l]) => a + l.length, 0);
@@ -5311,7 +5328,7 @@ function unlinkedEvidence(c: PaneCtx): HTMLElement | null {
     return h('li', {}, h('span', { class: 'pu-val' }, name),
       it ? h('small', { class: 'pu-cand', title: '이름이 같을 뿐이에요 · 이름 일치는 근거가 아니에요' }, ' · 후보: 관계 ', fnButton(c, it, footText(it), `relation:${x!.r.id}`, name), '의 넘기는 것과 이름 같음 · 근거로 올리지 않음') : null);
   };
-  return h('section', { class: 'ev-group ev-unlinked-g', 'data-ev': 'unlinked' }, h('h3', { tabindex: '-1', title: UNLINKED_HINT }, '항목 근거 미연결', h('small', {}, String(n))),
+  return h('section', { class: 'ev-group ev-unlinked-g', 'data-ev': 'unlinked' }, h('h3', { tabindex: '-1', title: UNLINKED_HINT }, UNLINKED_HEAD, h('small', {}, String(n))),
     h('p', { class: 'pu-diag' }, '정리가 이 칸들에 항목마다의 원문 줄을 저장하지 않았어요 (계약 map-reading.16) · 그래서 핀·선·반복·상태의 근거로 쓰지 않고 번호도 달지 않아요'),
     h('ul', { class: 'pu-fields' }, ...rows.map(([label, field, list, lines]) => h('li', {}, h('p', { class: 'pu-field' }, h('span', { class: 'why-key' }, label), h('small', {}, ` ${list.length} · 정리 결과의 ${field} 목록`)),
       h('ul', { class: 'pu-vals-l' }, ...list.map(x => value(x, lines)))))));

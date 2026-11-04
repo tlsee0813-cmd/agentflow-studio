@@ -5,8 +5,10 @@
 // double-click instead of opened as an empty expansion. No browser.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { ladderWords, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain,
-  variantPlain, portModeWord, conditionPlain, READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM } from '../dist/public/client/pane-plain.js';
+  variantPlain, portModeWord, conditionPlain, READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_FIELD, PLAIN_KEPT, noPortsPlain } from '../dist/public/client/pane-plain.js';
+import { UNLINKED_HEAD } from '../dist/public/client/pane-view.js';
 import { RULE_BLANKS, RULE_DESIGN_PROGRAM, GATE_BLANK, ruleView, ruleSaid } from '../dist/public/client/signs-view.js';
 import { evidenceItems, STRUCTURE_ORDER, STRUCTURE_TITLE } from '../dist/public/client/pane-view.js';
 import { opensInto } from '../dist/public/client/expansion.js';
@@ -64,18 +66,67 @@ test('S9-2 「설계 대응 · 프로그램 대응」 is said once: not at all w
   assert.equal(unplacedPlain(0, 3), null);
 });
 
-test('S9-2/3 the loop\'s fields in one line, one mark for what the program filled (never a 「프로그램」 chip after each field)', () => {
-  // hyperfine .44 v4 Executor: the unit and the stop carried over by the program.
+// The line as 구조 draws it (app.ts loopFieldNodes): each field, then 「표에서」 right after it when the program filled that field.
+const drawn = segs => segs.map(x => `${x.text}${x.program ? ` 「${PLAIN_PROGRAM_FIELD}」` : ''}`).join(' · ');
+
+test('S9 B1 the loop\'s fields in one line, a 「표에서」 mark right after each field the program filled, never after another field', () => {
+  // hyperfine .44 v4 Executor: the unit and the stop carried over by the program, the resume not.
   const loop = { unit: '빈 명령 1회', stop: '끝 또는 측정 실패 bail', resume: null, program: true };
   const l = loopLinePlain(loop, [], []);
   assert.equal(l.text, '단위 빈 명령 1회 · 멈춤 끝 또는 측정 실패 bail · 다시 시작 기록에 없음');
+  assert.deepEqual(l.segs.map(x => [x.key, x.program]), [['unit', true], ['stop', true], ['resume', false]], 'a mark per filled field');
+  assert.equal(drawn(l.segs), `단위 빈 명령 1회 「${PLAIN_PROGRAM_FIELD}」 · 멈춤 끝 또는 측정 실패 bail 「${PLAIN_PROGRAM_FIELD}」 · 다시 시작 기록에 없음`);
+  assert.doesNotMatch(drawn(l.segs), new RegExp(`다시 시작 기록에 없음 「`), 'no mark after the field the program did not fill (the review\'s B1)');
   assert.deepEqual(l.program, ['단위', '멈춤']);
   assert.doesNotMatch(l.text, /프로그램|미상/);
   const own = loopLinePlain({ unit: '행마다', stop: null, resume: null }, [], []);
   assert.deepEqual(own.program, [], 'the model\'s loop carries no mark');
+  assert.equal(own.segs.some(x => x.program), false);
   assert.equal(own.text, '단위 행마다 · 멈춤 기록에 없음 · 다시 시작 기록에 없음', 'an unsaid field is still on the line');
   const told = loopLinePlain({ unit: 'cadence 5s', stop: 'STALE', resume: null, program: true }, ['cadence 5s'], [{ then: 'x', else: null }]);
-  assert.deepEqual(told.program, ['단위'], 'only the field the program can be told to have filled');
+  assert.deepEqual(told.segs.map(x => x.program), [true, false, false], 'only the field the program can be told to have filled');
+  // The picked step's 「실패·재개」 line: the stop the program filled keeps its own mark (it was plain text in S9).
+  const fail = loopLinePlain(loop, [], [], { only: ['stop', 'resume'] });
+  assert.equal(drawn(fail.segs), `멈춤 끝 또는 측정 실패 bail 「${PLAIN_PROGRAM_FIELD}」 · 다시 시작 기록에 없음`);
+  assert.match(READING_GUIDE.map(x => x.term).join(' '), new RegExp(PLAIN_PROGRAM_FIELD), '「읽는 법」 says what the small mark means');
+});
+
+test('S9 N3 with the loop table under it, the loop line leaves out a unit or a stop a table row already says (the resume stays)', () => {
+  // hyperfine .44 v4 Benchmark: 「단위 워밍업 1회 · 멈춤 끝 또는 ? 오류」 above 「워밍업 1회 · … · 멈춤 끝 또는 ? 오류」.
+  const loop = { unit: '워밍업 1회', stop: '끝 또는 ? 오류', resume: null, program: true };
+  const rows = [{ unit: '워밍업 1회', stop: '끝 또는 ? 오류' }, { unit: '측정 1회', stop: '끝 또는 ? 오류' }];
+  const l = loopLinePlain(loop, [], [], { shown: rows });
+  assert.equal(l.text, '다시 시작 기록에 없음');
+  assert.deepEqual(l.segs.map(x => x.key), ['resume']);
+  const other = loopLinePlain({ unit: '명령마다', stop: '끝 또는 ? 오류', resume: '다음 명령', program: false }, [], [], { shown: rows });
+  assert.equal(other.text, '단위 명령마다 · 다시 시작 다음 명령', 'a unit no row says stays on the line');
+  assert.equal(loopLinePlain(loop, [], [], { shown: [] }).segs.length, 3, 'no table shown: every field');
+});
+
+test('S9 B3 받는 것 · 내는 것 with no inputs/outputs item: never 「이름은 기록에 없음」 over rows that name them', () => {
+  assert.equal(noPortsPlain(true), '이 부분이 받는 것·내는 것을 항목으로 적은 기록은 없음 · 아래는 선에서 읽은 것');
+  assert.equal(noPortsPlain(false), '받는 것·내는 것을 적은 기록 없음');
+  for (const w of [noPortsPlain(true), noPortsPlain(false)]) { assert.doesNotMatch(w, /이름은 기록에 없음/); assert.doesNotMatch(w, JARGON); }
+});
+
+test('S9 B2 the variant rows and the loop table rows are cited like every other row: numbered in 구조\'s order, filed under 동작 and 안쪽 · 연결', () => {
+  const q = (t, from) => ({ record: 'R1', quote: t, from, to: from + t.length });
+  // hyperfine .44 v4 Executor / Benchmark: X01–X03, B11:L01–L02 (the second row listed first, read after the first by the tree).
+  const book = evidenceItems({ roleBasis: [q('설명', 0)], type: null, state: null,
+    relations: [{ id: 'i1', label: 'i1', quote: q('선 i1', 30), dir: 'in' }, { id: 'w', label: 'w', quote: q('선 w', 60), dir: 'with' }],
+    loop: { quote: q('반복', 90) }, steps: [{ name: 'a', quote: q('단계 a', 100) }], conditions: [], portMap: [], fileRoles: [{ path: 'a.rs', quote: q('파일', 220) }],
+    recordLoops: [{ index: 1, ref: 'B11:L01', label: '반복 표 · 워밍업 1회', quote: q('| B11:L01 |', 92) }, { index: 0, ref: 'B11:L02', label: '반복 표 · 측정 1회', quote: q('| B11:L02 |', 95) }],
+    variants: [{ ref: 'X01', label: '변형 · RawExecutor', quote: q('| X01 |', 400) }, { ref: 'X02', label: '변형 · ShellExecutor', quote: q('| X02 |', 410) }],
+    claims: [], rules: [], chain: { ports: 0, steps: 0 } });
+  const by = k => book.thing.get(k)?.n ?? null;
+  assert.deepEqual(['role:0', 'relation:i1', 'loop', 'recordLoop:1', 'recordLoop:0', 'step:0', 'relation:w', 'variant:0', 'variant:1', 'file:a.rs'].map(by), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  assert.deepEqual(book.groups.map(g => [g.section, g.items.map(x => x.n)]), [['role', [1]], ['contract', [2]], ['behaviour', [3, 4, 5, 6]], ['links', [7, 8, 9]], ['where', [10]]],
+    'they read in 근거 under the sections 구조 shows them in');
+  assert.deepEqual(['recordLoop:1', 'variant:0'].map(k => [book.thing.get(k).kind, book.thing.get(k).uses[0].ref]), [['recordLoop', 'recordLoop:B11:L01'], ['variant', 'variant:X01']], 'the note key is the record\'s row ID');
+  const same = evidenceItems({ roleBasis: [], type: null, state: null, relations: [], loop: { quote: q('| B11:L01 |', 92) }, steps: [], conditions: [], portMap: [], fileRoles: [],
+    recordLoops: [{ ref: 'B11:L01', label: '반복 표 · 워밍업 1회', quote: q('| B11:L01 |', 92) }], claims: [], rules: [], chain: { ports: 0, steps: 0 } });
+  assert.equal(same.items.length, 1, 'the loop and its own table row quoting the same span are one item');
+  assert.equal(same.thing.get('recordLoop:0').n, 1);
 });
 
 test('S9-5 the record\'s loop table nests every C-LOOP row under the loop it runs in; an outer loop of another part is named', () => {
@@ -134,4 +185,20 @@ test('S9-4 a group with parts inside and no steps of its own is entered on a dou
   assert.equal(opensInto(2, 8), false, 'Executor (two parts inside, eight steps) opens its steps');
   assert.equal(opensInto(0, 0), false, 'a leaf part opens as before');
   assert.equal(opensInto(0, 3), false);
+});
+
+test('S9 N2 구조 and 근거 call the same groups by the same names (the 「근거 탭에서 ›」 button lands on a group with its name)', async () => {
+  assert.equal(UNLINKED_HEAD, '목록으로만 적힌 값'); assert.equal(PLAIN_KEPT, '기억하는 값');
+  assert.ok(READING_GUIDE.some(x => x.term === UNLINKED_HEAD));
+  const app = await readFile(new URL('../dist/public/client/app.js', import.meta.url), 'utf8');
+  const body = name => { const i = app.indexOf(`function ${name}(`); assert.ok(i >= 0, name); let d = 0, j = app.indexOf('{', i); for (let k = j; k < app.length; k++) { if (app[k] === '{') d++; else if (app[k] === '}' && --d === 0) return app.slice(j, k + 1); } return ''; };
+  const ev = body('unlinkedEvidence'), st = body('unlinkedSection');
+  assert.match(ev, /UNLINKED_HEAD/, '근거\'s group head is 구조\'s name'); assert.doesNotMatch(ev, /'항목 근거 미연결'|'유지 상태'/);
+  assert.match(ev, /PLAIN_KEPT/); assert.match(st, /PLAIN_KEPT/);
+  // B2: the variant rows and the loop table rows carry their own marks; N1: the kind word's dot is never followed by a 「·」.
+  assert.match(body('linksSection'), /fnMarks\(c, \[`variant:\$\{i\}`\]/);
+  assert.match(body('behaviourSection'), /fnMarks\(c, \[`recordLoop:\$\{i\}`\]/);
+  assert.doesNotMatch(body('contractSection'), /이름은 기록에 없음/);
+  const kl = body('kindLine');
+  assert.match(kl, /kind && !typeMark \? sep\(\)/); assert.match(kl, /typeMark \? \[typeMark\] : \[sep\(\)\]/);
 });
