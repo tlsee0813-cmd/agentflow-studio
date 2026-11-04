@@ -98,13 +98,21 @@ test('tierText: the screen floors hold at every scale; 가까이 keeps the line 
 const shape = (x = {}) => ({ nameLines: 1, rows: 3, contract: 32, inner: 24, signs: 24, total: 264, status: 1, ...x });
 test('tierFit: 54% shows title, kind and short status only; 77% the head, the bottom line and the rows that fit; 100% everything', () => {
   const far = tierFit(shape(), 0.54, 'far');
-  assert.deepEqual({ ...far, nameLines: undefined }, { nameLines: undefined, kind: true, status: true, rows: 0, contract: false, inner: false, signs: false, bottom: false });
+  assert.deepEqual({ ...far, nameLines: undefined }, { nameLines: undefined, kind: true, status: true, rows: 0, vals: 0, contract: false, inner: false, signs: false, bottom: false });
   assert.ok(far.nameLines >= 1);
   const mid = tierFit(shape(), 0.77, 'mid');
   assert.equal(mid.kind, true); assert.equal(mid.bottom, true); assert.equal(mid.contract, false, 'the pins and names hide at 중간');
-  assert.ok(mid.rows >= 1 && mid.rows <= 2, 'one or two kind rows');
+  assert.ok(mid.rows >= 1 && mid.rows <= 3, 'the kind rows that fit, so the fixed box is used');
   assert.equal(mid.status, false, 'the bottom line says the status at 중간');
-  assert.deepEqual(tierFit(shape(), 1, 'near'), { nameLines: 1, kind: true, status: false, rows: 3, contract: true, inner: true, signs: true, bottom: true });
+  assert.deepEqual(tierFit(shape(), 1, 'near'), { nameLines: 1, kind: true, status: false, rows: 3, vals: 0, contract: true, inner: true, signs: true, bottom: true });
+  // 중간 never shows the 「?」 blank (drawn last); the value rows follow the kind rows while they fit; the name's second line comes
+  // after them unless the name took two lines at 가까이.
+  const blanked = tierFit(shape({ rows: 2, blank: 1, vals: 2, inner: 0, signs: 0, total: 208 }), 0.77, 'mid');
+  assert.equal(blanked.rows, 1, 'the blank never reads at 중간'); assert.equal(blanked.vals, 2); assert.equal(blanked.contract, true);
+  assert.equal(tierFit(shape({ rows: 0, vals: 1, inner: 0, signs: 0, total: 136 }), 0.77, 'mid').vals, 1, 'a small card shows its value row rather than an empty body');
+  assert.equal(tierFit(shape({ nameLines: 2, rows: 0, vals: 1, inner: 0, signs: 0, total: 160 }), 0.77, 'mid').nameLines, 2, 'a two-line name keeps its line first');
+  assert.equal(tierFit(shape({ rows: 0, vals: 0, inner: 0, signs: 0, total: 104 }), 0.77, 'mid').vals, 0);
+  assert.equal(tierFit(shape({ vals: 2 }), 1, 'near').vals, 2);
   // A small box at a small scale: the second name line and the status give way before the first line; nothing overflows.
   const tiny = tierFit(shape({ total: 136, rows: 0, inner: 0, signs: 0 }), 0.42, 'far');
   assert.equal(tiny.nameLines, 1);
@@ -114,10 +122,10 @@ test('tierFit: 54% shows title, kind and short status only; 77% the head, the bo
 test('tierFit: what is shown always fits the box (screen line floors × lines ≤ the box), at every tier and scale', () => {
   const PAD = 26;
   for (const total of [136, 144, 168, 192, 208, 264, 420]) for (const k of [0.2, 0.3, 0.42, 0.54, 0.59, 0.6, 0.66, 0.77, 0.87]) {
-    const t = zoomTier(k), T = tierText(k, t), f = tierFit(shape({ total, rows: 3, status: 1 }), k, t);
+    const t = zoomTier(k), T = tierText(k, t), f = tierFit(shape({ total, rows: 3, status: 1, vals: 2, blank: 1 }), k, t);
     if (t === 'near') continue;
     let used = PAD + f.nameLines * T.titleLh + (f.kind ? T.kindLh : 0) + (f.status ? T.kindLh : 0);
-    if (t === 'mid') used += T.gap + (f.bottom ? T.bottom : 0) + (f.inner ? Math.max(24, T.rowLh + 4) : 0) + (f.rows ? f.rows * T.rowLh + 12 : 0) + (f.signs ? Math.max(24, T.rowLh + 4) : 0);
+    if (t === 'mid') used += T.gap + (f.bottom ? T.bottom : 0) + (f.inner ? Math.max(24, T.rowLh + 4) : 0) + (f.rows ? f.rows * T.rowLh + T.gap * 0.75 : 0) + (f.vals ? f.vals * T.rowLh + T.gap * 0.75 : 0) + (f.signs ? Math.max(24, T.rowLh + 4) : 0);
     // The first name line is always kept, even in a box too small for it at this scale (it is cut, never shrunk).
     if (f.nameLines > 1 || f.kind || f.bottom) assert.ok(used <= total + 1e-6, JSON.stringify({ total, k, f, used }));
   }

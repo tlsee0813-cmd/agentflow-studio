@@ -86,19 +86,24 @@ export function tierText(k: number, tier: ZoomTier): TierText {
  * and whole height (map px). */
 export interface CardShapeIn { nameLines: number; rows: number; contract: number; inner: number; signs: number; total: number;
   /** 1 when the card's short status reads on a line of its own at 개요 (a card with a lifecycle chip says it in the kind line). */
-  status?: number }
-/** What a card shows at a tier: its name lines, the kind line, the short status line (개요), how many kind rows, and whether the
- * contract area, the inner line, the sign row and the bottom line are drawn. */
-export interface CardFit { nameLines: number; kind: boolean; status: boolean; rows: number; contract: boolean; inner: boolean; signs: boolean; bottom: boolean }
+  status?: number;
+  /** The rows of list values shown by name in the contract area (0 when the area holds pins, which hide below 가까이). */
+  vals?: number;
+  /** 1 when one of the kind rows is the defining blank 「?」 (drawn last; never shown below 가까이). */
+  blank?: number }
+/** What a card shows at a tier: its name lines, the kind line, the short status line (개요), how many kind rows and value rows,
+ * and whether the contract area, the inner line, the sign row and the bottom line are drawn. */
+export interface CardFit { nameLines: number; kind: boolean; status: boolean; rows: number; vals: number; contract: boolean; inner: boolean; signs: boolean; bottom: boolean }
 /** The card's padding above and below (map px), as card-family draws it. */
 const FIT_PAD = 12 * 2 + 2;
 /** What fits a card's fixed box at a tier and scale (5.2–5.4): what does not fit is hidden, never shrunk or overlapped. 가까이 shows
- * everything (the box was made for it). 중간 keeps the head, then the bottom line, the inner line, at most two kind rows and the sign
- * row, each only while its scaled lines fit; never the contract area (its pins and names hide; the lines' ends stay). 개요 and the
- * dot map keep the head only: two name lines, else one, and the kind line with the short status when it fits. */
+ * everything (the box was made for it). 중간 keeps the head, then the bottom line, the inner line, the kind rows (never the 「?」
+ * blank), the value rows and the sign row, each only while its scaled lines fit, so the fixed box is used rather than left empty;
+ * never pins (their names hide; the lines' ends stay). 개요 and the dot map keep the head only: two name lines, else one, and the
+ * kind line with the short status when it fits. */
 export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier): CardFit {
   const nl = Math.min(2, Math.max(1, c.nameLines));
-  if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, contract: true, inner: c.inner > 0, signs: c.signs > 0, bottom: true };
+  if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, vals: c.vals ?? 0, contract: true, inner: c.inner > 0, signs: c.signs > 0, bottom: true };
   const T = tierText(k, tier);
   let room = c.total - FIT_PAD;
   const take = (h: number) => { if (room >= h) { room -= h; return true; } return false; };
@@ -107,14 +112,20 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier): CardFit {
   room -= T.titleLh;
   if (tier !== 'mid') {
     const kind = take(T.kindLh), status = !!c.status && take(T.kindLh), names = take(T.titleLh) ? 2 : 1;
-    return { nameLines: names, kind, status, rows: 0, contract: false, inner: false, signs: false, bottom: false };
+    return { nameLines: names, kind, status, rows: 0, vals: 0, contract: false, inner: false, signs: false, bottom: false };
   }
-  // 중간: the kind line, the bottom line (it says the status) under the head's gap, then a second name line, the inner line, one or
-  // two kind rows and the sign row, each while it fits.
+  // 중간: the kind line, the bottom line (it says the status) under the head's gap, then a second name line, the inner line, the
+  // kind rows but the blank, the value rows and the sign row, each while it fits.
   const kind = take(T.kindLh); room -= T.gap;
-  const bottom = take(T.bottom), names = take(T.titleLh) ? 2 : 1, inner = c.inner > 0 && take(Math.max(24, T.rowLh + 4));
-  // The rows' block keeps its 12px after the last row.
-  let rows = 0; while (rows < Math.min(2, c.rows) && take(T.rowLh + (rows ? 0 : 12))) rows++;
+  // A name that took two lines at 가까이 keeps its second line first; one that kept one line there takes a second (the larger type
+  // here may wrap it) only with the room the rows leave, so the body is never left empty for a line the name may not need.
+  const bottom = take(T.bottom); let names = nl >= 2 && take(T.titleLh) ? 2 : 1;
+  const inner = c.inner > 0 && take(Math.max(24, T.rowLh + 4));
+  // Each block of rows keeps its space after its last row (three quarters of the head gap: 12 at 가까이, 6 here, styles.css).
+  const after = T.gap * 0.75;
+  let rows = 0; const said = Math.max(0, c.rows - (c.blank ? 1 : 0)); while (rows < said && take(T.rowLh + (rows ? 0 : after))) rows++;
+  let vals = 0; const all = c.vals ?? 0; while (rows === said && vals < all && take(T.rowLh + (vals ? 0 : after))) vals++;
   const signs = c.signs > 0 && take(Math.max(24, T.rowLh + 4));
-  return { nameLines: names, kind, status: false, rows, contract: false, inner, signs, bottom };
+  if (names === 1 && take(T.titleLh)) names = 2;
+  return { nameLines: names, kind, status: false, rows, vals, contract: vals > 0, inner, signs, bottom };
 }

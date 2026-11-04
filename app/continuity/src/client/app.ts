@@ -26,13 +26,14 @@ import { requestResults, frozenRequests, displayAbout, captureRequestReading, re
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type RelationView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
+import { groupAxis, filedUnder, AXIS_WORD, SHELF_TITLE, SHELF_TIP, OUTSIDE_TITLE, OUTSIDE_TIP, BOUNDARY_TITLE, BOUNDARY_TIP } from './map-regions.js';
 import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
-import { cardTemplate, cardHeights, lifecycleOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, type CardFacts, type CardTemplate } from './card-family.js';
+import { cardTemplate, cardHeights, lifecycleOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
@@ -163,7 +164,7 @@ function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(
 
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope: string | null = null;
-let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [] };
+let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [], bands: { outside: [], boundary: [], shelf: [] } };
 const cameras = new Map<string, { x: number; y: number; k: number; win?: [number, number] }>();
 const winSize = (): [number, number] => [window.innerWidth, window.innerHeight];
 /** Whether a camera saved in a window of that size still fits this one: both sides within a quarter. An unknown size is taken. */
@@ -616,8 +617,6 @@ let openPlanOnArrive = false;
 /** A package-like name ('@node-red/runtime') may break after its slashes rather than inside a word. */
 const slashBreaks = (name: string): (string | HTMLElement)[] => name.split('/').flatMap((x, i, all) => (i < all.length - 1 ? [`${x}/`, document.createElement('wbr')] : [x]));
 /** A quiet monogram for a project card: its first letter on one of six tints, chosen from the name so it stays the same. */
-/** Region hues (the map and the home miniature): blue, teal, amber, violet, rose, green, told apart at a faint wash. */
-const HUES = [214, 158, 32, 268, 345, 96];
 /** A miniature of the project's map on its home card: the top-level parts and regions (one level open), their lines, the spine
  * stronger, drawn as SVG from the very layout the map opens with, so the card shows the map's shape before it is opened. */
 function miniMap(v: StudioView): SVGSVGElement | null {
@@ -632,13 +631,10 @@ function miniMap(v: StudioView): SVGSVGElement | null {
   const X = (x: number) => (ox + x * k).toFixed(1), Y = (y: number) => (oy + y * k).toFixed(1), S = (n: number) => Math.max(1.5, n * k).toFixed(1);
   const el = (tag: string, attrs: Record<string, string>) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const [a, val] of Object.entries(attrs)) e.setAttribute(a, val); return e; };
   const root = el('svg', { class: 'mini-map', viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true', focusable: 'false' }) as SVGSVGElement;
-  const hues = new Map<string, number>(); v.roots.forEach((id, i) => hues.set(id, HUES[i % HUES.length]!));
   const byId = new Map(v.parts.map(p => [p.id, p]));
-  // Regions under everything, lines over them, cards on top.
-  for (const b of boxes.filter(x => x.kind === 'frame').sort((p, q) => p.depth - q.depth)) {
-    const hue = hues.get(b.id);
-    root.append(el('rect', { class: 'mm-frame', x: X(b.x), y: Y(b.y), width: S(b.w), height: S(b.h), rx: '6', ...(hue !== undefined ? { style: `--hue: ${hue}` } : {}) }));
-  }
+  // Regions under everything (one neutral surface: a colour by order says nothing, map design v3 2.1), lines over them, cards on top.
+  for (const b of boxes.filter(x => x.kind === 'frame').sort((p, q) => p.depth - q.depth))
+    root.append(el('rect', { class: 'mm-frame', x: X(b.x), y: Y(b.y), width: S(b.w), height: S(b.h), rx: '6' }));
   for (const e of L.edges) {
     const a = L.boxes.get(e.from), b = L.boxes.get(e.to); if (!a || !b) continue;
     const forward = b.x >= a.x + a.w;
@@ -894,9 +890,9 @@ function fitCards() {
   fitFrame = 0;
   const t = tier ?? zoomTier(camera.k), k = camera.k;
   document.querySelectorAll<HTMLElement>('#world .node.card[data-shape]').forEach(el => {
-    const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0] = el.dataset.shape!.split(',').map(Number);
-    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status }, k, t);
-    el.style.setProperty('--nl', String(f.nameLines)); el.dataset.fitRows = String(f.rows);
+    const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0, vals = 0, blank = 0] = el.dataset.shape!.split(',').map(Number);
+    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status, vals, blank }, k, t);
+    el.style.setProperty('--nl', String(f.nameLines)); el.dataset.fitRows = String(f.rows); el.dataset.fitVals = String(f.vals);
     el.classList.toggle('fit-nokind', !f.kind); el.classList.toggle('fit-nocontract', !f.contract); el.classList.toggle('fit-noinner', !f.inner);
     el.classList.toggle('fit-nosigns', !f.signs); el.classList.toggle('fit-nobottom', !f.bottom); el.classList.toggle('fit-status', f.status);
   });
@@ -1161,11 +1157,10 @@ function typedRoom(o: Opened, tpls?: Map<string, CardTemplate>): (id: string, fa
     } };
   };
 }
-const UNLINKED_TIP = '항목 근거 미연결 · 기록이 이 목록의 항목마다 원문 줄을 저장하지 않아 핀·필드 칸으로 그리지 않는다 (값은 패널 구조 탭에서)';
 const CONTACT_TIP = '포트 대응 미기록 · 이 선들은 카드 수준 접점에 붙는다 (모델이 적은 포트 대응 행이 있는 끝만 핀에)';
 /** A typed card's DOM (styles.css .node.card): the head (glyph tile · name · kind word with the lifecycle chip and, for the
  * overview, the short status), the kind rows, the contract area, the inner line, the sign row and the bottom line. */
-function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, face: Face, extra: { cls: string; title: string; onkeydown: (e: Event) => void; toggle: HTMLElement | null; links: HTMLElement | null; enter: HTMLElement | null; boxH: number }): HTMLElement {
+function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, face: Face, extra: { cls: string; title: string; onkeydown: (e: Event) => void; toggle: HTMLElement | null; links: HTMLElement | null; enter: HTMLElement | null; boxH: number; filed?: string | null }): HTMLElement {
   const s = r.stateRead, life = lifecycleOf(s?.state, s?.quote?.quote ?? ''), ops = opsCard(s?.state ?? null, s?.when ?? null, opsRef, life);
   const ev = s ? claimEvidence({ quote: s.quote?.quote ?? '' }) : null, kids = p.childIds.length;
   // The shape the box was measured for (its near content), written on the card so the zoom's fit reads it without measuring.
@@ -1174,17 +1169,25 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   tile.innerHTML = glyphSvg(t.glyph) + (t.inner === 'composition' || t.inner === 'both' ? `<span class="glyph-badge">${glyphSvg('composition')}</span>` : '');
   const head = h('div', { class: 'c-head' }, tile,
     h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name' }, p.name),
-      h('span', { class: 'c-kind' }, h('span', { class: 'c-kind-word' }, `${t.kind}${kids ? ` · 구성 ${kids}` : ''}`),
-        life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null),
+      h('span', { class: 'c-kind' }, h('span', { class: `c-kind-word${t.family === 'neutral' ? ' unknown' : ''}`, ...(t.family === 'neutral' ? { title: '유형 미상 · 기록이 이 부분의 종류를 말하지 않았다 (패널 구조 탭에서)' } : {}) }, `${t.kind}${kids ? ` · 구성 ${kids}` : ''}`),
+        life ? h('span', { class: 'c-life', title: `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null,
+        extra.filed ? h('span', { class: 'c-filed', title: `원문 분류 · 기록이 이 부분을 「${extra.filed}」 묶음 아래에만 두었다 (실행 위치의 근거가 아님)` }, `원문 분류: ${extra.filed}`) : null),
       // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
       life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short),
       h('span', { class: 'plan-note' })),
     extra.toggle);
-  const rows = t.rows.length ? h('div', { class: 'c-rows' }, ...t.rows.map(x => h('div', { class: `c-row${x.blank ? ' blank' : ''}`, title: x.blank ? `${x.label} · 기록에 없음 (이 종류를 정의하는 빈칸)` : `${x.label} · ${x.value}` },
-    h('span', { class: 'c-label' }, x.label), h('span', { class: 'c-val' }, x.value), x.program ? progChip(`${x.label}은 기록에서 프로그램이 옮긴 값`) : null))) : null;
+  // The kind's one defining blank reads last (it never shows below 가까이, so the rows above it keep their places when it hides).
+  const ordered = [...t.rows.filter(x => !x.blank), ...t.rows.filter(x => x.blank)];
+  const rows = ordered.length ? h('div', { class: 'c-rows' }, ...ordered.map(x => h('div', { class: `c-row${x.blank ? ' blank' : ''}`, title: x.blank ? `${x.label} · 기록에 없음 (이 종류를 정의하는 빈칸)` : `${x.label} · ${x.value}${x.unlinked ? `\n${UNLINKED_TIP}` : ''}` },
+    h('span', { class: 'c-label' }, x.label), h('span', { class: `c-val${x.unlinked ? ' unl' : ''}` }, x.value), x.program ? progChip(`${x.label}은 기록에서 프로그램이 옮긴 값`) : null))) : null;
   const c = t.contract;
-  const contract = c.kind === 'lines'
-    ? h('div', { class: 'c-contract lines' }, ...c.lines.map(l => h('p', { class: 'c-cline', title: l.endsWith('항목 근거 미연결') ? UNLINKED_TIP : '기록이 이 부분의 데이터 입력·출력을 말하지 않았다' }, l)))
+  // List values by name (0.1, the owner's decision): muted, each name under a dotted rule whose tip says it has no line of its own;
+  // never a pin, never a line's end. A part whose record names none has no contract area here (the panel says so).
+  const contract = c.kind === 'values'
+    ? c.rows.length ? h('div', { class: 'c-contract vals' }, ...c.rows.map(v => h('div', { class: 'c-row c-vrow', title: `${v.label} · ${v.names.join(' · ')}${v.more ? ` 외 ${v.more}개` : ''}\n${UNLINKED_TIP}` },
+      h('span', { class: 'c-label' }, v.label),
+      h('span', { class: 'c-val c-names' }, ...v.names.flatMap((n, i) => [i ? h('span', { class: 'c-sep', 'aria-hidden': 'true' }, ' · ') : null, h('span', { class: 'unl' }, n)].filter((x): x is HTMLElement => !!x))),
+      v.more ? h('span', { class: 'c-more' }, `+${v.more}`) : null))) : null
     : h('div', { class: 'c-contract pins', role: 'group', 'aria-label': `${p.name}의 포트 · 모델이 적은 포트 대응` },
       h('div', { class: 'c-pin-head' }, h('span', {}, c.ins.length ? c.inTitle : ''), h('span', {}, c.outs.length ? c.outTitle : '')),
       ...Array.from({ length: Math.max(c.ins.length, c.outs.length) }, (_, i) => h('div', { class: 'c-pin-row' },
@@ -1192,15 +1195,18 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
         c.outs[i] ? h('span', { class: 'c-pin out', title: `${c.outTitle} · ${c.outs[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('span', { class: 'c-pin-name' }, c.outs[i]!), h('i', { class: 'pin', 'aria-hidden': 'true' })) : h('span', { class: 'c-pin empty' }))),
       c.unmapped ? h('p', { class: 'c-cline', title: CONTACT_TIP }, `포트 대응 미기록 ${c.unmapped}`) : null);
   const words = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 });
-  const inner = t.innerLine ? h('div', { class: 'c-inner', title: `${words.join(' · ')}\n지도에서는 기록의 행 순서 · 실행 순서나 반복 범위를 그리지 않는다` }, h('span', { class: 'c-inner-text' }, t.innerLine.text),
-    t.innerLine.program ? h('span', { class: 'sg-chip prog-chip', title: PROGRAM_STEP_HINT }, `+${t.innerLine.program} ${PROGRAM_LABEL}`) : null) : null;
+  // The inner line: '단계 N' and the first recorded steps' names (each step carries its quote), in the record's row order.
+  const il = t.innerLine;
+  const inner = il ? h('div', { class: 'c-inner', title: `${words.join(' · ')}${il.names.length ? `\n단계: ${il.names.join(' · ')}${il.more ? ` 외 ${il.more}개` : ''}` : ''}\n기록의 행 순서 · 지도에서는 실행 순서나 반복 범위를 그리지 않는다` }, h('span', { class: 'c-label c-inner-label' }, il.text),
+    il.names.length ? h('span', { class: 'c-val c-inner-text' }, il.names.join(' · ')) : null, il.more && il.names.length ? h('span', { class: 'c-more' }, `+${il.more}`) : null,
+    il.program ? h('span', { class: 'sg-chip prog-chip', title: PROGRAM_STEP_HINT }, `+${il.program} ${PROGRAM_LABEL}`) : null) : null;
   const signs = t.signs ? signTabsEl(o, p, r) : null;
   const open = !kids && words.length && words[0] !== '내부 미상'
     ? h('button', { type: 'button', class: 'entry-open', title: `동작 열기 · ${words.join(' · ')}\n제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)`, 'aria-label': `${p.name} 내부 보기`, onclick: () => openAction(p.id) }, '내부 보기') : null;
   const bottom = h('div', { class: 'c-bottom' }, h('span', { class: 'c-ops', title: ops.tip }, ops.text),
     ev ? h('span', { class: `ev ev-${ev}`, title: `운영 한 줄의 근거 · 기록 작성자의 꼬리표 (${EVIDENCE_HINT[ev]}) · 앱의 판정 아님` }, EVIDENCE_LABEL[ev]) : null,
     h('span', { class: 'c-entry' }, extra.links, extra.enter, open));
-  return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1}`,
+  return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1},${c.kind === 'values' ? c.rows.length : 0},${t.rows.some(x => x.blank) ? 1 : 0}`,
     'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: extra.title, onkeydown: extra.onkeydown },
   head, rows, contract, inner, signs ? h('div', { class: 'c-signs' }, signs) : null, bottom);
 }
@@ -1688,8 +1694,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // Enter on the selected card opens it (동작 열기); otherwise Enter and Space select.
   const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); if (k === 'Enter' && selected === id && openable(o, id)) openAction(id); else go(o.key, id); } };
   const boxes = [...lay.boxes.values()].sort((a, b) => (a.kind === 'frame' ? 0 : 1) - (b.kind === 'frame' ? 0 : 1) || a.depth - b.depth);
-  // Each region (an open group directly in the scope) takes a hue of its own, by its place in the scope's order.
-  const hueOf = new Map<string, number>(); (scope ? partOf(o, scope)?.childIds ?? [] : view.roots).forEach((id, i) => hueOf.set(id, HUES[i % HUES.length]!));
+  // Regions share one neutral surface (map design v3 2.1: a colour by order says nothing); what a group is reads in its head's
+  // axis word (map-regions groupAxis), and a lifecycle group is the 실행 위치 미기록 shelf.
   // Same names under different parents read with their parent beside them (only where a name repeats in this view).
   const seen = new Map<string, number>();
   for (const b of boxes) if (b.kind !== 'ghost') { const n = partOf(o, b.id)!.name; seen.set(n, (seen.get(n) ?? 0) + 1); }
@@ -1714,12 +1720,14 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     }
     const p = partOf(o, b.id)!, of = owner(p);
     if (b.kind === 'frame') {
-      const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, note = region ? mapLead(view, p.id) : '';
-      world.append(h('div', { class: `frame ${region ? 'region' : 'group'} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id, ...(region && hueOf.has(p.id) ? { style: `--hue:${hueOf.get(p.id)}` } : {}) },
-        h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: of ? `${of} › ${p.name}` : p.name, onkeydown: keySelect(p.id) },
+      const latest = subtreeRecords(view, p.id)[0]?.at ?? null, region = b.depth === 0, axis = groupAxis(view, p.id), shelf = axis === 'lifecycle';
+      const note = region && !shelf ? mapLead(view, p.id) : '', named = of ? `${of} › ${p.name}` : p.name;
+      world.append(h('div', { class: `frame ${region ? 'region' : 'group'}${shelf ? ' shelf' : ''}${axis ? ` ax-${axis}` : ''} depth-${Math.min(b.depth, 2)}${b.depth % 2 ? ' tint' : ''}${b.list ? ' list' : ''}`, 'data-part': p.id, 'data-box': p.id },
+        h('div', { class: `frame-head s-${p.status}${b.head > HEAD ? ' tall' : ''}`, style: `height:${b.head}px`, 'data-part': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', title: shelf ? `${SHELF_TIP}\n원문 분류: ${p.name}` : named, onkeydown: keySelect(p.id) },
           toggleButton(p, true),
-          // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width.
-          h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, p.name), h('span', { class: 'plan-note' })),
+          // A change line reads under the name (in the preview only), never beside it: the name keeps the whole head width. The
+          // axis word says what the group is when it is known; the shelf's title is exactly what the record did not say.
+          h('span', { class: 'frame-title' }, h('span', { class: 'frame-name' }, axis && !shelf ? h('span', { class: 'frame-axis' }, AXIS_WORD[axis]) : null, shelf ? SHELF_TITLE : p.name), h('span', { class: 'plan-note' })),
           h('span', { class: 'frame-meta' }, latest ? h('span', { class: recentAt(latest) ? 'fresh' : '' }, ago(latest)) : null),
           linksChip(p.id), enterButton(p), note ? h('span', { class: 'frame-note' }, note) : null)));
     } else {
@@ -1732,7 +1740,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
       const tpl = face === 'item' ? undefined : cardTpls.get(p.id);
       if (tpl && p.reading) {
         world.append(cardEl(o, p, p.reading, tpl, face, { cls: `${onTint ? 'on-tint ' : ''}s-${p.status}${recentAt(last) ? ' fresh' : ''}`, title, onkeydown: keySelect(p.id),
-          toggle: b.kids ? toggleButton(p, false) : null, links: b.kids ? linksChip(p.id) : null, enter: b.kids ? enterButton(p) : null, boxH: b.h }));
+          toggle: b.kids ? toggleButton(p, false) : null, links: b.kids ? linksChip(p.id) : null, enter: b.kids ? enterButton(p) : null, boxH: b.h, filed: filedUnder(view, p.id) }));
         continue;
       }
       // An untyped card (no reading): its name, its own first sentence on a unit without an inside, and its state line.
@@ -1753,12 +1761,14 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   const sp = partOf(o, scope), purpose = (sp ? sp.note : o.project.space.brief?.text ?? '').trim(), first = lead(purpose);
   const outside = scopeEnds(o), more = purpose.replace(/\s+/g, ' ').length > first.length + 1, basis = basisLine(o);
   // The basis line reads under the purpose; with no purpose the reading's sentence stands in its place, and the basis under it.
+  // A calm head (map design v3 9): the summary (two lines at most, with its way to more), one meta line, one row of chips (the main
+  // flow, the rules, the since filter, the state counts); a chosen scenario's line under it.
+  const chips = [flowStrip(o), rulesStrip(o), sinceStrip(o), stateStrip(o)].filter((x): x is HTMLElement => !!x);
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
-    first ? basis : null,
     sp ? null : understoodLine(o),
-    first ? null : basis,
-    flowStrip(o), scenarioStrip(o), rulesStrip(o), sinceStrip(o), stateStrip(o),
+    basis,
+    chips.length ? h('div', { class: 'map-chips' }, ...chips) : null, scenarioStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -1804,12 +1814,30 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
 let loneIds: string[] = [];
 function placeLoneHead(crossing?: Map<string, { all: number }>) {
   const world = $('world'), here = scope ?? ROOT, touched = new Set(lay.edges.flatMap(e => [e.from, e.to]));
-  const own = [...lay.boxes.values()].filter(b => b.container === here && b.kind !== 'ghost');
+  const banded = new Set(Object.values(lay.bands).flat()), own = [...lay.boxes.values()].filter(b => b.container === here && b.kind !== 'ghost' && !banded.has(b.id));
   loneIds = crossing ? own.filter(b => !touched.has(b.id) && !(crossing.get(b.id)?.all)).map(b => b.id) : loneIds;
   world.querySelector('.lone-head')?.remove();
   if (!loneIds.length || loneIds.length === own.length) return;
-  const el = h('div', { class: 'lone-head', 'aria-hidden': 'true' }, `연결 없음 · ${loneIds.length}`);
+  // A placement, not a group of the record: the caption says what the parts share (no line), in the band captions' quiet style.
+  const el = h('div', { class: 'lone-head', 'aria-hidden': 'true' }, `이은 선 없음 · ${loneIds.length}`);
   world.append(el); moveLoneHead();
+}
+/** The scope's bands (map design v3 2.1, map-layout placeBands): the 참여자 caption over the outside roles' column (no outline, no
+ * surface) and the quiet system boundary: a 1px solid line between the middle and the external systems, its caption at its top.
+ * Placed from the boxes (a drag moves them with their parts); nothing is drawn for an empty band. */
+function placeBands() {
+  const world = $('world'); world.querySelectorAll('.band-head, .band-line').forEach(x => x.remove());
+  const rect = (ids: string[]) => { const bs = ids.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b); if (!bs.length) return null;
+    const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y)); return { x, y, x2: Math.max(...bs.map(b => b.x + b.w)), y2: Math.max(...bs.map(b => b.y + b.h)) }; };
+  const out = rect(lay.bands.outside), ext = rect(lay.bands.boundary);
+  if (out) world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${out.x}px;top:${out.y - 22}px` }, OUTSIDE_TITLE));
+  if (ext) {
+    const banded = new Set(lay.bands.boundary), rest = [...lay.boxes.values()].filter(b => b.kind !== 'ghost' && !banded.has(b.id) && b.container === (scope ?? ROOT));
+    const midR = rest.length ? Math.max(...rest.map(b => b.x + b.w)) : ext.x - 48, x = Math.round((Math.max(midR, ext.x - 96) + ext.x) / 2);
+    const top = Math.min(ext.y, ...rest.map(b => b.y)) - 22, bottom = Math.max(ext.y2, ...rest.map(b => b.y + b.h));
+    world.append(h('div', { class: 'band-line', 'aria-hidden': 'true', style: `left:${x}px;top:${top}px;height:${bottom - top}px` }),
+      h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${ext.x}px;top:${ext.y - 22}px` }, BOUNDARY_TITLE));
+  }
 }
 function moveLoneHead() {
   const el = $('world').querySelector<HTMLElement>('.lone-head'); if (!el) return;
@@ -1848,7 +1876,7 @@ function afterRedraw(world: HTMLElement, was: Redraw) {
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {
   const world = $('world');
-  moveLoneHead();
+  moveLoneHead(); placeBands();
   // Heads of the outside partners' runs follow their layout (it can change while a part is dragged).
   const heads = new Map(lay.heads.map(x => [x.key, x]));
   world.querySelectorAll<HTMLElement>('.ghost-head').forEach(el => {
@@ -2938,8 +2966,11 @@ function setRail(on: boolean) {
  * is not a status: no colour says more than the words. */
 function kindLine(c: PaneCtx): HTMLElement {
   const u = c.u, t = u?.typeRead ?? null, s = u?.stateRead ?? null;
-  const kind = t ? h('span', { class: 'lens-kind', ...(t.quote ? { title: `종류 · 기록의 말 “${t.quote.quote}”` } : {}) }, TYPE_LABEL[t.type])
+  const filed = filedUnder(c.o.view, c.part.id);
+  const kind0 = t ? h('span', { class: 'lens-kind', ...(t.quote ? { title: `종류 · 기록의 말 “${t.quote.quote}”` } : {}) }, TYPE_LABEL[t.type])
     : u ? h('span', { class: 'lens-kind blank', title: '기록이 이 부분의 종류를 말하지 않았어요' }, '유형 미상') : null;
+  // 「원문 분류: 폐기」 (map design v3 2.2): the lifecycle group the record placed the part under, kept beside its kind word.
+  const kind = kind0 && filed ? h('span', { class: 'lens-kind-wrap' }, kind0, h('span', { class: 'lens-filed', title: `${SHELF_TIP}` }, ` · 원문 분류: ${filed}`)) : kind0;
   const sep = () => h('span', { class: 'lk-sep', 'aria-hidden': 'true' }, '·');
   // map design v3 8.2-3 / 8.4: the kind word's and the operations line's footnotes in place of the evidence chip (the tag reads in the mark).
   const typeMark = t ? fnMarks(c, ['type'], '종류', false) : null;
@@ -3143,9 +3174,12 @@ function contractSection(c: PaneCtx): HTMLElement | null {
     [labels.outputs, unlinkedNames(u?.outputs ?? [], outs.map(x => c.handed.get(x.r.id)?.payload))], [labels.fields, u?.fields ?? []]]);
   const leadEl = lead.length ? h('ul', { class: 'pn-lead' }, ...lead.map(x => h('li', { title: x.hint }, h('span', { class: 'why-key' }, x.label), h('span', {}, x.text)))) : null;
   const inG = portGroup(c, 'in', '받는 것', '다른 부분이 이 부분에 넘겨주는 것', ins), outG = portGroup(c, 'out', '내는 것', '이 부분이 다른 부분에 넘겨주는 것', outs);
-  if (!leadEl && !inG && !outG && !unlinked) return null;
+  // The card says nothing when the record names no input or output (map design v3 0.1): the words read here, once.
+  const noPorts = u && !u.inputs.length && !u.outputs.length && !(u.portMap ?? []).length
+    ? h('p', { class: 'pn-blank-note', title: '기록이 이 부분이 받는 것·내는 것을 항목으로 말하지 않았다 · 관계선은 카드 수준 접점에 붙는다' }, '데이터 입력·출력 포트 미기록') : null;
+  if (!leadEl && !inG && !outG && !unlinked && !noPorts) return null;
   const count = ins.length + outs.length ? `받는 것 ${ins.length} · 내는 것 ${outs.length}` : null;
-  return type === 'store' ? secEl('contract', count, '', leadEl, unlinked, inG, outG) : secEl('contract', count, '', leadEl, inG, outG, unlinked);
+  return type === 'store' ? secEl('contract', count, '', leadEl, noPorts, unlinked, inG, outG) : secEl('contract', count, '', leadEl, noPorts, inG, outG, unlinked);
 }
 /** 연결: what the part is with (needs, shares, related; each row says its verb), an open group's inner parts' links to the outside,
  * and the explicit way in. */
@@ -3540,7 +3574,10 @@ function renderLineKey(present: Set<Channel>) {
  * written, and that every state is a reported one; a blank says it is unknown, never the time a record arrived. */
 function basisLine(o: Opened): HTMLElement | null {
   const last = [...o.project.readings].reverse().find(isMapReading); if (!last) return null;
-  return h('p', { class: 'map-basis' }, `설계 근거 · ${last.basisAt ?? '작성 시각 미상'} 작성 보고 · 대상 판본 ${last.basisVersion ?? '미상'} · 운영: 보고된 상태 (기록 없음은 제공된 자료 기준)`);
+  // One line: a long commit id reads by its first seven characters (the whole line, as written, in the tip).
+  const full = `설계 근거 · ${last.basisAt ?? '작성 시각 미상'} 작성 보고 · 대상 판본 ${last.basisVersion ?? '미상'} · 운영: 보고된 상태 (기록 없음은 제공된 자료 기준)`;
+  const version = (last.basisVersion ?? '미상').replace(/\b([0-9a-f]{7})[0-9a-f]{9,}\b/g, '$1');
+  return h('p', { class: 'map-basis', title: full }, `설계 근거 · ${last.basisAt ?? '작성 시각 미상'} 작성 보고 · 대상 판본 ${version} · 운영: 보고된 상태`);
 }
 /** The AI sessions behind a part in the full reading: the ones whose records the map quotes for it, and the ones that took it over
  * by a handover. */
@@ -4299,7 +4336,7 @@ function understoodLine(o: Opened): HTMLElement | null {
 function refreshUnderstood() {
   const o = opened, title = document.querySelector('#world .map-title'); if (!o || !title || scope) return;
   const next = understoodLine(o), cur = title.querySelector('.map-understood');
-  if (cur && next) cur.replaceWith(next); else if (cur) cur.remove(); else if (next) title.append(next);
+  if (cur && next) cur.replaceWith(next); else if (cur) cur.remove(); else if (next) { const at = title.querySelector('.map-basis, .map-chips'); if (at) at.before(next); else title.append(next); }
   const t = title as HTMLElement, hBefore = titleH;
   titleH = o.view.parts.length ? t.offsetHeight : 0;
   if (titleH !== hBefore) { lay.bounds = { ...core }; withTitle(); positionWorld(); }

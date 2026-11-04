@@ -8,7 +8,8 @@
   --line: #e3e5e9; --line-strong: #cdd1d7; --hair: #eef0f2;
   /* Greys keep their order of emphasis; every one of them reads at 4.5:1 or more on white (text-4 ≈ 5:1, on the canvas 4.57:1;
      #6b717c would sit at 4.50 exactly on the canvas, so text-4 is one step darker). */
-  --text: #16181d; --text-2: #3d424b; --text-3: #575d68; --text-4: #6a707b;
+  /* map design v3 9.1: ink 17.74:1 on white, text-2 10.37, text-3 6.90, text-4 5.34 (4.90 on the canvas). */
+  --text: #17181c; --text-2: #3d4048; --text-3: #565a64; --text-4: #676b74;
   --accent: #3358ff; --accent-strong: #2343e0; --accent-soft: #eef1ff; --accent-line: #c3ccff;
   /* One weight per role: titles, names, quiet meta, body text. */
   --fw-title: 680; --fw-name: 590; --fw-meta: 500; --fw-body: 420;
@@ -166,7 +167,7 @@ button:disabled { opacity: .5; cursor: default; }
 .program-mini { display: block; position: relative; aspect-ratio: 5 / 2; background: #f4f5f7; border-bottom: 1px solid var(--hair-2); line-height: 0; }
 .program-mini-empty { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12.5px; line-height: 18px; color: var(--text-4); }
 .mini-map { display: block; width: 100%; height: 100%; }
-.mini-map .mm-frame { fill: hsl(var(--hue, 214) 30% 95%); stroke: hsl(var(--hue, 214) 22% 85%); stroke-width: 1; }
+.mini-map .mm-frame { fill: #eef0f3; stroke: var(--region-line); stroke-width: 1; }
 .mini-map .mm-edge { fill: none; stroke: #b9c0c9; stroke-width: 1; stroke-linejoin: round; }
 .mini-map .mm-edge.spine { stroke: #8b93a0; stroke-width: 1.25; }
 .mini-map .mm-node rect { fill: #fff; stroke: #cfd4db; stroke-width: 1; }
@@ -342,12 +343,20 @@ button:disabled { opacity: .5; cursor: default; }
 
 .frame { position: absolute; border-radius: var(--r-lg); border: 1px solid transparent; transition: border-color .12s, box-shadow .12s; }
 .frame.region { background: #fafbfc; border-color: var(--region-line); border-radius: var(--r-lg); box-shadow: var(--shadow-region); }
-/* Each region of the scope has a hue of its own (set on the element): a faint wash and a border of that hue, so the regions
-   read apart at a glance; names stay in the text greys. */
-/* (Under :where, so the states that follow — selected, related, cited, a change's marks — keep their own borders and halo.) */
-.frame.region:where([style*="--hue"]) { background: hsl(var(--hue) 28% 97.6%); border-color: hsl(var(--hue) 22% 87%); border-radius: 16px; box-shadow: none; }
-.frame.region[style*="--hue"] > .frame-head .frame-name { color: hsl(var(--hue) 35% 22%); }
-.frame.region[style*="--hue"] > .frame-head .frame-name::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 7px; border-radius: 50%; background: hsl(var(--hue) 55% 55%); vertical-align: 1px; }
+/* Regions share one neutral surface (map design v3 2.1: a hue by sibling order said nothing); what a group is reads in its head's
+   axis word (12px text-3) before its name. (Under :where, so the states that follow keep their own borders and halo.) */
+.frame.region:where(*) { background: #eef0f3; border-color: var(--region-line); border-radius: 16px; box-shadow: none; }
+.frame-axis { margin-right: 6px; font-size: 12px; font-weight: var(--fw-meta); letter-spacing: 0; color: var(--text-3); }
+/* The 실행 위치 미기록 shelf (2.2): a quiet tray under the scope, its title what the record did not say; its cards keep their
+   lifecycle surface and 「원문 분류」. */
+.frame.shelf:where(*) { background: transparent; border: 1px solid var(--line-essential); border-radius: 12px; }
+.frame.shelf > .frame-head .frame-name { color: var(--text-2); }
+/* The scope's bands (2.1): the 참여자 caption over the outside roles (no outline, no surface) and the quiet system boundary, a 1px
+   solid line between the middle and the external systems with its caption at its top. Solid: a dash is a reference line's. */
+.band-head { position: absolute; font-size: 12px; line-height: 16px; font-weight: var(--fw-meta); color: var(--text-3); white-space: nowrap; pointer-events: auto; cursor: default; }
+.band-line { position: absolute; width: 0; border-left: 1px solid var(--line-essential); pointer-events: none; }
+/* The panel says once what the card leaves out (map design v3 0.1): a part whose record names no input or output. */
+.pn-blank-note { margin: 2px 0 6px; font-size: 13px; line-height: 20px; color: var(--text-3); }
 .frame.group { background: transparent; border-color: var(--hair-2); border-radius: var(--r-pop); }
 .frame.group.tint { background: rgba(16,24,40,.022); border-color: var(--hair-2); }
 .frame:has(> .frame-head:hover):not(.selected):not(.related) { border-color: var(--line-strong); }
@@ -455,24 +464,36 @@ button:disabled { opacity: .5; cursor: default; }
 .glyph-tile.g-trigger { --fam-bg: #f8f0e3; --fam-ink: #87560f; }
 .glyph-tile.g-neutral { --fam-bg: #f1f1ef; --fam-ink: #5a5d64; }
 .c-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.node.card .c-name { font-size: var(--t-title, 15px); line-height: var(--t-title-lh, 20px); font-weight: var(--fw-name); letter-spacing: -.012em; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: var(--nl, 2); -webkit-box-orient: vertical; overflow: hidden; }
-.c-kind { display: flex; align-items: center; gap: 6px; min-width: 0; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-meta); color: var(--text-4); white-space: nowrap; overflow: hidden; }
+.node.card .c-name { font-size: var(--t-title, 15px); line-height: var(--t-title-lh, 20px); font-weight: 600; letter-spacing: -.012em; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: var(--nl, 2); -webkit-box-orient: vertical; overflow: hidden; }
+.c-kind { display: flex; align-items: center; gap: 6px; min-width: 0; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-meta); color: var(--text-3); white-space: nowrap; overflow: hidden; }
 .c-kind-word { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* 유형 미상 stays a small kind word in the head and nothing more on the card (the panel says it in full). */
+.c-kind-word.unknown { color: var(--text-4); }
+/* 「원문 분류: 폐기」: the group the record placed the part under, kept as it was written (2.2); never drawn as a place. */
+.c-filed { flex: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); font-weight: var(--fw-meta); }
 .c-life { flex: none; padding: 0 5px; border: 1px solid var(--line-essential); border-radius: 6px; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); font-weight: var(--fw-name); color: var(--text-2); }
 /* The short status (5.4) reads only where the card shows nothing under its head. */
 .c-short { display: none; height: var(--t-kind-lh, 16px); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); }
 .c-head > .toggle { flex: none; margin: -2px -6px 0 0; }
 /* Kind rows (3.3): a label column (12/500, ≤80px) and the value (13/420, one line); the defining blank a quiet 「?」 over a 1px
    rule, no weight, no colour (3.5). */
-.c-rows { flex: none; display: flex; flex-direction: column; padding-bottom: 12px; }
+.c-rows { flex: none; display: flex; flex-direction: column; padding-bottom: calc(var(--t-gap, 16px) * .75); }
 .c-row { display: flex; align-items: center; gap: 8px; min-width: 0; height: var(--t-row-lh, 20px); font-size: var(--t-row, 13px); line-height: var(--t-row-lh, 20px); font-weight: var(--fw-body); color: var(--text-2); white-space: nowrap; }
-.c-label { flex: none; max-width: 80px; min-width: 52px; overflow: hidden; text-overflow: ellipsis; font-size: var(--t-label, 12px); font-weight: var(--fw-meta); color: var(--text-4); }
+.c-label { flex: none; max-width: 80px; min-width: 52px; overflow: hidden; text-overflow: ellipsis; font-size: var(--t-label, 12px); font-weight: var(--fw-meta); color: var(--text-3); }
 .c-val { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+/* A value the record lists without a line of its own (0.1, the owner's decision): shown by name, muted, over a dotted rule; its
+   tip says so. Never a pin, never a line's end. */
+.node.card .unl { color: var(--text-3); text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--line-essential); }
+.c-names { display: block; white-space: nowrap; }
+.c-sep { color: var(--text-4); }
+.c-more { flex: none; font-size: var(--t-label, 12px); font-weight: var(--fw-meta); color: var(--text-4); font-variant-numeric: tabular-nums; }
 .c-row .prog-chip { flex: none; }
 .c-row.blank .c-val { color: var(--text-4); font-size: var(--t-label, 12px); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
-/* The contract area (3.3): today one count line ('받는 것 3 · 내는 것 2 · 항목 근거 미연결'), or the pin rows of the ports a model
-   portMap row ties to a line: 「받는 것」·「내는 것」 over two columns, a 5px pin on the card's edge, a 24px row. */
+/* The contract area (3.3): the list values by name in the kind rows' grammar (받는 것 · 내는 것 · 필드, muted, 0.1), or the pin
+   rows of the ports a model portMap row ties to a line: 「받는 것」·「내는 것」 over two columns, a 5px pin on the card's edge, a
+   24px row. */
 .c-contract { flex: none; display: flex; flex-direction: column; }
+.c-contract.vals { padding-bottom: calc(var(--t-gap, 16px) * .75); }
 .c-contract.lines { padding: 8px 0; }
 .c-cline { margin: 0; height: 16px; font-size: var(--t-kind, 12px); line-height: 16px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .c-contract.pins { padding-bottom: 8px; }
@@ -485,15 +506,17 @@ button:disabled { opacity: .5; cursor: default; }
 .c-pin.in .pin { left: calc(-1 * var(--c-pad) - 3px); }
 .c-pin.out .pin { right: calc(-1 * var(--c-pad) - 3px); }
 /* The inner line (a part with recorded steps): their count in the record's row order, the loop's unit when it has one. */
-.c-inner { flex: none; display: flex; align-items: center; gap: 6px; min-width: 0; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); font-size: var(--t-kind, 12px); line-height: 16px; color: var(--text-3); white-space: nowrap; border-top: 1px solid var(--hair-2); }
+.c-inner { flex: none; display: flex; align-items: center; gap: 8px; min-width: 0; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); font-size: var(--t-row, 13px); line-height: 16px; color: var(--text-2); white-space: nowrap; }
 .c-inner-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-inner .c-more { margin-left: -2px; }
 .c-signs { flex: none; display: flex; align-items: center; height: max(24px, calc(var(--t-row-lh, 20px) + 4px)); min-width: 0; }
 .c-signs .node-signs { margin-left: 0; }
 .node.card .c-signs .sign-tab { height: auto; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
 /* The bottom line (3.2): the operations report with its time ('가동 보고 · 08:01Z') and the author's tag of its line, then the way
    in at the right (내부 보기, or 구성 N › with its 연결 N). Pinned to the card's bottom at every height. */
-.c-bottom { flex: none; display: flex; align-items: center; gap: 6px; height: var(--t-bottom, 28px); margin-top: auto; min-width: 0; font-size: var(--t-kind, 12px); line-height: 16px; white-space: nowrap; }
-.c-ops { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-3); font-weight: var(--fw-meta); font-variant-numeric: tabular-nums; }
+/* The bottom line sits on the card's last 28px under a hairline at every height, so cards side by side keep one footer band. */
+.c-bottom { flex: none; display: flex; align-items: center; gap: 6px; height: var(--t-bottom, 28px); margin-top: auto; min-width: 0; font-size: var(--t-kind, 12px); line-height: 16px; white-space: nowrap; border-top: 1px solid var(--hair-2); }
+.c-ops { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); font-size: var(--t-row, 13px); font-weight: var(--fw-body); font-variant-numeric: tabular-nums; }
 .node.card .c-bottom .ev { flex: none; background: none; border-color: var(--line-strong); color: var(--text-3); font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) - 2px); }
 .c-entry { flex: none; display: inline-flex; align-items: center; gap: 4px; margin-left: auto; }
 .c-entry .entry-open { height: auto; padding: 0 5px; border: 0; border-radius: 4px; background: none; font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); font-weight: var(--fw-name); color: var(--accent); }
@@ -1596,7 +1619,10 @@ button:disabled { opacity: .5; cursor: default; }
    dot map keeps the glyph and names only what is selected, cited or focused. */
 .node.card.fit-nokind .c-kind, .node.card.fit-nocontract .c-contract, .node.card.fit-noinner .c-inner, .node.card.fit-nosigns .c-signs, .node.card.fit-nobottom .c-bottom { display: none; }
 .node.card[data-fit-rows="0"] .c-rows { display: none; }
-.node.card[data-fit-rows="1"] .c-row:nth-child(n+2), .node.card[data-fit-rows="2"] .c-row:nth-child(n+3) { display: none; }
+.node.card[data-fit-rows="1"] .c-rows > .c-row:nth-child(n+2), .node.card[data-fit-rows="2"] .c-rows > .c-row:nth-child(n+3) { display: none; }
+.node.card[data-fit-vals="1"] .c-contract.vals > .c-vrow:nth-child(n+2), .node.card[data-fit-vals="2"] .c-contract.vals > .c-vrow:nth-child(n+3) { display: none; }
+/* The kind's defining blank (drawn last) reads only at 가까이 (3.5-3: none at 개요, and none at 중간 either). */
+.space:not(.tier-near) .node.card .c-row.blank { display: none; }
 .space:is(.tier-far, .tier-dots) .node.card.fit-status .c-short { display: block; }
 .space:is(.tier-far, .tier-dots) .node.card .plan-note { display: none; }
 .space.tier-dots .node.card { background: var(--surface); }
@@ -1664,7 +1690,16 @@ button:disabled { opacity: .5; cursor: default; }
 .mu-pending { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); }
 .mu-ready { font-size: 13px; color: var(--text-2); }
 /* The basis line under the purpose (map spec 6): what the records give as their basis and target version, quiet. */
-.map-basis { margin: 8px 0 0; word-break: keep-all; font-size: 12.5px; line-height: 18px; color: var(--text-4); }
+/* The head's one meta line (map design v3 9): cut with an ellipsis, the whole line in its tip. */
+.map-basis { margin: 8px 0 0; font-size: 12px; line-height: 16px; font-weight: var(--fw-meta); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: auto; }
+/* The head's one row of chips: the main flow, the rules, the since filter and the state counts, side by side, wrapping as a row. */
+.map-chips { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--hair-2); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 18px; }
+.map-chips > :is(.map-flow, .map-states) { margin: 0; padding: 0; border-top: 0; flex-wrap: nowrap; }
+.map-chips > .map-states { padding-left: 0; }
+.map-chips .mf-verb { flex: none; margin-right: 4px; }
+.map-chips .mf-step { height: 24px; }
+.map-chips > .map-rules.open { flex-basis: 100%; flex-wrap: wrap; }
+.map-chips + .map-scenarios { margin-top: 6px; padding-top: 6px; }
 /* The title's quiet line of what was read: a small state dot, the reading's sentence and its ways on, in the meta grey. */
 .map-understood { position: relative; margin: 10px 0 0; padding-left: 14px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; word-break: keep-all; font-size: 12.5px; line-height: 18px; color: var(--text-4); }
 .map-understood::before { content: ""; position: absolute; left: 0; top: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }

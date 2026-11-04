@@ -7,6 +7,7 @@
  *   unit (a card with the same two lines); inside a region parts are compact rows, and a long run of siblings with few links
  *   among them reads as a list. Heights follow the lines a part really needs (two-line names, a state line); text never shrinks. */
 import type { StudioView, RelationView } from '../shared/studio.js';
+import { bandsOf, type Band } from './map-regions.js';
 
 /** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
 export const FRAME_MIN_W = 228;
@@ -26,6 +27,9 @@ export const FLOW_GAP = 44;
 export const LIST_GAP = 18, LIST_ROW_GAP = 2;
 /** Between an open group and a sibling: a lane wide enough for a line to pass between them. */
 export const FRAME_GUTTER = 40;
+/** The scope's bands (map-regions bandsOf, map design v3 2.1): the gap between the 참여자 band and the middle, between the middle and
+ * the system boundary (its quiet line runs in the middle of it), and above the 실행 위치 미기록 shelf (its caption's room). */
+export const BAND_GAP = 76, BOUNDARY_GAP = 96, SHELF_GAP = 64;
 export interface Point { x: number; y: number }
 /** layoutScope's extra for a part the readings typed (map design v3 3.3, 5.3): a card of CARD_W, as a unit and as a row inside a
  * group alike, whose name takes one line or two in nameRoom (the name's room beside the glyph, and the fold toggle when it has an
@@ -58,7 +62,10 @@ export interface GhostHead { key: string; x: number; y: number; w: number; h: nu
 export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: GhostHead[]; bounds: { x: number; y: number; w: number; h: number };
   /** The scope's spine: the longest chain of its direct parts along flows and needs, left to right; the arrangement keeps it
    * on one line. Empty when no two parts are so linked. */
-  spine: string[] }
+  spine: string[];
+  /** The scope's own parts by band (map-regions bandsOf): the 참여자 band on the left, the system boundary on the right, the
+   * 실행 위치 미기록 shelf at the bottom; each in its order. Empty lists when nothing is banded. */
+  bands: Record<Band, string[]> }
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number; contact?: number; pins?: Record<string, number> }
 export const ghostId = (id: string) => `ghost:${id}`;
@@ -214,8 +221,13 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   // A part with an inside keeps room beside its name for its boundary count.
   const cross = boundaryCounts(v), chip = (id: string) => (kidsOf(id).length ? linkChipW(cross.get(id)?.all ?? 0) : 0);
   // Automatic arrangement of siblings: longest-path columns over relations lifted to the siblings; long columns wrap.
+  const bandOf = new Map<string, Band>();
   const autoArrange = (container: string | null, sizes: Map<string, Measure>): Map<string, Point> => {
-    const ids = kidsOf(container), set = new Set(ids);
+    // The scope's own outside roles, external systems and lifecycle groups keep to their bands (map-regions): the middle is
+    // arranged without them, then they are set beside and under it. A list keeps its own order whole.
+    const band = container === scope && !listOf(container) ? bandsOf(v, kidsOf(container)) : new Map<string, Band>();
+    for (const [i, b] of band) bandOf.set(i, b);
+    const ids = kidsOf(container).filter(i => !band.has(i)), set = new Set(ids);
     const lift = (id: string) => { let cur = byId.get(id), guard = 0; while (cur && !set.has(cur.id) && guard++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
     if (listOf(container)) {
       // A list keeps its own order in columns. Rows linked outward sit in the last column and rows linked from outside in the
@@ -423,7 +435,27 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
         x += w + (inFrame ? GAP : WRAP_GAP);
       });
     }
+    if (band.size) placeBands(band, at, sizes);
     return at;
+  };
+  /** The bands around the arranged middle (map design v3 2.1): the 참여자 band as a column left of it, the external systems as a
+   * column right of it past the boundary's lane, the lifecycle groups in a row under everything (the shelf). Each in the scope's
+   * order; nothing in the middle moves. */
+  const placeBands = (band: Map<string, Band>, at: Map<string, Point>, sizes: Map<string, Measure>) => {
+    const box = (i: string) => { const p = at.get(i)!, z = sizes.get(i)!; return { x: p.x + z.ox, y: p.y + z.oy, w: z.w, h: z.h }; };
+    const mid = [...at.keys()].map(box), x0 = mid.length ? Math.min(...mid.map(b => b.x)) : 0, y0 = mid.length ? Math.min(...mid.map(b => b.y)) : 0;
+    const x1 = mid.length ? Math.max(...mid.map(b => b.x + b.w)) : 0;
+    const of = (b: Band) => kidsOf(scope).filter(i => band.get(i) === b);
+    const column = (list: string[], x: (w: number) => number) => {
+      if (!list.length) return;
+      const w = Math.max(...list.map(i => sizes.get(i)!.w)), left = x(w); let y = y0;
+      for (const i of list) { const z = sizes.get(i)!; at.set(i, { x: left - z.ox, y: y - z.oy }); y += z.h + ROW_GAP; }
+    };
+    column(of('outside'), w => x0 - BAND_GAP - w);
+    column(of('boundary'), () => x1 + BOUNDARY_GAP);
+    const shelf = of('shelf'); if (!shelf.length) return;
+    const all = [...at.keys()].map(box), bottom = Math.max(...all.map(b => b.y + b.h)), left = Math.min(x0, ...all.map(b => b.x));
+    let x = left; for (const i of shelf) { const z = sizes.get(i)!; at.set(i, { x: x - z.ox, y: bottom + SHELF_GAP - z.oy }); x += z.w + WRAP_GAP; }
   };
   const anchors = (container: string | null, depth: number) => {
     const ids = kidsOf(container), sizes = new Map(ids.map(i => [i, measure(i, depth, container)]));
@@ -591,7 +623,9 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   let bx = Infinity, by = Infinity, bx2 = -Infinity, by2 = -Infinity;
   for (const b of [...boxes.values(), ...heads]) { bx = Math.min(bx, b.x); by = Math.min(by, b.y); bx2 = Math.max(bx2, b.x + b.w); by2 = Math.max(by2, b.y + b.h); }
   if (!boxes.size) { bx = by = bx2 = by2 = 0; }
-  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine };
+  const bands: Record<Band, string[]> = { outside: [], boundary: [], shelf: [] };
+  for (const id of kidsOf(scope)) { const b = bandOf.get(id); if (b && boxes.has(id)) bands[b].push(id); }
+  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands };
 }
 
 /** Rounded orthogonal path through points (corners of radius up to r). */
