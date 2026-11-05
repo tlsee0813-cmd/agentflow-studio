@@ -3,6 +3,8 @@
 import type { Point } from './map-layout.js';
 
 export type Rect = { x: number; y: number; w: number; h: number };
+/** A place beside a vertical run rather than on a level one (map hygiene H4: a verb at rest reads along a level run first). */
+export type Spot = Rect & { beside?: true };
 /** Corner radius of a drawn line (map-layout's rounded): a chip keeps this far from each corner. */
 const CORNER = 8;
 
@@ -11,7 +13,7 @@ const CORNER = 8;
  * rest sits by the part its line points to). A run too short to hold the chip clear of both corners gives no spot.
  * pad: free line the chip keeps along its run on each side past the corners' clearance (a verb at rest keeps 8px), so it
  * never reads squeezed between two bends. */
-export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 'end' | 'start' = 'long', pad = 0): Rect[] {
+export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 'end' | 'start' = 'long', pad = 0): Spot[] {
   type Seg = { a: Point; b: Point; horiz: boolean; len: number; idx: number };
   const segs: Seg[] = [];
   for (let i = 1; i < pts.length; i++) {
@@ -28,7 +30,7 @@ export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 
     const dp = prefer === 'end' ? n - p.idx : p.idx - 1, dq = prefer === 'end' ? n - q.idx : q.idx - 1;
     return dp - dq || Number(q.horiz) - Number(p.horiz) || q.len - p.len;
   });
-  const out: Rect[] = [];
+  const out: Spot[] = [];
   for (const s of ok) {
     // Along the run: its middle, then towards the preferred end, kept clear of the corners.
     const forward = s.horiz ? s.b.x > s.a.x : s.b.y > s.a.y;
@@ -40,7 +42,7 @@ export function labelSpots(pts: Point[], w: number, h: number, prefer: 'long' | 
       // Distance from a to the chip's centre, along the run, in the run's own direction.
       const d = Math.round(lo + (hi - lo) * (forward ? t : 1 - t));
       if (s.horiz) out.push({ x: Math.min(s.a.x, s.b.x) + d - w / 2, y: s.a.y - h / 2, w, h });
-      else { const y = Math.min(s.a.y, s.b.y) + d - h / 2; out.push({ x: s.a.x + 4, y, w, h }, { x: s.a.x - w - 4, y, w, h }); }
+      else { const y = Math.min(s.a.y, s.b.y) + d - h / 2; out.push({ x: s.a.x + 4, y, w, h, beside: true }, { x: s.a.x - w - 4, y, w, h, beside: true }); }
     }
   }
   return out;

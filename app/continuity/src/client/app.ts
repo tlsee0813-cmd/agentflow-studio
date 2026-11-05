@@ -45,7 +45,7 @@ import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirs
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
-import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensFadeNote, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
@@ -2321,15 +2321,18 @@ function placeLoneHead(crossing?: Map<string, { all: number }>) {
  * surface) and the quiet system boundary: a 1px solid line between the middle and the external systems, its caption at its top.
  * Placed from the boxes (a drag moves them with their parts); nothing is drawn for an empty band. */
 function placeBands() {
-  const world = $('world'); world.querySelectorAll('.band-head, .band-line').forEach(x => x.remove());
+  const world = $('world'); world.querySelectorAll('.band-head, .band-line, .band-zone').forEach(x => x.remove());
+  // Map hygiene H7: each band is a zone of plain canvas behind its column (the dot grid stops there, as inside a region).
+  const zone = (x: number, y: number, x2: number, y2: number) => world.prepend(h('div', { class: 'band-zone', 'aria-hidden': 'true', style: `left:${x}px;top:${y}px;width:${x2 - x}px;height:${y2 - y}px` }));
   const rect = (ids: string[]) => { const bs = ids.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b); if (!bs.length) return null;
     const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y)); return { x, y, x2: Math.max(...bs.map(b => b.x + b.w)), y2: Math.max(...bs.map(b => b.y + b.h)) }; };
   const out = rect(lay.bands.outside), ext = rect(lay.bands.boundary);
-  if (out) world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${out.x}px;top:${out.y - 22}px` }, OUTSIDE_TITLE));
+  if (out) { zone(out.x - 20, out.y - 34, out.x2 + 20, out.y2 + 20); world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${out.x}px;top:${out.y - 22}px` }, OUTSIDE_TITLE)); }
   if (ext) {
     const banded = new Set(lay.bands.boundary), rest = [...lay.boxes.values()].filter(b => b.kind !== 'ghost' && !banded.has(b.id) && b.container === (scope ?? ROOT));
     const midR = rest.length ? Math.max(...rest.map(b => b.x + b.w)) : ext.x - 48, x = Math.round((Math.max(midR, ext.x - 96) + ext.x) / 2);
     const top = Math.min(ext.y, ...rest.map(b => b.y)) - 22, bottom = Math.max(ext.y2, ...rest.map(b => b.y + b.h));
+    zone(x + 8, top - 12, ext.x2 + 20, Math.max(bottom, ext.y2 + 20));
     world.append(h('div', { class: 'band-line', 'aria-hidden': 'true', style: `left:${x}px;top:${top}px;height:${bottom - top}px` }),
       h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${ext.x}px;top:${ext.y - 22}px` }, BOUNDARY_TITLE));
   }
@@ -2475,7 +2478,7 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); placeScenarioMarks(); applyLegendMarks(); }
+function placeEdgeLabels() { placeLineLabels(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); }
 function placeLineLabels() {
   const world = $('world'), o = opened; if (!o) return;
   let box = world.querySelector<HTMLElement>('.edge-labels');
@@ -2668,7 +2671,11 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional', besi
   offParts: (r: Rect) => boolean, apart: (r: Rect) => boolean, offLabels: (r: Rect) => boolean, set: (el: HTMLElement, r: Rect) => void) {
   const inv = labelInv(), s = CUE_PX * inv, len = path.getTotalLength();
   const at = (p: { x: number; y: number }): Rect => ({ x: p.x - s / 2, y: p.y - s / 2, w: s, h: s });
-  const spots = [...cuePoints(edgePts(e.key, path), s + 4 * inv, 'start'), ...Array.from({ length: 13 }, (_, i) => path.getPointAtLength(len * (0.04 + i * 0.075)))].map(at);
+  // Map hygiene H5: one mark per line, at the middle of its longest run first (where it reads as the line's, not a port's or a
+  // bundle's), then the places its badge would take, then anywhere along it.
+  const pts = edgePts(e.key, path), runs = pts.slice(1).map((q, i) => ({ a: pts[i]!, b: q, n: Math.abs(q.x - pts[i]!.x) + Math.abs(q.y - pts[i]!.y) })).sort((p, q) => q.n - p.n);
+  const mids = runs.slice(0, 2).map(r => ({ x: (r.a.x + r.b.x) / 2, y: (r.a.y + r.b.y) / 2 }));
+  const spots = [...mids, ...cuePoints(pts, s + 4 * inv, 'long'), ...Array.from({ length: 13 }, (_, i) => path.getPointAtLength(len * (0.04 + i * 0.075)))].map(at);
   const spot = spots.find(r => offParts(r) && apart(r) && offLabels(r)) ?? spots.find(r => offParts(r) && apart(r)) ?? spots.find(offParts) ?? null;
   if (!spot) return;
   const el = h('span', { class: `edge-cue q-${cue}${beside ? ' beside' : ''}`, 'data-cue': e.key, role: 'img', 'aria-label': cue === 'condition' ? '조건 있는 관계' : '선택 관계' });
@@ -2751,10 +2758,12 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
   for (const g of lines) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
     const pts = edgePts(e.key, path), free = (r: Rect) => clear(r) && !lineUnder(r, e.key, shown);
+    // Map hygiene H4: a place on a level run outranks, across all labels, a place beside a vertical run or beside the end port, so a
+    // verb reads along its line and never floats beside a bundle of verticals with no clear owner while a level place is free.
     const spotsFor = (el: HTMLElement) => { const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
-      return [...labelSpots(pts, w, hh, 'long', REST_PAD).filter(free).slice(0, 10), ...portSpots(pts, w, hh).filter(r => free(r) && !polylineHitsRect(pts, r, 1))]; };
+      return [...labelSpots(pts, w, hh, 'long', REST_PAD).filter(free).slice(0, 10), ...portSpots(pts, w, hh).filter(r => free(r) && !polylineHitsRect(pts, r, 1)).map(r => ({ ...r, beside: true as const }))]; };
     // A type chip (map-reading.13) takes its widest form that has a place; with none it gives way to the plain label.
-    let label: HTMLElement | null = null, mine: Rect[] = [];
+    let label: HTMLElement | null = null, mine: (Rect & { beside?: true })[] = [];
     // short (the middle tier): the plain label cut to LABEL_SHORT characters, its whole words in its tip; no type chip.
     const tp = short ? undefined : lineTypes.get(e.key);
     if (tp) { const chip = typeChipEl(e, tp); box.append(chip);
@@ -2769,7 +2778,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     // then better places across all labels: every label's first place before any label's second.
     const word = wordOf(e), said = word !== (REL_LABEL[e.kind] ?? e.kind) && word !== '제어' && word !== '참조';
     const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path'), spine: g.classList.contains('spine') || g.classList.contains('fv-emph'), said });
-    mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i, rank, el: label }));
+    mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i + ('beside' in r && r.beside ? 100 : 0), rank, el: label }));
   }
   const { kept, dropped } = resolveLabels(spots, 6);
   for (const s of kept) { s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; }
@@ -2802,6 +2811,8 @@ function renderRecent() {
 /** The wheel and the buttons zoom between ZOOM_MIN and ZOOM_MAX; only 전체 보기 goes further out, down to the dot map (FIT_MIN, map
  * design v3 5.1), and a zoom from there keeps on from where it is. */
 const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6, FIT_MIN = 0.2;
+/** Below this zoom the map's 26px title would read under 10px (map hygiene H3): the title chip says the name instead. */
+const TITLE_FLOOR_K = 10 / 26;
 /** The chip scale the verbs were last placed at, and the frame that re-places them after a zoom. */
 let placedInv = 1, relabel = 0;
 /** The reading pane is a column of its own on the right: the map's viewport ends where the pane begins (syncMapArea), so nothing
@@ -2811,7 +2822,10 @@ let placedInv = 1, relabel = 0;
 const paneWidth = () => (!$('lens').hidden && $('panel').hidden && $('lens').classList.contains('railed') ? RAIL_W : ['lens', 'panel'].some(id => !$(id).hidden) || (!$('plan-panel').hidden && !$('plan-panel').classList.contains('work')) ? inspW() : 0);
 const leftInset = () => 16;
 /** Map tools sit at the bottom left; the map keeps clear of them only below this line. */
-const BOTTOM = 64;
+const BOTTOM = 88;
+/** The safe area (map hygiene H2): a fit and a first view keep their cards inside it, under the title chip at the top
+ * (SAFE_TOP), above the dock at the bottom (BOTTOM) and off the window's sides (SAFE_SIDE). */
+const SAFE_TOP = 64, SAFE_SIDE = 32;
 function applyCamera(animate = false) {
   const world = $('world'), vp = $('viewport');
   world.classList.toggle('animate', animate);
@@ -2824,6 +2838,9 @@ function applyCamera(animate = false) {
   // removed from the page or its layout.
   const sp = $('space');
   sp.classList.toggle('z-mid', camera.k < Z_MID); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
+  // The text floor (map hygiene H3): world-space text that would read below 10px on screen is not drawn. The map's title (26px)
+  // gives way to the title chip; its purpose line (15px) and the 「이은 선 없음」 caption (11.5px) go first.
+  sp.classList.toggle('title-floor', camera.k < TITLE_FLOOR_K); sp.classList.toggle('purpose-floor', camera.k < 10 / 15); sp.classList.toggle('caption-floor', camera.k < 10 / 11.5);
   // The zoom tier (점 지도 · 개요 · 중간 · 가까이, map design v3 5.1): what a typed card shows inside its box, and the on-screen
   // floors of its type (5.2). The boxes, the lines and their ends stay where they are: nothing is laid out again for a zoom.
   tier = zoomTier(camera.k, tier);
@@ -2852,26 +2869,66 @@ function applyCamera(animate = false) {
 function fitView(explicit: boolean, animate = false) {
   const o = opened; if (!o) return;
   syncMapArea();
-  const vp = $('viewport').getBoundingClientRect(), left = leftInset() + 8, right = 24, top = topInset() + 12, bottom = mapBottomInset() + 8;
-  const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom), B = drawnBounds();
-  const fit = Math.min(1, w / Math.max(1, B.w + 40), hgt / Math.max(1, B.h + 40));
-  const k = explicit ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
+  const vp = $('viewport').getBoundingClientRect(), left = SAFE_SIDE, right = SAFE_SIDE, top = Math.max(SAFE_TOP, topInset() + 12), bottom = mapBottomInset();
+  const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom);
+  // The map's own title is part of the whole view while it can be read there; below the text floor it is hidden and the title chip
+  // at the top left says the name (map hygiene H3), so the fit does not keep room for it.
+  const fitOf = (b: Rect) => Math.min(1, w / Math.max(1, b.w + 16), hgt / Math.max(1, b.h + 16));
+  let B = drawnBounds(), fit = fitOf(B);
+  if (titleH && fit < TITLE_FLOOR_K) { const nb = drawnBounds(false); fit = fitOf(nb); B = nb; }
+  // Map hygiene H2: the first view opens on its focus (the first view's emphasis, else the main flow) at the opening scale when that
+  // focus fits inside the safe area there; a focus too large for it opens the whole map at its fit instead.
+  const f = explicit ? null : openFocus();
+  const k = explicit || (f && fit < OPEN_MIN && (f.w * OPEN_MIN > w || f.h * OPEN_MIN > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
   // The whole view sits in the middle of the free area, both ways: the title and the parts together. A reading pane opened
   // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
   const mw = B.w * k, mh = B.h * k, free = w - mw;
-  const xoff = free <= 0 ? 12 : free / 2;
-  const yoff = mh <= hgt ? (hgt - mh) / 2 : 12;
+  const xoff = free <= 0 ? 0 : free / 2;
+  const yoff = mh <= hgt ? (hgt - mh) / 2 : 0;
   camera = { k, x: left + xoff - B.x * k, y: top + yoff - B.y * k };
   // Polish round fixes 1: a map that does not fit at the opening scale opens on what the first view points at (its emphasised parts,
   // else the main flow), centred where it can be, never past the map's own edges; not on its top-left corner and title.
-  const f = explicit ? null : openFocus();
-  if (f) {
-    // camera offset along one axis: c mid-room, clamped so the map's edges [lo, lo + size] keep within 12px of the room's.
-    const along = (lo: number, size: number, start: number, room: number, c: number) => Math.min(start + 12 - lo * k, Math.max(start + room - 12 - (lo + size) * k, start + room / 2 - c * k));
+  if (f && k >= OPEN_MIN && (B.w * k > w || B.h * k > hgt)) {
+    // camera offset along one axis: c mid-room, clamped so the map's edges [lo, lo + size] stay at the safe area's.
+    const along = (lo: number, size: number, start: number, room: number, c: number) => Math.min(start - lo * k, Math.max(start + room - (lo + size) * k, start + room / 2 - c * k));
     camera = { k, x: B.w * k <= w ? camera.x : along(B.x, B.w, left, w, f.x + f.w / 2),
-      y: B.h * k <= hgt ? camera.y : along(B.y, B.h, top, hgt, f.h * k > hgt ? f.y + (hgt / 2 - 12) / k : f.y + f.h / 2) };
+      y: B.h * k <= hgt ? camera.y : along(B.y, B.h, top, hgt, f.h * k > hgt ? f.y + (hgt / 2) / k : f.y + f.h / 2) };
+    clearChrome(f, B, { left, top, w, hgt });
   }
   applyCamera(animate);
+}
+/** A first view larger than the safe area (map hygiene H2): among small pans that keep its focus inside the safe area and the map's
+ * edges no further in than the safe area's, the one with the fewest cards under the title chip, then the fewest cut by the window's
+ * edges or by the dock's row (where the map fades out, styles: .viewport mask), then the nearest to centred. Only the camera's
+ * offset changes, never the scale. */
+function clearChrome(f: Rect, B: Rect, a: { left: number; top: number; w: number; hgt: number }) {
+  const k = camera.k, space = $('space'), vpw = $('viewport').clientWidth, vph = mapBottom();
+  const chrome: Rect[] = [], sr = space.getBoundingClientRect();
+  const own = (el: HTMLElement | null, pad: number) => { if (el && !el.hidden && el.offsetWidth) { const r = el.getBoundingClientRect(); chrome.push({ x: r.left - sr.left - pad, y: r.top - sr.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad }); } };
+  own(space.querySelector<HTMLElement>(':scope > .controls'), 8); own(document.getElementById('first-view'), 6); own(document.getElementById('line-key'), 6);
+  // The title chip takes the top left while the map's own title is out of view.
+  const chip: Rect = { x: 0, y: 0, w: Math.min(vpw, 420), h: Math.max(0, a.top - 12) };
+  const cards = [...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost');
+  const hit = (r: Rect, c: Rect) => r.x < c.x + c.w && c.x < r.x + r.w && r.y < c.y + c.h && c.y < r.y + r.h;
+  const range = (lo: number, size: number, start: number, room: number, flo: number, fsize: number, now: number): number[] => {
+    if (size * k <= room) return [now];
+    const min = Math.max(start + room - (lo + size) * k, start + room - (flo + fsize) * k), max = Math.min(start - lo * k, start - flo * k);
+    if (min > max) return [now];
+    const out = [now]; for (let d = 6; d <= 240; d += 6) { if (now + d <= max) out.push(now + d); if (now - d >= min) out.push(now - d); }
+    return out;
+  };
+  const xs = range(B.x, B.w, a.left, a.w, f.x, f.w, camera.x), ys = range(B.y, B.h, a.top, a.hgt, f.y, f.h, camera.y);
+  const t = titleH ? titleRect() : null;
+  let best = { s: Infinity, x: camera.x, y: camera.y };
+  for (const cx of xs) for (const cy of ys) {
+    const scr = cards.map(b => ({ x: cx + b.x * k, y: cy + b.y * k, w: b.w * k, h: b.h * k }));
+    const titleOut = !t || cy + t.y * k < a.top - 24;
+    const under = scr.filter(r => titleOut && hit(r, chip)).length;
+    const cut = scr.filter(r => chrome.some(c => hit(r, c)) || (r.x < 0 && r.x + r.w > 0) || (r.x < vpw && r.x + r.w > vpw) || (r.y < 0 && r.y + r.h > 0) || (r.y < vph && r.y + r.h > vph)).length;
+    const sc = under * 1000 + cut * 10 + (Math.abs(cx - camera.x) + Math.abs(cy - camera.y)) / 100;
+    if (sc < best.s) best = { s: sc, x: cx, y: cy };
+  }
+  camera = { k, x: best.x, y: best.y };
 }
 /** The parts the opening view centres on when the whole map does not fit (the first view's emphasis, else the main flow): their
  * boxes' bounds, or null. */
@@ -2884,9 +2941,9 @@ function openFocus(): Rect | null {
 /** What the map draws, in map px: the layout's bounds (boxes, heads, the title) with every drawn element that can reach past them
  * (the band captions and the boundary line, the outside partners' heads, a caption's own text, the lines' routes), so 전체 보기
  * shows all of it. */
-function drawnBounds(): Rect {
-  const world = $('world'), rs: Rect[] = [lay.bounds];
-  world.querySelectorAll<HTMLElement>(':scope > [data-box], :scope > .ghost-head, :scope > .band-head, :scope > .band-line, :scope > .lone-head, :scope > .map-title').forEach(el => {
+function drawnBounds(withTitle = true): Rect {
+  const world = $('world'), rs: Rect[] = [withTitle ? lay.bounds : core];
+  world.querySelectorAll<HTMLElement>(`:scope > [data-box], :scope > .ghost-head, :scope > .band-head, :scope > .band-line, :scope > .lone-head${withTitle ? ', :scope > .map-title' : ''}`).forEach(el => {
     if (el.hidden || getComputedStyle(el).display === 'none') return;
     const x = parseFloat(el.style.left), y = parseFloat(el.style.top); if (!Number.isFinite(x) || !Number.isFinite(y)) return;
     rs.push({ x, y, w: Math.max(el.offsetWidth, el.scrollWidth), h: Math.max(el.offsetHeight, el.scrollHeight) });
@@ -3025,7 +3082,7 @@ function syncMapArea() {
   const top = $('plan-strip').hidden ? 0 : topInset();
   vp.style.top = top + 'px'; vp.style.bottom = '0px';
   world.style.top = -top + 'px'; vp.style.backgroundPosition = camera.x + 'px ' + (camera.y - top) + 'px';
-  updateSticky();
+  placeDock(); updateSticky();
 }
 /** A new target to read (or an explicit resize): the target, its line ends and the title together when they fit beside the
  * pane; a large frame still reveals its own heading and first rows. Never a zoom. */
@@ -3043,7 +3100,13 @@ function updateSticky() {
   if (!o || !titleH) { st.hidden = true; return; }
   const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset();
   st.style.top = `${top - 6}px`;
-  st.hidden = t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
+  st.hidden = camera.k >= TITLE_FLOOR_K && t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
+  // Map hygiene H2: the chip never covers a card (the header's path names the map all the same); it waits for room.
+  if (!st.hidden) {
+    const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
+    const r = { x: st.offsetLeft - 4, y: st.offsetTop - 4, w: st.offsetWidth + 8, h: st.offsetHeight + 8 };
+    st.hidden = [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k);
+  }
   // One title at a time: the map's own title steps back while its name is pinned.
   document.querySelector('.map-title')?.classList.toggle('pinned', !st.hidden);
 }
@@ -3380,6 +3443,21 @@ function markLines() {
     // A data or control line marks where it starts while it is read (styles.css shows that dot on a hovered or selected line); an
     // ear or a plain relation's dot is always drawn.
     line.setAttribute('marker-start', start === 'none' ? `url(#m-dot${lit ? '-on' : ''})` : mark(start));
+  });
+  mergeHeads();
+}
+/** Map hygiene H5: heads of lines at rest that land on one port point (within 6px on screen, arriving the same way, the same kind of
+ * head) are drawn once, so a port never wears a stack of three to five heads. A selected or path line keeps its own head, and a
+ * pointed-at line shows its head again (styles: .edge.near). Re-run when the zoom changes enough to re-place the labels. */
+function mergeHeads() {
+  const tol = 6 / camera.k, seen: { x: number; y: number; d: string; head: string }[] = [];
+  document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
+    const line = el.querySelector('.edge-line'), r = lastRouted.get(el.dataset.key ?? ''); if (!line || !r || r.pts.length < 2) return;
+    if (el.classList.contains('head-merged')) { el.classList.remove('head-merged'); const lit = el.classList.contains('on') || el.classList.contains('sc-path'), hd = el.dataset.head ?? 'filled'; if (hd !== 'none') line.setAttribute('marker-end', `url(#m-${hd}${lit ? '-on' : ''})`); }
+    const head = line.getAttribute('marker-end') ?? 'none'; if (head === 'none' || el.classList.contains('on') || el.classList.contains('sc-path')) return; const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden') return;
+    const a = r.pts[r.pts.length - 2]!, b = r.pts[r.pts.length - 1]!, d = Math.abs(a.x - b.x) > Math.abs(a.y - b.y) ? (b.x > a.x ? 'r' : 'l') : (b.y > a.y ? 'd' : 'u');
+    if (seen.some(q => q.d === d && q.head === head && Math.abs(q.x - b.x) < tol && Math.abs(q.y - b.y) < tol)) { line.setAttribute('marker-end', 'none'); el.classList.add('head-merged'); }
+    else seen.push({ x: b.x, y: b.y, d, head });
   });
 }
 /** The end marks of the map's lines (map design v3 6.1, 9.6), each in three paints (rest, selected, pointed at): the filled
@@ -4573,7 +4651,7 @@ function renderFirstView() {
   const o = opened, v = fvNow, r = fvRec;
   const offer = !!o && !!v && (!!v.reason || v.emphasis.parts.length > 0) && differs(r, viewLens, v);
   const emph = fvOn() && (r!.parts.length > 0 || r!.lines.length > 0);
-  if (!o || !v || (!r?.reason && !offer && !emph)) { box.hidden = true; box.replaceChildren(); return; }
+  if (!o || !v || (!r?.reason && !offer && !emph)) { box.hidden = true; box.replaceChildren(); placeDock(); return; }
   const btn = (cls: string, text: string, title: string, on: () => void, extra: Record<string, string> = {}) => h('button', { type: 'button', class: `fv-b ${cls}`, title, onclick: on, ...extra }, text);
   // The reason speaks for the lens it chose: once the person reads with another lens it steps back (「추천 첫 보기로」 offers it again).
   // Polish round fixes 1: the toolbar says the first view in a few words (「첫 보기 · 시작·반복 ▾」); its sentence is the tip and the popover.
@@ -4587,7 +4665,7 @@ function renderFirstView() {
   const dot = () => h('span', { class: 'fv-dot', 'aria-hidden': 'true' }, '·');
   const row = [why, change, off, rec].filter(<T,>(x: T | null): x is T => !!x).flatMap((x, i): HTMLElement[] => (i ? [dot(), x] : [x]));
   box.replaceChildren(...row, ...(fvMenu ? [fvPop(o, v, r)] : []));
-  box.hidden = false;
+  box.hidden = false; placeDock();
 }
 const fvOffButton = () => h('button', { type: 'button', class: 'fv-b fv-off', title: '첫 보기의 테두리·선 강조만 풀어요 (렌즈는 그대로)', onclick: clearEmphasis }, '강조 해제');
 const fvRecButton = (v: FirstView) => h('button', { type: 'button', class: 'fv-b fv-rec', title: `${v.reason?.text ?? `첫 보기: ${v.lens}`} · 렌즈와 강조를 다시 적용해요`, onclick: () => applyFirstView(null) }, '추천 첫 보기로');
@@ -4767,22 +4845,38 @@ function setLegendOpen(open: boolean) {
 function syncLegendFold(): boolean {
   const o = opened; if (!o) return false;
   const was = legendOpenNow, chosen = legendChoice.get(o.key);
-  if (chosen !== undefined) legendOpenNow = chosen;
-  else {
-    legendOpenNow = true; renderLegend();
-    const key = document.getElementById('line-key'), r = key?.getBoundingClientRect();
-    if (r && r.width) {
-      // Where the cards are under the camera now (from the layout, not the screen: a fit may still be sliding there).
-      const w = $('world'), pr = (w.offsetParent as HTMLElement | null)?.getBoundingClientRect(), ox = (pr?.left ?? 0) + w.offsetLeft, oy = (pr?.top ?? 0) + w.offsetTop, k = camera.k;
-      const cards = [...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost').map(b => ({ x: ox + camera.x + b.x * k, y: oy + camera.y + b.y * k, w: b.w * k, h: b.h * k }));
-      legendOpenNow = !covers({ x: r.left, y: r.top, w: r.width, h: r.height }, cards);
-    }
-  }
+  // Map hygiene H2: the legend starts as its compact chip on the dock's row (it covers no card); a click unfolds it.
+  legendOpenNow = chosen ?? false;
   renderLegend();
   return was !== legendOpenNow;
 }
-/** The room the folded legend's chip keeps under the map (a fit keeps cards clear of it); none while open (it was opened over it). */
-const legendInset = () => { const k = document.getElementById('line-key'); return k && !k.hidden && k.classList.contains('folded') ? k.offsetHeight + 8 : 0; };
+/** The room what sits above the dock keeps under the map (a fit keeps cards clear of it): the first view's guide line and the folded
+ * legend chip when they could not sit beside the dock (placeDock); none for the open legend (it was opened over the map). */
+const legendInset = () => {
+  const k = document.getElementById('line-key'), fv = document.getElementById('first-view');
+  return (fv && !fv.hidden && fv.classList.contains('fv-above') ? fv.offsetHeight + 8 : 0) + (k && !k.hidden && k.classList.contains('folded') && !k.dataset.docked ? k.offsetHeight + 8 : 0);
+};
+/** The dock's row (map hygiene H2, H9): the tools keep one width; the first view's guide line and the legend sit beside them on the
+ * same row while there is room left of the reading pane, else above the tools, stacked. Never a camera move. */
+function placeDock() {
+  const space = $('space'), ctl = space.querySelector<HTMLElement>(':scope > .controls'), fv = document.getElementById('first-view'), key = document.getElementById('line-key');
+  if (!ctl) return;
+  const limit = space.clientWidth - paneWidth() - 16, row = ctl.offsetHeight, base = parseFloat(getComputedStyle(ctl).bottom) || 16;
+  let x = ctl.offsetLeft + ctl.offsetWidth + 8, above = base + row + 8;
+  if (fv && !fv.hidden) {
+    fv.classList.remove('fv-above');
+    if (x + fv.offsetWidth <= limit) x += fv.offsetWidth + 8;
+    else { fv.classList.add('fv-above'); above += fv.offsetHeight + 8; }
+  }
+  if (key && !key.hidden) {
+    const w = key.offsetWidth;
+    if (x + w <= limit) { key.dataset.docked = '1'; key.style.left = `${x}px`; key.style.bottom = key.classList.contains('folded') ? `${base + (row - key.offsetHeight) / 2}px` : `${base}px`; }
+    else { delete key.dataset.docked; key.style.left = ''; key.style.bottom = `${above}px`; }
+  }
+  // The map fades out under the dock's row (styles: .viewport mask), so no card reads as covered by the tools.
+  const ends = [ctl, fv, key].filter((el): el is HTMLElement => !!el && !el.hidden && !!el.offsetWidth && !el.classList.contains('fv-above') && (el !== key || !!key.dataset.docked)).map(el => el.getBoundingClientRect().right - space.getBoundingClientRect().left);
+  space.style.setProperty('--dock-w', `${Math.round(Math.max(...ends) + 16)}px`);
+}
 const FAMILY_GLYPH: Record<string, string> = { participant: 'person', process: 'compute', store: 'store', trigger: 'timer', neutral: 'neutral' };
 function legendSample(s: Sample): HTMLElement | SVGElement {
   if (s.kind === 'family') { const t = h('span', { class: `glyph-tile lg-tile g-${s.family}`, 'aria-hidden': 'true' }); t.innerHTML = glyphSvg((FAMILY_GLYPH[s.family] ?? 'neutral') as Parameters<typeof glyphSvg>[0]); return t; }
@@ -4816,7 +4910,7 @@ function renderLegend() {
     // Review: what a missing dot means is reachable from the folded chip too.
     key.replaceChildren(h('button', { type: 'button', class: 'lg-chip', 'aria-expanded': 'false', title: `범례 펼치기 · ${def.name}${head ? ` · ${head}` : ''}${fade ? `\n${fade.tip}` : ''}\n${DOT_LEGEND}`, onclick: () => setLegendOpen(true) },
       h('span', { class: 'lg-chip-text' }, legendChip(viewLens, legendNow)), head ? h('span', { class: 'lg-chip-state' }, head) : null, fadeEl(true), h('span', { class: 'lg-chip-v', 'aria-hidden': 'true' }, '▴')));
-    key.hidden = false; return;
+    key.hidden = false; placeDock(); return;
   }
   key.classList.remove('folded');
   const menuOf = (it: LegendItem) => h('div', { class: 'lg-menu', role: 'menu', 'aria-label': `${it.label} 보기` },
@@ -4843,7 +4937,7 @@ function renderLegend() {
     // Cards v2 §1: what the dot means (and that no dot is not stopped), under the 구성 and 상태·공백 legends.
     // Review: the dot line under every lens, only while a card here draws a dot (the 표시 menu keeps it as reference text).
     document.querySelector('#world .node.card.has-dot') ? h('p', { class: 'lg-dots', title: '상태 점은 기록된 운영 상태(가동 ● · 멈춤 ■ · 대기 ○ · 충돌 ◇)에만 · 파일 근거만이면 점 없음 · 나이로 멈춤을 짐작하지 않음' }, DOT_LEGEND) : null].filter(<T,>(x: T | null): x is T => !!x));
-  key.hidden = false;
+  key.hidden = false; placeDock();
 }
 /** Keys inside the legend (7.3): ↑↓ between items, Enter selects (the button's own), Shift+F10 or the menu key opens the item's
  * menu, Esc closes the menu, else clears the legend and goes back to the map. */
