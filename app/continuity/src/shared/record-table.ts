@@ -450,8 +450,37 @@ export function rowsOf(texts: Texts & object, ids: readonly string[]): TableRow[
 }
 /** The v4 type word of a v5 role whose type is clear (ROLE_TYPES), for the v4 passes; '' for any other role. */
 const V4_WORD_OF: Readonly<Record<string, string>> = { person: '사람', external: '외부 시스템', session: '세션', store: '행 파일·저장소', ai: 'AI 판단', timer: '타이머·일정', compute: '계산',
-  collector: '수집기', actor: '집행·외부 호출', screen: '화면', automation: '빌드·배포 자동화' };
-export const roleType = (cell: string): string | null => { const f = readFamily(cell); return f.ok && f.role ? fixedWord(f.role, ROLE_TYPES)?.value ?? null : null; };
+  collector: '수집기', actor: '집행·외부 호출', screen: '화면', automation: '빌드·배포 자동화', loop: '루프·엔진' };
+/** Recipe .48: a C-PART row's type from its 표현군 and the words of its role, by a fixed table (never a guess from the part's name or what it
+ * does): 저장 → store; 촉발 → timer for a schedule (일정·타이머·주기·cron·스케줄), automation for a build or deploy (빌드·배포·자동화); 관문 → person
+ * for a person's approval (사람·승인·검토), else compute (a check; the family stays 관문); 참여 → external for a bot, anything outside (외부), a
+ * service or the user's code, session for an AI session, person for a person's word; 처리 → loop (반복·루프·실행 조정·스케줄), collector
+ * (수집·측정), ai (AI 판단·LLM), screen (화면·UI), actor (외부 호출·실행기·집행), compute (계산·변환·파싱·검증), the first that the role
+ * says. A row of a family whose role the table does not map gives no type and says so (unmapped); a row of no family (미정, a cell
+ * outside the words) gives nothing. */
+export function familyType(cell: string): { type: string | null; unmapped: boolean } {
+  const f = readFamily(cell); if (!f.ok || !f.family) return { type: null, unmapped: false };
+  const role = f.role ?? '', has = (re: RegExp) => re.test(role);
+  const exact = role ? fixedWord(role, ROLE_TYPES)?.value ?? null : null;
+  const pick = (): string | null => {
+    switch (f.family) {
+      case 'store': return 'store';
+      case 'trigger': return has(/일정|타이머|주기|cron|스케줄|schedule/i) ? 'timer' : has(/빌드|배포|자동화/) ? 'automation' : null;
+      case 'gate': return has(/사람|승인|검토/) ? 'person' : 'compute';
+      case 'participant':
+        if (has(/사용자\s*코드|봇|외부|서비스|\bbot\b/i)) return 'external';
+        if (has(/AI\s*세션|세션/i)) return 'session';
+        return has(/사람|소유자|메인테이너|기여자|방문자|사용자|운영자|관리자|작성자|검토자|개발자|회원|고객/) ? 'person' : exact;
+      case 'process':
+        return has(/반복|루프|실행\s*조정|스케줄|\bloop\b/i) ? 'loop' : has(/수집|측정/) ? 'collector' : has(/AI\s*판단|LLM/i) ? 'ai' : has(/화면|\bUI\b/) ? 'screen'
+          : has(/외부\s*호출|실행기|집행/) ? 'actor' : has(/계산|변환|파싱|검증/) ? 'compute' : null;
+      default: return null;
+    }
+  };
+  const type = pick();
+  return { type, unmapped: type === null };
+}
+export const roleType = (cell: string): string | null => familyType(cell).type;
 /** A v5 row read as a v4 row (see TableRow): B IDs in a cell as their parts' names (「B07: 통로」 as 「푸시 발송기: 통로」), F IDs as paths. */
 export function v5View(f: FoldedRecord, r: FoldRow): Record<string, string> {
   const c = r.row.byColumn, nameOf = (id: string) => (f.byId.get(id)?.table === 'C-PART' ? (f.byId.get(id)!.row.byColumn['이름'] ?? '').trim() : '') || id;
@@ -692,6 +721,13 @@ export function readReserved(cell: string): { id: string; name: string }[] {
   return [...cell.matchAll(/((?:B\d{1,3}:[SL]\d{1,3}[a-z]?)|(?:[A-Z]{1,2}\d{1,3}))(?![\d:])\s*([^·,，]*)/g)].map(m => ({ id: m[1]!, name: m[2]!.trim() }));
 }
 /** The part IDs (B05), loop IDs (B05:L01) and other row IDs (D02, X01, N01, K01, B05:S02) a cell names. */
+/** Recipe .48: the names of the parts a v5 row's cell names by B ID (its 「: 통로」 tail left off), each as its C-PART row's 이름 cell; []
+ * for a v4 or v3 row. A name holding 「·」 (「진입·종료 조정」) stays one name: the view's text joins names with the same mark. */
+export function v5PartNames(x: TableRow, column: string): string[] {
+  if (x.dialect !== 'v5' || !x.fold || !x.folded) return [];
+  const raw = (x.fold.row.byColumn[column] ?? '').replace(/\s*:\s*.+$/, '');
+  return partRefs(raw).flatMap(id => { const r = x.folded!.byId.get(id); const n = r?.table === 'C-PART' ? (r.row.byColumn['이름'] ?? '').trim() : ''; return n ? [n] : []; });
+}
 export const partRefs = (cell: string | undefined): string[] => [...new Set([...(cell ?? '').matchAll(/(?<![A-Za-z0-9])B\d{1,3}(?![\d:])/g)].map(m => m[0]))];
 export const loopRefs = (cell: string | undefined): string[] => [...new Set([...(cell ?? '').matchAll(/(?<![A-Za-z0-9])B\d{1,3}:L\d{1,3}(?!\d)/g)].map(m => m[0]))];
 // A step a branch names (→ B05:S01) may stand on a later page and is no reference checked here.

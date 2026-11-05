@@ -11,7 +11,7 @@ import type { PartState, PartType, PartImplementation, ReadingStatusClaim, Readi
   ReadingEntryPoint, ReadingContract, ReadingStepBranch, ReadingActor, ActorKind, ReadingContractChange, ReadingShippedIn, WithdrawalMethod, ReadingDecider,
   ConditionPhase, ReadingCoverage, ReadingArtifact, ReadingProfileTable, ReadingRecordExtra, ReadingRecordDiagnostic, ReadingFocus, EnforcerKind, CadenceKind,
   CrossKind, StatusDimension, ClaimTopic, RecordFamily, FamilyReason, ClaimNature, FoundBy, StatusScopeKind, VariantTogether, ReadingPage, ReadingObligation,
-  ReadingPageEnd, ReadingCheck, ReadingDefault, ReadingPartState } from './types.js';
+  ReadingPageEnd, ReadingCheck, ReadingDefault, ReadingPartState, EvidenceGrade } from './types.js';
 import { RECORD_DIAGNOSTIC_CATEGORIES } from './types.js';
 import { secretLike } from './secret.js';
 /** Recipe .46: the fold's own categories (page-replaced, row-id-prefix, drop-ambiguous) are never stored (map-reading.19 keeps its list). */
@@ -24,7 +24,7 @@ type Texts = Map<string, { text: string }>;
 interface Step43 { name?: string; does?: string | null; uses?: string[]; program?: true; quote: Record43Quote | { record: string; quote: string; from?: number; to?: number }; recordRef?: string | null; loopIds?: string[]; alt?: { group: string; branch: string } | null; branch?: ReadingStepBranch[]; model?: string | null; cites?: Cite[] }
 interface Claim43 { topic?: ClaimTopic | null; record: string; from?: number; to?: number; enforcedBy?: { kind: EnforcerKind; text: string; quote: Record43Quote | null; program?: true }[];
   decidedBy?: ReadingDecider | null; actors?: ReadingActor[]; mergedWhen?: string | null; contractChange?: ReadingContractChange | null; shippedIn?: ReadingShippedIn | null; withdrawalMethod?: WithdrawalMethod | null;
-  cites?: Cite[]; foundBy?: FoundBy | null }
+  cites?: Cite[]; foundBy?: FoundBy | null; evidence?: EvidenceGrade | null; when?: string | null; kind?: string; text?: string }
 export interface Part43 { ref: string; name: string | null; state?: PartState | null; stateQuote?: unknown; stateWhen?: string | null; type?: PartType | null; typeQuote?: unknown;
   parent?: string | null; role?: string | null; basis?: { record: string; quote: string; from?: number; to?: number }[]; config?: string[];
   steps?: Step43[]; claims: Claim43[]; conditions?: { when?: string; then?: string; else?: string | null; quote: { record: string; quote?: string; from?: number; to?: number }; phase?: ConditionPhase | null }[];
@@ -482,10 +482,14 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
       if (items.length) b.members = { count: items.length, ordered: null, items: [...new Set(items)].slice(0, RECORD43_MAX.members), quote: q };
     }
     // Cites of the steps, claims and lines on v5 rows (record43 gave lines theirs).
-    const rowAt = (q: { record: string; from?: number; to?: number }) => [...f.byKey.values()].find(r => overlaps(q, { record: r.record, from: r.row.from, to: r.row.to }));
+    // Recipe .48: the claim's own row: the one its quote opens on (a quote running into the next row never takes that row's cells).
+    const rowAt = (q: { record: string; from?: number; to?: number }) => {
+      const hits = [...f.byKey.values()].filter(r => overlaps(q, { record: r.record, from: r.row.from, to: r.row.to }));
+      return hits.find(r => q.from !== undefined && r.row.from <= q.from && q.from < r.row.to) ?? hits.sort((a, b) => a.row.from - b.row.from)[0];
+    };
     for (const b of parts) {
       for (const s of b.steps ?? []) { const r = s.recordRef ? f.byId.get(s.recordRef) : undefined; if (r) s.cites = cites6(r.cites); }
-      for (const c of b.claims) { const r = rowAt(c); if (r) c.cites = cites6(r.cites); }
+      for (const c of b.claims) { const r = rowAt(c); if (r) { c.cites = cites6(r.cites); ledgerOn(c, r); } }
     }
     // The v5 record's own artifacts (C-DATA, 13.3 shared data), gates checked as none, supplementary tables and unknown tables.
     const r43 = ctx.read43;
@@ -593,6 +597,23 @@ export function glossVariants(text: string, gloss: ReadonlyMap<string, string>):
   if (!gloss.size) return text;
   return text.replace(/\bX\d{1,3}\b(?!\s*[(（])/g, id => gloss.has(id) ? `${id}(${gloss.get(id)})` : id);
 }
+/** Recipe .48: the column of a v5 table that dates its row (C-CHANGE 날짜, C-RULE 정한 이·언제, C-ISSUE 언제부터, C-GATE 언제쯤). */
+const DATE_COLUMNS: Readonly<Record<string, string>> = { 'C-CHANGE': '날짜', 'C-RULE': '정한 이·언제', 'C-ISSUE': '언제부터', 'C-GATE': '언제쯤' };
+const DATE = /(?<!\d)(\d{4}-\d{2}(?:-\d{2})?)(?!\d)/;
+/** Recipe .48 (the evidence ledger): a claim on a v5 row takes its grade from the row's own cites (the first that resolves to a graded E
+ * or a read F: 파일 → file, 실행 → run, 보고 → report; a row citing only 추정 → guess, only 모름 or an unread file → unknown), never past
+ * them; and its when from that same row: the date its date column holds, or the model's when only where the row itself writes it (a
+ * date the model took from the next row is not kept). A row citing nothing leaves both as the reply wrote them. */
+function ledgerOn(c: Claim43, r: FoldRow): void {
+  if (c.topic === undefined) return;
+  const graded = r.cites.find(x => x.grade === 'file' || x.grade === 'run' || x.grade === 'report');
+  const grade: EvidenceGrade | null = graded ? graded.grade as EvidenceGrade : r.cites.some(x => x.grade === 'guess') ? 'guess' : r.cites.some(x => x.grade === 'unknown') ? 'unknown' : null;
+  if (grade) c.evidence = grade;
+  const column = DATE_COLUMNS[r.table], dated = column ? DATE.exec(r.row.byColumn[column] ?? '')?.[1] ?? null : null;
+  const own = (w: string) => Object.values(r.row.byColumn).some(cell => plain(cell).includes(plain(w)));
+  const when = typeof c.when === 'string' && c.when.trim() ? c.when : null;
+  c.when = dated && (!when || DATE.test(when) || !own(when)) ? dated : when && own(when) ? when : null;
+}
 /** Recipe .45: a part's family from a v5 C-PART 표현군·역할 cell, on its row (nothing for a cell outside the fixed words: the next page
  * asks for it). */
 function familyOn(b: Part43, cell: string, q: Record43Quote, added: boolean): void {
@@ -682,10 +703,15 @@ const fileNames = (t: string): string[] => (t.toLowerCase().match(/[a-z0-9_][a-z
 /** .44 (see record43): the record's own lines from its C-LINK and C-DATA rows that the reply left undrawn, pushed onto relations. */
 function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableRow[]; dataRows: TableRow[]; byName: (name: string) => Part43 | undefined;
   nameOfPart: (b: Part43) => string; rowQuote: (r: TableRow) => Record43Quote | null; dataById: (id: string, record: string) => TableRow | undefined; maxLines: number }): void {
-  const { parts, relations, byName } = ctx;
+  const { parts, byName } = ctx;
+  // Recipe .48: the lines are gathered first and drawn within the cap after, one line of each row before any row's second (a stored
+  // hand-over is two lines, maker → store and store → reader): a cap leaves later rows a line each, never earlier rows both and later none.
+  const pending: { line: Line43; tier: number; order: number }[] = [], perRow = new Map<TableRow, number>();
+  const put = (r: TableRow, line: Line43) => { const n = perRow.get(r) ?? 0; perRow.set(r, n + 1); pending.push({ line, tier: n, order: pending.length }); };
+  const drawn = (fn: (l: Line43) => boolean) => ctx.relations.some(fn) || pending.some(p => fn(p.line));
   const partsIn = (cell: string): Part43[] => partsInCell(cell, byName);
-  const has = (a: string, b: string) => relations.some(l => l.from === a && l.to === b);
-  const through = (a: string, b: string) => relations.some(l => l.from === a && l.to !== b && has(l.to, b));
+  const has = (a: string, b: string) => drawn(l => l.from === a && l.to === b);
+  const through = (a: string, b: string) => drawn(l => l.from === a && l.to !== b && has(l.to, b));
   const storeOf = (name: string): Part43 | undefined => {
     const n = plain(bare(name)), files = fileNames(name);
     return parts.find(b => (b.type === 'store' || b.family === 'store') && (plain(ctx.nameOfPart(b)) === n || (files.length > 0 && fileNames(ctx.nameOfPart(b)).some(f => files.includes(f)))));
@@ -694,8 +720,8 @@ function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableR
   const modeOf = (r: TableRow): 'design' | 'observed' | null => r.id === 'C-LINK' ? fixedWord(r.byColumn['설계/관찰'] ?? '', { 설계: 'design', 관찰: 'observed' } as const)?.value ?? null : null;
   const add = (from: Part43, to: Part43, r: TableRow, payload: string, ref: string | null, fields: string[]) => {
     const q = ctx.rowQuote(r);
-    if (!q || from === to || relations.length >= ctx.maxLines || has(from.ref, to.ref) || secretLike(payload) || fields.some(f => secretLike(f))) return;
-    relations.push({ from: from.ref, to: to.ref, kind: 'flow', note: '', record: q.record, quote: q.quote, span: { from: q.from, to: q.to }, payload: payload ? cut(payload, 80) : null, cadence: null,
+    if (!q || from === to || has(from.ref, to.ref) || secretLike(payload) || fields.some(f => secretLike(f))) return;
+    put(r, { from: from.ref, to: to.ref, kind: 'flow', note: '', record: q.record, quote: q.quote, span: { from: q.from, to: q.to }, payload: payload ? cut(payload, 80) : null, cadence: null,
       mode: modeOf(r), channel: 'data', payloadFields: fields, when: null, optional: false, variantRef: null, crosses: null, cadenceKind: null, payloadRef: ref, via: null, member: null });
   };
   // An artifact handed from makers to readers on row r: through its store part when one holds it, else directly.
@@ -719,8 +745,8 @@ function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableR
     if (row) { hand(from, to, r, row.byColumn['이름'] ?? '', what, ref, fieldsOf(row.byColumn['필드·모양'] ?? ''), fixedWord(row.byColumn['종류'] ?? '', DATA_WORDS)?.value === 'store'); continue; }
     // A line with no artifact row: the row's own line, its channel unsaid (the record's 넘기는 것 words alone do not say data or control).
     const a = from[0]!, b = to[0]!, q = ctx.rowQuote(r);
-    if (a === b || !q || relations.length >= ctx.maxLines || has(a.ref, b.ref) || through(a.ref, b.ref) || secretLike(what)) continue;
-    relations.push({ from: a.ref, to: b.ref, kind: 'flow', note: '', record: q.record, quote: q.quote, span: { from: q.from, to: q.to }, payload: what ? cut(what, 80) : null, cadence: null,
+    if (a === b || !q || has(a.ref, b.ref) || through(a.ref, b.ref) || secretLike(what)) continue;
+    put(r, { from: a.ref, to: b.ref, kind: 'flow', note: '', record: q.record, quote: q.quote, span: { from: q.from, to: q.to }, payload: what ? cut(what, 80) : null, cadence: null,
       mode: modeOf(r), channel: null, payloadFields: [], when: null, optional: false, variantRef: null, crosses: null, cadenceKind: null, payloadRef: null, via: null, member: null });
   }
   for (const r of ctx.dataRows) {
@@ -741,6 +767,9 @@ function programLines(ctx: { parts: Part43[]; relations: Line43[]; links: TableR
     if (!makers.length && !readers.length) continue;
     hand(makers, readers, r, name, name, /^D\d{1,3}$/.test(id) ? id : null, fieldsOf(r.byColumn['필드·모양'] ?? ''), fixedWord(r.byColumn['종류'] ?? '', DATA_WORDS)?.value === 'store');
   }
+  // Recipe .48: within the cap, each row's first line (C-LINK rows before C-DATA rows), then each row's second, in the rows' order.
+  const rank = (p: { line: Line43; tier: number; order: number }) => p.tier * 2 + (ctx.links.some(r => r.record === p.line.record && p.line.span && r.from <= p.line.span.from && p.line.span.from < r.to) ? 0 : 1);
+  for (const p of [...pending].sort((a, b) => rank(a) - rank(b) || a.order - b.order)) { if (ctx.relations.length >= ctx.maxLines) break; ctx.relations.push(p.line); }
 }
 /** C-CHANGE 관련 주체·역할: 「역할: 주체」 joined by 「+」. */
 export function actorsOf(cell: string): ReadingActor[] {

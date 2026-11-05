@@ -13,7 +13,7 @@ import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
-import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
+import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun } from './record-excerpt.js';
 export { glossVariants };
@@ -285,7 +285,10 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // Recipe .45 (13.7d): a part splitting one part-table row (a list row, a contributors row) or a C-GROUP 목록 item written as a part.
   | 'list-split'
   // Recipe .45 (review N9): a claim on a v5 row whose grade its row's cites do not reach (a run-grade claim on a row citing reports only).
-  | 'cite-grade';
+  | 'cite-grade'
+  // Recipe .48: a model line on no record row left out so the record's undrawn C-LINK rows fit the first map's lines (line-cap, set aside by
+  // the server); a condition's 거짓이면 or a step's 하는 일 past its bound written null alone (the condition or step stays).
+  | 'line-cap' | 'condition-else' | 'step-does';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -1607,6 +1610,10 @@ const exclusionExplanation = (e: MapReplyError): string => {
     : e.rule === 'contract' && e.target === 'condition' ? '부분의 조건 행 하나가 규칙에 맞지 않거나 그 부분의 「조건·거부·분기」 행에서 찾을 수 없어 그 조건만 제외했어요.'
     : e.rule === 'contract' && e.target === 'list-split' ? '부분 표의 한 행(목록·기여자 목록)이나 묶음 표의 목록 항목을 따로 세운 부분이어서 그 부분과 연결을 제외했어요. 그 행은 부분 하나이고 항목은 목록으로 남아요.'
     : e.rule === 'contract' && e.target === 'cite-grade' ? '주장의 근거 등급이 그 행이 인용한 근거(장부의 등급)보다 높아서 제외했어요. 보고만 인용한 행에서 실행·파일 등급 주장을 만들지 않아요.'
+    // Recipe .48: a model line set aside for the record's own lines; a field past its bound written null alone.
+    : e.rule === 'contract' && e.target === 'line-cap' ? '첫 지도의 선 48개 안에 기록의 연결 행을 모두 그리려고, 기록 행(연결·산출물·진입)에 서지 않은 모델의 선을 뺐어요. 기록의 연결 행 선은 남아요.'
+    : e.rule === 'contract' && e.target === 'condition-else' ? '조건 행의 거짓이면 칸이 지도 칸 길이(60자)를 넘어 그 칸만 비우고 조건은 남겼어요. 원문 행은 그대로 보여요.'
+    : e.rule === 'contract' && e.target === 'step-does' ? '단계의 하는 일 칸이 지도 칸 길이(120자)를 넘어 그 칸만 비우고 단계는 남겼어요. 원문 행은 그대로 보여요.'
     : e.rule === 'contract' && e.target === 'store-dup' ? '같은 「있는 곳」을 이미 다른 저장소 부분이 맡고 있어 겹친 저장소 부분과 그 연결을 제외했어요. 다른 부분으로 다시 잇지 않았어요.'
     : e.rule === 'contract' && e.target === 'unrecorded' ? '기록의 연결 표·산출물·부분별 설계·안의 단계 행이나 화살표 줄이 아닌 줄에서 만든 연결이어서 제외했어요.'
     // pipeline .38: the channel alone is written null; the line stays.
@@ -2403,7 +2410,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
           if (x === r.to && meets(ownRows ??= [...rowsUnder(texts, DESIGN_TABLE), ...rowsUnder(texts, STEP_TABLE)])) continue;
           if (!!own && artifactRows(ask).some(w => w.record === q.record && w.from < q.to! && q.from! < w.to && w.makers.includes(own))) continue;
         }
-        const placed = line.row ? (byRef.get(x)?.type === 'store' ? !!own && line.row.slice(1).some(cell => cellNames(cell).includes(own)) : holds(line.row.slice(1).join(' | ')))
+        const placed = line.row ? (byRef.get(x)?.type === 'store' ? !!own && line.row.slice(1).some(cell => cellNamesPart(cell, own)) : holds(line.row.slice(1).join(' | ')))
           : holds(line.head) || (!!own && plainName(line.head).includes(own));
         need(placed, `relations[${i}]`, 'sender');
       }
@@ -2415,7 +2422,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         const endName = (ref: unknown) => plainName(typeof ref === 'string' ? byRef.get(ref)?.name ?? parts.get(ref)?.name ?? '' : '');
         const storeRows = rowsOf(texts, ['C-PART']).filter(x => x.dialect === 'v5' && /^\s*저장/.test(x.byColumn['표현군·역할'] ?? ''));
         const isStore = (ref: unknown, n: string) => (typeof ref === 'string' && byRef.get(ref)?.type === 'store') || storeRows.some(x => plainName(x.byColumn['이름'] ?? '') === n);
-        const a = endName(r.from), b = endName(r.to), cell = (x: TableRow, c: string) => cellNames(String(x.byColumn[c] ?? '').replace(/\s*:\s*.+$/, ''));
+        // Recipe .48: a row's ends are the parts its B IDs name, whole (the .47 replays set aside 86 recorded lines whose part name holds
+        // 「·」, 「진입·종료 조정」 read as 「진입」 and 「종료 조정」); the view's words split on 「·」 still count for a cell naming no B ID.
+        const a = endName(r.from), b = endName(r.to), cell = (x: TableRow, c: string) => [...v5PartNames(x, c).map(plainName), ...cellNames(String(x.byColumn[c] ?? '').replace(/\s*:\s*.+$/, ''))];
         need(!a || !b || linkRows5.some(x => {
           const s = cell(x, '보내는 부분'), t = cell(x, '받는 부분'), on = (n: string) => s.includes(n) || t.includes(n);
           return (s.includes(a) && t.includes(b)) || (s.includes(b) && t.includes(a)) || (isStore(r.from, a) && t.includes(b)) || (isStore(r.to, b) && s.includes(a) && !on(b));
@@ -2445,7 +2454,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       if (s13.payloadFields.length) {
         // pipeline .42: a row's field group also goes by its name with its members elided (「hardware_counters(…)」).
         const rows = formatRows(ask, nameOf(r.from as string), nameOf(r.to as string), s7.payload), known = new Set(rows.flatMap(x => x.fields.flatMap(f => [f, fieldGroupHead(f) ?? f])).map(plainName));
-        if (!rows.length) { held7.push(new MapReplyError(`relations[${i}].payloadFields`, 'contract', 'payload-fields')); s13.payloadFields = []; }
+        // Recipe .48: a list none of whose fields the rows know is left out as one list (one reason, as a list no row backs), never as a
+        // reason per field (a recorded line's fourteen fields would spend fourteen of the divided map's 64 reasons and refuse it whole).
+        if (!rows.length || !s13.payloadFields.some(x => known.has(plainName(x)))) { held7.push(new MapReplyError(`relations[${i}].payloadFields`, 'contract', 'payload-fields')); s13.payloadFields = []; }
         else {
           const raw = Array.isArray(r.payloadFields) ? (r.payloadFields as unknown[]).map(x => typeof x === 'string' ? (x.trim().length > FIELD_ITEM_MAX ? fieldGroupHead(x) ?? x.trim() : x.trim()) : null) : [];
           s13.payloadFields = s13.payloadFields.filter(x => {

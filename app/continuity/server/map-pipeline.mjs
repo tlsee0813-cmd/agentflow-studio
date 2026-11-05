@@ -434,8 +434,14 @@ export const LINES_CORRECTION_USD = 0.07;
 // to 16 records of 48,000 characters and 960 pieces, 160 KiB and 24 partitions (a later map 12); what does not fit leaves out Q3 rows,
 // then the least connected Q2 rows, each named in its record's note (under the shared bounds: page order, cut, read on next time); the
 // reading's level, pages, obligations and fold diagnostics are the whole record's (the project's pasted texts).
-export const PIPELINE_RECIPE = 'first-map-divided.47';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.47';
+// .48 (map-reading.19 kept; from the blind three-way judging of the .47 maps): a v5 line's ends are its rows' B IDs read whole (a part
+// name holding 「·」 set no recorded line aside), the connection diagnostics name parts and count the lines the map shows, the record's
+// lines fit the 48 one row at a time with model-only lines left out first (line-cap) and the rest counted (record-lines); a part's type
+// comes from its 표현군·역할 by a fixed table (type-unmapped where none fits); a claim's grade and date come from its own row's cites and
+// cells; a step or condition keeps its row when only an optional cell is past its bound; C-GROUP rows set children's parents; a rule a
+// code device keeps with a cite describes; the divided route alone takes the first-map bounds; the v5 ask is v5.1.
+export const PIPELINE_RECIPE = 'first-map-divided.48';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.48';
 /** .45 (RECORD_ASKS_V5_KO.md 12.4 (d)): the key sets beside a stage's INPUT: for each v5 record, the B, F and E IDs its own text cites
  * (each B with its name and one-line responsibility, F with its path, E with its grade and source), a closed set; nothing for an ask with
  * no v5 record (its stage inputs stay as .44 sent them). */
