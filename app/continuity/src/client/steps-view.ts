@@ -153,7 +153,7 @@ export function decisionStep(gate: GateLike, steps: readonly Pick<ChainStep, 'na
   if (!conditions) return { index: at, name: s.name, matched, exits: decisionExits(s) };
   const placed = conditionPlacement(conditions, steps).steps.get(at) ?? [];
   const exits = placed.flatMap(({ index, condition: c }): DecisionExit[] => [{ when: c.when, text: c.then, condition: index, branch: 'then' },
-    ...(c.else ? [{ when: '아니면', text: c.else, condition: index, branch: 'else' as const }] : [])]);
+    ...(c.else ? [{ when: '아니면', text: c.else, condition: index, branch: 'else' as const }] : c.incomplete ? [{ when: '아니면', text: ELSE_BLANKED, condition: index, branch: 'else' as const }] : [])]);
   return { index: at, name: s.name, matched, exits, source: 'conditions' };
 }
 
@@ -163,8 +163,12 @@ export function decisionStep(gate: GateLike, steps: readonly Pick<ChainStep, 'na
  * the longest step name or uses item (two characters or more) those words hold, the name before a uses item of the same length,
  * the first step in the record's row order on a tie. A condition naming no step stands at the part's boundary (단계 미상) and is
  * listed apart (자리 없는 조건): never placed by guess. On a step box a condition reads as a compact exit list: '조건 {when} →
- * {then}', and '아니면 → {else}' only when the record wrote one. */
-export interface ConditionLike { when: string; then: string; else: string | null }
+ * {then}', and '아니면 → {else}' only when the record wrote one. Recipe .48 fix (A7): a condition whose 거짓이면 the reading blanked (its
+ * cell past the map's bound, condition-else) is incomplete: its else exit reads '아니면 → 미상 …', never as if the record wrote none (a
+ * condition with no else would read as one with nothing to do otherwise). */
+export interface ConditionLike { when: string; then: string; else: string | null; incomplete?: boolean }
+/** The else exit of an incomplete condition (its 거짓이면 left out for its length). */
+export const ELSE_BLANKED = '미상 · 거짓이면 칸이 길어 비움(조건 불완전)';
 /** How the condition reached its step: its when or its then, equal to the step's name or one of its uses, or holding it. */
 export interface ConditionPlace { step: number; by: 'when' | 'then'; key: 'name' | 'uses'; how: 'equal' | 'holds' }
 export const CONDITION_BLANK = '단계 미상', CONDITION_UNPLACED = '자리 없는 조건';
@@ -200,7 +204,11 @@ export function conditionPlacement<T extends ConditionLike>(conditions: readonly
   return out;
 }
 /** A condition's exit lines on a step box: '조건 {when} → {then}', then '아니면 → {else}' when the record wrote it. */
-export const conditionLines = (c: ConditionLike): string[] => [`조건 ${c.when} → ${c.then}`, ...(c.else ? [`아니면 → ${c.else}`] : [])];
+export const conditionLines = (c: ConditionLike): string[] => [`조건 ${c.when} → ${c.then}`, ...(c.else ? [`아니면 → ${c.else}`] : c.incomplete ? [`아니면 → ${ELSE_BLANKED}`] : [])];
+/** Recipe .48 fix: whether a stored condition's 거짓이면 was blanked by its reading (an exclusion condition-else on the condition's own row). */
+export function elseBlanked(q: QuoteLike, exclusions: readonly { category: string | null; record: string | null; from: number | null; to: number | null }[]): boolean {
+  return q.from !== undefined && q.to !== undefined && exclusions.some(x => x.category === 'condition-else' && x.record === q.record && x.from !== null && x.to !== null && x.from < q.to! && q.from! < x.to);
+}
 /** The condition whose row is the given quote (a rule anchor's): the same record and words (spacing aside), and the same span
  * when both carry one; -1 when none. */
 export interface QuoteLike { record: string; quote: string; from?: number; to?: number }

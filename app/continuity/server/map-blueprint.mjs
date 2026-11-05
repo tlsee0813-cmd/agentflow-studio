@@ -5,8 +5,8 @@ import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusio
   artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt, conditionRows, fileMapRows, programPortMap, carriesQuery, contentWords,
   portSides, stepRenames, REFUSAL_OUTCOME, LOOP_TYPES, listItems, sameSetting, VERSION_WORD, namesWord, fieldGroupHead, programLoopStep, programSteps, tableCells, MAP_SUMMARY_MAX, STEP_NAME_MAX, CADENCE_MAX, FILE_ROLE_MAX } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
-import { rowsOf, readRecordTables, v5PartNames, familyType } from '../dist/public/shared/record-table.js';
-import { groupParentConflicts } from '../dist/public/shared/record-reading.js';
+import { rowsOf, readRecordTables, v5PartNames, familyType, partStructure } from '../dist/public/shared/record-table.js';
+import { groupParentConflicts, ledgerOf } from '../dist/public/shared/record-reading.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
 // .31: a first map plans up to 36 parts (twelve fragments of three; the two KORU records need about 33: 24 table rows and nine
@@ -1587,14 +1587,55 @@ function aliasExclusion(path, category, alias, ask) {
 // condition row with no code device (anchor-enforce).
 // .40: and the steps whose parenthesised tail went to does (step-name). .41: and the 4절 rows no step stands on (steps-cut).
 // .42: and the artifact table's product lines merged into a kept line or left out as shortcuts (product-lines).
-export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'record-lines', 'lines-set-aside', 'group-parent', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count', 'type-unmapped']);
-export const FINAL_DIAGNOSTICS_MAX = 16;
-/** Recipe .48: the v5 C-PART rows of a family whose role the type table (familyType) does not map, 「B07 name: 표현군·역할」. */
-export function unmappedTypes(ask) {
+// Recipe .48 fix: and each C-LINK row kept, held or changed (line-rows), the claims whose row cites nothing (grade-no-cite) apart from those
+// whose cites the app could not resolve or that mix graded with guess or unknown cites (grade-unresolved), and the role types the record's
+// structure did not confirm or that compete (type-held), apart from the roles no type maps (type-unmapped).
+export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'record-lines', 'line-rows', 'lines-set-aside', 'group-parent', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count', 'grade-no-cite', 'grade-unresolved', 'type-unmapped', 'type-held']);
+export const FINAL_DIAGNOSTICS_MAX = 24;
+/** Recipe .48: the v5 C-PART rows of a family whose role the type table (familyType) does not map, 「B07 name: 표현군·역할」. Recipe .48 fix:
+ * held, the rows whose role proposed a type the record's structure did not confirm, or proposed types that compete, 「B07 name: 표현군·역할
+ * → loop?」 (no type; the family stays). */
+export function unmappedTypes(ask, held = false) {
   try {
-    return rowsOf(askRecords(ask), ['C-PART']).filter(r => r.dialect === 'v5' && familyType(r.byColumn['표현군·역할'] ?? '').unmapped)
-      .map(r => `${r.fold?.id ?? ''} ${opening(r.byColumn['이름'] ?? '')}: ${opening(r.byColumn['표현군·역할'] ?? '')}`.trim());
+    return rowsOf(askRecords(ask), ['C-PART']).filter(r => r.dialect === 'v5').flatMap(r => {
+      const t = familyType(r.byColumn['표현군·역할'] ?? '', partStructure(r.folded, r.fold?.id ?? ''));
+      if (held ? !t.held : !t.unmapped) return [];
+      return [`${r.fold?.id ?? ''} ${opening(r.byColumn['이름'] ?? '')}: ${opening(r.byColumn['표현군·역할'] ?? '')}${held ? ` → ${t.held}` : ''}`.trim()];
+    });
   } catch { return []; }
+}
+/** Recipe .48 fix (A7): each v5 C-LINK row (current rows) as the read reply draws it, by row ID: kept, a line stands on the row between its
+ * two ends in its direction (or through a store part between them), or another line joins its ends so; changed, lines stand on the row but
+ * none joins its ends in its direction; held, no line draws it (a row whose ends name no part of the reply is held too, 「(끝 없음)」). */
+export function recordLineRows(read, ask) {
+  try {
+    const texts = askRecords(ask), parts = Array.isArray(read?.parts) ? read.parts : [], lines = Array.isArray(read?.relations) ? read.relations : [];
+    const refOf = new Map(parts.flatMap(p => typeof p?.name === 'string' ? [[plainName(p.name), p.ref]] : []));
+    const stores = new Set(parts.filter(p => p?.type === 'store' || p?.family === 'store').map(p => p.ref));
+    const joinedIn = (list, a, b) => list.some(l => l.from === a && l.to === b), throughIn = (list, a, b) => joinedIn(list, a, b) || [...stores].some(s => joinedIn(list, a, s) && joinedIn(list, s, b));
+    const end = (r, column) => plainName(((v5PartNames(r, column)[0] ?? r.byColumn[column] ?? '')).replace(/\s*:\s*.+$/, ''));
+    const out = { kept: [], held: [], changed: [] };
+    for (const r of rowsOf(texts, ['C-LINK']).filter(x => x.dialect === 'v5')) {
+      const id = r.fold?.id ?? r.id, a = refOf.get(end(r, '보내는 부분')), b = refOf.get(end(r, '받는 부분'));
+      if (!a || !b || a === b) { out.held.push(`${id} (끝 없음)`); continue; }
+      const on = lines.filter(l => l.record === r.record && l.span && l.span.from < r.to && r.from < l.span.to);
+      if (throughIn(on, a, b) || (!on.length && throughIn(lines, a, b))) out.kept.push(id);
+      else if (on.length) out.changed.push(id);
+      else out.held.push(id);
+    }
+    return out;
+  } catch { return { kept: [], held: [], changed: [] }; }
+}
+/** Recipe .48 fix (A7): the claims the evidence ledger set no grade for, by cause: none, their row cites nothing; unresolved, the app could
+ * not resolve a cite of the row, or the row mixes graded cites with guess or unknown ones (「ref row 섞임」); 「ref row」 each. */
+export function ledgerGaps(read) {
+  const none = [], unresolved = [];
+  for (const p of Array.isArray(read?.parts) ? read.parts : []) for (const c of Array.isArray(p?.claims) ? p.claims : []) {
+    const x = c && typeof c === 'object' ? ledgerOf(c) : null; if (!x || c.evidence) continue;
+    if (x.state === 'none') none.push(`${p.ref} ${x.row}`);
+    else if (x.state === 'unresolved' || x.state === 'mixed') unresolved.push(`${p.ref} ${x.row}${x.state === 'mixed' ? ' 섞임' : ''}`);
+  }
+  return { none, unresolved };
 }
 export function finalDiagnostics(fragments, global, ask, blueprint) {
   try {
@@ -1614,8 +1655,17 @@ export function finalDiagnostics(fragments, global, ask, blueprint) {
     const conflicts = read ? groupParentConflicts(askRecords(ask), read.parts) : [];
     if (conflicts.length) found.push({ path: 'parts', rule: 'group-parent', expected: null, actual: conflicts.length, names: conflicts });
     // Recipe .48: the C-PART rows whose role the type table does not map (no type, quietly said; never one invented).
-    const unmapped = unmappedTypes(ask);
+    const unmapped = unmappedTypes(ask), held = unmappedTypes(ask, true);
     if (unmapped.length) found.push({ path: 'parts', rule: 'type-unmapped', expected: null, actual: unmapped.length, names: unmapped });
+    if (held.length) found.push({ path: 'parts', rule: 'type-held', expected: null, actual: held.length, names: held });
+    // Recipe .48 fix: each C-LINK row kept, held or changed (the counts first, then the held and changed row IDs).
+    const lineRows = read ? recordLineRows(read, ask) : null, rowCount = lineRows ? lineRows.kept.length + lineRows.held.length + lineRows.changed.length : 0;
+    if (lineRows && rowCount) found.push({ path: 'relations', rule: 'line-rows', expected: rowCount, actual: lineRows.kept.length,
+      names: [`kept ${lineRows.kept.length} · held ${lineRows.held.length} · changed ${lineRows.changed.length}`, ...lineRows.held.map(id => `held ${id}`), ...lineRows.changed.map(id => `changed ${id}`)] });
+    // Recipe .48 fix: the claims the evidence ledger left ungraded, by cause (no cite apart from unresolved).
+    const gaps = read ? ledgerGaps(read) : { none: [], unresolved: [] };
+    if (gaps.none.length) found.push({ path: 'parts', rule: 'grade-no-cite', expected: null, actual: gaps.none.length, names: gaps.none });
+    if (gaps.unresolved.length) found.push({ path: 'parts', rule: 'grade-unresolved', expected: null, actual: gaps.unresolved.length, names: gaps.unresolved });
     const count = n => Number.isSafeInteger(n) && n >= 0 && n <= 9999 ? n : null;
     return FINAL_DIAGNOSTICS.flatMap(rule => found.filter(x => x.rule === rule)).slice(0, FINAL_DIAGNOSTICS_MAX).map(x => ({ path: x.path, rule: x.rule,
       expected: count(x.expected), actual: count(x.actual), names: (Array.isArray(x.names) ? x.names : []).flatMap(n => typeof n === 'string' ? [n.replace(/\s+/g, ' ').trim().slice(0, 160)] : [])

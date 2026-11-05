@@ -5,7 +5,7 @@
  * claims, conditions and file-map rows to the rows their own quotes stand on. */
 import { readRecordTables, recordRefs, rowsOf, fixedWord, STEP_REF, IMPLEMENTATION_WORDS, TYPE_WORDS, GROUP_WORDS, CADENCE_WORDS, CROSS_WORDS, STATUS_DIMENSIONS,
   STATUS_VALUES, DEVICE_WORDS, ENTRY_WORDS, TOGETHER_WORDS, SELECT_WORDS, DONE_WORDS, DATA_WORDS, WRITE_WORDS, WITHDRAW_WORDS, PHASE_WORDS, ROLE_WORDS,
-  WITHDRAW_WORDS_V5, TOGETHER_WORDS_V5, SCOPE_WORDS, FOUND_WORDS, NATURE_WORDS, CHECK_WORDS, V4_TYPE_FAMILY, readFamily, roleType, foldPages, partRefs, loopRefs, rowKey,
+  WITHDRAW_WORDS_V5, TOGETHER_WORDS_V5, SCOPE_WORDS, FOUND_WORDS, NATURE_WORDS, CHECK_WORDS, V4_TYPE_FAMILY, readFamily, roleType, partStructure, foldPages, partRefs, loopRefs, rowKey,
   type TableRow, type RecordTables, type FoldedRecord, type FoldRow, type Cite } from './record-table.js';
 import type { PartState, PartType, PartImplementation, ReadingStatusClaim, ReadingProjectStatus, ReadingRecordLoop, ReadingMembers, GroupAxis, ReadingVariant,
   ReadingEntryPoint, ReadingContract, ReadingStepBranch, ReadingActor, ActorKind, ReadingContractChange, ReadingShippedIn, WithdrawalMethod, ReadingDecider,
@@ -463,7 +463,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
       if (!b) {
         b = parts.find(x => !x.recordRef && x.name !== null && (x.basis ?? []).some(y => (f.history.get(rowKey(r.table, r.id)) ?? [r]).some(h => overlaps(y, { record: h.record, from: h.row.from, to: h.row.to }))));
         if (!b) continue;
-        b.recordRef = r.id; const t = roleType(r.row.byColumn['표현군·역할'] ?? ''); b.type = t as PartType | null; b.typeQuote = t ? q : null;
+        b.recordRef = r.id; const t = roleType(r.row.byColumn['표현군·역할'] ?? '', partStructure(f, r.id)); b.type = t as PartType | null; b.typeQuote = t ? q : null;
         const impl = fixedWord(r.row.byColumn['구현 상태'] ?? '', IMPLEMENTATION_WORDS); b.implementation = impl?.value ?? null; b.implementationQuote = impl?.value ? q : null;
       }
       familyOn(b, r.row.byColumn['표현군·역할'] ?? '', q, r.mark === 'add'); b.cites = cites6(r.cites);
@@ -556,10 +556,17 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
         ctx.read43.recordDiagnostics.push({ category: 'part-no-row', table: 'C-PART', column: null, record: q.record, from: q.from!, to: q.to! });
     }
   }
-  // Recipe .48: a C-GROUP row (실행 위치, 구성, 참여자, 외부; never a 목록) whose 부모 is one part's B ID is its children's parent: each child
-  // the row names by B ID takes that part as its parent where the reply gave it none; a parent the reply gave is kept (groupParents says
-  // where the two differ), and none is set that would make a part its own ancestor.
-  if (latest) for (const g of groupParents(latest, parts)) if (!g.child.parent && !ancestorOf(parts, g.child.ref, g.parent.ref)) g.child.parent = g.parent.ref;
+  // Recipe .48 fix (A7): a C-GROUP 구성 or 목록 row (never 실행 위치, 참여자 or 외부: a place, the people taking part or a boundary is no
+  // containment) whose 부모 is one part's B ID is its children's parent, over a parent the reply gave (a model parent never overrides an
+  // explicit group); none is set for a child two rows give different parents, nor one that would make a part its own ancestor
+  // (groupParentIssues says each of these, and where the reply's own parent was replaced).
+  if (latest) {
+    const links = groupParents(latest, parts), many = new Set(links.filter(g => links.some(h => h.child === g.child && h.parent !== g.parent)).map(g => g.child));
+    for (const g of links) if (!many.has(g.child) && g.child.parent !== g.parent.ref && !ancestorOf(parts, g.child.ref, g.parent.ref)) {
+      if (g.child.parent) REPLACED_PARENT.set(g.child, g.child.parent);
+      g.child.parent = g.parent.ref;
+    }
+  }
   // Every part with no family yet: from its type word, the unambiguous ones only (a v4 or v3 record; 12.3).
   for (const b of parts) {
     if (b.family !== undefined || b.familyRole !== undefined || !b.type || !b.typeQuote) continue;
@@ -601,24 +608,46 @@ export function glossVariants(text: string, gloss: ReadonlyMap<string, string>):
   if (!gloss.size) return text;
   return text.replace(/\bX\d{1,3}\b(?!\s*[(（])/g, id => gloss.has(id) ? `${id}(${gloss.get(id)})` : id);
 }
-/** Recipe .48: the parent each v5 C-GROUP row gives its children: a row other than 목록 whose 부모 cell is one B ID of a C-PART row, each
- * child B ID of its 자식들 cell (the parent itself left out), as the parts that stand on those rows ({ row, parent, child }). */
+/** Recipe .48 fix: the axes a C-GROUP row may turn into parents (구성, 목록): containment; 실행 위치, 참여자, 외부 and 모름 never are. */
+const PARENT_AXES: ReadonlySet<string> = new Set(['composition', 'members']);
+/** Recipe .48 fix: the reply's own parent a C-GROUP row replaced (by part), for the diagnostic. */
+const REPLACED_PARENT = new WeakMap<object, string>();
+/** Recipe .48: the parent each v5 C-GROUP row gives its children: a 구성 or 목록 row (PARENT_AXES) whose 부모 cell is one B ID of a C-PART row,
+ * each child B ID of its 자식들 cell (the parent itself left out), as the parts that stand on those rows ({ row, parent, child }). */
 export function groupParents(f: FoldedRecord, parts: readonly Part43[]): { row: string; parent: Part43; child: Part43 }[] {
   const byRef = (id: string) => f.byId.get(id)?.table === 'C-PART' ? parts.find(b => b.recordRef === id) : undefined, out: { row: string; parent: Part43; child: Part43 }[] = [];
   for (const r of f.rows.get('C-GROUP') ?? []) {
-    if (fixedWord(r.row.byColumn['묶음 뜻'] ?? '', GROUP_WORDS)?.value === 'members') continue;
+    const axis = fixedWord(r.row.byColumn['묶음 뜻'] ?? '', GROUP_WORDS)?.value; if (!axis || !PARENT_AXES.has(axis)) continue;
     const cell = (r.row.byColumn['부모'] ?? '').replace(/\s*:\s*.+$/, '').trim();
     if (!/^B\d{1,3}$/.test(cell)) continue;
     const parent = byRef(cell); if (!parent) continue;
-    for (const id of partRefs(r.row.byColumn['자식들'])) { const child = id === cell ? undefined : byRef(id); if (child && child !== parent) out.push({ row: r.id, parent, child }); }
+    // A 목록 row's items are its parent's items, not parts (「B06: serve(B07)」 names B07 inside an item): only an item that is a B ID whole
+    // is a child.
+    const kids = axis === 'members' ? (r.row.byColumn['자식들'] ?? '').split(/\s*[·,]\s*/).map(x => x.replace(/^B\d{1,3}\s*:\s*/, '').trim()).filter(x => /^B\d{1,3}$/.test(x))
+      : partRefs(r.row.byColumn['자식들']);
+    for (const id of new Set(kids)) { const child = id === cell ? undefined : byRef(id); if (child && child !== parent) out.push({ row: r.id, parent, child }); }
   }
   return out;
 }
-/** Recipe .48 (diagnostic): the C-GROUP rows of the latest v5 record whose parent the read reply does not give a child, 「GR01: child
- * → parent (지도: other)」 (a parent the reply gave of its own, or one a cycle kept out). */
+/** Recipe .48 fix (diagnostic, group-parent): what the latest v5 record's C-GROUP rows say of parents that the read reply does not simply
+ * take: a row that lists its own parent among its children (「GR01: B03 안에 자기 자신」), a child two rows give different parents
+ * (「B05: 부모 둘 B01(GR01) · B02(GR03)」, none set), a parent a cycle kept out (「GR02: B04 → B07 순환」), and a parent the reply gave that the
+ * row replaced (「GR04: B09 → B03 (모델 부모 B12 대신)」). */
 export function groupParentConflicts(texts: Texts, parts: readonly Part43[]): string[] {
   const latest = latestFold45(texts, foldPages([...texts].map(([record, { text }]) => ({ record, text })), 'newest-first')); if (!latest) return [];
-  return groupParents(latest, parts).filter(g => g.child.parent !== g.parent.ref).map(g => `${g.row}: ${g.child.ref} → ${g.parent.ref} (지도: ${g.child.parent ?? '없음'})`);
+  const out: string[] = [], links = groupParents(latest, parts);
+  for (const r of latest.rows.get('C-GROUP') ?? []) {
+    const axis = fixedWord(r.row.byColumn['묶음 뜻'] ?? '', GROUP_WORDS)?.value, cell = (r.row.byColumn['부모'] ?? '').replace(/\s*:\s*.+$/, '').trim();
+    if (axis && PARENT_AXES.has(axis) && /^B\d{1,3}$/.test(cell) && axis !== 'members' && partRefs(r.row.byColumn['자식들']).includes(cell)) out.push(`${r.id}: ${cell} 안에 자기 자신`);
+  }
+  const seen = new Set<Part43>();
+  for (const g of links) {
+    const others = links.filter(h => h.child === g.child && h.parent !== g.parent);
+    if (others.length) { if (!seen.has(g.child)) { seen.add(g.child); out.push(`${g.child.ref}: 부모 둘 ${[g, ...others].map(h => `${h.parent.ref}(${h.row})`).join(' · ')}`); } continue; }
+    if (g.child.parent !== g.parent.ref) out.push(`${g.row}: ${g.child.ref} → ${g.parent.ref} 순환 (지도: ${g.child.parent ?? '없음'})`);
+    else if (REPLACED_PARENT.has(g.child)) out.push(`${g.row}: ${g.child.ref} → ${g.parent.ref} (모델 부모 ${REPLACED_PARENT.get(g.child)} 대신)`);
+  }
+  return out;
 }
 /** Whether `ancestor` is `ref` or stands above it among the parts (by parent refs, a chain of at most the parts' count). */
 function ancestorOf(parts: readonly Part43[], ancestor: string, ref: string): boolean {
@@ -629,19 +658,59 @@ function ancestorOf(parts: readonly Part43[], ancestor: string, ref: string): bo
 /** Recipe .48: the column of a v5 table that dates its row (C-CHANGE 날짜, C-RULE 정한 이·언제, C-ISSUE 언제부터, C-GATE 언제쯤). */
 const DATE_COLUMNS: Readonly<Record<string, string>> = { 'C-CHANGE': '날짜', 'C-RULE': '정한 이·언제', 'C-ISSUE': '언제부터', 'C-GATE': '언제쯤' };
 const DATE = /(?<!\d)(\d{4}-\d{2}(?:-\d{2})?)(?!\d)/;
-/** Recipe .48 (the evidence ledger): a claim on a v5 row takes its grade from the row's own cites (the first that resolves to a graded E
- * or a read F: 파일 → file, 실행 → run, 보고 → report; a row citing only 추정 → guess, only 모름 or an unread file → unknown), never past
- * them; and its when from that same row: the date its date column holds, or the model's when only where the row itself writes it (a
- * date the model took from the next row is not kept). A row citing nothing leaves both as the reply wrote them. */
+/** Recipe .48 fix: how far each grade carries (a run and a file read alike; a report below them; a guess, then unknown, below that). */
+const GRADE_RANK: Readonly<Record<EvidenceGrade, number>> = { run: 3, file: 3, report: 2, guess: 1, unknown: 0 };
+/** Recipe .48 fix (review B1): what a v5 row's own cites give a claim on it. none: the row cites nothing (no cite); unresolved: a cite the
+ * app could not read (a word no cite reads, an ID neither ledger holds, 「=」); mixed: graded cites (a read F, a graded E) beside a guess,
+ * 모름 or an unread file, which gives no grade; graded: the lowest grade of its cites (all graded, or all guess and unknown). */
+export type LedgerState = 'none' | 'unresolved' | 'mixed' | 'graded';
+export function rowGrade(r: Pick<FoldRow, 'cites' | 'citeProblems'>): { state: LedgerState; grade: EvidenceGrade | null } {
+  if ((r.citeProblems ?? []).some(k => k === 'cite-word' || k === 'cite-missing' || k === 'cite-equals')) return { state: 'unresolved', grade: null };
+  if (!r.cites.length) return { state: 'none', grade: null };
+  const strong = r.cites.filter(x => x.grade === 'file' || x.grade === 'run' || x.grade === 'report'), weak = r.cites.filter(x => x.grade === 'guess' || x.grade === 'unknown');
+  if (strong.length && weak.length) return { state: 'mixed', grade: null };
+  const grades = r.cites.map(x => x.grade as EvidenceGrade), low = Math.min(...grades.map(g => GRADE_RANK[g]));
+  const at = grades.filter(g => GRADE_RANK[g] === low);
+  return { state: 'graded', grade: at.every(g => g === at[0]) ? at[0]! : at.includes('file') ? 'file' : at[0]! };
+}
+/** Recipe .48 fix (N1): a claim that says the record could not confirm it (an open question, topic unknown, 「확인하지 못했다」, 「일부만
+ * 읽」, 「읽지 못」, the claim one sentence): the ledger never gives it a file, run or report grade the reply did not. A detail left unknown
+ * inside a claim that states something (「병합한 사람은 모른다」, 「계약 변화는 모름이다」, a second sentence 「이슈 본문은 확인하지 못했다」)
+ * does not make the claim unconfirmed. */
+const UNCONFIRMED = /확인하지\s*못|확인\s*못\s*했|확인되지\s*않았|확인\s*안\s*(?:함|됨|했)|일부만\s*읽|읽지\s*못/;
+const unconfirmed = (c: Claim43): boolean => c.kind === 'open' || c.topic === 'unknown'
+  || (UNCONFIRMED.test(c.text ?? '') && (c.text ?? '').trim().split(/(?<=[.。])\s+/).filter(Boolean).length === 1);
+/** Recipe .48 fix: the ledger's outcome on each claim it read (by claim object), for the final diagnostics (grade-no-cite, grade-unresolved). */
+const LEDGER = new WeakMap<object, { row: string; state: LedgerState; from: EvidenceGrade | null; to: EvidenceGrade | null }>();
+export const ledgerOf = (c: object) => LEDGER.get(c) ?? null;
+/** Recipe .48 fix (review B2): a date cell's date phrase whole: a pair (「2024-01-26 / 2024-02-27」, 작성 / 병합), a range (「2023-07-13 –
+ * 2026-09-26」, 「~」), its qualifier (이후, 이전, 전, 경, 쯤, 부터, 까지) and a short bracketed note right after it (「(최근 2개)」), within the
+ * claim's 40 (the words around it, 「메인테이너·」, are not the date); past 40 the first date with its qualifier only; null for no date. */
+export function datePhrase(cell: string): string | null {
+  const t = cell.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim(); if (!DATE.test(t)) return null;
+  const D = String.raw`(?<!\d)\d{4}-\d{2}(?:-\d{2})?(?!\d)`, Q = String.raw`(?:\s*(?:이후|이전|전|경|쯤|부터|까지))?`;
+  const whole = new RegExp(`${D}${Q}(?:\\s*(?:/|~|～|–|—|\\s-\\s)\\s*${D}${Q})*(?:\\s*[(（][^)）]{1,20}[)）])?`).exec(t)?.[0]?.trim();
+  if (whole && whole.length <= 40) return whole;
+  return new RegExp(`${D}${Q}`).exec(t)?.[0]?.trim() ?? null;
+}
+/** Recipe .48 (the evidence ledger, as the .48 review's B1 and B2 fix it): a claim on a v5 row is checked against the row's own cites
+ * (rowGrade) and may only be lowered or confirmed, never raised: a grade the reply gave stays when a cite of the row has it or the row's
+ * grade is no lower; a lower row grade lowers it; a reply with no grade takes the row's (an unconfirmed claim only a guess or unknown);
+ * a row citing nothing, one the app cannot resolve, or one mixing graded and guess or unknown cites sets nothing. Its when: the reply's
+ * own when where its row writes it word for word; else, where the row's date column holds a date, that cell's date phrase whole
+ * (datePhrase: a pair, a range and a qualifier kept); else none (a date the model took from another row is not kept). */
 function ledgerOn(c: Claim43, r: FoldRow): void {
   if (c.topic === undefined) return;
-  const graded = r.cites.find(x => x.grade === 'file' || x.grade === 'run' || x.grade === 'report');
-  const grade: EvidenceGrade | null = graded ? graded.grade as EvidenceGrade : r.cites.some(x => x.grade === 'guess') ? 'guess' : r.cites.some(x => x.grade === 'unknown') ? 'unknown' : null;
-  if (grade) c.evidence = grade;
-  const column = DATE_COLUMNS[r.table], dated = column ? DATE.exec(r.row.byColumn[column] ?? '')?.[1] ?? null : null;
+  const model = c.evidence ?? null, { state, grade } = rowGrade(r);
+  if (state === 'graded' && grade) {
+    if (model === null) { if (!unconfirmed(c) || grade === 'guess' || grade === 'unknown') c.evidence = grade; }
+    else if (!r.cites.some(x => x.grade === model) && GRADE_RANK[grade] <= GRADE_RANK[model]) c.evidence = grade;
+  }
+  LEDGER.set(c, { row: r.id, state, from: model, to: c.evidence ?? null });
+  const column = DATE_COLUMNS[r.table], dated = column ? datePhrase(r.row.byColumn[column] ?? '') : null;
   const own = (w: string) => Object.values(r.row.byColumn).some(cell => plain(cell).includes(plain(w)));
   const when = typeof c.when === 'string' && c.when.trim() ? c.when : null;
-  c.when = dated && (!when || DATE.test(when) || !own(when)) ? dated : when && own(when) ? when : null;
+  c.when = when && own(when) ? when : dated;
 }
 /** Recipe .48: a rule a code device keeps is what the code does, not a wish: a want claim on a v5 C-RULE row whose 지키는 장치 names 코드
  * or 검사 (alone or with 「+」) and whose cites hold a file read or a run describes (the judged maps showed such rules as [want]). */

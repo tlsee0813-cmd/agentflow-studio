@@ -288,7 +288,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   | 'cite-grade'
   // Recipe .48: a model line on no record row left out so the record's undrawn C-LINK rows fit the first map's lines (line-cap, set aside by
   // the server); a condition's 거짓이면 or a step's 하는 일 past its bound written null alone (the condition or step stays).
-  | 'line-cap' | 'condition-else' | 'step-does';
+  | 'line-cap' | 'condition-else' | 'step-does'
+  // Recipe .48 fix (A7): a step whose overlong 하는 일 says what it does not do, and a rule whose scope breaks the contract, held whole.
+  | 'step-held' | 'scope-held';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -1417,14 +1419,18 @@ function stepCut48(texts: Map<string, { text: string; spans: Span[] | null }>, p
       return k === 0 || k === rows.length - 1 ? 2 : 3;
     };
     const order = rows.map((r, k) => ({ r, k, rank: rank(r, k) })).sort((x, y) => x.rank - y.rank || x.k - y.k);
-    const keep = new Set(order.slice(0, max).map(x => x.k));
+    // Recipe .48 fix (review N4): every reply step on a kept row stays (a row the reply wrote two steps for keeps both), not its first
+    // only; the rows kept are as many as the bound holds with those steps (the lowest-ranked row gives way, never a loop body's).
+    const mineOn = (k: number) => b.steps!.filter((_, i) => onRow[i] === k);
+    let n = max, keep = new Set(order.slice(0, n).map(x => x.k));
+    while (n > 0 && [...keep].reduce((sum, k) => sum + Math.max(1, mineOn(k).length), 0) > max) keep = new Set(order.slice(0, --n).map(x => x.k));
     if (onRow.every(k => keep.has(k)) && b.steps.length >= Math.min(max, keep.size)) continue;
     const cut60 = (t: string, n: number) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length <= n ? s : `${s.slice(0, n - 1)}…`; };
     // The names the kept reply steps hold come first: a program step never takes one (a reading's step names are unique).
-    const steps: MapReplyStep[] = [], names = new Set<string>([...keep].flatMap(k => { const s = b.steps![onRow.indexOf(k)]; return s ? [plainName(s.name)] : []; }));
+    const steps: MapReplyStep[] = [], names = new Set<string>([...keep].flatMap(k => mineOn(k).map(s => plainName(s.name))));
     for (const k of [...keep].sort((x, y) => x - y)) {
-      const mine = b.steps[onRow.indexOf(k)];
-      if (mine) { steps.push(mine); names.add(plainName(mine.name)); continue; }
+      const mine = mineOn(k);
+      if (mine.length) { for (const s of mine) { steps.push(s); names.add(plainName(s.name)); } continue; }
       const r = rows[k]!, c = r.byColumn, name = cut60(c['단계 이름'] ?? '', STEP_NAME_MAX), text = texts.get(r.record)?.text;
       if (!name || names.has(plainName(name)) || text === undefined || secretLike(name) || onMaterial({ record: r.record, from: r.from, to: r.to })) continue;
       const doesCell = (c['하는 일 한 줄'] ?? '').trim(), does = doesCell && !/^[—–-]+$/.test(doesCell) && !secretLike(doesCell) ? cut60(doesCell, 120) : null;
@@ -1492,6 +1498,8 @@ export function askRecords(ask: MapAsk): Map<string, { text: string; spans: Span
 export const crossesGap = (text: string, from: number, to: number): boolean => /\n[ \t]*\r?\n|(?:^|\n)[ \t]*\|[ \t]*\|[ \t]*\r?(?:\n|$)/.test(text.slice(from, to)) && readRecordTables(text).version === 'v5';
 const KEY = /^s\d{1,3}$/, PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/, PRIOR = /^M\d{2}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+/** Recipe .48 fix (A7): words that say what something does not do or has not (a negation): a cell holding one is never blanked. */
+export const NEGATION = /않|안\s*(?:함|한다|된다|됨|하고|해)|못\s|못한다|금지|없(?:다|음|으면|이|는)|아니|\bnot\b|\bnever\b|\bno\b|n't/i;
 const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
 /** Where a quote stands in a record, as the record's own text. Exactly (white space read loosely, as quoteAt); else, narrowly, when
  * the quote only leaves out the delimiters of paired Markdown strong emphasis ('**Error handling**', '__x__') that the record
@@ -1666,6 +1674,9 @@ const exclusionExplanation = (e: MapReplyError): string => {
     : e.rule === 'contract' && e.target === 'line-cap' ? '첫 지도의 선 48개 안에 기록의 연결 행을 모두 그리려고, 기록 행(연결·산출물·진입)에 서지 않은 모델의 선을 뺐어요. 기록의 연결 행 선은 남아요.'
     : e.rule === 'contract' && e.target === 'condition-else' ? '조건 행의 거짓이면 칸이 지도 칸 길이(60자)를 넘어 그 칸만 비우고 조건은 남겼어요. 원문 행은 그대로 보여요.'
     : e.rule === 'contract' && e.target === 'step-does' ? '단계의 하는 일 칸이 지도 칸 길이(120자)를 넘어 그 칸만 비우고 단계는 남겼어요. 원문 행은 그대로 보여요.'
+    // Recipe .48 fix (A7): a cell that carries meaning is never blanked; the step or rule is held whole instead.
+    : e.rule === 'contract' && e.target === 'step-held' ? '단계의 하는 일 칸이 지도 칸 길이(120자)를 넘었고 하지 않는 일(부정)을 담고 있어, 비우면 뜻이 뒤집혀 그 단계를 보류했어요. 원문 행은 그대로 보여요.'
+    : e.rule === 'contract' && e.target === 'scope-held' ? '규칙의 적용 범위 칸이 규칙에 맞지 않아 그 규칙을 보류했어요. 범위를 비우면 부분 전체의 규칙으로 넓게 읽혀 비우지 않아요. 원문 행은 그대로 보여요.'
     : e.rule === 'contract' && e.target === 'store-dup' ? '같은 「있는 곳」을 이미 다른 저장소 부분이 맡고 있어 겹친 저장소 부분과 그 연결을 제외했어요. 다른 부분으로 다시 잇지 않았어요.'
     : e.rule === 'contract' && e.target === 'unrecorded' ? '기록의 연결 표·산출물·부분별 설계·안의 단계 행이나 화살표 줄이 아닌 줄에서 만든 연결이어서 제외했어요.'
     // pipeline .38: the channel alone is written null; the line stays.
@@ -2009,6 +2020,11 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         need(named ? name !== null : !said(c, 'scopeName'), `${at}.scope`, 'scope');
         return [sc, name];
       }, `${at}.scope`, 'scope', [null, null]);
+      // Recipe .48 fix (A7): a narrow scope the reply gave (a step, port or field) is never blanked in a divided first map: blanked, the
+      // rule would lose what it is narrowed to, so a rule whose step, port or field scope breaks the contract (no name, a name past 40) is
+      // held whole (scope-held), its reason kept. A scope word outside RULE_SCOPES, or a stray name on a part scope, is still blanked
+      // alone (.33): the pane reads a blank scope as 「범위 미상」, never as the whole part's.
+      if (divided && lenient && rule && ['step', 'port', 'field'].includes(c.scope as string) && held.some(e => e.path === `${at}.scope`)) throw new MapReplyError(at, 'contract', 'scope-held');
       // A place: stated or inferred, as written, on the line that places it (each once).
       const lowered: string[] = [];
       const anchors = alone10((): MapReplyAnchor[] => {
@@ -2194,8 +2210,10 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // the step aside.
       steps = items('steps', 'step', (o, path) => {
         const name = words(o, 'name', STEP_NAME_MAX, path, 'step', true)!, held: MapReplyError[] = [], uses: string[] = [];
-        // Recipe .48: a 하는 일 past its bound is written null alone (step-does); the step stays.
+        // Recipe .48: a 하는 일 past its bound is written null alone (step-does); the step stays. Recipe .48 fix (A7): never one that says
+        // what the step does not do (a negation, 「저장하지 않는다」, 「없으면」): blanked it would read as the opposite, so the step is held (step-held).
         const doesLong = lenient && typeof o.does === 'string' && o.does.length > 120 && !!o.does.trim() && !CONTROL.test(o.does), does = doesLong ? null : words(o, 'does', 120, path, 'step');
+        if (doesLong && NEGATION.test(o.does as string)) throw new MapReplyError(path, 'contract', 'step-held');
         if (doesLong) held.push(new MapReplyError(`${path}.does`, 'contract', 'step-does'));
         if (said(o, 'uses')) {
           need(Array.isArray(o.uses) && o.uses.length <= 4, path, 'step');

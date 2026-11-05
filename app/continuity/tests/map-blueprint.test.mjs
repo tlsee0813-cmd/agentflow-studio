@@ -1060,8 +1060,9 @@ test('.32: the final wire\'s diagnostics come in fixed shapes for the global sta
   const found = finalDiagnostics(fragments, global, f.ask, plan);
   // .36: and store-dup, store-island after the lines. .37: and the lines the contract set aside (lines-set-aside), after the lines.
   // .38: and anchor-enforce and portmap-missing after anchor-kind. .40: and step-name after portmap-missing.
-  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'record-lines', 'lines-set-aside', 'group-parent', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count', 'type-unmapped']);
-  assert.ok(found.length >= 1 && found.length <= 16);
+  // Recipe .48 fix: and line-rows after record-lines, grade-no-cite and grade-unresolved, type-held after type-unmapped; at most 24.
+  assert.deepEqual(FINAL_DIAGNOSTICS, ['connections', 'plan-relations', 'record-lines', 'line-rows', 'lines-set-aside', 'group-parent', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count', 'grade-no-cite', 'grade-unresolved', 'type-unmapped', 'type-held']);
+  assert.ok(found.length >= 1 && found.length <= 24);
   for (const x of found) {
     assert.deepEqual(Object.keys(x), ['path', 'rule', 'expected', 'actual', 'names']);
     assert.ok(FINAL_DIAGNOSTICS.includes(x.rule)); assert.ok(Array.isArray(x.names) && x.names.length <= 24);
