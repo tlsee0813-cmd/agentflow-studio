@@ -3150,7 +3150,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space.show-ev .node.card .c-ev { display: inline-block; background: none; border-color: var(--line-strong); color: var(--text-3); font-size: 11px; line-height: 14px; }
 /* The ops words live in the kind line (no layout change when shown); recorded ones behind the setting, every card's in the lens. */
 .node.card .c-opsw { display: none; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); font-variant-numeric: tabular-nums; }
-.node.card .c-opsw::before { content: '· '; color: var(--text-4); }
+.node.card .c-opsw::before { content: "· "; margin-left: -2px; color: var(--text-4); }
 .space.show-ops .node.card .c-opsw:not(.ops-none), .space.show-ops-all .node.card .c-opsw { display: inline; }
 .space.lens-state .node.card .c-opsw { color: var(--text); font-weight: var(--fw-name); }
 .space.lens-state .node.card .c-opsw.ops-none { color: var(--text-3); font-weight: var(--fw-meta); }
@@ -3171,7 +3171,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .node.card .c-entry .c-enter.entry-open { padding: 0; font-size: 14px; }
 .node.card .c-entry .c-enter:hover, .node.card .c-entry .c-chip:hover { border-color: var(--line-strong); color: var(--text); background: var(--surface); }
 .node.card .c-entry .c-enter:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.node.card .c-entry .c-enter.enter-in span { font-size: 10px; }
+.node.card .c-entry .c-enter.enter-in span { font-size: 11px; }
 /* The map's hover surface (one at a time, anchored, hoverable: WCAG 1.4.13). */
 .edge-tip.hoverable { pointer-events: auto; }
 .edge-tip .hc-name { color: var(--text); font-weight: var(--fw-name); font-size: 13px; }
@@ -3185,7 +3185,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .edge-tip .hc-ops.d-waiting::before { background: none; box-shadow: inset 0 0 0 1.5px var(--dot-wait); }
 .edge-tip .hc-ops.d-conflict::before { background: none; transform: rotate(45deg); border-radius: 0; box-shadow: inset 0 0 0 1.5px var(--dot-conflict); }
 .edge-tip .hc-ops.d-none::before { display: none; }
-.edge-tip .hc-io { color: var(--text-3); font-size: 12px; }
+.edge-tip .hc-io { color: var(--text-3); font-size: 12px; white-space: pre-line; }
 .edge-tip .hc-line { white-space: pre-line; }
 .edge-tip .tip-rel { display: flex; flex-direction: column; padding-top: 3px; margin-top: 2px; border-top: 1px solid var(--hair-2); }
 .edge-tip .tip-rel.first { border-top: 0; padding-top: 0; margin-top: 0; }
@@ -3216,3 +3216,5 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 @keyframes ops-flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
 .lens-blanks { margin: 4px 0 0; font-size: 12px; line-height: 17px; color: var(--text-4); }
 .lg-dots { margin: 6px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-4); cursor: help; }
+.space.lens-state .node.card .c-opsw { flex: 0 0 auto; max-width: 100%; }
+.space.lens-state .node.card .c-kind-word { min-width: 2em; }

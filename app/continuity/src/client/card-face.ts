@@ -61,10 +61,11 @@ export function namesOf(xs: readonly string[], k = 2): string {
   const shown = xs.slice(0, k).join(' · '), rest = xs.length - k;
   return rest > 0 ? `${shown} ${moreText(rest)}` : shown;
 }
-/** The hover card's key line: up to two inputs → up to two outputs (each with 「외 N」), or null when the record names neither. */
+/** The hover card's key lines: up to two inputs and up to two outputs (each with 「외 N」), one labelled line each (names may hold
+ * arrows of their own, so no arrow joins the two); null when the record names neither. */
 export function ioLine(inputs: readonly string[], outputs: readonly string[]): string | null {
   if (!inputs.length && !outputs.length) return null;
-  return `${inputs.length ? namesOf(inputs) : '받는 것 미기록'} → ${outputs.length ? namesOf(outputs) : '내는 것 미기록'}`;
+  return `받는 것 ${inputs.length ? namesOf(inputs) : '미기록'}\n내는 것 ${outputs.length ? namesOf(outputs) : '미기록'}`;
 }
 
 /* ---------- display settings (§5) ---------- */

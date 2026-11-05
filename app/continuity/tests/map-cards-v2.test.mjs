@@ -47,8 +47,8 @@ test('CARD-2 the role line, counted 「외 N」 and the hover card\'s inputs →
   assert.equal(roleLine(''), null); assert.equal(roleLine(null), null);
   assert.equal(moreText(2), '외 2'); assert.equal(moreTip(2, '받는 것'), '받는 것 2개 더');
   assert.equal(namesOf(['a', 'b', 'c', 'd']), 'a · b 외 2'); assert.equal(namesOf(['a']), 'a');
-  assert.equal(ioLine(['명령', '설정', '환경'], ['결과']), '명령 · 설정 외 1 → 결과');
-  assert.equal(ioLine([], ['결과']), '받는 것 미기록 → 결과');
+  assert.equal(ioLine(['명령', '설정', '환경'], ['결과']), '받는 것 명령 · 설정 외 1\n내는 것 결과');
+  assert.equal(ioLine([], ['결과']), '받는 것 미기록\n내는 것 결과');
   assert.equal(ioLine([], []), null);
 });
 
