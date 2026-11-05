@@ -106,7 +106,9 @@ test('FORM-22 the detail view and its styles: stations matched by row ID, port l
   assert.ok(detail.includes('프로그램 단계로 · 목록에서') && detail.includes('정거장 없는 단계의'), 'what sits on steps with no station is said');
   const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
   assert.ok(/\.edge\.agg\.near:not\(\.on\):not\(\.lit\) \.edge-line \{ stroke: #7a8390/.test(css) && !/^\.edge\.agg\.near \.edge-line \{ stroke: #7a8390/m.test(css), 'a selected summary line keeps its colour under the pointer');
-  assert.ok(/:not\(\.plan-impact\):not\(\.lit\) \{ outline: 2px solid var\(--fam-edge\)/.test(css), 'the family edge never replaces the impact or lit outline');
+  // Beauty v2 (A2/A3): the far view's 2px family outline is gone (one decoration: the family's thin left stripe), so it can never
+  // replace the impact or lit outline.
+  assert.ok(!/outline: 2px solid var\(--fam-edge\)/.test(css), 'no family outline at any zoom');
   assert.ok(/:root\[data-theme="dark"\] :is\(\.sl-route, \.dv-states\) \{ --sl-loop:/.test(css) && /color: var\(--form-on-ink\)/.test(css), 'loop tokens and the entry pill have dark values');
 });
 

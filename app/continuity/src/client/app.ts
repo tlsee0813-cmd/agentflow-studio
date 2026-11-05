@@ -33,9 +33,10 @@ import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
-import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
-import { cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
+import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
+import { CARD_H, CARD_H_TALL, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
+import { cardFace, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots, cuePoints } from './map-labels.js';
@@ -906,38 +907,58 @@ function opsOf(r: PartUnderstanding): { full: string; brief: string; tip: string
 let opsRef: string | null = null;
 const opsDay = (o: Opened) => [...o.project.readings].reverse().find(isMapReading)?.basisAt ?? new Date().toISOString().slice(0, 10);
 /* The map's zoom tiers (card-budget zoomTier, map design v3 5): one for the whole map, by the card's projected width with ±6px of
- * hysteresis. A typed card's box, its contact point and its pins never change with the tier or the scale (5.3): no relayout on a
- * zoom; the tier and the scale only choose what is shown inside each box (tierFit, fitCards) and the type's on-screen floors
- * (tierText, the --t-* sizes). Below Z_MID an untyped card's name reads on one line (styles.css z-mid). */
+ * hysteresis. Since beauty v2 they choose what the lines show (labels, widths, cues); a typed card's face is its own (cardFace
+ * below). No box, contact point or pin changes with the zoom (5.3): no relayout on a zoom. Below Z_MID an untyped card's name reads
+ * on one line (styles.css z-mid). */
 const Z_MID = 0.705;
 let tier: ZoomTier | null = null, fitFrame = 0, lastFresh = 0;
-/** Every typed card shows what fits its own box at the tier and scale (card-budget tierFit): writes only (each card's shape was
- * written on it when drawn), so it runs once per frame of a zoom. */
+/* Beauty v2 (A1, A3): a typed card has two faces. At the middle and near views (its name 15px on the map reads 12px or more on
+ * screen) the card itself, drawn at its own fixed sizes: every line of it fits its box by construction, so nothing is hidden or
+ * shrunk by the zoom. Further out the box draws a name tag: the kind icon and the identifiable name at a fixed screen size (name-tag
+ * fitTag), the kind line when there is a line left, a lifecycle word before the kind. The face changes with 12% of hysteresis
+ * (name-tag cardFace); the box, its lines' ends, its id and the selection never change with it. */
+let face: CardFace | null = null, tagAt = { k: 0, n: 0 };
+/** The tags' font in the page's own family (the measure the fit uses is the one drawn). */
+const tagMeasure = (() => {
+  let ctx: CanvasRenderingContext2D | null = null; const cache = new Map<string, number>();
+  return (s: string, px: number, weight = 600) => {
+    const key = `${weight}|${px}|${s}`, hit = cache.get(key); if (hit !== undefined) return hit;
+    if (!ctx) { ctx = document.createElement('canvas').getContext('2d'); }
+    if (!ctx) return s.length * px * 0.6;
+    ctx.font = `${weight} ${px}px ${getComputedStyle(document.body).fontFamily}`;
+    const w = ctx.measureText(s).width; if (cache.size > 6000) cache.clear(); cache.set(key, w); return w;
+  };
+})();
 function fitCards() {
   fitFrame = 0;
-  const t = tier ?? zoomTier(camera.k), k = camera.k, cards = [...document.querySelectorAll<HTMLElement>('#world .node.card[data-shape]')];
-  cards.forEach(el => {
-    const [nameLines = 1, rows = 0, contract = 0, inner = 0, signs = 0, total = 0, status = 0, vals = 0, blank = 0, members = 0, role = 0, foot = 1] = el.dataset.shape!.split(',').map(Number);
-    // S10: a focused group or loop shows its 「안에」 preview first, an emphasised card its rows (inside its own box; card-budget tierFit).
-    const f = tierFit({ nameLines, rows, contract, inner, signs, total, status, vals, blank, members, role, foot }, k, t, { preview: el.classList.contains('fv-preview'), alt: el.classList.contains('fv-emph') });
-    el.style.setProperty('--nl', String(f.nameLines)); el.dataset.fitRows = String(f.rows); el.dataset.fitVals = String(f.vals);
-    el.classList.toggle('fit-nokind', !f.kind); el.classList.toggle('fit-nocontract', !f.contract); el.classList.toggle('fit-noinner', !f.inner);
-    el.classList.toggle('fit-nosigns', !f.signs); el.classList.toggle('fit-nobottom', !f.bottom); el.classList.toggle('fit-status', f.status); el.classList.toggle('fit-norole', !f.role);
-    el.classList.toggle('fit-auto', t !== 'near');
-  });
-  // Review: below 가까이 each card is drawn at its content's height inside its fixed box (one read for all, then the writes); the rest
-  // of the box is its dashed outline (styles.css fit-ghost). A card whose content fills its box keeps the box.
-  if (t === 'near') { cards.forEach(el => el.classList.remove('fit-ghost')); return; }
-  const tall = cards.map(el => el.offsetHeight);
-  cards.forEach((el, i) => {
-    const box = parseFloat(el.style.height) || 0, rest = box - tall[i]!;
-    if (rest < 12) { el.classList.remove('fit-auto', 'fit-ghost'); return; }
-    el.style.setProperty('--rest', `${rest.toFixed(1)}px`); el.classList.add('fit-ghost');
-  });
+  const k = camera.k, cards = [...document.querySelectorAll<HTMLElement>('#world .node.card')];
+  if (face !== 'tag') return;
+  // A tag's lines are fitted again when the zoom moved enough to change them (2%) or the cards changed.
+  if (Math.abs(k - tagAt.k) / Math.max(tagAt.k, 0.01) < 0.02 && tagAt.n === cards.length && cards.every(el => el.dataset.tagK)) return;
+  tagAt = { k, n: cards.length };
+  const nameW = (s: string) => tagMeasure(s, TAG.name), compactW = (s: string) => tagMeasure(s, TAG_COMPACT.name);
+  const items: { id: string; name: string; width: number; lines: number; el: HTMLElement; measure: (s: string) => number }[] = [];
+  for (const el of cards) {
+    const name = el.querySelector('.c-name')?.textContent ?? '', w = (parseFloat(el.style.width) || el.offsetWidth) * k, hgt = (parseFloat(el.style.height) || el.offsetHeight) * k;
+    // A group or a loop container keeps its own (taller) box: its tag reads in the box's head (its own size up to the tall card's).
+    const own = el.classList.contains('has-well') || el.classList.contains('grp');
+    const room = tagRoom(w, Math.min(hgt, (own ? CARD_H_TALL : el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), (x, px) => linesNeeded(name, x, px === TAG.name ? nameW : compactW), el.dataset.life === '1');
+    el.classList.toggle('tag-noicon', !room.icon); el.classList.toggle('tag-kind', room.kind); el.classList.toggle('tag-compact', room.compact);
+    items.push({ id: el.dataset.part ?? '', name, width: room.width, lines: room.lines, el, measure: room.compact ? compactW : nameW });
+  }
+  const fitted = fitTags(items, nameW);
+  for (const x of items) {
+    const f = fitted.get(x.id); if (!f) continue;
+    const tn = x.el.querySelector<HTMLElement>('.c-tag-name'); if (!tn) continue;
+    tn.replaceChildren(...f.lines.map(l => h('span', { class: 'c-tag-line' }, l)));
+    x.el.dataset.tagK = k.toFixed(3); x.el.classList.toggle('tag-cut', !f.full);
+  }
 }
 /** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
 /** A card's 「여기서 펼치기」 glyph: a plus (polish round fixes 1). */
 const plusGlyph = () => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true' }); el.append(svg('path', { d: 'M8 4v8M4 8h8' })); return el; };
+/** Beauty v2 (A2): the card's one way in: an arrow going into a frame open on its left (into a group's parts, or a part's detail). */
+const goGlyph = () => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true' }); el.append(svg('path', { d: 'M7 3h6v10H7M2 8h7M6.5 5.5 9 8l-2.5 2.5' })); return el; };
 const progChip = (what?: string) => h('span', { class: 'sg-chip prog-chip', title: what ? `${PROGRAM_HINT} · ${what}` : PROGRAM_HINT }, PROGRAM_LABEL);
 /** map-reading.14: a step the program cut from the 3절 chain (steps-view stepFace), and a port → step correspondence it made. */
 const stepChip = () => h('span', { class: 'sg-chip prog-chip', title: PROGRAM_STEP_HINT }, PROGRAM_LABEL);
@@ -1190,7 +1211,7 @@ function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<str
     personRules: sg.rules.filter(x => (x.enforcedBy ?? []).some(e => e.kind === 'person')).length, children: p.childIds.length,
     controlIn: uniq(controlIn), controlOut: uniq(controlOut), dataIn: uniq(dataIn), dataInCadence: uniq(cadence), writers: writers.size, readers: readers.size,
     pins: { in: pm.filter(m => m.direction === 'in').map(m => m.port), out: pm.filter(m => m.direction === 'out').map(m => m.port) }, unmapped,
-    portSteps: [...new Set(pm.map(m => m.step))], wellOpen: wellOpen.has(`${o.key}|${p.id}`), wellDepth: wellDepthOf(o, p.id),
+    portSteps: [...new Set(pm.map(m => m.step))], wellOpen: wellOpen.has(`${o.key}|${p.id}`), wellShown: wellOpen.has(`${o.key}|${p.id}`), wellDepth: wellDepthOf(o, p.id),
     signs: hasSigns(sg), failureSaid: !fb || !fb.failure,
     // Cards v2 §1: the role line (the description's first sentence), the foot (a way in: ▸ N for a group, ⤢ for an inside the card
     // does not name in full), the value rows behind the display setting.
@@ -1279,7 +1300,8 @@ function wellEl(o: Opened, p: PartView, r: PartUnderstanding, w: Well, blankShow
  * measured for. A part missing here draws as an untyped card. */
 let cardTpls = new Map<string, CardTemplate>();
 /** The lines a typed card's name takes (map-layout measures it the same way): two at most, cut with an ellipsis past them. */
-const cardNameLines = (p: PartView, dot = false) => (measureName(p.name, 'head') * 1.06 + 2 > nameRoomOf(p.childIds.length > 0, dot, dot && shownDisplay().evidence) ? 2 : 1);
+// Beauty v2 (A2): the head's one status mark (the dot, else the loop's ↻) takes the dot's room whichever it is.
+const cardNameLines = (p: PartView, dot = false, loop = false) => (measureName(p.name, 'head') * 1.06 + 2 > nameRoomOf(p.childIds.length > 0, dot || loop, dot && shownDisplay().evidence) ? 2 : 1);
 /** Cards v2 §1: the card's status dot (card-face statusDot): the reading's recorded state with its time and grade, and the record's
  * 운영 상태 rows (a conflict between them is its own mark); null with no record, for a lifecycle chip, or from file evidence alone. */
 function cardDot(r: PartUnderstanding): StatusDot | null {
@@ -1311,7 +1333,7 @@ function typedRoom(o: Opened, tpls?: Map<string, CardTemplate>): (id: string, fa
     const t = cardTemplate(cardFactsOf(o, p, r, said)); tpls?.set(id, t);
     const pm = (r.portMap ?? []).filter(m => m.program !== true);
     const dotted = !!cardDot(r);
-    return { nameRoom: nameRoomOf(p.childIds.length > 0, dotted, dotted && shownDisplay().evidence), shape: (nl, planned) => {
+    return { nameRoom: nameRoomOf(p.childIds.length > 0, dotted || !!r.loop, dotted && shownDisplay().evidence), shape: (nl, planned) => {
       const hs = cardHeights(t, nl, planned), pins: Record<string, number> = {};
       for (const m of pm) { const y = hs.pins[`${m.direction}:${m.port}`]; if (y !== undefined) pins[`${m.relationId}|${m.direction}`] = y; }
       return { h: hs.total, contact: hs.contact, pins, ear: hs.ear };
@@ -1333,7 +1355,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const maint = life ? null : maintenanceOf(r.statusClaims), maintQuote = maint ? r.statusClaims.find(x => x.dimension === 'maintenance')?.quote.quote ?? null : null;
   const ev = s ? claimEvidence({ quote: s.quote?.quote ?? '' }) : null, kids = p.childIds.length, dot = cardDot(r);
   // The shape the box was measured for (its near content), written on the card so the zoom's fit reads it without measuring.
-  const nl = cardNameLines(p, !!dot), hs = cardHeights(t, nl);
+  const nl = cardNameLines(p, !!dot, !!r.loop), hs = cardHeights(t, nl);
   // A group (S8) reads as a group: an untyped one's tile is its axis glyph (a place pin, or the composition squares) with no badge
   // over it; a typed one keeps its type's glyph and the composition badge.
   const grp = t.group, typedGroup = !!grp && !!r.typeRead?.type;
@@ -1341,7 +1363,13 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const tile = h('span', { class: `glyph-tile g-${t.family}` });
   tile.innerHTML = glyphSvg(t.glyph) + ((t.inner === 'composition' || t.inner === 'both') && (!grp || typedGroup) ? `<span class="glyph-badge">${glyphSvg('composition')}</span>` : '');
   // A recorded loop on the card (a container's well, or a loop the record gives): the ↻ tab at the head's right, at every tier.
-  const loopTab = r.loop ? h('span', { class: 'c-loop-tab', 'data-tip': `반복 · 기록된 반복${r.loop.unit ? ` · 단위 ${r.loop.unit}` : ' · 단위 미상'}${r.loop.stop ? ` · 정지 ${r.loop.stop}` : ''}`, 'aria-label': '반복이 기록된 부분' }, '↻') : null;
+  const loopTip = r.loop ? `반복 · 기록된 반복${r.loop.unit ? ` · 단위 ${r.loop.unit}` : ' · 단위 미상'}${r.loop.stop ? ` · 정지 ${r.loop.stop}` : ''}` : '';
+  // Beauty v2 (A1): a loop container keeps its own form on request: its ↻ opens its well (every step) in place, the parts it overlaps
+  // moving the least way (toggleWell, 4.5), and closes it again; the card itself keeps the two sizes.
+  const loopTab = !r.loop ? null : t.container
+    ? h('button', { type: 'button', class: 'c-loop-tab c-well-open', 'aria-expanded': String(!!t.well), 'data-tip': `${loopTip}
+${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러서 이 자리에 단계 펼치기 (주변의 겹치는 부분만 비킴)'}`, 'aria-label': `${p.name} 반복 단계 ${t.well ? '접기' : '이 자리에 펼치기'}`, onclick: (e: Event) => { e.stopPropagation(); toggleWell(p.id); } }, '↻')
+    : h('span', { class: 'c-loop-tab', 'data-tip': loopTip, 'aria-label': '반복이 기록된 부분' }, '↻');
   // Cards v2 §1: the status dot (a recorded operations state only; shape and colour together) at a fixed place right of the name;
   // the evidence chip beside it only behind the display setting 「근거 꼬리표」. A click opens the pane at its operations line.
   const dotEl = dot ? h('button', { type: 'button', class: `c-dot d-${dot.kind}`, 'data-tip': `${dot.line}\n눌러서 읽기면의 운영 줄`, 'aria-label': `${dot.word} · ${dot.line} · 읽기면의 운영 줄 열기`,
@@ -1375,54 +1403,43 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const roleRevised = !!r.roleBasisRevised && !!r.role;
   const role = t.role ? h('div', { class: `c-role${roleRevised ? ' revised' : ''}` }, h('span', { class: 'c-role-text' }, t.role),
     roleRevised ? h('span', { class: 'c-role-rev', 'data-tip': `하는 일${REVISED_BASIS} · 읽기면의 하는 일에서` }, REVISED_SHORT) : null) : null;
-  // Polish round fixes 1: a row the program carried over from the record's table says so in its tip (as the well's badges do).
-  const rows = t.rows.length ? h('div', { class: 'c-rows' }, ...t.rows.map(x => h('div', { class: `c-row${x.members ? ' c-members' : ''}`, ...(x.program ? { 'data-tip': `${x.label} · 기록에서 프로그램이 옮긴 값` } : {}) },
-    h('span', { class: 'c-label' }, x.label), h('span', { class: `c-val${x.unlinked ? ' unl' : ''}` }, x.value)))) : null;
+  // Beauty v2 (A1): the card face keeps its own forms only: a group's 「안에」 row (its first parts by name), the value rows behind the
+  // display setting 「받는·내는 것 행」, a loop container's well. The kind rows read in the hover card and the pane.
+  const members = t.rows[0]?.members ? t.rows[0] : null;
+  const rows = members ? h('div', { class: 'c-rows' }, h('div', { class: 'c-row c-members' }, h('span', { class: 'c-label' }, members.label), h('span', { class: 'c-val' }, members.value))) : null;
   const c = t.contract;
   // List values by name (0.1, the owner's decision; behind the display setting 「받는·내는 것 행」 since cards v2): muted, each name under
   // a dotted rule; never a pin, never a line's end. A part whose record names none has no contract area here (the panel says so).
+  // Beauty v2 (A1): a pin (a port a model portMap row ties to a relation end) is a mark on the card's side where its line meets it,
+  // in the record's port order; its name reads in its tip, the pane and the detail view.
   const contract = c.kind === 'values'
     ? c.rows.length ? h('div', { class: 'c-contract vals' }, ...c.rows.map(v => h('div', { class: 'c-row c-vrow' },
       h('span', { class: 'c-label' }, v.label),
       h('span', { class: 'c-val c-names' }, ...v.names.flatMap((n, i) => [i ? h('span', { class: 'c-sep', 'aria-hidden': 'true' }, ' · ') : null, h('span', { class: 'unl' }, n)].filter((x): x is HTMLElement => !!x))),
       v.more ? h('span', { class: 'c-more', 'data-tip': moreTip(v.more, v.label) }, moreText(v.more)) : null))) : null
     : h('div', { class: 'c-contract pins', role: 'group', 'aria-label': `${p.name}의 포트 · 모델이 적은 포트 대응` },
-      h('div', { class: 'c-pin-head', ...(c.unmapped ? { 'data-tip': `포트 대응 미기록 ${c.unmapped} · ${CONTACT_TIP.replace(/^포트 대응 미기록 · /, '')}` } : {}) }, h('span', {}, c.ins.length ? c.inTitle : ''), h('span', {}, c.outs.length ? c.outTitle : '')),
-      ...Array.from({ length: Math.max(c.ins.length, c.outs.length) }, (_, i) => h('div', { class: 'c-pin-row' },
-        c.ins[i] ? h('span', { class: 'c-pin in', 'data-tip': `${c.inTitle} · ${c.ins[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('i', { class: 'pin', 'aria-hidden': 'true' }), h('span', { class: 'c-pin-name' }, c.ins[i]!)) : h('span', { class: 'c-pin empty' }),
-        c.outs[i] ? h('span', { class: 'c-pin out', 'data-tip': `${c.outTitle} · ${c.outs[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('span', { class: 'c-pin-name' }, c.outs[i]!), h('i', { class: 'pin', 'aria-hidden': 'true' })) : h('span', { class: 'c-pin empty' }))));
-  // Polish round (spec-cards-v2 §1): 「포트 대응 미기록 N」 is off the card face: the 데이터 and 상태·공백 lenses count it and the detail
-  // view marks each port; the pin head's tip says how many lines meet the card-level contact point.
-  // Polish round fixes 2: the ⤢ tip says the unplaced rules in a reader's words (the counts keep entryParts' order).
+      ...c.ins.map(n => h('i', { class: 'c-pin in', style: `top:${hs.pins[`in:${n}`] ?? hs.contact}px`, 'data-tip': `${c.inTitle} · ${n} · 포트 대응 행(모델)이 이 포트에 선을 잇는다${c.unmapped ? `\n포트 대응 미기록 ${c.unmapped} · ${CONTACT_TIP.replace(/^포트 대응 미기록 · /, '')}` : ''}`, 'aria-label': `${c.inTitle} 포트 ${n}` })),
+      ...c.outs.map(n => h('i', { class: 'c-pin out', style: `top:${hs.pins[`out:${n}`] ?? hs.contact}px`, 'data-tip': `${c.outTitle} · ${n} · 포트 대응 행(모델)이 이 포트에 선을 잇는다`, 'aria-label': `${c.outTitle} 포트 ${n}` })));
+  // Polish round fixes 2: the way in's tip says the unplaced rules in a reader's words (the counts keep entryParts' order).
   const words = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 }).map(w => w.replace(/^배치 미정 (\d+)$/, '단계 미정 규칙 $1'));
-  // The inner line: '단계 N' and the first recorded steps' names (each step carries its quote), in the record's row order.
-  const il = t.innerLine;
-  // Review: at 중간 the inner line is a plain 「단계 N」 (styles.css hides the unit, the names and their count there; the ⤢ tip says the rest).
-  const [ilCount, ...ilUnit] = (il?.text ?? '').split(' · ');
-  const inner = il ? h('div', { class: 'c-inner' }, h('span', { class: 'c-label c-inner-label' }, ilCount ?? '', ilUnit.length ? h('span', { class: 'c-inner-unit' }, ` · ${ilUnit.join(' · ')}`) : null),
-    il.names.length ? h('span', { class: 'c-val c-inner-text' }, il.names.join(' · ')) : null, il.more && il.names.length ? h('span', { class: 'c-more', 'data-tip': moreTip(il.more, '단계') }, moreText(il.more)) : null) : null;
-  // Polish round (spec-cards-v2 §1): the program's cut steps are no 「+N 프로그램」 chip on the face: the ⤢ tip says 「단계 N (+P 프로그램)」
-  // and the pane and the detail view mark each one.
   const well = t.well ? wellEl(o, p, r, t.well, false) : null;
-  const signs = t.signs ? signTabsEl(o, p, r, true) : null;
-  // Cards v2 §1: the ways in as quiet icon buttons at the bottom-right (⤢ the detail view, ▸ N the group; 연결 N its own chip beside
-  // them), the sign chips at the bottom-left: never piled into one spot with the status dot.
+  // Beauty v2 (A2, the symbol budget): no 「§ N」 or 「Δ N」 on the face (the pane's 규칙과 관문 and 이력 read them, and a selected card's
+  // pane opens on them), no 「연결 N」 (the pane's 안쪽 · 연결), no inner line (the way in's tip says 「단계 N」). One way in, in one place
+  // (the card's bottom-right corner), shown on hover, selection or keyboard focus: into a group (its parts) or into a part's detail
+  // view (its steps, 노선 and 상태 전이). ⤢ and ▸ no longer stand for two things on one card.
   const sc = stepCounts(stepsOf(r)), stepWord = sc.recorded || sc.program ? ` · 단계 ${sc.recorded}${sc.program ? ` (+${sc.program} 프로그램)` : ''}` : '';
-  // Polish round fixes 1: a framed 「상세 ⤢」 (the word steps out at 개요) and a short tip: what opens and what it holds.
-  const open = !kids && words.length && words[0] !== '내부 미상'
-    ? h('button', { type: 'button', class: 'c-enter entry-open', 'data-tip': `내부 상세${stepWord}\n${words.join(' · ')}`, 'aria-label': `${p.name} 내부 상세 열기${stepWord}`, onclick: () => openAction(p.id) },
-      h('span', { class: 'c-enter-w' }, '상세'), h('span', { class: 'c-enter-g', 'aria-hidden': 'true' }, '⤢')) : null;
-  // A card whose only way in is ⤢ (no sign chips, no group controls) draws no foot row for it: the button sits over its bottom-right
-  // corner (cardFactsOf gives such a card no foot, so its height has none either).
-  const floatOpen = !!open && !signs && !extra.links && !extra.enter;
-  const bottom = !floatOpen && (signs || extra.links || extra.enter || open) ? h('div', { class: 'c-bottom' }, signs ? h('span', { class: 'c-signs' }, signs) : null,
-    h('span', { class: 'c-entry' }, extra.links, extra.enter, open)) : null;
-  const corner = floatOpen ? h('span', { class: 'c-entry c-corner' }, open) : null;
-  const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''}${corner ? ' open-corner' : ''} ${extra.cls}`, style: `--nl:${nl}`,
-    'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${signs ? 1 : 0},${extra.boxH},0,${c.kind === 'values' ? c.rows.length : 0},0,${t.rows[0]?.members ? 1 : 0},${t.role ? 1 : 0},${bottom ? 1 : 0}`,
+  const go = kids ? extra.enter
+    : words.length && words[0] !== '내부 미상'
+      ? h('button', { type: 'button', class: 'c-go entry-open', 'data-tip': `안으로 · 내부 상세${stepWord}\n${words.join(' · ')}`, 'aria-label': `${p.name} 내부 상세 열기${stepWord}`, onclick: () => openAction(p.id) }, goGlyph()) : null;
+  // The far view's name tag (A3): the same box drawn as the kind icon and the name at a fixed screen size (fitCards writes its lines).
+  const tagIcon = h('span', { class: `c-tag-icon g-${t.family}`, 'aria-hidden': 'true' }); tagIcon.innerHTML = glyphSvg(t.glyph);
+  const tag = h('div', { class: 'c-tag', 'aria-hidden': 'true' }, tagIcon, h('span', { class: 'c-tag-text' }, h('span', { class: 'c-tag-name' }, p.name), h('span', { class: 'c-tag-kind' }, life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? null, life || maint || t.undecided ? h('span', { class: 'c-tag-sep' }, ' · ') : null, t.kind)));
+  const mark = t.container ? 'loop' : dot ? 'dot' : r.loop ? 'loop' : '';
+  const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${t.container ? ' container' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${maint ? ' maint' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''}${go ? ' has-go' : ''}${hs.total > CARD_H ? ' tall' : ''} ${extra.cls}`, style: `--nl:${nl}`,
+    'data-mark': mark, 'data-life': life || maint ? '1' : '',
     // Review (spec §7): focus gives what the hover card says first: the name, the kind, the role and a recorded state's words.
-    'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', 'aria-label': [p.name, t.kind, t.role, dot?.word ?? null].filter(Boolean).join(' · '), onkeydown: extra.onkeydown },
-  head, role, rows, contract, inner, well, bottom, corner);
+    'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', 'aria-label': [p.name, t.kind, life, maint, t.role, dot?.word ?? null].filter(Boolean).join(' · '), onkeydown: extra.onkeydown },
+  head, role, rows, contract, well, go ? h('span', { class: 'c-go-at' }, go) : null, tag);
   // One hover surface (cards v2 §2): a native title left inside the card (the well's, a chip's) reads through the map's own tip.
   el.querySelectorAll<HTMLElement>('[title]').forEach(x => { x.dataset.tip = x.title; x.removeAttribute('title'); });
   return el;
@@ -2116,7 +2133,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // holds go with the elements they stood for (review M6).
   held = null; $('space').classList.remove('peek', 'state-peek'); hoverStop();
   // A new view reads its first tier without hysteresis (card-budget zoomTier); the cards' boxes do not depend on it.
-  opsRef = opsDay(o); if (cameraMode !== 'keep') tier = null;
+  opsRef = opsDay(o); if (cameraMode !== 'keep') { tier = null; face = null; } tagAt = { k: 0, n: 0 };
   relayout(o);
   const world = $('world'), view = o.view;
   // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
@@ -2164,8 +2181,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   };
   // Cards v2 §1: a group card's way in, a quiet icon button (「▸ N」); its tip says what opens.
   // Polish round fixes 1: a framed control with its word (「안쪽 2 ▸」; the word steps out at 개요), never a bare 「▸2」 glued to 연결 N.
-  const cardEnter = (p: PartView) => h('button', { type: 'button', class: 'c-enter enter-in', 'data-tip': `안으로 들어가기 · 안쪽 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기 · 안쪽 부분 ${p.childIds.length}`, onclick: () => go(o.key, null, p.id) },
-    h('span', { class: 'c-enter-w' }, '안쪽 '), `${p.childIds.length}`, h('span', { class: 'c-enter-g', 'aria-hidden': 'true' }, '▸'));
+  // Beauty v2 (A2): the card's one way in (its fixed corner, the same button as a part's detail view): into the group's parts.
+  const cardEnter = (p: PartView) => h('button', { type: 'button', class: 'c-go enter-in', 'data-tip': `안으로 · 안쪽 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기 · 안쪽 부분 ${p.childIds.length}`, onclick: () => go(o.key, null, p.id) }, goGlyph());
   // Review: one enter style for frames and cards (「▸ N」, as cardEnter).
   const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기 · 부분 ${p.childIds.length}`, onclick: () => go(o.key, null, p.id) }, h('span', { class: 'enter-g', 'aria-hidden': 'true' }, '▸'), ` ${p.childIds.length}`);
   // Polish round fixes 1: a card's 「여기서 펼치기」 is its own glyph (＋, never a third chevron beside ▸ and ⤢) and says what it opens.
@@ -2229,7 +2246,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
         // Cards v2 §1: no native title on the card (the hover card says the path and the alias); the group's way in is the ▸ N icon
         // button, 연결 N its own chip in the same style.
         world.append(cardEl(o, p, p.reading, tpl, face, { cls: `${onTint ? 'on-tint ' : ''}s-${p.status}${recentAt(last) ? ' fresh' : ''}`, onkeydown: keySelect(p.id),
-          toggle: b.kids ? toggleButton(p, false, true) : null, links: b.kids ? linksChip(p.id, true) : null, enter: b.kids ? cardEnter(p) : null, boxH: b.h, filed: filedUnder(view, p.id) }));
+          toggle: b.kids ? toggleButton(p, false, true) : null, links: null, enter: b.kids ? cardEnter(p) : null, boxH: b.h, filed: filedUnder(view, p.id) }));
         continue;
       }
       // An untyped card (no reading): its name, its own first sentence on a unit without an inside, and its state line.
@@ -2811,6 +2828,9 @@ function renderRecent() {
 /** The wheel and the buttons zoom between ZOOM_MIN and ZOOM_MAX; only 전체 보기 goes further out, down to the dot map (FIT_MIN, map
  * design v3 5.1), and a zoom from there keeps on from where it is. */
 const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6, FIT_MIN = 0.2;
+/** Beauty v2 (A4): the first view is the whole map (its fit) wherever its name tags still read there: a box of 224 × 80 at this scale
+ * holds two lines of an identifiable name (name-tag TAG). Further out the first view opens on its focus at OPEN_MIN, as before. */
+const FIRST_FIT_MIN = 0.36;
 /** Below this zoom the map's 26px title would read under 10px (map hygiene H3): the title chip says the name instead. */
 const TITLE_FLOOR_K = 10 / 26;
 /** The chip scale the verbs were last placed at, and the frame that re-places them after a zoom. */
@@ -2847,6 +2867,9 @@ function applyCamera(animate = false) {
   for (const t of ['dots', 'far', 'mid', 'near'] as const) sp.classList.toggle(`tier-${t}`, tier === t);
   const T = tierText(camera.k, tier), px = (n: number) => `${n.toFixed(2)}px`;
   for (const [v, n] of [['title', T.title], ['title-lh', T.titleLh], ['kind', T.kind], ['kind-lh', T.kindLh], ['row', T.row], ['row-lh', T.rowLh], ['label', T.label], ['bottom', T.bottom], ['glyph', T.glyph], ['gap', T.gap]] as const) sp.style.setProperty(`--t-${v}`, px(n));
+  // Beauty v2 (A3): the card or its name tag, by the name's size on screen (name-tag cardFace, with its hysteresis).
+  face = cardFace(camera.k, face);
+  sp.classList.toggle('face-tag', face === 'tag'); sp.classList.toggle('face-card', face === 'card');
   if (!fitFrame) fitFrame = requestAnimationFrame(fitCards);
   sp.style.setProperty('--grow', String(Math.min(1.25, Math.max(1, 0.85 / camera.k))));
   // The line grammar is drawn in screen pixels (map design v3 6.1): --u is one screen pixel in map units, so widths, dashes and
@@ -2881,7 +2904,7 @@ function fitView(explicit: boolean, animate = false) {
   // Map hygiene H2: the first view opens on its focus (the first view's emphasis, else the main flow) at the opening scale when that
   // focus fits inside the safe area there; a focus too large for it opens the whole map at its fit instead.
   const f = explicit ? null : openFocus();
-  const k = explicit || (f && fit < OPEN_MIN && (f.w * OPEN_MIN > w || f.h * OPEN_MIN > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
+  const k = explicit || fit >= FIRST_FIT_MIN || (f && fit < OPEN_MIN && (f.w * OPEN_MIN > w || f.h * OPEN_MIN > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
   // The whole view sits in the middle of the free area, both ways: the title and the parts together. A reading pane opened
   // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
   const mw = B.w * k, mh = B.h * k, free = w - mw;
@@ -6813,7 +6836,10 @@ function bindEdgeHints() {
       role ? h('span', { class: `hc-role${roleRevised ? ' revised' : ''}` }, role) : null,
       roleRevised ? h('span', { class: 'tip-revised' }, `하는 일${REVISED_BASIS}`) : null,
       ops ? h('span', { class: `hc-ops d-${dot?.kind ?? 'none'}` }, ops) : null,
-      io ? h('span', { class: 'hc-io' }, io) : null].filter((x): x is HTMLElement => !!x);
+      io ? h('span', { class: 'hc-io' }, io) : null,
+      // Beauty v2 (A1): what left the card face reads here: its kind rows (the record's own fields) and its inner line (「단계 N」).
+      ...(t?.rows ?? []).filter(x => !x.members && !x.blank).map(x => h('span', { class: 'hc-row' }, h('span', { class: 'hc-row-l' }, x.label), ` ${x.value}`, x.program ? h('span', { class: 'hc-row-l' }, ' · 기록에서 프로그램이 옮긴 값') : null)),
+      t?.innerLine ? h('span', { class: 'hc-row' }, t.innerLine.text) : null].filter((x): x is HTMLElement => !!x);
   };
   const place = (x: HoverTarget) => {
     // Review: inside the map's visible area (the viewport, which keeps clear of the reading pane), never over the pane.

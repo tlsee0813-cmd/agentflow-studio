@@ -118,5 +118,6 @@ test('CONT-6 expanding in the layout keeps the top-left edge, moves only overlap
   open = false;
   const lay3 = layoutScope(v, null, () => false, {}, undefined, undefined, 1.6, extra);
   for (const [id, b0] of before) assert.deepEqual({ x: lay3.boxes.get(id).x, y: lay3.boxes.get(id).y, w: lay3.boxes.get(id).w, h: lay3.boxes.get(id).h }, b0, id);
-  assert.equal(CARD_W, 272);
+  // Beauty v2 (A1): the card is 224 wide (two sizes: 224 × 80 and 224 × 104).
+  assert.equal(CARD_W, 224);
 });

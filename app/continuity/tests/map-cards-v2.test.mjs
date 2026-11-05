@@ -141,8 +141,10 @@ test('CARD-6 the card face: no blank rows, no store relation counts, value rows 
   assert.equal(cardTemplate(facts({ pins: { in: ['명령'], out: [] } })).contract.kind, 'pins');
   const plain = cardTemplate(facts({ type: 'compute' })), roled = cardTemplate(facts({ type: 'compute', role: '평균을 낸다.' })), footed = cardTemplate(facts({ type: 'compute', foot: true }));
   assert.equal(roled.role, '평균을 낸다.'); assert.equal(plain.role, null);
-  assert.equal(cardHeights(roled, 1).rows - cardHeights(plain, 1).rows, 28, 'one line and its gap');
-  assert.equal(cardHeights(plain, 1).bottom, 0); assert.equal(cardHeights(footed, 1).bottom, 28);
+  // Beauty v2 (A1/A2): the role line is 18 with its 6 gap; the foot left the face (one way in sits over the card's corner), so a
+  // way in adds no height and both cards keep the short size.
+  assert.equal(cardHeights(roled, 1).rows - cardHeights(plain, 1).rows, 24, 'one line and its gap');
+  assert.equal(cardHeights(plain, 1).bottom, 0); assert.equal(cardHeights(footed, 1).bottom, 0); assert.equal(cardHeights(footed, 1).total, 80);
   assert.equal(cardTemplate(facts({ signs: true })).foot, true, 'signs sit in the foot');
   // The name keeps clear of the status dot's fixed place.
   assert.equal(nameRoomOf(false, false), NAME_ROOM); assert.equal(nameRoomOf(true, true), NAME_ROOM - TOGGLE_W - DOT_W);
@@ -183,10 +185,12 @@ test('CARD-9 review fixes: the legend marks, the record\'s own 모름, one word 
 test('CARD-8 the built card and map: no ops footer, no c-short, no card title; the dot, ⤢ / ▸ N / 연결 N, § ◇ Δ, data-tip targets, line parts in the hover, the 표시 popover', () => {
   const src = app(), card = body(src, 'cardEl');
   for (const gone of ["'c-short", "class: 'c-ops'", 'title: extra.title', '내부 보기\')', "class: `ev ev-${ev}`, title"]) assert.ok(!card.includes(gone), gone);
-  for (const here of ['c-dot', 'openOps(', "'⤢'", 'c-role', 'c-opsw', 'data-tip', 'c-state', 'moreText(']) assert.ok(card.includes(here), here);
+  // Beauty v2 (A2): one way in (goGlyph, a fixed corner) in place of ⤢ and ▸ N; no 연결 N, § or Δ on the face.
+  for (const here of ['c-dot', 'openOps(', 'goGlyph()', "'c-go-at'", 'c-role', 'c-opsw', 'data-tip', 'c-state', 'moreText(']) assert.ok(card.includes(here), here);
+  assert.ok(!card.includes("'⤢'") && !card.includes('signTabsEl(') && !card.includes('extra.links'), 'no ⤢, sign chips or 연결 N on the face');
   assert.ok(/el\.querySelectorAll\(["']\[title\]["']\)/.test(card), 'native titles left in a card read through the one tip');
   const space = body(src, 'renderSpace');
-  assert.ok(space.includes('cardEnter(p)') && space.includes("'▸'") && space.includes('linksChip(p.id, true)'));
+  assert.ok(space.includes('cardEnter(p)') && space.includes("'▸'") && space.includes('links: null'), 'a group card\'s way in is the one corner button; 연결 N reads in the pane');
   assert.ok(!/cardEl\([^)]*\btitle,/.test(space), 'renderSpace passes no title to a typed card');
   assert.ok(body(src, 'signTabsEl').includes('SIGN_GLYPH') && /rule: '§', gate: '◇', change: 'Δ'/.test(src));
   // The hover: one machine, line parts are targets of the line, Esc first, no hover while dragging, panning or zooming.
@@ -213,14 +217,14 @@ test('CARD-8 the built card and map: no ops footer, no c-short, no card title; t
   assert.ok(!/animation[^;]*(pulse|blink)/i.test(css.slice(css.indexOf('Cards v2 (spec cards v2'))), 'no pulse, no blink');
   assert.match(css, /--dot-stop: #9c8a62/, 'stopped is grey-amber, not red');
   // Cards v2 review.
-  assert.ok(card.includes('${signs ? 1 : 0},${extra.boxH}'), 'B1: the shape carries the sign chips (no literal 0)');
   assert.ok(/hoverLast\.el === x\.el/.test(hov) && body(src, 'renderSpace').includes('hoverStop()'), 'M6: a redraw drops the held target; a key is the same target only on the same element');
   assert.ok(hov.includes("$('viewport').getBoundingClientRect()") && hov.includes('.near-end, .near-self') && hov.includes('.c-head'), 'tips stay in the map area, off lit neighbours and names');
   assert.ok(hov.includes('hoverQuiet') && !hov.includes('누르면 출발 부분을 고르고'), 'a picked card keeps its tip shut; no click hint');
   assert.ok(!hov.includes('실선 · 채운 머리'), 'no stroke vocabulary in the line tip');
   assert.ok(hov.includes('conditionTip(s.when)') && body(src, 'relationLines').includes('(conditionWords(x.when))'), 'M3: each relation row says its condition (polish round: 「조건: …」, the form word left off)');
   assert.ok(body(src, 'cardIo').includes('relationEnds('), 'the hover card falls back to the lines the pane reads');
-  assert.ok(body(src, 'fitCards').includes("'fit-auto'") && /\.node\.card\.fit-auto \{ height: auto !important/.test(css), 'cards below 가까이 at their content height');
+  // Beauty v2 (A1/A3): the card face is drawn at its own fixed sizes (nothing to fit); further out the box draws its name tag.
+  assert.ok(body(src, 'fitCards').includes('fitTags(') && css.includes('.space.face-tag .node.card > :not(.c-tag) { display: none !important; }'), 'the far view draws name tags');
   assert.ok(!/title: `양쪽으로/.test(body(src, 'placeCounts')) && !/title: `데이터 계약/.test(body(src, 'typeChipEl')), 'one hover surface: no native titles on line parts');
 });
 
@@ -238,7 +242,8 @@ test('CARD-10 polish round (spec-cards-v2 §1): 포트 대응 미기록, 유지 
   assert.equal(cardHeights(kept, 1).total, cardHeights(none, 1).total);
   const src = app(), card = body(src, 'cardEl'), well = body(src, 'wellEl');
   assert.ok(!card.includes('c-cline') && !card.includes('포트 대응 미기록 ${c.unmapped}`)'), 'no unmapped line on the card');
-  assert.ok(card.includes("'c-pin-head', ...(c.unmapped ?"), 'the pin head says the unmapped count in its tip');
+  // Beauty v2 (A1): pins are marks on the card's sides; the in-pin's tip says the unmapped count.
+  assert.ok(card.includes("'c-pin in'") && card.includes('포트 대응 미기록 ${c.unmapped} · '), 'the in-pin says the unmapped count in its tip');
   assert.ok(!/progChip|stepChip|prog-chip/.test(card) && !/progChip|stepChip|w-state/.test(well), 'no 프로그램 chip nor 유지 상태 compartment on the card');
   assert.ok(well.includes('PROGRAM_STEP_HINT') && well.includes('프로그램이 옮긴 값'), 'the provenance reads in the well rows\' and badges\' tips');
   // Reachable elsewhere: the lenses count unmapped lines and unlinked kept state; the pane and the detail view keep the chips.
@@ -248,7 +253,8 @@ test('CARD-10 polish round (spec-cards-v2 §1): 포트 대응 미기록, 유지 
   const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
   // Polish round fixes 1: only the quiet line hides beside the detail view; a conflict note in the same block stays.
   assert.ok(css.includes('.space.detail-open .pane-ops-line.none { display: none; }') && !/\.space\.detail-open \.pane-ops-notes[^{]*\{ display: none/.test(css));
-  assert.ok(card.includes("'data-tip': `${x.label} · 기록에서 프로그램이 옮긴 값`"), 'a program row says so in its tip');
+  // Beauty v2 (A1): the kind rows read in the hover card, a program row with its provenance.
+  assert.ok(body(src, 'bindEdgeHints').includes("' · 기록에서 프로그램이 옮긴 값'"), 'a program row says so in the hover card');
   assert.ok(body(src, 'shortContent').includes("r.stateRead ? h('span', { class: 'xp-ops'"));
   // Restore (spec-cards-v2 §4): the map's pane still states it; only beside the detail view does the quiet line hide.
   assert.ok(body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'), 'the map\'s pane states it');
@@ -265,13 +271,15 @@ test('CARD-11 polish round fixes 1: the 상태·공백 lens marks recorded state
   assert.ok(css.includes('.space.lens-state .node.card .c-opsw.ops-none { display: none; }'));
   assert.ok(!css.includes('.space.lens-state:is(.tier-far, .tier-dots) .node.card .c-opsw::before { content: none; }'), 'the mark stays when zoomed out');
   // The ways in: 「안쪽 N ▸」 and 「상세 ⤢」 framed at rest, their words gone only at 개요; the head's 펼치기 is its own glyph.
-  assert.ok(src.includes("'안쪽 '") && card.includes("'상세'") && card.includes("'⤢'"));
+  // Beauty v2 (A2): one way in, the same button for a group (its parts) and a part (its detail view), shown on hover, selection and
+  // keyboard focus.
+  assert.ok(src.includes("class: 'c-go enter-in'") && card.includes("class: 'c-go entry-open'") && css.includes('.space .node.card:not(:hover):not(:focus-within):not(.selected) .c-go-at { opacity: 0; pointer-events: none; }'));
   assert.ok(!card.includes('제자리에 들어가면 펼치고'), 'a short ⤢ tip');
   assert.match(css, /\.node\.card \.c-entry \.c-enter \{ height: calc\(var\(--t-bottom, 28px\) - 6px\);[^}]*border-color: var\(--line\)/);
   assert.ok(src.includes('plusGlyph()') && src.includes('toggleButton(p, false, true)'));
   // No dashed ghost under a card; a card whose only way in is ⤢ has no foot row (its height has none either).
   assert.ok(css.includes('.node.card.fit-auto.fit-ghost::after { content: none; }'));
-  assert.ok(card.includes('floatOpen') && card.includes("'c-entry c-corner'") && body(src, 'cardFactsOf').includes('foot: p.childIds.length > 0,'));
+  assert.ok(!card.includes("class: 'c-bottom'") && body(src, 'cardFactsOf').includes('foot: p.childIds.length > 0,'), 'no foot row on the face');
   // The first screen: 기록 정보 ▾ folds the title's meta lines; the toolbar's first view is a few words, its sentence the tip; the
   // opening view centres the first view's parts (else the main flow) when the map does not fit.
   assert.ok(src.includes("'기록 정보 ▾'") && css.includes('.map-title:not(.meta-open) > .map-meta { display: none; }'));

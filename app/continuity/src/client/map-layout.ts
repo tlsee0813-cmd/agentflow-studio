@@ -12,7 +12,7 @@ import { bandsOf, type Band } from './map-regions.js';
 /** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
 export const FRAME_MIN_W = 228;
 /** NODE_W: a row's width (long names widen it). NODE_H: the least height of a unit card. */
-export const NODE_W = 200, NODE_H = 52, UNIT_W = 240, CARD_W = 272, PAD = 14, GAP = 8, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
+export const NODE_W = 200, NODE_H = 52, UNIT_W = 240, CARD_W = 224, PAD = 14, GAP = 8, COL_GAP = 76, ROW_GAP = 22, GHOST_W = 168, GHOST_H = 34;
 /** Head of a group inside a region: one line, or two when the name needs them (names never shrink). */
 export const HEAD = 34, HEAD_2 = 52;
 /** A planned change line under a part's name in the preview (12px). */

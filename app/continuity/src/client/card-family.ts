@@ -137,6 +137,9 @@ export interface CardFacts {
   /** A container's well (4.5): expanded by the person (every step shown), and how deep it sits among the containers drawn
    * around it on this map (1: none around it; past 2 the well reads as one nested row). */
   wellOpen?: boolean; wellDepth?: number;
+  /** Beauty v2 (A1): false: the container's well is not drawn on its card (the two card sizes; its ↻ opens it in place, its steps read
+   * in the detail view); absent: drawn as before. */
+  wellShown?: boolean;
   conditions: readonly { then: string; else: string | null }[];
   stateVars?: number;
   /** The 파일 지도 rows (a session's 다루는 파일). */
@@ -184,6 +187,8 @@ export interface CardTemplate {
   /** A loop container's well (container-view, 4.3): drawn at the near tier in place of the inner line, which the overview and
    * middle tiers keep; null for any other card. */
   well: Well | null;
+  /** A loop container (a recorded loop with recorded steps), its well drawn or not. */
+  container?: boolean;
   signs: boolean;
   /** An untyped part with recorded steps or a loop (structuralOf): drawn with the structural outline, its kind line naming what is
    * recorded (kindLabel). */
@@ -313,7 +318,8 @@ export function cardTemplate(f: CardFacts): CardTemplate {
     ? { text: `단계 ${recorded}${inner !== 'list' && unit ? ` · ${unit}` : ''}`, names, more: Math.max(0, recorded - names.length), program } : null;
   // A loop container (4.1, 4.3): only a recorded loop with recorded steps; never from the type word, a name or step names alone.
   const ws = f.steps.map(s => ({ name: s.name ?? '', program: s.program === true }));
-  const well = f.loop && isContainer(ws, f.loop)
+  const container = !!f.loop && isContainer(ws, f.loop);
+  const well = f.loop && container && f.wellShown !== false
     // Polish round (spec-cards-v2 §1): the 「유지 상태 N」 compartment is no part of the card face (the pane's 구조 탭, the detail view
     // and the ⤢ tip name it; the 상태·공백 lens counts its unlinked items), so the card is measured without it.
     ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
@@ -327,7 +333,7 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   return { family: familyOf({ family: fam?.family ?? null, type: f.type }), inner, glyph: gateGlyph(fam, f.type) ?? (group ? groupGlyph(group.axis) : 'neutral'),
     kind: group ? groupKind(f.type, group.word, kids) : role && !f.type ? role : chip && !f.type ? chip : kindLabel(f.type, recorded || f.steps.length, !!f.loop),
     rows: mr ? [mr, ...kindRows(f, { blanks: false })] : kindRows(f, { blanks: false }), contract: shownContract(f), innerLine, well, signs: !!f.signs,
-    structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group, undecided: chip,
+    structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group, undecided: chip, container,
     role: f.role?.trim() ? f.role.trim() : null, foot: !!f.foot || !!f.signs, blanks: kindRows(f).filter(r => r.blank).map(r => r.label) };
 }
 /** Cards v2 §1: the contract's value rows (받는 것 · 내는 것 · 필드) only behind the display setting 「받는·내는 것 행」; pins (the
@@ -336,41 +342,55 @@ function shownContract(f: CardFacts): CardContract {
   const c = contractOf(f); return c.kind === 'pins' || f.values ? c : { kind: 'values', rows: [] };
 }
 
-/* ---------- heights (map design v3 3.8, 5.3, 9.5): as styles.css draws them at the near tier ---------- */
-/** The card's base width (map px) and its name's room: 272 − 16 × 2 sides − 20 glyph − 8 gap = 212; a card with an inside gives
- * its fold toggle 28 more. */
+/* ---------- sizes (beauty v2 「읽히는 첫 전체 화면」 A1; map design v3 3.8, 5.3) ----------
+ * Two card sizes at the middle and near views: 224 × 80 and 224 × 104 map px. The width never grows with a name. A name takes at most
+ * two lines and the role one; a name that needs its second line beside a role takes the tall size instead of a smaller type. What a
+ * part says past that (its kind rows, its inner line, its rules and changes, its relation count) reads in the hover card and the
+ * pane. Groups and loop containers keep their own form under the same head: a group its 「안에」 row, a container its well (and the
+ * value rows behind the display setting 「받는·내는 것 행」 keep theirs), each on the 8px grid and never under the tall size. */
+/** The card's width (map px), its two heights, and its name's room: 224 − 16 left (the family stripe in it) − 12 right − 20 glyph −
+ * 8 gap = 168; a card with an inside gives its fold toggle 28 more. */
 export { CARD_W };
-export const NAME_ROOM = CARD_W - 16 * 2 - 20 - 8, TOGGLE_W = 28;
-/** Padding above and below; the head (name lines of 20 + the kind line 16 + 16 around); a kind row 20 and the rows' 12 after
- * (a value row the same); the contract's title 16, a pin row 24, its 8 after; the unmapped line 16; the inner line, the sign row
- * and the bottom line. */
-export const BORDER = 2, PAD_Y = 12, NAME_LH = 20, KIND_LH = 16, HEAD_GAP = 16, ROW_H = 20, ROWS_GAP = 12, ROLE_H = 20, ROLE_GAP = 8, DOT_W = 16, PIN_TITLE = 16, PIN_H = 24, PIN_GAP = 8, LINE_H16 = 16, INNER_H = 24, SIGNS_H = 24, BOTTOM_H = 28, GRID = 8;
+export const CARD_H = 80, CARD_H_TALL = 104, PAD_L = 16, PAD_R = 12;
+export const NAME_ROOM = CARD_W - PAD_L - PAD_R - 20 - 8, TOGGLE_W = 28;
+/** Padding above and below; the name lines (20), the kind line (16), the role line (18) and the gap before it; a row (20) and the
+ * rows' gap; the inner line; the old pin rows (title, row, gap: the pins now sit on the card's sides). */
+export const BORDER = 2, PAD_Y = 12, NAME_LH = 20, KIND_LH = 16, HEAD_GAP = 16, ROW_H = 20, ROWS_GAP = 12, ROLE_H = 18, ROLE_GAP = 6, DOT_W = 16, PIN_TITLE = 16, PIN_H = 24, PIN_GAP = 8, LINE_H16 = 16, INNER_H = 24, SIGNS_H = 24, BOTTOM_H = 28, GRID = 8;
+/** Where a line meets a card that ties it to no pin (from the card's top): the middle of the short size, on both sizes, so the lines
+ * between cards of one row run straight whatever their heights. Pins (a model portMap row) spread around it 16px apart (the port
+ * order of the record), on the side the line takes. */
+export const CONTACT_Y = CARD_H / 2, PIN_STEP = 16;
 export interface CardHeights { head: number; rows: number; contract: number; inner: number; signs: number; bottom: number; total: number;
-  /** From the card's top: the card-level contact point (the contract area's middle) and each pin's centre ('in:결과', 'out:결과'). */
+  /** From the card's top: the card-level contact point and each pin's centre ('in:결과', 'out:결과'). */
   contact: number; pins: Record<string, number>;
   /** From the card's top: the first name line's middle, where a reference's port-less ear sits on a side (3.6). */
   ear: number }
+/** Pins on one side, centred on the contact point, PIN_STEP apart, kept inside the card's body (below its top 12, above its bottom 8). */
+function sidePins(names: readonly string[], total: number): number[] {
+  const n = names.length, step = Math.min(PIN_STEP, n > 1 ? (total - 20) / (n - 1) : PIN_STEP);
+  const c = Math.min(Math.max(CONTACT_Y, 12 + step * (n - 1) / 2), total - 8 - step * (n - 1) / 2);
+  return names.map((_, i) => c + (i - (n - 1) / 2) * step);
+}
 export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): CardHeights {
   const nl = Math.min(2, Math.max(1, Math.floor(nameLines) || 1));
-  const head = nl * NAME_LH + KIND_LH + HEAD_GAP + planned;
-  // Cards v2: the role line (one line, under the head) before the kind rows.
-  const role = t.role ? ROLE_H + ROLE_GAP : 0, rows = (t.rows.length ? t.rows.length * ROW_H + ROWS_GAP : 0) + role;
-  const c = t.contract;
-  // Polish round (spec-cards-v2 §1): 「포트 대응 미기록 N」 is no line on the card face (the 데이터 and 상태·공백 lenses count it, the
-  // detail view marks each port), so the pin area is its title and rows only; contract.unmapped stays as data.
-  const contract = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H + PIN_GAP : c.rows.length ? c.rows.length * ROW_H + ROWS_GAP : 0;
-  // A container's well is the near tier's content, so its height is the card's (the inner line reads in the same room further out).
-  // Cards v2: the sign chips share the foot with the way in (bottom-left and bottom-right); no foot when the card has neither.
-  const inner = t.well ? wellHeight(t.well) : t.innerLine ? INNER_H : 0, signs = 0, bottom = t.foot || t.signs ? BOTTOM_H : 0;
+  const head = nl * NAME_LH + KIND_LH + planned;
+  const role = t.role ? ROLE_GAP + ROLE_H : 0;
+  // The forms a card keeps of its own: a group's 「안에」 row, the value rows behind the display setting, a loop container's well.
+  const members = t.group && t.rows[0]?.members ? ROW_H + ROWS_GAP / 2 : 0;
+  const c = t.contract, contract = c.kind === 'values' && c.rows.length ? ROWS_GAP / 2 + c.rows.length * ROW_H : 0;
+  const inner = t.well ? wellHeight(t.well) : 0;
+  const size = nl === 2 && t.role ? CARD_H_TALL : CARD_H;
   // The 1px border a side is not added: at worst it takes 2px of the bottom padding, which stays inside the card.
-  const raw = PAD_Y + head + rows + contract + inner + signs + bottom + PAD_Y, total = Math.ceil(raw / GRID) * GRID;
-  const top = BORDER / 2 + PAD_Y + head + rows, pins: Record<string, number> = {};
+  // The change preview's lines under the name (planned) add to the card they belong to, whatever its size.
+  const raw = PAD_Y + head + role + members + contract + inner + PAD_Y, own = members || contract || inner;
+  const total = own ? Math.max(size + planned, Math.ceil(raw / GRID) * GRID) : size + (planned ? Math.ceil(planned / GRID) * GRID : 0);
+  const pins: Record<string, number> = {};
   if (c.kind === 'pins') {
-    c.ins.forEach((n, i) => { pins[`in:${n}`] = top + PIN_TITLE + i * PIN_H + PIN_H / 2; });
-    c.outs.forEach((n, i) => { pins[`out:${n}`] = top + PIN_TITLE + i * PIN_H + PIN_H / 2; });
+    const ins = sidePins(c.ins, total), outs = sidePins(c.outs, total);
+    c.ins.forEach((n, i) => { pins[`in:${n}`] = ins[i]!; });
+    c.outs.forEach((n, i) => { pins[`out:${n}`] = outs[i]!; });
   }
-  const pinRows = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H : contract;
-  return { head, rows, contract, inner, signs, bottom, total, contact: top + pinRows / 2, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
+  return { head, rows: role + members, contract, inner, signs: 0, bottom: 0, total, contact: CONTACT_Y, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
 }
 /** A name in the pieces it may break between (a line break opportunity after each separator: · / . _ - : , and the spaces it has):
  * an identifier breaks at 'CancelToken·|signal', 'train.|py', never 'adapter|s'. Joined, the pieces are the name. */

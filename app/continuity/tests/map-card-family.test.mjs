@@ -125,34 +125,35 @@ test('contract (3.3, principle 9, 0.1): list values by name until items carry th
   assert.deepEqual(many.ins, ['a', 'b', 'c'], 'three a side, each once');
 });
 
-test('heights (3.8, 5.3): the near content on an 8px grid; the timer mock-up is 208; the name lines change the head only', () => {
+// Beauty v2 (「읽히는 첫 전체 화면」 A1) replaced the near-content heights on purpose: two card sizes, 224 × 80 and 224 × 104; the kind
+// rows, the inner line, the sign chips and the foot left the card face (the hover card and the pane read them), so they add no height.
+test('sizes (beauty v2 A1): 224 × 80, or 224 × 104 for a two-line name beside a role; only a card\'s own forms grow it; pins on its sides', () => {
   const timer = cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'] }));
-  // Cards v2: 12 · head 52 · rows (2 × 20 + 12) · no contract (nothing recorded) · no foot (no way in, no signs) · 12 = 128.
   const h1 = cardHeights(timer, 1);
-  assert.equal(h1.head, 52); assert.equal(h1.rows, 52); assert.equal(h1.contract, 0); assert.equal(h1.bottom, 0); assert.equal(h1.total % GRID, 0); assert.equal(h1.total, 128);
-  // A way in draws the 28px foot; the role line adds one line and its gap (20 + 8).
-  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'], foot: true })), 1).total, 160);
-  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'], role: '매일 수집을 시작한다.' })), 1).rows, 52 + 28);
-  const h2 = cardHeights(timer, 2);
-  assert.equal(h2.head, 72); assert.equal(h2.total - h1.total >= 16, true);
-  assert.equal(cardHeights(timer, 5).head, 72, 'two name lines at most');
-  // Three rows: 12 + 52 + 72 + 12 = 148 → 152 (no foot); value rows (behind the display setting, cards v2) add 20 each
-  // and their 12.
-  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다', '매시 00:00Z'], controlOut: ['수집기'] })), 1).total, 152);
-  assert.equal(cardHeights(cardTemplate(facts({ inputs: ['a'], outputs: ['b'], values: true })), 1).contract, 2 * 20 + 12);
+  assert.equal(h1.head, 36); assert.equal(h1.rows, 0); assert.equal(h1.contract, 0); assert.equal(h1.bottom, 0); assert.equal(h1.total, 80);
+  // A way in, sign chips, kind rows and the inner line add nothing (they read in the hover card, the pane and the way in's tip).
+  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'], foot: true, signs: true })), 1).total, 80);
+  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다', '매시 00:00Z'], controlOut: ['수집기'] })), 1).total, 80);
+  const roled = cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'], role: '매일 수집을 시작한다.' }));
+  assert.equal(cardHeights(roled, 1).rows, 6 + 18, 'the role line and its gap');
+  assert.equal(cardHeights(roled, 1).total, 80, 'one name line and the role: the short size');
+  assert.equal(cardHeights(roled, 2).total, 104, 'two name lines and the role: the tall size, never a smaller type');
+  assert.equal(cardHeights(timer, 2).total, 80, 'two name lines and no role: the short size');
+  assert.equal(cardHeights(timer, 5).head, 56, 'two name lines at most');
+  for (const t of [timer, roled]) for (const nl of [1, 2]) assert.ok([80, 104].includes(cardHeights(t, nl).total));
+  // Own forms: the value rows behind the display setting (6 + 20 each), on the 8px grid and never under the size.
+  const vals = cardHeights(cardTemplate(facts({ inputs: ['a'], outputs: ['b'], values: true })), 1);
+  assert.equal(vals.contract, 6 + 2 * 20); assert.equal(vals.total % GRID, 0); assert.equal(vals.total, 112);
   assert.equal(cardHeights(cardTemplate(facts({ inputs: ['a'], outputs: ['b'] })), 1).contract, 0, 'cards v2: no value rows by default');
-  // Pins: title 16 + rows 24 + 8; each pin's centre on its row; the contact point the pin rows' middle.
+  // Pins sit on the card's sides around the contact point (40, the short size's middle) in the record's port order, 16 apart.
   const pinned = cardTemplate(facts({ type: 'loop', loop: { unit: '명령별', stop: null, resume: null }, pins: { in: ['명령 목록'], out: ['측정 결과', '요약'] }, unmapped: 0 }));
-  const hp = cardHeights(pinned, 1), top = 1 + 12 + 52 + 32;
-  assert.equal(hp.contract, 16 + 2 * 24 + 8);
-  assert.deepEqual(hp.pins, { 'in:명령 목록': top + 16 + 12, 'out:측정 결과': top + 16 + 12, 'out:요약': top + 16 + 36 });
-  assert.equal(hp.contact, top + (16 + 48) / 2);
-  // The sign row and the inner line each add their own height.
-  const plain = cardTemplate(facts()), signed = cardTemplate(facts({ signs: true })), stepped = cardTemplate(facts({ steps: [step(), step()] }));
-  assert.ok(cardHeights(signed, 1).total >= cardHeights(plain, 1).total + 16);
+  const hp = cardHeights(pinned, 1);
+  assert.equal(hp.total, 80); assert.equal(hp.contact, 40);
+  assert.deepEqual(hp.pins, { 'in:명령 목록': 40, 'out:측정 결과': 32, 'out:요약': 48 });
+  const stepped = cardTemplate(facts({ steps: [step(), step()] }));
   assert.equal(stepped.innerLine.text, '단계 2', 'a plain list: the row order reads in the tip, not on the line');
-  assert.equal(cardHeights(stepped, 1).inner, 24);
-  assert.equal(CARD_W, 272); assert.equal(NAME_ROOM, 212);
+  assert.equal(cardHeights(stepped, 1).inner, 0, 'the inner line is off the face');
+  assert.equal(CARD_W, 224); assert.equal(NAME_ROOM, 168);
 });
 
 test('the inner line: steps in the record\'s row order, the loop\'s unit, the program\'s cut steps apart', () => {

@@ -2869,10 +2869,6 @@ li > .port + .fn-marks { margin: 0; padding-top: 6px; }
 .node.card.has-well:not(.selected) { border-color: var(--fam-edge); }
 .c-loop-tab { flex: none; align-self: flex-start; display: inline-grid; place-items: center; min-width: 20px; height: 18px; margin: 1px 0 0; padding: 0 4px; border: 1px solid var(--fam-edge, var(--line-strong)); border-radius: 9px; background: var(--surface); color: var(--fam-ink, var(--text-2)); font-size: var(--t-kind, 12px); line-height: 16px; font-weight: 600; }
 .node.card.has-kids .c-loop-tab { margin-right: 2px; }
-/* The overview and the dot map (5.4): the card's face is its family's faint tint, so a silhouette reads as a mass. */
-.space:is(.tier-far, .tier-dots) .node.card:not(.life) { background: var(--fam-strip); }
-.space:is(.tier-far, .tier-dots) .node.card:not(.life) .c-head { background: none; box-shadow: none; }
-.space:is(.tier-far, .tier-dots) .node.card.f-neutral:not(.life) { background: var(--surface); }
 /* Names break at a separator or between words (app breakable: a <wbr> after · / . _ - : ,), never inside a word. */
 .node.card .c-name, .ghost-name, .ghost-head { overflow-wrap: break-word; }
 .port-top strong { flex: 0 1 auto; min-width: min(7em, 55%); word-break: keep-all; overflow-wrap: break-word; }
@@ -3179,8 +3175,8 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 
 /* ---------- Hierarchy pass (spec forms v1 §4, overrides 8 and 10): visual only, the DOM keeps every fact ----------
    1. No footer word for a part with no operations record (the pane says it; the map title counts it). 2. Lines darker: --edge about
-   3:1 on the canvas (was 1.8:1), a folded summary band in step (dash patterns kept: they mean channel). 4. Family as mass when far:
-   the card face takes the family's tile colour and a 2px family edge (never a status, never on a line). The spine stays as it is. */
+   3:1 on the canvas (was 1.8:1), a folded summary band in step (dash patterns kept: they mean channel). The spine stays as it is.
+   (4., family as mass when far, gave way to beauty v2: the far view is a name tag on the one white surface with its family stripe.) */
 :root { --edge: #858e9b; --edge-soft: #9ea6b1; }
 .edge.agg.near:not(.on):not(.lit) .edge-line { stroke: #7a8390; }
 .node.card .c-short.ops-none { display: none !important; }
@@ -3188,8 +3184,6 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .map-ops-none { font-size: 12px; line-height: 18px; color: var(--text-3); white-space: nowrap; cursor: help; }
 .map-ops-none::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border: 1.5px dashed var(--text-4); border-radius: 50%; vertical-align: 0; }
 .lens-ops.none { color: var(--text-3); }
-.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp) { background: var(--fam-bg); }
-.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp):not(.selected):not(:focus-visible):not(.plan-impact):not(.lit) { outline: 2px solid var(--fam-edge); outline-offset: -2px; }
 
 /* ---------- Cards v2 (spec cards v2 §1–§5, §7) ----------
    The card face at rest: the family silhouette and glyph, the name, the kind word, the lifecycle / maintenance / 미정 chips, the
@@ -3460,3 +3454,80 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact):not(:focus-visible) { outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: -1px; filter: drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 6px 12px rgba(16,24,40,.16)); }
 .space .frame.fv-emph:not(.selected):not(.plan-impact):not(:focus-visible) { outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: -1px; }
 .space .node.lens-off.fv-emph:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { filter: grayscale(1) contrast(.65) brightness(1.22) drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 6px 12px rgba(16,24,40,.16)); }
+
+/* ---------- beauty v2 · 「읽히는 첫 전체 화면」 (A1 two card sizes, A2 the symbol budget, A3 the far view's name tags) ----------
+   The ruling's surface: a light canvas, white cards, neutral lines, one accent. A card is one white surface with a 1px neutral edge,
+   10px corners and one decoration, a thin left stripe in its family's low colour; no shadow (the selection and the first view's
+   emphasis keep their edges), no tinted face, no second rule. Its sizes are fixed on the map (224 × 80 or 224 × 104, card-family
+   cardHeights): the type is drawn at its own scale (name 15/20, kind 12/16, role 13/18), so nothing in it is hidden or shrunk by the
+   zoom. A group and a loop container keep their own form (the 「안에」 row, the well) under the same head. Where the name would read
+   under 12px on screen the box draws its name tag instead (app.ts fitCards, name-tag.ts). */
+:root { --card-edge: rgba(17,24,39,.14); --card-edge-hover: rgba(17,24,39,.28); }
+.space .node.card { --t-title: 15px; --t-title-lh: 20px; --t-kind: 12px; --t-kind-lh: 16px; --t-row: 13px; --t-row-lh: 20px; --t-label: 12px; --t-glyph: 20px; --t-gap: 0px; --t-bottom: 28px; --c-pad: 12px; --c-pl: 16px; --c-pt: 12px; }
+.space .node.card:is(.f-participant, .f-process, .f-store, .f-trigger, .f-neutral) { border-width: 1px; border-style: solid; border-radius: 10px; padding: 12px 12px 12px 16px; }
+.space .node.card:not(.selected):not(.life):not(.gx-place) { border-color: var(--card-edge); }
+.space .node.card:not(.selected):not(.life):not(.gx-place):hover { border-color: var(--card-edge-hover); }
+.space .node.card:not(.life):not(.gx-place) { background: var(--surface); }
+.space .node.card:not(.selected):not(.grp) { box-shadow: none; }
+.space .node.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border: 0; background: var(--fam-edge); pointer-events: none; }
+.space .node.card.f-neutral::before { background: var(--fam-neutral-edge); opacity: .7; }
+/* The head: glyph · name (two lines at most) and kind line · one status mark. */
+.space .node.card .c-head { margin: 0; padding: 0; gap: 8px; }
+.space .node.card .c-name { font-size: 15px; line-height: 20px; }
+.space .node.card .c-role { height: 18px; margin: auto 0 0; padding: 0; font-size: 13px; line-height: 18px; }
+.space .node.card .c-rows { margin-top: 6px; padding: 0; }
+.space .node.card .c-contract.vals { margin-top: 6px; padding: 0; }
+.space.face-card .node.card .c-well { display: block; }
+/* A2: one status mark for the current view at the head's right: the recorded state's dot, else the loop's ↻; under 시작·반복 the ↻
+   first. The ↻ is a plain mark in the slot the dot takes (16px), not a framed chip. */
+.space .node.card .c-loop-tab { min-width: 16px; width: 16px; height: 20px; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--fam-ink, var(--text-2)); }
+.space .node.card .c-state { height: 20px; }
+.space .node.card[data-mark="dot"] .c-loop-tab { display: none; }
+.space.lens-start .node.card.has-loop .c-loop-tab { display: inline-grid; }
+.space.lens-start .node.card.has-loop .c-state { display: none; }
+/* Pins: where a line a model portMap row ties meets the card, a half disc on its side (its port's name in its tip). */
+.space .node.card .c-contract.pins { position: absolute; inset: 0; padding: 0; pointer-events: none; }
+.space .node.card .c-pin { position: absolute; display: block; width: 8px; height: 8px; margin-top: -4px; padding: 0; border-radius: 50%; background: var(--edge-spine); pointer-events: auto; cursor: help; }
+.space .node.card .c-pin.in { left: -5px; }
+.space .node.card .c-pin.out { right: -5px; }
+/* A2: the one way in, in one place (the bottom-right corner): shown on hover, on selection and while the card has the keyboard. */
+.space .node.card .c-go-at { position: absolute; right: 8px; bottom: 8px; z-index: 2; display: inline-flex; transition: opacity .12s; }
+.space .node.card .c-go { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 1px solid var(--line-strong); border-radius: 7px; background: var(--surface); color: var(--text-2); cursor: pointer; }
+.space .node.card .c-go > svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.space .node.card .c-go:hover { border-color: var(--accent); color: var(--accent-strong); background: var(--accent-soft); }
+.space .node.card .c-go:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.space .node.card:not(:hover):not(:focus-within):not(.selected) .c-go-at { opacity: 0; pointer-events: none; }
+/* A3: the far view's name tag. The box stays (its lines' ends, its id, its selection); inside it, the kind icon and the name at a fixed
+   screen size (--u is one screen pixel in map units), the kind line when a line is left (a lifecycle word before the kind), nothing
+   else: no rows, no buttons, no status mark, no pins. */
+.c-tag { display: none; }
+.space.face-tag .node.card { padding: 0; }
+.space.face-tag .node.card > :not(.c-tag) { display: none !important; }
+.space.face-tag .node.card > .c-tag { display: flex; align-items: flex-start; gap: calc(4px * var(--u, 1)); width: 100%; min-width: 0; padding: calc(3px * var(--u, 1)) calc(6px * var(--u, 1)) calc(3px * var(--u, 1)) calc(7px * var(--u, 1)); overflow: hidden; }
+.c-tag-icon { flex: none; display: grid; place-items: center; width: calc(12px * var(--u, 1)); height: calc(14px * var(--u, 1)); color: var(--fam-ink, var(--text-2)); }
+.c-tag-icon > svg { width: calc(12px * var(--u, 1)); height: calc(12px * var(--u, 1)); }
+.space.face-tag .node.card.tag-noicon .c-tag-icon { display: none; }
+.c-tag-text { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+.c-tag-name { display: block; font-size: calc(12.5px * var(--u, 1)); line-height: calc(14px * var(--u, 1)); font-weight: 600; letter-spacing: -.01em; color: var(--text); white-space: nowrap; }
+.c-tag-line { display: block; white-space: nowrap; }
+.c-tag-kind { display: none; font-size: calc(12px * var(--u, 1)); line-height: calc(14px * var(--u, 1)); font-weight: var(--fw-meta); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.space.face-tag .node.card.tag-kind .c-tag-kind { display: block; }
+.space.face-tag .node.card:is(.life, .maint) .c-tag-kind { color: var(--text-2); }
+.space.dim .node.card:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .c-tag-name { color: var(--text-3); }
+/* A plain card's tag reads in the middle of its box, on the row where its lines meet it (card-family CONTACT_Y); a group's or a loop
+   container's in its head, where its own form begins. */
+.space.face-tag .node.card:not(.has-well):not(.grp) { justify-content: center; }
+/* A box too low for the lines its name needs: the name at the floor (12 on 13), 1px inside the box's top and bottom. */
+.space.face-tag .node.card.tag-compact > .c-tag { padding-top: calc(1px * var(--u, 1)); padding-bottom: calc(1px * var(--u, 1)); }
+.space.face-tag .node.card.tag-compact .c-tag-name { font-size: calc(12px * var(--u, 1)); line-height: calc(13px * var(--u, 1)); }
+.space.face-tag .node.card.tag-compact .c-tag-icon { height: calc(13px * var(--u, 1)); }
+/* A loop container's ↻ is its well's switch (a button in the status slot); under 상태·공백 the recorded state's dot takes the slot. */
+.space .node.card[data-mark="loop"] .c-state { display: none; }
+.space.lens-state .node.card.has-dot[data-mark="loop"] .c-state { display: inline-flex; }
+.space.lens-state .node.card.has-dot[data-mark="loop"] .c-loop-tab { display: none; }
+.space .node.card .c-well-open { cursor: pointer; border-radius: 4px; }
+.space .node.card .c-well-open:hover, .space .node.card .c-well-open[aria-expanded="true"] { background: var(--chip); }
+.space .node.card .c-well-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* The hover card's rows (beauty v2 A1: the kind rows and the inner line that left the card face). */
+.edge-tip .hc-row { font-size: 12px; line-height: 17px; color: var(--text-2); }
+.edge-tip .hc-row-l { color: var(--text-3); }
