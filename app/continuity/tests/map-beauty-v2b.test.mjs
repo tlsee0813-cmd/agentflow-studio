@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { lineStyle, lineWidth, mergeByChannel, relationSig, sigKey, LINE_W } from '../dist/public/client/line-grammar.js';
 import { laneRoom, LANE_MARGIN, LANE_TRACK, layoutScope } from '../dist/public/client/map-layout.js';
-import { routeEdges, openCorridors, crowdedAt, stripShift, CROWD, PORT_MIN, TRACK_GAP } from '../dist/public/client/map-route.js';
+import { routeEdges, openCorridors, applyStrips, crowdedAt, stripShift, CROWD, PORT_MIN, PORT_FLOOR, PORT_INSET, TRACK_GAP } from '../dist/public/client/map-route.js';
 import { lensLook, lensLineFg, BG_LINE } from '../dist/public/client/view-lens.js';
 
 const css = readFileSync(new URL('../public/styles.css', import.meta.url), 'utf8');
@@ -61,15 +61,20 @@ test('BV2B-4 ports: the ends on one side are spread PORT_MIN or more apart in th
   for (const y of ys) assert.ok(y > 200 && y < 280, 'on the side');
 });
 
-test('BV2B-5 a side with more ends than room shares ports only between ends that arrive with the same head', () => {
-  const sources = Array.from({ length: 9 }, (_, i) => box(`s${i}`, 0, i * 100));
-  const b = boxes([box('m', 400, 400), ...sources]);
-  const es = sources.map((s, i) => edge(s.id, 'm', i, { head: i < 5 ? 'filled' : 'open', start: 'none' }));
-  const r = routeEdges(b, es), at = new Map();
-  for (const e of es) { const y = Math.round(r.get(e.key).pts.at(-1).y * 10) / 10; (at.get(y) ?? at.set(y, []).get(y)).push(e.marks.head); }
-  for (const heads of at.values()) assert.equal(new Set(heads).size, 1, 'one mark per point');
-  const ys = [...at.keys()].sort((p, q) => p - q);
-  for (let i = 1; i < ys.length; i++) assert.ok(ys[i] - ys[i - 1] >= PORT_MIN - 1e-6);
+// Beauty v2 review (H2): no port is shared any more (two lines out of one point ran together and forked: a bus the ruling forbids).
+// A side with more ends than fit PORT_MIN apart spreads them PORT_FLOOR apart, inside the card's corners where it can.
+test('BV2B-5 a side with more ends than room gives each end its own port, PORT_FLOOR apart, in order; never two ends on one point', () => {
+  for (const n of [7, 8, 9]) {
+    const sources = Array.from({ length: n }, (_, i) => box(`s${i}`, 0, i * 100));
+    const b = boxes([box('m', 400, 400), ...sources]);
+    const es = sources.map((s, i) => edge(s.id, 'm', i, { head: i < 5 ? 'filled' : 'open', start: 'none' }));
+    const r = routeEdges(b, es), ys = es.map(e => r.get(e.key).pts.at(-1).y);
+    assert.equal(new Set(ys.map(y => y.toFixed(2))).size, n, `${n}: every end its own port`);
+    const sorted = [...ys].sort((p, q) => p - q);
+    for (let i = 1; i < n; i++) assert.ok(sorted[i] - sorted[i - 1] >= PORT_FLOOR - 1e-6, `${n}: ${sorted[i] - sorted[i - 1]}`);
+    for (const y of ys) assert.ok(y >= 400 + 4 - 1e-6 && y <= 480 - 4 + 1e-6, 'on the side');
+    if (n <= 8) for (const y of ys) assert.ok(y >= 400 + PORT_INSET - 1e-6 && y <= 480 - PORT_INSET + 1e-6, 'inside the corners');
+  }
 });
 
 test('BV2B-6 openCorridors: strips only where they part crowded lines, boxes keep their order and never overlap; positions only', () => {
@@ -109,4 +114,32 @@ test('BV2B-8 layout: a gap that lines must pass is widened before routing (colum
   const gap = Math.min(...t.map(b => b.x)) - (s.x + s.w);
   // (a line level with its partner turns nowhere, so five or six of them need a track)
   assert.ok(gap >= laneRoom(5) - 0.5, `gap ${gap} >= ${laneRoom(5)}`);
+});
+
+// Beauty v2 review (H1, H4): the strips belong to the automatic arrangement. Laid again (applyStrips) on the same parts they give the
+// same places; a part the person placed keeps the place it was put at, and the others stand where they stood before the drag.
+test('BV2B-9 strips laid again give the automatic places; a placed part is kept and the others do not move; found once per arrangement', () => {
+  const list = () => [box('a1', 0, 0), box('a2', 0, 100), box('m1', 300, 0, 224, 80), box('m2', 300, 96, 224, 80), box('z1', 700, 0), box('z2', 700, 100)];
+  const es = [edge('a1', 'z2'), edge('a2', 'z1')];
+  const auto = boxes(list()), strips = openCorridors(auto, es);
+  const again = boxes(list()); applyStrips(again, strips);
+  for (const [k, v] of auto) assert.deepEqual([again.get(k).x, again.get(k).y, again.get(k).rel], [v.x, v.y, v.rel], `${k} as the automatic arrangement`);
+  // The person dragged z2 after the strips had moved it: its stored place is in the opened map's coordinates and is kept as it is.
+  const placed = boxes(list().map(b => (b.id === 'z2' ? { ...b, x: auto.get('z2').x + 30, y: auto.get('z2').y + 24, rel: { x: auto.get('z2').x + 30, y: auto.get('z2').y + 24 } } : b)));
+  applyStrips(placed, strips, new Set(['z2']));
+  for (const [k, v] of auto) if (k !== 'z2') assert.deepEqual([placed.get(k).x, placed.get(k).y], [v.x, v.y], `${k} stands where it stood`);
+  assert.deepEqual([placed.get('z2').x, placed.get('z2').y], [auto.get('z2').x + 30, auto.get('z2').y + 24], 'the placed part is where it was put');
+  const app = readFileSync(new URL('../src/client/app.ts', import.meta.url), 'utf8'), room = app.slice(app.indexOf('function openRoom('), app.indexOf('function openRoom(') + 1800);
+  assert.ok(room.includes('applyStrips(lay.boxes, strips, mine)') && room.includes('roomMemo?.sig === sig'), 'openRoom lays the arrangement\'s strips, found once per arrangement');
+  assert.ok(!/if \(dragQuick \|\| Object\.keys\(held/.test(room), 'a place of the person\'s no longer turns the strips off');
+});
+
+// Beauty v2 review (H3, visual 4): the lines seen beside a selection are routed together, and a picked line is singled out.
+test('BV2B-10 a selection\'s lines and the summary beside it are routed as one set; a picked line is 3px in the accent, the others step back', () => {
+  const app = readFileSync(new URL('../src/client/app.ts', import.meta.url), 'utf8');
+  const shown = app.slice(app.indexOf('function routeShown('), app.indexOf('function routeShown(') + 1400);
+  assert.ok(shown.includes('routeEdges(lay.boxes, set)') && shown.includes("'sel-sum'"), 'one routing for what is seen');
+  assert.ok(/function markSelection[\s\S]*?routeShown\(\);[\s\S]*?markPicked\(\);/.test(app));
+  assert.match(css, /\.space \.world \.edge\.picked \{ --bw: 3; \}/);
+  assert.match(css, /\.space\.line-picked \.world \.edge\.on:not\(\.picked\) \{ --bw: 2\.25; \}/);
 });

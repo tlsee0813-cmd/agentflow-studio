@@ -35,8 +35,11 @@ test('S7-1 an untyped part with recorded steps or a loop: 「유형 미기록 ·
 
 test('S7-2 a name breaks only after a separator or at its spaces, never inside a word; joined it is the name', () => {
   assert.deepEqual(nameBreaks('CancelToken·signal'), ['CancelToken·', 'signal']);
-  assert.deepEqual(nameBreaks('train.bin/val.bin'), ['train.', 'bin/', 'val.', 'bin']);
-  assert.deepEqual(nameBreaks('sample.py'), ['sample.', 'py']);
+  // Beauty v2 review (M4): a file's extension stays with its stem (never 'model.|py'); a module path still breaks at its dots.
+  assert.deepEqual(nameBreaks('train.bin/val.bin'), ['train.bin/', 'val.bin']);
+  assert.deepEqual(nameBreaks('sample.py'), ['sample.py']);
+  assert.deepEqual(nameBreaks('GPT 모델(model.py)'), ['GPT 모델(model.py)']);
+  assert.deepEqual(nameBreaks('torch.nn.Module'), ['torch.', 'nn.', 'Module']);
   assert.deepEqual(nameBreaks('adapters'), ['adapters']);
   assert.deepEqual(nameBreaks('wandb'), ['wandb']);
   assert.deepEqual(nameBreaks('main::run'), ['main:', ':', 'run']);

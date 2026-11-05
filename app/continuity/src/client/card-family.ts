@@ -393,9 +393,11 @@ export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): Ca
   return { head, rows: role + members, contract, inner, signs: 0, bottom: 0, total, contact: CONTACT_Y, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
 }
 /** A name in the pieces it may break between (a line break opportunity after each separator: · / . _ - : , and the spaces it has):
- * an identifier breaks at 'CancelToken·|signal', 'train.|py', never 'adapter|s'. Joined, the pieces are the name. */
+ * an identifier breaks at 'CancelToken·|signal', 'torch.|nn', never 'adapter|s'. Beauty v2 review (M4): a file's extension stays with
+ * its stem ('model.py', 'ckpt.pt', never 'model.|py'): no break after a dot that only a short extension (four letters or digits at
+ * most) follows. Joined, the pieces are the name. */
 export function nameBreaks(name: string): string[] {
-  return name.split(/(?<=[·/._\-:,])(?=\S)/).filter(s => s.length > 0);
+  return name.split(/(?<=[·/_\-:,])(?=\S)|(?<=\.)(?![A-Za-z0-9]{1,4}(?:$|[\s)\]}·,:/]))(?=\S)/).filter(s => s.length > 0);
 }
 /** The lines a name takes on the card: one, or two (the most drawn; a longer name is cut with an ellipsis, its whole in the tip). */
 export function nameLinesOf(need: number, kids: boolean, dot = false): 1 | 2 {

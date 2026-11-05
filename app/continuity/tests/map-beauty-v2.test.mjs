@@ -14,11 +14,13 @@ const body = (src, name) => { const i = src.indexOf(`function ${name}(`); assert
 const measure = s => [...s].reduce((n, c) => n + (/[ㄱ-힝]/.test(c) ? 12 : c === '…' ? 9 : 7), 0);
 const facts = (x = {}) => ({ type: null, config: [], inputs: [], outputs: [], fields: [], loop: null, steps: [], conditions: [], ...x });
 
-test('BV2-1 the face: the card while its 15px name reads 12px or more on screen, else the name tag; 12% back, so no flicker', () => {
-  assert.equal(FACE_K, NAME_FLOOR_PX / CARD_NAME_PX); assert.ok(FACE_HYST >= 1.1 && FACE_HYST <= 1.15, 'hysteresis 10-15%');
-  assert.equal(cardFace(0.79), 'tag'); assert.equal(cardFace(0.8), 'card');
-  assert.equal(cardFace(0.85, 'tag'), 'tag', 'the way back needs 12% more'); assert.equal(cardFace(0.9, 'tag'), 'card');
-  assert.equal(cardFace(0.81, 'card'), 'card'); assert.equal(cardFace(0.79, 'card'), 'tag');
+// Beauty v2 review (H3): the card face turns to the tag below 0.9, not 0.8: its lines are spaced for 8 screen px at 0.9 (map-route
+// CROWD, PORT_FLOOR), so the card face is never drawn further out than that. The way back needs 10%.
+test('BV2-1 the face: the card from 0.9 (its name 13.5px or more, its lines spaced for that zoom), else the name tag; 10% back, so no flicker', () => {
+  assert.equal(FACE_K, 0.9); assert.ok(FACE_K >= NAME_FLOOR_PX / CARD_NAME_PX); assert.ok(FACE_HYST >= 1.1 && FACE_HYST <= 1.15, 'hysteresis 10-15%');
+  assert.equal(cardFace(0.89), 'tag'); assert.equal(cardFace(0.9), 'card');
+  assert.equal(cardFace(0.95, 'tag'), 'tag', 'the way back needs 10% more'); assert.equal(cardFace(1, 'tag'), 'card');
+  assert.equal(cardFace(0.91, 'card'), 'card'); assert.equal(cardFace(0.89, 'card'), 'tag');
   // Whatever the face, a name never reads under 12px on screen.
   for (let k = 0.2; k <= 1.6; k += 0.01) for (const prev of [null, 'tag', 'card']) {
     const f = cardFace(k, prev), px = f === 'card' ? CARD_NAME_PX * k : Math.min(TAG.name, TAG_COMPACT.name);
@@ -33,7 +35,17 @@ test('BV2-2 a tag fits its name in its lines, cut at the end with 「…」, bro
   const cut = fitTag('보관소를 읽어 조건을 확인하고 주문을 요청하는 감시 루프', 70, 2, measure);
   assert.equal(cut.lines.length, 2); assert.equal(cut.full, false); assert.ok(cut.lines[1].endsWith('…'));
   for (const l of cut.lines) assert.ok(measure(l) <= 70, l);
-  assert.equal(linesNeeded('ReadWriteProxy·압축 워커', 90, measure), 2);
+  // Beauty v2 review (M4): an identifier breaks where its words meet, never inside one: 'ReadWrite|Proxy·압축 |워커' (three lines where the
+  // old character break made two with 'ReadWriteProx|y').
+  assert.equal(linesNeeded('ReadWriteProxy·압축 워커', 90, measure), 3);
+  assert.deepEqual(fitTag('GPTResearcher', 80, 2, measure).lines, ['GPT', 'Researcher']);
+  assert.deepEqual(fitTag('WebSocketManager·run_agent', 90, 3, measure).lines, ['WebSocket', 'Manager·run_', 'agent']);
+  // A word wider than a line is cut at its end on a line of its own; the name goes on below. Hangul still breaks between syllables.
+  const long = fitTag('tinyshakespeare 데이터', 70, 2, measure);
+  assert.deepEqual(long.lines, ['tinyshak…', '데이터']); assert.equal(long.full, false);
+  assert.ok(fitTag('가나다라마바사아자차', 60, 2, measure).lines.every(l => measure(l) <= 60));
+  // The last line reads the rest of the name as written (no space put where it had a separator).
+  assert.deepEqual(fitTag('CancelToken·signal·abort·timeout', 95, 2, measure).lines, ['CancelToken·', 'signal·abort…']);
 });
 
 test('BV2-3 identifiable: names that would read alike keep the part that tells them apart', () => {

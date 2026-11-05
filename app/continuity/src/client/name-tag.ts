@@ -6,11 +6,13 @@ import { nameBreaks } from './card-family.js';
 
 /** The card's name on the map (styles.css: 15px) and the least it may read on screen. */
 export const CARD_NAME_PX = 15, NAME_FLOOR_PX = 12;
-/** Below this scale the card's name would read under the floor: the face turns to the name tag. */
-export const FACE_K = NAME_FLOOR_PX / CARD_NAME_PX;
-/** The way back to the card needs 12% more zoom than the way out (10–15% hysteresis), so a wheel that settles near the edge does
- * not flicker; the name reads at the floor or more on both sides of it. */
-export const FACE_HYST = 1.12;
+/** Below this scale the face turns to the name tag. Beauty v2 review (H3): 0.9, not the 0.8 where the card's 15px name would reach the
+ * floor: the card face draws its lines at the middle view's spacing (map-route CROWD and PORT_FLOOR, 8 screen px at 0.9), so it is
+ * never drawn further out than that; the tag (12.5px) reads there instead, and the lines fold as the far view does. */
+export const FACE_K = 0.9;
+/** The way back to the card needs 10% more zoom than the way out (10–15% hysteresis), so a wheel that settles near the edge does
+ * not flicker; the name reads at the floor or more on both sides of it (13.5px at 0.9). */
+export const FACE_HYST = 1.1;
 export type CardFace = 'card' | 'tag';
 /** The face at camera scale k; prev: the face shown now (null for a first view, read without hysteresis). */
 export function cardFace(k: number, prev: CardFace | null = null): CardFace {
@@ -26,15 +28,18 @@ export const TAG_COMPACT = { name: 12, nameLh: 13, padY: 1 } as const;
 /** What a tag of a box (on screen) holds: the name's width and lines, the icon, the kind line, and the compact type. */
 export interface TagRoom { width: number; lines: number; icon: boolean; kind: boolean; compact: boolean }
 /** The room a box of w × h screen px gives a tag. need(width, px): the lines the name takes at that width and type size. mustKind: a
- * lifecycle word must read (it sits in the kind line, kept before a name's last line when two or more lines are left). */
-export function tagRoom(w: number, h: number, need: (width: number, px: number) => number, mustKind = false): TagRoom {
+ * lifecycle word must read (it sits in the kind line, kept before a name's last line when two or more lines are left). cut(width,
+ * px): whether a word of the name is wider than a line at that type size (beauty v2 review M4: the compact type is taken when it
+ * keeps such a word whole). */
+export function tagRoom(w: number, h: number, need: (width: number, px: number) => number, mustKind = false, cut: (width: number, px: number) => boolean = () => false): TagRoom {
   const icon = w >= TAG.minIconW, width = Math.max(8, w - TAG.padL - TAG.padX - (icon ? TAG.icon + TAG.iconGap : 0));
   const at = (lh: number, pad: number) => Math.max(1, Math.floor((h - 2 * pad + 0.5) / lh));
   let rows = at(TAG.nameLh, TAG.padY), want = need(width, TAG.name), compact = false;
-  // The compact type only when it gives the name a line it lacked.
-  if (rows < Math.min(want, TAG.maxLines) + (mustKind ? 1 : 0)) {
+  // The compact type only when it gives the name a line it lacked, or keeps whole a word the tag's type would cut.
+  const whole = cut(width, TAG.name) && !cut(width, TAG_COMPACT.name);
+  if (rows < Math.min(want, TAG.maxLines) + (mustKind ? 1 : 0) || whole) {
     const cr = at(TAG_COMPACT.nameLh, TAG_COMPACT.padY);
-    if (cr > rows) { rows = cr; want = need(width, TAG_COMPACT.name); compact = true; }
+    if (cr > rows || whole) { rows = Math.max(rows, cr); want = need(width, TAG_COMPACT.name); compact = true; }
   }
   if (mustKind && rows >= 2) return { width, lines: Math.min(want, rows - 1, TAG.maxLines), icon, kind: true, compact };
   const lines = Math.min(want, rows, TAG.maxLines);
@@ -42,26 +47,40 @@ export function tagRoom(w: number, h: number, need: (width: number, px: number) 
 }
 
 /** The pieces a name breaks into on a tag: after its separators (card-family nameBreaks), at its spaces (the space kept with the
- * piece before it) and before an opening bracket (「메인테이너|(Yota Hamada)」, never 「메인테이너(Y|ota」). */
+ * piece before it), before an opening bracket (「메인테이너|(Yota Hamada)」, never 「메인테이너(Y|ota」) and, beauty v2 review M4, where
+ * the words of an identifier meet (「GPT|Researcher」, 「WebSocket|Manager」): never inside a word. */
 function pieces(name: string): string[] {
-  return nameBreaks(name).flatMap(p => p.split(/(?<=\s)(?=\S)|(?<=\S)(?=[([{])/)).filter(Boolean);
+  return nameBreaks(name).flatMap(p => p.split(/(?<=\s)(?=\S)|(?<=\S)(?=[([{])|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z]{2})/)).filter(Boolean);
+}
+/** Hangul breaks between its syllables (Korean is set that way); a Latin word, an identifier or a number never breaks inside. */
+const HANGUL = /[ㄱ-ㆎ가-힣]/;
+/** Whether a word of the name is wider than a line of width w (on its line it would be cut with 「…」). */
+export function cutsWord(name: string, w: number, measure: (s: string) => number): boolean {
+  return pieces(name.trim()).some(p => !HANGUL.test(p) && measure(p.trimEnd()) > w);
 }
 /** How many lines a name takes at width w (no line cut). */
 export function linesNeeded(name: string, w: number, measure: (s: string) => number): number {
   return wrap(name, w, measure).length;
 }
-/** The name wrapped greedily at its breaks; a piece wider than the line breaks between characters. */
+/** The name wrapped greedily at its breaks. A piece wider than the line: Hangul breaks between its syllables; any other word takes a
+ * line of its own, cut at its end with 「…」, and the name goes on on the next line (beauty v2 review M4: 「tinyshakesp…」, never
+ * 「tinyshakesp|eare」). */
 function wrap(name: string, w: number, measure: (s: string) => number): string[] {
-  const out: string[] = []; let cur = '';
+  return wrapAt(name, w, measure).map(l => l.text);
+}
+/** wrap, each line with the offset in the name where it starts (so the rest of a name is read from the name itself, as written). */
+function wrapAt(name: string, w: number, measure: (s: string) => number): { text: string; start: number }[] {
+  const out: { text: string; start: number }[] = []; let cur = '', start = 0, at = 0;
+  const push = (text: string) => { out.push({ text: text.trimEnd(), start }); };
   for (const p of pieces(name)) {
-    if (measure((cur + p).trimEnd()) <= w) { cur += p; continue; }
-    if (cur) { out.push(cur.trimEnd()); cur = ''; }
-    if (measure(p.trimEnd()) <= w) { cur = p; continue; }
-    // A piece too long for a line: by characters.
-    for (const ch of [...p]) { if (cur && measure((cur + ch).trimEnd()) > w) { out.push(cur.trimEnd()); cur = ''; } cur += ch; }
+    if (measure((cur + p).trimEnd()) <= w) { cur += p; at += p.length; continue; }
+    if (cur) { push(cur); cur = ''; start = at; }
+    if (measure(p.trimEnd()) <= w) { cur = p; at += p.length; continue; }
+    if (!HANGUL.test(p)) { push(cutEnd(p.trimEnd(), w, measure)); at += p.length; start = at; continue; }
+    for (const ch of [...p]) { if (cur && measure((cur + ch).trimEnd()) > w) { push(cur); cur = ''; start = at; } cur += ch; at += ch.length; }
   }
-  if (cur.trim()) out.push(cur.trimEnd());
-  return out.length ? out : [''];
+  if (cur.trim()) push(cur);
+  return out.length ? out : [{ text: '', start: 0 }];
 }
 /** The longest start of s (by characters) that fits w with an ellipsis after it. */
 function cutEnd(s: string, w: number, measure: (s: string) => number): string {
@@ -71,9 +90,11 @@ function cutEnd(s: string, w: number, measure: (s: string) => number): string {
 }
 /** A name in at most `lines` lines of width w, cut at the end with 「…」 (its start reads). full: nothing was cut. */
 export function fitTag(name: string, w: number, lines: number, measure: (s: string) => number): { lines: string[]; full: boolean } {
-  const all = wrap(name.trim(), w, measure), n = Math.max(1, lines);
-  if (all.length <= n) return { lines: all, full: true };
-  return { lines: [...all.slice(0, n - 1), cutEnd(all.slice(n - 1).join(' '), w, measure)], full: false };
+  const nm = name.trim(), at = wrapAt(nm, w, measure), all = at.map(l => l.text), n = Math.max(1, lines);
+  // A word cut on its own line (wrap) leaves the name not full either.
+  if (all.length <= n) return { lines: all, full: !all.some(l => l.endsWith('…')) };
+  // The last line reads the rest of the name as written (no space put where the name had a separator), cut at its end.
+  return { lines: [...all.slice(0, n - 1), cutEnd(nm.slice(at[n - 1]!.start).trim(), w, measure)], full: false };
 }
 /** The part of a name that tells it from others that start alike: its first word (at most 8 characters) and 「…」, then the name from
  * where it first differs from them (back to that word's start): 「Hugging…datasets openwebtext」 beside 「Hugging…GPT-2 가중치」. */

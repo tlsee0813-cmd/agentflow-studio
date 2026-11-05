@@ -15,6 +15,9 @@ export interface Routed extends Route { key: string; faces?: { a: PortFace; b: P
 /** Beauty v2 B2/B3: runs side by side in one gap sit LANE_TRACK (10) apart, ports on one side PORT_GAP (12) apart and never closer than
  * PORT_MIN (11.5): at the least card-face zoom (0.9) about 9, 10.8 and 10.4 screen pixels. */
 export const TRACK_GAP = LANE_TRACK, PORT_GAP = 12, PORT_MIN = 11.5;
+/** Beauty v2 review (H2): a side with more ends than fit PORT_MIN apart spreads them no closer than PORT_FLOOR (8.1 screen px at 0.9,
+ * the least card-face zoom) rather than sharing a port; ports stay PORT_INSET inside a card's top and bottom (its 10px corners). */
+export const PORT_FLOOR = 9, PORT_INSET = 8;
 /** The room a spread run keeps off every card when its gap has it (map hygiene review: no run squeezed along a card's edge). */
 const RUN_CLEAR = 10;
 /** Where a reference's ear sits on a box without one of its own (an untyped card): the head band, at most halfway down. */
@@ -84,42 +87,56 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
   const put = (key: string, end: 'a' | 'b', y: number) => { const port = out.get(key) ?? {}; port[end] = y; out.set(key, port); };
   // An end tied to a pin stands at the pin and never moves; so does a reference's ear (the head band, 3.6: no port, no spread).
   // The side's other lines spread round its contact point.
-  const pinned = new Set<string>();
+  const pinned = new Set<string>(), pinnedAt = new Map<string, number[]>();
   for (const [k, list] of [...at]) {
-    const box = boxes.get(k.split('|')[0]!)!, free: End[] = [];
+    const box = boxes.get(k.split('|')[0]!)!, free: End[] = [], tied = new Map<number, End[]>();
     for (const p of list) {
       // Beauty v2 B2: a reference's ear takes its place in the side's order like any other end (it was set at the head band, where
       // every reference leaving one side stood on one point).
       const e = sides.get(p.key)!.e, y = pinOf(box, e, p.end);
-      if (y === undefined) free.push(p); else { put(p.key, p.end, y); pinned.add(`${p.key}|${p.end}`); }
+      if (y === undefined) free.push(p); else { (tied.get(y) ?? tied.set(y, []).get(y)!).push(p); pinned.add(`${p.key}|${p.end}`); }
     }
+    // Beauty v2 review (H2/H3): lines tied to one pin meet it side by side, PORT_FLOOR apart across its dot (in the order of their other
+    // ends), never on one point (they ran together out of it as one line).
+    const ys: number[] = [];
+    for (const [y, ps] of tied) { ps.sort((p, q) => p.far - q.far); ps.forEach((p, i) => { const at2 = Math.round((y + (i - (ps.length - 1) / 2) * PORT_FLOOR) * 2) / 2; put(p.key, p.end, at2); ys.push(at2); }); }
+    if (ys.length) pinnedAt.set(k, ys);
     if (free.length) at.set(k, free); else at.delete(k);
   }
   for (const [k, list] of at) {
     const box = boxes.get(k.split('|')[0]!)!, side = box.kind === 'frame' ? box.head : box.h;
-    if (list.length < 2) { put(list[0]!.key, list[0]!.end, mid(box)); continue; }
     list.sort((p, q) => p.far - q.far);
-    // Beauty v2 B2: a side with more ends than fit PORT_MIN apart shares ports: neighbouring ends (in the side's order) that arrive with
-    // the same head, or leave with the same start, take one port (their heads drawn once there: identical heads at the same port),
-    // the nearest pairs first, until the ports fit. Never two different marks on one point.
-    const cap = Math.max(1, Math.floor((side - 8) / PORT_MIN) + 1), mark = (p: End) => { const e = sides.get(p.key)!.e; return `${p.end}|${p.end === 'b' ? e.marks?.head ?? '' : e.marks?.start ?? ''}`; };
-    const groups: End[][] = list.map(p => [p]);
-    while (groups.length > cap) {
-      let best = -1, bd = Infinity;
-      for (let i = 0; i + 1 < groups.length; i++) { const a = groups[i]!, b = groups[i + 1]!; if (mark(a[0]!) !== mark(b[0]!) || !sides.get(a[0]!.key)!.e.marks) continue; const d = b[0]!.far - a[a.length - 1]!.far; if (d < bd) { bd = d; best = i; } }
-      if (best < 0) break;
-      groups.splice(best, 2, [...groups[best]!, ...groups[best + 1]!]);
+    // Beauty v2 review (H3): a side that also has ends tied to pins spreads its free ends round them (they were spread over the side as
+    // if the pins' lines were not there, and a free end met the card a pixel or two from a pinned one).
+    const fixedYs = pinnedAt.get(k) ?? [];
+    if (fixedYs.length) {
+      const inset = box.kind === 'frame' ? 7 : PORT_INSET, n = list.length;
+      let slots: number[] = [];
+      for (const g of [PORT_GAP, PORT_FLOOR, 6]) {
+        slots = [];
+        for (let y = Math.ceil((box.y + inset) * 2) / 2; y <= box.y + side - inset + 1e-6; y += 0.5) if (fixedYs.every(f => Math.abs(f - y) >= g) && (!slots.length || y - slots.at(-1)! >= g)) slots.push(y);
+        if (slots.length >= n) break;
+      }
+      if (slots.length >= n) {
+        let best = 0, bd = Infinity;
+        for (let i = 0; i + n <= slots.length; i++) { const m = (slots[i]! + slots[i + n - 1]!) / 2, d = Math.abs(m - mid(box)); if (d < bd) { bd = d; best = i; } }
+        list.forEach((p, i) => put(p.key, p.end, slots[best + i]!));
+        continue;
+      }
     }
-    const n = groups.length;
-    if (n < 2) { for (const p of list) put(p.key, p.end, mid(box)); continue; }
-    // Beauty v2 B2: PORT_GAP apart while the side has room (7 inside its corners), PORT_MIN at the least; a side too short even for
-    // that spreads over its whole length (never two ends on one point). The run is centred on the contact point and kept on the
-    // side.
-    const room = side - 14, gap = (n - 1) * PORT_MIN <= room ? Math.min(PORT_GAP, room / (n - 1)) : Math.max(4, (side - 6) / (n - 1));
-    const span = (n - 1) * gap, start = span > side - 14 ? box.y + (side - span) / 2 : Math.min(Math.max(mid(box) - span / 2, box.y + 7), box.y + side - 7 - span);
+    if (list.length < 2) { put(list[0]!.key, list[0]!.end, mid(box)); continue; }
+    // Beauty v2 review (H2): every end has a port of its own. Two lines out of one point ran together and forked further on (a shared
+    // bus the ruling forbids: 다른 끝점의 선을 공통 버스에 접합하지 않음), so a busy side spreads its ends closer (PORT_FLOOR at the least)
+    // instead of sharing one. PORT_GAP apart while the side has room inside its corners (PORT_INSET: a card's 10px corner is not a
+    // port); a side too short even for PORT_FLOOR spreads over its whole room (never two ends on one point). The run is centred on
+    // the contact point and kept on the side.
+    const n = list.length, inset = box.kind === 'frame' ? 7 : PORT_INSET, room = side - 2 * inset;
+    // Under PORT_FLOOR inside the corners, the run takes the corners' room too (4 from the ends) before it goes closer.
+    const gap = Math.max(4, room / (n - 1) >= PORT_FLOOR ? Math.min(PORT_GAP, room / (n - 1)) : Math.min(PORT_FLOOR, (side - 8) / (n - 1)));
+    const span = (n - 1) * gap, start = span > room ? box.y + (side - span) / 2 : Math.min(Math.max(mid(box) - span / 2, box.y + inset), box.y + side - inset - span);
     // On the half-pixel grid the route search keeps its lanes on (a port off it would leave its last run slanted).
     const s2 = Math.round(start * 2) / 2, g2 = Math.floor(gap * 2) / 2;
-    groups.forEach((g, i) => { for (const p of g) put(p.key, p.end, s2 + i * g2); });
+    list.forEach((p, i) => put(p.key, p.end, s2 + i * g2));
   }
   const within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = boxes.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
   // The boxes a straight run between a and b must not cross (as edgePath reckons them): every box but the two ends, the groups
@@ -134,10 +151,9 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
   };
   const onSide = (k: string, y: number) => { const box = boxes.get(k.split('|')[0]!)!, h = box.kind === 'frame' ? box.head : box.h; return y >= box.y + PORT_MIN && y <= box.y + h - PORT_MIN; };
   // Moving one end from y to to keeps clear of the side's other ports: none between the two heights or within PORT_MIN of to.
-  const canMove = (k: string, key: string, from: number, to: number) => onSide(k, to) && (at.get(k) ?? []).every(p => {
-    if (p.key === key) return true;
-    const y = out.get(p.key)![p.end]!; return y < Math.min(from, to) - PORT_MIN + 0.01 || y > Math.max(from, to) + PORT_MIN - 0.01;
-  });
+  const clearOf = (y: number, from: number, to: number) => y < Math.min(from, to) - PORT_MIN + 0.01 || y > Math.max(from, to) + PORT_MIN - 0.01;
+  const canMove = (k: string, key: string, from: number, to: number) => onSide(k, to) && (at.get(k) ?? []).every(p => p.key === key || clearOf(out.get(p.key)![p.end]!, from, to))
+    && (pinnedAt.get(k) ?? []).every(y => clearOf(y, from, to));
   const order = [...sides.values()].filter(s => out.get(s.e.key)?.a !== undefined && out.get(s.e.key)?.b !== undefined).sort((p, q) => Number(!!q.e.spine) - Number(!!p.e.spine) || Math.abs(out.get(p.e.key)!.a! - out.get(p.e.key)!.b!) - Math.abs(out.get(q.e.key)!.a! - out.get(q.e.key)!.b!));
   for (const { a: sa, b: sb, e } of order) {
     const port = out.get(e.key)!, ya = port.a!, yb = port.b!; if (Math.abs(ya - yb) < 0.5) continue;
@@ -241,7 +257,11 @@ function nudge(routes: Map<string, Routed>, blocks: (key: string) => Box[], vert
       // pushes a run along a card's edge while the gap has room.
       // Beauty v2 B3: never onto another line's track (the old trunk join) nor a hairline beside it: a run with no room keeps its
       // place, and a port run it lies on moves its rest away (below), or a strip of room is opened (openCorridors).
-      const at = tries.slice(0, 9).find(x => ok(x, RUN_CLEAR) && apart(s, x, CROWD)) ?? tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, CROWD)) ?? tries.find(x => ok(x, -1) && apart(s, x, CROWD));
+      // Beauty v2 review (H3): a run with no place apart within 48 looks further (to 96) before it stays on another line: with a
+      // selection's own lines drawn one by one a lane holds more lines than the room opened for the map at rest.
+      const far: number[] = []; for (let k = 50; k <= 96; k += 2) far.push(slot + k, slot - k);
+      const at = tries.slice(0, 9).find(x => ok(x, RUN_CLEAR) && apart(s, x, CROWD)) ?? tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, CROWD)) ?? tries.find(x => ok(x, -1) && apart(s, x, CROWD))
+        ?? (apart(s, s.at, CROWD) ? undefined : far.find(x => ok(x, LANE_CLEAR) && apart(s, x, CROWD)));
       if (at !== undefined) move(s, at, vertical);
       placed.push(s);
     });
@@ -349,6 +369,9 @@ export function routeEdges(boxes: Map<string, Box>, edges: Edge[], opts: { quick
   nudge(out, blocks, true, rims, portFree, owns); nudge(out, blocks, false, rims, portFree, owns);
   // Beauty v2 B3: the horizontal pass lengthens or adds vertical runs (its moves and jogs); one more vertical pass parts them.
   if (!opts.quick) nudge(out, blocks, true, rims, portFree, owns);
+  // Beauty v2 review (H3): that vertical pass moves the turns of level runs, so two level runs can come to overlap where they did not
+  // (a run reaching 17 past the turn of another, 4 apart); one more level pass and one more vertical pass part them.
+  if (!opts.quick) { nudge(out, blocks, false, rims, portFree, owns); nudge(out, blocks, true, rims, portFree, owns); }
   for (const r of out.values()) {
     r.pts = cleanPts(r.pts);
     if (r.pts.length >= 3 || !opts.quick) { r.d = rounded(r.pts); const m = Math.floor((r.pts.length - 1) / 2); r.mx = (r.pts[m]!.x + r.pts[m + 1]!.x) / 2; r.my = (r.pts[m]!.y + r.pts[m + 1]!.y) / 2; }
@@ -356,21 +379,8 @@ export function routeEdges(boxes: Map<string, Box>, edges: Edge[], opts: { quick
   return out;
 }
 
-/** Beauty v2 B3: the first and last runs of a route longer than PORT_RUN split into a stub of FIRST_BEND at the port and the rest, with
- * a repeated point between (a run of no length, so the rest is a middle run the nudging may move); a straight line longer than
- * 2·PORT_RUN keeps a stub at each end. cleanPts drops what is left unused. */
+/** The stub a run at a port keeps when the rest of it moves to a track of its own (splitRun), and the least run that is split. */
 const STUB = 16, PORT_RUN = 40;
-function splitPortRuns(p: Point[]): Point[] {
-  const len = (a: Point, b: Point) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y), toward = (a: Point, b: Point, d: number): Point => { const l = len(a, b) || 1; return { x: a.x + ((b.x - a.x) / l) * d, y: a.y + ((b.y - a.y) / l) * d }; };
-  const orth = (a: Point, b: Point) => Math.abs(a.x - b.x) < 0.01 || Math.abs(a.y - b.y) < 0.01;
-  if (p.length === 2) { const [A, B] = p as [Point, Point]; if (!orth(A, B) || len(A, B) <= PORT_RUN * 2) return p; const a = toward(A, B, STUB), b = toward(B, A, STUB); return [A, a, { ...a }, { ...b }, b, B]; }
-  if (p.length < 3) return p;
-  let out = [...p];
-  if (orth(out[0]!, out[1]!) && len(out[0]!, out[1]!) > PORT_RUN) { const a = toward(out[0]!, out[1]!, STUB); out = [out[0]!, a, { ...a }, ...out.slice(1)]; }
-  const n = out.length;
-  if (orth(out[n - 2]!, out[n - 1]!) && len(out[n - 2]!, out[n - 1]!) > PORT_RUN) { const b = toward(out[n - 1]!, out[n - 2]!, STUB); out = [...out.slice(0, n - 1), { ...b }, b, out[n - 1]!]; }
-  return out;
-}
 /** Splits a run at a port (s, fixed) longer than PORT_RUN into its stub (STUB long, kept at the port, still s) and the rest (a
  * middle run, returned, which the caller may move): a repeated point between them, so moving the rest makes a jog by the stub. A
  * straight line keeps a stub at each end. The other runs of the same route keep their places (their indices follow). null when the
@@ -413,10 +423,9 @@ function cleanPts(raw: Point[]): Point[] {
 export const CROWD = 8 / 0.9;
 /** A strip opened across the map: every top-level box wholly past `at` (below it for 'y', right of it for 'x') moves by d. */
 export interface Strip { axis: 'x' | 'y'; at: number; d: number }
-/** Where routed lines crowd: parallel runs of two different lines that overlap along their length (more than 4) closer than CROWD
- * (two runs ending at the same point of the same box are one merged head, not a crowd). Each place once (within 24). */
-export function crowdedAt(routes: ReadonlyMap<string, Routed>, edges: readonly Edge[]): { axis: 'x' | 'y'; at: number; lo: number; hi: number; len: number }[] {
-  const byKey = new Map(edges.map(e => [e.key, e]));
+/** Where routed lines crowd: parallel runs of two different lines that overlap along their length (more than 4) closer than CROWD.
+ * Beauty v2 review (H2): two runs out of one shared point are a crowd too (no port is shared any more). Each place once (within 24). */
+export function crowdedAt(routes: ReadonlyMap<string, Routed>, _edges: readonly Edge[] = []): { axis: 'x' | 'y'; at: number; lo: number; hi: number; len: number }[] {
   type S = { key: string; hz: boolean; at: number; lo: number; hi: number; A: Point; B: Point; first: boolean; last: boolean };
   const segs: S[] = [];
   for (const r of routes.values()) {
@@ -431,9 +440,6 @@ export function crowdedAt(routes: ReadonlyMap<string, Routed>, edges: readonly E
   for (let i = 0; i < segs.length; i++) for (let j = i + 1; j < segs.length; j++) {
     const a = segs[i]!, b = segs[j]!; if (a.key === b.key || a.hz !== b.hz) continue;
     const ov = Math.min(a.hi, b.hi) - Math.max(a.lo, b.lo); if (ov <= 4 || Math.abs(a.at - b.at) >= CROWD) continue;
-    const ea = byKey.get(a.key), eb = byKey.get(b.key);
-    const merged = (a.last && b.last && ea?.to === eb?.to && Math.hypot(a.B.x - b.B.x, a.B.y - b.B.y) < 0.6) || (a.first && b.first && ea?.from === eb?.from && Math.hypot(a.A.x - b.A.x, a.A.y - b.A.y) < 0.6);
-    if (merged) continue;
     const at = (a.at + b.at) / 2, axis = a.hz ? 'y' : 'x', lo = Math.max(a.lo, b.lo), hi = Math.min(a.hi, b.hi);
     const same = out.find(o => o.axis === axis && Math.abs(o.at - at) < 24 && lo < o.hi && o.lo < hi);
     if (same) same.len += ov; else out.push({ axis, at, lo, hi, len: ov });
@@ -450,8 +456,7 @@ export function openCorridors(boxes: Map<string, Box>, edges: readonly Edge[], r
   const strips: Strip[] = [];
   const top = (b: Box): Box => { let c: Box = b; for (let g = 0; g < 64; g++) { const up = boxes.get(c.container); if (!up) return c; c = up; } return c; };
   const crowd = () => crowdedAt(routeEdges(boxes, [...edges]), edges);
-  const shift = (ids: Set<string>, axis: 'x' | 'y', d: number) => { for (const b of boxes.values()) if (ids.has(top(b).id)) {
-    if (axis === 'y') { b.y += d; if (top(b) === b) b.rel = { x: b.rel.x, y: b.rel.y + d }; } else { b.x += d; if (top(b) === b) b.rel = { x: b.rel.x + d, y: b.rel.y }; } } };
+  const shift = (ids: Set<string>, axis: 'x' | 'y', d: number) => shiftTops(boxes, ids, axis, d);
   // How badly the lines crowd: the length they run crowded, summed.
   const worse = (c: { len: number }[]) => c.reduce((a, x) => a + x.len, 0);
   let now = crowd(), tried = 0;
@@ -476,6 +481,23 @@ export function openCorridors(boxes: Map<string, Box>, edges: readonly Edge[], r
     if (!moved) break;
   }
   return strips;
+}
+/** The top-level box holding b (b itself at the top). */
+function topOf(boxes: ReadonlyMap<string, Box>, b: Box): Box { let c: Box = b; for (let g = 0; g < 64; g++) { const up = boxes.get(c.container); if (!up) return c; c = up; } return c; }
+/** Moves the top-level boxes ids (and everything inside them) by d along axis: their place and their stored-relative place alike. */
+function shiftTops(boxes: Map<string, Box>, ids: ReadonlySet<string>, axis: 'x' | 'y', d: number) {
+  for (const b of boxes.values()) { const t = topOf(boxes, b); if (!ids.has(t.id)) continue;
+    if (axis === 'y') { b.y += d; if (t === b) b.rel = { x: b.rel.x, y: b.rel.y + d }; } else { b.x += d; if (t === b) b.rel = { x: b.rel.x + d, y: b.rel.y }; } }
+}
+/** Beauty v2 review (H1): the strips openCorridors opened on the automatic arrangement, laid again on a layout of the same parts: in
+ * their order, each moves the top-level boxes wholly past it, as openCorridors did, except the boxes in `keep` (a place of the
+ * person's, stored or held: it is where the person put it, already in the opened map's coordinates). So the parts the person did not
+ * place stand where they stood before a drag, whatever the person placed. Positions only. */
+export function applyStrips(boxes: Map<string, Box>, strips: readonly Strip[], keep: ReadonlySet<string> = new Set()) {
+  for (const s of strips) {
+    const past = new Set([...boxes.values()].filter(b => topOf(boxes, b) === b && !keep.has(b.id) && (s.axis === 'y' ? b.y : b.x) >= s.at).map(b => b.id));
+    if (past.size) shiftTops(boxes, past, s.axis, s.d);
+  }
 }
 /** A point moved by the strips opened (in their order), as the boxes past them were. */
 export function stripShift(strips: readonly Strip[], x: number, y: number): { x: number; y: number } {

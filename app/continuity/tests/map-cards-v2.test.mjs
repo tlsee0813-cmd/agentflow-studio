@@ -275,10 +275,12 @@ test('CARD-11 polish round fixes 1: the 상태·공백 lens marks recorded state
   // keyboard focus.
   assert.ok(src.includes("class: 'c-go enter-in'") && card.includes("class: 'c-go entry-open'") && css.includes('.space .node.card:not(:hover):not(:focus-within):not(.selected) .c-go-at { opacity: 0; pointer-events: none; }'));
   assert.ok(!card.includes('제자리에 들어가면 펼치고'), 'a short ⤢ tip');
-  assert.match(css, /\.node\.card \.c-entry \.c-enter \{ height: calc\(var\(--t-bottom, 28px\) - 6px\);[^}]*border-color: var\(--line\)/);
+  // Beauty v2 review (M3): the old foot row's way-in rules (.c-entry .c-enter) went with the foot; the face has no such element any more.
+  assert.ok(!/\.c-entry|\.c-enter\b/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')), 'no rules left for the old foot row');
   assert.ok(src.includes('plusGlyph()') && src.includes('toggleButton(p, false, true)'));
   // No dashed ghost under a card; a card whose only way in is ⤢ has no foot row (its height has none either).
-  assert.ok(css.includes('.node.card.fit-auto.fit-ghost::after { content: none; }'));
+  // Beauty v2 review (M3): no card is drawn at its content's height any more (fit-auto went with A1's fixed sizes), so its ghost rule went too.
+  assert.ok(!/\.fit-(auto|ghost)\b/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')) && !card.includes('fit-auto'));
   assert.ok(!card.includes("class: 'c-bottom'") && body(src, 'cardFactsOf').includes('foot: p.childIds.length > 0,'), 'no foot row on the face');
   // The first screen: 기록 정보 ▾ folds the title's meta lines; the toolbar's first view is a few words, its sentence the tip; the
   // opening view centres the first view's parts (else the main flow) when the map does not fit.

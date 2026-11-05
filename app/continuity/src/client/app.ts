@@ -32,11 +32,11 @@ import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, su
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
-import { routeEdges, samplePath, mixPath, openCorridors, stripShift, type Routed } from './map-route.js';
+import { routeEdges, samplePath, mixPath, openCorridors, applyStrips, stripShift, type Routed, type Strip } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
 import { CARD_H, CARD_H_TALL, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
-import { cardFace, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
+import { cardFace, cutsWord, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots, cuePoints } from './map-labels.js';
@@ -400,7 +400,8 @@ async function render() {
     if (insideScope(o, part)) expandPath(o, part, tempExpand);
     else { location.replace(hashFor(o.key, part, partOf(o, part)!.parentId)); return; }
   }
-  if ([...tempExpand].join('|') !== before) renderSpace('keep'); else relayout(o);
+  // Beauty v2 review (H4): the layout above was made with no reference folds open; it is made again only when some are open now.
+  if ([...tempExpand].join('|') !== before) renderSpace('keep'); else if (tempExpand.size) relayout(o);
   // Visits: kept only while the selection is the part a relation led to; any other way of moving on lets them go.
   if (pendingVisit) { if (pendingVisit.to === part && pendingVisit.from.key === o.key) { visits.push(pendingVisit); ahead = []; markEntry({ to: pendingVisit.id }); } pendingVisit = null; }
   else if (forwardAt >= 0 && ahead[forwardAt]!.to === part && leaving) { const again = ahead.splice(forwardAt).reverse(); again[0] = { ...again[0]!, from: leaving }; visits.push(...again); }
@@ -842,13 +843,32 @@ const heldPositions = (o: Opened): Positions => {
 };
 const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
 /** Beauty v2 B3: where the routed lines still crowd, strips open across the map (map-route openCorridors), for the lines drawn at rest
- * (a busy map's summary lines, else each line). Only an automatic arrangement: once a part of this view has a place of the person's
- * (stored, or held while a part is dragged), nothing is moved for the lines. Positions only. */
+ * (a busy map's summary lines, else each line). Positions only.
+ * Beauty v2 review (H1, H4): the strips belong to the automatic arrangement, never to the person's places. They are found on the
+ * arrangement with none of this view's places (the same arrangement the person saw before any drag), kept for as long as that
+ * arrangement is the same (roomMemo: a selection, a lens or a redraw of the same map finds them again, it does not search again), and
+ * laid on every part the person did not place (applyStrips); a part the person placed, stored or held, stands where it was put. So one
+ * drag never moves the other parts, now or on the next visit. */
+let roomMemo: { sig: string; view: string; strips: Strip[] } | null = null;
+const restSet = (o: Opened, L: ScopeLayout) => (L.edges.length > 6 ? sumLines(o, summaryEdges(L.boxes, L.edges)) : L.edges);
 function openRoom(o: Opened, held: Positions) {
-  if (dragQuick || Object.keys(held[scope ?? ROOT] ?? {}).length) return;
-  const set = lay.edges.length > 6 ? sumLines(o, summaryEdges(lay.boxes, lay.edges)) : lay.edges, strips = openCorridors(lay.boxes, set);
+  const level = scope ?? ROOT, mine = new Set(Object.keys(held[level] ?? {})), view = `${o.key}|${level}`;
+  const tops = [...lay.boxes.values()].filter(b => !lay.boxes.has(b.container)).sort((p, q) => (p.id < q.id ? -1 : 1));
+  const sig = [view, mapAspect().toFixed(3), ...tops.map(b => `${b.id}:${b.w}x${b.h}${mine.has(b.id) ? '' : `@${b.x},${b.y}`}`), '#', ...lay.edges.map(e => `${e.key}>${e.to}`)].join('|');
+  let strips = roomMemo?.sig === sig ? roomMemo.strips : null, laid = false;
+  // While a part follows the hand its container's places are held; the strips of this view stand as they were (no search per move).
+  if (!strips && dragQuick) strips = roomMemo?.view === view ? roomMemo.strips : [];
+  if (!strips) {
+    if (mine.size) {
+      const pos: Positions = { ...held }; delete pos[level];
+      const L = layoutScope(o.view, scope, isExpanded(o), pos, measureName, planRows ?? undefined, mapAspect(), typedRoom(o));
+      L.edges = grammarEdges(o, L.edges); strips = openCorridors(L.boxes, restSet(o, L));
+    } else { strips = openCorridors(lay.boxes, restSet(o, lay)); laid = true; }
+    roomMemo = { sig, view, strips };
+  }
   if (!strips.length) return;
-  lay.heads = lay.heads.map(x => ({ ...x, ...stripShift(strips, x.x, x.y) }));
+  if (!laid) applyStrips(lay.boxes, strips, mine);
+  lay.heads = lay.heads.map(x => ({ ...x, ...stripShift(strips!, x.x, x.y) }));
   lay.bounds = unionRect([...lay.boxes.values(), ...lay.heads]) ?? lay.bounds;
 }
 /** The map's lines in the line grammar (map design v3 6.5, 3.6): one stroke per pair, direction and channel (data and control
@@ -956,9 +976,10 @@ function fitCards() {
   const items: { id: string; name: string; width: number; lines: number; el: HTMLElement; measure: (s: string) => number }[] = [];
   for (const el of cards) {
     const name = el.querySelector('.c-name')?.textContent ?? '', w = (parseFloat(el.style.width) || el.offsetWidth) * k, hgt = (parseFloat(el.style.height) || el.offsetHeight) * k;
-    // A group or a loop container keeps its own (taller) box: its tag reads in the box's head (its own size up to the tall card's).
+    // A group or a loop container keeps its own (taller) box. Beauty v2 review (visual 2): its tag takes the whole box and reads in its
+    // middle like any other tag (it stood in the box's head, over an empty half of the box).
     const own = el.classList.contains('has-well') || el.classList.contains('grp');
-    const room = tagRoom(w, Math.min(hgt, (own ? CARD_H_TALL : el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), (x, px) => linesNeeded(name, x, px === TAG.name ? nameW : compactW), el.dataset.life === '1');
+    const room = tagRoom(w, own ? hgt : Math.min(hgt, (el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), (x, px) => linesNeeded(name, x, px === TAG.name ? nameW : compactW), el.dataset.life === '1', (x, px) => cutsWord(name, x, px === TAG.name ? nameW : compactW));
     el.classList.toggle('tag-noicon', !room.icon); el.classList.toggle('tag-kind', room.kind); el.classList.toggle('tag-compact', room.compact);
     items.push({ id: el.dataset.part ?? '', name, width: room.width, lines: room.lines, el, measure: room.compact ? compactW : nameW });
   }
@@ -1434,8 +1455,8 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
       h('span', { class: 'c-val c-names' }, ...v.names.flatMap((n, i) => [i ? h('span', { class: 'c-sep', 'aria-hidden': 'true' }, ' · ') : null, h('span', { class: 'unl' }, n)].filter((x): x is HTMLElement => !!x))),
       v.more ? h('span', { class: 'c-more', 'data-tip': moreTip(v.more, v.label) }, moreText(v.more)) : null))) : null
     : h('div', { class: 'c-contract pins', role: 'group', 'aria-label': `${p.name}의 포트 · 모델이 적은 포트 대응` },
-      ...c.ins.map(n => h('i', { class: 'c-pin in', style: `top:${hs.pins[`in:${n}`] ?? hs.contact}px`, 'data-tip': `${c.inTitle} · ${n} · 포트 대응 행(모델)이 이 포트에 선을 잇는다${c.unmapped ? `\n포트 대응 미기록 ${c.unmapped} · ${CONTACT_TIP.replace(/^포트 대응 미기록 · /, '')}` : ''}`, 'aria-label': `${c.inTitle} 포트 ${n}` })),
-      ...c.outs.map(n => h('i', { class: 'c-pin out', style: `top:${hs.pins[`out:${n}`] ?? hs.contact}px`, 'data-tip': `${c.outTitle} · ${n} · 포트 대응 행(모델)이 이 포트에 선을 잇는다`, 'aria-label': `${c.outTitle} 포트 ${n}` })));
+      ...c.ins.map(n => h('i', { class: 'c-pin in', style: `top:${hs.pins[`in:${n}`] ?? hs.contact}px`, 'data-tip': `${c.inTitle} · ${n} · 포트 대응 행(모델)이 이 포트에 선을 잇는다${c.unmapped ? `\n포트 대응 미기록 ${c.unmapped} · ${CONTACT_TIP.replace(/^포트 대응 미기록 · /, '')}` : ''}`, role: 'img', 'aria-label': `${c.inTitle} 포트 ${n}` })),
+      ...c.outs.map(n => h('i', { class: 'c-pin out', style: `top:${hs.pins[`out:${n}`] ?? hs.contact}px`, 'data-tip': `${c.outTitle} · ${n} · 포트 대응 행(모델)이 이 포트에 선을 잇는다`, role: 'img', 'aria-label': `${c.outTitle} 포트 ${n}` })));
   // Polish round fixes 2: the way in's tip says the unplaced rules in a reader's words (the counts keep entryParts' order).
   const words = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 }).map(w => w.replace(/^배치 미정 (\d+)$/, '단계 미정 규칙 $1'));
   const well = t.well ? wellEl(o, p, r, t.well, false) : null;
@@ -2428,7 +2449,7 @@ function positionWorld() {
   // The lines of each drawn set routed together (ports and nudging among themselves); while a part is dragged, their plain
   // shapes, so they follow the hand continuously; after the drop, the full routes, each morphing from the shape it had.
   const routed = new Map([...routeEdges(lay.boxes, lay.edges, { quick: dragQuick }), ...routeEdges(lay.boxes, sums, { quick: dragQuick })]);
-  lastRouted = routed;
+  lastRouted = restRouted = routed; shownKey = '';
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const r = routed.get(g.dataset.key!); if (!r) return;
     const from = morphFrom?.get(g.dataset.key!) ?? null;
@@ -2443,8 +2464,38 @@ function positionWorld() {
     let len = 99; try { len = g.querySelector<SVGPathElement>('.edge-line')?.getTotalLength() ?? 99; } catch { /* not rendered */ }
     g.classList.toggle('stub', len < 14);
   });
+  routeShown();
   placeScenarioHeads();
   placeEdgeLabels();
+}
+/** Beauty v2 review (H3): the lines drawn beside a selection on a busy map (its own lines one by one, the summary of the rest, a
+ * store's path, a change's context, a scenario's path) were routed in two sets that never made room for each other, so a selected
+ * part's line could run a pixel from a summary line. They are routed together whenever that drawn set changes (ports and nudging
+ * among the lines that are seen); with nothing selected the map's rest routes come back. Lines only: no box moves. */
+let restRouted = new Map<string, Routed>(), shownKey = '';
+function routeShown() {
+  if (dragQuick) return;
+  const world = $('world'), sel = $('space').classList.contains('sel-sum');
+  const gs = sel ? [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => (g.classList.contains('sum') ? !g.classList.contains('hit') : ['on', 'path', 'ctx', 'sc-path'].some(c => g.classList.contains(c)))) : [];
+  const set = gs.map(g => edgeOf(g.dataset.key)).filter((e): e is Edge => !!e);
+  const key = set.map(e => `${e.key}:${e.ids.length}`).join('|');
+  if (key === shownKey) return;
+  shownKey = key;
+  lastRouted = set.length ? new Map([...restRouted, ...routeEdges(lay.boxes, set)]) : restRouted;
+  world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
+    const r = lastRouted.get(g.dataset.key!), line = g.querySelector('.edge-line'); if (!r || !line || line.getAttribute('d') === r.d) return;
+    g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
+    g.classList.toggle('detour', !!r.detour); g.classList.toggle('clear', r.clear); layerEdge(g);
+  });
+}
+/** Beauty v2 review (visual 4): a line picked on the map is the selection's own line among its others: drawn 3px in the accent, the
+ * part's other lines stepping back to the foreground's neutral (the pane reads the picked one). */
+function markPicked() {
+  const pl = pickedLine && pickedLine.part === selected ? new Set(pickedLine.rels) : null;
+  document.querySelectorAll<SVGGElement>('#world .edge').forEach(g => g.classList.toggle('picked', !!pl && !g.classList.contains('sum') && g.classList.contains('on') && (g.dataset.ids ?? '').split(',').some(id => pl.has(id))));
+  $('space').classList.toggle('line-picked', !!pl && !!document.querySelector('#world .edge.picked'));
+  document.querySelectorAll<HTMLElement>('#world .edge-label').forEach(el => el.classList.toggle('picked', !!pl && !!document.querySelector(`#world .edge.picked[data-key="${CSS.escape(el.dataset.key ?? '')}"]`)));
+  markLines();
 }
 /** While a part is dragged: lines keep their plain shape (map-route quick). morphFrom: the shapes the lines had before a drop,
  * for the morph into their full routes. */
@@ -2780,7 +2831,7 @@ function pickLine(e: Edge) {
   const ghost = e.from.startsWith('ghost:'), from = ghost ? e.from.slice(6) : e.from;
   pickedLine = { rels: [...e.ids], part: from };
   // The line's block reads in 구조's 계약 (map design v3 8.3), open.
-  if (from === selected) { paneTab = 'structure'; refreshReading(); } else go(o.key, from, ghost ? partOf(o, from)?.parentId ?? null : scope);
+  if (from === selected) { paneTab = 'structure'; markPicked(); refreshReading(); } else go(o.key, from, ghost ? partOf(o, from)?.parentId ?? null : scope);
 }
 /** Labels at rest: each on a straight run of its own line with room for it and 8px of line on each side (the longest level
  * run first), else beside the line just short of the part it points to; never on a corner, over another line (where lines
@@ -3495,8 +3546,10 @@ function markVisit() {
 function badgeHolds(b: HTMLElement, id: string): boolean { return (b.getAttribute('title') ?? '').includes(`(${id})`); }
 /** Each line's ends as it reads now: a selected line or a line of the scenario's path carries the accent's head and start dot. */
 function markLines() {
+  // A picked line among the selection's (markPicked) is the one that keeps the accent's ends.
+  const picking = $('space').classList.contains('line-picked');
   document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
-    const lit = el.classList.contains('on') || el.classList.contains('sc-path'), line = el.querySelector('.edge-line'); if (!line) return;
+    const lit = (el.classList.contains('on') && (!picking || el.classList.contains('picked'))) || el.classList.contains('sc-path'), line = el.querySelector('.edge-line'); if (!line) return;
     // A wait on the path reads as a control line: its open head (placeScenarioMarks dashes its end).
     const head = (el.classList.contains('sc-wait') && el.dataset.head === 'filled' ? 'open' : el.dataset.head ?? 'filled') as Head, start = (el.dataset.start ?? 'none') as Head;
     const mark = (h: Head) => (h === 'none' ? 'none' : `url(#m-${h}${lit ? '-on' : ''})`);
@@ -4001,7 +4054,7 @@ function pickedLineBlock(c: PaneCtx): HTMLElement | null {
   const name = (id: string) => partOf(c.o, id)?.name ?? '부분';
   return h('section', { class: 'pn-line', 'data-sec': 'line', 'aria-labelledby': 'pn-h-line' },
     h('div', { class: 'pl-head' }, h('h3', { id: 'pn-h-line', tabindex: '-1', 'data-path': '선택한 선' }, '선택한 선', rels.length > 1 ? h('small', {}, `관계 ${rels.length}`) : null),
-      h('button', { type: 'button', class: 'link-button pl-clear', title: '선 선택을 풀고 이 부분의 구조만 읽어요', onclick: () => { pickedLine = null; reread(null); } }, '선 선택 풀기')),
+      h('button', { type: 'button', class: 'link-button pl-clear', title: '선 선택을 풀고 이 부분의 구조만 읽어요', onclick: () => { pickedLine = null; markPicked(); reread(null); } }, '선 선택 풀기')),
     ...rels.map(x => { const ch = c.lineSaid.get(x.r.id)?.channel ?? null, from = x.out ? name(x.near) : name(x.far), to = x.out ? name(x.far) : name(x.near);
       return h('div', { class: 'pl-rel' }, h('p', { class: 'pl-title' }, h('strong', {}, ...breakable(from)), h('span', { class: 'pl-arrow', 'aria-hidden': 'true' }, x.r.kind === 'related' ? ' — ' : ' → '), h('strong', {}, ...breakable(to)),
         h('span', { class: 'pl-ch' }, ` · ${ch ? CHANNEL_LABEL[ch] : REL_LABEL[x.r.kind] ?? x.r.kind}`)), lineBlock(c, x.r.id)); }));
@@ -4899,7 +4952,9 @@ function applyLegendMarks() {
     // Under 상태와 공백 the fade is a fact (no operations record) that the legend counts, so an emphasised part fades too (its outline
     // stays); under the other lenses an emphasised part is never stepped back (S10).
     el.classList.toggle('lens-off', off.has(id) && (viewLens === 'state' || !emph.has(id)));
-    if (m) el.dataset.lensMark = m; else delete el.dataset.lensMark; });
+    if (m) el.dataset.lensMark = m; else delete el.dataset.lensMark;
+    // Beauty v2 review: in the far view's tag the mark takes the kind icon's place (the corner mark covered the tag's name).
+    const icon = el.querySelector<HTMLElement>('.c-tag-icon'); if (icon) { if (m) icon.dataset.mark = m; else delete icon.dataset.mark; } });
   markFirstView();
 }
 /** Pointing at a legend item: after ~150 ms its parts and lines keep an outline until the pointer leaves (7.2: no blinking). */
@@ -5146,7 +5201,9 @@ function markSelection(partId: string | null) {
   markLines();
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   syncLineMode();
+  routeShown();
   placeEdgeLabels();
+  markPicked();
   document.querySelectorAll<HTMLElement>('.node[data-part],.frame,.ghost').forEach(el => {
     el.classList.toggle('selected', !!partId && (el.dataset.part === partId || (me !== partId && el.dataset.box === me)));
     el.classList.toggle('related', related.has(el.dataset.box!));

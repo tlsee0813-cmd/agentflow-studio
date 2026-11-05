@@ -70,7 +70,8 @@ test('HYG-5 styles: one dock width, a text floor, quiet fades, regions with a bo
   assert.doesNotMatch(tail, /\.frame-head \.frame-name \{[^}]*font-size/, 'the region name keeps the size its head was measured for');
   assert.doesNotMatch(tail, /caption-floor/, 'the 「이은 선 없음」 caption keeps a readable size instead of hiding');
   assert.doesNotMatch(tail.replace(/\/\*[\s\S]*?\*\//g, ''), /\.frame[^{]*\{[^}]*dashed/, 'no dashed region frames');
-  assert.match(tail, /\.node\.card \.c-bottom \{ border-top: 0; \}/);
+  // Beauty v2 review (M3): the foot row (.c-bottom) left the card face in beauty v2 A2; its rules went with it.
+  assert.ok(!/\.c-bottom\b/.test(tail.replace(/\/\*[\s\S]*?\*\//g, '')));
   const app = await readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
   assert.ok(app.includes('const BOTTOM = 88;') && app.includes('const SAFE_TOP = 64, SAFE_SIDE = 32;'), 'the safe area');
   assert.ok(app.includes('legendOpenNow = chosen ?? false;'), 'the legend starts as its chip');
