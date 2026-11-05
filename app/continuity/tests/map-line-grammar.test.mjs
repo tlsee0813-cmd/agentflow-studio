@@ -5,7 +5,7 @@
 // a route of few turns; a reference from its ear; first bends 16 from a port). No browser.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { lineStyle, lineWidth, lineBadge, mergeByChannel, multiWord, labelRank, portFaces, turnsOf, DASH, HEAD_PX, RANK, WIDTH_FLOOR, LABEL_MAX, BADGE_H, BADGE_H_ON, FACE_TURNS, badgeForms, overflowMark, isRelativeRef, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, BADGE_CLIP, LABEL_SHORT } from '../dist/public/client/line-grammar.js';
+import { lineStyle, lineWidth, lineBadge, mergeByChannel, multiWord, labelRank, portFaces, turnsOf, DASH, HEAD_PX, RANK, WIDTH_FLOOR, LABEL_MAX, BADGE_H, BADGE_H_ON, FACE_TURNS, badgeForms, overflowMark, isRelativeRef, conditionWords, conditionTip, COND_UNSAID, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, BADGE_CLIP, LABEL_SHORT } from '../dist/public/client/line-grammar.js';
 import { resolveLabels, faceRoute, rounded } from '../dist/public/client/map-layout.js';
 import { routeEdges, earY } from '../dist/public/client/map-route.js';
 
@@ -41,19 +41,20 @@ test('LINE-3 the badge comes only from what the reading wrote of when the line f
   assert.equal(lineBadge([{ cadence: '   ' }]), null);
   // The record's words as written: a condition it put in the cadence column reads as it is.
   const b = lineBadge([{ cadence: "init_from='resume'", mode: 'design' }]);
-  assert.deepEqual(b, { kind: 'cadence', short: "init_from='resume'", full: "init_from='resume' · 설계", tip: "박자 · 기록의 글자 그대로\n“init_from='resume'”\n설계", words: ["init_from='resume'"], n: 1, unresolved: false, lead: "init_from='resume'", quiet: false });
+  assert.deepEqual(b, { kind: 'cadence', short: "init_from='resume'", full: "init_from='resume' · 설계", tip: "박자 · 기록의 글자 그대로\n“init_from='resume'”\n코드·문서에서 읽은 흐름", words: ["init_from='resume'"], n: 1, unresolved: false, lead: "init_from='resume'", quiet: false });
   // Never parsed: '명령마다' stays the words, no beat kind is made of '마다'.
   assert.equal(lineBadge([{ cadence: '명령마다' }]).short, '명령마다');
   // A selected badge says at most 24 of the record's characters, then an ellipsis.
   const long = lineBadge([{ cadence: '가'.repeat(40) }]);
   assert.equal(long.full, `${'가'.repeat(23)}…`);
   // S7: a stroke of several relations reads the record's own words: the first and how many other wordings, or how many say any.
-  assert.deepEqual(lineBadge([{ cadence: '명령마다' }, { cadence: '끝에 1회' }]), { kind: 'cadence', short: '명령마다 외 1', full: '명령마다 외 1', tip: '박자 · 기록의 글자 그대로\n“명령마다”\n“끝에 1회”\n관계 2개 중 2개가 적음', words: ['명령마다', '끝에 1회'], n: 2, unresolved: false, lead: '명령마다', quiet: false });
+  assert.deepEqual(lineBadge([{ cadence: '명령마다' }, { cadence: '끝에 1회' }]), { kind: 'cadence', short: '명령마다 외 1', full: '명령마다 외 1', tip: '박자 · 기록의 글자 그대로\n“명령마다”\n“끝에 1회”', words: ['명령마다', '끝에 1회'], n: 2, unresolved: false, lead: '명령마다', quiet: false });
   assert.equal(lineBadge([{ cadence: '명령마다' }, {}]).short, '명령마다 (1/2)');
   assert.equal(lineBadge([{ cadence: '명령마다' }, { cadence: '명령마다' }]).short, '명령마다', 'the same words on every relation read once');
   // Once the contract carries them, a condition outranks an optional mark, which outranks cadence words.
   assert.equal(lineBadge([{ when: 'wandb_log면', cadence: 'eval_interval마다' }]).kind, 'condition');
-  assert.equal(lineBadge([{ when: 'wandb_log면' }]).full, '조건 · wandb_log면');
+  assert.equal(lineBadge([{ when: 'wandb_log면' }]).full, '조건', 'polish round: a condition is its cue; its words in the tip');
+  assert.equal(lineBadge([{ when: 'wandb_log면' }]).tip, '조건 · 이 조건일 때만 흐름\n조건: wandb_log면');
   const opt = lineBadge([{ optional: true }]);
   assert.deepEqual([opt.kind, opt.short, opt.full, opt.n], ['optional', '선택', '선택', 1]);
   assert.equal(BADGE_H, 16); assert.equal(BADGE_H_ON, 20);
@@ -79,9 +80,10 @@ test('LINE-3b S7: a badge never reads the bare kind word; it falls back from its
   // The overview keeps condition badges with their words; a cadence badge is its glyph there (its words in the tip and on selection).
   assert.deepEqual(badgeForms(call, false, 'far'), [BADGE_GLYPH]);
   assert.deepEqual(badgeForms(call, true, 'far'), ['호출마다 · 설계', '호출마다', BADGE_GLYPH]);
-  assert.deepEqual(badgeForms(lineBadge([{ when: 'wandb_log면' }]), false, 'far'), ['wandb_log면', 'wandb_…', '조건']);
+  assert.deepEqual(badgeForms(lineBadge([{ when: 'wandb_log면' }]), false, 'far'), ['조건'], 'polish round: the cue alone, never clipped words');
   assert.deepEqual(badgeForms(lineBadge([{ optional: true }]), true), ['선택']);
-  assert.equal(overflowMark(3), '+3');
+  assert.equal(overflowMark(3), '배지 +3'); // cards v2 §1: the marker says what it counts
+  assert.equal(overflowMark(2, ['cadence', 'condition']), '조건·박자 +2'); // polish round fixes 1: it names the cues it gathers
 });
 
 test('LINE-3c S7: an unresolved reference of the record reads as written, marked unresolved; never resolved', () => {
@@ -131,9 +133,9 @@ test('LINE-4 one stroke per pair, direction and channel: a flow and a need of on
   assert.equal(s1.find(e => e.ids.includes('r1')).key, s2[0].key);
   assert.ok(s1.every(e => e.key.startsWith('sum:')));
   // The label of a stroke handing over different things.
-  assert.equal(multiWord(['결과', '설정', '로그']), '결과 · 설정 +1');
+  assert.equal(multiWord(['결과', '설정', '로그']), '결과 · 설정 외 1');
   assert.equal(multiWord(['결과', '결과']), '결과');
-  assert.equal(multiWord(['결과', null, '설정']), '결과 · 설정 +1');
+  assert.equal(multiWord(['결과', null, '설정']), '결과 · 설정 외 1');
   assert.equal(multiWord([null, null]), null);
 });
 
@@ -202,4 +204,37 @@ test('LINE-8 a reference starts at its ear (the head band of the side it leaves)
 test('LINE-9 corners are rounded at 8', () => {
   const d = rounded([{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }]);
   assert.match(d, /L92,0 Q100,0 100,8/);
+});
+
+test('LINE-3d polish round (spec-cards-v2 §1): a condition or optional mark is a fixed cue, never cut, never lost; its words in the tip', () => {
+  // The ask's form word the record copied in front of its condition is no part of the words.
+  assert.equal(conditionWords('조건 그대로: not os.path.exists(input_file_path)'), 'not os.path.exists(input_file_path)');
+  assert.equal(conditionWords('  조건 그대로 :  key in globals() '), 'key in globals()');
+  assert.equal(conditionWords('wandb_log면'), 'wandb_log면');
+  assert.equal(conditionWords('조건 그대로'), COND_UNSAID, 'the form word alone: conditional, words not in the record');
+  assert.equal(conditionWords('  '), null); assert.equal(conditionWords(null), null);
+  assert.equal(conditionTip('a > 0'), '조건: a > 0'); assert.equal(conditionTip(COND_UNSAID), `조건 · ${COND_UNSAID}`);
+  const one = lineBadge([{ when: '조건 그대로: not os.path.exists(input_file_path)' }]);
+  assert.deepEqual([one.kind, one.short, one.full], ['condition', '조건', '조건']);
+  assert.ok(one.tip.includes('조건: not os.path.exists(input_file_path)') && !one.tip.includes('그대로'), one.tip);
+  for (const on of [false, true]) for (const tier of [null, 'near', 'mid', 'far', 'dots']) assert.deepEqual(badgeForms(one, on, tier), ['조건'], `${on} ${tier}`);
+  // A bare form word still reads conditional (never 선택, never no badge).
+  const bare = lineBadge([{ when: '조건 그대로', optional: true }]);
+  assert.equal(bare.kind, 'condition'); assert.ok(bare.tip.includes(COND_UNSAID));
+  // A bundle only partly conditional says how many: it never reads wholly conditional, nor unconditional.
+  const part = lineBadge([{ when: 'a' }, {}, { when: 'b' }]);
+  assert.equal(part.short, '조건 2/3'); assert.deepEqual(badgeForms(part, false, 'mid'), ['조건 2/3', '조건']);
+  assert.ok(part.tip.includes('조건: a\n조건: b') && part.tip.includes('관계 3개 중 2개에 기록됨'), part.tip);
+  // 선택: the variant it flows for, in the tip, by its name.
+  const opt = lineBadge([{ optional: true, variant: 'CPU 경로' }, {}]);
+  assert.deepEqual([opt.kind, opt.short], ['optional', '선택 1/2']);
+  assert.ok(opt.tip.startsWith('선택 · 늘 흐르지는 않음 · 그 변형일 때만\n변형 ‘CPU 경로’'), opt.tip);
+  // Polish round fixes 1: only the optional relations' variants (a stale variant on a non-optional relation is never said).
+  const stale = lineBadge([{ optional: true, variant: 'A' }, { optional: false, variant: 'B' }]);
+  assert.ok(stale.tip.includes('변형 ‘A’') && !stale.tip.includes('‘B’'), stale.tip);
+  // A condition that only points at another row: said as a relative reference, muted (.unres).
+  const rel = lineBadge([{ when: '위와 같음' }]);
+  assert.ok(rel.unresolved && rel.tip.split('\n')[0].endsWith('기록 안의 상대 참조 (풀지 않음)'), rel.tip);
+  assert.equal(lineBadge([{ when: 'a > 0' }]).unresolved, false);
+  assert.ok(lineBadge([{ optional: true }]).tip.startsWith('선택 · 늘 흐르지는 않음 (기록이 선택으로 적음)'));
 });

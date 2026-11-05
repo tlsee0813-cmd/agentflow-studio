@@ -276,9 +276,13 @@ button:disabled { opacity: .5; cursor: default; }
 .edge[data-start="none"]:not(.on):not(.near) .edge-line { marker-start: none; }
 /* A line drawn from a folded part summarises relations of its inside: a soft band, wider, its kind's dash kept. */
 .edge.agg .edge-line { stroke: var(--edge-soft); --lw: 3; }
-.edge.near .edge-line { stroke: var(--text-3); --lw: 2; stroke-opacity: 1; }
+.edge.near .edge-line { stroke: var(--accent); --lw: 2.5; stroke-opacity: 1; }
 /* A spine line pointed at reads firmer than at rest, never lighter. */
-.edge.near.spine:not(.on) .edge-line { stroke: var(--text-2); --lw: 2.25; }
+.edge.near.spine:not(.on) .edge-line { stroke: var(--accent); --lw: 2.5; }
+/* Polish round fixes 1: a pointed line's bundle mates step back at once (the pointed and selected lines stay whole). */
+.space.line-near .edge:not(.near):not(.on) .edge-line { opacity: .3; }
+/* Polish round fixes 1: while the first view emphasises its lines, the other control lines are lighter at rest. */
+.space.fv-lines .world .edge.c-control:not(.fv-emph):not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: calc(var(--lo-control, 1) * .45); }
 .edge.near:not(.on)[data-head="filled"] .edge-line { marker-end: url(#m-filled-near); }
 .edge.near:not(.on)[data-head="open"] .edge-line { marker-end: url(#m-open-near); }
 .edge.near:not(.on)[data-head="ref"] .edge-line { marker-end: url(#m-ref-near); }
@@ -294,13 +298,13 @@ button:disabled { opacity: .5; cursor: default; }
 .edge.agg.on .edge-line { stroke: #a9b8f5; --lw: 3; }
 /* The end marks (app.ts endMarkDefs): a filled triangle, open Vs, the ear's ring (canvas inside) and a dot, in their line's
    paint where supported. */
-.mk .mk-fill { fill: var(--edge); } .mk-on .mk-fill { fill: var(--accent); } .mk-near .mk-fill { fill: var(--text-3); }
+.mk .mk-fill { fill: var(--edge); } .mk-on .mk-fill { fill: var(--accent); } .mk-near .mk-fill { fill: var(--accent); }
 .mk .mk-fill { fill: context-stroke; }
 .mk .mk-open { fill: none; stroke: var(--edge); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .mk-ref .mk-open { stroke-width: 1.9; }
-.mk-on .mk-open { stroke: var(--accent); stroke-width: 2.2; } .mk-near .mk-open { stroke: var(--text-3); stroke-width: 2; }
+.mk-on .mk-open { stroke: var(--accent); stroke-width: 2.2; } .mk-near .mk-open { stroke: var(--accent); stroke-width: 2; }
 .mk .mk-open { stroke: context-stroke; }
-.mk .mk-ring { fill: var(--bg); stroke: var(--edge); stroke-width: 2.2; } .mk-on .mk-ring { stroke: var(--accent); stroke-width: 2.6; } .mk-near .mk-ring { stroke: var(--text-3); }
+.mk .mk-ring { fill: var(--bg); stroke: var(--edge); stroke-width: 2.2; } .mk-on .mk-ring { stroke: var(--accent); stroke-width: 2.6; } .mk-near .mk-ring { stroke: var(--accent); }
 .mk .mk-ring { stroke: context-stroke; }
 .space.dim .edge:not(.on):not(.near):not(.sc-path) .edge-line { opacity: .22; }
 /* Pointing at a part (nothing selected): its lines and their other ends stay, the rest of the map steps back. */
@@ -352,6 +356,10 @@ button:disabled { opacity: .5; cursor: default; }
 .edge-badge.beside { color: var(--text-4); border-color: var(--line); }
 .edge-label.revised { outline: 1px dashed var(--line-strong); outline-offset: -1px; }
 .map-title.pinned { opacity: 0; }
+/* Polish round fixes 1: the title's meta lines open from one screen-sized 「기록 정보 ▾」 (closed on the first screen). */
+.map-title:not(.meta-open) > .map-meta { display: none; }
+.map-meta-toggle { display: inline-flex; align-items: center; margin: 8px 0 0; padding: 0 calc(var(--t-kind, 12px) * .5); height: calc(var(--t-kind-lh, 16px) + 6px); border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); cursor: pointer; }
+.map-meta-toggle:hover { color: var(--text); border-color: var(--line-strong); }
 .map-name { margin: 0; word-break: keep-all; font-size: 26px; line-height: 32px; font-weight: var(--fw-title); letter-spacing: -.025em; color: var(--text); overflow-wrap: anywhere; }
 .map-purpose > span:first-child:not(:last-child) { margin-right: var(--s-2); }
 /* Two lines at most; '설명 전체' opens the whole text in the pane. */
@@ -636,6 +644,9 @@ button:disabled { opacity: .5; cursor: default; }
 /* The detail view (내부 상세): the part's boundary in the middle of the workspace, its ports on its edges, its outside partners as
    small reference cards beyond them. The rest of the map is not shown while it is open. */
 .space.detail-open #world, .space.detail-open > .controls, .space.detail-open #line-key { visibility: hidden; }
+/* Polish round (spec-cards-v2 §1, §4): beside the detail view the pane head keeps a recorded state's words but drops the quiet
+ * 「운영 기록 없음」 line under the part name; the map's pane (a click on the card) still states it. */
+.space.detail-open .pane-ops-line.none { display: none; }
 .detail-view { position: absolute; top: 0; left: 0; bottom: 0; right: var(--plan-w, 0px); z-index: 2; display: flex; flex-direction: column; background: var(--bg); }
 .detail-view:focus { outline: none; }
 .dv-head { flex: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 16px 24px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
@@ -1796,7 +1807,28 @@ button:disabled { opacity: .5; cursor: default; }
 .space:is(.tier-far, .tier-dots) .node.card.fit-status .c-short { display: block; }
 .space:is(.tier-far, .tier-dots) .node.card .plan-note { display: none; }
 .space.tier-dots .node.card { background: var(--surface); }
-.space.tier-dots .node.card:not(.selected):not(.cited):not(:focus-visible):not(:hover) .c-title { visibility: hidden; }
+/* Review (cards v2): the whole-map view answers what the system is made of: every card keeps its name (smaller, two lines at most,
+   broken only at its separators), the glyph tile giving it the room. */
+.space.tier-dots .node.card .glyph-tile { display: none; }
+.space.tier-dots .node.card .c-name { font-size: calc(var(--t-title, 15px) * .8); line-height: calc(var(--t-title-lh, 20px) * .8); -webkit-line-clamp: 2; }
+.space.tier-dots .node.card .c-kind { display: none; }
+.space:is(.tier-far, .tier-dots) .node.card .c-name { overflow-wrap: normal; word-break: keep-all; }
+.space.tier-far .node.card .c-name { font-size: calc(var(--t-title, 15px) * .9); line-height: calc(var(--t-title-lh, 20px) * .9); }
+/* Names before chips: the whole-map view drops counts and cadence glyphs from its lines (conditions stay with their lines). */
+.space.tier-dots .edge-labels > :is(.edge-count, .edge-badge.b-cadence) { display: none; }
+/* Review: below 가까이 a card is drawn at its content's height (fitCards fit-auto); the rest of its fixed box (where its lines still
+   attach) is a faint dashed outline, so zooming never relays the map and no card reads as a large empty box. */
+.node.card.fit-auto { height: auto !important; overflow: visible; }
+/* Polish round fixes 1: the rest of the box stays invisible (a dashed outline read as an empty placeholder card under many cards). */
+.node.card.fit-auto.fit-ghost::after { content: none; }
+/* Review: at 중간 the inner line is a plain 「단계 N」; the program's provenance chips read only with 근거 꼬리표 on. */
+.space.tier-mid .node.card .c-inner :is(.c-inner-unit, .c-inner-text, .c-more, .prog-chip) { display: none; }
+.node.card .prog-chip { display: none; }
+.space.show-ev .node.card .prog-chip { display: inline-block; }
+/* Review: the count of parts with no operations record is the 상태·공백 lens's (the pane says it per part). */
+.space:not(.lens-state) .map-ops-none { display: none; }
+/* Review: where a card is narrow the lens's ops word takes the kind word's room (never both cut). */
+.space.lens-state:is(.tier-far, .tier-dots) .node.card .c-kind-word { display: none; }
 .space.z-mid .node .node-text { justify-content: center; align-self: stretch; }
 .space.z-mid :is(.node:not(.card) .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .space.z-mid .node:not(.card) .node-name { font-size: calc(13.5px * var(--grow)); }
@@ -2852,6 +2884,12 @@ li > .port + .fn-marks { margin: 0; padding-top: 6px; }
 .edge-badge.unres { color: var(--text-4); border-color: var(--line); background: var(--surface-2); font-weight: 420; }
 .edge-badge.glyph { min-width: 16px; justify-content: center; padding: 0 3px; font-size: 11px; color: var(--text-3); }
 .edge-badge.b-more { color: var(--text-3); border-color: var(--line-strong); background: var(--surface-2); font-variant-numeric: tabular-nums; }
+/* Polish round (spec-cards-v2 §1): a condition or optional mark is a small cue of fixed words (조건 · 조건 1/3 · 선택), never cut; its
+ * words read in the line tip. Optional reads dashed so the two never look alike. */
+.edge-badge:is(.b-condition, .b-optional) { max-width: none; overflow: visible; padding: 0 4px; font-size: 11px; font-weight: 600; letter-spacing: 0; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.edge-badge.b-optional { border-style: dashed; font-weight: 500; }
+.edge-badge.on:is(.b-condition, .b-optional) { color: var(--accent-strong); }
+.edge-badge.beside:is(.b-condition, .b-optional) { color: var(--text-4); }
 .tip-badge-w { color: var(--text-2); }
 .edge-label.brief { max-width: 132px; }
 
@@ -2983,3 +3021,384 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .pn-guide dl { margin: 6px 0 0; }
 .pn-guide dt { font-weight: 590; color: var(--text-2); }
 .pn-guide dd { margin: 0 0 6px; overflow-wrap: anywhere; }
+
+/* ---------- 보기틀 (spec forms v1): the detail view's forms 목록 · 노선 · 상태 전이 (view-forms.ts) ----------
+   The switch in the head; 노선, a vertical metro strip in the part's family ink (white stations on a 6px line, loop brackets on the
+   left, jumps dashed on the right, a fork's branches ending open); 상태 전이, state pills on a circle with curved transitions. Every
+   shape's tip names the record row it stands on. Prefixes: vf- (switch), sl- (step line), vg- (state graph). */
+.vf-seg { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: var(--r-pop); background: var(--surface-2); align-self: flex-end; }
+.vf-label { padding: 0 6px 0 8px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-4); }
+.vf-opt { height: 28px; padding: 0 12px; border: 0; border-radius: var(--r-md); background: none; color: var(--text-3); font-size: 13px; font-weight: var(--fw-name); white-space: nowrap; }
+.vf-opt:hover:not(.off):not(.on) { background: var(--surface); color: var(--text); }
+.vf-opt.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line); }
+.vf-opt.off { color: var(--text-4); opacity: .55; cursor: help; }
+.vf-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dv-grid.has-graph { grid-template-columns: minmax(120px, 160px) minmax(560px, 980px) minmax(120px, 160px); column-gap: 40px; }
+/* spec line fixes 4: with the line drawn, the partner columns give way (down to 112px, at most 180px) and the line's own column
+   inside the boundary keeps at least 520px, also with the reading pane open beside the view (the stage scrolls past that). The
+   ports are compact chips: the name on one line with an ellipsis, the full text and the mapped-step note in the tip. */
+.dv-grid.has-line { grid-template-columns: minmax(112px, 180px) minmax(min-content, 1040px) minmax(112px, 180px); column-gap: 28px; align-items: start; }
+.dv-inner.has-line { grid-template-columns: minmax(88px, 120px) minmax(520px, 1fr) minmax(88px, 120px); column-gap: 20px; }
+/* Review: a port chip keeps room for its name (88px, about ten characters); 상태 전이 uses the same one-line chips. */
+.dv-inner.has-states { grid-template-columns: minmax(88px, 120px) minmax(0, 1fr) minmax(88px, 120px); column-gap: 16px; }
+/* Review: a boundary narrower than the graph needs (the reading pane open beside it) puts its ports in rows above and below the
+   graph, so the graph has the boundary's whole width. */
+.dv-grid.has-graph > .dv-bound { container-type: inline-size; }
+@container (max-width: 780px) {
+  .dv-inner.has-states { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding: 0 12px; }
+  .dv-inner.has-states .dv-ports { flex-direction: row; flex-wrap: wrap; }
+  .dv-inner.has-states .dv-port { max-width: 180px; border: 1px solid var(--line); border-radius: 6px; }
+}
+.dv-inner.has-states .dv-ports { gap: 4px; }
+.dv-inner.has-states .dv-port { flex-wrap: nowrap; min-height: 22px; padding: 1px 6px; white-space: nowrap; overflow: hidden; overflow-wrap: normal; font-size: 12px; }
+.dv-inner.has-states .dv-port-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dv-inner.has-states .dv-port.unmapped .dv-port-name { color: var(--text-3); }
+.dv-inner.has-states .dv-port.blank { white-space: normal; }
+/* Review: a side column narrower than 160px shows each partner as its name (two lines at most) and kind; the relation words read
+   in its tip, never as a wall of record text. */
+.dv-grid.has-line > .dv-side, .dv-grid.has-graph > .dv-side { container-type: inline-size; }
+@container (max-width: 159px) {
+  .dv-ref .dv-ref-rel { display: none; }
+  .dv-ref .dv-ref-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; word-break: keep-all; } /* polish round fixes 1: a long path wraps inside its two lines, never cut at the side */
+}
+.vg-more-note { margin: 4px 0 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.vg-more-note::before { content: '⇢ '; color: var(--text-4); }
+.dv-inner.has-line .dv-ports { gap: 4px; }
+.dv-inner.has-line .dv-port { flex-wrap: nowrap; min-height: 22px; padding: 1px 6px; white-space: nowrap; overflow: hidden; overflow-wrap: normal; font-size: 12px; }
+.dv-inner.has-line .dv-port-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dv-inner.has-line .dv-port.unmapped .dv-port-name { color: var(--text-3); }
+.dv-inner.has-line .dv-port.blank { white-space: normal; }
+.dv-inner.has-line .dv-body { min-width: 0; }
+.sl-noref { color: var(--text-3); cursor: help; }
+
+.sl-route, .dv-states { --form-ink: var(--fam-neutral-ink); --form-soft: var(--fam-neutral-bg);
+  --sl-loop: #5b63c9; --sl-loop-soft: #eff0fc; --sl-loop-line: #c9cdf3; }
+.sl-route.f-participant, .dv-states.f-participant { --form-ink: var(--fam-participant-ink); --form-soft: var(--fam-participant-bg); --sl-loop: #3f7f86; --sl-loop-soft: #ebf5f5; --sl-loop-line: #b9dadd; }
+.sl-route.f-process, .dv-states.f-process { --form-ink: var(--fam-process-ink); --form-soft: var(--fam-process-bg); }
+.sl-route.f-store, .dv-states.f-store { --form-ink: var(--fam-store-ink); --form-soft: var(--fam-store-bg); }
+.sl-route.f-trigger, .dv-states.f-trigger { --form-ink: var(--fam-trigger-ink); --form-soft: var(--fam-trigger-bg); }
+/* The ink an entry pill writes on the family ink: the page surface on the light inks, the family strip on the dark theme's light inks. */
+.sl-route, .dv-states { --form-on-ink: var(--surface); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states) { --sl-loop: #a3a9f2; --sl-loop-soft: #262942; --sl-loop-line: #474d86; --form-on-ink: var(--fam-neutral-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-participant { --sl-loop: #8fcfd5; --sl-loop-soft: #1d2d2f; --sl-loop-line: #3f6b70; --form-on-ink: var(--fam-participant-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-process { --form-on-ink: var(--fam-process-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-store { --form-on-ink: var(--fam-store-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-trigger { --form-on-ink: var(--fam-trigger-strip); }
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states) { --sl-loop: #a3a9f2; --sl-loop-soft: #262942; --sl-loop-line: #474d86; --form-on-ink: var(--fam-neutral-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-participant { --sl-loop: #8fcfd5; --sl-loop-soft: #1d2d2f; --sl-loop-line: #3f6b70; --form-on-ink: var(--fam-participant-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-process { --form-on-ink: var(--fam-process-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-store { --form-on-ink: var(--fam-store-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-trigger { --form-on-ink: var(--fam-trigger-strip); }
+}
+.sl-caption, .vg-caption { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 17px; color: var(--text-4); cursor: help; }
+.sl-caption::before { content: ''; flex: none; width: 16px; height: 4px; border-radius: 2px; background: var(--form-ink); }
+.vg-caption::before { content: ''; flex: none; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--form-ink); box-sizing: border-box; }
+.sl-scroll, .vg-scroll { width: 100%; min-width: 0; overflow-x: auto; overflow-y: hidden; }
+.sl-canvas, .vg-canvas { position: relative; }
+.sl-svg, .vg-svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.sl-seg { fill: none; stroke: var(--form-ink); stroke-width: 6; stroke-linecap: round; }
+.sl-seg.cond { stroke-dasharray: .1 11; }
+.sl-seg.open { stroke-linecap: butt; }
+/* A segment over C-STEP rows the stored steps skip: thinner and broken; its tag says how many (never 「다음 행」). */
+.sl-seg.skip { stroke-width: 4; stroke-dasharray: 2 8; stroke-linecap: round; }
+.sl-tag.k-skip { line-height: 16px; padding: 0 8px; border: 1px dotted var(--text-4); background: var(--surface); color: var(--text-3); font-size: 11.5px; }
+/* A C-STEP row the program kept as a step (the reply left it out): its dot dashed, its name in the program's quieter tone. */
+.sl-btn.program .sl-dot { border-style: dashed; }
+.sl-btn.program .dv-step-name { color: var(--text-2); font-weight: 560; }
+.sl-line.sl-if.blank { color: var(--text-4); }
+.sl-fade-a { stop-color: var(--form-ink); stop-opacity: 1; } .sl-fade-b { stop-color: var(--form-ink); stop-opacity: 0; }
+.sl-bracket { fill: none; stroke: var(--sl-loop); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sl-bracket.d2 { opacity: .8; } .sl-bracket.d3, .sl-bracket.d4 { opacity: .65; }
+.sl-arc { fill: none; stroke: var(--text-3); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.sl-head { fill: none; stroke: var(--text-3); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.sl-leader { fill: none; stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 1 3; }
+.sl-tag { position: absolute; box-sizing: border-box; display: block; width: max-content; padding: 0 9px; border-radius: 999px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: help; }
+.sl-tag.k-loop { line-height: 18px; border: 1px solid var(--sl-loop-line); background: var(--sl-loop-soft); color: var(--sl-loop); font-weight: 620; }
+.sl-tag.k-fork { line-height: 18px; border: 1px solid color-mix(in srgb, var(--form-ink) 45%, transparent); background: var(--form-soft); color: var(--form-ink); font-weight: 620; }
+.sl-tag.k-cond { line-height: 16px; padding: 0 8px; border: 1px dashed var(--line-strong); background: var(--surface); color: var(--text-3); font-size: 11.5px; }
+.sl-tag.k-gap { line-height: 18px; padding: 0 4px; color: var(--text-4); font-size: 11.5px; }
+.sl-tag.k-gap::before { content: "\22EF  "; color: var(--form-ink); }
+.sl-tag.k-jump { line-height: 18px; border: 1px dashed var(--text-4); background: var(--surface); color: var(--text-2); }
+.sl-tag.sl-term { line-height: 24px; padding: 0 12px; border-radius: 6px; background: var(--form-ink); color: var(--form-on-ink); font-size: 12.5px; font-weight: 620; letter-spacing: .01em; box-shadow: var(--shadow-sm); }
+.sl-st { position: absolute; display: flex; flex-direction: column; }
+.sl-st > .dv-step.sl-btn { position: relative; flex: none; width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 0; padding: 0 0 0 32px; border: 0; border-radius: 6px; background: none; box-shadow: none; font-size: 13px; line-height: 20px; text-align: left; }
+.sl-st > .dv-step.sl-btn:hover, .sl-st > .dv-step.sl-btn.on { border: 0; box-shadow: none; }
+.sl-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sl-btn .dv-step-head { height: 24px; align-items: center; gap: 8px; }
+.sl-btn .sl-ref { flex: none; min-width: 0; font-size: 11px; line-height: 24px; font-weight: 560; color: var(--text-4); letter-spacing: .02em; }
+.sl-btn .dv-step-name { min-width: 0; font-size: 15px; line-height: 24px; font-weight: 650; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }
+.sl-btn:hover .dv-step-name { color: var(--accent-strong); }
+.sl-btn .dv-step-does { height: 20px; padding: 0; font-size: 13px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; overflow-wrap: normal; }
+.sl-dot { position: absolute; left: 0; top: 1px; width: 22px; height: 22px; box-sizing: border-box; border: 3px solid var(--form-ink); border-radius: 50%; background: var(--surface); box-shadow: 0 0 0 3px var(--surface); transition: transform .12s ease, background-color .12s ease; }
+.sl-btn:hover .sl-dot { transform: scale(1.12); }
+.sl-btn.on .sl-dot { background: var(--form-ink); box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--accent-line); }
+.sl-btn.decision .sl-dot { border-radius: 6px; transform: rotate(45deg) scale(.9); }
+.sl-line { display: block; height: 20px; line-height: 20px; font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-line > b { margin-right: 6px; font-size: 11px; font-weight: 620; color: var(--text-4); }
+.sl-exits { display: flex; align-items: center; gap: 4px; }
+.sl-exit { flex: 0 1 auto; min-width: 0; height: 18px; line-height: 16px; padding: 0 7px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--surface); color: var(--text-2); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-exit.k-out, .sl-exit.k-exit { border-color: var(--accent-line); color: var(--accent-strong); }
+.sl-exit.k-end { border-color: var(--text-3); }
+.sl-conds { display: block; padding: 0; }
+.sl-conds .dv-cond { display: block; height: 20px; line-height: 20px; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-conds .dv-cond > span { display: inline; margin-right: 8px; }
+.sl-st .dv-gate { margin: 0 0 0 32px; display: grid; grid-auto-rows: 20px; align-items: center; gap: 0; min-width: 0; }
+.sl-st .dv-gate-chip, .sl-st .dv-exits { min-width: 0; white-space: nowrap; overflow: hidden; flex-wrap: nowrap; }
+.sl-st .dv-gate-t { display: inline; -webkit-line-clamp: unset; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-st.has-sign > .rule-sign { position: absolute; top: 2px; right: 0; z-index: 1; }
+.sl-st.has-sign .dv-step-head { padding-right: 64px; }
+.sl-apart { margin: 10px 0 0; padding: 6px 10px; list-style: none; border: 1px dashed var(--sl-loop-line); border-radius: var(--r-sm); font-size: 12px; line-height: 18px; color: var(--text-3); }
+.sl-apart li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.sl-apart-mark { color: var(--sl-loop); font-weight: 620; }
+.sl-open { font-size: 12px; }
+.sl-prog { margin: 8px 0 0; font-size: 12px; line-height: 18px; color: var(--text-4); }
+
+.vg-canvas { margin: 6px auto 0; }
+.vg-edge { fill: none; stroke: var(--text-3); stroke-width: 1.6; }
+.vg-edge.blank { stroke-dasharray: 4 4; }
+.vg-head { fill: var(--text-3); }
+.vg-start { fill: var(--form-ink); }
+.vg-start-line { fill: none; stroke: var(--form-ink); stroke-width: 1.6; }
+.vg-node { position: absolute; box-sizing: border-box; display: block; padding: 0 14px; border: 2px solid var(--form-ink); border-radius: 18px; background: var(--surface); color: var(--text); font-size: 14px; line-height: 32px; font-weight: 650; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: var(--shadow-sm); cursor: help; }
+.vg-node.terminal { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--form-ink); }
+.vg-node.start { background: var(--form-soft); }
+.vg-ev { position: absolute; box-sizing: border-box; display: block; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--surface); color: var(--text-2); font-size: 12px; line-height: 18px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: help; }
+.vg-ev.blank { border-style: dashed; color: var(--text-4); }
+.vg-shared, .vg-steps-note { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 12px; line-height: 18px; color: var(--text-3); }
+.vg-shared .link-button { font-size: 12px; }
+/* 보기틀 entries in the reading pane's head (override 9): one quiet button per form the part's records can draw. */
+.vf-entries { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.vf-entry { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 11px 0 9px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--text-2); font-size: 12.5px; font-weight: var(--fw-name); white-space: nowrap; }
+.vf-entry:hover { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent-strong); }
+.vf-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.vf-glyph { flex: none; position: relative; width: 12px; height: 14px; }
+.vf-glyph.g-line::before { content: ''; position: absolute; left: 5px; top: 0; width: 2px; height: 14px; border-radius: 1px; background: currentColor; }
+.vf-glyph.g-line::after { content: ''; position: absolute; left: 2px; top: 4px; width: 8px; height: 8px; box-sizing: border-box; border: 2px solid currentColor; border-radius: 50%; background: var(--surface); }
+.vf-glyph.g-states::before { content: ''; position: absolute; left: 0; top: 1px; width: 12px; height: 12px; box-sizing: border-box; border: 2px solid currentColor; border-radius: 50%; border-right-color: transparent; transform: rotate(-30deg); }
+
+/* ---------- Hierarchy pass (spec forms v1 §4, overrides 8 and 10): visual only, the DOM keeps every fact ----------
+   1. No footer word for a part with no operations record (the pane says it; the map title counts it). 2. Lines darker: --edge about
+   3:1 on the canvas (was 1.8:1), a folded summary band in step (dash patterns kept: they mean channel). 4. Family as mass when far:
+   the card face takes the family's tile colour and a 2px family edge (never a status, never on a line). The spine stays as it is. */
+:root { --edge: #858e9b; --edge-soft: #9ea6b1; }
+.edge.agg.near:not(.on):not(.lit) .edge-line { stroke: #7a8390; }
+.node.card .c-short.ops-none { display: none !important; }
+.c-ops.ops-none { min-width: 0; }
+.map-ops-none { font-size: 12px; line-height: 18px; color: var(--text-3); white-space: nowrap; cursor: help; }
+.map-ops-none::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border: 1.5px dashed var(--text-4); border-radius: 50%; vertical-align: 0; }
+.lens-ops.none { color: var(--text-3); }
+.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp) { background: var(--fam-bg); }
+.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp):not(.selected):not(:focus-visible):not(.plan-impact):not(.lit) { outline: 2px solid var(--fam-edge); outline-offset: -2px; }
+
+/* ---------- Cards v2 (spec cards v2 §1–§5, §7) ----------
+   The card face at rest: the family silhouette and glyph, the name, the kind word, the lifecycle / maintenance / 미정 chips, the
+   status dot (a recorded operations state only), 「하는 일」 on one line, the kind rows that say something, the pins, the inner line,
+   and a foot with the sign chips at the bottom-left and the ways in at the bottom-right. The ops words, the evidence chip and the
+   value rows are behind the 「표시」 settings (the 상태·공백 lens shows the ops words on every card while it is on). */
+:root { --dot-run: #4f8f66; --dot-stop: #9c8a62; --dot-wait: #7d8796; --dot-conflict: #6f6a8f; }
+:root[data-theme="dark"] { --dot-run: #7fbf96; --dot-stop: #c8b48a; --dot-wait: #a3acb9; --dot-conflict: #a9a3cc; }
+@media (prefers-color-scheme: dark) { :root[data-theme="auto"]:not([data-theme="light"]) { --dot-run: #7fbf96; --dot-stop: #c8b48a; --dot-wait: #a3acb9; --dot-conflict: #a9a3cc; } }
+.c-state { flex: none; display: inline-flex; align-items: center; gap: 4px; height: var(--t-title-lh, 20px); }
+.c-dot { position: relative; flex: none; width: 16px; height: 16px; padding: 0; border: 0; border-radius: 4px; background: none; display: grid; place-items: center; cursor: pointer; }
+.c-dot::before { content: ''; display: block; box-sizing: border-box; width: 9px; height: 9px; }
+.c-dot.d-running::before { border-radius: 50%; background: var(--dot-run); }
+.c-dot.d-stopped::before { width: 8px; height: 8px; border-radius: 1.5px; background: var(--dot-stop); }
+.c-dot.d-waiting::before { border-radius: 50%; border: 2px solid var(--dot-wait); }
+.c-dot.d-conflict::before { width: 7px; height: 7px; border: 1.5px solid var(--dot-conflict); transform: rotate(45deg); }
+.c-dot:hover, .c-dot:focus-visible { background: var(--chip); }
+.c-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.node.card .c-ev { display: none; }
+.space.show-ev .node.card .c-ev { display: inline-block; background: none; border-color: var(--line-strong); color: var(--text-3); font-size: 11px; line-height: 14px; }
+/* The ops words live in the kind line (no layout change when shown); recorded ones behind the setting, every card's in the lens. */
+.node.card .c-opsw { display: none; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.node.card .c-opsw::before { content: "· "; margin-left: -2px; color: var(--text-4); }
+.space.show-ops .node.card .c-opsw:not(.ops-none), .space.show-ops-all .node.card .c-opsw { display: inline; }
+.space.lens-state .node.card .c-opsw { color: var(--text); font-weight: var(--fw-name); }
+.space.lens-state .node.card .c-opsw.ops-none { color: var(--text-3); font-weight: var(--fw-meta); }
+.space.lens-state .node.card .c-kind-word { flex: 0 3 auto; }
+/* 「하는 일」: one line, ellipsis (the whole in the hover card and the pane). */
+.c-role { flex: none; height: var(--t-row-lh, 20px); margin-bottom: calc(var(--t-gap, 16px) * .5); font-size: var(--t-row, 13px); line-height: var(--t-row-lh, 20px); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.node.card.fit-norole .c-role { display: none; }
+/* Review M4: a role whose reports were all revised later: muted, with its short 「보고 정정됨」 at its contact point. */
+.c-role.revised { display: flex; align-items: center; gap: 6px; color: var(--text-3); }
+.c-role.revised .c-role-text { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-role-rev { flex: none; font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); color: var(--text-3); border-bottom: 1px dotted var(--text-4); }
+.edge-tip .hc-role.revised { color: var(--text-3); }
+.node.card.life .c-role { color: var(--text-3); }
+.space.dim .node.card:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .c-role { color: var(--text-4); }
+/* The foot: the sign chips at the bottom-left, the ways in at the bottom-right (24px quiet icon buttons, a border on hover). */
+.node.card .c-bottom .c-signs { height: auto; flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.node.card .c-bottom .c-signs .node-signs { gap: 2px; }
+/* Review: the chips keep whole beside the ways in (a tighter chip rather than a clipped Δ). */
+.node.card .c-bottom .c-signs { flex: 0 0 auto; }
+.node.card .c-bottom .c-entry { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.node.card .c-bottom .c-signs .sign-tab { height: 20px; padding: 0 3px; border-color: transparent; background: none; font-size: var(--t-kind, 12px); line-height: 18px; color: var(--text-3); letter-spacing: .01em; }
+.node.card .c-bottom .c-signs .sign-tab:hover, .node.card .c-bottom .c-signs .sign-tab:focus-visible { border-color: var(--line-strong); color: var(--text); }
+.node.card .c-bottom .c-signs .sign-tab.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.node.card .c-entry { gap: 2px; }
+.node.card .c-entry :is(.c-enter, .c-chip) { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-width: 24px; height: 24px; padding: 0 6px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-3); font-size: var(--t-kind, 12px); line-height: 1; font-weight: var(--fw-name); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.node.card .c-entry .c-enter.entry-open { padding: 0; font-size: 14px; }
+.node.card .c-entry .c-enter:hover, .node.card .c-entry .c-chip:hover { border-color: var(--line-strong); color: var(--text); background: var(--surface); }
+.node.card .c-entry .c-enter:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* Polish round fixes 1: the ways in are framed at rest (not only on hover), sized with the type floors so they read when zoomed out,
+   set apart from 연결 N, and carry their word (「안쪽 2 ▸」, 「상세 ⤢」) at 중간 and 가까이. */
+.node.card .c-entry .c-enter { height: calc(var(--t-bottom, 28px) - 6px); min-width: calc(var(--t-bottom, 28px) - 6px); padding: 0 calc(var(--t-kind, 12px) * .4); border-color: var(--line); color: var(--text-2); font-size: var(--t-kind, 12px); gap: calc(var(--t-kind, 12px) * .25); }
+.node.card .c-entry .c-enter.entry-open { padding: 0 calc(var(--t-kind, 12px) * .4); font-size: var(--t-kind, 12px); }
+.node.card .c-entry .c-enter .c-enter-g { font-size: calc(var(--t-kind, 12px) * 1.25); line-height: 1; }
+.node.card .c-entry .c-chip + .c-enter { margin-left: calc(var(--t-kind, 12px) * .5); }
+.space:is(.tier-far, .tier-dots) .node.card .c-enter-w { display: none; }
+/* In a shared foot at 중간 the words step out before anything overlaps (the framed 「1 ▸」 and 「⤢」 stay); the ways in never shrink into each other. */
+.space.tier-mid .node.card .c-bottom .c-enter-w { display: none; }
+.node.card .c-entry > * { flex: none; }
+/* The ways in keep whole in a shared foot: they never shrink or clip (at 중간 a tighter frame); a crowded foot clips its sign chips' end. */
+.node.card .c-bottom .c-entry { flex: 0 0 auto; }
+.node.card .c-bottom .c-signs { flex: 0 1 auto; }
+.space.tier-mid .node.card .c-bottom .c-entry .c-enter { padding: 0 calc(var(--t-kind, 12px) * .2); gap: calc(var(--t-kind, 12px) * .12); }
+.space.tier-mid .node.card .c-bottom .c-entry .c-chip + .c-enter { margin-left: 2px; }
+.space.tier-mid .node.card .c-bottom .c-entry .c-chip { padding: 0 calc(var(--t-kind, 12px) * .2); }
+.space.tier-mid .node.card .c-bottom { gap: 4px; }
+.node.card.open-corner > :is(.c-role, .c-rows, .c-inner) { padding-right: calc(var(--t-bottom, 28px) - 2px); }
+.node.card .c-corner { position: absolute; right: 6px; bottom: 6px; display: inline-flex; z-index: 1; }
+.node.card .c-corner .c-enter { background: var(--surface); }
+.space:is(.tier-far, .tier-dots) .node.card :is(.c-corner, .toggle.c-expand) { display: none; }
+.node.card .toggle.c-expand { color: var(--text-3); border: 1px solid var(--line); width: 20px; height: 20px; margin-left: 2px; }
+.node.card .toggle.c-expand svg { width: 12px; height: 12px; }
+/* The map's hover surface (one at a time, anchored, hoverable: WCAG 1.4.13). */
+.edge-tip.hoverable { pointer-events: auto; }
+.edge-tip .hc-name { color: var(--text); font-weight: var(--fw-name); font-size: 13px; }
+.edge-tip .hc-path { font-size: 11.5px; color: var(--text-4); }
+.edge-tip .hc-kind { font-size: 11.5px; color: var(--text-3); }
+.edge-tip .hc-role { color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.edge-tip .hc-ops { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.edge-tip .hc-ops::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--dot-wait); vertical-align: 1px; }
+.edge-tip .hc-ops.d-running::before { background: var(--dot-run); }
+.edge-tip .hc-ops.d-stopped::before { border-radius: 1px; background: var(--dot-stop); }
+.edge-tip .hc-ops.d-waiting::before { background: none; box-shadow: inset 0 0 0 1.5px var(--dot-wait); }
+.edge-tip .hc-ops.d-conflict::before { background: none; transform: rotate(45deg); border-radius: 0; box-shadow: inset 0 0 0 1.5px var(--dot-conflict); }
+.edge-tip .hc-ops.d-none::before { display: none; }
+.edge-tip .hc-io { color: var(--text-3); font-size: 12px; white-space: pre-line; }
+.edge-tip .hc-line { white-space: pre-line; }
+/* Polish round fixes 1: Korean words never break mid-word in a tip (「“호출마 / 다”」). */
+.edge-tip { word-break: keep-all; overflow-wrap: anywhere; }
+.edge-tip .tip-rel { display: flex; flex-direction: column; padding-top: 3px; margin-top: 2px; border-top: 1px solid var(--hair-2); }
+.edge-tip .tip-rel.first { border-top: 0; padding-top: 0; margin-top: 0; }
+/* Line parts join the line's hover (cards v2 §3): its label, badges, type chip and count chip are hover targets of the line. */
+.edge-labels > :is(.edge-label, .edge-badge, .edge-count, .edge-once) { pointer-events: auto; cursor: default; }
+.edge-labels > .edge-once { cursor: help; }
+.edge-labels > .edge-label.near:not(.on) { color: var(--text); background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); }
+.edge-labels > .edge-badge.near:not(.on) { border-color: var(--text-3); color: var(--text); }
+/* 선 이름표 off: the labels at rest step out (badges stay: a condition never reads as unconditional); a pointed or selected line keeps its own. */
+.space.no-labels .edge-labels > .edge-label:not(.on):not(.near):not(.type-chip) { visibility: hidden; }
+/* 「표시」: a popover over the bottom toolbar. */
+.display-wrap { position: relative; display: inline-flex; }
+.controls .display-toggle { padding: 0 10px; }
+.controls .display-toggle.on { background: var(--accent-soft); color: var(--accent); }
+.display-menu { position: absolute; left: 0; bottom: calc(100% + 10px); z-index: 5; width: 248px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); font-size: 12.5px; color: var(--text-2); }
+.display-menu[hidden] { display: none; }
+.dm-head { margin: 0 0 4px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-4); }
+.dm-row { display: flex; align-items: center; gap: 8px; min-height: 28px; cursor: pointer; }
+.dm-row input { margin: 0; accent-color: var(--accent); }
+.dm-own { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--hair-2); color: var(--text-3); }
+.dm-note { margin: 4px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-4); }
+/* The pane's explicit operations line (cards v2 §4). */
+.pane-ops-notes { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
+.pane-ops-line.none { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-3); }
+/* Review: no dot-like glyph for 「운영 기록 없음」 (a ring is the map's 대기 dot); an en dash, never used for a recorded state. */
+.pane-ops-line.none::before { content: '–'; display: inline-block; width: 7px; margin-right: 8px; color: var(--text-4); }
+.pane-ops-note { margin: 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.pane-ops-note.conflict { color: var(--text-2); }
+.pane-ops-line.flash { animation: ops-flash 1.6s ease-out 1; border-radius: 4px; }
+@keyframes ops-flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+.lens-blanks { margin: 4px 0 0; font-size: 12px; line-height: 17px; color: var(--text-4); }
+.lg-dots { margin: 6px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-4); cursor: help; }
+.space.lens-state .node.card .c-opsw { flex: 0 0 auto; max-width: 100%; }
+.space.lens-state .node.card .c-kind-word { min-width: 2em; }
+/* Polish round fixes 1 (the 상태·공백 lens): a recorded state takes the kind line whole (the kind word and its chips step out, so neither
+   is cut), led by its mark in its dot's colour, never the words 「운영 기록 없음」 on every card. A card with no record carries nothing
+   more (its kind word stays whole):
+   the legend's one 「– 운영 기록 없음 N」 is the group's mark, so the recorded states are what stands out. */
+.space.lens-state .node.card .c-kind:has(> .c-opsw:not(.ops-none)) > :not(.c-opsw) { display: none; }
+.space.lens-state .node.card .c-opsw:not(.ops-none) { flex: 0 1 auto; overflow: visible; text-overflow: clip; }
+.space.lens-state .node.card .c-opsw::before { content: attr(data-mark); display: inline-block; min-width: 1em; margin: 0 4px 0 0; color: var(--text-3); font-weight: var(--fw-name); }
+.space.lens-state .node.card .c-opsw.os-running::before { color: var(--dot-run); }
+.space.lens-state .node.card .c-opsw.os-stopped::before { color: var(--dot-stop); }
+.space.lens-state .node.card .c-opsw:is(.os-waiting, .os-conflict)::before { color: var(--dot-wait); }
+.space.lens-state .node.card .c-opsw.ops-none { display: none; }
+/* Polish round fixes 1: the first view's own control lines read firm but not heavy black (after the S10 emphasis rule, which it softens). */
+.space.fv-lines .world .edge.c-control.fv-emph:not(.on):not(.near):not(.agg):not(.sum):not(.s-dotted):not(.s-sparse) .edge-line { --lw: 1.75; stroke: var(--text-2); }
+
+/* Polish round fixes 2: how far the part's records go reads in 근거, each rung by its word (lit when the record has it). */
+.ev-ladder { margin: 0 0 10px; flex-wrap: wrap; }
+.ladder-words { display: inline-flex; gap: 4px; }
+.ladder-words > span { padding: 0 6px; height: 18px; line-height: 16px; border: 1px solid var(--hair-2); border-radius: 9px; font-size: 11.5px; color: var(--text-4); }
+.ladder-words > span.on { border-color: var(--accent-line); color: var(--text-2); background: var(--accent-soft); }
+.lens-kind-line { margin-top: 4px; }
+/* Polish round fixes 2: the 상태·공백 lens marks a part with something to say (a recorded state's mark, 「?」 for something to check)
+   by a ring and a corner mark kept at screen size (--u = 1/zoom), so the lens reads at the whole-map view too; the rest step back. */
+.space.lens-state .node.card[data-lens-mark] { box-shadow: 0 0 0 calc(2px * var(--u, 1)) var(--accent-line), 0 1px 2px rgb(15 23 42 / 6%); }
+.space.lens-state .node.card[data-lens-mark]::after { content: attr(data-lens-mark); position: absolute; top: 0; right: 0; z-index: 3; min-width: calc(18px * var(--u, 1)); height: calc(18px * var(--u, 1));
+  padding: 0 calc(4px * var(--u, 1)); border-bottom-left-radius: calc(6px * var(--u, 1)); background: var(--accent); color: var(--surface); font-size: calc(12px * var(--u, 1)); line-height: calc(18px * var(--u, 1)); font-weight: 700; text-align: center; pointer-events: none; }
+/* Polish round fixes 2: at the whole-map tiers the name takes the card's whole width and up to two lines: no glyph tile (the card's
+   colour says its family there), no ↻ loop tab and no head icons beside it, so nothing covers it; it breaks at spaces, dots and
+   underscores (the <wbr> breakable puts there), a word too long for a line breaking only as a last resort. */
+.space:is(.tier-far, .tier-dots) .node.card :is(.glyph-tile, .c-loop-tab) { display: none; }
+.space:is(.tier-far, .tier-dots) .node.card .c-head { gap: 0; }
+.space:is(.tier-far, .tier-dots) .node.card .c-title { min-width: 0; flex: 1 1 auto; }
+.space:is(.tier-far, .tier-dots) .node.card .c-name { word-break: keep-all; overflow-wrap: break-word; }
+/* Polish round fixes 2: a step-list head chip is a block of text (an inline-flex box never draws text-overflow's ellipsis, so the
+   chip was cut mid-character), sized to its words: the stop chip no longer stretches empty across the head. */
+.w-badge { display: inline-block; vertical-align: middle; flex: 0 1 auto; min-width: 0; }
+.w-badge.stop { flex: 0 1 auto; }
+/* Polish round fixes 2: over the 노선 the port → station lines show only for the port or station pointed at (they crossed the
+   stations' words as diagonals); a line wider than its strip fades at the edge it scrolls past and says so. */
+.dv-bound.hover-lines .dv-inlines .in-step { opacity: 0; transition: opacity .12s; }
+.dv-bound.hover-lines .dv-inlines .in-step.hot { opacity: 1; }
+.sl-scroll.wide { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+.sl-scroll.wide:hover, .sl-scroll.wide:focus-within { -webkit-mask-image: none; mask-image: none; }
+.sl-wide-note { margin: 4px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-3); }
+/* Polish round fixes 2: under 시작·반복 the control lines read thin and grey at rest (they wrapped half the map as thick black dashes),
+   dark on the line pointed at or a picked card's lines. */
+.space.lens-start .edge.c-control .edge-line { --lw: 1.5; stroke: var(--text-3); }
+.space.lens-start .edge.c-control:is(.on, .hover, :hover, .lit, .lg-pick, .lg-hover) .edge-line { --lw: 2; stroke: var(--text-2); }
+/* Polish round fixes 2: a card's foot reads in words at 가까이 (규칙 4 · 변경 2), its glyphs only where the foot is small (중간);
+   「안쪽 N ▸」 always says 안쪽; the ＋ (expand here) shows on the card pointed at or picked only. */
+.sign-tab .sg-w { display: none; }
+.space.tier-near .node.card .sign-tab .sg-w { display: inline; }
+.space.tier-near .node.card .sign-tab .sg-g { display: none; }
+.space.tier-mid .node.card .c-bottom .enter-in .c-enter-w { display: inline; }
+.node.card:not(:hover):not(:focus-within):not(.selected) .toggle.c-expand { visibility: hidden; }
+/* Polish round fixes 2: the corner's framed 「상세 ⤢」 is about 4 em wide: the lines it sits over keep that room (the role line's end and
+   its ellipsis stay visible); at the whole-map tiers the corner is not drawn, so nothing is kept. */
+.node.card.open-corner > :is(.c-role, .c-rows, .c-inner) { padding-right: calc(var(--t-kind, 12px) * 4.2 + 8px); }
+.space:is(.tier-far, .tier-dots) .node.card.open-corner > :is(.c-role, .c-rows, .c-inner) { padding-right: 0; }
+/* Polish round fixes 2: the region captions (참여자 · 시스템 경계) keep about 11px on screen at every zoom (--u = 1/zoom), growing
+   upward from their place over the region; never smaller than at 100%. */
+.band-head { transform: scale(max(1, calc(var(--u, 1) * .92))); transform-origin: 0 100%; }
+/* Polish round fixes 2: below 가까이 the inner line's type grows with the tier (--t-row) while its line height stayed 16px, so its
+   glyphs were cut in half by the card's edge (스케줄러 at the whole-map view): the line height follows the type. */
+.space:not(.tier-near) .node.card .c-inner { line-height: var(--t-row-lh, 20px); }
+/* Polish round fixes 2: a route shorter than its head is not drawn (a lone arrowhead between two stacked cards). */
+#world .edge.stub { display: none; }
+/* Polish round fixes 2: beside the 노선 the port columns take the room the line leaves (up to 220px), so a port reads 「updateDisplay」,
+   not 「updateD…」, while the line keeps its 520px. */
+.dv-inner.has-line { grid-template-columns: minmax(88px, max-content) minmax(520px, 1fr) minmax(88px, max-content); }
+.dv-inner.has-line > .dv-ports, .dv-inner.has-line .dv-ports { max-width: 220px; }
+/* Below 가까이 the card's box lets its overflow show: the mark sits on the card's corner, off its name. */
+.space.lens-state .node.card.fit-auto[data-lens-mark]::after { top: calc(-9px * var(--u, 1)); right: calc(-9px * var(--u, 1)); border-radius: calc(9px * var(--u, 1)); }
+.w-badge:not(.stop) { flex: none; }
+/* Restore (spec-cards-v2 §7 'Conditional relations'): below 가까이 a conditional or optional line at rest keeps a tiny text-free mark
+   ON the line (8px on screen: --inv keeps it so), quiet grey: ◇ a condition, a dashed ring 선택. It is part of the line's hover (the
+   tip says the words) and darkens with it; a wider invisible ring makes it easy to point at. */
+.edge-labels > .edge-cue { position: absolute; width: 8px; height: 8px; pointer-events: auto; cursor: help; transform: scale(var(--inv, 1)); transform-origin: 0 0; }
+.edge-cue::after { content: ""; position: absolute; inset: -4px; }
+.edge-cue::before { content: ""; position: absolute; box-sizing: border-box; background: var(--surface); }
+.edge-cue.q-condition::before { left: 1.25px; top: 1.25px; width: 5.5px; height: 5.5px; border: 1.5px solid var(--text-3); transform: rotate(45deg); }
+.edge-cue.q-optional::before { inset: 0; border: 1.5px dashed var(--text-3); border-radius: 50%; }
+.edge-cue.beside::before { border-color: var(--text-4); }
+.edge-cue:is(.near, :hover)::before, .edge-cue.lg-pick::before { border-color: var(--text); }
+.edge-cue.lg-dim, .edge-cue.lg-fade { opacity: .3; }
+/* Restore: the 상태·공백 legend's plain words for its faded cards (open: a line under the items; folded: a muted part of the chip). */
+.lg-fade-note { margin: 6px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-3); }
+.lg-chip-fade { flex: none; color: var(--text-3); font-weight: 400; }
+.lg-chip-fade::before { content: "·"; margin: 0 6px 0 2px; color: var(--text-4); }

@@ -87,7 +87,8 @@ export function kindLabel(type: PartType | null | undefined, steps: number, loop
  * word (실행 위치 · 구성 · 참여자 · 외부, or the app's own reading of its children; 묶음 when neither says) and how many parts it holds:
  * 「실행 위치 · 부분 5」. Typed, the type word first, then the axis and the count: 「계산 · 구성 2」 (as before for a composition). */
 export function groupKind(type: PartType | null | undefined, axisWord: string | null | undefined, children: number): string {
-  return type ? `${TYPE_LABEL[type]} · ${axisWord ?? '구성'} ${children}` : `${axisWord ?? '묶음'} · 부분 ${children}`;
+  // Polish round fixes 1: one phrase for what a group holds on the card, the hover card and the ▸ control (「안쪽 N」).
+  return type ? `${TYPE_LABEL[type]}${axisWord && axisWord !== '구성' ? ` · ${axisWord}` : ''} · 안쪽 ${children}` : `${axisWord ?? '묶음'} · 안쪽 ${children}`;
 }
 /** The glyph of an untyped group: a place pin for a group the record says is where things run (실행 위치), else the composition
  * squares; a typed group keeps its type's glyph (with the composition badge). */
@@ -160,6 +161,9 @@ export interface CardFacts {
   /** A group's parts by name, in the record's order, and what kind of group it is (map-regions groupWordOf: the axis key and its
    * word); absent for a part with no children. */
   members?: readonly string[]; groupAxis?: string | null; groupWord?: string | null; groupRecorded?: boolean;
+  /** Cards v2 (spec cards v2 §1): the first sentence of what the part does (the card's 「하는 일」 line); the card has a way in (⤢ · ▸ N ·
+   * 연결 N) so its foot is drawn; the display setting 「받는·내는 것 행」 (off by default) draws the contract's value rows. */
+  role?: string | null; foot?: boolean; values?: boolean;
 }
 /** A kind row; unlinked: its value comes from a list the record keeps without a line per item (config, inputs, outputs), drawn
  * muted under a dotted rule (UNLINKED_TIP), never as structure. */
@@ -189,6 +193,9 @@ export interface CardTemplate {
   group: { axis: string | null; word: string | null; names: string[]; recorded: boolean } | null;
   /** Recipe .45: the 「미정: 이유」 chip of a part with no record family; null for any other card (review N8: 「대응 불명확」 reads in the pane only). */
   undecided?: string | null;
+  /** Cards v2: the role line (null: none); the foot (the way in and the sign chips) drawn; the kind's defining blanks, by label, which
+   * the card no longer draws (the pane says 「X 미기록」). */
+  role?: string | null; foot?: boolean; blanks?: string[];
 }
 
 /** The most kind rows a card holds (the blank slot included), the most pins a side holds. */
@@ -197,8 +204,8 @@ export const KIND_ROWS = 3, PINS_MAX = 3;
 export const UNLINKED_TIP = '항목 근거 미연결 — 정리가 이 항목의 원문 줄을 따로 저장하지 않음';
 /** The names a value row shows: inputs and outputs two, a store's fields three; the first recorded steps three. */
 export const IO_NAMES = 2, FIELD_NAMES = 3, STEP_NAMES = 3;
-/** A list on one row: two names, then '+N'. */
-const listValue = (xs: readonly string[], k = 2) => [...xs.slice(0, k), ...(xs.length > k ? [`+${xs.length - k}`] : [])].join(' · ');
+/** A list on one row: two names, then 「외 N」 (cards v2 §1: a count says what it counts; the row's label is the noun). */
+const listValue = (xs: readonly string[], k = 2) => `${xs.slice(0, k).join(' · ')}${xs.length > k ? ` 외 ${xs.length - k}` : ''}`;
 /** A schedule's time basis when its words name one (00:15Z, UTC, KST); null when they do not. */
 export function timeBasis(texts: readonly string[]): string | null {
   for (const t of texts) {
@@ -210,11 +217,13 @@ export function timeBasis(texts: readonly string[]): string | null {
 
 /** The kind rows and the one defining blank (3.4, 3.5): in the table's order, at most KIND_ROWS together, the blank always kept
  * (it takes the place of the row it stands for). Only what the record says; a row with nothing to say is not drawn. */
-export function kindRows(f: CardFacts): CardRow[] {
-  const t = f.type, rows: CardRow[] = [], cfg = f.config;
+export function kindRows(f: CardFacts, opts: { blanks?: boolean } = {}): CardRow[] {
+  const t = f.type, rows: CardRow[] = [], cfg = f.config, withBlanks = opts.blanks !== false;
   const add = (label: string, value: string | null | undefined, extra: Partial<CardRow> = {}) => { if (value) rows.push({ label, value, ...extra }); };
   const U = { unlinked: true } as const;
-  const blank = (label: string) => rows.push({ label, value: '?', blank: true });
+  // Cards v2 §1: the card draws no blank row (the pane says 「X 미기록」); blanks: false leaves them out, so the rows that said
+  // something keep the room.
+  const blank = (label: string) => { if (withBlanks) rows.push({ label, value: '?', blank: true }); };
   switch (t) {
     case 'person':
       add('지키는 규칙', f.personRules ? `${f.personRules}` : null);
@@ -236,7 +245,7 @@ export function kindRows(f: CardFacts): CardRow[] {
       break;
     }
     case 'store':
-      add('관계', (f.writers ?? 0) + (f.readers ?? 0) ? `쓰는 쪽 ${f.writers ?? 0} · 읽는 쪽 ${f.readers ?? 0}` : null);
+      // Cards v2 §1: no 「관계 쓰는 쪽 N · 읽는 쪽 M」 on the card (the pane names the writers and readers).
       // 3.4 reads 「보존」 from config[0]; a setting does not say it is a retention, so it reads as the setting it is.
       add('설정', cfg[0], U);
       if (!f.fields.length) blank('행 형식'); else if (!cfg.length) blank('보존 기간');
@@ -305,7 +314,9 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   // A loop container (4.1, 4.3): only a recorded loop with recorded steps; never from the type word, a name or step names alone.
   const ws = f.steps.map(s => ({ name: s.name ?? '', program: s.program === true }));
   const well = f.loop && isContainer(ws, f.loop)
-    ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], stateVars: f.stateVars ?? 0, open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
+    // Polish round (spec-cards-v2 §1): the 「유지 상태 N」 compartment is no part of the card face (the pane's 구조 탭, the detail view
+    // and the ⤢ tip name it; the 상태·공백 lens counts its unlinked items), so the card is measured without it.
+    ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
   // A group (S8): what kind of group in its kind line, its first parts in an 안에 row before the kind rows; never 「유형 미상」.
   const kids = f.children ?? 0, group = kids > 0 ? { axis: f.groupAxis ?? null, word: f.groupWord ?? null, names: [...(f.members ?? [])], recorded: !!f.groupRecorded } : null;
   const mr = group ? membersRow(group.names) : null;
@@ -315,8 +326,14 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   const fam = f.family ?? null, chip = fam?.unclear ? null : undecidedChip(fam), role = fam?.family && fam.role ? fam.role : null;
   return { family: familyOf({ family: fam?.family ?? null, type: f.type }), inner, glyph: gateGlyph(fam, f.type) ?? (group ? groupGlyph(group.axis) : 'neutral'),
     kind: group ? groupKind(f.type, group.word, kids) : role && !f.type ? role : chip && !f.type ? chip : kindLabel(f.type, recorded || f.steps.length, !!f.loop),
-    rows: mr ? [mr, ...kindRows(f)] : kindRows(f), contract: contractOf(f), innerLine, well, signs: !!f.signs,
-    structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group, undecided: chip };
+    rows: mr ? [mr, ...kindRows(f, { blanks: false })] : kindRows(f, { blanks: false }), contract: shownContract(f), innerLine, well, signs: !!f.signs,
+    structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group, undecided: chip,
+    role: f.role?.trim() ? f.role.trim() : null, foot: !!f.foot || !!f.signs, blanks: kindRows(f).filter(r => r.blank).map(r => r.label) };
+}
+/** Cards v2 §1: the contract's value rows (받는 것 · 내는 것 · 필드) only behind the display setting 「받는·내는 것 행」; pins (the
+ * line ends attach there) always. */
+function shownContract(f: CardFacts): CardContract {
+  const c = contractOf(f); return c.kind === 'pins' || f.values ? c : { kind: 'values', rows: [] };
 }
 
 /* ---------- heights (map design v3 3.8, 5.3, 9.5): as styles.css draws them at the near tier ---------- */
@@ -327,7 +344,7 @@ export const NAME_ROOM = CARD_W - 16 * 2 - 20 - 8, TOGGLE_W = 28;
 /** Padding above and below; the head (name lines of 20 + the kind line 16 + 16 around); a kind row 20 and the rows' 12 after
  * (a value row the same); the contract's title 16, a pin row 24, its 8 after; the unmapped line 16; the inner line, the sign row
  * and the bottom line. */
-export const BORDER = 2, PAD_Y = 12, NAME_LH = 20, KIND_LH = 16, HEAD_GAP = 16, ROW_H = 20, ROWS_GAP = 12, PIN_TITLE = 16, PIN_H = 24, PIN_GAP = 8, LINE_H16 = 16, INNER_H = 24, SIGNS_H = 24, BOTTOM_H = 28, GRID = 8;
+export const BORDER = 2, PAD_Y = 12, NAME_LH = 20, KIND_LH = 16, HEAD_GAP = 16, ROW_H = 20, ROWS_GAP = 12, ROLE_H = 20, ROLE_GAP = 8, DOT_W = 16, PIN_TITLE = 16, PIN_H = 24, PIN_GAP = 8, LINE_H16 = 16, INNER_H = 24, SIGNS_H = 24, BOTTOM_H = 28, GRID = 8;
 export interface CardHeights { head: number; rows: number; contract: number; inner: number; signs: number; bottom: number; total: number;
   /** From the card's top: the card-level contact point (the contract area's middle) and each pin's centre ('in:결과', 'out:결과'). */
   contact: number; pins: Record<string, number>;
@@ -336,20 +353,24 @@ export interface CardHeights { head: number; rows: number; contract: number; inn
 export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): CardHeights {
   const nl = Math.min(2, Math.max(1, Math.floor(nameLines) || 1));
   const head = nl * NAME_LH + KIND_LH + HEAD_GAP + planned;
-  const rows = t.rows.length ? t.rows.length * ROW_H + ROWS_GAP : 0;
+  // Cards v2: the role line (one line, under the head) before the kind rows.
+  const role = t.role ? ROLE_H + ROLE_GAP : 0, rows = (t.rows.length ? t.rows.length * ROW_H + ROWS_GAP : 0) + role;
   const c = t.contract;
-  const contract = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H + PIN_GAP + (c.unmapped ? LINE_H16 : 0) : c.rows.length ? c.rows.length * ROW_H + ROWS_GAP : 0;
+  // Polish round (spec-cards-v2 §1): 「포트 대응 미기록 N」 is no line on the card face (the 데이터 and 상태·공백 lenses count it, the
+  // detail view marks each port), so the pin area is its title and rows only; contract.unmapped stays as data.
+  const contract = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H + PIN_GAP : c.rows.length ? c.rows.length * ROW_H + ROWS_GAP : 0;
   // A container's well is the near tier's content, so its height is the card's (the inner line reads in the same room further out).
-  const inner = t.well ? wellHeight(t.well) : t.innerLine ? INNER_H : 0, signs = t.signs ? SIGNS_H : 0;
+  // Cards v2: the sign chips share the foot with the way in (bottom-left and bottom-right); no foot when the card has neither.
+  const inner = t.well ? wellHeight(t.well) : t.innerLine ? INNER_H : 0, signs = 0, bottom = t.foot || t.signs ? BOTTOM_H : 0;
   // The 1px border a side is not added: at worst it takes 2px of the bottom padding, which stays inside the card.
-  const raw = PAD_Y + head + rows + contract + inner + signs + BOTTOM_H + PAD_Y, total = Math.ceil(raw / GRID) * GRID;
+  const raw = PAD_Y + head + rows + contract + inner + signs + bottom + PAD_Y, total = Math.ceil(raw / GRID) * GRID;
   const top = BORDER / 2 + PAD_Y + head + rows, pins: Record<string, number> = {};
   if (c.kind === 'pins') {
     c.ins.forEach((n, i) => { pins[`in:${n}`] = top + PIN_TITLE + i * PIN_H + PIN_H / 2; });
     c.outs.forEach((n, i) => { pins[`out:${n}`] = top + PIN_TITLE + i * PIN_H + PIN_H / 2; });
   }
   const pinRows = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H : contract;
-  return { head, rows, contract, inner, signs, bottom: BOTTOM_H, total, contact: top + pinRows / 2, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
+  return { head, rows, contract, inner, signs, bottom, total, contact: top + pinRows / 2, pins, ear: BORDER / 2 + PAD_Y + NAME_LH / 2 };
 }
 /** A name in the pieces it may break between (a line break opportunity after each separator: · / . _ - : , and the spaces it has):
  * an identifier breaks at 'CancelToken·|signal', 'train.|py', never 'adapter|s'. Joined, the pieces are the name. */
@@ -357,6 +378,11 @@ export function nameBreaks(name: string): string[] {
   return name.split(/(?<=[·/._\-:,])(?=\S)/).filter(s => s.length > 0);
 }
 /** The lines a name takes on the card: one, or two (the most drawn; a longer name is cut with an ellipsis, its whole in the tip). */
-export function nameLinesOf(need: number, kids: boolean): 1 | 2 {
-  return need > NAME_ROOM - (kids ? TOGGLE_W : 0) ? 2 : 1;
+export function nameLinesOf(need: number, kids: boolean, dot = false): 1 | 2 {
+  return need > nameRoomOf(kids, dot) ? 2 : 1;
 }
+/** The name's room on a card: less the fold toggle with an inside, less the status dot's place when the card has one (cards v2). */
+export const nameRoomOf = (kids: boolean, dot = false, ev = false): number => NAME_ROOM - (kids ? TOGGLE_W : 0) - (dot ? DOT_W : 0) - (dot && ev ? EV_W : 0);
+/** Cards v2 review: the evidence chip beside the dot (behind 근거 꼬리표) takes this much of the name's row too (「보고」 at 11px with its
+ * padding, border and the 4px gap), so a name measured with it on never runs under it. */
+export const EV_W = 40;

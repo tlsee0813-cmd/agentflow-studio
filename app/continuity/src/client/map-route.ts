@@ -164,7 +164,9 @@ function nudge(routes: Map<string, Routed>, blocks: (key: string) => Box[], vert
   segs.sort((p, q) => p.at - q.at || p.lo - q.lo);
   const clusters: Seg[][] = [];
   for (const s of segs) {
-    const c = clusters.find(c => Math.abs(c[0]!.at - s.at) < 1.5 && c.some(o => s.lo < o.hi + 6 && o.lo < s.hi + 6));
+    // Cards v2 review: runs a few pixels apart (closer than half a track) are one cluster too, so they are spread or joined, never
+    // left as a striped band.
+    const c = clusters.find(c => Math.abs(c[0]!.at - s.at) < TRACK_GAP / 2 && c.some(o => s.lo < o.hi + 6 && o.lo < s.hi + 6));
     if (c) c.push(s); else clusters.push([s]);
   }
   for (const c of clusters) {
@@ -181,8 +183,12 @@ function nudge(routes: Map<string, Routed>, blocks: (key: string) => Box[], vert
       // A gap too narrow for the full spacing (a list's columns) still keeps its runs a hairline apart where it can. Off the
       // edges of boxes first; a gap too narrow for that lets a run touch an edge rather than lie on another line.
       const ok = (x: number, clear: number) => fits(s, x, blocks(s.key), vertical, rims(s.key), clear);
-      const at = tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, 3))
-        ?? tries.find(x => ok(x, -1) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, -1) && apart(s, x, 3));
+      // Cards v2 review: a gap with no room for its own track never stacks runs a hairline apart (a striped band at the middle zoom);
+      // the run joins the nearest track already placed beside it (one trunk; the badges and the tip say what it holds), and only
+      // with no trunk to join does it keep the hairline.
+      const trunk = () => placed.filter(o => !(o.hi < s.lo - 2 || s.hi < o.lo - 2)).map(o => o.at).sort((p, q) => Math.abs(p - slot) - Math.abs(q - slot)).find(x => ok(x, -1));
+      const at = tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, -1) && apart(s, x, TRACK_GAP - 1))
+        ?? trunk() ?? tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, 3)) ?? tries.find(x => ok(x, -1) && apart(s, x, 3));
       if (at !== undefined) move(s, at, vertical);
       placed.push(s);
     });

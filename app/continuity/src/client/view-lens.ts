@@ -46,7 +46,10 @@ export function lensLook(id: LensId): LensLook {
  * 반복 about the ends of control lines, triggers and gates, and the parts with a recorded loop. 구성과 역할, 상태와 공백 and 시나리오
  * are about every card (시나리오 marks its own path). A lens that is about none of the drawn cards steps none back: the map never
  * goes blank for want of a topic. */
-export function lensOffTopic(id: LensId, parts: readonly Pick<LensPart, 'id' | 'family' | 'loop'>[], lines: readonly Pick<LensLine, 'channel' | 'from' | 'to'>[]): Set<string> {
+export function lensOffTopic(id: LensId, parts: readonly (Pick<LensPart, 'id' | 'family' | 'loop'> & Partial<Pick<LensPart, 'short' | 'unlinked'>>)[], lines: readonly Pick<LensLine, 'channel' | 'from' | 'to'>[]): Set<string> {
+  // Polish round fixes 2: 상태와 공백 is about the parts whose state the record says (a recorded state, its 「모름」 included); the rest
+  // step back, so the lens reads at every zoom (at the whole-map view its words are too small to see).
+  if (id === 'state') { const off = new Set(parts.filter(p => p.short === NO_RECORD).map(p => p.id)); return off.size >= parts.length ? new Set() : off; }
   if (id !== 'data' && id !== 'start') return new Set();
   const want: Channel = id === 'data' ? 'data' : 'control', ends = new Set<string>();
   for (const l of lines) if (l.channel === want) { ends.add(l.from); ends.add(l.to); }
@@ -70,7 +73,26 @@ const FAMILY_ORDER = ['participant', 'process', 'store', 'trigger', 'neutral'] a
 const FAMILY_NAME: Record<string, string> = { participant: '참여자', process: '처리', store: '저장', trigger: '촉발·관문', neutral: '중립' };
 const CHANNEL_NAME: Record<Channel | 'related', string> = { data: '데이터 선', control: '제어 선', uses: '참조 선', related: '관련 선' };
 /** The order the overview's short statuses are listed in (state lens), the rest after them in their first order. */
-const SHORT_ORDER = ['가동 보고', '작업 중 보고', '멈춤 보고', '대기 보고', '폐기', '설계만', '미구현', '운영 기록 충돌', '운영 기록 모름', '운영 기록 없음'];
+const SHORT_ORDER = ['가동 보고', '작업 중 보고', '멈춤 보고', '대기 보고', '폐기', '설계만', '미구현', '운영 기록 충돌', '상태 미상(기록)', '운영 기록 없음'];
+/** Restore: the 상태와 공백 legend says in plain words what its faded cards are, so fading never reads as 멈춤. */
+export const STATE_FADE_NOTE = '흐린 카드: 운영 상태를 말한 기록이 없음';
+/** The faded-card line under the 상태와 공백 legend (its count, and that it is not 멈춤); null under the other lenses or when no card
+ * steps back. */
+export function lensFadeNote(id: LensId, faded: number): { text: string; tip: string } | null {
+  if (id !== 'state' || faded <= 0) return null;
+  return { text: `${STATE_FADE_NOTE} · ${faded}개`, tip: `${STATE_FADE_NOTE} (멈춤이라는 뜻이 아님) · 카드를 누르면 사이드 창에 「운영 기록 없음」` };
+}
+/** A part no record gave an operations state (never counted in the 상태와 공백 legend: the lens is about what was said). */
+export const NO_RECORD = '운영 기록 없음';
+/** Polish round fixes 2: the legend's words for a status, in a reader's terms (the record said 「모름」; nothing self-contradicting). */
+const SHORT_LABEL: Readonly<Record<string, string>> = { '상태 미상(기록)': '기록에 「모름」으로 적힘' };
+/** The corner mark the 상태와 공백 lens puts on a part whose state the record says: its state's mark. Something to check (unlinked
+ * evidence) is no mark of its own: on a real map it is most cards, so a 「?」 on each read as noise; its legend item outlines them. */
+export function stateMark(p: Pick<LensPart, 'short'>): string | null {
+  return p.short !== NO_RECORD ? SHORT_MARK[p.short] ?? '·' : null;
+}
+/** Each short status its own mark (review: the record's 「모름」 and no record never share a glyph); the dots' shapes for their states. */
+const SHORT_MARK: Readonly<Record<string, string>> = { '가동 보고': '●', '멈춤 보고': '■', '대기 보고': '○', '운영 기록 충돌': '◇', '상태 미상(기록)': '…', '운영 기록 없음': '–' };
 
 /** The legend of a lens over what the map draws: items with a count above zero only (nothing the map does not have is listed),
  * each with the parts and lines it stands for. 시나리오 lists nothing here: its path and visits read in the scenario strip. */
@@ -103,11 +125,11 @@ export function legendItems(id: LensId, parts: readonly LensPart[], lines: reado
     }
     case 'state': {
       const words = [...new Set(parts.map(p => p.short))].sort((a, b) => (SHORT_ORDER.indexOf(a) + 1 || 99) - (SHORT_ORDER.indexOf(b) + 1 || 99));
-      for (const w of words) { const ps = parts.filter(p => p.short === w); add({ id: `short-${w}`, label: w, count: ps.length, sample: { kind: 'mark', text: '·' }, parts: ps.map(p => p.id), lines: [] }); }
+      // Polish round fixes 2: what was recorded first, each state by its words; a part with no record is not listed (it steps back on
+      // the map), and the author's 포트 대응 미기록 belongs to the 데이터 이동 lens, not this one.
+      for (const w of words.filter(x => x !== NO_RECORD)) { const ps = parts.filter(p => p.short === w); add({ id: `short-${w}`, label: SHORT_LABEL[w] ?? w, count: ps.length, sample: { kind: 'mark', text: SHORT_MARK[w] ?? '·' }, parts: ps.map(p => p.id), lines: [] }); }
       const ul = parts.filter(p => p.unlinked);
-      add({ id: 'unlinked', label: '항목 근거 미연결', count: ul.length, sample: { kind: 'mark', text: '?' }, parts: ul.map(p => p.id), lines: [] });
-      const um = parts.filter(p => p.unmapped > 0);
-      add({ id: 'unmapped', label: '포트 대응 미기록', count: um.reduce((a, p) => a + p.unmapped, 0), sample: { kind: 'mark', text: '□' }, parts: um.map(p => p.id), lines: [] });
+      add({ id: 'unlinked', label: '확인이 필요한 부분', count: ul.length, sample: { kind: 'mark', text: '?' }, parts: ul.map(p => p.id), lines: [] });
       break;
     }
     case 'scenario': break;
@@ -186,7 +208,7 @@ export function legendMarks(s: LegendState, items: readonly LegendItem[], world?
  * counts, then how many more ('구성 · 참여자 4 · 처리 1 · +2'). */
 export function legendChip(id: LensId, items: readonly LegendItem[], max = 2): string {
   const shown = items.slice(0, max).map(i => `${i.label} ${i.count}`), more = items.length - shown.length;
-  return [lensDef(id).short, ...shown, ...(more > 0 ? [`+${more}`] : [])].join(' · ');
+  return [lensDef(id).short, ...shown, ...(more > 0 ? [`외 ${more}개`] : [])].join(' · ');
 }
 /** Whether a box (the legend opened) would cover any of the given boxes (the cards on screen), with a few pixels of margin. */
 export function covers(box: { x: number; y: number; w: number; h: number }, boxes: readonly { x: number; y: number; w: number; h: number }[], m = 4): boolean {

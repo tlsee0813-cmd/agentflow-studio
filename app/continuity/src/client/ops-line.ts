@@ -7,6 +7,8 @@
 /** A state the readings give a part (map-reading.7), or anything else (read as not known). */
 export type OpsState = 'running' | 'working' | 'stopped' | 'unbuilt' | 'retired' | 'unknown' | string;
 
+/** Review (cards v2): the record's own 「모름」 reads apart from 「운영 기록 없음」 at a glance (the record spoke, and said it is unknown). */
+export const OPS_UNKNOWN = '상태 미상(기록)';
 /** A date and a clock time as records write them: '2026-11-03T07:46Z', '2026-11-03 07:46:12Z', '11-03 07:46Z', '11-03 07:46'. */
 const STAMP = /^(?:(\d{4})-)?(\d{1,2})-(\d{1,2})(?:T|\s+)(\d{1,2}:\d{2})(?::\d{2}(?:\.\d+)?)?\s*(Z|UTC)?$/i;
 /** The day of a basis time or of today ('2026-11-03…', '11-03 …'): year when written, month and day. */
@@ -35,7 +37,7 @@ export function opsText(state: OpsState | null, when: string | null, brief = fal
     case 'stopped': return `멈춤 보고${at}`;
     case 'unbuilt': return `미구현${at}`;
     case 'retired': return `폐기${at}`;
-    default: return '운영 기록 모름';
+    default: return OPS_UNKNOWN;
   }
 }
 
@@ -65,7 +67,7 @@ export function opsWord(state: OpsState | null, life: string | null = null): str
     case 'stopped': return '멈춤 보고';
     case 'unbuilt': return `${life ?? '미구현'} 보고`;
     case 'retired': return `${life ?? '폐기'} 보고`;
-    default: return '운영 기록 모름';
+    default: return OPS_UNKNOWN;
   }
 }
 /** A card's bottom line (map design v3 3.2): the state as a report with the record's time ('가동 보고 · 08:01Z'), without the

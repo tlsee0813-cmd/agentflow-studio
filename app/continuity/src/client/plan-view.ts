@@ -351,7 +351,8 @@ export function createPlanView(host: PlanHost) {
   }
   function overlay() {
     document.querySelectorAll<HTMLElement>('.plan-direct,.plan-impact,.plan-focus,.plan-reading,.plan-reading-now').forEach(el => { el.classList.remove('plan-direct', 'plan-impact', 'plan-focus', 'plan-reading', 'plan-reading-now'); el.removeAttribute('data-plan-title'); });
-    document.querySelectorAll<HTMLElement>('.plan-note').forEach(el => { el.replaceChildren(); el.removeAttribute('title'); el.className = 'plan-note'; });
+    // One hover surface (cards v2 review): a plan note's words read through the map's own tip (data-tip), never a native title.
+    document.querySelectorAll<HTMLElement>('.plan-note').forEach(el => { el.replaceChildren(); el.removeAttribute('title'); delete el.dataset.tip; el.className = 'plan-note'; });
     document.querySelectorAll('.plan-badge').forEach(el => el.remove());
     $('space').classList.toggle('planning', !!s);
     $('space').classList.toggle('preview', !!s && s.mode === 'preview' && !!plan());
@@ -388,18 +389,18 @@ export function createPlanView(host: PlanHost) {
         const mine = list.length > 1 && focusItem ? list.find(c => c.item === focusItem) ?? null : list.length === 1 ? list[0]! : null;
         if (mine) put(note, kind(kindWord(mine)), gap(kindWord(mine)), mine.text, list.length > 1 ? h('span', { class: 'pn-more' }, ` 외 ${list.length - 1}건`) : null);
         else put(note, kind(`변경 ${list.length}건`), ' ', manyLine(list));
-        note.title = list.map(c => `${c.item.title}${c.pres ? ` · ${c.pres.origin === 'suggestion' ? '분석 제안' : '바꿀 모습'}: ${c.text}` : ' (이 부분의 바꿀 모습 자료 없음)'}`).join('\n') + '\n아직 적용 안 됨';
-        if (m.inner.length) note.title += `\n안쪽에도 변경: ${m.inner.map(partName).join(', ')}`;
+        note.dataset.tip = list.map(c => `${c.item.title}${c.pres ? ` · ${c.pres.origin === 'suggestion' ? '분석 제안' : '바꿀 모습'}: ${c.text}` : ' (이 부분의 바꿀 모습 자료 없음)'}`).join('\n') + '\n아직 적용 안 됨';
+        if (m.inner.length) note.dataset.tip += `\n안쪽에도 변경: ${m.inner.map(partName).join(', ')}`;
       } else {
         note.classList.add('inner');
         put(note, kind('안쪽'), ' ', `‘${m.inner.map(partName).join('’, ‘')}’ 변경`);
-        note.title = `안쪽 부분을 바꾸려는 변경(아직 적용 안 됨): ${m.items.map(i => i.title).join(', ')}\n이 부분 전체를 바꾸는 것은 아니에요.`;
+        note.dataset.tip = `안쪽 부분을 바꾸려는 변경(아직 적용 안 됨): ${m.items.map(i => i.title).join(', ')}\n이 부분 전체를 바꾸는 것은 아니에요.`;
       }
     }
     for (const x of impacts) {
       const r = rep(x.partId), e = r ? el(r) : null; if (!e || e.classList.contains('plan-impact')) continue;
       e.classList.add('plan-impact');
-      const note = e.querySelector<HTMLElement>('.plan-note'); if (note) { note.classList.add('inner'); note.textContent = `${r !== x.partId ? `안쪽 ‘${partName(x.partId)}’ · ` : ''}영향 후보`; note.title = `영향 후보: ${x.reason}`; }
+      const note = e.querySelector<HTMLElement>('.plan-note'); if (note) { note.classList.add('inner'); note.textContent = `${r !== x.partId ? `안쪽 ‘${partName(x.partId)}’ · ` : ''}영향 후보`; note.dataset.tip = `영향 후보: ${x.reason}`; }
     }
   }
 
