@@ -38,6 +38,8 @@ import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
+import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep, formLoop, chooseForm, formUsable, nextForm, readForm, writeForm, formKeyOf, shortRef,
+  FORM_IDS, FORM_WORD, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, stateText as wellStateText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, badgeForms, quietTip, isRelativeRef, overflowMark, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
@@ -1494,7 +1496,7 @@ function closeOpen(focus = false) {
   if (focus && st) window.setTimeout(() => document.querySelector<HTMLElement>(`#world [data-drag="${CSS.escape(st.part)}"]`)?.focus({ preventScroll: true }), 0);
 }
 function hideDetail() {
-  const v = document.getElementById('detail'); detailFor = null;
+  const v = document.getElementById('detail'); detailFor = null; detailForm = null; formDraw = null;
   if (v && !v.hidden) { v.hidden = true; v.replaceChildren(); }
   $('space').classList.remove('detail-open');
   const vp = $('viewport');
@@ -1524,6 +1526,52 @@ function afterRenderOpen(o: Opened) {
   const id = pendingAction; pendingAction = null;
   if (id && id === selected) { openAction(id); return; }
   if (openState) syncOpenSoon(); else { dropShort(); hideDetail(); }
+}
+/* ---------- 보기틀 (spec forms v1): the detail view's other forms of one part (view-forms.ts) ----------
+ * What the forms read: the newest stored map reading's part (its full C-STEP rows, not the pane's twelve; its C-ENTRY and C-STATE
+ * rows), the C-LOOP rows of every part (a loop may run over another part's steps), and each other part's steps and states (a loop
+ * body or a state name there is said, never merged). Read once per view. */
+type StoredForms = { ref: string | null; steps: MapReading['parts'][number]['steps'] | null; entries: FormEntry[]; states: FormState[] };
+let formStore: { view: StudioView; parts: Map<string, StoredForms> } | null = null;
+function storedForms(o: Opened): Map<string, StoredForms> {
+  if (formStore?.view === o.view) return formStore.parts;
+  const parts = new Map<string, StoredForms>();
+  for (const r of mapReadings(o)) for (const p of r.parts) {
+    const was = parts.get(p.areaId) ?? { ref: null, steps: null, entries: [], states: [] };
+    parts.set(p.areaId, { ref: p.recordRef ?? was.ref, steps: p.steps?.length ? p.steps : was.steps,
+      entries: p.entries ? p.entries.map(e => ({ ref: e.recordRef, name: e.name, kind: e.kind })) : was.entries,
+      states: p.states ? p.states.map(s => ({ name: s.name, event: s.event, next: s.next })) : was.states });
+  }
+  formStore = { view: o.view, parts }; return parts;
+}
+interface FormInput { steps: FormStep[]; listIndex: (number | null)[]; loops: FormLoop[]; entries: FormEntry[]; states: FormState[]; owner: string | null;
+  elsewhere: { ref: string | null; loopIds: string[] }[]; ownerNames: Record<string, string>; ownerPart: Record<string, string>;
+  otherStates: { part: string; name: string; rows: FormState[] }[]; offer: FormOffer; listCount: number }
+function formInput(o: Opened, id: string): FormInput {
+  const p = partOf(o, id), r = p?.reading ?? null, all = storedForms(o), mine = all.get(id), list = r ? stepsOf(r) : [];
+  // The stored part's rows; the pane's own (twelve at most) only when no stored part has steps.
+  const steps = (mine?.steps?.length ? mine.steps : r?.steps ?? []).map(formStep);
+  const listIndex = steps.map(s => { const i = list.findIndex(x => x.name === s.name); return i >= 0 ? i : null; });
+  const loops = o.view.parts.flatMap(q => (q.reading?.recordLoops ?? []).map(formLoop));
+  const ownerNames: Record<string, string> = {}, ownerPart: Record<string, string> = {};
+  for (const q of o.view.parts) { const ref = all.get(q.id)?.ref; const own = ref ? /^B(\d+)$/i.exec(ref.trim()) : null; if (own) { ownerNames[`B${Number(own[1])}`] = q.name; ownerPart[`B${Number(own[1])}`] = q.id; } }
+  const elsewhere = [...all].filter(([k]) => k !== id).flatMap(([, v]) => (v.steps ?? []).map(s => ({ ref: s.recordRef ?? null, loopIds: [...(s.loopIds ?? [])] })));
+  const otherStates = [...all].filter(([k, v]) => k !== id && v.states.length && partOf(o, k)).map(([k, v]) => ({ part: k, name: partOf(o, k)!.name, rows: v.states }));
+  const states = mine?.states ?? [];
+  return { steps, listIndex, loops, entries: mine?.entries ?? [], states, owner: mine?.ref ?? null, elsewhere, ownerNames, ownerPart, otherStates,
+    offer: { line: lineOffer(steps, mine?.ref ?? null), states: stateOffer(states), steps: list.length || steps.length }, listCount: list.length };
+}
+const formKey = (o: Opened, id: string) => formKeyOf(viewKeyOf(o), stableId(o, id));
+/** The form an entry button asked for (the reading pane's 「노선 보기」), waiting for the detail view; and the form the view shows. */
+let pendingForm: { part: string; form: FormId } | null = null;
+let detailForm: { part: string; form: FormId; offer: FormOffer } | null = null;
+/** The line's own drawing, run again when the width it was drawn for changes (drawDetailLines, the window's resize). */
+let formDraw: (() => void) | null = null;
+function setDetailForm(form: FormId) {
+  const o = opened, d = detailForm; if (!o || !d || !formUsable(form, d.offer)) return;
+  writeForm(kv, formKey(o, d.part), form);
+  renderDetail(d.part);
+  document.querySelector<HTMLElement>(`#detail .vf-seg [data-form="${form}"]`)?.focus({ preventScroll: true });
 }
 function detailEl(): HTMLElement {
   let v = document.getElementById('detail');
@@ -1665,27 +1713,134 @@ function renderDetail(id: string) {
   const move = (k: string, label: string, key: string, aria: string, on: boolean, title: string, run: () => void) =>
     h('button', { type: 'button', class: `dv-move m-${k}`, title, 'aria-keyshortcuts': aria, disabled: !on, onclick: run }, h('span', {}, label), h('kbd', {}, key));
   const kids = p.childIds.map(c => partOf(o, c)).filter((x): x is PartView => !!x);
+  const fam = r?.typeRead ? FAMILY_OF[r.typeRead.type] : 'neutral';
+  // 보기틀 (spec forms v1): 목록 · 노선 · 상태 전이. The switch shows every form (one that cannot be drawn is disabled, its reason in its
+  // tip) and only when 노선 or 상태 전이 can be drawn for this part; a stored choice that still holds is kept, else the default.
+  const fi = formInput(o, id), fkey = formKey(o, id);
+  const asked = pendingForm?.part === id ? pendingForm.form : null; if (asked) pendingForm = null;
+  const form = chooseForm(asked ?? readForm(kv, fkey), fi.offer);
+  if (asked && form === asked) writeForm(kv, fkey, asked);
+  detailForm = { part: id, form, offer: fi.offer }; formDraw = null;
+  const formTip = (f: FormId) => f === 'list' ? '목록 · 기록 표의 행 순서대로 번호를 붙인 단계 (단계끼리 잇지 않음)'
+    : f === 'line' ? (fi.offer.line.ok ? `노선 · ${LINE_CAPTION}\n${LINE_RULE}` : `노선 · 그리지 않음 · ${fi.offer.line.reason}`)
+    : fi.offer.states.ok ? `상태 전이 · ${STATE_CAPTION}` : `상태 전이 · 그리지 않음 · ${fi.offer.states.reason}`;
+  const formSeg = fi.offer.line.ok || fi.offer.states.ok ? h('div', { class: 'vf-seg', role: 'radiogroup', 'aria-label': '보기' },
+    h('span', { class: 'vf-label', 'aria-hidden': 'true', title: '보기 · V로 다음 보기' }, '보기'),
+    ...FORM_IDS.map(f => { const usable = formUsable(f, fi.offer);
+      return h('button', { type: 'button', role: 'radio', class: `vf-opt${f === form ? ' on' : ''}${usable ? '' : ' off'}`, 'data-form': f, 'aria-checked': String(f === form), 'aria-disabled': String(!usable),
+        'aria-keyshortcuts': 'V', title: formTip(f), onclick: () => { if (usable && f !== form) setDetailForm(f); } }, FORM_WORD[f]); })) : null;
+  // 노선: the recorded steps as stations on one line in the record's row order (program steps listed under it, never stations).
+  const stationCount = fi.steps.filter(s => !s.program).length, progCount = fi.steps.length - stationCount, listRecorded = counts.recorded;
+  const lineOpts = (width: number) => ({ width, owner: fi.owner, elsewhere: fi.elsewhere, ownerNames: fi.ownerNames,
+    extra: fi.steps.map((_, i) => { const li = fi.listIndex[i]; if (li === null || li === undefined) return 0; const dec = decisions.filter(x => x.d.index === li);
+      return (dec.some(x => x.d.source === 'conditions') ? 0 : (cp.steps.get(li) ?? []).length) + dec.length * 2; }) });
+  const pre = form === 'line' ? stepLine(fi.steps, fi.loops, fi.entries, lineOpts(0)) : null;
+  const stationEl = (s: Station) => {
+    const li = fi.listIndex[s.index] ?? null, fs = fi.steps[s.index]!, row = li !== null ? chain.rows[li] : undefined;
+    const on = pickedStep?.part === id && pickedStep.name === s.name, sign = li !== null ? signChip(ds?.steps.get(li), `단계 ‘${s.name}’`) : null;
+    const dec = li !== null ? decisions.filter(x => x.d.index === li) : [];
+    const own = li === null || dec.some(x => x.d.source === 'conditions') ? [] : cp.steps.get(li) ?? [];
+    const progIn = li === null ? [] : chain.links.filter(l => l.step === li && l.direction === 'in' && linkFace(l).chipAt), progOut = li === null ? [] : chain.links.filter(l => l.step === li && l.direction === 'out' && linkFace(l).chipAt);
+    const uses = row?.uses ?? [];
+    const tip = [`${s.ref} · ${s.name}`, fs.does, uses.length ? `씀 · ${uses.map(u => { const f = fileRoleOf(u, fileRoles); return f ? `${u} (${f.role})` : u; }).join(', ')}` : null,
+      row?.ins.length ? `들어오는 포트 · ${row.ins.join(', ')}` : null, row?.outs.length ? `나가는 포트 · ${row.outs.join(', ')}` : null,
+      s.loops.length ? `반복 ${s.loops.join(', ')}의 몸통` : null, fs.cell ? `조건·분기 칸 · ${fs.cell}` : null,
+      ...[...progIn, ...progOut].map(l => `포트 ‘${l.port}’ 대응 · ${PROGRAM_PORT_HINT}`),
+      li === null ? '목록(12개까지) 밖의 행 · 포트와 단계를 잇는 선은 목록의 단계에만' : null, '기록의 C-STEP 행 · 눌러서 읽기면에 이 단계'].filter(Boolean).join('\n');
+    const line = (cls: string, title: string, ...kids: (Node | string | null)[]) => h('span', { class: `sl-line ${cls}`, title }, ...kids);
+    return h('div', { class: `sl-st${sign ? ' has-sign' : ''}${s.col ? ' alt' : ''}`, style: `left:${s.left}px;top:${s.top}px;width:${s.right - s.left}px;height:${s.h}px` },
+      h('button', { type: 'button', class: `dv-step sl-btn${on ? ' on' : ''}${dec.length ? ' decision' : ''}`, ...(li !== null ? { 'data-step': String(li) } : {}), 'data-station': String(s.index), 'aria-pressed': String(on), title: tip, onclick: () => pickStep(id, s.name) },
+        h('span', { class: 'sl-dot', 'aria-hidden': 'true' }),
+        h('span', { class: 'dv-step-head' }, ...progIn.map(l => portChip('step', l.port)), h('span', { class: 'dv-step-n sl-ref' }, shortRef(s.ref)), h('span', { class: 'dv-step-name' }, s.name),
+          dec.length ? h('span', { class: 'dv-diamond', role: 'img', 'aria-label': '판정 단계' }) : null, progOut.length ? h('span', { class: 'dv-prog-out' }, ...progOut.map(l => portChip('step', l.port))) : null),
+        fs.does ? h('span', { class: 'dv-step-does' }, fs.does) : null,
+        s.cond ? line('sl-if', `갈래의 조건 칸 · ${s.cond}`, h('b', {}, '조건'), s.cond) : null,
+        s.notes.length ? line('sl-notes', `조건·분기 칸 · ${s.notes.join(' · ')}`, h('b', {}, '갈림'), s.notes.join(' · ')) : null,
+        s.exits.length ? line('sl-exits', s.exits.map(e => e.tip).join('\n'), ...s.exits.map(e => h('span', { class: `sl-exit k-${e.kind}` }, e.text))) : null,
+        own.length ? h('span', { class: 'dv-conds sl-conds', role: 'list', 'aria-label': '조건 출구' }, ...own.map(condEl)) : null),
+      ...dec.map(gateAt), sign);
+  };
+  const paintLine = (canvas: HTMLElement, l: StepLine) => {
+    canvas.style.width = `${l.width}px`; canvas.style.height = `${l.height}px`;
+    const g = svg('svg', { class: 'sl-svg', width: String(l.width), height: String(l.height), 'aria-hidden': 'true' }), defs = svg('defs', {});
+    const head = svg('marker', { id: 'sl-head', viewBox: '0 0 10 10', refX: '7', refY: '5', markerWidth: '8', markerHeight: '8', orient: 'auto', markerUnits: 'userSpaceOnUse' });
+    head.append(svg('path', { d: 'M1,1 L8,5 L1,9', class: 'sl-head' })); defs.append(head); g.append(defs);
+    const titled = (el: SVGElement, tip: string) => { if (tip) { const t = svg('title', {}); t.textContent = tip; el.append(t); } return el; };
+    l.brackets.forEach(b => g.append(titled(svg('path', { class: `sl-bracket d${Math.min(b.depth, 4)}`, d: `M${b.xEnd},${b.y1} H${b.x + 8} Q${b.x},${b.y1} ${b.x},${b.y1 + 8} V${b.y2 - 8} Q${b.x},${b.y2} ${b.x + 8},${b.y2} H${b.xEnd}` }), b.tip)));
+    l.segments.forEach((s, k) => {
+      const d = s.curve ? `M${s.x1},${s.y1} C${s.x1},${(s.y1 + s.y2) / 2} ${s.x2},${(s.y1 + s.y2) / 2} ${s.x2},${s.y2}` : `M${s.x1},${s.y1} L${s.x2},${s.y2}`;
+      const p = svg('path', { class: `sl-seg${s.kind === 'cond' ? ' cond' : ''}${s.open ? ' open' : ''}${s.tail ? ' tail' : ''}`, d });
+      if (s.open) { const gid = `sl-fade-${k}`, lg = svg('linearGradient', { id: gid, gradientUnits: 'userSpaceOnUse', x1: String(s.x1), y1: String(s.y1), x2: String(s.x2), y2: String(s.y2) });
+        lg.append(svg('stop', { offset: '0', class: 'sl-fade-a' }), svg('stop', { offset: '1', class: 'sl-fade-b' })); defs.append(lg); p.style.stroke = `url(#${gid})`; }
+      g.append(titled(p, s.tip));
+    });
+    for (const a of l.arcs) {
+      const r0 = Math.min(10, Math.abs(a.y2 - a.y1) / 2), dir = a.y2 > a.y1 ? 1 : -1;
+      g.append(titled(svg('path', { class: `sl-arc${a.back ? ' back' : ''}`, 'marker-end': 'url(#sl-head)', d: `M${a.xFrom},${a.y1} H${a.x - r0} Q${a.x},${a.y1} ${a.x},${a.y1 + dir * r0} V${a.y2 - dir * r0} Q${a.x},${a.y2} ${a.x - r0},${a.y2} H${a.xFrom + 3}` }), a.tip));
+      g.append(svg('path', { class: 'sl-leader', d: `M${a.x},${a.pill.y + a.pill.h / 2} H${a.pill.x}` }));
+    }
+    const kind = new Map<object, string>();
+    for (const b of l.brackets) kind.set(b.tag, 'k-loop'); for (const f of l.forks) { kind.set(f.tag, 'k-fork'); if (f.gap) kind.set(f.gap, 'k-gap'); } for (const a of l.arcs) kind.set(a.pill, 'k-jump');
+    const pill = (t: { x: number; y: number; w: number; h: number; text: string; tip: string }, cls: string) => h('span', { class: `sl-tag ${cls}`, title: t.tip, style: `left:${t.x}px;top:${t.y}px;max-width:${t.w}px;height:${t.h}px` }, t.text);
+    canvas.replaceChildren(g, ...l.terminals.map(t => pill(t, 'sl-term')), ...l.tags.map(t => pill(t, kind.get(t) ?? 'k-cond')), ...l.stations.map(stationEl));
+  };
+  if (form === 'line') { let drawnW = -1;
+    formDraw = () => { const sc = v.querySelector<HTMLElement>('.sl-route .sl-scroll'), canvas = sc?.querySelector<HTMLElement>('.sl-canvas'); if (!sc || !canvas) return;
+      const w = Math.floor(sc.clientWidth); if (w === drawnW) return; drawnW = w; paintLine(canvas, stepLine(fi.steps, fi.loops, fi.entries, lineOpts(w))); }; }
+  const lineTip = [LINE_RULE, stationCount > listRecorded ? `목록은 ${listRecorded}개까지 · 노선은 기록된 단계 ${stationCount}개 모두` : null,
+    pre?.crossings ? `엇갈린 분기 ${pre.crossings}쌍은 오른쪽 길이 서로 건넘` : null].filter(Boolean).join('\n');
+  const lineSec = pre ? h('section', { class: `xp-sec x-steps sl-route f-${fam}`, 'aria-label': '노선 · 기록에 적힌 실행 순서' },
+    h('h4', { class: 'xp-title' }, '기록된 단계', h('small', {}, String(stationCount))),
+    h('p', { class: 'sl-caption', title: lineTip }, LINE_CAPTION),
+    h('div', { class: 'sl-scroll' }, h('div', { class: 'sl-canvas' })),
+    pre.loopsApart.length ? h('ul', { class: 'sl-apart', 'aria-label': '선 위에 괄호로 두지 않은 반복' }, ...pre.loopsApart.map(x => h('li', { title: `${x.label}\n${x.why} · 몸통 전체가 이 노선에 이어져 있을 때만 괄호로 그림` },
+      h('span', { class: 'sl-apart-mark', 'aria-hidden': 'true' }, '↻'), h('span', {}, x.text),
+      ...x.parts.filter(q => fi.ownerPart[q]).map(q => h('button', { type: 'button', class: 'link-button sl-open', title: `‘${fi.ownerNames[q]}’ 상세 열기`, onclick: () => openDetail(fi.ownerPart[q]!, true) }, `${fi.ownerNames[q]} 보기`))))) : null,
+    progCount ? h('p', { class: 'sl-prog', title: `기록의 C-STEP 행이 아님 · ${PROGRAM_STEP_HINT}` }, `프로그램이 만든 단계 ${progCount}개는 목록에서`) : null,
+    condsApart,
+    chain.stray.length ? h('p', { class: 'dv-none', title: chain.stray.map(m => `${m.port} · ${m.step}`).join('\n') }, `포트·단계를 찾지 못한 대응 ${chain.stray.length}`) : null) : null;
+  // 상태 전이: the part's C-STATE rows on a circle; another part's same state names said, never merged.
+  const statesSec = form === 'states' ? (() => {
+    const gr = stateGraph(fi.states), shared = statesElsewhere(fi.states, fi.otherStates);
+    const canvas = h('div', { class: 'vg-canvas', style: `width:${gr.width}px;height:${gr.height}px` });
+    const s = svg('svg', { class: 'vg-svg', width: String(gr.width), height: String(gr.height), 'aria-hidden': 'true' }), defs = svg('defs', {});
+    const m = svg('marker', { id: 'vg-head', viewBox: '0 0 10 10', refX: '8', refY: '5', markerWidth: '9', markerHeight: '9', orient: 'auto', markerUnits: 'userSpaceOnUse' });
+    m.append(svg('path', { d: 'M0,1 L9,5 L0,9 z', class: 'vg-head' })); defs.append(m); s.append(defs);
+    for (const e of gr.edges) { const p = svg('path', { class: `vg-edge${e.self ? ' self' : ''}${e.label === '사건 미기재' ? ' blank' : ''}`, d: e.d, 'marker-end': 'url(#vg-head)' }); const t = svg('title', {}); t.textContent = e.pill.tip; p.append(t); s.append(p); }
+    for (const n of gr.nodes.filter(q => q.start)) { s.append(svg('circle', { class: 'vg-start', cx: String(n.x - 22), cy: String(n.cy), r: '4' }), svg('path', { class: 'vg-start-line', d: `M${n.x - 18},${n.cy} H${n.x - 3}`, 'marker-end': 'url(#vg-head)' })); }
+    canvas.append(s, ...gr.nodes.map(n => h('span', { class: `vg-node${n.terminal ? ' terminal' : ''}${n.start ? ' start' : ''}`, style: `left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px`,
+      title: [`상태 ${n.name}`, n.rows.length ? `C-STATE 행 ${n.rows.map(i => i + 1).join(', ')}` : '다른 행의 다음 상태로만 나옴', n.start ? '기록이 시작·초기라고 부른 상태' : null, n.terminal ? STATE_TERMINAL : null].filter(Boolean).join('\n') }, n.name)),
+      ...gr.edges.map(e => h('span', { class: `vg-ev${e.label === '사건 미기재' ? ' blank' : ''}`, title: e.pill.tip, style: `left:${e.pill.x}px;top:${e.pill.y}px;width:${e.pill.w}px;height:${e.pill.h}px` }, e.label)));
+    return h('section', { class: `xp-sec dv-states f-${fam}`, 'aria-label': '상태 전이' },
+      h('h4', { class: 'xp-title' }, '상태 전이', h('small', {}, `상태 ${gr.nodes.length} · 전이 ${gr.edges.length}`)),
+      h('p', { class: 'vg-caption', title: 'C-STATE 행: 상태 · 떠나는 사건 · 다음 상태 · 원 위의 자리는 행에 처음 나온 차례일 뿐' }, STATE_CAPTION),
+      h('div', { class: 'vg-scroll' }, canvas),
+      ...shared.map(x => h('p', { class: 'vg-shared', title: `같은 이름 · ${x.shared.join(', ')} · 같은 상태인지 기록이 말하지 않아 합치지 않음` }, `같은 이름의 상태가 ‘${x.name}’에도 있음 · 합치지 않음`,
+        h('button', { type: 'button', class: 'link-button', onclick: () => openDetail(x.part, true) }, '열기'))),
+      steps.length ? h('p', { class: 'vg-steps-note', title: '단계는 다른 보기에서 · 보기를 바꾸거나 V' }, `단계 ${stationCount || steps.length}개는 ${fi.offer.line.ok ? '노선·목록' : '목록'}에서`) : null,
+      steps.length ? condsApart : null);
+  })() : null;
   const inner = h('div', { class: 'dv-body' },
     !r ? h('p', { class: 'dv-none' }, '이 부분을 말한 기록이 없다 · 빈 카드') : null,
-    r && !r.inputs.length && !r.outputs.length && !r.fields.length && !r.config.length && !kids.length && !steps.length && !loop && !vars.length && !conds.length ? h('p', { class: 'dv-none' }, '내부 미상 · 기록이 안쪽을 말하지 않았다') : null,
-    chainEl,
+    r && !r.inputs.length && !r.outputs.length && !r.fields.length && !r.config.length && !kids.length && !steps.length && !loop && !vars.length && !conds.length && !statesSec ? h('p', { class: 'dv-none' }, '내부 미상 · 기록이 안쪽을 말하지 않았다') : null,
+    lineSec ?? statesSec ?? chainEl,
     r && !steps.length ? h('section', { class: 'xp-sec x-steps' }, h('h4', { class: 'xp-title' }, '단계'), h('p', { class: 'dv-none', title: '받는 것에서 내는 것까지의 단계를 기록이 아직 말하지 않았다. 포트와 단계는 잇지 않는다.' }, '기록된 단계 없음 · 진입 단계 미상'),
       runs.length ? h('p', { class: 'dv-none dv-gate-none', title: runs.map(g => `실행 관문 · ${g.text}`).join('\n') }, `실행 관문 ${runs.length} · 판정 단계 미상 · ${EXIT_BLANK}`) : null, condsApart) : null,
     keepEl, variantsEl,
     ...actionBody(p, true, x => signChip(ds?.cells.get(x), `필드 ‘${x}’`)),
     kids.length ? h('section', { class: 'xp-sec x-kids' }, h('h4', { class: 'xp-title' }, '구성', h('small', {}, String(kids.length))),
       h('div', { class: 'dv-kids' }, ...kids.map(k => h('button', { type: 'button', class: 'dv-kid', 'data-part-ref': k.id, title: `‘${k.name}’ 상세 열기`, onclick: () => openDetail(k.id, true) }, k.reading?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[k.reading.typeRead.type]) : null, h('span', {}, k.name))))) : null);
-  const fam = r?.typeRead ? FAMILY_OF[r.typeRead.type] : 'neutral';
   v.replaceChildren(
     h('header', { class: 'dv-head' },
       h('div', { class: 'dv-title' }, h('span', { class: 'dv-kind' }, '내부 상세'), path.length ? h('span', { class: 'dv-where' }, `${path.join(' › ')} ›`) : null, h('h2', { class: 'dv-name' }, p.name),
         ds && (ds.project.length || ds.unplaced.length) ? h('span', { class: 'dv-view-signs' }, signChip(ds.project, '프로젝트 전체', `전체 규칙 ${ds.project.length}`),
           signChip(ds.unplaced, '배치 미정', `배치 미정 ${ds.unplaced.length}`, 'unplaced')) : null),
+      formSeg,
       h('div', { class: 'dv-moves', role: 'toolbar', 'aria-label': '내부 상세에서 나가기' },
         move('close', '닫기', 'Esc', 'Escape', true, '닫기 · 이 상세만 닫고 지도의 같은 선택으로', () => closeOpen(true)),
         move('back', '이전 읽기 위치', 'Alt ←', 'Alt+ArrowLeft', backStack.length > 0, backStack.length ? '이전 읽기 위치 · 이 상세를 열기 전의 카메라·선택·확대 단계·열림으로' : '이전 읽기 위치 없음', goBackPlace),
         move('up', parent ? `상위 구성 · ${parent.name}` : '상위 구성', 'Alt ↑', 'Alt+ArrowUp', !!parent, parent ? `상위 구성 · 이 부분을 실제로 담은 ‘${parent.name}’의 상세` : '상위 구성 없음 · 맨 위의 부분', goUp))),
-    h('div', { class: 'dv-stage' }, h('div', { class: `dv-grid${steps.length ? ' has-steps' : ''}` },
+    h('div', { class: 'dv-stage' }, h('div', { class: `dv-grid${steps.length ? ' has-steps' : ''}${form === 'line' ? ' has-line' : form === 'states' ? ' has-graph' : ''}` },
       svg('svg', { class: 'dv-lines', 'aria-hidden': 'true' }),
       h('div', { class: 'dv-side s-in', role: 'list', 'aria-label': '들어오는 쪽의 바깥 부분' }, ...order(false).map(f => refCard(f, false))),
       h('div', { class: `dv-bound f-${fam}`, role: 'group', 'aria-label': `${p.name}의 경계` },
@@ -1729,6 +1884,8 @@ function openCondition(id: string, index: number) {
 let detailLinks: { ref: string; port: string; out: boolean; ch: Channel | null; plain: boolean }[] = [];
 function drawDetailLines() {
   const v = document.getElementById('detail'); if (!v || v.hidden) return;
+  // 노선 (spec forms v1): the line is laid out for the width it has first, so the port → station lines measure its stations.
+  formDraw?.();
   const grid = v.querySelector<HTMLElement>('.dv-grid'), lines = v.querySelector<SVGSVGElement>('.dv-grid > .dv-lines'), bound = v.querySelector<HTMLElement>('.dv-bound'); if (!grid || !lines || !bound) return;
   const G = grid.getBoundingClientRect(), B = bound.getBoundingClientRect();
   lines.setAttribute('width', String(Math.ceil(G.width))); lines.setAttribute('height', String(Math.ceil(G.height)));
@@ -3328,7 +3485,20 @@ function paneHead(c: PaneCtx, tools: HTMLElement): HTMLElement {
     path.length ? h('div', { class: w ? 'panel-path' : 'lens-path' }, ...crumbs) : w ? h('div', { class: 'panel-path' }, h('span', {}, o.project.name)) : null,
     h('h2', { id: w ? 'panel-title' : 'lens-title', ...(w ? { tabindex: '-1' } : {}) }, part.name),
     aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
-    kindLine(c), storeLine(o, part), scLine, visitEntry(o), tools);
+    kindLine(c), w ? null : formEntries(o, part.id), storeLine(o, part), scLine, visitEntry(o), tools);
+}
+/** 보기틀 (spec forms v1, override 9): for the selected part, one button per form its records can draw (「노선 보기 · 단계 n」,
+ * 「상태 전이 · 상태 k」), each opening the detail view in that form. None when only the list can be drawn. */
+function formEntries(o: Opened, id: string): HTMLElement | null {
+  const fi = formInput(o, id), line = fi.offer.line.ok, st = fi.offer.states.ok; if (!line && !st) return null;
+  const open = (form: FormId) => { pendingForm = { part: id, form }; if (openState?.mode === 'detail' && openState.part === id && detailFor?.part === id) renderDetail(id); else openDetail(id, true); };
+  const n = fi.steps.filter(s => !s.program).length, k = new Set(fi.states.flatMap(s => [s.name, s.next]).filter((x): x is string => !!x && !!x.trim()).map(x => x.trim())).size;
+  return h('p', { class: 'vf-entries', role: 'group', 'aria-label': '다른 보기' },
+    line ? h('button', { type: 'button', class: 'vf-entry', 'data-form': 'line', title: `노선 · ${LINE_CAPTION}
+${LINE_RULE}
+내부 상세를 노선으로 열기`, onclick: () => open('line') }, h('span', { class: 'vf-glyph g-line', 'aria-hidden': 'true' }), `노선 보기 · 단계 ${n}`) : null,
+    st ? h('button', { type: 'button', class: 'vf-entry', 'data-form': 'states', title: `상태 전이 · ${STATE_CAPTION}
+내부 상세를 상태 전이로 열기`, onclick: () => open('states') }, h('span', { class: 'vf-glyph g-states', 'aria-hidden': 'true' }), `상태 전이 · 상태 ${k}`) : null);
 }
 
 /* ---------- 구조 (8.3, with the design review's first-screen chain) ---------- */
@@ -5966,6 +6136,10 @@ function bindCanvas() {
         const first = document.querySelector<HTMLElement>(`#line-key .lg-item${legend.picked ? `[data-item="${CSS.escape(legend.picked)}"]` : ''}`) ?? document.querySelector<HTMLElement>('#line-key .lg-item');
         if (first) { e.preventDefault(); first.focus(); return; }
       }
+    }
+    // 보기틀 (spec forms v1): V shows the detail view's next form that can be drawn (목록 · 노선 · 상태 전이); never inside a field or the pane.
+    if ((e.key === 'v' || e.key === 'V') && !e.altKey && !e.ctrlKey && !e.metaKey && openState?.mode === 'detail' && detailForm && !(e.target as HTMLElement).closest('#lens, #panel, [contenteditable]')) {
+      const next = nextForm(detailForm.form, detailForm.offer); if (next !== detailForm.form) { e.preventDefault(); setDetailForm(next); } return;
     }
     // The detail view's other two moves: 이전 읽기 위치 (Alt+←) and 상위 구성 (Alt+↑); 닫기 is Escape, below.
     if (e.altKey && openState?.mode === 'detail' && (e.key === 'ArrowLeft' || e.key === 'ArrowUp')) { e.preventDefault(); if (e.key === 'ArrowLeft') goBackPlace(); else goUp(); return; }

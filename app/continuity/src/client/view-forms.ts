@@ -82,7 +82,7 @@ export function lineOffer(steps: readonly FormStep[], owner: string | null = nul
 /* ---------- 노선: geometry ---------- */
 export const ROW_H = 64, ROW_H_DOES = 84, COL_W = 220, LOOP_GUTTER = 28, JUMP_GUTTER = 26;
 /** One line of station content (a condition chip, a gate, the exits), the name line, the gap a segment's tag sits in, a tag band. */
-export const LINE_H = 20, NAME_H = 24, GAP = 40, TAG_H = 26, SPLIT_H = 22, ENTRY_H = 30, PAD = 12, DOT_R = 11;
+export const LABEL_MAX = 400, LINE_H = 20, NAME_H = 24, GAP = 40, TAG_H = 26, SPLIT_H = 22, ENTRY_H = 30, PAD = 12, DOT_R = 11;
 export const LINE_CAPTION = '기록에 적힌 실행 순서 · 실행 검증 아님 · 간격은 시간 아님';
 export const FORK_TAG = '조건에 따라 하나';
 export const FORK_OPEN = '갈래 뒤 합류는 기록에 없음';
@@ -94,7 +94,7 @@ export const ENTRY_WORD: Readonly<Record<string, string>> = { command: '명령',
  * keeps by a max width and an ellipsis. */
 export function textWidth(s: string, px: number): number {
   let w = 0;
-  for (const ch of s) { const c = ch.codePointAt(0)!; w += c >= 0x1100 && (c <= 0x11ff || (c >= 0x2e80 && c <= 0xa4cf) || (c >= 0xac00 && c <= 0xd7a3) || (c >= 0xf900 && c <= 0xfaff) || (c >= 0xff00 && c <= 0xffef)) ? 1 : /[A-Z0-9MW@%#&]/.test(ch) ? 0.66 : ch === ' ' ? 0.3 : 0.56; }
+  for (const ch of s) { const c = ch.codePointAt(0)!; w += c >= 0x1100 && (c <= 0x11ff || (c >= 0x2e80 && c <= 0xa4cf) || (c >= 0xac00 && c <= 0xd7a3) || (c >= 0xf900 && c <= 0xfaff) || (c >= 0xff00 && c <= 0xffef)) ? 1 : /[A-Z0-9MW@%#&]/.test(ch) ? 0.68 : ch === ' ' ? 0.32 : c > 0x7f ? 1 : 0.58; }
   return Math.ceil(w * px);
 }
 export interface Rect { x: number; y: number; w: number; h: number }
@@ -232,12 +232,15 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     (laneSpans[lane] ??= []).push([lo, hi]); laneOf.set(k, lane);
   }
   const lanes = laneSpans.length;
-  const labelW = raw.length ? Math.min(180, Math.max(...raw.map(j => textWidth(j.label, 12) + 18))) : 0;
+  const labelW = raw.length ? Math.min(190, Math.max(...raw.map(j => textWidth(j.label, 12) + 28))) : 0;
   const jumpArea = lanes ? 14 + (lanes - 1) * JUMP_GUTTER + 14 + labelW : 0;
   const maxCols = Math.max(1, ...rows.map(r => r.items.length));
   const natural = x0 + (maxCols - 1) * COL_W + DOT_R + 220 + jumpArea + 8;
   const width = Math.max(Math.round(opts.width ?? 0), natural);
-  const labelRight = width - 8 - jumpArea;
+  // With jumps, the labels end where a name and its line need (LABEL_MAX), so the arcs stay beside the stations, not across the view.
+  const need = Math.max(220, ...rows.map(r => { const x = r.items.at(-1)!, rd = reads.get(x.index)!;
+    return (r.items.length - 1) * COL_W + 32 + Math.max(textWidth(`${shortRef(x.s.ref ?? '')}  ${x.s.name}`, 15), textWidth(x.s.does ?? '', 13), textWidth(rd.exits.map(e => e.text).join('  '), 12) + rd.exits.length * 16); }));
+  const labelRight = lanes ? Math.min(width - 8 - jumpArea, x0 + DOT_R + Math.min(LABEL_MAX + (maxCols - 1) * COL_W, need + 24)) : width - 8 - jumpArea;
 
   // Vertical layout: entries, then each row with the bands of the tags that open on it.
   const terminals: Pill[] = [], tags: Pill[] = [], stations: Station[] = [], forks: Fork[] = [], segments: Segment[] = [], brackets: Bracket[] = [];
@@ -256,8 +259,8 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     const opening = cands.filter(c => c.top === ri).sort((a, b) => depthOf.get(b.l.ref)! - depthOf.get(a.l.ref)!);
     for (const c of opening) {
       const d = depthOf.get(c.l.ref)!, label = loopLabel(c.l), tx = x0 + 18;
-      const tag: Pill = { x: tx, y: y + 3, w: tagRight(label, tx), h: TAG_H - 6, text: label, tip: `반복 ${c.l.ref} · ${label}\n몸통 ${rows.slice(c.top, c.bottom + 1).flatMap(q => q.items.map(x => x.s.ref)).join(', ')} · 기록의 C-LOOP 행과 단계의 소속 반복\n괄호는 몸통일 뿐 · 실행 화살표가 아님` };
-      brackets.push({ ref: c.l.ref, x: x0 - 16 - (d - 1) * LOOP_GUTTER, xEnd: x0 - 6, y1: y + TAG_H / 2, y2: 0, depth: d, label, tag, tip: tag.tip });
+      const tag: Pill = { x: tx, y: y + 3, w: tagRight(label, tx), h: TAG_H - 6, text: label, tip: `반복 ${c.l.ref} · ${label}\n몸통 ${rows.slice(c.top, c.bottom + 1).flatMap(q => q.items.map(x => x.s.ref)).join(', ')} · 기록의 C-LOOP 행과 단계의 소속 반복${c.l.parentRef ? `\n바깥 반복 ${c.l.parentRef}` : ''}\n괄호는 몸통일 뿐 · 실행 화살표가 아님` };
+      brackets.push({ ref: c.l.ref, x: x0 - 22 - (d - 1) * LOOP_GUTTER, xEnd: x0 - 8, y1: y + TAG_H / 2, y2: 0, depth: d, label, tag, tip: tag.tip });
       tags.push(tag); y += TAG_H;
     }
     let forkTag: Pill | null = null;
@@ -332,6 +335,13 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
   for (let i = 0; i < arcs.length; i++) for (let k = i + 1; k < arcs.length; k++) {
     const A = arcs[i]!, B = arcs[k]!, [a1, a2] = [Math.min(A.y1, A.y2), Math.max(A.y1, A.y2)], [b1, b2] = [Math.min(B.y1, B.y2), Math.max(B.y1, B.y2)];
     if ((a1 < b1 && b1 < a2 && a2 < b2) || (b1 < a1 && a1 < b2 && b2 < a2)) crossings++;
+  }
+  // Arcs meeting at one station (as a start or an end) spread a few pixels apart, so their ends and heads stay apart.
+  const meets = new Map<number, { a: Arc; end: 'y1' | 'y2' }[]>();
+  raw.forEach((j, k) => { for (const [st, end] of [[j.fromIndex, 'y1'], [j.toIndex, 'y2']] as const) { const list = meets.get(st) ?? []; list.push({ a: arcs[k]!, end }); meets.set(st, list); } });
+  for (const list of meets.values()) if (list.length > 1) {
+    list.sort((p, q) => p.a.lane - q.a.lane || (p.end < q.end ? -1 : 1));
+    list.forEach((e, i) => { e.a[e.end] += Math.round((i - (list.length - 1) / 2) * 7); });
   }
   const bottom = Math.max(y - GAP + 24, ...tags.map(t => t.y + t.h + PAD), ...segments.map(s => Math.max(s.y1, s.y2) + PAD));
   return { width, height: Math.ceil(bottom), x0, stations, segments, brackets, arcs, jumps, forks, tags, terminals, loopsApart: apart, program: steps.length - rec.length, crossings };
