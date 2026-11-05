@@ -3,8 +3,10 @@
  * for the steps in run order, one per line, alternatives as S04a·b), and 「상태 전이」 draws the part's C-STATE rows on a circle.
  *
  * Geometry asserts facts, so a form is offered only when the record proves what its shape implies:
- * - the line only for at least three recorded steps whose C-STEP IDs are of one owner, unique and ascending in row order, with every
- *   branch naming a step of that owner that exists (never reordered, never repaired);
+ * - the line only for at least three steps with C-STEP row IDs, of one owner, unique and ascending in row order, with every branch
+ *   naming a step of that owner that exists (never reordered, never repaired); a recorded step with no row ID is not a station but
+ *   listed under the line (its place in the run order is not recorded), and the line is refused for missing IDs only when no
+ *   recorded step has one;
  * - a program-made step is a station only when it is a C-STEP row (it carries the row's ID: the program kept a row the reply left out),
  *   marked the program's; one with no row ID is not a station; C-STEP numbers skipped between two stations (rows not stored) are
  *   said on the segment, never drawn as 「다음 행」;
@@ -53,25 +55,36 @@ export const shortRef = (ref: string) => { const p = parseStepRef(ref); return p
 /* ---------- 노선: eligibility ---------- */
 export const LINE_RULE = '기록 요청서 C-STEP: 부분의 단계를 실행 순서대로 한 줄에 하나씩';
 export const LINE_FEW = '단계가 3개보다 적음';
-export const LINE_OLD = '이 단계 표는 행 순서를 실행 순서로 쓰라는 규칙이 없는 옛 기록';
+export const LINE_OLD = '이 단계 표에는 C-STEP 행 ID가 없음(행 순서가 실행 순서라는 규칙 밖)';
+/** Recorded steps with no C-STEP row ID leave fewer than three stations. */
+export const LINE_FEW_REF = 'C-STEP 행 ID가 있는 단계가 3개보다 적음';
+/** The note under the line for recorded steps with no C-STEP row ID (not on the line: their run-order place is not recorded). */
+export const noRefWord = (n: number) => `행 ID 없는 단계 ${n}개 · 순서 미상 · 목록에서`;
+export const NO_REF_TIP = '기록이 이 단계들에 C-STEP 행 ID를 주지 않아 실행 순서의 자리가 기록되지 않음 · 노선에 두지 않고 목록에서';
 export const LINE_OWNER = '단계 ID가 다른 부분의 것';
 export const LINE_DUP = '단계 ID가 겹침';
 export const LINE_ORDER = '단계 ID가 행 순서대로 오르지 않음';
 export const LINE_TARGET = '분기가 없는 단계를 가리킴';
 export interface Offer { ok: boolean; reason: string }
-/** A step the line draws as a station: a recorded step, or a program step that is a C-STEP row (it carries the row's ID). */
-export const onLine = (s: FormStep) => !s.program || !!parseStepRef(s.ref);
+/** A step the line draws as a station: a C-STEP row (it carries the row's ID), recorded or kept by the program. A step with no
+ * readable row ID is never a station: a recorded one is listed under the line, a program one counted there. */
+export const onLine = (s: FormStep) => !!parseStepRef(s.ref);
+/** A recorded (non-program) step with no readable C-STEP row ID: listed under the line, never placed on it. */
+export const noRef = (s: FormStep) => !s.program && !parseStepRef(s.ref);
 /** A C-STEP number skipped between two consecutive station numbers: a row the stored steps do not hold (not a missing row). */
 const inGap = (p: StepRef, ns: readonly number[]) => !ns.includes(p.n) && ns.some((n, i) => i > 0 && ns[i - 1]! < p.n && p.n < n);
 /** Whether the line may be drawn for these steps (owner: the part's own C-PART ID, when known). Only stations count (recorded steps,
  * and program steps that are C-STEP rows); three is a display policy, not a meaning test. Any failed consistency check means no line
  * and says which. A branch to a number skipped between two stations names a row not stored, not a missing one. */
 export function lineOffer(steps: readonly FormStep[], owner: string | null = null): Offer {
+  // Recorded steps and C-STEP program rows: fewer than three is too few whatever their IDs.
+  if (steps.filter(s => !s.program || onLine(s)).length < 3) return { ok: false, reason: LINE_FEW };
+  // Refused for missing IDs only when no recorded step has one; else the steps with IDs form the line (the others are listed
+  // under it) and the checks below read those only.
+  if (!steps.some(s => !s.program && onLine(s))) return { ok: false, reason: LINE_OLD };
   const rec = steps.filter(onLine);
-  if (rec.length < 3) return { ok: false, reason: LINE_FEW };
-  const parsed = rec.map(s => parseStepRef(s.ref));
-  if (parsed.some(p => !p)) return { ok: false, reason: LINE_OLD };
-  const ps = parsed as StepRef[], owners = new Set(ps.map(p => p.owner)), own = ownerOf(owner);
+  if (rec.length < 3) return { ok: false, reason: LINE_FEW_REF };
+  const ps = rec.map(s => parseStepRef(s.ref)!), owners = new Set(ps.map(p => p.owner)), own = ownerOf(owner);
   if (owners.size > 1 || (own && !owners.has(own))) return { ok: false, reason: `${LINE_OWNER} · ${rec.find((_, i) => ps[i]!.owner !== (own ?? ps[0]!.owner))?.ref ?? rec[0]!.ref}` };
   const seen = new Set<string>();
   for (let i = 0; i < ps.length; i++) { const k = refKey(ps[i]!); if (seen.has(k)) return { ok: false, reason: `${LINE_DUP} · ${rec[i]!.ref}` }; seen.add(k); }
@@ -95,7 +108,7 @@ export const LINE_CAPTION = '기록에 적힌 실행 순서 · 실행 검증 아
 export const FORK_TAG = '조건에 따라 하나';
 export const FORK_OPEN = '갈래 뒤 합류는 기록에 없음';
 export const COND_TAG = '조건에 따라';
-export const APART_OUT = '몸통 단계가 이 노선 밖', APART_SPLIT = '몸통이 떨어져 있음', APART_NONE = '몸통 미기록';
+export const APART_OUT = '몸통 단계가 이 노선 밖', APART_SPLIT = '몸통이 떨어져 있음', APART_NONE = '몸통 미기록', APART_UNREAD = '몸통 일부가 이 지도에 없음';
 /** A segment over C-STEP numbers the stored steps skip (the rows are in the record, not in the stored steps). */
 export const skipWord = (n: number) => `사이 행 ${n}개 없음`;
 export const UNSTORED = '저장 안 된 행';
@@ -131,7 +144,9 @@ export interface Jump { from: number; to: number; label: string; back: boolean }
 export interface StepLine { width: number; height: number; x0: number; stations: Station[]; segments: Segment[]; brackets: Bracket[]; arcs: Arc[];
   jumps: Jump[]; forks: Fork[]; tags: Pill[]; terminals: Pill[]; loopsApart: LoopApart[];
   /** program: program-made steps that are no station (no C-STEP row); skipped: C-STEP rows skipped between stations */
-  program: number; skipped: number; crossings: number }
+  program: number; skipped: number; crossings: number;
+  /** recorded steps with no C-STEP row ID (input index and name): listed under the line, their run-order place not recorded */
+  noRef: { index: number; name: string }[] }
 export interface LineOptions {
   /** the width the view has for the line (it grows past it only for what cannot be narrower; the view scrolls then) */
   width?: number;
@@ -167,6 +182,7 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
   const rowOfIndex = new Map<number, number>(), keyRow = new Map<string, number>(), keyIndex = new Map<string, number>(), groupRow = new Map<string, number>();
   rows.forEach((r, ri) => r.items.forEach(x => { rowOfIndex.set(x.index, ri); const p = parseStepRef(x.s.ref); if (p) { keyRow.set(refKey(p), ri); keyIndex.set(refKey(p), x.index); if (p.sfx) groupRow.set(`${p.owner}:${p.n}`, ri); } }));
   const nums = rec.map(x => parseStepRef(x.s.ref)?.n ?? 0);
+  const rowNum = (ri: number) => parseStepRef(rows[ri]!.items[0]!.s.ref)?.n ?? 0;
   const resolve = (t: string): { row: number; index: number } | 'outside' | 'unstored' | null => {
     const p = parseStepRef(t); if (!p) return null;
     if (p.owner !== owner) return 'outside';
@@ -225,13 +241,18 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     if (!body.size) { apart.push({ ref: l.ref, label, why: APART_NONE, text: `${l.ref} 반복 · ${APART_NONE}${l.bodyState === 'unexpanded' ? ' (몸통 단계 펼치지 않음)' : ''}`, parts: [] }); continue; }
     const others = [...new Set([...body].map(t => ownerOf(t)).filter((o): o is string => !!o && o !== owner))];
     const rowsIn = new Set<number>(); let missing = false;
-    for (const t of body) { const p = parseStepRef(t); if (!p) { missing = true; continue; } if (p.owner !== owner) continue; const r0 = keyRow.get(refKey(p)); if (r0 === undefined) missing = true; else rowsIn.add(r0); }
+    let unread = false;
+    for (const t of body) { const p = parseStepRef(t); if (!p) { missing = true; continue; } if (p.owner !== owner) continue; const r0 = keyRow.get(refKey(p)); if (r0 === undefined) { missing = true; unread = true; } else rowsIn.add(r0); }
     if (others.length) {
       const names = others.map(o => opts.ownerNames?.[o] ? `‘${opts.ownerNames[o]}’` : o);
       apart.push({ ref: l.ref, label, why: APART_OUT, text: `${l.ref} 반복의 일부 · 몸통이 ${names.join(', ')}에도 있음`, parts: others }); continue;
     }
-    if (missing || !rowsIn.size) { apart.push({ ref: l.ref, label, why: APART_OUT, text: `${l.ref} 반복의 일부 · ${APART_OUT}`, parts: [] }); continue; }
+    // A body row of this part the map's reading does not hold (a skipped C-STEP number): part of the body is not on this map.
+    if (missing || !rowsIn.size) { apart.push({ ref: l.ref, label, why: unread ? APART_UNREAD : APART_OUT, text: `${l.ref} 반복의 일부 · ${unread ? APART_UNREAD : APART_OUT}`, parts: [] }); continue; }
     const top = Math.min(...rowsIn), bottom = Math.max(...rowsIn);
+    // A body over skipped C-STEP rows is not known contiguous (the rows between are not read): never a bracket.
+    let overGap = false; for (let r0 = top; r0 < bottom; r0++) if (rowNum(r0 + 1) - rowNum(r0) > 1) overGap = true;
+    if (overGap) { apart.push({ ref: l.ref, label, why: APART_SPLIT, text: `${l.ref} 반복의 일부 · ${APART_SPLIT} (사이 행이 이 지도에 없음)`, parts: [] }); continue; }
     const bodyKeys = new Set([...body].map(t => parseStepRef(t)).filter((p): p is StepRef => !!p).map(refKey));
     let whole = true;
     for (let r0 = top; r0 <= bottom; r0++) for (const x of rows[r0]!.items) { const p = parseStepRef(x.s.ref); if (!p || !bodyKeys.has(refKey(p))) whole = false; }
@@ -381,7 +402,8 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     list.forEach((e, i) => { e.a[e.end] += Math.round((i - (list.length - 1) / 2) * 7); });
   }
   const bottom = Math.max(y - GAP + 24, ...tags.map(t => t.y + t.h + PAD), ...segments.map(s => Math.max(s.y1, s.y2) + PAD));
-  return { width, height: Math.ceil(bottom), x0, stations, segments, brackets, arcs, jumps, forks, tags, terminals, loopsApart: apart, program: steps.length - rec.length, skipped, crossings };
+  return { width, height: Math.ceil(bottom), x0, stations, segments, brackets, arcs, jumps, forks, tags, terminals, loopsApart: apart, program: steps.filter(s => s.program && !onLine(s)).length, skipped, crossings,
+    noRef: steps.flatMap((s, index) => noRef(s) ? [{ index, name: s.name }] : []) };
 }
 /** Every box the line places (stations, tags, terminals): the view's no-overlap invariant reads these. */
 export function lineBoxes(l: StepLine): (Rect & { what: string })[] {

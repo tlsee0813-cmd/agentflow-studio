@@ -109,3 +109,45 @@ test('FORM-22 the detail view and its styles: stations matched by row ID, port l
   assert.ok(/:not\(\.plan-impact\):not\(\.lit\) \{ outline: 2px solid var\(--fam-edge\)/.test(css), 'the family edge never replaces the impact or lit outline');
   assert.ok(/:root\[data-theme="dark"\] :is\(\.sl-route, \.dv-states\) \{ --sl-loop:/.test(css) && /color: var\(--form-on-ink\)/.test(css), 'loop tokens and the entry pill have dark values');
 });
+
+// Spec line fixes (2026-11-05, the screen check on real v5 maps): the training-project shape. Stored steps S01-S07, then S21-S35
+// (S08-S20 past the map reading's step bound), then three steps the record gave no C-STEP row ID, at the end out of row order;
+// nested loops L01 (outer) and L02 (inner) inside S21-S35, one loop over the gap and one with a body row the map does not hold.
+test('FORM-23 training shape: the line is offered over the steps with row IDs; ID-less steps listed apart; the gap is said between S07 and S21; only whole contiguous loops get brackets', async () => {
+  const vf = await import('../dist/public/client/view-forms.js');
+  const n2 = n => String(n).padStart(2, '0');
+  const steps = [];
+  for (let n = 1; n <= 7; n++) steps.push(step(`B05:S${n2(n)}`, `준비 ${n}`, { loopIds: n >= 6 ? ['B05:L03'] : [] }));
+  for (let n = 21; n <= 35; n++) steps.push(step(`B05:S${n2(n)}`, `학습 ${n}`, { loopIds: n >= 24 && n <= 33 ? [n >= 26 && n <= 30 ? 'B05:L02' : 'B05:L01'] : n === 21 ? ['B05:L03'] : [] }));
+  steps.push(step(null, '체크포인트 저장'), step(null, '평가 기록'), step(null, '로그 정리'));
+  const loops = [loop('B05:L01', ['B05:S24', 'B05:S25', 'B05:S31', 'B05:S32', 'B05:S33'], { unit: '에폭마다' }), loop('B05:L02', ['B05:S26', 'B05:S27', 'B05:S28', 'B05:S29', 'B05:S30'], { parentRef: 'B05:L01', unit: '배치마다' }),
+    loop('B05:L03', ['B05:S06', 'B05:S07', 'B05:S21']), loop('B05:L04', ['B05:S34', 'B05:S12'])];
+  const offer = lineOffer(steps, 'B05');
+  assert.equal(offer.ok, true, offer.reason);
+  const l = stepLine(steps, loops, [], { owner: 'B05' });
+  assert.equal(l.stations.length, 22); assert.ok(l.stations.every(s => s.ref));
+  assert.deepEqual(l.noRef.map(x => x.name), ['체크포인트 저장', '평가 기록', '로그 정리']); assert.equal(l.program, 0);
+  assert.equal(vf.noRefWord(3), '행 ID 없는 단계 3개 · 순서 미상 · 목록에서');
+  // The gap: the segment from S07 to S21 is the dotted skip segment with its tag; never a plain next-row segment.
+  const s07 = l.stations.find(s => s.ref === 'B05:S07'), s21 = l.stations.find(s => s.ref === 'B05:S21');
+  const gapSeg = l.segments.find(s => s.y1 === s07.y && s.y2 === s21.y);
+  assert.equal(gapSeg.skip, 13); assert.ok(!/다음 행/.test(gapSeg.tip));
+  const tag = l.tags.find(t => t.text === skipWord(13)); assert.ok(tag && tag.y > s07.top && tag.y < s21.top, 'the gap tag sits between S07 and S21');
+  assert.equal(l.skipped, 13);
+  // Brackets: L01 (outer, whole with L02's rows) and L02; L03 crosses the gap (split), L04 holds a row this map does not hold.
+  assert.deepEqual(l.brackets.map(b => b.ref).sort(), ['B05:L01', 'B05:L02']);
+  assert.ok(l.brackets.find(b => b.ref === 'B05:L01').depth > l.brackets.find(b => b.ref === 'B05:L02').depth);
+  const apart = Object.fromEntries(l.loopsApart.map(x => [x.ref, x.why]));
+  assert.equal(apart["B05:L03"], vf.APART_SPLIT); assert.equal(apart['B05:L04'], vf.APART_UNREAD);
+  noOverlap(l);
+  // The consistency checks read the steps with IDs only: the ID-less tail out of row order is no LINE_ORDER refusal; a duplicate among
+  // the ID'd steps still is.
+  assert.equal(lineOffer([...steps, step('B05:S35', '다시')], 'B05').reason.split(' · ')[0], vf.LINE_DUP);
+  // The detail view lists the ID-less steps under the line and counts the program's apart from them.
+  const app = readFileSync(new URL('../dist/public/client/app.js', import.meta.url), 'utf8');
+  assert.ok(app.includes('pre.noRef.length') && app.includes('NO_REF_TIP'));
+  assert.ok(/progCount = fi\.steps\.filter\(\(?s\)? => s\.program && !onLine\(s\)\)/.test(app));
+  const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
+  assert.ok(/\.dv-inner\.has-line \{ grid-template-columns: minmax\(64px, 120px\) minmax\(520px, 1fr\)/.test(css), 'the line keeps at least 520px');
+  assert.ok(/\.dv-inner\.has-line \.dv-port \{[^}]*white-space: nowrap/.test(css), 'ports are one-line chips in 노선');
+});

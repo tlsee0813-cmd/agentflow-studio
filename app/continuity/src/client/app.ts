@@ -39,7 +39,7 @@ import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, wr
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep, formLoop, chooseForm, formUsable, nextForm, readForm, writeForm, formKeyOf, shortRef,
-  FORM_IDS, FORM_WORD, COND_TAG, onLine, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
+  FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, stateText as wellStateText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, badgeForms, quietTip, isRelativeRef, overflowMark, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
@@ -1662,7 +1662,8 @@ function renderDetail(id: string) {
     return h('li', { class: `dv-port${x.unnamed ? ' unnamed' : ''}${mark ? ' unmapped' : ''}${offMark ? ' off-line' : ''}${sign ? ' has-sign' : ''}`, 'data-port': `${out ? 'o' : 'i'}|${x.key}`,
       title: `${out ? '내는 것' : '받는 것'} · ${x.name}${x.unnamed ? '\n기록이 이 관계에 포트 이름을 주지 않았다 (관계의 말)' : ''}${via.length ? `\n안쪽 ‘${via.join('’, ‘')}’에서` : ''}${to.length ? `\n${out ? '나오는 단계' : '들어가는 단계'} · ${to.join(', ')}` : ''}${mark ? `\n${mark} · 기록이 이 포트와 단계를 잇지 않았다` : ''}${offMark ? `\n${off.map(k => `‘${chain.rows[k]!.name}’`).join(', ')}은 노선에 정거장이 없어 선을 긋지 않음 · 목록 보기에서` : ''}` },
       h('span', { class: 'io-mark', 'aria-hidden': 'true' }, out ? '⇤' : '⇥'), h('span', { class: 'dv-port-name' }, x.name),
-      mark ? h('span', { class: 'dv-unmapped' }, mark) : offMark ? h('span', { class: 'dv-unmapped off-line' }, offMark) : null, sign);
+      // spec line fixes 4: in 노선 the ports are compact chips (the name on one line); the mapped-step note is in the tip.
+      form === 'line' ? null : mark ? h('span', { class: 'dv-unmapped' }, mark) : offMark ? h('span', { class: 'dv-unmapped off-line' }, offMark) : null, sign);
   };
   const stepBox = (s: (typeof chain.rows)[number]) => {
     const on = pickedStep?.part === id && pickedStep.name === s.name, sign = signChip(ds?.steps.get(s.index), `단계 ‘${s.name}’`), dec = decisions.filter(x => x.d.index === s.index);
@@ -1746,7 +1747,7 @@ function renderDetail(id: string) {
       return h('button', { type: 'button', role: 'radio', class: `vf-opt${f === form ? ' on' : ''}${usable ? '' : ' off'}`, 'data-form': f, 'aria-checked': String(f === form), 'aria-disabled': String(!usable),
         'aria-keyshortcuts': 'V', title: formTip(f), onclick: () => { if (usable && f !== form) setDetailForm(f); } }, FORM_WORD[f]); })) : null;
   // 노선: the C-STEP rows as stations on one line in the record's row order (a program step with no C-STEP row is listed under it).
-  const stationCount = fi.steps.filter(onLine).length, progCount = fi.steps.length - stationCount, listRecorded = counts.recorded;
+  const stationCount = fi.steps.filter(onLine).length, progCount = fi.steps.filter(s => s.program && !onLine(s)).length, listRecorded = counts.recorded;
   // What the list shows on its steps that no station hosts (a program step with no row, a list step no stored row matches): said
   // under the line, so a condition, gate, rule or port correspondence on them never just disappears.
   const offLine = form === 'line' ? steps.map((_, i) => i).filter(i => !hosted.has(i)) : [];
@@ -1821,6 +1822,8 @@ function renderDetail(id: string) {
     pre.loopsApart.length ? h('ul', { class: 'sl-apart', 'aria-label': '선 위에 괄호로 두지 않은 반복' }, ...pre.loopsApart.map(x => h('li', { title: `${x.label}\n${x.why} · 몸통 전체가 이 노선에 이어져 있을 때만 괄호로 그림` },
       h('span', { class: 'sl-apart-mark', 'aria-hidden': 'true' }, '↻'), h('span', {}, x.text),
       ...x.parts.filter(q => fi.ownerPart[q]).map(q => h('button', { type: 'button', class: 'link-button sl-open', title: `‘${fi.ownerNames[q]}’ 상세 열기`, onclick: () => openDetail(fi.ownerPart[q]!, true) }, `${fi.ownerNames[q]} 보기`))))) : null,
+    // spec line fixes 1: recorded steps with no C-STEP row ID are not stations; listed here, by name in the tip.
+    pre.noRef.length ? h('p', { class: 'sl-prog sl-noref', title: `${pre.noRef.map(x => `‘${x.name}’`).join(', ')}\n${NO_REF_TIP}` }, noRefWord(pre.noRef.length)) : null,
     progCount ? h('p', { class: 'sl-prog', title: `기록의 C-STEP 행 ID가 없는 단계 · ${PROGRAM_STEP_HINT}` }, `프로그램이 만든 단계 ${progCount}개는 목록에서`) : null,
     offWords.length ? h('p', { class: 'sl-prog sl-off', title: `노선에 정거장이 없는 단계(${offLine.map(i => `‘${steps[i]!.name}’`).join(', ')})에 놓인 것 · 목록 보기에서 그 단계에` }, `정거장 없는 단계의 ${offWords.join(' · ')}는 목록에서`) : null,
     condsApart,
@@ -1874,7 +1877,7 @@ function renderDetail(id: string) {
         h('div', { class: 'dv-bhead' }, r?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[r.typeRead.type]) : null, h('strong', { class: 'dv-bname' }, p.name), ops ? h('span', { class: 'xp-ops', title: ops.tip }, ops.full) : null,
           ds?.boundary.length ? h('span', { class: 'dv-scope-signs' }, signChip(ds.boundary, `‘${p.name}’ 전체`, `범위 규칙 ${ds.boundary.length}`),
             ds.open.length ? h('span', { class: 'sg-blank', title: '이 부분 전체에 미치는 규칙: 정확한 단계·포트·필드는 기록이 정하지 않았거나 이 지도에 그 자리가 없음' }, ds.open.length < ds.boundary.length ? `세부 접점 미정 ${ds.open.length}` : '세부 접점 미정') : null) : null),
-        h('div', { class: `dv-inner${steps.length ? ' has-steps' : ''}` },
+        h('div', { class: `dv-inner${steps.length ? ' has-steps' : ''}${form === 'line' ? ' has-line' : ''}` },
           h('ul', { class: 'dv-ports p-in', 'aria-label': '받는 것' }, ...(ins.length ? ins.map(x => portEl(x, false)) : [h('li', { class: 'dv-port blank' }, '받는 것 미기재')]), ...blankEls('write')),
           inner,
           h('ul', { class: 'dv-ports p-out', 'aria-label': '내는 것' }, ...(outs.length ? outs.map(x => portEl(x, true)) : [h('li', { class: 'dv-port blank' }, '내는 것 미기재')]), ...blankEls('exit')))),
@@ -3527,7 +3530,7 @@ function paneHead(c: PaneCtx, tools: HTMLElement): HTMLElement {
 function formEntries(o: Opened, id: string): HTMLElement | null {
   const fi = formInput(o, id), line = fi.offer.line.ok, st = fi.offer.states.ok; if (!line && !st) return null;
   const open = (form: FormId) => { pendingForm = { part: id, form }; if (openState?.mode === 'detail' && openState.part === id && detailFor?.part === id) renderDetail(id); else openDetail(id, true); };
-  const n = fi.steps.filter(s => !s.program).length, k = new Set(fi.states.flatMap(s => [s.name, s.next]).filter((x): x is string => !!x && !!x.trim()).map(x => x.trim())).size;
+  const n = fi.steps.filter(onLine).length, k = new Set(fi.states.flatMap(s => [s.name, s.next]).filter((x): x is string => !!x && !!x.trim()).map(x => x.trim())).size;
   return h('p', { class: 'vf-entries', role: 'group', 'aria-label': '다른 보기' },
     line ? h('button', { type: 'button', class: 'vf-entry', 'data-form': 'line', title: `노선 · ${LINE_CAPTION}
 ${LINE_RULE}

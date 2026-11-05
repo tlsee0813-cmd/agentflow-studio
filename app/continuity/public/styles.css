@@ -2995,7 +2995,19 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .vf-opt.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line); }
 .vf-opt.off { color: var(--text-4); opacity: .55; cursor: help; }
 .vf-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.dv-grid.has-line, .dv-grid.has-graph { grid-template-columns: minmax(120px, 160px) minmax(560px, 980px) minmax(120px, 160px); column-gap: 40px; }
+.dv-grid.has-graph { grid-template-columns: minmax(120px, 160px) minmax(560px, 980px) minmax(120px, 160px); column-gap: 40px; }
+/* spec line fixes 4: with the line drawn, the partner columns give way (down to 112px, at most 180px) and the line's own column
+   inside the boundary keeps at least 520px, also with the reading pane open beside the view (the stage scrolls past that). The
+   ports are compact chips: the name on one line with an ellipsis, the full text and the mapped-step note in the tip. */
+.dv-grid.has-line { grid-template-columns: minmax(112px, 180px) minmax(min-content, 1040px) minmax(112px, 180px); column-gap: 28px; align-items: start; }
+.dv-inner.has-line { grid-template-columns: minmax(64px, 120px) minmax(520px, 1fr) minmax(64px, 120px); column-gap: 20px; }
+.dv-inner.has-line .dv-ports { gap: 4px; }
+.dv-inner.has-line .dv-port { flex-wrap: nowrap; min-height: 22px; padding: 1px 6px; white-space: nowrap; overflow: hidden; overflow-wrap: normal; font-size: 12px; }
+.dv-inner.has-line .dv-port-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dv-inner.has-line .dv-port.unmapped .dv-port-name { color: var(--text-3); }
+.dv-inner.has-line .dv-port.blank { white-space: normal; }
+.dv-inner.has-line .dv-body { min-width: 0; }
+.sl-noref { color: var(--text-3); cursor: help; }
 
 .sl-route, .dv-states { --form-ink: var(--fam-neutral-ink); --form-soft: var(--fam-neutral-bg);
   --sl-loop: #5b63c9; --sl-loop-soft: #eff0fc; --sl-loop-line: #c9cdf3; }

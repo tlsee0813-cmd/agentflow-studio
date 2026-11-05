@@ -6,8 +6,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
   lineOffer, stepLine, lineBoxes, overlaps, stateOffer, stateGraph, statesElsewhere, formStep, formLoop, chooseForm, defaultForm, nextForm,
-  readForm, writeForm, formKeyOf, formSpots, loopLabel, parseStepRef, shortRef, FORM_KEY, LINE_FEW, LINE_OLD, LINE_OWNER, LINE_DUP, LINE_ORDER,
-  LINE_TARGET, LINE_RULE, STATE_FEW, FORK_TAG, FORK_OPEN, COND_TAG, APART_SPLIT, APART_NONE, APART_OUT, NO_EVENT, STATE_TERMINAL, STATE_CAPTION, LINE_CAPTION
+  readForm, writeForm, formKeyOf, formSpots, loopLabel, parseStepRef, shortRef, FORM_KEY, LINE_FEW, LINE_FEW_REF, LINE_OLD, LINE_OWNER, LINE_DUP, LINE_ORDER,
+  LINE_TARGET, LINE_RULE, STATE_FEW, FORK_TAG, FORK_OPEN, COND_TAG, APART_SPLIT, APART_NONE, APART_OUT, APART_UNREAD, NO_EVENT, STATE_TERMINAL, STATE_CAPTION, LINE_CAPTION
 } from '../dist/public/client/view-forms.js';
 
 // A cell given without its clauses is read as the record reading reads it: 「when → to/outcome」, or the whole clause as the outcome.
@@ -23,7 +23,9 @@ const noOverlap = l => { const bs = lineBoxes(l); for (let i = 0; i < bs.length;
 test('FORM-1 line eligibility: three recorded steps of one owner pass; fewer, old rows without C-STEP IDs and another owner\'s IDs say why', () => {
   assert.deepEqual(lineOffer(order(3)), { ok: true, reason: LINE_RULE });
   assert.equal(lineOffer(order(2)).reason, LINE_FEW);
-  assert.equal(lineOffer([...order(2), step(null, '옛 행')]).reason, LINE_OLD);
+  // spec line fixes 1: refused for missing IDs only when no recorded step has one; two IDs and one ID-less step are too few stations.
+  assert.equal(lineOffer([step(null, '옛 행 1'), step(null, '옛 행 2'), step(null, '옛 행 3')]).reason, LINE_OLD);
+  assert.equal(lineOffer([...order(2), step(null, '옛 행')]).reason, LINE_FEW_REF);
   assert.equal(lineOffer([step('B03:S01', 'a'), step('B03:S02', 'b'), step('B07:S03', 'c')]).reason.split(' · ')[0], LINE_OWNER);
   assert.equal(lineOffer(order(3, 'B03'), 'B07').reason.split(' · ')[0], LINE_OWNER);
   assert.equal(lineOffer(order(3, 'B3'), 'B03').ok, true, 'B3 and B03 are one owner');
@@ -117,9 +119,9 @@ test('FORM-6 loop brackets only for the full contiguous body; partial bodies are
   // No body at all.
   const none = stepLine(steps, [loop('B03:L06', [], { bodyState: 'unexpanded' })], []);
   assert.equal(none.loopsApart[0].why, APART_NONE);
-  // A body step of this owner that is not on the line (a missing row).
+  // A body step of this owner that is not on the line (a missing row): spec line fixes 2 says part of the body is not on this map.
   const out = stepLine(steps, [loop('B03:L07', ['B03:S04', 'B03:S08'])], []);
-  assert.equal(out.loopsApart[0].why, APART_OUT);
+  assert.equal(out.loopsApart[0].why, APART_UNREAD);
   // A loop the line does not touch is not listed.
   assert.equal(stepLine(steps, [loop('B20:L01', ['B20:S01'])], []).loopsApart.length, 0);
   noOverlap(l);
