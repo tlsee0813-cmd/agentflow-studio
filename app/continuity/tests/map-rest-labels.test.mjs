@@ -11,7 +11,8 @@ test('S1 the panel head\'s operations line: the full form with the record\'s mon
   assert.equal(opsHead('stopped', '11-01 09:00Z'), '멈춤 보고 · 11-01 09:00Z');
   assert.equal(opsHead('working', '어제 저녁'), '작업 중 보고 · 어제 저녁', 'a time written another way reads as written');
   assert.equal(opsHead(null, null), '운영 기록 없음');
-  assert.equal(opsHead('odd', null), '운영 기록 모름');
+  // cards v2 review: the record's 「모름」 reads apart from 「운영 기록 없음」 (상태 미상(기록)).
+  assert.equal(opsHead('odd', null), '상태 미상(기록)');
   assert.equal(opsText('running', '08:01Z'), '가동 보고 · 08:01Z · 현재 미확인', 'the card keeps its own words');
 });
 
@@ -61,7 +62,7 @@ test('the operations line: its words, the brief form only shortens 현재 미확
   assert.equal(opsText('running', '07:46Z', true), '가동 보고 · 07:46Z · 현재 ?');
   assert.equal(opsText('stopped', null), '멈춤 보고');
   assert.equal(opsText(null, null), '운영 기록 없음');
-  assert.equal(opsText('unknown', '07:46Z'), '운영 기록 모름');
+  assert.equal(opsText('unknown', '07:46Z'), '상태 미상(기록)');
   assert.deepEqual(opsLines('running', '11-03 07:46Z', '2026-11-03T09:01:03Z'), { full: '가동 보고 · 07:46Z · 현재 미확인', brief: '가동 보고 · 07:46Z · 현재 ?', tip: '가동 보고 · 11-03 07:46Z · 현재 미확인' });
   // Nothing but 현재 미확인 is ever shortened: other states read the same in both forms.
   for (const st of ['working', 'stopped', 'unbuilt', 'retired']) { const l = opsLines(st, '11-02 07:46Z', '2026-11-03'); assert.equal(l.full, l.brief); }

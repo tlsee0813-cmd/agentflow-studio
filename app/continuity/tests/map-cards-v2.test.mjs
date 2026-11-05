@@ -4,10 +4,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { statusDot, opsSaid, roleLine, moreText, moreTip, namesOf, ioLine, readDisplay, writeDisplay, clearDisplayOverride, displayUnder, DISPLAY_KEY, DISPLAY_DEFAULT, DOT_LEGEND, DOT_WORD } from '../dist/public/client/card-face.js';
+import { opsConflict, OP_VALUE_WORD, statusDot, opsSaid, roleLine, moreText, moreTip, namesOf, ioLine, readDisplay, writeDisplay, clearDisplayOverride, displayUnder, DISPLAY_KEY, DISPLAY_DEFAULT, DOT_LEGEND, DOT_WORD } from '../dist/public/client/card-face.js';
 import { hoverMachine, placeTip, HOVER_OPEN_MS, HOVER_GRACE_MS, DIM_AFTER_MS } from '../dist/public/client/hover-tip.js';
 import { cardTemplate, cardHeights, kindRows, nameRoomOf, NAME_ROOM, DOT_W, TOGGLE_W } from '../dist/public/client/card-family.js';
 import { tierFit } from '../dist/public/client/card-budget.js';
+import { legendItems } from '../dist/public/client/view-lens.js';
+import { opsText } from '../dist/public/client/ops-line.js';
 
 const facts = (x = {}) => ({ type: null, config: [], inputs: [], outputs: [], fields: [], loop: null, steps: [], conditions: [], ...x });
 const store = () => { const m = new Map(); return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), m }; };
@@ -21,8 +23,13 @@ test('CARD-1 the status dot: a recorded operations state only, shape by kind; no
   assert.equal(statusDot({ state: 'stopped', when: null, grade: null }).line, '멈춤 보고 · 근거 꼬리표 없음');
   // 작업 중 mixes development and running: no dot, unless the record calls it waiting (an operations state): a ring.
   assert.equal(statusDot({ state: 'working', when: null, grade: 'report' }), null);
-  assert.equal(statusDot({ state: 'working', when: null, grade: 'report', quote: '상태: 대기 중 [보고]' }).kind, 'waiting');
-  assert.equal(statusDot({ state: null, when: null, grade: null, ops: [{ value: 'idle' }] }).kind, 'waiting', 'a 유휴·대기 row alone');
+  // Cards v2 review M5: only when the record calls it an operations state in so many words (or beside an idle 운영 상태 row); a
+  // development wait (「코드 리뷰 대기」) is no ring.
+  assert.equal(statusDot({ state: 'working', when: null, grade: 'report', quote: '운영 상태: 대기 [보고]' }).kind, 'waiting');
+  assert.equal(statusDot({ state: 'working', when: null, grade: 'report', quote: '기능 구현 작업 중 · 코드 리뷰 대기 [보고]' }), null);
+  assert.equal(statusDot({ state: 'working', when: null, grade: 'report', quote: '작업 중 [보고]', ops: [{ value: 'idle' }] }).kind, 'waiting');
+  // Review M1: a 유휴·대기 row alone decides nothing (record-reading 4.6), so it draws no dot (every surface says 운영 기록 없음).
+  assert.equal(statusDot({ state: null, when: null, grade: null, ops: [{ value: 'idle' }] }), null, 'a 유휴·대기 row alone');
   // Never from file evidence alone; never doubling a lifecycle chip; never for no record or 모름.
   assert.equal(statusDot({ state: 'running', when: null, grade: 'file' }), null);
   assert.equal(statusDot({ state: 'retired', when: null, grade: 'report', life: '폐기' }), null);
@@ -31,7 +38,14 @@ test('CARD-1 the status dot: a recorded operations state only, shape by kind; no
   assert.equal(statusDot({ state: 'unknown', when: null, grade: 'report' }), null);
   // Records that disagree: the conflict mark, never one picked (even when the reading's state chose one).
   const c = statusDot({ state: 'running', when: null, grade: 'report', ops: [{ value: 'running' }, { value: 'stopped' }] });
-  assert.equal(c.kind, 'conflict'); assert.match(c.line, /^운영 기록 충돌 · running · stopped/);
+  // Review: the rows in words (never the record's enum spelling).
+  assert.equal(c.kind, 'conflict'); assert.equal(c.line, '운영 기록 충돌 · 실행 중 · 정지');
+  // Review: rows for different stated ranges are two claims (each of its own range), never a conflict; rows on file evidence alone
+  // make no mark either.
+  assert.equal(statusDot({ state: 'running', when: null, grade: 'report', ops: [{ value: 'running', scope: 'API' }, { value: 'idle', scope: '배치' }] }).kind, 'running');
+  assert.equal(statusDot({ state: 'running', when: null, grade: 'report', ops: [{ value: 'running', scope: 'API' }, { value: 'stopped', scope: ' API ' }] }).line, '운영 기록 충돌 · 실행 중(API) · 정지( API )');
+  assert.equal(statusDot({ state: 'running', when: null, grade: 'file', ops: [{ value: 'running', grade: 'file' }, { value: 'stopped', grade: 'file' }] }), null);
+  assert.equal(opsConflict([{ value: 'running', grade: 'file' }, { value: 'stopped', grade: 'report' }]).length, 2, 'one row on a report is enough');
   assert.equal(statusDot({ state: 'stopped', when: null, grade: 'report', ops: [{ value: 'stopped' }, { value: 'failed' }] }).kind, 'stopped', 'failed and stopped are one kind');
   // Never 멈춤 from age: an old running report stays a running report (the function reads no clock).
   assert.equal(statusDot({ state: 'running', when: '2020-01-01T00:00Z', grade: 'report' }).kind, 'running');
@@ -144,6 +158,25 @@ test('CARD-7 the card budget: the role line takes the room the ops line took at 
   assert.equal(tierFit(shape({ foot: 0 }), 0.77, 'mid').bottom, false);
   assert.equal(tierFit(shape({ foot: 0 }), 1, 'near').bottom, false);
   assert.equal(tierFit(shape(), 1, 'near').role, true);
+  // Review B1: the sign chips sit in the foot, so they show whenever the foot does (near and 중간) and never take room of their own.
+  for (const [k, t] of [[1, 'near'], [0.77, 'mid'], [0.62, 'mid']]) { const f = tierFit(shape({ signs: 1 }), k, t); assert.equal(f.signs, f.bottom, `${t} ${k}`); assert.equal(f.signs, true, `${t} ${k}`); }
+  assert.equal(tierFit(shape({ signs: 1, foot: 0 }), 1, 'near').signs, false, 'no foot, no chips');
+  assert.equal(tierFit(shape({ signs: 1 }), 0.54, 'far').signs, false);
+  const without = tierFit(shape({ total: 150 }), 0.77, 'mid'), withSigns = tierFit(shape({ total: 150, signs: 1 }), 0.77, 'mid');
+  assert.deepEqual({ ...withSigns, signs: false }, without, 'the chips cost nothing else');
+});
+
+test('CARD-9 review fixes: the legend marks, the record\'s own 모름, one word for a conflict, a placement that covers the least', () => {
+  assert.equal(opsText('unknown', null), '상태 미상(기록)', 'reads apart from 운영 기록 없음');
+  const parts = [{ id: 'a', short: '운영 기록 없음' }, { id: 'b', short: '상태 미상(기록)' }, { id: 'c', short: '운영 기록 충돌' }].map(x => ({ family: 'process', type: null, loop: false, unlinked: false, unmapped: 0, ...x }));
+  const marks = Object.fromEntries(legendItems('state', parts, []).filter(x => x.id.startsWith('short-')).map(x => [x.label, x.sample.text]));
+  assert.deepEqual(marks, { '운영 기록 충돌': '◇', '상태 미상(기록)': '…', '운영 기록 없음': '–' });
+  assert.equal(OP_VALUE_WORD.idle, '유휴·대기');
+  // Nothing clear anywhere: the side that covers the least (never simply the first side over a lit neighbour's name).
+  const bounds = { x: 0, y: 0, w: 600, h: 400 }, card = { x: 200, y: 100, w: 200, h: 150 }, size = { w: 190, h: 140 };
+  const right = { x: 400, y: 0, w: 200, h: 400 }, leftName = { x: 0, y: 100, w: 150, h: 20 };
+  const p = placeTip(card, size, bounds, 'beside', [right, leftName, { x: 0, y: 260, w: 600, h: 140 }, { x: 0, y: 0, w: 600, h: 90 }]);
+  assert.equal(p.side, 'left', JSON.stringify(p));
 });
 
 test('CARD-8 the built card and map: no ops footer, no c-short, no card title; the dot, ⤢ / ▸ N / 연결 N, § ◇ Δ, data-tip targets, line parts in the hover, the 표시 popover', () => {
@@ -177,4 +210,14 @@ test('CARD-8 the built card and map: no ops footer, no c-short, no card title; t
   assert.match(css, /\.c-dot\.d-stopped::before \{[^}]*background: var\(--dot-stop\)/);
   assert.ok(!/animation[^;]*(pulse|blink)/i.test(css.slice(css.indexOf('Cards v2 (spec cards v2'))), 'no pulse, no blink');
   assert.match(css, /--dot-stop: #9c8a62/, 'stopped is grey-amber, not red');
+  // Cards v2 review.
+  assert.ok(card.includes('${signs ? 1 : 0},${extra.boxH}'), 'B1: the shape carries the sign chips (no literal 0)');
+  assert.ok(/hoverLast\.el === x\.el/.test(hov) && body(src, 'renderSpace').includes('hoverStop()'), 'M6: a redraw drops the held target; a key is the same target only on the same element');
+  assert.ok(hov.includes("$('viewport').getBoundingClientRect()") && hov.includes('.near-end, .near-self') && hov.includes('.c-head'), 'tips stay in the map area, off lit neighbours and names');
+  assert.ok(hov.includes('hoverQuiet') && !hov.includes('누르면 출발 부분을 고르고'), 'a picked card keeps its tip shut; no click hint');
+  assert.ok(!hov.includes('실선 · 채운 머리'), 'no stroke vocabulary in the line tip');
+  assert.ok(hov.includes('조건 “${s.when}”') && body(src, 'relationLines').includes('when:'), 'M3: each relation row says its condition');
+  assert.ok(body(src, 'cardIo').includes('relationEnds('), 'the hover card falls back to the lines the pane reads');
+  assert.ok(body(src, 'fitCards').includes("'fit-auto'") && /\.node\.card\.fit-auto \{ height: auto !important/.test(css), 'cards below 가까이 at their content height');
+  assert.ok(!/title: `양쪽으로/.test(body(src, 'placeCounts')) && !/title: `데이터 계약/.test(body(src, 'typeChipEl')), 'one hover surface: no native titles on line parts');
 });

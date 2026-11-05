@@ -16,23 +16,44 @@ export const DOT_LEGEND = '점: 기록된 운영 상태만 · 점 없음 = 상�
 export type Grade = 'file' | 'run' | 'report' | 'guess' | 'unknown';
 export const GRADE_WORD: Readonly<Record<Grade, string>> = { file: '파일', run: '실행', report: '보고', guess: '추정', unknown: '모름' };
 /** What the dot reads: the reading's state with its time and its quote's grade, and the record's 운영 상태 rows (a v4/v5 C-STATUS
- * row each: running · idle · stopped · failed · unknown). life: the card's lifecycle chip (폐기 · 미구현 · 설계만), which a dot never doubles. */
-export interface DotInput { state: string | null; when: string | null; grade: Grade | null; quote?: string | null; ops?: readonly { value: string; basis?: string | null }[]; life?: string | null }
+ * row each: running · idle · stopped · failed · unknown, with its 적용 범위 and its own quote's grade). life: the card's lifecycle
+ * chip (폐기 · 미구현 · 설계만), which a dot never doubles. */
+export interface DotInput { state: string | null; when: string | null; grade: Grade | null; quote?: string | null; ops?: readonly { value: string; basis?: string | null; scope?: string | null; grade?: Grade | null }[]; life?: string | null }
 export interface StatusDot { kind: DotKind; word: string;
   /** the dot's own answer (spec §7: 언제, 무엇을 근거로?): 「가동 보고 · 08:08Z · 보고 근거」 */
   line: string; grade: Grade | null }
 const OP_KIND: Readonly<Record<string, DotKind | null>> = { running: 'running', stopped: 'stopped', failed: 'stopped', idle: 'waiting', unknown: null };
-/** The words that make a 작업 중 state an operations state (the record calls it waiting or idle): only then a ring. */
-const WAITING = /대기|유휴|idle|waiting|standby/i;
+/** A 운영 상태 row's value in words (the pane's, the dot's tip and its accessible name): never the record's enum spelling. */
+export const OP_VALUE_WORD: Readonly<Record<string, string>> = { running: '실행 중', idle: '유휴·대기', stopped: '정지', failed: '실패', unknown: '모름' };
+/** A 작업 중 state is an operations state only when the record says so in so many words (review M5): 「운영 상태 … 대기」, 「운영 대기」,
+ * 「유휴」, idle or standby; never a development wait such as 「코드 리뷰 대기」. */
+const OPS_WAITING = /운영\s*(상태\s*[:：·]?\s*)?(대기|유휴)|유휴|\bidle\b|\bstandby\b/i;
+/** The 운영 상태 rows that disagree, or null: rows are one claim only within one stated 적용 범위 (API running and batch idle are two
+ * claims, each of its own range), and rows on file evidence alone never make a mark (a dot never comes from file evidence alone). */
+export function opsConflict(ops: DotInput['ops']): { value: string; scope: string | null }[] | null {
+  const by = new Map<string, { value: string; scope: string | null; grade: Grade | null }[]>();
+  for (const o of ops ?? []) {
+    if (!OP_KIND[o.value]) continue;
+    const k = (o.scope ?? '').replace(/\s+/g, ' ').trim(); let l = by.get(k); if (!l) by.set(k, l = []);
+    l.push({ value: o.value, scope: o.scope ?? null, grade: o.grade ?? null });
+  }
+  for (const l of by.values()) if (new Set(l.map(o => OP_KIND[o.value])).size > 1 && !l.every(o => o.grade === 'file')) return l.map(o => ({ value: o.value, scope: o.scope }));
+  return null;
+}
+/** A conflict's rows in words: 「실행 중 · 정지」, each with its range when the record wrote one. */
+export const conflictWords = (rows: readonly { value: string; scope: string | null }[]): string => rows.map(o => `${OP_VALUE_WORD[o.value] ?? o.value}${o.scope ? `(${o.scope})` : ''}`).join(' · ');
 /** The dot for a card, or null (no dot means not confirmed: the legend says so). when: the time as the card shows it. */
 export function statusDot(x: DotInput, when: string | null = x.when): StatusDot | null {
   if (x.life) return null;
-  // Records that say different operations states: their own mark, never one picked (the hover and the pane list them).
-  const kinds = [...new Set((x.ops ?? []).map(o => OP_KIND[o.value] ?? null).filter((k): k is DotKind => !!k))];
-  if (kinds.length > 1) return { kind: 'conflict', word: DOT_WORD.conflict, line: `${DOT_WORD.conflict} · ${(x.ops ?? []).map(o => o.value).join(' · ')}`, grade: null };
-  let kind: DotKind | null = x.state === 'running' ? 'running' : x.state === 'stopped' ? 'stopped'
-    : x.state === 'working' && WAITING.test(x.quote ?? '') ? 'waiting' : null;
-  if (!kind && !x.state && kinds[0] === 'waiting') kind = 'waiting';
+  // Records that say different operations states for one range: their own mark, never one picked (the hover and the pane list them).
+  const clash = opsConflict(x.ops);
+  if (clash) return { kind: 'conflict', word: DOT_WORD.conflict, line: `${DOT_WORD.conflict} · ${conflictWords(clash)}`, grade: null };
+  // The reading's own state only (review M1; record-reading 4.6: a 유휴·대기 row alone decides nothing, so it draws no dot either and
+  // every surface says 「운영 기록 없음」 for it). 작업 중 is a ring only when the record calls it an operations state (review M5): an
+  // idle 운영 상태 row beside it, or the words of its quote.
+  const idleRow = (x.ops ?? []).some(o => o.value === 'idle');
+  const kind: DotKind | null = x.state === 'running' ? 'running' : x.state === 'stopped' ? 'stopped'
+    : x.state === 'working' && (idleRow || OPS_WAITING.test(x.quote ?? '')) ? 'waiting' : null;
   if (!kind) return null;
   // Never from file evidence alone: a state whose only grade is 'file' gets no dot (the hover and the pane still say it).
   if (x.grade === 'file') return null;

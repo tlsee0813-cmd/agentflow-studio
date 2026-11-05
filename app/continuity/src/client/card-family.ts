@@ -377,4 +377,7 @@ export function nameLinesOf(need: number, kids: boolean, dot = false): 1 | 2 {
   return need > nameRoomOf(kids, dot) ? 2 : 1;
 }
 /** The name's room on a card: less the fold toggle with an inside, less the status dot's place when the card has one (cards v2). */
-export const nameRoomOf = (kids: boolean, dot = false): number => NAME_ROOM - (kids ? TOGGLE_W : 0) - (dot ? DOT_W : 0);
+export const nameRoomOf = (kids: boolean, dot = false, ev = false): number => NAME_ROOM - (kids ? TOGGLE_W : 0) - (dot ? DOT_W : 0) - (dot && ev ? EV_W : 0);
+/** Cards v2 review: the evidence chip beside the dot (behind 근거 꼬리표) takes this much of the name's row too (「보고」 at 11px with its
+ * padding, border and the 4px gap), so a name measured with it on never runs under it. */
+export const EV_W = 40;

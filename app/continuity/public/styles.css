@@ -1796,7 +1796,29 @@ button:disabled { opacity: .5; cursor: default; }
 .space:is(.tier-far, .tier-dots) .node.card.fit-status .c-short { display: block; }
 .space:is(.tier-far, .tier-dots) .node.card .plan-note { display: none; }
 .space.tier-dots .node.card { background: var(--surface); }
-.space.tier-dots .node.card:not(.selected):not(.cited):not(:focus-visible):not(:hover) .c-title { visibility: hidden; }
+/* Review (cards v2): the whole-map view answers what the system is made of: every card keeps its name (smaller, two lines at most,
+   broken only at its separators), the glyph tile giving it the room. */
+.space.tier-dots .node.card .glyph-tile { display: none; }
+.space.tier-dots .node.card .c-name { font-size: calc(var(--t-title, 15px) * .8); line-height: calc(var(--t-title-lh, 20px) * .8); -webkit-line-clamp: 2; }
+.space.tier-dots .node.card .c-kind { display: none; }
+.space:is(.tier-far, .tier-dots) .node.card .c-name { overflow-wrap: normal; word-break: keep-all; }
+.space.tier-far .node.card .c-name { font-size: calc(var(--t-title, 15px) * .9); line-height: calc(var(--t-title-lh, 20px) * .9); }
+/* Names before chips: the whole-map view drops counts and cadence glyphs from its lines (conditions stay with their lines). */
+.space.tier-dots .edge-labels > :is(.edge-count, .edge-badge.b-cadence) { display: none; }
+/* Review: below 가까이 a card is drawn at its content's height (fitCards fit-auto); the rest of its fixed box (where its lines still
+   attach) is a faint dashed outline, so zooming never relays the map and no card reads as a large empty box. */
+.node.card.fit-auto { height: auto !important; overflow: visible; }
+.node.card.fit-auto.fit-ghost::after { content: ''; position: absolute; left: -1px; right: -1px; top: 100%; height: var(--rest, 0px); box-sizing: border-box;
+  border: calc(var(--u, 1) * 1px) dashed var(--line-strong); border-top: 0; border-radius: 0 0 8px 8px; opacity: .55; pointer-events: none; }
+/* Review: at 중간 the inner line is a plain 「단계 N」; the program's provenance chips read only with 근거 꼬리표 on. */
+.space.tier-mid .node.card .c-inner :is(.c-inner-unit, .c-inner-text, .c-more, .prog-chip) { display: none; }
+.node.card .prog-chip { display: none; }
+.space.show-ev .node.card .prog-chip { display: inline-block; }
+/* Review: the count of parts with no operations record is the 상태·공백 lens's (the pane says it per part). */
+.space:not(.lens-state) .map-ops-none { display: none; }
+/* Review: where a card is narrow the lens's ops word takes the kind word's room (never both cut). */
+.space.lens-state:is(.tier-far, .tier-dots) .node.card .c-kind-word { display: none; }
+.space.lens-state:is(.tier-far, .tier-dots) .node.card .c-opsw::before { content: none; }
 .space.z-mid .node .node-text { justify-content: center; align-self: stretch; }
 .space.z-mid :is(.node:not(.card) .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .space.z-mid .node:not(.card) .node-name { font-size: calc(13.5px * var(--grow)); }
@@ -3000,7 +3022,31 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    inside the boundary keeps at least 520px, also with the reading pane open beside the view (the stage scrolls past that). The
    ports are compact chips: the name on one line with an ellipsis, the full text and the mapped-step note in the tip. */
 .dv-grid.has-line { grid-template-columns: minmax(112px, 180px) minmax(min-content, 1040px) minmax(112px, 180px); column-gap: 28px; align-items: start; }
-.dv-inner.has-line { grid-template-columns: minmax(64px, 120px) minmax(520px, 1fr) minmax(64px, 120px); column-gap: 20px; }
+.dv-inner.has-line { grid-template-columns: minmax(88px, 120px) minmax(520px, 1fr) minmax(88px, 120px); column-gap: 20px; }
+/* Review: a port chip keeps room for its name (88px, about ten characters); 상태 전이 uses the same one-line chips. */
+.dv-inner.has-states { grid-template-columns: minmax(88px, 120px) minmax(0, 1fr) minmax(88px, 120px); column-gap: 16px; }
+/* Review: a boundary narrower than the graph needs (the reading pane open beside it) puts its ports in rows above and below the
+   graph, so the graph has the boundary's whole width. */
+.dv-grid.has-graph > .dv-bound { container-type: inline-size; }
+@container (max-width: 780px) {
+  .dv-inner.has-states { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding: 0 12px; }
+  .dv-inner.has-states .dv-ports { flex-direction: row; flex-wrap: wrap; }
+  .dv-inner.has-states .dv-port { max-width: 180px; border: 1px solid var(--line); border-radius: 6px; }
+}
+.dv-inner.has-states .dv-ports { gap: 4px; }
+.dv-inner.has-states .dv-port { flex-wrap: nowrap; min-height: 22px; padding: 1px 6px; white-space: nowrap; overflow: hidden; overflow-wrap: normal; font-size: 12px; }
+.dv-inner.has-states .dv-port-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dv-inner.has-states .dv-port.unmapped .dv-port-name { color: var(--text-3); }
+.dv-inner.has-states .dv-port.blank { white-space: normal; }
+/* Review: a side column narrower than 160px shows each partner as its name (two lines at most) and kind; the relation words read
+   in its tip, never as a wall of record text. */
+.dv-grid.has-line > .dv-side, .dv-grid.has-graph > .dv-side { container-type: inline-size; }
+@container (max-width: 159px) {
+  .dv-ref .dv-ref-rel { display: none; }
+  .dv-ref .dv-ref-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: normal; word-break: keep-all; }
+}
+.vg-more-note { margin: 4px 0 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.vg-more-note::before { content: '⇢ '; color: var(--text-4); }
 .dv-inner.has-line .dv-ports { gap: 4px; }
 .dv-inner.has-line .dv-port { flex-wrap: nowrap; min-height: 22px; padding: 1px 6px; white-space: nowrap; overflow: hidden; overflow-wrap: normal; font-size: 12px; }
 .dv-inner.has-line .dv-port-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -3158,12 +3204,20 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* 「하는 일」: one line, ellipsis (the whole in the hover card and the pane). */
 .c-role { flex: none; height: var(--t-row-lh, 20px); margin-bottom: calc(var(--t-gap, 16px) * .5); font-size: var(--t-row, 13px); line-height: var(--t-row-lh, 20px); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .node.card.fit-norole .c-role { display: none; }
+/* Review M4: a role whose reports were all revised later: muted, with its short 「보고 정정됨」 at its contact point. */
+.c-role.revised { display: flex; align-items: center; gap: 6px; color: var(--text-3); }
+.c-role.revised .c-role-text { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.c-role-rev { flex: none; font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); color: var(--text-3); border-bottom: 1px dotted var(--text-4); }
+.edge-tip .hc-role.revised { color: var(--text-3); }
 .node.card.life .c-role { color: var(--text-3); }
 .space.dim .node.card:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .c-role { color: var(--text-4); }
 /* The foot: the sign chips at the bottom-left, the ways in at the bottom-right (24px quiet icon buttons, a border on hover). */
 .node.card .c-bottom .c-signs { height: auto; flex: 0 1 auto; min-width: 0; overflow: hidden; }
-.node.card .c-bottom .c-signs .node-signs { gap: 3px; }
-.node.card .c-bottom .c-signs .sign-tab { height: 20px; padding: 0 5px; border-color: transparent; background: none; font-size: var(--t-kind, 12px); line-height: 18px; color: var(--text-3); letter-spacing: .01em; }
+.node.card .c-bottom .c-signs .node-signs { gap: 2px; }
+/* Review: the chips keep whole beside the ways in (a tighter chip rather than a clipped Δ). */
+.node.card .c-bottom .c-signs { flex: 0 0 auto; }
+.node.card .c-bottom .c-entry { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.node.card .c-bottom .c-signs .sign-tab { height: 20px; padding: 0 3px; border-color: transparent; background: none; font-size: var(--t-kind, 12px); line-height: 18px; color: var(--text-3); letter-spacing: .01em; }
 .node.card .c-bottom .c-signs .sign-tab:hover, .node.card .c-bottom .c-signs .sign-tab:focus-visible { border-color: var(--line-strong); color: var(--text); }
 .node.card .c-bottom .c-signs .sign-tab.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
 .node.card .c-entry { gap: 2px; }
@@ -3191,6 +3245,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .edge-tip .tip-rel.first { border-top: 0; padding-top: 0; margin-top: 0; }
 /* Line parts join the line's hover (cards v2 §3): its label, badges, type chip and count chip are hover targets of the line. */
 .edge-labels > :is(.edge-label, .edge-badge, .edge-count, .edge-once) { pointer-events: auto; cursor: default; }
+.edge-labels > .edge-once { cursor: help; }
 .edge-labels > .edge-label.near:not(.on) { color: var(--text); background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); }
 .edge-labels > .edge-badge.near:not(.on) { border-color: var(--text-3); color: var(--text); }
 /* 선 이름표 off: the labels at rest step out (badges stay: a condition never reads as unconditional); a pointed or selected line keeps its own. */
@@ -3209,7 +3264,8 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* The pane's explicit operations line (cards v2 §4). */
 .pane-ops-notes { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
 .pane-ops-line.none { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-3); }
-.pane-ops-line.none::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--text-4); vertical-align: 1px; }
+/* Review: no dot-like glyph for 「운영 기록 없음」 (a ring is the map's 대기 dot); an en dash, never used for a recorded state. */
+.pane-ops-line.none::before { content: '–'; display: inline-block; width: 7px; margin-right: 8px; color: var(--text-4); }
 .pane-ops-note { margin: 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
 .pane-ops-note.conflict { color: var(--text-2); }
 .pane-ops-line.flash { animation: ops-flash 1.6s ease-out 1; border-radius: 4px; }

@@ -116,7 +116,10 @@ export interface FitPriority { preview?: boolean; alt?: boolean }
 export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPriority = {}): CardFit {
   const nl = Math.min(2, Math.max(1, c.nameLines));
   const foot = c.foot !== 0, hasRole = !!c.role;
-  if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, vals: c.vals ?? 0, contract: true, inner: c.inner > 0, signs: c.signs > 0, bottom: foot, role: hasRole };
+  // Cards v2 (review B1): a card that gives its foot (the foot field) holds its sign chips in that foot, so they show whenever the
+  // foot does and take no room of their own; the old sign row (no foot field) still takes its own room.
+  const v2 = c.foot !== undefined;
+  if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, vals: c.vals ?? 0, contract: true, inner: c.inner > 0, signs: c.signs > 0 && (!v2 || foot), bottom: foot, role: hasRole };
   const T = tierText(k, tier);
   let room = c.total - FIT_PAD;
   const take = (h: number) => { if (room >= h) { room -= h; return true; } return false; };
@@ -155,7 +158,7 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPrior
   let vals = 0; const all = c.vals ?? 0; while (rows === said && vals < all && take(T.rowLh + (vals ? 0 : after))) vals++;
   // Alt-mode: after the name, the kind rows and values went before the inner line; the inner line takes the room that is left.
   if (alt && c.inner > 0) inner = take(Math.max(24, T.rowLh + 4));
-  const signs = c.signs > 0 && take(Math.max(24, T.rowLh + 4));
+  const signs = v2 ? c.signs > 0 && bottom : c.signs > 0 && take(Math.max(24, T.rowLh + 4));
   if (names === 1 && take(T.titleLh)) names = 2;
   return { nameLines: names, kind, status: false, rows, vals, contract: vals > 0, inner, signs, bottom, role };
 }

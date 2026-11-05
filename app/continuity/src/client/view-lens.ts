@@ -70,7 +70,9 @@ const FAMILY_ORDER = ['participant', 'process', 'store', 'trigger', 'neutral'] a
 const FAMILY_NAME: Record<string, string> = { participant: '참여자', process: '처리', store: '저장', trigger: '촉발·관문', neutral: '중립' };
 const CHANNEL_NAME: Record<Channel | 'related', string> = { data: '데이터 선', control: '제어 선', uses: '참조 선', related: '관련 선' };
 /** The order the overview's short statuses are listed in (state lens), the rest after them in their first order. */
-const SHORT_ORDER = ['가동 보고', '작업 중 보고', '멈춤 보고', '대기 보고', '폐기', '설계만', '미구현', '운영 기록 충돌', '운영 기록 모름', '운영 기록 없음'];
+const SHORT_ORDER = ['가동 보고', '작업 중 보고', '멈춤 보고', '대기 보고', '폐기', '설계만', '미구현', '운영 기록 충돌', '상태 미상(기록)', '운영 기록 없음'];
+/** Each short status its own mark (review: the record's 「모름」 and no record never share a glyph); the dots' shapes for their states. */
+const SHORT_MARK: Readonly<Record<string, string>> = { '가동 보고': '●', '멈춤 보고': '■', '대기 보고': '○', '운영 기록 충돌': '◇', '상태 미상(기록)': '…', '운영 기록 없음': '–' };
 
 /** The legend of a lens over what the map draws: items with a count above zero only (nothing the map does not have is listed),
  * each with the parts and lines it stands for. 시나리오 lists nothing here: its path and visits read in the scenario strip. */
@@ -103,7 +105,7 @@ export function legendItems(id: LensId, parts: readonly LensPart[], lines: reado
     }
     case 'state': {
       const words = [...new Set(parts.map(p => p.short))].sort((a, b) => (SHORT_ORDER.indexOf(a) + 1 || 99) - (SHORT_ORDER.indexOf(b) + 1 || 99));
-      for (const w of words) { const ps = parts.filter(p => p.short === w); add({ id: `short-${w}`, label: w, count: ps.length, sample: { kind: 'mark', text: '·' }, parts: ps.map(p => p.id), lines: [] }); }
+      for (const w of words) { const ps = parts.filter(p => p.short === w); add({ id: `short-${w}`, label: w, count: ps.length, sample: { kind: 'mark', text: SHORT_MARK[w] ?? '·' }, parts: ps.map(p => p.id), lines: [] }); }
       const ul = parts.filter(p => p.unlinked);
       add({ id: 'unlinked', label: '항목 근거 미연결', count: ul.length, sample: { kind: 'mark', text: '?' }, parts: ul.map(p => p.id), lines: [] });
       const um = parts.filter(p => p.unmapped > 0);

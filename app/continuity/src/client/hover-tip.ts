@@ -28,10 +28,25 @@ export function placeTip(target: Rect, size: { w: number; h: number }, bounds: R
   if (prefer) order.unshift(...order.splice(order.indexOf(prefer), 1));
   const clamp = (r: Rect) => ({ x: Math.max(bounds.x, Math.min(r.x, bounds.x + bounds.w - w)), y: Math.max(bounds.y, Math.min(r.y, bounds.y + bounds.h - h)) });
   const self = mode === 'beside' ? [target] : [];
-  for (const side of order) { const r = at[side]; if (inside(r, bounds) && ![...avoid, ...self].some(a => overlap(r, a))) return { ...clamp(r), side }; }
-  for (const side of order) { const r = at[side], c = clamp(r), cr = { ...c, w, h }; if (![...avoid, ...self].some(a => overlap(cr, a))) return { ...c, side }; }
-  // Nothing clear: the first side, clamped (a card's name stays clear by the beside sides; a point keeps off the line's ends first).
-  const first = order[0]!; return { ...clamp(at[first]), side: first };
+  // Review: beside a box the popup may also slide along that side (still sharing at least 24px with it), so a lit neighbour or a
+  // name right beside the card does not push it over another card's name.
+  const slides = (side: TipSide): Rect[] => {
+    const r = at[side]; if (mode !== 'beside') return [r];
+    const vertical = side === 'right' || side === 'left', lo = vertical ? -(h - 24) : -(w - 24), hi = vertical ? target.h - 24 : target.w - 24, out = [r];
+    for (let s = 32; s <= Math.max(-lo, hi); s += 32) for (const d of [s, -s]) if (d >= lo && d <= hi) out.push(vertical ? { ...r, y: r.y + d } : { ...r, x: r.x + d });
+    return out;
+  };
+  for (const side of order) for (const r of slides(side)) if (inside(r, bounds) && ![...avoid, ...self].some(a => overlap(r, a))) return { ...clamp(r), side };
+  for (const side of order) for (const r of slides(side)) { const c = clamp(r), cr = { ...c, w, h }; if (![...avoid, ...self].some(a => overlap(cr, a))) return { ...c, side }; }
+  // Nothing clear (review): the side that covers the least of what it should avoid (the target itself counts most), clamped.
+  const area = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+  let best = order[0]!, least = Infinity;
+  for (const side of order) {
+    const c = clamp(at[side]), cr = { ...c, w, h };
+    const cost = avoid.reduce((s, a) => s + area(cr, a), 0) + self.reduce((s, a) => s + 4 * area(cr, a), 0);
+    if (cost < least) { least = cost; best = side; }
+  }
+  return { ...clamp(at[best]), side: best };
 }
 
 /** The dwell machine: one target at a time, one surface. Timers are injected (tests run them by hand). */

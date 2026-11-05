@@ -148,6 +148,7 @@ test('FORM-23 training shape: the line is offered over the steps with row IDs; I
   assert.ok(app.includes('pre.noRef.length') && app.includes('NO_REF_TIP'));
   assert.ok(/progCount = fi\.steps\.filter\(\(?s\)? => s\.program && !onLine\(s\)\)/.test(app));
   const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
-  assert.ok(/\.dv-inner\.has-line \{ grid-template-columns: minmax\(64px, 120px\) minmax\(520px, 1fr\)/.test(css), 'the line keeps at least 520px');
+  // cards v2 review: the port column keeps 88px (a port's name stays readable beside the 520px line).
+  assert.ok(/\.dv-inner\.has-line \{ grid-template-columns: minmax\(88px, 120px\) minmax\(520px, 1fr\)/.test(css), 'the line keeps at least 520px');
   assert.ok(/\.dv-inner\.has-line \.dv-port \{[^}]*white-space: nowrap/.test(css), 'ports are one-line chips in 노선');
 });
