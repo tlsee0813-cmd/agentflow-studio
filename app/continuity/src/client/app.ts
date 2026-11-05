@@ -38,14 +38,14 @@ import { cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf
 import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
-import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
+import { labelSpots, polylineHitsRect, portSpots, cuePoints } from './map-labels.js';
 import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep, formLoop, chooseForm, formUsable, nextForm, readForm, writeForm, formKeyOf, shortRef,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
-import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensFadeNote, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
@@ -2595,7 +2595,9 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     const on = g.classList.contains('on') || g.classList.contains('sc-path'), beside = !!selected && !on;
     // Polish round fixes 2 (the user: show what is wanted where it is looked at): below 가까이 a line at rest carries no cue chip (조건,
     // 선택, 박자, ◷, the 「한 번」 tick): its words read in the line's tip on hover, and on the lines of a picked card.
-    if (!on && tier !== 'near') continue;
+    // Restore (spec §7 'Conditional relations'): a conditional or optional line still never reads unconditional: a tiny text-free
+    // mark sits on the line itself at its badge's place (restCue), part of the line's hover, under every lens (시작·반복 too).
+    if (!on && tier !== 'near') { const cue = restCue(b, on, tier); if (cue) placeCue(box, e, cue, beside, path, offParts, apart, offLabels, set); continue; }
     const el = h('span', { class: `edge-badge b-${b.kind}${on ? ' on' : ''}${beside ? ' beside' : ''}${b.unresolved ? ' unres' : ''}`, 'data-badge': e.key });
     box.append(el);
     const pts = edgePts(e.key, path), len = path.getTotalLength();
@@ -2658,6 +2660,19 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     if (!spot) { el.remove(); continue; }
     set(el, spot);
   }
+}
+/** Restore (spec-cards-v2 §7): the rest cue of a conditional (◇) or optional (dashed ring) line below 가까이, CUE_PX on screen, its
+ * centre on the line at the places its badge would take (cuePoints), then anywhere along it: off every part, the badges and marks
+ * set so far and the labels when it can; off the parts always (a mark under a card's name says nothing). Its words: the line's tip. */
+function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional', beside: boolean, path: SVGPathElement,
+  offParts: (r: Rect) => boolean, apart: (r: Rect) => boolean, offLabels: (r: Rect) => boolean, set: (el: HTMLElement, r: Rect) => void) {
+  const inv = labelInv(), s = CUE_PX * inv, len = path.getTotalLength();
+  const at = (p: { x: number; y: number }): Rect => ({ x: p.x - s / 2, y: p.y - s / 2, w: s, h: s });
+  const spots = [...cuePoints(edgePts(e.key, path), s + 4 * inv, 'start'), ...Array.from({ length: 13 }, (_, i) => path.getPointAtLength(len * (0.04 + i * 0.075)))].map(at);
+  const spot = spots.find(r => offParts(r) && apart(r) && offLabels(r)) ?? spots.find(r => offParts(r) && apart(r)) ?? spots.find(offParts) ?? null;
+  if (!spot) return;
+  const el = h('span', { class: `edge-cue q-${cue}${beside ? ' beside' : ''}`, 'data-cue': e.key, role: 'img', 'aria-label': cue === 'condition' ? '조건 있는 관계' : '선택 관계' });
+  box.append(el); set(el, spot);
 }
 /** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none).
  * Beside a selection (dimmed, .beside) a count that finds no clear place is left off rather than set over a part or a verb. */
@@ -3719,9 +3734,10 @@ function opsLineEl(c: PaneCtx): HTMLElement | null {
   const fileOnly = s && !dot && (s.state === 'running' || s.state === 'stopped') && claimEvidence({ quote: s.quote?.quote ?? '' }) === 'file'
     ? h('p', { class: 'pane-ops-note', title: '지도의 상태 점은 파일 근거만으로 그리지 않음' }, '파일 근거만 · 지도에 상태 점 없음') : null;
   if (s) return conflict || fileOnly || waiting ? h('div', { class: 'pane-ops-notes' }, conflict, waiting, fileOnly) : null;
-  // Polish round fixes 2 (the user: 「운영 기록 없음」 is not needed on the map): no line at all when no state was recorded; the 표시 menu's
-  // dot note says what no dot means. Records that disagree still read.
-  return conflict ? h('div', { class: 'pane-ops-notes' }, conflict) : null;
+  // Restore (spec-cards-v2 §4; the user: 「운영 기록 없음 같은 건 지도에 필요 없다 — 사용자가 이 노드를 눌렀을 때 사이드창에 표시하던가」):
+  // the map draws nothing for a part no record gave a state, but the pane its click opens says so, as one quiet line at the
+  // operations position (muted, an en dash before it, never a ring like the 대기 dot). Beside the detail view it stays hidden (CSS).
+  return h('div', { class: 'pane-ops-notes' }, h('p', { class: 'pane-ops-line none', title: '기록이 이 부분의 운영 상태를 말하지 않았다 (멈춤이라는 뜻이 아님) · 지도에는 상태 점 없음' }, '운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'), conflict);
 }
 /** Cards v2 §4: the kind's definition blanks the card no longer draws, as concrete phrases (「행 형식 미기록」). */
 function blanksLine(c: PaneCtx): HTMLElement | null {
@@ -4702,7 +4718,7 @@ function applyLegendMarks() {
   const world = $('world'), m = legendMarks(legend, legendNow, { parts, lines: lensLinesOf() });
   world.querySelectorAll('.lg-pick, .lg-dim, .lg-hide, .lg-fade').forEach(el => el.classList.remove('lg-pick', 'lg-dim', 'lg-hide', 'lg-fade'));
   const mark = (set: Set<string>, cls: string) => { for (const x of set) {
-    if (x.startsWith('line:')) { const k = CSS.escape(x.slice(5)); world.querySelectorAll(`.edge[data-key="${k}"], .edge-label[data-key="${k}"], .edge-badge[data-badge="${k}"], .edge-once[data-once="${k}"]`).forEach(el => el.classList.add(cls)); }
+    if (x.startsWith('line:')) { const k = CSS.escape(x.slice(5)); world.querySelectorAll(`.edge[data-key="${k}"], .edge-label[data-key="${k}"], .edge-badge[data-badge="${k}"], .edge-once[data-once="${k}"], .edge-cue[data-cue="${k}"]`).forEach(el => el.classList.add(cls)); }
     else world.querySelector(`[data-box="${CSS.escape(x)}"]`)?.classList.add(cls); } };
   mark(m.fade, 'lg-fade'); mark(m.dim, 'lg-dim'); mark(m.hide, 'lg-hide'); mark(m.picked, 'lg-pick');
   // A 「+N」 marker of gathered badges steps back or hides with the lines it gathers only when all of them do.
@@ -4789,12 +4805,15 @@ function renderLegend() {
   const ids = new Set(legendNow.map(i => i.id));
   legend = { picked: legend.picked && ids.has(legend.picked) ? legend.picked : null, mode: Object.fromEntries(Object.entries(legend.mode).filter(([k]) => ids.has(k))), solo: legend.solo && ids.has(legend.solo) ? legend.solo : null };
   const def = lensDef(viewLens), head = legendHead(legend, legendNow);
+  // Restore: under 상태·공백 the legend says what its faded cards are, in plain words (folded too), so fading never reads as 멈춤.
+  const fade = lensFadeNote(viewLens, lensOffTopic(viewLens, lensPartsOf(o), lensLinesOf()).size);
+  const fadeEl = (folded: boolean) => (fade ? h(folded ? 'span' : 'p', { class: folded ? 'lg-chip-fade' : 'lg-fade-note', title: fade.tip }, fade.text) : null);
   // Folded (it starts so when it would cover cards, syncLegendFold): one chip, the lens and its first items; a click unfolds it.
   if (!legendOpenNow) {
     key.classList.add('folded');
     // Review: what a missing dot means is reachable from the folded chip too.
-    key.replaceChildren(h('button', { type: 'button', class: 'lg-chip', 'aria-expanded': 'false', title: `범례 펼치기 · ${def.name}${head ? ` · ${head}` : ''}\n${DOT_LEGEND}`, onclick: () => setLegendOpen(true) },
-      h('span', { class: 'lg-chip-text' }, legendChip(viewLens, legendNow)), head ? h('span', { class: 'lg-chip-state' }, head) : null, h('span', { class: 'lg-chip-v', 'aria-hidden': 'true' }, '▴')));
+    key.replaceChildren(h('button', { type: 'button', class: 'lg-chip', 'aria-expanded': 'false', title: `범례 펼치기 · ${def.name}${head ? ` · ${head}` : ''}${fade ? `\n${fade.tip}` : ''}\n${DOT_LEGEND}`, onclick: () => setLegendOpen(true) },
+      h('span', { class: 'lg-chip-text' }, legendChip(viewLens, legendNow)), head ? h('span', { class: 'lg-chip-state' }, head) : null, fadeEl(true), h('span', { class: 'lg-chip-v', 'aria-hidden': 'true' }, '▴')));
     key.hidden = false; return;
   }
   key.classList.remove('folded');
@@ -4818,6 +4837,7 @@ function renderLegend() {
     head ? h('div', { class: 'lg-state' }, h('span', {}, head), h('button', { type: 'button', class: 'link-button lg-all', onclick: () => legendAct({ do: 'all' }) }, '모두 보기')) : null,
     rows.length ? h('ul', { class: 'lg-items', role: 'listbox', 'aria-label': `${def.name} 범례 · ↑↓ 이동 · Enter 선택 · Shift+F10 메뉴 · Esc 해제` }, ...rows)
       : h('p', { class: 'lg-none' }, viewLens === 'scenario' ? '경로와 방문은 제목 아래 시나리오 줄에서' : '이 지도에 해당하는 것 없음'),
+    fadeEl(false),
     // Cards v2 §1: what the dot means (and that no dot is not stopped), under the 구성 and 상태·공백 legends.
     // Review: the dot line under every lens, only while a card here draws a dot (the 표시 menu keeps it as reference text).
     document.querySelector('#world .node.card.has-dot') ? h('p', { class: 'lg-dots', title: '상태 점은 기록된 운영 상태(가동 ● · 멈춤 ■ · 대기 ○ · 충돌 ◇)에만 · 파일 근거만이면 점 없음 · 나이로 멈춤을 짐작하지 않음' }, DOT_LEGEND) : null].filter(<T,>(x: T | null): x is T => !!x));
@@ -6540,8 +6560,8 @@ function bindCanvas() {
 /** The line a pointer-down lands on: its widened hit area, or (cards v2 §3) its label, badge or count chip. */
 function lineHit(t: HTMLElement): string | null {
   if (t.classList.contains('edge-hit')) return t.closest<SVGGElement>('.edge')?.dataset.key ?? null;
-  const lab = t.closest<HTMLElement>('.edge-labels > [data-key], .edge-labels > [data-badge], .edge-labels > [data-once]');
-  return lab ? lab.dataset.key ?? lab.dataset.badge ?? lab.dataset.once ?? null : null;
+  const lab = t.closest<HTMLElement>('.edge-labels > [data-key], .edge-labels > [data-badge], .edge-labels > [data-once], .edge-labels > [data-cue]');
+  return lab ? lab.dataset.key ?? lab.dataset.badge ?? lab.dataset.once ?? lab.dataset.cue ?? null : null;
 }
 /** Hover (cards v2 §2, §3, §7): one surface at a time (#edge-tip), each target answering its own question. The pointed card or
  * line and its neighbours light at once; the rest of the map steps back and the popup opens only after HOVER_OPEN_MS of dwell
@@ -6592,7 +6612,7 @@ function bindEdgeHints() {
     if (g?.parentNode && g.parentNode.lastChild !== g) g.parentNode.appendChild(g);
     space.classList.add('line-near');
     // The line's own label, badges and chips light with it (they are the same target).
-    world.querySelectorAll(`.edge-labels > [data-key="${CSS.escape(key)}"], .edge-labels > [data-badge="${CSS.escape(key)}"], .edge-labels > [data-once="${CSS.escape(key)}"]`).forEach(el => el.classList.add('near'));
+    world.querySelectorAll(`.edge-labels > [data-key="${CSS.escape(key)}"], .edge-labels > [data-badge="${CSS.escape(key)}"], .edge-labels > [data-once="${CSS.escape(key)}"], .edge-labels > [data-cue="${CSS.escape(key)}"]`).forEach(el => el.classList.add('near'));
     for (const end of [edge.from, edge.to]) world.querySelector(`[data-box="${CSS.escape(end)}"]`)?.classList.add('near-end');
     clearTimeout(linePeek); space.classList.remove('peek');
     linePeek = window.setTimeout(() => { if (g?.classList.contains('near')) space.classList.add('peek'); }, DIM_AFTER_MS);
@@ -6615,7 +6635,7 @@ function bindEdgeHints() {
         s?.when && !(badgeSaid && badge?.kind === 'condition') ? conditionTip(s.when) : s?.optional && !s.when && !(badgeSaid && badge?.kind === 'optional') ? `선택${s.variant ? ` · ${variantWord(s.variant)}일 때만` : ''}` : null,
         // Polish round fixes 1: no bare 「설계」 at a row's end (the mode reads in the pane's 근거, and in a badge's tip in words).
         s?.cadence && !(badgeSaid && badge?.kind === 'cadence') ? `박자 “${s.cadence}”` : null].filter(Boolean).join(' · '); };
-    const pointed = !!el && (el.classList.contains('edge-badge') || el.classList.contains('edge-once'));
+    const pointed = !!el && (el.classList.contains('edge-badge') || el.classList.contains('edge-once') || el.classList.contains('edge-cue'));
     // Polish round fixes 2: a bundle that runs both ways reads 「A ↔ B」 in its head; a row of the head's own pair and direction says
     // only its words (never the head again as its first row).
     const both = rels.some(r => r.from === edge.to && r.to === edge.from) && rels.some(r => r.from === edge.from && r.to === edge.to);
@@ -6711,8 +6731,8 @@ function bindEdgeHints() {
   /** The target under an element: a chip with its own tip, a line part, or a typed card (the priority of §2: a button or badge
    * first, then the card, then the line's widened hit area). */
   const targetOf = (t: Element, pt: { x: number; y: number } | null): HoverTarget | null => {
-    const lab = t.closest<HTMLElement>('.edge-labels > [data-key], .edge-labels > [data-badge], .edge-labels > [data-once]');
-    if (lab) { const key = lab.dataset.key ?? lab.dataset.badge ?? lab.dataset.once!; return { key: `line:${key}:${lab.className}`, kind: 'line', edge: key, el: lab, at: null }; }
+    const lab = t.closest<HTMLElement>('.edge-labels > [data-key], .edge-labels > [data-badge], .edge-labels > [data-once], .edge-labels > [data-cue]');
+    if (lab) { const key = lab.dataset.key ?? lab.dataset.badge ?? lab.dataset.once ?? lab.dataset.cue!; return { key: `line:${key}:${lab.className}`, kind: 'line', edge: key, el: lab, at: null }; }
     const chip = t.closest<HTMLElement>('[data-tip]');
     if (chip && world.contains(chip)) { const card = chip.closest<HTMLElement>('.node.card'); return { key: `tip:${chip.dataset.tip}:${card?.dataset.box ?? ''}`, kind: 'tip', el: chip, card }; }
     const card = t.closest<HTMLElement>('.node.card[data-box]');

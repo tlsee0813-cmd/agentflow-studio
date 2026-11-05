@@ -232,7 +232,17 @@ export function badgeForms(b: LineBadge, on: boolean, tier: ZoomTier | null = nu
   const clipped = others ? `${cut(first, BADGE_CLIP - 1)} 외 ${others}` : cut(first, BADGE_CLIP);
   return [...new Set([...(on ? [b.full] : []), b.short, clipped, fallback])];
 }
-/** The record's bare 「한 번」 (CADENCE_WORDS 'once', and the same said as 1회 or once): a cadence word that says only that the line
+/** Restore (spec-cards-v2 §7 'Conditional relations'; Astra F2, Pro R2): below 가까이 a line at rest carries no text pill (polish
+ * round fixes 2), but a line with a condition or a 선택 mark never reads unconditional: it carries a tiny text-free mark on the line
+ * itself (◇ a condition, a dashed ring 선택), its words in the line's tip. null: the pill is drawn (가까이, or the line is picked) or
+ * the line has no such cue (a cadence word is no condition: it may rest unsaid, the 시작·반복 lens and the tip say it). */
+export function restCue(b: Pick<LineBadge, 'kind'>, on: boolean, tier: ZoomTier | null): 'condition' | 'optional' | null {
+  if (on || tier === 'near') return null;
+  return b.kind === 'condition' || b.kind === 'optional' ? b.kind : null;
+}
+/** The rest cue mark's size on screen (px), at every zoom. */
+export const CUE_PX = 8;
+/** The record's bare 「한 번」 (CADENCE_WORDS 'once',and the same said as 1회 or once): a cadence word that says only that the line
  * flows once. Any word with more in it ('prepare 한 번', '시작 시 한 번', '끝에 한 번', '실행마다 1회') says more and is never quiet. */
 export const isOnceWord = (t: string): boolean => /^(한\s?번|1\s?회|once)\.?$/i.test(t.replace(/\s+/g, ' ').trim());
 /** Whether a badge folds into the quiet tick (S8): cadence words that are all a bare 「한 번」, at rest, at the overview, the dot map

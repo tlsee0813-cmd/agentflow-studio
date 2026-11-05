@@ -68,3 +68,25 @@ export function polylineHitsRect(pts: Point[], r: Rect, margin = 2): boolean {
   }
   return false;
 }
+/** Restore (spec-cards-v2 §7 'Conditional relations'): where a text-free cue mark of s×s sits ON a line, its centre on the line
+ * itself, at the places a badge would take from the line's start ('start' runs first, clear of the corners): each candidate chip
+ * spot snapped back onto the nearest point of the polyline, one point per place. */
+export function cuePoints(pts: Point[], s: number, prefer: 'long' | 'end' | 'start' = 'start'): Point[] {
+  const out: Point[] = [];
+  for (const r of labelSpots(pts, s, s, prefer)) {
+    const p = nearestOn(pts, { x: r.x + r.w / 2, y: r.y + r.h / 2 });
+    if (p && !out.some(q => Math.abs(q.x - p.x) < 0.5 && Math.abs(q.y - p.y) < 0.5)) out.push(p);
+  }
+  return out;
+}
+/** The point of a polyline nearest a given point (null for a polyline of fewer than two points). */
+export function nearestOn(pts: Point[], q: Point): Point | null {
+  let best: Point | null = null, bd = Infinity;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1]!, b = pts[i]!, dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy;
+    const t = l2 ? Math.max(0, Math.min(1, ((q.x - a.x) * dx + (q.y - a.y) * dy) / l2)) : 0;
+    const p = { x: a.x + dx * t, y: a.y + dy * t }, d = (p.x - q.x) ** 2 + (p.y - q.y) ** 2;
+    if (d < bd) { bd = d; best = p; }
+  }
+  return best;
+}

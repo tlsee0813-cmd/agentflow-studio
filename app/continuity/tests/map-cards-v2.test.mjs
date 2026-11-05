@@ -196,8 +196,8 @@ test('CARD-8 the built card and map: no ops footer, no c-short, no card title; t
   assert.ok(/'data-key': e\.key/.test(body(src, 'placeCounts')), 'the count chip joins its line');
   assert.ok(body(src, 'lineHit').includes('edge-labels'), 'a press on a label picks its line');
   // The pane: the operations line always, the blanks in words, the store's writers and readers by name.
-  // Polish round fixes 2: no 「운영 기록 없음」 line in the pane; records that disagree still read.
-  assert.ok(!body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음') && body(src, 'opsLineEl').includes('하나로 고르지 않음'));
+  // Restore (spec-cards-v2 §4): the pane says 「운영 기록 없음」 as its quiet operations line (the map does not); records that disagree still read.
+  assert.ok(body(src, 'opsLineEl').includes("'운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'") && body(src, 'opsLineEl').includes("class: 'pane-ops-line none'") && body(src, 'opsLineEl').includes('하나로 고르지 않음'));
   assert.ok(body(src, 'blanksLine').includes('미기록'));
   assert.ok(body(src, 'storeLine').includes('nm(writerIds)') && !body(src, 'storeLine').includes('`쓰기 ${writers} · 읽기 ${readers}`'));
   assert.ok(body(src, 'kindLine').includes('pane-ops-line'));
@@ -250,7 +250,8 @@ test('CARD-10 polish round (spec-cards-v2 §1): 포트 대응 미기록, 유지 
   assert.ok(css.includes('.space.detail-open .pane-ops-line.none { display: none; }') && !/\.space\.detail-open \.pane-ops-notes[^{]*\{ display: none/.test(css));
   assert.ok(card.includes("'data-tip': `${x.label} · 기록에서 프로그램이 옮긴 값`"), 'a program row says so in its tip');
   assert.ok(body(src, 'shortContent').includes("r.stateRead ? h('span', { class: 'xp-ops'"));
-  assert.ok(/return conflict \? h\('div', \{ class: 'pane-ops-notes' \}, conflict\) : null;/.test(body(src, 'opsLineEl')), 'no record: no line');
+  // Restore (spec-cards-v2 §4): the map's pane still states it; only beside the detail view does the quiet line hide.
+  assert.ok(body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'), 'the map\'s pane states it');
   // The map head's basis line: the time and the version only; the rest in its tip.
   const basis = body(src, 'basisLine');
   assert.ok(basis.includes('`설계 근거 · ${last.basisAt ?? \'작성 시각 미상\'} · 판본 ${version}`') && basis.includes('운영: 보고된 상태 (기록 없음은 제공된 자료 기준)'));

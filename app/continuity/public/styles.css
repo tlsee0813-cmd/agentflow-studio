@@ -3387,3 +3387,18 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* Below 가까이 the card's box lets its overflow show: the mark sits on the card's corner, off its name. */
 .space.lens-state .node.card.fit-auto[data-lens-mark]::after { top: calc(-9px * var(--u, 1)); right: calc(-9px * var(--u, 1)); border-radius: calc(9px * var(--u, 1)); }
 .w-badge:not(.stop) { flex: none; }
+/* Restore (spec-cards-v2 §7 'Conditional relations'): below 가까이 a conditional or optional line at rest keeps a tiny text-free mark
+   ON the line (8px on screen: --inv keeps it so), quiet grey: ◇ a condition, a dashed ring 선택. It is part of the line's hover (the
+   tip says the words) and darkens with it; a wider invisible ring makes it easy to point at. */
+.edge-labels > .edge-cue { position: absolute; width: 8px; height: 8px; pointer-events: auto; cursor: help; transform: scale(var(--inv, 1)); transform-origin: 0 0; }
+.edge-cue::after { content: ""; position: absolute; inset: -4px; }
+.edge-cue::before { content: ""; position: absolute; box-sizing: border-box; background: var(--surface); }
+.edge-cue.q-condition::before { left: 1.25px; top: 1.25px; width: 5.5px; height: 5.5px; border: 1.5px solid var(--text-3); transform: rotate(45deg); }
+.edge-cue.q-optional::before { inset: 0; border: 1.5px dashed var(--text-3); border-radius: 50%; }
+.edge-cue.beside::before { border-color: var(--text-4); }
+.edge-cue:is(.near, :hover)::before, .edge-cue.lg-pick::before { border-color: var(--text); }
+.edge-cue.lg-dim, .edge-cue.lg-fade { opacity: .3; }
+/* Restore: the 상태·공백 legend's plain words for its faded cards (open: a line under the items; folded: a muted part of the chip). */
+.lg-fade-note { margin: 6px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-3); }
+.lg-chip-fade { flex: none; color: var(--text-3); font-weight: 400; }
+.lg-chip-fade::before { content: "·"; margin: 0 6px 0 2px; color: var(--text-4); }

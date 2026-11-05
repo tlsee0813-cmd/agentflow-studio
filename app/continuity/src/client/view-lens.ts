@@ -74,6 +74,14 @@ const FAMILY_NAME: Record<string, string> = { participant: '참여자', process:
 const CHANNEL_NAME: Record<Channel | 'related', string> = { data: '데이터 선', control: '제어 선', uses: '참조 선', related: '관련 선' };
 /** The order the overview's short statuses are listed in (state lens), the rest after them in their first order. */
 const SHORT_ORDER = ['가동 보고', '작업 중 보고', '멈춤 보고', '대기 보고', '폐기', '설계만', '미구현', '운영 기록 충돌', '상태 미상(기록)', '운영 기록 없음'];
+/** Restore: the 상태와 공백 legend says in plain words what its faded cards are, so fading never reads as 멈춤. */
+export const STATE_FADE_NOTE = '흐린 카드: 운영 상태를 말한 기록이 없음';
+/** The faded-card line under the 상태와 공백 legend (its count, and that it is not 멈춤); null under the other lenses or when no card
+ * steps back. */
+export function lensFadeNote(id: LensId, faded: number): { text: string; tip: string } | null {
+  if (id !== 'state' || faded <= 0) return null;
+  return { text: `${STATE_FADE_NOTE} · ${faded}개`, tip: `${STATE_FADE_NOTE} (멈춤이라는 뜻이 아님) · 카드를 누르면 사이드 창에 「운영 기록 없음」` };
+}
 /** A part no record gave an operations state (never counted in the 상태와 공백 legend: the lens is about what was said). */
 export const NO_RECORD = '운영 기록 없음';
 /** Polish round fixes 2: the legend's words for a status, in a reader's terms (the record said 「모름」; nothing self-contradicting). */

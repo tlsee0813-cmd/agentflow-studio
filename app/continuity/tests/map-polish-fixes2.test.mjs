@@ -80,10 +80,11 @@ test('PF2-6 at the whole-map view a card\'s name takes its second line before th
   assert.ok(/\.w-badge \{ display: inline-block;[^}]*min-width: 0;/.test(css), 'a step-head chip draws its ellipsis');
 });
 
-test('PF2-7 the pane opens on what the part does: no 「운영 기록 없음」 line, the record ladder in 근거; uses chips by name', () => {
+test('PF2-7 the pane opens on what the part does: the quiet 「운영 기록 없음」 line (restored, spec §4), the record ladder in 근거; uses chips by name', () => {
   const src = readFileSync(new URL('../src/client/app.ts', import.meta.url), 'utf8');
   const body = (name) => { const i = src.indexOf(`function ${name}(`); return src.slice(i, src.indexOf('\n}\n', i)); };
-  assert.ok(!body('opsLineEl').includes("'운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'"));
+  assert.ok(body('opsLineEl').includes("'운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'"));
+  assert.ok(!body('kindLine').includes('ladderLine('), 'the ladder chips stay in 근거');
   assert.ok(body('evidenceTab').includes('ladderLine(o.view, part)'));
   assert.ok(src.includes("usesShown(face.uses).map(([u, said])"), 'a step\'s uses read by name, unnamed IDs left off');
   assert.ok(!src.includes("h('span', { class: 'dv-step-n sl-ref' }, shortRef(s.ref))") && src.includes("h('span', { class: 'dv-step-n sl-ref' }, s.no)"));
