@@ -216,8 +216,38 @@ test('CARD-8 the built card and map: no ops footer, no c-short, no card title; t
   assert.ok(hov.includes("$('viewport').getBoundingClientRect()") && hov.includes('.near-end, .near-self') && hov.includes('.c-head'), 'tips stay in the map area, off lit neighbours and names');
   assert.ok(hov.includes('hoverQuiet') && !hov.includes('누르면 출발 부분을 고르고'), 'a picked card keeps its tip shut; no click hint');
   assert.ok(!hov.includes('실선 · 채운 머리'), 'no stroke vocabulary in the line tip');
-  assert.ok(hov.includes('조건 “${s.when}”') && body(src, 'relationLines').includes('when:'), 'M3: each relation row says its condition');
+  assert.ok(hov.includes('conditionTip(s.when)') && body(src, 'relationLines').includes('when: conditionWords(x.when)'), 'M3: each relation row says its condition (polish round: 「조건: …」, the form word left off)');
   assert.ok(body(src, 'cardIo').includes('relationEnds('), 'the hover card falls back to the lines the pane reads');
   assert.ok(body(src, 'fitCards').includes("'fit-auto'") && /\.node\.card\.fit-auto \{ height: auto !important/.test(css), 'cards below 가까이 at their content height');
   assert.ok(!/title: `양쪽으로/.test(body(src, 'placeCounts')) && !/title: `데이터 계약/.test(body(src, 'typeChipEl')), 'one hover surface: no native titles on line parts');
+});
+
+test('CARD-10 polish round (spec-cards-v2 §1): 포트 대응 미기록, 유지 상태 and the 프로그램 chips are off the card face and out of its height; each stays reachable', () => {
+  // The pin area is its title and rows: unmapped lines add no height (contract.unmapped stays as data, for the pin head's tip).
+  const pins = (unmapped) => facts({ type: 'loop', loop: { unit: '명령별', stop: null, resume: null }, pins: { in: ['명령 목록'], out: ['측정 결과'] }, unmapped });
+  const t2 = cardTemplate(pins(2));
+  assert.equal(t2.contract.unmapped, 2);
+  assert.deepEqual(cardHeights(t2, 1), cardHeights(cardTemplate(pins(0)), 1));
+  // A loop container's well has no kept-state compartment and is measured without one.
+  const steps = Array.from({ length: 4 }, (_, i) => ({ name: `단계${i + 1}`, does: null }));
+  const kept = cardTemplate(facts({ type: 'loop', loop: { unit: '명령마다', stop: null, resume: null }, steps, stateVars: 3 }));
+  const none = cardTemplate(facts({ type: 'loop', loop: { unit: '명령마다', stop: null, resume: null }, steps }));
+  assert.ok(kept.well); assert.equal(kept.well.state, null);
+  assert.equal(cardHeights(kept, 1).total, cardHeights(none, 1).total);
+  const src = app(), card = body(src, 'cardEl'), well = body(src, 'wellEl');
+  assert.ok(!card.includes('c-cline') && !card.includes('포트 대응 미기록 ${c.unmapped}`)'), 'no unmapped line on the card');
+  assert.ok(card.includes("'c-pin-head', ...(c.unmapped ?"), 'the pin head says the unmapped count in its tip');
+  assert.ok(!/progChip|stepChip|prog-chip/.test(card) && !/progChip|stepChip|w-state/.test(well), 'no 프로그램 chip nor 유지 상태 compartment on the card');
+  assert.ok(well.includes('PROGRAM_STEP_HINT') && well.includes('프로그램이 옮긴 값'), 'the provenance reads in the well rows\' and badges\' tips');
+  // Reachable elsewhere: the lenses count unmapped lines and unlinked kept state; the pane and the detail view keep the chips.
+  assert.ok(body(src, 'lensPartsOf').includes('(f?.stateVars ?? 0) > 0'));
+  assert.ok(/stepChip\(\)/.test(body(src, 'renderDetail')) || /stepChip\(\)/.test(src.slice(src.indexOf('function renderDetail'))), 'the detail view keeps the program chip');
+  // The detail view's side and the short expansion: no 「운영 기록 없음」 under the name (a recorded state's words stay); the map's pane keeps it.
+  const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
+  assert.ok(css.includes('.space.detail-open .pane-ops-notes:has(> .pane-ops-line.none) { display: none; }'));
+  assert.ok(body(src, 'shortContent').includes("r.stateRead ? h('span', { class: 'xp-ops'"));
+  assert.ok(body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'));
+  // The map head's basis line: the time and the version only; the rest in its tip.
+  const basis = body(src, 'basisLine');
+  assert.ok(basis.includes('`설계 근거 · ${last.basisAt ?? \'작성 시각 미상\'} · 판본 ${version}`') && basis.includes('운영: 보고된 상태 (기록 없음은 제공된 자료 기준)'));
 });

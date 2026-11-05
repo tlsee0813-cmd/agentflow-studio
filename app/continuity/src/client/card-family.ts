@@ -313,7 +313,9 @@ export function cardTemplate(f: CardFacts): CardTemplate {
   // A loop container (4.1, 4.3): only a recorded loop with recorded steps; never from the type word, a name or step names alone.
   const ws = f.steps.map(s => ({ name: s.name ?? '', program: s.program === true }));
   const well = f.loop && isContainer(ws, f.loop)
-    ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], stateVars: f.stateVars ?? 0, open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
+    // Polish round (spec-cards-v2 §1): the 「유지 상태 N」 compartment is no part of the card face (the pane's 구조 탭, the detail view
+    // and the ⤢ tip name it; the 상태·공백 lens counts its unlinked items), so the card is measured without it.
+    ? containerBody(ws, f.loop, { conditions: f.conditions, portSteps: f.portSteps ?? [], open: !!f.wellOpen, depth: f.wellDepth ?? 1 }) : null;
   // A group (S8): what kind of group in its kind line, its first parts in an 안에 row before the kind rows; never 「유형 미상」.
   const kids = f.children ?? 0, group = kids > 0 ? { axis: f.groupAxis ?? null, word: f.groupWord ?? null, names: [...(f.members ?? [])], recorded: !!f.groupRecorded } : null;
   const mr = group ? membersRow(group.names) : null;
@@ -353,7 +355,9 @@ export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): Ca
   // Cards v2: the role line (one line, under the head) before the kind rows.
   const role = t.role ? ROLE_H + ROLE_GAP : 0, rows = (t.rows.length ? t.rows.length * ROW_H + ROWS_GAP : 0) + role;
   const c = t.contract;
-  const contract = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H + PIN_GAP + (c.unmapped ? LINE_H16 : 0) : c.rows.length ? c.rows.length * ROW_H + ROWS_GAP : 0;
+  // Polish round (spec-cards-v2 §1): 「포트 대응 미기록 N」 is no line on the card face (the 데이터 and 상태·공백 lenses count it, the
+  // detail view marks each port), so the pin area is its title and rows only; contract.unmapped stays as data.
+  const contract = c.kind === 'pins' ? PIN_TITLE + Math.max(c.ins.length, c.outs.length) * PIN_H + PIN_GAP : c.rows.length ? c.rows.length * ROW_H + ROWS_GAP : 0;
   // A container's well is the near tier's content, so its height is the card's (the inner line reads in the same room further out).
   // Cards v2: the sign chips share the foot with the way in (bottom-left and bottom-right); no foot when the card has neither.
   const inner = t.well ? wellHeight(t.well) : t.innerLine ? INNER_H : 0, signs = 0, bottom = t.foot || t.signs ? BOTTOM_H : 0;

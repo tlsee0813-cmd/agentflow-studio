@@ -107,7 +107,7 @@ test('S8-5 a bare 「한 번」 is quiet: no badge at the overview and the middl
   assert.deepEqual(badgeForms(mixed, false, 'mid'), ['항목마다 외 2', BADGE_GLYPH]);
   // A condition is never quiet; nor are the informative cadences.
   const cond = lineBadge([{ cadence: '한 번', when: "init_from == 'resume'" }]);
-  assert.equal(cond.kind, 'condition'); assert.equal(cond.quiet, false); assert.deepEqual(badgeForms(cond, false, 'mid')[0], "init_from == 'resume'");
+  assert.equal(cond.kind, 'condition'); assert.equal(cond.quiet, false); assert.deepEqual(badgeForms(cond, false, 'mid')[0], '조건', 'polish round: the cue; the words in the tip');
   for (const w of ['호출마다', '주기: eval_interval', '사건 때', '항목마다', '끝에 한 번']) assert.equal(lineBadge([{ cadence: w }]).quiet, false, w);
   assert.equal(quietAt(lineBadge([{ cadence: '호출마다' }]), false, 'mid'), false);
 });

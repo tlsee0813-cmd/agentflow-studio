@@ -636,6 +636,9 @@ button:disabled { opacity: .5; cursor: default; }
 /* The detail view (내부 상세): the part's boundary in the middle of the workspace, its ports on its edges, its outside partners as
    small reference cards beyond them. The rest of the map is not shown while it is open. */
 .space.detail-open #world, .space.detail-open > .controls, .space.detail-open #line-key { visibility: hidden; }
+/* Polish round (spec-cards-v2 §1, §4): beside the detail view the pane head keeps a recorded state's words but drops the quiet
+ * 「운영 기록 없음」 line under the part name; the map's pane (a click on the card) still states it. */
+.space.detail-open .pane-ops-notes:has(> .pane-ops-line.none) { display: none; }
 .detail-view { position: absolute; top: 0; left: 0; bottom: 0; right: var(--plan-w, 0px); z-index: 2; display: flex; flex-direction: column; background: var(--bg); }
 .detail-view:focus { outline: none; }
 .dv-head { flex: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 16px 24px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
@@ -2874,6 +2877,12 @@ li > .port + .fn-marks { margin: 0; padding-top: 6px; }
 .edge-badge.unres { color: var(--text-4); border-color: var(--line); background: var(--surface-2); font-weight: 420; }
 .edge-badge.glyph { min-width: 16px; justify-content: center; padding: 0 3px; font-size: 11px; color: var(--text-3); }
 .edge-badge.b-more { color: var(--text-3); border-color: var(--line-strong); background: var(--surface-2); font-variant-numeric: tabular-nums; }
+/* Polish round (spec-cards-v2 §1): a condition or optional mark is a small cue of fixed words (조건 · 조건 1/3 · 선택), never cut; its
+ * words read in the line tip. Optional reads dashed so the two never look alike. */
+.edge-badge:is(.b-condition, .b-optional) { max-width: none; overflow: visible; padding: 0 4px; font-size: 11px; font-weight: 600; letter-spacing: 0; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.edge-badge.b-optional { border-style: dashed; font-weight: 500; }
+.edge-badge.on:is(.b-condition, .b-optional) { color: var(--accent-strong); }
+.edge-badge.beside:is(.b-condition, .b-optional) { color: var(--text-4); }
 .tip-badge-w { color: var(--text-2); }
 .edge-label.brief { max-width: 132px; }
 
