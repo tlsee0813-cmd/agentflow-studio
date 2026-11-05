@@ -2839,8 +2839,8 @@ function applyCamera(animate = false) {
   const sp = $('space');
   sp.classList.toggle('z-mid', camera.k < Z_MID); sp.classList.toggle('z-low', camera.k < 0.6); // z-mid: 70% as shown and below
   // The text floor (map hygiene H3): world-space text that would read below 10px on screen is not drawn. The map's title (26px)
-  // gives way to the title chip; its purpose line (15px) and the 「이은 선 없음」 caption (11.5px) go first.
-  sp.classList.toggle('title-floor', camera.k < TITLE_FLOOR_K); sp.classList.toggle('purpose-floor', camera.k < 10 / 15); sp.classList.toggle('caption-floor', camera.k < 10 / 11.5);
+  // gives way to the title chip; its purpose line (15px) goes first. The 「이은 선 없음」 caption keeps 10px instead (styles: .lone-head).
+  sp.classList.toggle('title-floor', camera.k < TITLE_FLOOR_K); sp.classList.toggle('purpose-floor', camera.k < 10 / 15);
   // The zoom tier (점 지도 · 개요 · 중간 · 가까이, map design v3 5.1): what a typed card shows inside its box, and the on-screen
   // floors of its type (5.2). The boxes, the lines and their ends stay where they are: nothing is laid out again for a zoom.
   tier = zoomTier(camera.k, tier);
@@ -2875,7 +2875,9 @@ function fitView(explicit: boolean, animate = false) {
   // at the top left says the name (map hygiene H3), so the fit does not keep room for it.
   const fitOf = (b: Rect) => Math.min(1, w / Math.max(1, b.w + 16), hgt / Math.max(1, b.h + 16));
   let B = drawnBounds(), fit = fitOf(B);
-  if (titleH && fit < TITLE_FLOOR_K) { const nb = drawnBounds(false); fit = fitOf(nb); B = nb; }
+  // Without the title the whole map may fit at a scale where the title would be drawn again (at or above the floor): the fit stays
+  // just under the floor then, so the title it left out of the frame stays hidden (the chip names the map).
+  if (titleH && fit < TITLE_FLOOR_K) { const nb = drawnBounds(false); fit = Math.min(fitOf(nb), TITLE_FLOOR_K - 0.001); B = nb; }
   // Map hygiene H2: the first view opens on its focus (the first view's emphasis, else the main flow) at the opening scale when that
   // focus fits inside the safe area there; a focus too large for it opens the whole map at its fit instead.
   const f = explicit ? null : openFocus();
@@ -2901,7 +2903,7 @@ function fitView(explicit: boolean, animate = false) {
  * edges no further in than the safe area's, the one with the fewest cards under the title chip, then the fewest cut by the window's
  * edges or by the dock's row (where the map fades out, styles: .viewport mask), then the nearest to centred. Only the camera's
  * offset changes, never the scale. */
-function clearChrome(f: Rect, B: Rect, a: { left: number; top: number; w: number; hgt: number }) {
+function clearChrome(f: Rect & { ids: string[] }, B: Rect, a: { left: number; top: number; w: number; hgt: number }) {
   const k = camera.k, space = $('space'), vpw = $('viewport').clientWidth, vph = mapBottom();
   const chrome: Rect[] = [], sr = space.getBoundingClientRect();
   const own = (el: HTMLElement | null, pad: number) => { if (el && !el.hidden && el.offsetWidth) { const r = el.getBoundingClientRect(); chrome.push({ x: r.left - sr.left - pad, y: r.top - sr.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad }); } };
@@ -2910,33 +2912,51 @@ function clearChrome(f: Rect, B: Rect, a: { left: number; top: number; w: number
   const chip: Rect = { x: 0, y: 0, w: Math.min(vpw, 420), h: Math.max(0, a.top - 12) };
   const cards = [...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost');
   const hit = (r: Rect, c: Rect) => r.x < c.x + c.w && c.x < r.x + r.w && r.y < c.y + c.h && c.y < r.y + r.h;
+  // The camera offsets c along one axis that keep the map's edges no further in than the safe area's (c ≤ start − lo·k and
+  // c ≥ start + room − (lo + size)·k) and the focus where it was framed: inside the safe area when it fits there
+  // (c ≥ start − flo·k, c ≤ start + room − (flo + fsize)·k), else still filling it (the same two bounds, the other way round).
   const range = (lo: number, size: number, start: number, room: number, flo: number, fsize: number, now: number): number[] => {
     if (size * k <= room) return [now];
-    const min = Math.max(start + room - (lo + size) * k, start + room - (flo + fsize) * k), max = Math.min(start - lo * k, start - flo * k);
+    const f0 = start - flo * k, f1 = start + room - (flo + fsize) * k;
+    const min = Math.max(start + room - (lo + size) * k, Math.min(f0, f1)), max = Math.min(start - lo * k, Math.max(f0, f1));
     if (min > max) return [now];
-    const out = [now]; for (let d = 6; d <= 240; d += 6) { if (now + d <= max) out.push(now + d); if (now - d >= min) out.push(now - d); }
+    const out = [now]; for (let d = 6; d <= 240; d += 6) { if (now + d <= max && now + d >= min) out.push(now + d); if (now - d >= min && now - d <= max) out.push(now - d); }
     return out;
   };
   const xs = range(B.x, B.w, a.left, a.w, f.x, f.w, camera.x), ys = range(B.y, B.h, a.top, a.hgt, f.y, f.h, camera.y);
   const t = titleH ? titleRect() : null;
+  // The safe area on screen: off the window's sides by SAFE_SIDE, under the title chip's row, above the dock's row (where the map
+  // fades out). A card the window shows only in part, or that reaches into the safe area's margins, counts against a pan.
+  const safe: Rect = { x: SAFE_SIDE, y: a.top, w: vpw - 2 * SAFE_SIDE, h: vph - BOTTOM - a.top };
+  const inside = (r: Rect, c: Rect) => r.x >= c.x && r.y >= c.y && r.x + r.w <= c.x + c.w && r.y + r.h <= c.y + c.h;
+  // A part the first view points at (a focus too large for the safe area) counts most when it is not wholly inside it.
+  const focus = new Set(f.ids);
   let best = { s: Infinity, x: camera.x, y: camera.y };
   for (const cx of xs) for (const cy of ys) {
-    const scr = cards.map(b => ({ x: cx + b.x * k, y: cy + b.y * k, w: b.w * k, h: b.h * k }));
+    const all = cards.map(b => ({ id: b.id, x: cx + b.x * k, y: cy + b.y * k, w: b.w * k, h: b.h * k }));
+    const scr = all.filter(r => hit(r, { x: 0, y: 0, w: vpw, h: vph }));
     const titleOut = !t || cy + t.y * k < a.top - 24;
     const under = scr.filter(r => titleOut && hit(r, chip)).length;
-    const cut = scr.filter(r => chrome.some(c => hit(r, c)) || (r.x < 0 && r.x + r.w > 0) || (r.x < vpw && r.x + r.w > vpw) || (r.y < 0 && r.y + r.h > 0) || (r.y < vph && r.y + r.h > vph)).length;
-    const sc = under * 1000 + cut * 10 + (Math.abs(cx - camera.x) + Math.abs(cy - camera.y)) / 100;
+    // A hard cut (the window's top or sides, a tool) counts more than a card running into the bottom band, where the map fades out
+    // and reads as going on below.
+    const hard = (r: Rect) => chrome.some(c => hit(r, c)) || r.x < 0 || r.x + r.w > vpw || r.y < 0;
+    // A card the window shows only a sliver of reads as off the map; one cut through its middle reads as cut.
+    const seen = (r: Rect) => (Math.min(r.x + r.w, vpw) - Math.max(r.x, 0)) * (Math.min(r.y + r.h, vph) - Math.max(r.y, 0)) / Math.max(1, r.w * r.h);
+    const cut = scr.filter(hard).reduce((n, r) => n + Math.min(1, 2 * seen(r)), 0), faded = scr.filter(r => !hard(r) && r.y + r.h > safe.y + safe.h).length;
+    const cramped = scr.filter(r => !inside(r, safe)).length;
+    const lost = all.filter(r => focus.has(r.id) && !inside(r, safe)).reduce((n, r) => n + (r.y + r.h > safe.y + safe.h && !hard(r) && r.y < vph ? 20 : 40), 0);
+    const sc = under * 1000 + lost + cut * 10 + faded * 5 + cramped * 3 + (Math.abs(cx - camera.x) + Math.abs(cy - camera.y)) / 40;
     if (sc < best.s) best = { s: sc, x: cx, y: cy };
   }
   camera = { k, x: best.x, y: best.y };
 }
 /** The parts the opening view centres on when the whole map does not fit (the first view's emphasis, else the main flow): their
- * boxes' bounds, or null. */
-function openFocus(): Rect | null {
+ * boxes' bounds and their ids (the pan search weighs them most, clearChrome), or null. */
+function openFocus(): (Rect & { ids: string[] }) | null {
   const ids = fvOn() && fvRec!.parts.length ? fvRec!.parts : lay.spine;
   const bs = ids.map(id => lay.boxes.get(id)).filter((b): b is NonNullable<typeof b> => !!b); if (!bs.length) return null;
   const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y)), r = Math.max(...bs.map(b => b.x + b.w)), btm = Math.max(...bs.map(b => b.y + b.h));
-  return { x, y, w: r - x, h: btm - y };
+  return { x, y, w: r - x, h: btm - y, ids };
 }
 /** What the map draws, in map px: the layout's bounds (boxes, heads, the title) with every drawn element that can reach past them
  * (the band captions and the boundary line, the outside partners' heads, a caption's own text, the lines' routes), so 전체 보기
@@ -3439,26 +3459,42 @@ function markLines() {
     // A wait on the path reads as a control line: its open head (placeScenarioMarks dashes its end).
     const head = (el.classList.contains('sc-wait') && el.dataset.head === 'filled' ? 'open' : el.dataset.head ?? 'filled') as Head, start = (el.dataset.start ?? 'none') as Head;
     const mark = (h: Head) => (h === 'none' ? 'none' : `url(#m-${h}${lit ? '-on' : ''})`);
-    line.setAttribute('marker-end', mark(head));
+    line.setAttribute('marker-end', mark(head)); el.classList.remove('head-merged'); delete el.dataset.mergedHead;
     // A data or control line marks where it starts while it is read (styles.css shows that dot on a hovered or selected line); an
     // ear or a plain relation's dot is always drawn.
     line.setAttribute('marker-start', start === 'none' ? `url(#m-dot${lit ? '-on' : ''})` : mark(start));
   });
   mergeHeads();
 }
-/** Map hygiene H5: heads of lines at rest that land on one port point (within 6px on screen, arriving the same way, the same kind of
- * head) are drawn once, so a port never wears a stack of three to five heads. A selected or path line keeps its own head, and a
- * pointed-at line shows its head again (styles: .edge.near). Re-run when the zoom changes enough to re-place the labels. */
+/** Map hygiene H5: heads of lines at rest that arrive the same way at one face with the same kind of head, at points closer than a
+ * head is wide (MERGE_PX on screen, so neighbouring port points read as one stack too), are drawn once, so a port never wears a
+ * stack of three to five heads. The head kept is the most prominent line's (the first view's emphasis, then the line drawn the
+ * strongest under the lens and the legend), so a faded line never carries the only head. A selected or path line keeps its own
+ * head, and a pointed-at line shows its head again (styles: .edge.near). Run after markLines, a re-placing of the labels and a
+ * legend action; a merged line gets back the head markLines gave it (data-merged-head). */
+const MERGE_PX = 11;
 function mergeHeads() {
-  const tol = 6 / camera.k, seen: { x: number; y: number; d: string; head: string }[] = [];
+  const tol = MERGE_PX / camera.k, along = 2 / camera.k;
+  type Cand = { el: SVGGElement; line: Element; x: number; y: number; d: string; head: string; w: number };
+  const cands: Cand[] = [];
+  const shown = (e: Element) => { const s = getComputedStyle(e); return parseFloat(s.opacity) * parseFloat(s.strokeOpacity || '1'); };
   document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
     const line = el.querySelector('.edge-line'), r = lastRouted.get(el.dataset.key ?? ''); if (!line || !r || r.pts.length < 2) return;
-    if (el.classList.contains('head-merged')) { el.classList.remove('head-merged'); const lit = el.classList.contains('on') || el.classList.contains('sc-path'), hd = el.dataset.head ?? 'filled'; if (hd !== 'none') line.setAttribute('marker-end', `url(#m-${hd}${lit ? '-on' : ''})`); }
+    if (el.classList.contains('head-merged')) { el.classList.remove('head-merged'); line.setAttribute('marker-end', el.dataset.mergedHead ?? 'none'); delete el.dataset.mergedHead; }
     const head = line.getAttribute('marker-end') ?? 'none'; if (head === 'none' || el.classList.contains('on') || el.classList.contains('sc-path')) return; const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden') return;
+    const w = parseFloat(cs.opacity) * shown(line); if (w < 0.05) return;
     const a = r.pts[r.pts.length - 2]!, b = r.pts[r.pts.length - 1]!, d = Math.abs(a.x - b.x) > Math.abs(a.y - b.y) ? (b.x > a.x ? 'r' : 'l') : (b.y > a.y ? 'd' : 'u');
-    if (seen.some(q => q.d === d && q.head === head && Math.abs(q.x - b.x) < tol && Math.abs(q.y - b.y) < tol)) { line.setAttribute('marker-end', 'none'); el.classList.add('head-merged'); }
-    else seen.push({ x: b.x, y: b.y, d, head });
+    cands.push({ el, line, x: b.x, y: b.y, d, head, w: w + (el.classList.contains('fv-emph') ? 2 : 0) + (el.classList.contains('lg-pick') ? 4 : 0) });
   });
+  // The strongest first; each later head that lands within reach of a kept one of its kind (on the same face line, near along it)
+  // steps back.
+  cands.sort((p, q) => q.w - p.w);
+  const kept: Cand[] = [];
+  for (const c of cands) {
+    const across = c.d === 'r' || c.d === 'l' ? (q: Cand) => Math.abs(q.x - c.x) < along && Math.abs(q.y - c.y) < tol : (q: Cand) => Math.abs(q.y - c.y) < along && Math.abs(q.x - c.x) < tol;
+    if (kept.some(q => q.d === c.d && q.head === c.head && across(q))) { c.el.dataset.mergedHead = c.head; c.line.setAttribute('marker-end', 'none'); c.el.classList.add('head-merged'); }
+    else kept.push(c);
+  }
 }
 /** The end marks of the map's lines (map design v3 6.1, 9.6), each in three paints (rest, selected, pointed at): the filled
  * triangle (data), the open V (control), a reference's smaller V, the ear's ring and a dot. Sized in screen pixels by syncMarks. */
@@ -4827,7 +4863,7 @@ function legendHover(item: LegendItem | null) {
   }, 150);
 }
 function legendAct(a: LegendAction, focusId?: string) {
-  legend = legendApply(legend, a, legendNow); legendMenu = null; saveLens(); applyLegendMarks(); renderLegend();
+  legend = legendApply(legend, a, legendNow); legendMenu = null; saveLens(); applyLegendMarks(); mergeHeads(); renderLegend();
   if (focusId) document.querySelector<HTMLElement>(`#line-key .lg-item[data-item="${CSS.escape(focusId)}"]`)?.focus();
 }
 const legendActive = () => !!legend.picked || !!legend.solo || Object.keys(legend.mode).length > 0;
@@ -4862,20 +4898,24 @@ function placeDock() {
   const space = $('space'), ctl = space.querySelector<HTMLElement>(':scope > .controls'), fv = document.getElementById('first-view'), key = document.getElementById('line-key');
   if (!ctl) return;
   const limit = space.clientWidth - paneWidth() - 16, row = ctl.offsetHeight, base = parseFloat(getComputedStyle(ctl).bottom) || 16;
+  // The folded legend chip says what the lens shows: it sits right after the lens buttons, the guide line after it (the open legend
+  // comes last). What has no room on the row goes above the tools, the guide line nearest them.
+  const fvOn = !!fv && !fv.hidden, keyOn = !!key && !key.hidden;
+  if (fv) { fv.classList.remove('fv-above'); fv.style.left = ''; }
+  const order = (keyOn && key!.classList.contains('folded') ? [key, fv] : [fv, key]).filter((el): el is HTMLElement => !!el && !el.hidden);
+  const docked = new Set<HTMLElement>(), at = new Map<HTMLElement, number>();
   let x = ctl.offsetLeft + ctl.offsetWidth + 8, above = base + row + 8;
-  if (fv && !fv.hidden) {
-    fv.classList.remove('fv-above');
-    if (x + fv.offsetWidth <= limit) x += fv.offsetWidth + 8;
-    else { fv.classList.add('fv-above'); above += fv.offsetHeight + 8; }
+  for (const el of order) if (x + el.offsetWidth <= limit) { docked.add(el); at.set(el, x); x += el.offsetWidth + 8; }
+  if (fvOn) {
+    if (docked.has(fv!)) fv!.style.left = `${at.get(fv!)! - ctl.offsetLeft - ctl.clientLeft}px`;
+    else { fv!.classList.add('fv-above'); above += fv!.offsetHeight + 8; }
   }
-  if (key && !key.hidden) {
-    const w = key.offsetWidth;
-    if (x + w <= limit) { key.dataset.docked = '1'; key.style.left = `${x}px`; key.style.bottom = key.classList.contains('folded') ? `${base + (row - key.offsetHeight) / 2}px` : `${base}px`; }
-    else { delete key.dataset.docked; key.style.left = ''; key.style.bottom = `${above}px`; }
+  if (keyOn) {
+    if (docked.has(key!)) { key!.dataset.docked = '1'; key!.style.left = `${at.get(key!)}px`; key!.style.bottom = key!.classList.contains('folded') ? `${base + (row - key!.offsetHeight) / 2}px` : `${base}px`; }
+    else { delete key!.dataset.docked; key!.style.left = ''; key!.style.bottom = `${above}px`; }
   }
-  // The map fades out under the dock's row (styles: .viewport mask), so no card reads as covered by the tools.
-  const ends = [ctl, fv, key].filter((el): el is HTMLElement => !!el && !el.hidden && !!el.offsetWidth && !el.classList.contains('fv-above') && (el !== key || !!key.dataset.docked)).map(el => el.getBoundingClientRect().right - space.getBoundingClientRect().left);
-  space.style.setProperty('--dock-w', `${Math.round(Math.max(...ends) + 16)}px`);
+  // The map fades out along the whole bottom edge, under the dock's row and beside it alike (styles: .viewport mask), so no card
+  // reads as covered by the tools and none is drawn full strength beside them.
 }
 const FAMILY_GLYPH: Record<string, string> = { participant: 'person', process: 'compute', store: 'store', trigger: 'timer', neutral: 'neutral' };
 function legendSample(s: Sample): HTMLElement | SVGElement {

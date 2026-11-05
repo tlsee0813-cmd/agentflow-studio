@@ -13,6 +13,8 @@ import { FACE_TURNS, turnsOf } from './line-grammar.js';
 export interface Routed extends Route { key: string; faces?: { a: PortFace; b: PortFace } }
 /** Space between lines that run side by side in one gap (6.7: 12), and the least space between ports on one side. */
 export const TRACK_GAP = 9, PORT_GAP = 12, PORT_MIN = 7;
+/** The room a spread run keeps off every card when its gap has it (map hygiene review: no run squeezed along a card's edge). */
+const RUN_CLEAR = 10;
 /** Where a reference's ear sits on a box without one of its own (an untyped card): the head band, at most halfway down. */
 export const earY = (b: Box): number => (b.kind === 'node' ? b.y + (b.ear ?? Math.min(20, b.h / 2)) : b.kind === 'frame' ? b.y + b.head / 2 : b.y + b.h / 2);
 /** The x where a control line meets a card's top or bottom: the head's left third (the wedge's place, 3.6), lines of one face
@@ -187,7 +189,9 @@ function nudge(routes: Map<string, Routed>, blocks: (key: string) => Box[], vert
       // the run joins the nearest track already placed beside it (one trunk; the badges and the tip say what it holds), and only
       // with no trunk to join does it keep the hairline.
       const trunk = () => placed.filter(o => !(o.hi < s.lo - 2 || s.hi < o.lo - 2)).map(o => o.at).sort((p, q) => Math.abs(p - slot) - Math.abs(q - slot)).find(x => ok(x, -1));
-      const at = tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, -1) && apart(s, x, TRACK_GAP - 1))
+      // Map hygiene review: a place RUN_CLEAR off every card first (within a few px of its slot), so spreading a bundle never
+      // pushes a run along a card's edge while the gap has room.
+      const at = tries.slice(0, 9).find(x => ok(x, RUN_CLEAR) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, TRACK_GAP - 1)) ?? tries.find(x => ok(x, -1) && apart(s, x, TRACK_GAP - 1))
         ?? trunk() ?? tries.find(x => ok(x, LANE_CLEAR) && apart(s, x, 3)) ?? tries.find(x => ok(x, -1) && apart(s, x, 3));
       if (at !== undefined) move(s, at, vertical);
       placed.push(s);

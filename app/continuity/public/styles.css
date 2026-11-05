@@ -3406,8 +3406,8 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* ---------- map hygiene (beauty v1) ----------
    Direction-independent fixes: a safe area for the fit and the first view, a text floor, one dock width, quieter fades, regions
    with a body, plain card bands. Later rules here win over the earlier passes they name. */
-/* H9: the dock keeps one width. The first view's guide line is its own pill on the dock's row (placeDock), or above the dock when
-   the row is full; the folded legend chip sits after it on the same row. */
+/* H9: the dock keeps one width. The folded legend chip (what the lens shows) sits right after the lens buttons on the dock's row, the
+   first view's guide line its own pill after it (placeDock); what has no room on the row goes above the dock. */
 .controls .fv { position: absolute; left: calc(100% + 8px); bottom: -1px; height: 42px; padding: 0 var(--s-2); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-float); white-space: nowrap; }
 .controls .fv::before { display: none; }
 .controls .fv.fv-above { left: -1px; bottom: calc(100% + 8px); }
@@ -3415,39 +3415,48 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* H9: the 「AI 키 없음」 dot says its state without being the most saturated pixel on the screen. */
 .ai-pill[data-state="off"] i, .ai-pill[data-state="code"] i { background: #b9a891; }
 /* H3: the text floor. World-space text that would read below 10px on screen is not drawn (its room is kept): the map's title gives
-   way to the title chip, then its purpose line, then the 「이은 선 없음」 caption. */
-.space.title-floor #world > .map-title { visibility: hidden; }
+   way to the title chip (as a pinned title does: unseen, its 「기록 정보 ▾」 still in the tab order and shown while it has the keyboard),
+   then its purpose line. The 「이은 선 없음」 caption keeps 10px on screen instead (it grows up from its place, as the band captions do). */
+.space.title-floor #world > .map-title:not(:focus-within) { opacity: 0; }
+.space.title-floor #world > .map-title:not(:focus-within) button { pointer-events: none; }
+.space #world > .map-title.pinned:focus-within { opacity: 1; }
 .space.purpose-floor #world > .map-title :is(.map-purpose, .map-understood > .mu-text) { visibility: hidden; }
-.space.caption-floor #world > .lone-head { visibility: hidden; }
-/* H2: the safe area's bottom. Under the dock's row (its width, --dock-w from placeDock) the map fades out over the last 88px, so a
-   card there reads as going on below the window, never as covered by the tools; right of the row the map runs to the edge. */
-.space > .viewport { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 100px), rgba(0,0,0,.06) calc(100% - 60px)), linear-gradient(#000, #000); mask-image: linear-gradient(to bottom, #000 calc(100% - 100px), rgba(0,0,0,.06) calc(100% - 60px)), linear-gradient(#000, #000);
-  -webkit-mask-size: var(--dock-w, 100%) 100%, calc(100% - var(--dock-w, 100%)) 100%; mask-size: var(--dock-w, 100%) 100%, calc(100% - var(--dock-w, 100%)) 100%; -webkit-mask-position: left top, right top; mask-position: left top, right top; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
-/* H4: a verb at rest wears a canvas-coloured halo round its letters instead of a box (the line shows up to its letters); the
-   selected, near, corrected and type-chip labels keep their boxes. */
-.edge-labels > .edge-label:not(.on):not(.near):not(.type-chip):not(.revised) { padding: 0 3px; background: transparent; border-radius: 0;
-  text-shadow: 0 0 1px var(--bg), 1.5px 0 0 var(--bg), -1.5px 0 0 var(--bg), 0 1.5px 0 var(--bg), 0 -1.5px 0 var(--bg), 1.2px 1.2px 0 var(--bg), -1.2px -1.2px 0 var(--bg), 1.2px -1.2px 0 var(--bg), -1.2px 1.2px 0 var(--bg), 0 0 3px var(--bg), 0 0 3px var(--bg); }
-/* H6: a lens steps back the cards it is not about as 'not in this question', not 'disabled': grey and lighter (.6), its words kept
-   at 3.5:1 or more (its quieter greys darkened under the fade, so even the role line reads). The legend's own 흐리게 stays as it was. */
-.space .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { opacity: .6; filter: grayscale(1); --text-2: #2a2c31; --text-3: #2a2c31; --text-4: #34363c; }
-/* H7: regions with a body. The area's fill stands apart from the canvas, its name reads on screen at 13px/600 or more (never under a
-   card's name, tracked +.04em), the system boundary is a 2px rule on screen, and the dot grid stops inside regions and bands. */
-.frame.region:where(*) { background: #e9ecf1; border-color: #d9dde4; }
-:root { --grp-place-bg: #e9ecf1; }
-:root[data-theme="dark"] .frame.region:where(*) { background: #1d2026; border-color: #30343c; }
-@media (prefers-color-scheme: dark) { :root[data-theme="auto"]:not([data-theme="light"]) .frame.region:where(*) { background: #1d2026; border-color: #30343c; } }
-.space .frame.region > .frame-head .frame-name { font-size: min(34px, max(14px, calc(13px * var(--u, 1)), var(--t-title, 14px))); line-height: 1.25; font-weight: 640; letter-spacing: .04em; color: #3d424c; }
-.band-head { font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: .04em; color: #5b616c; transform: scale(max(1, var(--u, 1))); }
+.lone-head { transform: scale(max(1, calc(var(--u, 1) * .8696))); transform-origin: 0 100%; }
+/* H2: the safe area's bottom. Along the whole bottom edge (under the dock's row and beside it alike) the map fades out over the band
+   the dock's row takes, to nothing at the dock's top, so a card there reads as going on below the window, never as covered by the
+   tools, and no ghost of its words is left under them. */
+.space > .viewport { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 88px), transparent calc(100% - 52px)); mask-image: linear-gradient(to bottom, #000 calc(100% - 88px), transparent calc(100% - 52px)); }
+/* H4: a verb at rest sits on a tight canvas-coloured band (2px each side, no border), so the line stops just short of its first and
+   last letters and never shows through the gaps between its words (a gap the line crossed read as a 「·」 separator). A label cut to
+   its whole words says so with a quiet 「…」 (its whole words in the tip); a middle-tier label is cut only there, never by its width. */
+.edge-labels > .edge-label:not(.on):not(.near):not(.type-chip):not(.revised) { padding: 0 2px; background: var(--bg); border-radius: 3px; text-shadow: none; }
+.edge-labels > .edge-label.brief { max-width: none; }
+.edge-labels > .edge-label[data-full]::after { content: "…"; margin-left: 1px; color: var(--text-4); }
+/* H6: a lens steps back the cards it is not about as 'not in this question', not 'disabled': grey and lighter, but solid (no dot grid
+   or line showing through its body). Lower contrast keeps its greys in their order (name, role, the retired card's quieter rows, an
+   unknown kind word), the quietest still at 3.5:1 or more on the card. The legend's own 흐리게 stays as it was. */
+.space .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { opacity: 1; filter: grayscale(1) contrast(.65) brightness(1.22); }
+/* H7: regions with a body. The area's fill stands apart from the canvas (tokens; the cards and the canvas have no dark form yet, so
+   neither has the region: a dark fill under light cards would break the rule at the top of this file), its name a step firmer in
+   the head the layout measured for it (its size stays the head's: a larger name would be cut or run into the head's second line),
+   the system boundary a 2px rule on screen, and the dot grid stops inside regions and bands. A band caption reads at 10-13px on
+   screen, under the map's own title while that is drawn (never larger than it). */
+:root { --region-bg: #e9ecf1; --region-edge: #d9dde4; --region-name: var(--text-2); --band-caption: var(--text-3); --grp-place-bg: var(--region-bg); }
+.frame.region:where(*) { background: var(--region-bg); border-color: var(--region-edge); }
+.space .frame.region > .frame-head .frame-name { font-weight: 640; color: var(--region-name); }
+.band-head { font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: .04em; color: var(--band-caption); transform: scale(max(1, min(var(--u, 1), max(calc(var(--u, 1) * .7692), 1.5385)))); }
 .band-line { border-left-width: calc(2px * var(--u, 1)); }
 .band-zone { position: absolute; border-radius: 16px; background: var(--bg); pointer-events: none; }
 /* H8: one card surface at every tier. The head, the rows, the inner line and the foot are plain rows with spacing (no tinted head
-   band, no hairlines between them); the ways in (⤢, ▸ N, 연결 N) share one quiet button; the first view's emphasis is an edge that
-   hugs the card (1.5px on screen, no gap) and a lift, not a second outline. */
+   band, no hairlines between them); the ways in (⤢, ▸ N, 연결 N) share one quiet button; the first view's emphasis is the card's own
+   edge drawn firmer: a 1.5px (on screen) outline laid over its 1px border (no gap, no second ring), a card lifted as well, a group or
+   region the same edge without the lift. The family's border is untouched underneath (a store's spine, a trigger's top edge). */
 .node.card .c-head, .node.card.f-store .c-head, .node.card.grp.gx-place .c-head { background: none; box-shadow: none; }
 .node.card :is(.c-rows, .c-inner) { background: none; border: 0; }
 .node.card .c-bottom { border-top: 0; }
 .node.card .c-entry :is(.c-enter, .c-chip) { border-color: transparent; background: var(--chip); color: var(--text-2); border-radius: calc(var(--t-kind, 12px) * .5); }
 .node.card .c-entry :is(.c-enter, .c-chip):hover { border-color: transparent; background: var(--accent-soft); color: var(--accent-strong); }
 .node.card .c-corner .c-enter { background: var(--chip); }
-.space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact):not(:focus-visible) { outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: 0px; filter: drop-shadow(0 6px 10px rgba(16,24,40,.13)); }
-.space .node.lens-off.fv-emph:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { filter: grayscale(1) drop-shadow(0 6px 10px rgba(16,24,40,.13)); }
+.space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact):not(:focus-visible) { outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: -1px; filter: drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 6px 12px rgba(16,24,40,.16)); }
+.space .frame.fv-emph:not(.selected):not(.plan-impact):not(:focus-visible) { outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: -1px; }
+.space .node.lens-off.fv-emph:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { filter: grayscale(1) contrast(.65) brightness(1.22) drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 6px 12px rgba(16,24,40,.16)); }

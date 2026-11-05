@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { outside, routeCost, ROUTE_TURN, NODE_W, NODE_H } from '../dist/public/client/map-layout.js';
+import { outside, routeCost, ROUTE_TURN, NODE_W, NODE_H, edgePath } from '../dist/public/client/map-layout.js';
 import { routeEdges } from '../dist/public/client/map-route.js';
 import { wholeWords } from '../dist/public/client/line-grammar.js';
 import { labelSpots } from '../dist/public/client/map-labels.js';
@@ -39,6 +39,7 @@ test('HYG-3 a middle-tier label is cut on whole words and never ends on an open 
   assert.equal(wholeWords('경고 문구(stderr, 종료 코드)'), '경고 문구');
   assert.equal(wholeWords('인터셉터 핸들러(use 등록)'), '인터셉터 핸들러');
   assert.equal(wholeWords('기동 · 명령 torch.compile 실행'), '기동 · 명령');
+  assert.equal(wholeWords('발행 layout → 보고서 파일 저장'), '발행 layout', 'no arrow left pointing at what was cut');
   for (const t of ['설정: 값 읽기 그리고 쓰기 순서', 'a, b, c, d, e, f, g, h', '명령 / 응답 / 기록 / 정리']) assert.doesNotMatch(wholeWords(t), /[,:;/(\[{·-]$/, t);
 });
 
@@ -54,12 +55,49 @@ test('HYG-5 styles: one dock width, a text floor, quiet fades, regions with a bo
   const tail = css.slice(css.indexOf('/* ---------- map hygiene (beauty v1)'));
   assert.ok(tail.length > 100);
   assert.match(tail, /\.controls \.fv \{ position: absolute; left: calc\(100% \+ 8px\)/, 'the guide line sits beside the dock, never widening it');
-  assert.match(tail, /\.space\.title-floor #world > \.map-title \{ visibility: hidden; \}/);
-  assert.match(tail, /\.node\.lens-off[^{]*\{ opacity: \.6; filter: grayscale\(1\)/);
-  assert.match(tail, /\.frame\.region:where\(\*\) \{ background: #e9ecf1;/);
+  // Review fixes (the earlier pins changed on purpose): the title under the floor is unseen but keeps its 「기록 정보 ▾」 in the tab
+  // order (opacity, as a pinned title; not visibility); an off-lens card is solid (no dot grid through it) and keeps its greys in
+  // order (a contrast step instead of flattened greys at .6); the region's colours are tokens, with no dark fill under light cards;
+  // the region name keeps the size its head was measured for.
+  assert.match(tail, /\.space\.title-floor #world > \.map-title:not\(:focus-within\) \{ opacity: 0; \}/);
+  assert.doesNotMatch(tail, /title-floor[^{]*\{[^}]*visibility: hidden/);
+  assert.match(tail, /\.node\.lens-off[^{]*\{ opacity: 1; filter: grayscale\(1\) contrast\(\.65\) brightness\(1\.22\); \}/);
+  assert.doesNotMatch(tail, /lens-off[^{]*\{[^}]*--text-[234]:/, 'no flattened greys under the fade');
+  assert.match(tail, /--region-bg: #e9ecf1;/);
+  assert.match(tail, /\.frame\.region:where\(\*\) \{ background: var\(--region-bg\);/);
+  assert.doesNotMatch(tail, /data-theme="dark"\][^{]*\.frame\.region/, 'no dark region under light cards');
+  assert.doesNotMatch(tail.replace(/\/\*[\s\S]*?\*\//g, ''), /\.(?:frame-name|band-head)[^{]*\{[^}]*color: #/, 'region and band colours from tokens');
+  assert.doesNotMatch(tail, /\.frame-head \.frame-name \{[^}]*font-size/, 'the region name keeps the size its head was measured for');
+  assert.doesNotMatch(tail, /caption-floor/, 'the 「이은 선 없음」 caption keeps a readable size instead of hiding');
   assert.doesNotMatch(tail.replace(/\/\*[\s\S]*?\*\//g, ''), /\.frame[^{]*\{[^}]*dashed/, 'no dashed region frames');
   assert.match(tail, /\.node\.card \.c-bottom \{ border-top: 0; \}/);
   const app = await readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
   assert.ok(app.includes('const BOTTOM = 88;') && app.includes('const SAFE_TOP = 64, SAFE_SIDE = 32;'), 'the safe area');
   assert.ok(app.includes('legendOpenNow = chosen ?? false;'), 'the legend starts as its chip');
+});
+
+test('HYG-6 review fixes: a corridor round a card takes the middle of the gap, not a row squeezed along the card', () => {
+  const a = box('a', 0, 0), b = box('b', 600, 0), m = box('m', 300, -20, 120, 200);
+  const r = edgePath(a, b, [a, b, m]);
+  assert.ok(r.clear);
+  const runs = r.pts.slice(1).map((q, i) => [r.pts[i], q]).filter(([p, q]) => Math.abs(p.y - q.y) < 0.01 && Math.min(p.x, q.x) < m.x + m.w && Math.max(p.x, q.x) > m.x);
+  assert.ok(runs.length, JSON.stringify(r.pts));
+  for (const [p] of runs) assert.ok(Math.min(Math.abs(p.y - m.y), Math.abs(p.y - (m.y + m.h))) >= 12, `the run past the card keeps its room: y ${p.y}`);
+});
+
+test('HYG-7 review fixes in the client: the best-pan search, head merging, the dock order', async () => {
+  const app = await readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
+  // The pan search's range keeps the focus where it was framed: inside the safe area when it fits (min of the two focus bounds as the
+  // lower limit, max as the upper), filling it otherwise. It was written the other way round and returned only the current pan.
+  assert.ok(app.includes('Math.max(start + room - (lo + size) * k, Math.min(f0, f1)), max = Math.min(start - lo * k, Math.max(f0, f1))'));
+  // A merged head comes back as markLines gave it (a wait step's open head), markLines clears the merge, and a legend action re-merges.
+  assert.ok(app.includes("line.setAttribute('marker-end', el.dataset.mergedHead ?? 'none')"));
+  assert.ok(/line\.setAttribute\('marker-end', mark\(head\)\); el\.classList\.remove\('head-merged'\)/.test(app));
+  assert.ok(app.includes('applyLegendMarks(); mergeHeads(); renderLegend();'));
+  // The kept head is the most prominent line's, not the first in the document.
+  assert.ok(app.includes('cands.sort((p, q) => q.w - p.w);'));
+  // A fit without the title stays under the title floor, so the title it left out of the frame is not drawn.
+  assert.ok(app.includes('fit = Math.min(fitOf(nb), TITLE_FLOOR_K - 0.001)'));
+  // The folded legend chip sits right after the lens buttons.
+  assert.ok(app.includes("key!.classList.contains('folded') ? [key, fv] : [fv, key]"));
 });

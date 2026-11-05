@@ -294,9 +294,10 @@ export function wholeWords(t: string, n = LABEL_SHORT): string {
   // A quotation cut open (「고정 질의 "Is AI」) keeps only the words before it.
   if (((out.match(/["“”]/g) ?? []).length % 2) === 1) out = out.slice(0, out.search(/["“][^"“”]*$/));
   // Map hygiene H4: a bracket cut open (「JSON 응답(token,」, 「fs-job {type,」, 「경고 문구(stderr,」) keeps only the words before it, and
-  // no label ends on punctuation that promises more (「,」 「(」 「{」 「:」 「;」 「/」 「-」 「·」).
+  // no label ends on punctuation that promises more (「,」 「(」 「{」 「:」 「;」 「/」 「-」 「·」) or on an arrow pointing at what was cut
+  // (「발행 layout →」; review fixes).
   for (const [o, c] of [['(', ')'], ['{', '}'], ['[', ']'], ['（', '）'], ['「', '」']] as const) { const i = out.lastIndexOf(o); if (i >= 0 && out.indexOf(c, i) < 0) out = out.slice(0, i); }
-  return out.replace(/[\s·,;:(\[{（「/-]+$/, '').trim();
+  return out.replace(/[\s·,;:(\[{（「/\-→←↔⇒]+$/, '').trim();
 }
 /** A line label's size on screen at zoom k: it follows the zoom a little (12.5 × √k) between 11 and 14px, so it never outweighs a
  * card's name (14px or more on screen, 5.2) far out and is not left tiny near in. */

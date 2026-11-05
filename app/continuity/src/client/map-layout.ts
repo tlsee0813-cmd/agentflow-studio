@@ -756,8 +756,16 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
   const around = (): Route => { const r = gapRoute(a, b, dir, blocks, segFree, ports, rims); return r ? { d: rounded(r.pts), pts: r.pts, mx: r.mid.x, my: r.mid.y, detour: true, clear: true } : plain; };
   if ((xb - xa) * dir <= 0) return around();
   const lo = Math.min(xa, xb), hi = Math.max(xa, xb);
-  const ys = [acy, bcy, ...blocks.filter(o => o.x < hi && lo < o.x + o.w).flatMap(o => [o.y - 6, o.y + o.h + 6])]
-    .sort((p, q) => Math.abs(p - acy) + Math.abs(p - bcy) - (Math.abs(q - acy) + Math.abs(q - bcy)));
+  // The corridor's row: the ends' own rows, then beside each card in the way at the middle of its gap to the next card (at most
+  // ROW_CLEAR off it), so a corridor never squeezes along a card's edge while the gap has room (map hygiene review); a row 6px
+  // off a card only when no such row is free.
+  const near = blocks.filter(o => o.x < hi && lo < o.x + o.w), ROW_CLEAR = 18;
+  const offRow = (o: Rect, up: boolean) => {
+    const e = up ? o.y : o.y + o.h, gap = Math.min(ROW_CLEAR * 2, ...near.filter(p => p !== o && (up ? p.y + p.h <= e : p.y >= e)).map(p => (up ? e - (p.y + p.h) : p.y - e)));
+    return up ? e - Math.max(6, gap / 2) : e + Math.max(6, gap / 2);
+  };
+  const byDist = (p: number, q: number) => Math.abs(p - acy) + Math.abs(p - bcy) - (Math.abs(q - acy) + Math.abs(q - bcy));
+  const ys = [...[acy, bcy, ...near.flatMap(o => [offRow(o, true), offRow(o, false)])].sort(byDist), ...near.flatMap(o => [o.y - 6, o.y + o.h + 6]).sort(byDist)];
   for (const yc of ys) {
     if (!segFree(xa, acy, xa, yc) || !segFree(xa, yc, xb, yc) || !segFree(xb, yc, xb, bcy)) continue;
     // The corridor at an end's own height leaves a repeated point there: only the corners are kept, since the router moves
@@ -850,6 +858,8 @@ type Port = { at: Point; lead: Point; cost: number };
  * (their leads' box grown by ROUTE_SPAN_PAD) costs ROUTE_OUT more per px. With a 400 turn and free length, a two-turn run
  * round the outside of the map beat a four-turn way through the gaps; now length counts and leaving the span counts double. */
 export const ROUTE_TURN = 140, ROUTE_OUT = 1, ROUTE_SPAN_PAD = 24, ROUTE_SPAN_RAMP = 48;
+/** A run nearer a card's edge than ROUTE_HUG (outside it) costs ROUTE_HUG_COST more per px it runs beside the card. */
+export const ROUTE_HUG = 12, ROUTE_HUG_COST = 1.5;
 type Span = { x0: number; x1: number; y0: number; y1: number };
 function spanOf(from: Port[], to: Port[]): Span {
   // The ports each end prefers (its cheapest): a dear top or bottom port far from the other end must not widen the span.
@@ -901,6 +911,24 @@ function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w
   }
   // Dijkstra over (crossing, heading). A turn costs ROUTE_TURN of run, and run that leaves the span of the two ends' leads
   // costs ROUTE_OUT more per px: a way through the gaps between cards beats a two-turn run round the outside of the map.
+  // Run that lies along a card's edge (outside it, nearer than ROUTE_HUG) costs ROUTE_HUG_COST more per px of the card it runs
+  // beside: a line takes the middle of a gap rather than squeezing along a card (map hygiene review).
+  const hug = (xa: number, ya: number, xb: number, yb: number) => {
+    const hz = ya === yb, v = hz ? ya : xa, lo = hz ? Math.min(xa, xb) : Math.min(ya, yb), hi = hz ? Math.max(xa, xb) : Math.max(ya, yb);
+    let c = 0;
+    for (const o of blocks) {
+      const e0 = hz ? o.y : o.x, e1 = hz ? o.y + o.h : o.x + o.w, s0 = hz ? o.x : o.y, s1 = hz ? o.x + o.w : o.y + o.h;
+      if ((v > e0 && v < e1) || Math.min(Math.abs(v - e0), Math.abs(v - e1)) >= ROUTE_HUG) continue;
+      const ov = Math.min(hi, s1) - Math.max(lo, s0); if (ov > 0) c += ov;
+    }
+    return c * ROUTE_HUG_COST;
+  };
+  // Each free step's hugging cost, worked out once (indexed as step).
+  const hc = new Float32Array(N * 2);
+  for (let j = 0; j < Y; j++) for (let i = 0; i < X; i++) {
+    if (step[(j * X + i) * 2]) hc[(j * X + i) * 2] = hug(xs[i]!, ys[j]!, xs[i + 1]!, ys[j]!);
+    if (step[(j * X + i) * 2 + 1]) hc[(j * X + i) * 2 + 1] = hug(xs[i]!, ys[j]!, xs[i]!, ys[j + 1]!);
+  }
   const TURN = ROUTE_TURN, span = spanOf(from, to), out = (xa: number, ya: number, xb: number, yb: number) => outside(span, xa, ya, xb, yb) * ROUTE_OUT, dist = new Float64Array(N * 4).fill(Infinity), prev = new Int32Array(N * 4).fill(-1), heap: [number, number][] = [];
   const push = (d: number, s: number) => { heap.push([d, s]); for (let c = heap.length - 1; c > 0;) { const q = (c - 1) >> 1; if (heap[q]![0] <= heap[c]![0]) break; [heap[q], heap[c]] = [heap[c]!, heap[q]!]; c = q; } };
   const pop = () => { const top = heap[0]!, last = heap.pop()!; if (heap.length) { heap[0] = last; for (let c = 0; ;) { const l = 2 * c + 1, r = l + 1; let m = c; if (l < heap.length && heap[l]![0] < heap[m]![0]) m = l; if (r < heap.length && heap[r]![0] < heap[m]![0]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c]!, heap[m]!]; c = m; } } return top; };
@@ -912,10 +940,10 @@ function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w
     const [d, s] = pop(); if (d > dist[s]! || d >= best) continue;
     const k = s >> 2, hd = s & 3, i = k % X, j = (k - i) / X, g = goal.get(k);
     if (g) { const into = (g.at.x > g.lead.x ? 0 : g.at.x < g.lead.x ? 2 : g.at.y > g.lead.y ? 1 : 3), c = d + g.cost + (into === hd ? 0 : TURN); if (c < best) { best = c; bestState = s; bestPort = g; } }
-    const moves: [number, number, boolean][] = [[0, k + 1, i + 1 < X && !!step[k * 2]], [1, k + X, j + 1 < Y && !!step[k * 2 + 1]], [2, k - 1, i > 0 && !!step[(k - 1) * 2]], [3, k - X, j > 0 && !!step[(k - X) * 2 + 1]]];
-    for (const [h, n, ok] of moves) {
+    const moves: [number, number, boolean, number][] = [[0, k + 1, i + 1 < X && !!step[k * 2], k * 2], [1, k + X, j + 1 < Y && !!step[k * 2 + 1], k * 2 + 1], [2, k - 1, i > 0 && !!step[(k - 1) * 2], (k - 1) * 2], [3, k - X, j > 0 && !!step[(k - X) * 2 + 1], (k - X) * 2 + 1]];
+    for (const [h, n, ok, si] of moves) {
       if (!ok || (h + 2) % 4 === hd) continue;
-      const nx = xs[n % X]!, ny = ys[(n - (n % X)) / X]!, len = Math.abs(nx - xs[i]!) + Math.abs(ny - ys[j]!), nd = d + len + out(xs[i]!, ys[j]!, nx, ny) + (h === hd ? 0 : TURN), ns = n * 4 + h;
+      const nx = xs[n % X]!, ny = ys[(n - (n % X)) / X]!, len = Math.abs(nx - xs[i]!) + Math.abs(ny - ys[j]!), nd = d + len + out(xs[i]!, ys[j]!, nx, ny) + hc[si]! + (h === hd ? 0 : TURN), ns = n * 4 + h;
       if (nd < dist[ns]!) { dist[ns] = nd; prev[ns] = s; push(nd, ns); }
     }
   }

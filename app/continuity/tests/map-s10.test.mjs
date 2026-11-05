@@ -295,8 +295,16 @@ test('S10-18 the emphasis keeps the family edge and never thins a selected or su
   assert.ok(cards.length >= 1);
   for (const r of cards) {
     assert.doesNotMatch(r.body, /border|box-shadow/, `the family border and a lens's lift stay: ${r.sel}`);
-    assert.match(r.body, /outline:/); assert.match(r.body, /outline-offset:/, 'a halo apart from the edge');
+    // Map hygiene review: the emphasis is the card's own edge drawn firmer (an outline laid over its border, offset 0 or inward), not a
+    // halo apart from it: a halo with a gap read as a second ring round the card. Wherever the halo is still written, a later rule lays
+    // it on the edge (checked below).
+    assert.match(r.body, /outline:/); assert.match(r.body, /outline-offset:/, 'the emphasis says where its edge lies');
     for (const one of r.sel.split(',')) assert.ok(one.includes(':not(:focus-visible)'), `the keyboard focus ring wins over the halo: ${one.trim()}`);
+  }
+  // Cards and groups share the form: for each, the last word on the emphasis lays it on the edge, no gap.
+  for (const one of ['.node.fv-emph', '.frame.fv-emph']) {
+    const last = cards.filter(r => r.sel.includes(one) && /outline-offset:/.test(r.body)).at(-1);
+    assert.ok(last, one); assert.match(last.body, /outline-offset: (?:0|-[\d.]+)px/, `on the edge, no gap: ${last.sel}`);
   }
   for (const r of rules.filter(x => /--lw/.test(x.body))) for (const not of ['.on', '.agg', '.sum', '.s-dotted', '.s-sparse'])
     assert.ok(r.sel.includes(`:not(${not})`), `a firmer stroke never on ${not}: ${r.sel}`);
