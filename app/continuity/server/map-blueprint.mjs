@@ -1154,7 +1154,7 @@ function withoutSetAside(raw, exclusions) {
   const mark = (list, index) => { if (!drop.has(list)) drop.set(list, new Set()); drop.get(list).add(index); };
   // .37: a relation's cadence or its format fields (the list, or one field) left out alone; the line stays. .38: and its channel
   // (a wrong word, or control on a line carrying an artifact), written null.
-  const relationUnsaid = new Set();
+  const relationUnsaid = new Set(), itemUnsaid = new Set();
   for (const x of exclusions) {
     const count = x.rule === 'contract' && x.category === 'count';
     let m;
@@ -1181,6 +1181,8 @@ function withoutSetAside(raw, exclusions) {
     // .30 (map-reading.9): a step or a kept state is left out at its index, a wrong list or loop (or its line) is written null, a
     // loop's own item is written null in the loop; a port-map row is left out, a wrong port map written null.
     // .39 (map-reading.14): and a file-map role row, or a wrong list of them.
+    // Recipe .48: a condition's 거짓이면 or a step's 하는 일 past its bound is written null there; the condition or step stays.
+    else if ((m = /^parts\[(\d{1,3})\]\.(conditions|steps)\[(\d{1,4})\]\.(else|does)$/.exec(x.path)) && ((m[2] === 'conditions') === (m[4] === 'else'))) itemUnsaid.add(`${m[1]}.${m[2]}.${m[3]}.${m[4]}`);
     else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|conditions|fileRoles)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(`parts.${m[1]}.${m[2]}`, Number(m[3]));
     else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|loop|conditions|fileRoles)(?:\.at)?$/.exec(x.path))) blank(Number(m[1]), [m[2]]);
     else if ((m = /^parts\[(\d{1,3})\]\.loop\.(unit|stop|resume)$/.exec(x.path))) blank(Number(m[1]), [`loop.${m[2]}`]);
@@ -1216,6 +1218,7 @@ function withoutSetAside(raw, exclusions) {
       return out;
     });
     if (Array.isArray(part?.steps)) part.steps = part.steps.map((step, j) => drop.has(`parts.${i}.steps.${j}.uses`) && step && Array.isArray(step.uses) ? { ...step, uses: keep(`parts.${i}.steps.${j}.uses`, step.uses) } : step);
+    for (const [key, field] of [['steps', 'does'], ['conditions', 'else']]) if (Array.isArray(part?.[key])) part[key] = part[key].map((item, j) => itemUnsaid.has(`${i}.${key}.${j}.${field}`) && item && typeof item === 'object' && Object.hasOwn(item, field) ? { ...item, [field]: null } : item);
     for (const key of ['basis', 'claims', 'steps', 'stateVars', 'conditions', 'fileRoles', 'files', 'inputs', 'outputs', 'fields', 'config']) if (Array.isArray(part?.[key])) part[key] = keep(`parts.${i}.${key}`, part[key]);
     for (const key of unsaid.get(i) ?? []) {
       if (!part || typeof part !== 'object') continue;

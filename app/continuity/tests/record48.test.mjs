@@ -43,9 +43,12 @@ function workshop() {
     table('C-PART', Array.from({ length: 30 }, (_, k) => { const i = k + 1;
       return [b(i), i === 30 ? '예약 기록부(bookings.db)' : `공방 부분 ${pad(i)}`, i === 30 ? '저장 · DB 테이블' : '처리 · 계산', `부분 ${pad(i)}의 일`, 'F01', '구현됨', 'F01']; })),
     table('C-LINK', links),
-    table('C-STEP', [[`${b(2)}:S01`, '받기', '예약을 받는다', 'take()', '—', '—', 'F01']]),
+    // B02 runs 30 steps; S10–S20 are the body of its loop B02:L01 (in the middle, where a first-and-last cut falls).
+    table('C-LOOP', [[`${b(2)}:L01`, b(2), '—', '예약마다', '대기열이 빌 때까지', '대기열 끝', 'S10–S20', 'F01']]),
+    table('C-STEP', Array.from({ length: 30 }, (_, k) => [`${b(2)}:S${pad(k + 1)}`, k === 0 ? '받기' : `단계 ${pad(k + 1)}`, `예약 처리 ${pad(k + 1)}`, `step${k + 1}()`,
+      k >= 9 && k <= 19 ? `${b(2)}:L01` : '—', '—', 'F01'])),
     table('C-DATA', [['D01', '예약 행(bookings.db)', '저장', 'member, bench, at', b(1), b(11), 'db/bookings (덧붙임)', 'F01']]),
-    table('C-END', [['C-PART', '끝남', 'B01–B30', '—', '—'], ['C-LINK', '끝남', 'LN01–LN50', '—', '—'], ['C-STEP', '끝남', 'B02:S01', '—', '—'], ['C-DATA', '끝남', 'D01', '—', '—']]),
+    table('C-END', [['C-PART', '끝남', 'B01–B30', '—', '—'], ['C-LINK', '끝남', 'LN01–LN50', '—', '—'], ['C-LOOP', '끝남', 'B02:L01', '—', '—'], ['C-STEP', '끝남', 'B02:S01–B02:S30', '—', '—'], ['C-DATA', '끝남', 'D01', '—', '—']]),
     '완료 단계: 상세 완료'].join('\n');
 }
 
@@ -124,6 +127,43 @@ test('R48-2 a claim on a v5 row takes its grade from the row\'s own cites (E →
   const past = wire([part(f, 'new:push', '푸시 발송기', '|B07|푸시', { claims: [claim(f, 's7', '|RU01|', { topic: 'rule', kind: 'describes', evidence: 'run' })] })]);
   const r2 = M.validateMapReply(structuredClone(past), f.ask, { setAside: true });
   assert.ok(!r2.parts.flatMap(x => x.claims).some(x => x.key === 's7') && M.readingExclusions(r2).some(x => x.category === 'cite-grade'));
+});
+
+test('R48-4 a part with more C-STEP rows than steps keeps its loop body: the reply\'s first-and-last cut gives way to the body rows (the program\'s, from their rows); the bound holds', () => {
+  const f = ofPages([workshop()]), step = k => ({ name: k === 1 ? '받기' : `단계 ${pad(k)}`, does: `예약 처리 ${pad(k)}`, uses: [`step${k}()`], at: f.at(`|${b(2)}:S${pad(k)}|`) });
+  const firstLast = [...Array.from({ length: 12 }, (_, k) => k + 1), ...Array.from({ length: 12 }, (_, k) => k + 19)];
+  const read = M.validateMapReply(wire([part(f, 'new:p02', '공방 부분 02', '|B02|', { steps: firstLast.map(step) })]), f.ask, { setAside: true });
+  const steps = read.parts.find(x => x.ref === 'new:p02').steps, names = steps.map(s => s.name);
+  assert.equal(steps.length, 24);
+  for (let k = 10; k <= 20; k++) assert.ok(names.includes(`단계 ${pad(k)}`), `loop body S${pad(k)} kept`);
+  assert.deepEqual(steps.filter(s => s.program).map(s => s.name), ['단계 13', '단계 14', '단계 15', '단계 16', '단계 17', '단계 18'], 'the body rows the reply left out are the program\'s');
+  assert.deepEqual(steps.filter(s => s.program).map(s => [s.does, s.uses]).slice(0, 1), [['예약 처리 13', ['step13()']]]);
+  assert.ok(names.includes('받기') && names.includes('단계 30'), 'the first and last rows stay');
+  assert.deepEqual(names, [...names].sort((x, y) => (x === '받기' ? 1 : Number(x.slice(3))) - (y === '받기' ? 1 : Number(y.slice(3)))), 'in row order');
+  // A part whose steps all fit (or a reply that already keeps the body) is left as written.
+  const body = [...Array.from({ length: 23 }, (_, k) => k + 1), 30];
+  const kept = M.validateMapReply(wire([part(f, 'new:p02', '공방 부분 02', '|B02|', { steps: body.map(step) })]), f.ask, { setAside: true }).parts.find(x => x.ref === 'new:p02').steps;
+  assert.deepEqual(kept.filter(s => s.program).length, 0);
+});
+
+test('R48-4 a condition whose 거짓이면, or a step whose 하는 일, runs past its bound keeps the row with that cell alone written null (said); a 참이면 past its bound still sets the condition aside', () => {
+  const longElse = '발송하고 다음 매시 틱까지 기다린 뒤 다시 계산한다 '.repeat(3).trim();
+  const p2 = page(2).replace('|CD01|B07|now in quietHours|아침 7시로 미룸|발송|실행 시|F04|', `|CD01|B07|now in quietHours|아침 7시로 미룸|${longElse}|실행 시|F04|`);
+  const f = ofPages([page(1), p2, page(3)]), longDoes = '화분의 마지막 급수 기록을 읽는다'.repeat(8);
+  assert.ok(longElse.length > 60 && longDoes.length > 120);
+  const w = wire([part(f, 'new:push', '푸시 발송기', '|B07|푸시', { conditions: [{ when: 'now in quietHours', then: '아침 7시로 미룸', else: longElse, at: f.at('|CD01|') }] }),
+    part(f, 'new:calc', '일정 계산기', '|B05|', { steps: [{ name: '기록 읽기', does: longDoes, uses: ['loadHistory()'], at: f.at('|B05:S01|') }] }),
+    part(f, 'new:login', '로그인 검사', '|B09|', { conditions: [{ when: '!token', then: '401 '.repeat(20), else: '다음', at: f.at('|CD02|') }] })]);
+  const read = M.validateMapReply(structuredClone(w), f.ask, { setAside: true }), of = ref => read.parts.find(x => x.ref === ref);
+  // (the program's P5-03 retry row stands after the reply's own condition)
+  assert.deepEqual(of('new:push').conditions.map(c => [c.when, c.then, c.else]).slice(0, 1), [['now in quietHours', '아침 7시로 미룸', null]]);
+  assert.deepEqual(of('new:calc').steps.map(s => [s.name, s.does]), [['기록 읽기', null]]);
+  assert.deepEqual(of('new:login').conditions, []);
+  const said = M.readingExclusions(read).map(x => [x.path, x.category]);
+  assert.ok(said.some(([p, c]) => c === 'condition-else' && /^parts\[0\]\.conditions\[0\]\.else$/.test(p)), JSON.stringify(said));
+  assert.ok(said.some(([p, c]) => c === 'step-does' && /^parts\[1\]\.steps\[0\]\.does$/.test(p)));
+  assert.ok(said.some(([p, c]) => c === 'condition' && /^parts\[2\]\.conditions\[0\]$/.test(p)));
+  assert.match(M.explainExclusion('parts[0].conditions[0].else', 'contract', 'condition-else'), /그 칸만 비우고 조건은 남겼어요/);
 });
 
 test('R48-5 a C-GROUP row whose 부모 is a part sets its children\'s parent; a parent the model gave is kept and said; no cycle; a 목록 row or a 부모 naming no part sets none', () => {
