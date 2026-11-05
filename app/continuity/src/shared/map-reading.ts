@@ -1392,8 +1392,8 @@ export function stepWhen(texts: Map<string, { text: string; spans: Span[] | null
  * the first and last rows cut the middle, where the loop runs): a v5 part with more C-STEP rows than PART_LIST_MAX.steps keeps, within the
  * bound, its rows in this order: the rows of a loop body (a 소속 반복 cell naming a loop), the rows something links to (a branch of another
  * row, a step a port-map row names), its first and last rows, then the rest in row order; kept rows stay in row order. The reply's step on
- * a kept row stays as written; a kept row the reply left out becomes the program's step (its row's 단계 이름, 하는 일, 쓰는 함수, marked
- * program); a reply step on a row left out goes (steps-cut names that row). A part with a step on no row of its own, or on material, is
+ * a kept row stays as written; a kept row the reply left out becomes the program's step (its row's 단계 이름 and 하는 일, using nothing as every program step, marked
+ * program); a reply step on a row left out goes (steps-cut names that row). A part the reply gave no steps, one with a step on no row of its own or on material, is
  * left as the reply wrote it. */
 function stepCut48(texts: Map<string, { text: string; spans: Span[] | null }>, parts: MapReplyPart[], relations: readonly { from: string; to: string }[],
   portMap: readonly { relation: number; step: string }[], onMaterial: (q: { record: string; from: number; to: number }) => boolean): void {
@@ -1401,7 +1401,7 @@ function stepCut48(texts: Map<string, { text: string; spans: Span[] | null }>, p
   if (!stepRows.length) return;
   const meets = (q: { record: string; from?: number; to?: number }, r: { record: string; from: number; to: number }) => q.record === r.record && q.from !== undefined && q.to !== undefined && q.from < r.to && r.from < q.to;
   for (const b of parts) {
-    if (b.name === null || !Array.isArray(b.steps)) continue;
+    if (b.name === null || !Array.isArray(b.steps) || !b.steps.length) continue;
     const own = partRows.find(r => plainName(r.byColumn['이름'] ?? '') === plainName(b.name!)) ?? partRows.find(r => b.basis.some(q => meets(q, r)));
     const id = own?.fold?.id; if (!id) continue;
     const rows = stepRows.filter(r => r.fold!.id.startsWith(`${id}:S`)).sort((x, y) => x.record === y.record ? x.from - y.from : 0);
@@ -1420,16 +1420,16 @@ function stepCut48(texts: Map<string, { text: string; spans: Span[] | null }>, p
     const keep = new Set(order.slice(0, max).map(x => x.k));
     if (onRow.every(k => keep.has(k)) && b.steps.length >= Math.min(max, keep.size)) continue;
     const cut60 = (t: string, n: number) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length <= n ? s : `${s.slice(0, n - 1)}…`; };
-    const steps: MapReplyStep[] = [], names = new Set<string>();
+    // The names the kept reply steps hold come first: a program step never takes one (a reading's step names are unique).
+    const steps: MapReplyStep[] = [], names = new Set<string>([...keep].flatMap(k => { const s = b.steps![onRow.indexOf(k)]; return s ? [plainName(s.name)] : []; }));
     for (const k of [...keep].sort((x, y) => x - y)) {
       const mine = b.steps[onRow.indexOf(k)];
       if (mine) { steps.push(mine); names.add(plainName(mine.name)); continue; }
       const r = rows[k]!, c = r.byColumn, name = cut60(c['단계 이름'] ?? '', STEP_NAME_MAX), text = texts.get(r.record)?.text;
       if (!name || names.has(plainName(name)) || text === undefined || secretLike(name) || onMaterial({ record: r.record, from: r.from, to: r.to })) continue;
       const doesCell = (c['하는 일 한 줄'] ?? '').trim(), does = doesCell && !/^[—–-]+$/.test(doesCell) && !secretLike(doesCell) ? cut60(doesCell, 120) : null;
-      const uses = (c['쓰는 파일·함수'] ?? '').split(/\s*[·,]\s*/).map(x => x.trim()).filter(x => x && !/^[—–-]+$/.test(x) && x.length <= 60 && !secretLike(x)).slice(0, 4);
       const to = Math.min(r.to, r.from + 600);
-      steps.push({ name, does, uses, quote: { record: r.record, quote: text.slice(r.from, to), from: r.from, to }, program: true }); names.add(plainName(name));
+      steps.push({ name, does, uses: [], quote: { record: r.record, quote: text.slice(r.from, to), from: r.from, to }, program: true }); names.add(plainName(name));
     }
     b.steps = steps;
   }

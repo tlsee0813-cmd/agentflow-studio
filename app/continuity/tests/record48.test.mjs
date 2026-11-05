@@ -17,6 +17,7 @@ import * as T from '../dist/public/shared/record-table.js';
 import * as R from '../dist/public/shared/report-ask.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { groupParentConflicts } from '../dist/public/shared/record-reading.js';
+import { validateProject } from '../dist/public/shared/validation.js';
 import * as B from '../server/map-blueprint.mjs';
 
 const page = n => readFileSync(new URL(`./fixtures/record45/page${n}.txt`, import.meta.url), 'utf8');
@@ -143,7 +144,7 @@ test('R48-4 a part with more C-STEP rows than steps keeps its loop body: the rep
   assert.equal(steps.length, 24);
   for (let k = 10; k <= 20; k++) assert.ok(names.includes(`단계 ${pad(k)}`), `loop body S${pad(k)} kept`);
   assert.deepEqual(steps.filter(s => s.program).map(s => s.name), ['단계 13', '단계 14', '단계 15', '단계 16', '단계 17', '단계 18'], 'the body rows the reply left out are the program\'s');
-  assert.deepEqual(steps.filter(s => s.program).map(s => [s.does, s.uses]).slice(0, 1), [['예약 처리 13', ['step13()']]]);
+  assert.deepEqual(steps.filter(s => s.program).map(s => [s.does, s.uses]).slice(0, 1), [['예약 처리 13', []]], 'a program step uses nothing (map-reading.14); its row says the rest');
   assert.ok(names.includes('받기') && names.includes('단계 30'), 'the first and last rows stay');
   assert.deepEqual(names, [...names].sort((x, y) => (x === '받기' ? 1 : Number(x.slice(3))) - (y === '받기' ? 1 : Number(y.slice(3)))), 'in row order');
   // A part whose steps all fit (or a reply that already keeps the body) is left as written.
@@ -223,6 +224,22 @@ test('R48-7 the v5.1 ask names the role words the app reads as a type (each one 
   for (const [family, list] of Object.entries(words)) for (const [w, type] of list) assert.equal(T.familyType(`${family} · ${w}`).type, type, `${family} · ${w}`);
   // Nothing else of the ask changed: the same tables, the same header rows.
   for (const id of [...T.Q1_TABLES, ...T.Q2_TABLES]) assert.ok(ask.includes(`\n${T.headerLine(T.V5_TABLE_DEFS.get(id))}\n`) || !T.V5_TABLE_DEFS.get(id).columns.length, id);
+});
+
+test('R48 contract: every reading .48 makes is stored as map-reading.19 exactly (types, grades, dates, parents, program steps, blanked cells, the 48 lines)', () => {
+  const meta = (id, n) => ({ id, at: '2026-11-05T05:00:00.000Z', model: 'stub', prompt: 'm6-000000000048', hash: n.repeat(64) });
+  const p1 = page(1).replace('|GR02|B07|B07: FCM 통로 · B07: APNs 통로|목록|F04|', '|GR02|B07|B07: FCM 통로 · B07: APNs 통로|목록|F04|\n|GR03|B03|B05·B04|구성|F02|');
+  const p2 = page(2).replace('|CD01|B07|now in quietHours|아침 7시로 미룸|발송|실행 시|F04|', `|CD01|B07|now in quietHours|아침 7시로 미룸|${'발송하고 다음 매시 틱까지 기다린 뒤 다시 계산한다 '.repeat(3).trim()}|실행 시|F04|`);
+  const f = ofPages([p1, p2, page(3)]);
+  const w = wire([part(f, 'new:api', '화분 API', '|B03|'), part(f, 'new:push', '푸시 발송기', '|B07|푸시', { claims: [claim(f, 's1', '|CH01|', { topic: 'change', evidence: null, when: '2026-08-02' }), claim(f, 's2', '|RU01|', { topic: 'rule', kind: 'want', evidence: null, when: null })],
+    conditions: [{ when: 'now in quietHours', then: '아침 7시로 미룸', else: '발송하고 다음 매시 틱까지 기다린 뒤 다시 계산한다 '.repeat(3).trim(), at: f.at('|CD01|') }] })]);
+  for (const [g, wr, name] of [[f, w, '물주기'], [ofPages([workshop()]), null, '공방']]) {
+    const wire0 = wr ?? wire([part(g, 'new:p02', '공방 부분 02', '|B02|', { steps: [1, 2, 3, 28, 29, 30].map(k => ({ name: k === 1 ? '받기' : `단계 ${pad(k)}`, does: null, uses: [], at: g.at(`|${b(2)}:S${pad(k)}|`) })) })]);
+    const read = M.validateMapReply(structuredClone(wire0), g.ask, { setAside: true });
+    const applied = M.applyReading(g.project, g.input, read, meta(`R_record48_${name === '공방' ? 'b' : 'a'}`, name === '공방' ? '8' : '4'));
+    assert.equal(applied.reading.version, 'map-reading.19', name);
+    assert.deepEqual(validateProject(applied.project), applied.project, name);
+  }
 });
 
 test('R48-8 a rule a code device keeps (지키는 장치 코드 or 검사, with a file or run cite) describes what the code does; a rule people keep stays a want', () => {
