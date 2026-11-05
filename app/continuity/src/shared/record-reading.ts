@@ -489,7 +489,7 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
     };
     for (const b of parts) {
       for (const s of b.steps ?? []) { const r = s.recordRef ? f.byId.get(s.recordRef) : undefined; if (r) s.cites = cites6(r.cites); }
-      for (const c of b.claims) { const r = rowAt(c); if (r) { c.cites = cites6(r.cites); ledgerOn(c, r); } }
+      for (const c of b.claims) { const r = rowAt(c); if (r) { c.cites = cites6(r.cites); ledgerOn(c, r); ruleStance(c, r); } }
     }
     // The v5 record's own artifacts (C-DATA, 13.3 shared data), gates checked as none, supplementary tables and unknown tables.
     const r43 = ctx.read43;
@@ -613,6 +613,13 @@ function ledgerOn(c: Claim43, r: FoldRow): void {
   const own = (w: string) => Object.values(r.row.byColumn).some(cell => plain(cell).includes(plain(w)));
   const when = typeof c.when === 'string' && c.when.trim() ? c.when : null;
   c.when = dated && (!when || DATE.test(when) || !own(when)) ? dated : when && own(when) ? when : null;
+}
+/** Recipe .48: a rule a code device keeps is what the code does, not a wish: a want claim on a v5 C-RULE row whose 지키는 장치 names 코드
+ * or 검사 (alone or with 「+」) and whose cites hold a file read or a run describes (the judged maps showed such rules as [want]). */
+function ruleStance(c: Claim43, r: FoldRow): void {
+  if (r.table !== 'C-RULE' || c.kind !== 'want') return;
+  const coded = (r.row.byColumn['지키는 장치'] ?? '').split('+').some(w => { const v = fixedWord(w.trim(), DEVICE_WORDS)?.value; return v === 'code' || v === 'gate'; });
+  if (coded && r.cites.some(x => x.grade === 'file' || x.grade === 'run')) c.kind = 'describes';
 }
 /** Recipe .45: a part's family from a v5 C-PART 표현군·역할 cell, on its row (nothing for a cell outside the fixed words: the next page
  * asks for it). */

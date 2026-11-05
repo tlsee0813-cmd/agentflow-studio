@@ -124,3 +124,12 @@ test('R48-2 a claim on a v5 row takes its grade from the row\'s own cites (E →
   const r2 = M.validateMapReply(structuredClone(past), f.ask, { setAside: true });
   assert.ok(!r2.parts.flatMap(x => x.claims).some(x => x.key === 's7') && M.readingExclusions(r2).some(x => x.category === 'cite-grade'));
 });
+
+test('R48-8 a rule a code device keeps (지키는 장치 코드 or 검사, with a file or run cite) describes what the code does; a rule people keep stays a want', () => {
+  const p2 = page(2).replace('|RU01|B07|푸시 토큰을 기록하지 않음|메인테이너·2026-08|코드|server/push/redact.ts|F04|',
+    '|RU01|B07|푸시 토큰을 기록하지 않음|메인테이너·2026-08|코드|server/push/redact.ts|F04|\n|RU02|B07|밤에는 사람이 발송을 멈춤|소유자·2026-09|사람|운영자|F04|\n|RU03|B07|발송 전 시험 통과|메인테이너·2026-10|검사+사람|ci.yml|추정|');
+  const f = ofPages([page(1), p2, page(3)]);
+  const w = wire([part(f, 'new:push', '푸시 발송기', '|B07|푸시', { claims: ['RU01', 'RU02', 'RU03'].map((id, k) => claim(f, `s${k + 1}`, `|${id}|`, { topic: 'rule', kind: 'want', evidence: null, when: null })) })]);
+  const read = M.validateMapReply(structuredClone(w), f.ask, { setAside: true }), kind = key => read.parts.flatMap(x => x.claims).find(x => x.key === key)?.kind;
+  assert.deepEqual([kind('s1'), kind('s2'), kind('s3')], ['describes', 'want', 'want'], 'code with a file cite describes; people keep RU02; RU03 cites only a guess');
+});
