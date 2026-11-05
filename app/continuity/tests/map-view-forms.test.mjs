@@ -265,3 +265,23 @@ test('FORM-16 step IDs read once: owner numbers normalised, suffix kept; the mod
   // The forms never use the word for a group box in identifiers (frame means a group box in this codebase).
   assert.ok(!/\bframe/i.test(src.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '')));
 });
+
+test('FORM-17 the detail view\'s form code never lays out the map, never queries or marks map lines and boxes, and the card footer word is visual only', () => {
+  const app = readFileSync(new URL('../dist/public/client/app.js', import.meta.url), 'utf8');
+  const body = name => { const i = app.indexOf(`function ${name}(`); assert.ok(i >= 0, name); let d = 0, j = app.indexOf('{', i); for (let k = j; k < app.length; k++) { if (app[k] === '{') d++; else if (app[k] === '}' && --d === 0) return app.slice(j, k + 1); } return ''; };
+  for (const fn of ['storedForms', 'formInput', 'setDetailForm', 'formEntries', 'opsNoneChip']) {
+    const b = body(fn);
+    for (const bad of ['renderSpace(', 'relayout(', 'layoutScope(', 'routeEdges(', 'positionWorld(', 'fitView(', 'applyCamera(', "'.edge", '[data-box', "'data-box'"]) assert.ok(!b.includes(bad), `${fn} has ${bad}`);
+  }
+  // The forms' own elements carry their own classes (vf-, sl-, vg-), never the map's line or box hooks.
+  const detail = body('renderDetail');
+  // (a class token "edge" exactly; vg-edge and sl- classes are the forms' own)
+  assert.ok(!/class: [`'](?:[^`']*\s)?edge[\s`'$]/.test(detail) &&!detail.includes("'data-box'") && !detail.includes("'data-drag'"));
+  // Section 4.1 / override 10: a part with no operations record keeps the word for screen readers and its tip; the pane says it.
+  const card = body('cardEl');
+  assert.ok(card.includes('ops-none') && card.includes('sr-only'));
+  assert.ok(body('kindLine').includes('운영 기록 없음'));
+  const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
+  assert.ok(/\.node\.card \.c-short\.ops-none \{ display: none/.test(css));
+  assert.ok(!/\.edge\.spine[^{]*\{[^}]*stroke-width/.test(css.slice(css.indexOf('Hierarchy pass (spec forms v1'))), 'the spine is not thickened (override 8)');
+});

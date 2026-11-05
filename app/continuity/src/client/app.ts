@@ -1295,7 +1295,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
         t.undecided ? h('span', { class: 'c-life c-undecided', title: `표현군 · ${r.familyRead?.quote ? `“${r.familyRead.quote.quote}”` : '원문 줄 없음'} · 모양은 기록된 안쪽(단계·반복·묶음)으로만 정함` }, t.undecided) : null,
         extra.filed ? h('span', { class: 'c-filed', title: `원문 분류 · 기록이 이 부분을 「${extra.filed}」 묶음 아래에만 두었다 (실행 위치의 근거가 아님)` }, `원문 분류: ${extra.filed}`) : null),
       // The short status (5.4) on a line of its own, read only at 개요 (the bottom line says it at 중간 and 가까이).
-      life ? null : h('span', { class: 'c-short', title: ops.tip }, ops.short),
+      life ? null : h('span', { class: `c-short${s ? '' : ' ops-none'}`, title: ops.tip }, ops.short),
       h('span', { class: 'plan-note' })),
     loopTab, extra.toggle);
   // The kind's one defining blank reads last (it never shows below 가까이, so the rows above it keep their places when it hides).
@@ -1326,7 +1326,9 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const signs = t.signs ? signTabsEl(o, p, r) : null;
   const open = !kids && words.length && words[0] !== '내부 미상'
     ? h('button', { type: 'button', class: 'entry-open', title: `동작 열기 · ${words.join(' · ')}\n제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)`, 'aria-label': `${p.name} 내부 보기`, onclick: () => openAction(p.id) }, '내부 보기') : null;
-  const bottom = h('div', { class: 'c-bottom' }, h('span', { class: 'c-ops', title: ops.tip }, ops.text),
+  // Hierarchy pass (spec forms v1 §4.1, override 10): a part with no operations record draws no footer word (it was the map's most
+  // repeated mark); the word stays for screen readers and in the tip, the reading pane says it, and the map title counts such parts.
+  const bottom = h('div', { class: 'c-bottom' }, s ? h('span', { class: 'c-ops', title: ops.tip }, ops.text) : h('span', { class: 'c-ops ops-none', title: ops.tip }, h('span', { class: 'sr-only' }, ops.text)),
     ev ? h('span', { class: `ev ev-${ev}`, title: `운영 한 줄의 근거 · 기록 작성자의 꼬리표 (${EVIDENCE_HINT[ev]}) · 앱의 판정 아님` }, EVIDENCE_LABEL[ev]) : null,
     h('span', { class: 'c-entry' }, extra.links, extra.enter, open));
   return h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${kids ? ' has-kids' : ''} ${extra.cls}`, style: `--nl:${nl}`, 'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${hs.signs},${extra.boxH},${life ? 0 : 1},${c.kind === 'values' ? c.rows.length : 0},${t.rows.some(x => x.blank) ? 1 : 0},${t.rows[0]?.members ? 1 : 0}`,
@@ -2070,7 +2072,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // The basis line reads under the purpose; with no purpose the reading's sentence stands in its place, and the basis under it.
   // A calm head (map design v3 9): the summary (two lines at most, with its way to more), one meta line, one row of chips (the main
   // flow, the rules, the since filter, the state counts); a chosen scenario's line under it.
-  const chips = [flowStrip(o), rulesStrip(o), sinceStrip(o), stateStrip(o)].filter((x): x is HTMLElement => !!x);
+  const chips = [flowStrip(o), rulesStrip(o), sinceStrip(o), stateStrip(o), opsNoneChip(o)].filter((x): x is HTMLElement => !!x);
   const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
     sp ? null : understoodLine(o),
@@ -3471,7 +3473,10 @@ function kindLine(c: PaneCtx): HTMLElement {
         s.when ? null : h('small', { class: 'lens-ops-at', title: fullTime(s.at) }, ` · 정리 ${ago(s.at)}`)),
       fnMarks(c, ['state'], '운영 한 줄', false));
   }
-  const lad = ladderLine(c.o.view, c.part); if (kind) lad.prepend(kind, ...(typeMark ? [typeMark] : [sep()])); return lad;
+  const lad = ladderLine(c.o.view, c.part); if (kind) lad.prepend(kind, ...(typeMark ? [typeMark] : [sep()]));
+  // Override 10: the card no longer draws it, so the pane says it (a part the records speak of, with no operations state).
+  if (u) lad.append(sep(), h('span', { class: 'lens-ops none', title: '운영 기록 없음 · 기록이 이 부분의 운영 상태를 말하지 않았다 (멈춤이라는 뜻이 아님)' }, '운영 기록 없음'));
+  return lad;
 }
 function paneHead(c: PaneCtx, tools: HTMLElement): HTMLElement {
   const { o, part } = c, path = partPath(o.view, part.id).slice(0, -1), w = c.wide;
@@ -5200,6 +5205,13 @@ function flowStrip(o: Opened): HTMLElement | null {
  * state of the whole map in one line over its structure. Pointing at a count lights those parts; the others step back. A click
  * holds that until the next click or Escape. */
 let stateHold: string | null = null;
+/** The map title's 「운영 기록 없는 부분 n」 (spec forms v1 §4.1): the drawn typed cards whose records give no operations state (their
+ * footers no longer repeat it); the names in the tip. */
+function opsNoneChip(o: Opened): HTMLElement | null {
+  const none = [...lay.boxes.values()].filter(b => b.kind === 'node').map(b => partOf(o, b.id)).filter((p): p is PartView => !!p && !!p.reading && !p.reading.stateRead);
+  return none.length ? h('span', { class: 'map-ops-none', title: `운영 기록 없음 · 기록이 운영 상태를 말하지 않은 부분 (멈춤이라는 뜻이 아님)
+${none.map(p => p.name).join(' · ')}` }, `운영 기록 없는 부분 ${none.length}`) : null;
+}
 function stateStrip(o: Opened): HTMLElement | null {
   const cards = [...lay.boxes.values()].filter(b => b.kind === 'node').map(b => partOf(o, b.id)).filter((p): p is PartView => !!p);
   if (cards.length < 2) return null;

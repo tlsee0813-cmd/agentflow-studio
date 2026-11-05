@@ -3081,3 +3081,17 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .vf-glyph.g-line::before { content: ''; position: absolute; left: 5px; top: 0; width: 2px; height: 14px; border-radius: 1px; background: currentColor; }
 .vf-glyph.g-line::after { content: ''; position: absolute; left: 2px; top: 4px; width: 8px; height: 8px; box-sizing: border-box; border: 2px solid currentColor; border-radius: 50%; background: var(--surface); }
 .vf-glyph.g-states::before { content: ''; position: absolute; left: 0; top: 1px; width: 12px; height: 12px; box-sizing: border-box; border: 2px solid currentColor; border-radius: 50%; border-right-color: transparent; transform: rotate(-30deg); }
+
+/* ---------- Hierarchy pass (spec forms v1 §4, overrides 8 and 10): visual only, the DOM keeps every fact ----------
+   1. No footer word for a part with no operations record (the pane says it; the map title counts it). 2. Lines darker: --edge about
+   3:1 on the canvas (was 1.8:1), a folded summary band in step (dash patterns kept: they mean channel). 4. Family as mass when far:
+   the card face takes the family's tile colour and a 2px family edge (never a status, never on a line). The spine stays as it is. */
+:root { --edge: #858e9b; --edge-soft: #9ea6b1; }
+.edge.agg.near .edge-line { stroke: #7a8390; }
+.node.card .c-short.ops-none { display: none !important; }
+.c-ops.ops-none { min-width: 0; }
+.map-ops-none { font-size: 12px; line-height: 18px; color: var(--text-3); white-space: nowrap; cursor: help; }
+.map-ops-none::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border: 1.5px dashed var(--text-4); border-radius: 50%; vertical-align: 0; }
+.lens-ops.none { color: var(--text-3); }
+.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp) { background: var(--fam-bg); }
+.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp):not(.selected):not(:focus-visible) { outline: 2px solid var(--fam-edge); outline-offset: -2px; }
