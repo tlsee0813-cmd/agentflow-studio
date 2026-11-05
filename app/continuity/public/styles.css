@@ -3003,6 +3003,20 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .sl-route.f-process, .dv-states.f-process { --form-ink: var(--fam-process-ink); --form-soft: var(--fam-process-bg); }
 .sl-route.f-store, .dv-states.f-store { --form-ink: var(--fam-store-ink); --form-soft: var(--fam-store-bg); }
 .sl-route.f-trigger, .dv-states.f-trigger { --form-ink: var(--fam-trigger-ink); --form-soft: var(--fam-trigger-bg); }
+/* The ink an entry pill writes on the family ink: the page surface on the light inks, the family strip on the dark theme's light inks. */
+.sl-route, .dv-states { --form-on-ink: var(--surface); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states) { --sl-loop: #a3a9f2; --sl-loop-soft: #262942; --sl-loop-line: #474d86; --form-on-ink: var(--fam-neutral-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-participant { --sl-loop: #8fcfd5; --sl-loop-soft: #1d2d2f; --sl-loop-line: #3f6b70; --form-on-ink: var(--fam-participant-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-process { --form-on-ink: var(--fam-process-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-store { --form-on-ink: var(--fam-store-strip); }
+:root[data-theme="dark"] :is(.sl-route, .dv-states).f-trigger { --form-on-ink: var(--fam-trigger-strip); }
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states) { --sl-loop: #a3a9f2; --sl-loop-soft: #262942; --sl-loop-line: #474d86; --form-on-ink: var(--fam-neutral-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-participant { --sl-loop: #8fcfd5; --sl-loop-soft: #1d2d2f; --sl-loop-line: #3f6b70; --form-on-ink: var(--fam-participant-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-process { --form-on-ink: var(--fam-process-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-store { --form-on-ink: var(--fam-store-strip); }
+  :root[data-theme="auto"]:not([data-theme="light"]) :is(.sl-route, .dv-states).f-trigger { --form-on-ink: var(--fam-trigger-strip); }
+}
 .sl-caption, .vg-caption { margin: 0 0 6px; display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 17px; color: var(--text-4); cursor: help; }
 .sl-caption::before { content: ''; flex: none; width: 16px; height: 4px; border-radius: 2px; background: var(--form-ink); }
 .vg-caption::before { content: ''; flex: none; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--form-ink); box-sizing: border-box; }
@@ -3012,6 +3026,13 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .sl-seg { fill: none; stroke: var(--form-ink); stroke-width: 6; stroke-linecap: round; }
 .sl-seg.cond { stroke-dasharray: .1 11; }
 .sl-seg.open { stroke-linecap: butt; }
+/* A segment over C-STEP rows the stored steps skip: thinner and broken; its tag says how many (never 「다음 행」). */
+.sl-seg.skip { stroke-width: 4; stroke-dasharray: 2 8; stroke-linecap: round; }
+.sl-tag.k-skip { line-height: 16px; padding: 0 8px; border: 1px dotted var(--text-4); background: var(--surface); color: var(--text-3); font-size: 11.5px; }
+/* A C-STEP row the program kept as a step (the reply left it out): its dot dashed, its name in the program's quieter tone. */
+.sl-btn.program .sl-dot { border-style: dashed; }
+.sl-btn.program .dv-step-name { color: var(--text-2); font-weight: 560; }
+.sl-line.sl-if.blank { color: var(--text-4); }
 .sl-fade-a { stop-color: var(--form-ink); stop-opacity: 1; } .sl-fade-b { stop-color: var(--form-ink); stop-opacity: 0; }
 .sl-bracket { fill: none; stroke: var(--sl-loop); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .sl-bracket.d2 { opacity: .8; } .sl-bracket.d3, .sl-bracket.d4 { opacity: .65; }
@@ -3025,7 +3046,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .sl-tag.k-gap { line-height: 18px; padding: 0 4px; color: var(--text-4); font-size: 11.5px; }
 .sl-tag.k-gap::before { content: "\22EF  "; color: var(--form-ink); }
 .sl-tag.k-jump { line-height: 18px; border: 1px dashed var(--text-4); background: var(--surface); color: var(--text-2); }
-.sl-tag.sl-term { line-height: 24px; padding: 0 12px; border-radius: 6px; background: var(--form-ink); color: var(--surface); font-size: 12.5px; font-weight: 620; letter-spacing: .01em; box-shadow: var(--shadow-sm); }
+.sl-tag.sl-term { line-height: 24px; padding: 0 12px; border-radius: 6px; background: var(--form-ink); color: var(--form-on-ink); font-size: 12.5px; font-weight: 620; letter-spacing: .01em; box-shadow: var(--shadow-sm); }
 .sl-st { position: absolute; display: flex; flex-direction: column; }
 .sl-st > .dv-step.sl-btn { position: relative; flex: none; width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 0; padding: 0 0 0 32px; border: 0; border-radius: 6px; background: none; box-shadow: none; font-size: 13px; line-height: 20px; text-align: left; }
 .sl-st > .dv-step.sl-btn:hover, .sl-st > .dv-step.sl-btn.on { border: 0; box-shadow: none; }
@@ -3087,11 +3108,11 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    3:1 on the canvas (was 1.8:1), a folded summary band in step (dash patterns kept: they mean channel). 4. Family as mass when far:
    the card face takes the family's tile colour and a 2px family edge (never a status, never on a line). The spine stays as it is. */
 :root { --edge: #858e9b; --edge-soft: #9ea6b1; }
-.edge.agg.near .edge-line { stroke: #7a8390; }
+.edge.agg.near:not(.on):not(.lit) .edge-line { stroke: #7a8390; }
 .node.card .c-short.ops-none { display: none !important; }
 .c-ops.ops-none { min-width: 0; }
 .map-ops-none { font-size: 12px; line-height: 18px; color: var(--text-3); white-space: nowrap; cursor: help; }
 .map-ops-none::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border: 1.5px dashed var(--text-4); border-radius: 50%; vertical-align: 0; }
 .lens-ops.none { color: var(--text-3); }
 .space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp) { background: var(--fam-bg); }
-.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp):not(.selected):not(:focus-visible) { outline: 2px solid var(--fam-edge); outline-offset: -2px; }
+.space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp):not(.selected):not(:focus-visible):not(.plan-impact):not(.lit) { outline: 2px solid var(--fam-edge); outline-offset: -2px; }

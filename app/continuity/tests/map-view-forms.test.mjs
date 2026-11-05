@@ -10,7 +10,11 @@ import {
   LINE_TARGET, LINE_RULE, STATE_FEW, FORK_TAG, FORK_OPEN, COND_TAG, APART_SPLIT, APART_NONE, APART_OUT, NO_EVENT, STATE_TERMINAL, STATE_CAPTION, LINE_CAPTION
 } from '../dist/public/client/view-forms.js';
 
-const step = (ref, name, extra = {}) => formStep({ recordRef: ref, name, does: extra.does ?? null, program: extra.program, alt: extra.alt ?? null, branch: extra.branch ?? [], loopIds: extra.loopIds ?? [], when: extra.cell ?? null });
+// A cell given without its clauses is read as the record reading reads it: 「when → to/outcome」, or the whole clause as the outcome.
+const clauses = cell => cell.split(/\s*;\s*/).filter(Boolean).map(c => { const a = c.search(/→|->/), when = a > 0 ? c.slice(0, a).trim() : null, after = a >= 0 ? c.slice(a).replace(/^(?:→|->)\s*/, '') : c;
+  const to = [...after.matchAll(/(?:(B\d{1,3})\s*:\s*)?S(\d{1,3}[a-z]?)/g)].map(m => `${m[1] ?? 'B03'}:S${m[2]}`), outcome = after.replace(/(?:B\d{1,3}\s*:\s*)?S\d{1,3}[a-z]?/g, ' ').trim();
+  return { when, to, max: null, outcome: outcome || null }; });
+const step = (ref, name, extra = {}) => formStep({ recordRef: ref, name, does: extra.does ?? null, program: extra.program, alt: extra.alt ?? null, branch: extra.branch ?? (extra.cell ? clauses(extra.cell) : []), loopIds: extra.loopIds ?? [], when: extra.cell ?? null });
 const order = (n, owner = 'B03') => Array.from({ length: n }, (_, i) => step(`${owner}:S${String(i + 1).padStart(2, '0')}`, `주문 단계 ${i + 1}`));
 const loop = (ref, body, extra = {}) => formLoop({ recordRef: ref, parentRef: extra.parentRef ?? null, unit: extra.unit ?? null, count: extra.count ?? null, stop: extra.stop ?? null, body, bodyState: extra.bodyState ?? 'linked' });
 const store = () => { const m = new Map(); return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, String(v)), m }; };

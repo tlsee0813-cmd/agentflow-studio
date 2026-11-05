@@ -5,8 +5,11 @@
  * Geometry asserts facts, so a form is offered only when the record proves what its shape implies:
  * - the line only for at least three recorded steps whose C-STEP IDs are of one owner, unique and ascending in row order, with every
  *   branch naming a step of that owner that exists (never reordered, never repaired);
- * - program-made steps are not stations (not record rows); a loop is a bracket only when its whole body is on the line and
- *   contiguous; a fork never joins (the record does not say where the branches meet); an exit with no condition breaks the line;
+ * - a program-made step is a station only when it is a C-STEP row (it carries the row's ID: the program kept a row the reply left out),
+ *   marked the program's; one with no row ID is not a station; C-STEP numbers skipped between two stations (rows not stored) are
+ *   said on the segment, never drawn as 「다음 행」;
+ * - a loop is a bracket only when its whole body (with the bodies of the loops nested in it) is on the line and contiguous; a fork
+ *   never joins (the record does not say where the branches meet); an exit with no condition breaks the line;
  * - the state graph places states on a circle in first-appearance order (no layer, no rank, no first-state emphasis), draws only
  *   recorded transitions, and marks a start only for a state the record calls initial.
  * Pure and deterministic: no DOM, unit-free numbers the detail view positions its own elements by. */
@@ -56,10 +59,15 @@ export const LINE_DUP = '단계 ID가 겹침';
 export const LINE_ORDER = '단계 ID가 행 순서대로 오르지 않음';
 export const LINE_TARGET = '분기가 없는 단계를 가리킴';
 export interface Offer { ok: boolean; reason: string }
-/** Whether the line may be drawn for these steps (owner: the part's own C-PART ID, when known). Only recorded (non-program) steps
- * count; three is a display policy, not a meaning test. Any failed consistency check means no line and says which. */
+/** A step the line draws as a station: a recorded step, or a program step that is a C-STEP row (it carries the row's ID). */
+export const onLine = (s: FormStep) => !s.program || !!parseStepRef(s.ref);
+/** A C-STEP number skipped between two consecutive station numbers: a row the stored steps do not hold (not a missing row). */
+const inGap = (p: StepRef, ns: readonly number[]) => !ns.includes(p.n) && ns.some((n, i) => i > 0 && ns[i - 1]! < p.n && p.n < n);
+/** Whether the line may be drawn for these steps (owner: the part's own C-PART ID, when known). Only stations count (recorded steps,
+ * and program steps that are C-STEP rows); three is a display policy, not a meaning test. Any failed consistency check means no line
+ * and says which. A branch to a number skipped between two stations names a row not stored, not a missing one. */
 export function lineOffer(steps: readonly FormStep[], owner: string | null = null): Offer {
-  const rec = steps.filter(s => !s.program);
+  const rec = steps.filter(onLine);
   if (rec.length < 3) return { ok: false, reason: LINE_FEW };
   const parsed = rec.map(s => parseStepRef(s.ref));
   if (parsed.some(p => !p)) return { ok: false, reason: LINE_OLD };
@@ -71,10 +79,10 @@ export function lineOffer(steps: readonly FormStep[], owner: string | null = nul
     const a = ps[i - 1]!, b = ps[i]!;
     if (b.n < a.n || (b.n === a.n && (!a.sfx || !b.sfx))) return { ok: false, reason: `${LINE_ORDER} · ${rec[i - 1]!.ref} 다음 ${rec[i]!.ref}` };
   }
-  const o = ps[0]!.owner, groups = new Set(ps.filter(p => p.sfx).map(p => `${p.owner}:${p.n}`));
+  const o = ps[0]!.owner, groups = new Set(ps.filter(p => p.sfx).map(p => `${p.owner}:${p.n}`)), ns = ps.map(p => p.n);
   for (const s of rec) for (const b of s.branch) for (const t of b.to) {
     const p = parseStepRef(t); if (!p || p.owner !== o) continue;
-    if (!seen.has(refKey(p)) && !(p.sfx === '' && groups.has(`${p.owner}:${p.n}`))) return { ok: false, reason: `${LINE_TARGET} · ${s.ref} → ${t}` };
+    if (!seen.has(refKey(p)) && !(p.sfx === '' && groups.has(`${p.owner}:${p.n}`)) && !inGap(p, ns)) return { ok: false, reason: `${LINE_TARGET} · ${s.ref} → ${t}` };
   }
   return { ok: true, reason: LINE_RULE };
 }
@@ -88,6 +96,11 @@ export const FORK_TAG = '조건에 따라 하나';
 export const FORK_OPEN = '갈래 뒤 합류는 기록에 없음';
 export const COND_TAG = '조건에 따라';
 export const APART_OUT = '몸통 단계가 이 노선 밖', APART_SPLIT = '몸통이 떨어져 있음', APART_NONE = '몸통 미기록';
+/** A segment over C-STEP numbers the stored steps skip (the rows are in the record, not in the stored steps). */
+export const skipWord = (n: number) => `사이 행 ${n}개 없음`;
+export const UNSTORED = '저장 안 된 행';
+/** An alternative whose 조건·분기 cell gives no condition (only a jump, or nothing). */
+export const ALT_NO_COND = '조건 미기재';
 export const ENTRY_WORD: Readonly<Record<string, string>> = { command: '명령', call: '호출', request: '요청', message: '메시지·사건', schedule: '일정', resident: '상주', script: '스크립트' };
 
 /** A text's width at a font size (px), from its characters (Hangul and CJK a full em, Latin about half): an upper bound the UI
@@ -102,18 +115,23 @@ export interface Pill extends Rect { text: string; tip: string }
 export type ExitKind = 'out' | 'exit' | 'end' | 'note';
 export interface StationExit { kind: ExitKind; text: string; tip: string }
 export interface Station { index: number; row: number; col: number; kind: 'recorded'; ref: string; name: string;
+  /** a C-STEP row the program kept as a step (the reply left it out): drawn, marked the program's, its name only */
+  program: boolean;
   /** the dot's centre (on the line) and the station block (the button: from the dot's left edge to its label's right end) */
   x: number; y: number; top: number; h: number; left: number; right: number;
   /** content lines below the name: the alternative's condition cell, the 조건·분기 clauses drawn nowhere else, the exits */
-  cond: string | null; notes: string[]; exits: StationExit[]; extra: number; loops: string[] }
-export interface Segment { x1: number; y1: number; x2: number; y2: number; kind: 'solid' | 'cond'; curve?: boolean; open?: boolean; tail?: boolean; tip: string }
+  cond: string | null; condBlank: boolean; notes: string[]; exits: StationExit[]; extra: number; loops: string[] }
+/** skip: C-STEP rows between the two stations that the stored steps do not hold (said on the segment, which is then not 「다음 행」). */
+export interface Segment { x1: number; y1: number; x2: number; y2: number; kind: 'solid' | 'cond'; curve?: boolean; open?: boolean; tail?: boolean; skip?: number; tip: string }
 export interface Bracket { ref: string; x: number; xEnd: number; y1: number; y2: number; depth: number; label: string; tag: Pill; tip: string }
 export interface Arc { lane: number; x: number; xFrom: number; y1: number; y2: number; back: boolean; from: number; to: number; label: string; pill: Pill; tip: string }
 export interface Fork { row: number; group: string; stations: number[]; open: true; tag: Pill; gap: Pill | null }
 export interface LoopApart { ref: string; label: string; why: string; text: string; parts: string[] }
 export interface Jump { from: number; to: number; label: string; back: boolean }
 export interface StepLine { width: number; height: number; x0: number; stations: Station[]; segments: Segment[]; brackets: Bracket[]; arcs: Arc[];
-  jumps: Jump[]; forks: Fork[]; tags: Pill[]; terminals: Pill[]; loopsApart: LoopApart[]; program: number; crossings: number }
+  jumps: Jump[]; forks: Fork[]; tags: Pill[]; terminals: Pill[]; loopsApart: LoopApart[];
+  /** program: program-made steps that are no station (no C-STEP row); skipped: C-STEP rows skipped between stations */
+  program: number; skipped: number; crossings: number }
 export interface LineOptions {
   /** the width the view has for the line (it grows past it only for what cannot be narrower; the view scrolls then) */
   width?: number;
@@ -138,7 +156,7 @@ const clauseText = (b: FormBranch) => [b.when, b.to.length || b.outcome || b.max
 /** The line for one part's steps (call it only when lineOffer passes: it never reorders and never repairs). loops: every C-LOOP row
  * that may touch the line (the part's own, and any its steps name). */
 export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[], entries: readonly FormEntry[], opts: LineOptions = {}): StepLine {
-  const rec = steps.map((s, index) => ({ s, index })).filter(x => !x.s.program);
+  const rec = steps.map((s, index) => ({ s, index })).filter(x => onLine(x.s));
   const owner = ownerOf(opts.owner) ?? parseStepRef(rec[0]?.s.ref)?.owner ?? null;
   // Rows: one per step; consecutive alternatives of one group (S04a, S04b) share a row, side by side.
   const rows: { items: typeof rec; group: string | null }[] = [];
@@ -148,29 +166,34 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
   }
   const rowOfIndex = new Map<number, number>(), keyRow = new Map<string, number>(), keyIndex = new Map<string, number>(), groupRow = new Map<string, number>();
   rows.forEach((r, ri) => r.items.forEach(x => { rowOfIndex.set(x.index, ri); const p = parseStepRef(x.s.ref); if (p) { keyRow.set(refKey(p), ri); keyIndex.set(refKey(p), x.index); if (p.sfx) groupRow.set(`${p.owner}:${p.n}`, ri); } }));
-  const resolve = (t: string): { row: number; index: number } | 'outside' | null => {
+  const nums = rec.map(x => parseStepRef(x.s.ref)?.n ?? 0);
+  const resolve = (t: string): { row: number; index: number } | 'outside' | 'unstored' | null => {
     const p = parseStepRef(t); if (!p) return null;
     if (p.owner !== owner) return 'outside';
     const k = refKey(p); if (keyRow.has(k)) return { row: keyRow.get(k)!, index: keyIndex.get(k)! };
     const g = groupRow.get(`${p.owner}:${p.n}`); if (g !== undefined && !p.sfx) return { row: g, index: rows[g]!.items[0]!.index };
-    return null;
+    return inGap(p, nums) ? 'unstored' : null;
   };
   const isFork = (ri: number) => rows[ri]!.items.length > 1;
 
   // Clauses read per station: jumps on the line, exits beside it, and what they do to the segment after the station.
-  type Read = { jumps: { to: number; toIndex: number; label: string; tip: string; uncond: boolean }[]; exits: StationExit[]; notes: string[]; cond: string[]; broken: boolean };
+  // alt: an alternative's own condition, from its clauses with a when (their when) or a plain clause with no arrow and no step (the
+  // cell is the 조건·분기 column); an arrow-led or jump-only clause is a destination, left to the exits and arcs.
+  type Read = { jumps: { to: number; toIndex: number; label: string; tip: string; uncond: boolean }[]; exits: StationExit[]; notes: string[]; cond: string[]; broken: boolean; alt: string[] };
   const reads = new Map<number, Read>();
   for (const { s, index } of rec) {
-    const r: Read = { jumps: [], exits: [], notes: [], cond: [], broken: false }, ri = rowOfIndex.get(index)!;
+    const r: Read = { jumps: [], exits: [], notes: [], cond: [], broken: false, alt: [] }, ri = rowOfIndex.get(index)!;
     const cells = (s.cell ?? '').trim().split(SPLIT).filter(Boolean);
     s.branch.forEach((b, k) => {
       const tip = `조건·분기 칸 · ${cells[k] ?? clauseText(b)}`, arrowLed = !b.when && /^\s*(?:→|->)/.test(cells[k] ?? '');
       const tail = `${b.max ? ` · ${b.max}` : ''}${b.outcome ? ` · ${b.outcome}` : ''}`;
-      const inside = b.to.map(t => ({ t, at: resolve(t) })), on = inside.filter(x => x.at && x.at !== 'outside') as { t: string; at: { row: number; index: number } }[];
-      const out = inside.filter(x => x.at === 'outside');
+      const inside = b.to.map(t => ({ t, at: resolve(t) })), on = inside.filter(x => !!x.at && typeof x.at === 'object') as { t: string; at: { row: number; index: number } }[];
+      const out = inside.filter(x => x.at === 'outside'), unstored = inside.filter(x => x.at === 'unstored');
+      if (s.alt) { if (b.when) r.alt.push(b.when); else if (!b.to.length && b.outcome && !arrowLed) r.alt.push(cells[k] ?? b.outcome); }
       const next = on.length > 0 && on.every(x => x.at.row === ri + 1);
       for (const x of on) if (!next) r.jumps.push({ to: x.at.row, toIndex: x.at.index, label: `${b.when ? `${b.when} ` : ''}→ ${shortRef(x.t)}${tail}`, tip, uncond: !b.when });
       for (const x of out) r.exits.push({ kind: 'out', text: `${b.when ? `${b.when} ` : ''}→ ${x.t}${tail}`, tip: `${tip}\n이 노선 밖의 단계로 · ${x.t}` });
+      for (const x of unstored) r.exits.push({ kind: 'out', text: `${b.when ? `${b.when} ` : ''}→ ${shortRef(x.t)} · ${UNSTORED}${tail}`, tip: `${tip}\n${x.t} · 기록의 C-STEP 행 번호이나 저장된 단계에 없음 · 선으로 잇지 않음` });
       if (!b.to.length && b.outcome) {
         if (b.when) r.exits.push({ kind: 'exit', text: `${b.when} → ${b.outcome}${b.max ? ` · ${b.max}` : ''}`, tip });
         else if (arrowLed) r.exits.push({ kind: 'end', text: `→ ${b.outcome}`, tip: `${tip}\n조건 없이 이 단계에서 끝나거나 거부함 (기록의 말)` });
@@ -178,23 +201,27 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
       }
       // A clause with a condition (or one written without an arrow: the cell is the 조건·분기 column) makes the next step conditional;
       // one with no condition that jumps or ends breaks the line after the station.
-      const uncond = !b.when && ((on.length > 0 && !next) || out.length > 0 || (!b.to.length && !!b.outcome && arrowLed));
+      const uncond = !b.when && ((on.length > 0 && !next) || out.length > 0 || unstored.length > 0 || (!b.to.length && !!b.outcome && arrowLed));
       if (uncond) r.broken = true; else if (b.when || (!b.to.length && b.outcome)) r.cond.push(tip);
     });
     reads.set(index, r);
   }
 
   // Loops: a bracket only for a whole, contiguous body on this line; any other loop the line touches is listed apart.
-  const stationKeys = new Set(keyRow.keys());
-  const touches = (l: FormLoop) => ownerOf(l.ref) === owner || rec.some(x => x.s.loopIds.includes(l.ref)) || l.body.some(t => { const p = parseStepRef(t); return !!p && stationKeys.has(refKey(p)); });
+  // A loop's whole body: its body list, the steps naming it (here and on other parts) and, transitively, the whole bodies of the loops
+  // whose parentRef chain reaches it (a v5 step names only its innermost loop, so an outer loop's own rows leave its inner loops out).
+  const stationKeys = new Set(keyRow.keys()), named = [...rec.map(x => ({ ref: x.s.ref, loopIds: x.s.loopIds })), ...(opts.elsewhere ?? [])];
+  const ownBody = (l: FormLoop) => { const b = new Set<string>(l.body); for (const e of named) if (e.ref && e.loopIds.includes(l.ref)) b.add(e.ref); return b; };
+  const below = (ref: string): string[] => { const out: string[] = [], todo = [ref];
+    while (todo.length) { const r0 = todo.pop()!; for (const q of loops) if (q.parentRef === r0 && q.ref !== ref && !out.includes(q.ref)) { out.push(q.ref); todo.push(q.ref); } } return out; };
+  const wholeBody = (l: FormLoop) => { const b = ownBody(l); for (const c of below(l.ref)) { const q = loops.find(x => x.ref === c); if (q) for (const t of ownBody(q)) b.add(t); } return b; };
+  const touches = (l: FormLoop, body: Set<string>) => ownerOf(l.ref) === owner || [...body].some(t => { const p = parseStepRef(t); return !!p && stationKeys.has(refKey(p)); });
   const cands: { l: FormLoop; top: number; bottom: number }[] = [], apart: LoopApart[] = [];
   const seenLoop = new Set<string>();
   for (const l of loops) {
-    if (seenLoop.has(l.ref) || !touches(l)) continue; seenLoop.add(l.ref);
+    if (seenLoop.has(l.ref)) continue;
+    const body = wholeBody(l); if (!touches(l, body)) continue; seenLoop.add(l.ref);
     const label = loopLabel(l);
-    const body = new Set<string>(l.body);
-    for (const x of rec) if (x.s.loopIds.includes(l.ref) && x.s.ref) body.add(x.s.ref);
-    for (const e of opts.elsewhere ?? []) if (e.ref && e.loopIds.includes(l.ref)) body.add(e.ref);
     if (!body.size) { apart.push({ ref: l.ref, label, why: APART_NONE, text: `${l.ref} 반복 · ${APART_NONE}${l.bodyState === 'unexpanded' ? ' (몸통 단계 펼치지 않음)' : ''}`, parts: [] }); continue; }
     const others = [...new Set([...body].map(t => ownerOf(t)).filter((o): o is string => !!o && o !== owner))];
     const rowsIn = new Set<number>(); let missing = false;
@@ -211,8 +238,9 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     if (!whole) { apart.push({ ref: l.ref, label, why: APART_SPLIT, text: `${l.ref} 반복의 일부 · ${APART_SPLIT}`, parts: [] }); continue; }
     cands.push({ l, top, bottom });
   }
-  // Depth: inner (shorter) loops first, a child before its parent on a tie; each sits one gutter left of anything it overlaps.
-  cands.sort((a, b) => (a.bottom - a.top) - (b.bottom - b.top) || (a.l.parentRef === b.l.ref ? -1 : b.l.parentRef === a.l.ref ? 1 : 0) || a.top - b.top || a.l.ref.localeCompare(b.l.ref));
+  // Depth: inner (shorter) loops first, a loop nested in another (by its parentRef chain) before it on a tie; each sits one gutter
+  // left of anything it overlaps (an outer loop's whole body holds its inner loops' rows, so it always overlaps them).
+  cands.sort((a, b) => (a.bottom - a.top) - (b.bottom - b.top) || (below(b.l.ref).includes(a.l.ref) ? -1 : below(a.l.ref).includes(b.l.ref) ? 1 : 0) || a.top - b.top || a.l.ref.localeCompare(b.l.ref));
   const depthOf = new Map<string, number>();
   for (const c of cands) {
     let d = 1; for (const o of cands) { const od = depthOf.get(o.l.ref); if (od !== undefined && o.top <= c.bottom && c.top <= o.bottom) d = Math.max(d, od + 1); }
@@ -259,27 +287,28 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     const opening = cands.filter(c => c.top === ri).sort((a, b) => depthOf.get(b.l.ref)! - depthOf.get(a.l.ref)!);
     for (const c of opening) {
       const d = depthOf.get(c.l.ref)!, label = loopLabel(c.l), tx = x0 + 18;
-      const tag: Pill = { x: tx, y: y + 3, w: tagRight(label, tx), h: TAG_H - 6, text: label, tip: `반복 ${c.l.ref} · ${label}\n몸통 ${rows.slice(c.top, c.bottom + 1).flatMap(q => q.items.map(x => x.s.ref)).join(', ')} · 기록의 C-LOOP 행과 단계의 소속 반복${c.l.parentRef ? `\n바깥 반복 ${c.l.parentRef}` : ''}\n괄호는 몸통일 뿐 · 실행 화살표가 아님` };
+      const kids = cands.filter(q => q !== c && below(c.l.ref).includes(q.l.ref)).map(q => q.l.ref);
+      const tag: Pill = { x: tx, y: y + 3, w: tagRight(label, tx), h: TAG_H - 6, text: label, tip: `반복 ${c.l.ref} · ${label}\n몸통 ${rows.slice(c.top, c.bottom + 1).flatMap(q => q.items.map(x => x.s.ref)).join(', ')} · 기록의 C-LOOP 행과 단계의 소속 반복${kids.length ? ` · 안쪽 반복 ${kids.join(', ')}의 몸통 포함` : ''}${c.l.parentRef ? `\n바깥 반복 ${c.l.parentRef}` : ''}\n괄호는 몸통일 뿐 · 실행 화살표가 아님` };
       brackets.push({ ref: c.l.ref, x: x0 - 22 - (d - 1) * LOOP_GUTTER, xEnd: x0 - 8, y1: y + TAG_H / 2, y2: 0, depth: d, label, tag, tip: tag.tip });
       tags.push(tag); y += TAG_H;
     }
     let forkTag: Pill | null = null;
     if (isFork(ri)) {
-      const whens = r.items.map(x => x.s.cell?.trim()).filter((c): c is string => !!c);
+      const whens = r.items.map(x => reads.get(x.index)!.alt.join(' · '));
       forkTag = { x: x0 + 18, y: y + 3, w: tagRight(FORK_TAG, x0 + 18), h: TAG_H - 6, text: FORK_TAG,
-        tip: `갈래 ${r.group} · ${r.items.map(x => x.s.ref).join(' · ')} 중 하나 (기록의 C-STEP 갈래 ID)${whens.length ? `\n${r.items.map(x => `${shortRef(x.s.ref!)}: ${x.s.cell?.trim() || '조건 미기재'}`).join('\n')}` : '\n갈래의 조건 칸은 기록에 없음'}` };
+        tip: `갈래 ${r.group} · ${r.items.map(x => x.s.ref).join(' · ')} 중 하나 (기록의 C-STEP 갈래 ID)${whens.some(Boolean) ? `\n${r.items.map((x, k) => `${shortRef(x.s.ref!)}: ${whens[k] || ALT_NO_COND}`).join('\n')}` : '\n갈래를 고르는 조건은 기록에 없음'}` };
       tags.push(forkTag); bandTop.set(ri, y); y += TAG_H + SPLIT_H;
     }
     rowTop[ri] = y; rowY[ri] = y + NAME_H / 2;
     let bottom = y;
     r.items.forEach((x, c) => {
-      const rd = reads.get(x.index)!, cond = x.s.alt && x.s.cell?.trim() ? x.s.cell.trim() : null;
+      const rd = reads.get(x.index)!, cond = x.s.alt ? rd.alt.join(' · ') || ALT_NO_COND : null;
       const extra = Math.max(0, Math.round(opts.extra?.[x.index] ?? 0));
-      const lines = (x.s.does ? 1 : 0) + (cond ? 1 : 0) + (rd.notes.length ? 1 : 0) + (rd.exits.length ? 1 : 0) + extra;
+      const lines = (x.s.does && !x.s.program ? 1 : 0) + (cond ? 1 : 0) + (rd.notes.length ? 1 : 0) + (rd.exits.length ? 1 : 0) + extra;
       const h = NAME_H + lines * LINE_H, sx = x0 + c * COL_W;
       const right = c < r.items.length - 1 ? sx + COL_W - 30 : labelRight;
-      stations.push({ index: x.index, row: ri, col: c, kind: 'recorded', ref: x.s.ref ?? '', name: x.s.name, x: sx, y: rowY[ri]!, top: y, h, left: sx - DOT_R, right,
-        cond, notes: rd.notes, exits: rd.exits, extra, loops: cands.filter(q => q.top <= ri && ri <= q.bottom).map(q => q.l.ref) });
+      stations.push({ index: x.index, row: ri, col: c, kind: 'recorded', program: x.s.program, ref: x.s.ref ?? '', name: x.s.name, x: sx, y: rowY[ri]!, top: y, h, left: sx - DOT_R, right,
+        cond, condBlank: cond === ALT_NO_COND, notes: rd.notes, exits: rd.exits, extra, loops: cands.filter(q => q.top <= ri && ri <= q.bottom).map(q => q.l.ref) });
       bottom = Math.max(bottom, y + h);
     });
     rowBottom[ri] = bottom;
@@ -294,28 +323,36 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
   // branch ends, a broken segment after an exit with no condition, and the line's plain end.
   const at = (index: number) => stations.find(s => s.index === index)!;
   const stub = (s: Station): Segment => ({ x1: s.x, y1: s.y, x2: s.x, y2: Math.max(s.y + 30, s.top + s.h + 14), kind: 'solid', open: true, tip: '' });
+  // C-STEP numbers skipped after row ri: rows in the record the stored steps do not hold (the bound, or a row read nowhere).
+  const rowN = (ri: number) => parseStepRef(rows[ri]!.items[0]!.s.ref)?.n ?? 0;
+  const skipAfter = (ri: number) => ri < last ? Math.max(0, rowN(ri + 1) - rowN(ri) - 1) : 0;
+  let skipped = 0; for (let ri = 0; ri < last; ri++) skipped += skipAfter(ri);
   for (let ri = 0; ri <= last; ri++) {
     const here = rows[ri]!.items.map(x => at(x.index));
     if (ri === last) {
-      for (const s of here) segments.push(here.length > 1 || reads.get(s.index)!.broken ? { ...stub(s), tip: here.length > 1 ? FORK_OPEN : '조건 없는 출구 · 이 단계 뒤로 잇지 않음' } : { x1: s.x, y1: s.y, x2: s.x, y2: s.top + s.h + 12, kind: 'solid', tail: true, tip: '기록된 마지막 행 · 끝이라는 기록은 아님' });
+      for (const s of here) segments.push(here.length > 1 || reads.get(s.index)!.broken ? { ...stub(s), tip: here.length > 1 ? FORK_OPEN : '조건 없는 출구 · 이 단계 뒤로 잇지 않음' } : { x1: s.x, y1: s.y, x2: s.x, y2: s.top + s.h + 12, kind: 'solid', tail: true, tip: `${skipped ? '저장된' : '기록된'} 마지막 행 · 끝이라는 기록은 아님` });
       continue;
     }
+    const sk = skipAfter(ri);
     if (here.length > 1) {
       for (const s of here) segments.push({ ...stub(s), tip: FORK_OPEN });
-      const f = forks.find(q => q.row === ri)!;
-      f.gap = { x: x0 + 14, y: rowBottom[ri]! + (GAP - 18) / 2, w: tagRight(FORK_OPEN, x0 + 14), h: 18, text: FORK_OPEN, tip: `${FORK_OPEN} · 갈래가 어디서 다시 만나는지 기록이 말하지 않아 잇지 않음` };
+      const f = forks.find(q => q.row === ri)!, text = sk ? `${FORK_OPEN} · ${skipWord(sk)}` : FORK_OPEN;
+      f.gap = { x: x0 + 14, y: rowBottom[ri]! + (GAP - 18) / 2, w: tagRight(text, x0 + 14), h: 18, text, tip: `${FORK_OPEN} · 갈래가 어디서 다시 만나는지 기록이 말하지 않아 잇지 않음${sk ? `\n그 뒤 C-STEP 행 ${sk}개는 저장된 단계에 없음` : ''}` };
       tags.push(f.gap); continue;
     }
     const s = here[0]!, rd = reads.get(s.index)!;
-    if (rd.broken) { segments.push({ ...stub(s), tip: '조건 없는 출구 · 이 단계 뒤로 잇지 않음 (기록의 조건·분기 칸)' }); continue; }
-    const kind = rd.cond.length ? 'cond' : 'solid', tip = rd.cond.length ? `${COND_TAG} · ${s.ref}의 ${rd.cond.join('\n')}` : `${s.ref} 다음 행 · 기록의 행 순서`;
+    if (rd.broken) { segments.push({ ...stub(s), tip: `조건 없는 출구 · 이 단계 뒤로 잇지 않음 (기록의 조건·분기 칸)${sk ? `\n그 뒤 C-STEP 행 ${sk}개는 저장된 단계에 없음` : ''}` }); continue; }
     const nextRow = rows[ri + 1]!.items.map(x => at(x.index));
+    const order = sk ? `${s.ref} 뒤 C-STEP 행 ${sk}개는 저장된 단계에 없음 (기록에는 있음) · 다음 저장된 행 ${nextRow[0]!.ref} · ${skipWord(sk)}` : `${s.ref} 다음 행 · 기록의 행 순서`;
+    const kind = rd.cond.length ? 'cond' : 'solid', tip = rd.cond.length ? `${COND_TAG} · ${s.ref}의 ${rd.cond.join('\n')}${sk ? `\n${order}` : ''}` : order;
+    const skip = sk ? { skip: sk } : {};
     if (nextRow.length > 1) {
       const split = bandTop.get(ri + 1)! + TAG_H;
-      segments.push({ x1: s.x, y1: s.y, x2: s.x, y2: nextRow[0]!.y, kind, tip });
-      for (const n of nextRow.slice(1)) segments.push({ x1: s.x, y1: split, x2: n.x, y2: n.y, kind, curve: true, tip });
-    } else segments.push({ x1: s.x, y1: s.y, x2: nextRow[0]!.x, y2: nextRow[0]!.y, kind, tip });
-    if (kind === 'cond' && nextRow.length === 1) tags.push({ x: x0 + 14, y: rowBottom[ri]! + (GAP - 18) / 2, w: tagRight(COND_TAG, x0 + 14), h: 18, text: COND_TAG, tip });
+      segments.push({ x1: s.x, y1: s.y, x2: s.x, y2: nextRow[0]!.y, kind, ...skip, tip });
+      for (const n of nextRow.slice(1)) segments.push({ x1: s.x, y1: split, x2: n.x, y2: n.y, kind, curve: true, ...skip, tip });
+    } else segments.push({ x1: s.x, y1: s.y, x2: nextRow[0]!.x, y2: nextRow[0]!.y, kind, ...skip, tip });
+    const text = [kind === 'cond' && nextRow.length === 1 ? COND_TAG : null, sk ? skipWord(sk) : null].filter(Boolean).join(' · ');
+    if (text) tags.push({ x: x0 + 14, y: rowBottom[ri]! + (GAP - 18) / 2, w: tagRight(text, x0 + 14), h: 18, text, tip });
   }
 
   // Arcs: right of the labels, out from the station's row and back into the target's, each label in the column beyond the lanes.
@@ -344,7 +381,7 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     list.forEach((e, i) => { e.a[e.end] += Math.round((i - (list.length - 1) / 2) * 7); });
   }
   const bottom = Math.max(y - GAP + 24, ...tags.map(t => t.y + t.h + PAD), ...segments.map(s => Math.max(s.y1, s.y2) + PAD));
-  return { width, height: Math.ceil(bottom), x0, stations, segments, brackets, arcs, jumps, forks, tags, terminals, loopsApart: apart, program: steps.length - rec.length, crossings };
+  return { width, height: Math.ceil(bottom), x0, stations, segments, brackets, arcs, jumps, forks, tags, terminals, loopsApart: apart, program: steps.length - rec.length, skipped, crossings };
 }
 /** Every box the line places (stations, tags, terminals): the view's no-overlap invariant reads these. */
 export function lineBoxes(l: StepLine): (Rect & { what: string })[] {
@@ -358,13 +395,17 @@ export const STATE_FEW = '상태 전이 행이 2개보다 적음';
 export const STATE_CAPTION = '이 부분의 C-STATE 행만 · 한 생명주기의 일부일 수 있음 · 배치 순서는 의미 없음';
 export const STATE_TERMINAL = '이 상태에서 나가는 전이 행이 없음 (끝이라는 기록은 아님)';
 export const NO_EVENT = '사건 미기재';
-const START = /^(시작|초기|initial|start)/i;
+/** A state the record calls initial: its whole name is 시작·초기·initial·start (with 상태·state at most), never a prefix (starting,
+ * started, 시작됨 are other states). An event that is exactly that word marks the state it leaves, said as the event's, not as a
+ * record that the state is initial. */
+const START = /^(?:시작|초기|initial|start)(?:\s*(?:상태|state))?$/i, START_EVENT = /^(?:시작|초기|initial|start)$/i;
 const names = (rows: readonly FormState[]) => { const out: string[] = []; for (const r of rows) for (const n of [r.name, r.next]) if (n && n.trim() && !out.includes(n.trim())) out.push(n.trim()); return out; };
 export function stateOffer(rows: readonly FormState[]): Offer {
   const ok = names(rows).length >= 2 && rows.filter(r => r.next && r.next.trim()).length >= 2;
   return { ok, reason: ok ? STATE_CAPTION : STATE_FEW };
 }
-export interface StateNode extends Rect { name: string; cx: number; cy: number; start: boolean; terminal: boolean; rows: number[] }
+/** startBy: 'name' when the state's own name says initial; 'event' when only an event leaving it is exactly start. */
+export interface StateNode extends Rect { name: string; cx: number; cy: number; start: boolean; startBy: 'name' | 'event' | null; terminal: boolean; rows: number[] }
 export interface StateEdge { from: string; to: string; label: string; rows: number[]; self: boolean; d: string; head: { x: number; y: number; angle: number }; pill: Pill }
 export interface StateGraph { width: number; height: number; nodes: StateNode[]; edges: StateEdge[] }
 const NODE_H = 36;
@@ -383,10 +424,11 @@ export function stateGraph(rows: readonly FormState[]): StateGraph {
   rx = Math.round(rx); ry = Math.round(ry);
   const margin = 56 + (selfAny ? 40 : 0), cx = Math.round(rx + maxW / 2 + margin), cy = Math.round(ry + NODE_H / 2 + margin);
   const nodes: StateNode[] = place().map(p => { const x = Math.round(cx + p.ax * rx), y = Math.round(cy + p.ay * ry);
-    return { name: p.name, cx: x, cy: y, x: x - p.w / 2, y: y - NODE_H / 2, w: p.w, h: NODE_H, start: false, terminal: false, rows: [] as number[] }; });
+    return { name: p.name, cx: x, cy: y, x: x - p.w / 2, y: y - NODE_H / 2, w: p.w, h: NODE_H, start: false, startBy: null as StateNode['startBy'], terminal: false, rows: [] as number[] }; });
   const node = (s: string) => nodes.find(q => q.name === s.trim())!;
+  for (const q of nodes) if (START.test(q.name)) { q.start = true; q.startBy = 'name'; }
   rows.forEach((r, i) => { const a = node(r.name); if (!a) return; a.rows.push(i);
-    if (START.test(r.name.trim()) || (r.event && START.test(r.event.trim()))) a.start = true; });
+    if (!a.start && r.event && START_EVENT.test(r.event.trim())) { a.start = true; a.startBy = 'event'; } });
   for (const q of nodes) q.terminal = !rows.some(r => r.name.trim() === q.name && r.next && r.next.trim());
   // Edges, one per (from, to, event); repeats of the same three merge.
   const keyed: { from: string; to: string; label: string; rows: number[] }[] = [];
@@ -482,7 +524,7 @@ export interface FormSpot { part: string; name: string; forms: FormId[]; loops: 
 export function formSpots(parts: readonly SpotInput[]): FormSpot[] {
   return parts.flatMap(p => {
     const forms: FormId[] = [...(lineOffer(p.steps, p.owner ?? null).ok ? ['line' as const] : []), ...(stateOffer(p.states).ok ? ['states' as const] : [])];
-    return forms.length ? [{ part: p.part, name: p.name, forms, loops: p.loops, states: names(p.states).length, n: p.steps.filter(s => !s.program).length }] : [];
+    return forms.length ? [{ part: p.part, name: p.name, forms, loops: p.loops, states: names(p.states).length, n: p.steps.filter(onLine).length }] : [];
   }).sort((a, b) => b.loops - a.loops || b.states - a.states || b.n - a.n || a.name.localeCompare(b.name) || a.part.localeCompare(b.part))
     .map(({ n: _n, ...s }) => s);
 }
