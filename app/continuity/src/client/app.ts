@@ -4732,7 +4732,9 @@ function applyLegendMarks() {
   // Polish round fixes 2: under 상태와 공백 a part with something to say carries its mark in a corner (screen-sized at every zoom).
   const marks = new Map(viewLens === 'state' ? lp.map(p => [p.id, stateMark(p)] as const) : []);
   world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => { const id = el.dataset.box!, m = marks.get(id);
-    el.classList.toggle('lens-off', off.has(id) && !emph.has(id));
+    // Under 상태와 공백 the fade is a fact (no operations record) that the legend counts, so an emphasised part fades too (its outline
+    // stays); under the other lenses an emphasised part is never stepped back (S10).
+    el.classList.toggle('lens-off', off.has(id) && (viewLens === 'state' || !emph.has(id)));
     if (m) el.dataset.lensMark = m; else delete el.dataset.lensMark; });
   markFirstView();
 }
