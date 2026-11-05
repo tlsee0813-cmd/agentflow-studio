@@ -468,7 +468,8 @@ export function familyType(cell: string): { type: string | null; unmapped: boole
       case 'trigger': return has(/일정|타이머|주기|cron|스케줄|schedule/i) ? 'timer' : has(/빌드|배포|자동화/) ? 'automation' : null;
       case 'gate': return has(/사람|승인|검토/) ? 'person' : 'compute';
       case 'participant':
-        if (has(/사용자\s*코드|봇|외부|서비스|\bbot\b/i)) return 'external';
+        // Code a user supplies (사용자 코드·실행기·플러그인·라이브러리) is outside, never a person.
+        if (has(/사용자\s*(?:코드|실행기|함수|구현|플러그인)|실행기|플러그인|라이브러리|봇|외부|서비스|\bbot\b/i)) return 'external';
         if (has(/AI\s*세션|세션/i)) return 'session';
         return has(/사람|소유자|메인테이너|기여자|방문자|사용자|운영자|관리자|작성자|검토자|개발자|회원|고객/) ? 'person' : exact;
       case 'process':

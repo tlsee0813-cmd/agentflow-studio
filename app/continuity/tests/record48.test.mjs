@@ -100,7 +100,7 @@ test('R48-3 at the cap, the model\'s own line on no C-LINK, C-DATA or C-ENTRY ro
 test('R48-1 a part\'s type comes from its 표현군·역할 by the fixed table; a family whose role it does not map gives none and is said quietly; 미정 gives nothing', () => {
   const cases = [['저장 · 행 파일', 'store'], ['저장', 'store'], ['촉발 · 매일 일정', 'timer'], ['촉발 · 5분 주기 신호', 'timer'], ['촉발 · 배포 자동화', 'automation'], ['촉발 · 창 닫힘 신호', null],
     ['관문 · 인증', 'compute'], ['관문 · 사람 승인', 'person'], ['참여 · 회원', 'person'], ['참여 · 창고 문', null], ['참여 · 방문자', 'person'], ['참여 · 메인테이너', 'person'], ['참여 · 의존성 갱신 봇', 'external'],
-    ['참여 · 결제 서비스', 'external'], ['참여 · 사용자 코드', 'external'], ['참여 · AI 세션', 'session'], ['처리 · 반복 실행 조정', 'loop'], ['처리 · 대기열 스케줄', 'loop'],
+    ['참여 · 결제 서비스', 'external'], ['참여 · 사용자 코드', 'external'], ['참여 · 임베딩 호출·사용자 실행기', 'external'], ['참여 · AI 세션', 'session'], ['처리 · 반복 실행 조정', 'loop'], ['처리 · 대기열 스케줄', 'loop'],
     ['처리 · 센서 값 수집', 'collector'], ['처리 · 속도 측정', 'collector'], ['처리 · AI 판단', 'ai'], ['처리 · LLM 요약', 'ai'], ['처리 · 목록 화면', 'screen'], ['처리 · 외부 호출', 'actor'],
     ['처리 · 작업 실행기', 'actor'], ['처리 · 값 변환', 'compute'], ['처리 · 입력 검증', 'compute'], ['처리 · 요청 처리', null], ['미정 · 서로 다른 역할 혼재(처리·저장)', null], ['그 밖', null]];
   for (const [cell, type] of cases) assert.equal(T.familyType(cell).type, type, cell);
