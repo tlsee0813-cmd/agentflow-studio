@@ -55,7 +55,7 @@ test('FORM-19 C-STEP rows: a program step with a row ID is a station (the progra
   const segs = gap.segments.filter(s => !s.tail);
   assert.deepEqual(segs.map(s => s.skip ?? 0), [3, 3, 0]);
   assert.ok(!/다음 행/.test(segs[0].tip) && /3개는 저장된 단계에 없음/.test(segs[0].tip)); assert.match(segs[2].tip, /B03:S09 다음 행/);
-  assert.deepEqual(gap.tags.map(t => t.text).filter(t => t.includes('사이 행')), [skipWord(3), skipWord(3)]);
+  assert.deepEqual(gap.tags.map(t => t.text).filter(t => t.includes(skipWord(3))), [skipWord(3), skipWord(3)]);
   assert.match(gap.segments.find(s => s.tail).tip, /^저장된 마지막 행/);
   // A conditional segment over skipped rows says both in its one tag.
   const both = stepLine([step('B03:S01', 'a', { cell: '값이 있을 때' }), step('B03:S03', 'b'), step('B03:S04', 'c')], [], []);

@@ -179,7 +179,8 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
     const said = pick(kind); if (!said.length) continue;
     const words = [...new Set(said.map(s => s.replace(/\s+/g, ' ').trim()))], word = kind === 'condition' ? '조건' : kind === 'optional' ? '선택' : '박자';
     const modes = [...new Set(rels.map(r => r.mode).filter(Boolean))], mode = modes.length === 1 ? (modes[0] === 'design' ? ' · 설계' : ' · 관찰') : '';
-    const count = rels.length > 1 ? `\n관계 ${rels.length}개 중 ${said.length}개가 적음` : '', modeLine = mode ? `\n${mode.slice(3)}` : '';
+    // Polish round fixes 1: the count says what it counts (「관계 2개 중 1개에 기록됨」, never 「…1개가 적음」, which reads as 'few').
+    const count = rels.length > 1 ? `\n${countWords(rels.length, said.length)}` : '', modeLine = mode ? `\n${mode.slice(3)}` : '';
     // Polish round (spec-cards-v2 §1): a condition or an optional mark is a small cue of fixed words on the line (「조건」, 「선택」;
     // 「조건 1/3」 when only some of the stroke's relations carry it, so a bundle never reads wholly conditional), never the record's
     // words cut short: those read whole in the tip, one 「조건: …」 a wording.
@@ -187,12 +188,15 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
     // The mode in words a reader can take without the legend (설계: what the code or docs define; 관찰: what a run showed).
     const modeSaid = modes.length === 1 ? (modes[0] === 'design' ? '\n설계상의 흐름 (코드·문서)' : '\n실행에서 관찰된 흐름') : '';
     if (kind === 'condition') {
-      const tip = `조건 · 이 조건일 때만 흐름\n${words.map(conditionTip).join('\n')}${count}${modeSaid}`;
-      return { kind, short: cue, full: cue, tip, words, n: said.length, unresolved: false, lead: words[0]!, quiet: false };
+      // A condition that only points at another row of the record (「위와 같음」) is said as such, muted, never resolved here.
+      const unresolved = words.every(isRelativeRef);
+      const tip = `조건 · 이 조건일 때만 흐름${unresolved ? ' · 기록 안의 상대 참조 (풀지 않음)' : ''}\n${words.map(conditionTip).join('\n')}${count}${modeSaid}`;
+      return { kind, short: cue, full: cue, tip, words, n: said.length, unresolved, lead: words[0]!, quiet: false };
     }
     if (kind === 'optional') {
-      const vs = [...new Set(rels.map(r => r.variant?.trim()).filter((x): x is string => !!x))];
-      const tip = `선택 · 늘 흐르지는 않음${vs.length ? ` · 그 변형일 때만\n${vs.map(v => `변형 ${v}`).join('\n')}` : ' (기록이 선택으로 적음)'}${count}${modeSaid}`;
+      // Only the optional relations' variants (another relation of the stroke may carry an older reading's variant).
+      const vs = [...new Set(rels.filter(r => r.optional).map(r => r.variant?.trim()).filter((x): x is string => !!x))];
+      const tip = `선택 · 늘 흐르지는 않음${vs.length ? ` · 그 변형일 때만\n${vs.map(variantWord).join('\n')}` : ' (기록이 선택으로 적음)'}${count}${modeSaid}`;
       return { kind, short: cue, full: cue, tip, words: vs, n: said.length, unresolved: false };
     }
     const unresolved = words.every(isRelativeRef);
@@ -207,6 +211,11 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
   }
   return null;
 }
+/** How many of a stroke's relations carry the badge's words (Polish round fixes 1: 「관계 2개 중 1개에 기록됨」). */
+export const countWords = (all: number, said: number): string => `관계 ${all}개 중 ${said}개에 기록됨`;
+export const COUNT_RE = /^관계 \d+개 중 \d+개에 기록됨$/;
+/** A variant in a tip, by its name (「변형 ‘다중 에이전트 그래프’」); a name already said as 「변형 …」 stays. */
+export const variantWord = (v: string): string => (/^변형\s/.test(v) ? v : `변형 ‘${v}’`);
 /** The texts a badge tries, in order, where it is placed (the first with room wins): selected, its full words, then the rest
  * form; then the words clipped to BADGE_CLIP; then the cadence glyph (or 조건 · 선택). At the overview and the dot map a cadence badge
  * is its glyph alone (5.5: the overview keeps condition badges; a cadence reads on hover and nearer). Never the bare kind word 박자. */
@@ -233,7 +242,11 @@ export const quietAt = (b: Pick<LineBadge, 'kind' | 'quiet'>, on: boolean, tier:
 export const quietTip = (b: Pick<LineBadge, 'tip'>): string => `한 번 · 가까이 보거나 선을 고르면 글자로\n${b.tip}`;
 /** Badges that found no place of their own on one part's side gather in one marker: '+N' (each line's words in its tip). */
 // Cards v2 §1: the marker names what it gathers (「배지 +2」).
-export const overflowMark = (n: number): string => `배지 +${n}`;
+// Polish round fixes 1: it names the cues it gathers (「조건·박자 +2」), in the cue order (조건, 선택, 박자); 「배지」 only without them.
+export const overflowMark = (n: number, kinds: readonly LineBadge['kind'][] = []): string => {
+  const w = (['condition', 'optional', 'cadence'] as const).filter(k => kinds.includes(k)).map(k => (k === 'condition' ? '조건' : k === 'optional' ? '선택' : '박자'));
+  return `${w.length ? w.join('·') : '배지'} +${n}`;
+};
 
 /* ---------- label priority (6.3) ---------- */
 /** The protected order of what a line carries, highest first (6.3 items 5–9; 1–4 are part and region names, which a label never

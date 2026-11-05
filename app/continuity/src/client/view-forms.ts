@@ -110,7 +110,8 @@ export const FORK_OPEN = '갈래 뒤 합류는 기록에 없음';
 export const COND_TAG = '조건에 따라';
 export const APART_OUT = '몸통 단계가 이 노선 밖', APART_SPLIT = '몸통이 떨어져 있음', APART_NONE = '몸통 미기록', APART_UNREAD = '몸통 일부가 이 지도에 없음';
 /** A segment over C-STEP numbers the stored steps skip (the rows are in the record, not in the stored steps). */
-export const skipWord = (n: number) => `사이 행 ${n}개 없음`;
+// Polish round fixes 1: what is missing in words (the steps the record's table has that this map did not keep), never 「사이 행」.
+export const skipWord = (n: number) => `표에 없는 단계 ${n}개`;
 export const UNSTORED = '저장 안 된 행';
 /** An alternative whose 조건·분기 cell gives no condition (only a jump, or nothing). */
 export const ALT_NO_COND = '조건 미기재';
@@ -414,7 +415,8 @@ export const overlaps = (a: Rect, b: Rect) => a.x < b.x + b.w && b.x < a.x + a.w
 
 /* ---------- 상태 전이 ---------- */
 export const STATE_FEW = '상태 전이 행이 2개보다 적음';
-export const STATE_CAPTION = '이 부분의 C-STATE 행만 · 한 생명주기의 일부일 수 있음 · 배치 순서는 의미 없음';
+// Polish round fixes 1: no table name in the caption a reader sees first (the node and edge tips keep the rows they stand on).
+export const STATE_CAPTION = '이 부분에 기록된 상태 전이만 · 한 생명주기의 일부일 수 있음 · 배치 순서는 의미 없음';
 export const STATE_TERMINAL = '이 상태에서 나가는 전이 행이 없음 (끝이라는 기록은 아님)';
 export const NO_EVENT = '사건 미기재';
 /** A state the record calls initial: its whole name is 시작·초기·initial·start (with 상태·state at most), never a prefix (starting,

@@ -8,7 +8,8 @@ import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, re
 import { parseScenarioRecord, applyScenario, scenarioUnderstanding, projectLedger, type ScenarioUnderstanding } from '../shared/scenario-record.js';
 import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace, headTexts, scenarioLabel, scenarioResultLine, saidText, visitNumber, linkTitle, LINK_WORD, LINK_GLYPH, KIND_WORD, type BrokenPlace,
   grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits, type GrammarMark } from './scenario-view.js';
-import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, projectVariantGloss, glossVariants, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
+import { plainIds, idOnly, nameVariants, variantName, plainView } from './plain-ids.js';
+import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, projectVariantGloss, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, structureSummary, structureConditions, structureKeep, whereRows, fileRoleOf, enforcePlace, type DisputedItem, type HistoryEntry,
   PANE_TABS, tabLabel, entryTab, tabKeyMove, STRUCTURE_TITLE, structureSections, jumpChips, PANE_SHOWN, foldRows, behaviourSummary, cautionRows, unlinkedNames, listLabels, kindLead, UNLINKED_HEAD, UNLINKED_HINT,
   evidenceItems, footMarks, pathKey, footText, gradeLine, quotePlace, pushReturn, sameName, spanKey, ITEM_TITLE, DISPUTE_REASONS, DISPUTE_REASON_LABEL, type EvidenceBook, type EvidenceItem, type EvidenceUse, type DisputeReason,
@@ -42,7 +43,7 @@ import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
@@ -337,7 +338,7 @@ function projectFor(key: string): Opened | null {
   if (!project) return null;
   let alias: Opened['alias'] = null;
   if (kind === 'example') { const toId = key === CONVERTER_KEY ? converterKeys(project) : key === UI62_KEY ? ui62Keys(project) : exampleKeys(key.slice(3), project); alias = { toId, toKey: new Map([...toId].map(([k, id]) => [id, k])) }; }
-  return { key, kind, project, ref, view: studioView(project), alias };
+  return { key, kind, project, ref, view: plainView(studioView(project)), alias };
 }
 
 /* ---------- rendering ---------- */
@@ -933,6 +934,8 @@ function fitCards() {
   });
 }
 /** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
+/** A card's 「여기서 펼치기」 glyph: a plus (polish round fixes 1). */
+const plusGlyph = () => { const el = svg('svg', { viewBox: '0 0 16 16', 'aria-hidden': 'true' }); el.append(svg('path', { d: 'M8 4v8M4 8h8' })); return el; };
 const progChip = (what?: string) => h('span', { class: 'sg-chip prog-chip', title: what ? `${PROGRAM_HINT} · ${what}` : PROGRAM_HINT }, PROGRAM_LABEL);
 /** map-reading.14: a step the program cut from the 3절 chain (steps-view stepFace), and a port → step correspondence it made. */
 const stepChip = () => h('span', { class: 'sg-chip prog-chip', title: PROGRAM_STEP_HINT }, PROGRAM_LABEL);
@@ -1186,7 +1189,8 @@ function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<str
     signs: hasSigns(sg), failureSaid: !fb || !fb.failure,
     // Cards v2 §1: the role line (the description's first sentence), the foot (a way in: ▸ N for a group, ⤢ for an inside the card
     // does not name in full), the value rows behind the display setting.
-    role: roleOf(p, r), foot: p.childIds.length > 0 || (() => { const w = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 }); return w.length > 0 && w[0] !== '내부 미상'; })(),
+    // Polish round fixes 1: ⤢ alone takes no foot row (it sits over the card's corner); the sign chips still give the foot (template).
+    role: roleOf(p, r), foot: p.childIds.length > 0,
     values: shownDisplay().values };
 }
 /** The card's 「하는 일」 (cards v2 §1): the first sentence of the description the pane reads (the reading's, else the person's note). */
@@ -1315,6 +1319,10 @@ const CONTACT_TIP = '포트 대응 미기록 · 이 선들은 카드 수준 접�
 const breakable = (name: string): (string | HTMLElement)[] => nameBreaks(name).flatMap((s, i) => (i ? [document.createElement('wbr'), s] : [s]));
 /** A typed card's DOM (styles.css .node.card): the head (glyph tile · name · kind word with the lifecycle chip and, for the
  * overview, the short status), the kind rows, the contract area, the inner line, the sign row and the bottom line. */
+/** How many relation rows a bundled line's tip lists before it counts the rest (polish round fixes 1). */
+const TIP_RELS = 3;
+/** The 상태·공백 lens's mark of a recorded state on the card (the legend's marks, view-lens SHORT_MARK). */
+const OPS_MARK: Readonly<Record<string, string>> = { running: '●', stopped: '■', waiting: '○', conflict: '◇' };
 function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, face: Face, extra: { cls: string; onkeydown: (e: Event) => void; toggle: HTMLElement | null; links: HTMLElement | null; enter: HTMLElement | null; boxH: number; filed?: string | null }): HTMLElement {
   const s = r.stateRead, life = lifecycleOf(s?.state, s?.quote?.quote ?? ''), ops = opsCard(s?.state ?? null, s?.when ?? null, opsRef, life);
   const maint = life ? null : maintenanceOf(r.statusClaims), maintQuote = maint ? r.statusClaims.find(x => x.dimension === 'maintenance')?.quote.quote ?? null : null;
@@ -1338,9 +1346,12 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   // the kind line, so showing them never moves a card; never doubling a lifecycle chip.
   // Review M2: records that disagree read 「운영 기록 충돌」 here too (never the one state the reading picked); a ring's 작업 중 reads as
   // the dot does (대기 보고), so the face, the dot, the hover and the pane say one word.
-  const opsWordEl = life ? null : dot?.kind === 'conflict' ? h('span', { class: 'c-opsw ops-conflict', 'data-tip': `${dot.line} · 하나로 고르지 않음` }, DOT_WORD.conflict)
-    : h('span', { class: `c-opsw${s ? '' : ' ops-none'}`, 'data-tip': s ? (dot?.kind === 'waiting' ? dot.line : ops.tip) : '운영 기록 없음 · 기록이 이 부분의 운영 상태를 말하지 않았다 (멈춤이라는 뜻이 아님)' },
-      s ? (dot?.kind === 'waiting' ? `${dot.word}${s.when ? ` · ${opsWhen(s.when, opsRef)}` : ''}` : ops.text) : '운영 기록 없음');
+  // Polish round fixes 1 (the 상태·공백 lens): each recorded state carries the legend's mark (● 가동, ■ 멈춤, ○ 대기, ◇ 충돌, … 미상), so
+  // running, stopped and unknown stand apart at a glance; a card with no record is the quiet 「–」 alone (the legend counts them).
+  const opsMark = dot ? OPS_MARK[dot.kind] ?? '·' : s?.state === 'unknown' ? '…' : '·';
+  const opsWordEl = life ? null : dot?.kind === 'conflict' ? h('span', { class: 'c-opsw ops-conflict os-conflict', 'data-mark': opsMark, 'data-tip': `${dot.line} · 하나로 고르지 않음` }, h('span', { class: 'c-opsw-t' }, DOT_WORD.conflict))
+    : h('span', { class: `c-opsw${s ? ` os-${dot?.kind ?? 'other'}` : ' ops-none'}`, 'data-mark': s ? opsMark : '–', 'data-tip': s ? (dot?.kind === 'waiting' ? dot.line : ops.tip) : '운영 기록 없음 · 기록이 이 부분의 운영 상태를 말하지 않았다 (멈춤이라는 뜻이 아님)' },
+      h('span', { class: 'c-opsw-t' }, s ? (dot?.kind === 'waiting' ? `${dot.word}${s.when ? ` · ${opsWhen(s.when, opsRef)}` : ''}` : ops.text) : '운영 기록 없음'));
   const head = h('div', { class: 'c-head' }, tile,
     h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name' }, ...breakable(p.name)),
       h('span', { class: 'c-kind' }, h('span', { class: `c-kind-word${t.family === 'neutral' && !grp ? ' unknown' : ''}${grp ? ' grp-word' : ''}` }, t.kind),
@@ -1359,7 +1370,8 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const roleRevised = !!r.roleBasisRevised && !!r.role;
   const role = t.role ? h('div', { class: `c-role${roleRevised ? ' revised' : ''}` }, h('span', { class: 'c-role-text' }, t.role),
     roleRevised ? h('span', { class: 'c-role-rev', 'data-tip': `하는 일${REVISED_BASIS} · 읽기면의 하는 일에서` }, REVISED_SHORT) : null) : null;
-  const rows = t.rows.length ? h('div', { class: 'c-rows' }, ...t.rows.map(x => h('div', { class: `c-row${x.members ? ' c-members' : ''}` },
+  // Polish round fixes 1: a row the program carried over from the record's table says so in its tip (as the well's badges do).
+  const rows = t.rows.length ? h('div', { class: 'c-rows' }, ...t.rows.map(x => h('div', { class: `c-row${x.members ? ' c-members' : ''}`, ...(x.program ? { 'data-tip': `${x.label} · 기록에서 프로그램이 옮긴 값` } : {}) },
     h('span', { class: 'c-label' }, x.label), h('span', { class: `c-val${x.unlinked ? ' unl' : ''}` }, x.value)))) : null;
   const c = t.contract;
   // List values by name (0.1, the owner's decision; behind the display setting 「받는·내는 것 행」 since cards v2): muted, each name under
@@ -1390,16 +1402,21 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   // Cards v2 §1: the ways in as quiet icon buttons at the bottom-right (⤢ the detail view, ▸ N the group; 연결 N its own chip beside
   // them), the sign chips at the bottom-left: never piled into one spot with the status dot.
   const sc = stepCounts(stepsOf(r)), stepWord = sc.recorded || sc.program ? ` · 단계 ${sc.recorded}${sc.program ? ` (+${sc.program} 프로그램)` : ''}` : '';
+  // Polish round fixes 1: a framed 「상세 ⤢」 (the word steps out at 개요) and a short tip: what opens and what it holds.
   const open = !kids && words.length && words[0] !== '내부 미상'
-    ? h('button', { type: 'button', class: 'c-enter entry-open', 'data-tip': `내부 상세 열기${stepWord}\n${words.join(' · ')}\n제자리에 들어가면 펼치고, 들어가지 않으면 내부 상세로 연다 (두 번 누르기 · 선택 후 Enter)`, 'aria-label': `${p.name} 내부 상세 열기${stepWord}`, onclick: () => openAction(p.id) },
-      h('span', { 'aria-hidden': 'true' }, '⤢')) : null;
-  const bottom = signs || extra.links || extra.enter || open ? h('div', { class: 'c-bottom' }, signs ? h('span', { class: 'c-signs' }, signs) : null,
+    ? h('button', { type: 'button', class: 'c-enter entry-open', 'data-tip': `내부 상세${stepWord}\n${words.join(' · ')}`, 'aria-label': `${p.name} 내부 상세 열기${stepWord}`, onclick: () => openAction(p.id) },
+      h('span', { class: 'c-enter-w' }, '상세'), h('span', { class: 'c-enter-g', 'aria-hidden': 'true' }, '⤢')) : null;
+  // A card whose only way in is ⤢ (no sign chips, no group controls) draws no foot row for it: the button sits over its bottom-right
+  // corner (cardFactsOf gives such a card no foot, so its height has none either).
+  const floatOpen = !!open && !signs && !extra.links && !extra.enter;
+  const bottom = !floatOpen && (signs || extra.links || extra.enter || open) ? h('div', { class: 'c-bottom' }, signs ? h('span', { class: 'c-signs' }, signs) : null,
     h('span', { class: 'c-entry' }, extra.links, extra.enter, open)) : null;
-  const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''} ${extra.cls}`, style: `--nl:${nl}`,
+  const corner = floatOpen ? h('span', { class: 'c-entry c-corner' }, open) : null;
+  const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''}${corner ? ' open-corner' : ''} ${extra.cls}`, style: `--nl:${nl}`,
     'data-shape': `${nl},${t.rows.length},${hs.contract},${hs.inner},${signs ? 1 : 0},${extra.boxH},0,${c.kind === 'values' ? c.rows.length : 0},0,${t.rows[0]?.members ? 1 : 0},${t.role ? 1 : 0},${bottom ? 1 : 0}`,
     // Review (spec §7): focus gives what the hover card says first: the name, the kind, the role and a recorded state's words.
     'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', 'aria-label': [p.name, t.kind, t.role, dot?.word ?? null].filter(Boolean).join(' · '), onkeydown: extra.onkeydown },
-  head, role, rows, contract, inner, well, bottom);
+  head, role, rows, contract, inner, well, bottom, corner);
   // One hover surface (cards v2 §2): a native title left inside the card (the well's, a chip's) reads through the map's own tip.
   el.querySelectorAll<HTMLElement>('[title]').forEach(x => { x.dataset.tip = x.title; x.removeAttribute('title'); });
   return el;
@@ -1427,7 +1444,8 @@ const conditionsOf = (r: PartUnderstanding): NonNullable<PartUnderstanding['cond
   let list: NonNullable<PartUnderstanding['conditions']> = r.conditions ?? [];
   if (blanked.length) list = list.map(c => (c.else === null && elseBlanked(c.quote, blanked) ? { ...c, incomplete: true } : c));
   if (!g?.size || !list.some(c => /\bX\d{1,3}\b/.test(`${c.when} ${c.then} ${c.else ?? ''}`))) return list;
-  return list.map(c => ({ ...c, when: glossVariants(c.when, g), then: glossVariants(c.then, g), else: c.else === null ? null : glossVariants(c.else, g) }));
+  // Polish round fixes 1: a variant reads by its name, once.
+  return list.map(c => ({ ...c, when: nameVariants(c.when, g), then: nameVariants(c.then, g), else: c.else === null ? null : nameVariants(c.else, g) }));
 };
 /** Whether the part's gate exits come from its condition rows: the newest map reading that speaks of it carries them
  * (map-reading.12, [] when it said none); before .12 they come from the decision step's own words (참이면 / 거짓이면). */
@@ -1786,7 +1804,7 @@ function renderDetail(id: string) {
     // Review: a narrow side column shows a partner as its name and kind only (styles.css container query); its words read in the tip.
     return h('button', { type: 'button', class: 'dv-ref', role: 'listitem', 'data-part-ref': far, 'data-ref': `${out ? 'o' : 'i'}|${far}`,
       title: `${partPath(o.view, far).map(x => x.name).join(' › ')}\n${[...new Set(mine.map(e => e.word))].join(' · ')}\n이 부분의 상세 열기`, 'aria-label': `${q?.name ?? '부분'} 상세 열기 · ${mine.map(e => e.word).join(', ')}`, onclick: () => openDetail(far, true) },
-      qr?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[qr.typeRead.type]) : null, h('span', { class: 'dv-ref-name' }, q?.name ?? '부분'),
+      qr?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[qr.typeRead.type]) : null, h('span', { class: 'dv-ref-name', title: q?.name ?? '부분' }, q?.name ?? '부분'),
       h('span', { class: 'dv-ref-rel' }, [...new Set(mine.map(e => e.word))].join(' · ')));
   };
   const order = (out: boolean) => { const ports = out ? outs : ins, seen: string[] = []; for (const pt of ports) for (const e of ends) if (e.out === out && e.port === pt.key && !seen.includes(e.far)) seen.push(e.far); return seen; };
@@ -1850,7 +1868,8 @@ function renderDetail(id: string) {
         h('span', { class: 'dv-step-head' }, ...progIn.map(l => portChip('step', l.port)), h('span', { class: 'dv-step-n sl-ref' }, shortRef(s.ref)), h('span', { class: 'dv-step-name' }, s.name), s.program ? stepChip() : null,
           dec.length ? h('span', { class: 'dv-diamond', role: 'img', 'aria-label': '판정 단계' }) : null, progOut.length ? h('span', { class: 'dv-prog-out' }, ...progOut.map(l => portChip('step', l.port))) : null),
         fs.does && !s.program ? h('span', { class: 'dv-step-does' }, fs.does) : null,
-        s.cond ? line(`sl-if${s.condBlank ? ' blank' : ''}`, s.condBlank ? '이 갈래를 고르는 조건을 기록이 적지 않았다 (조건·분기 칸에 조건이 없거나 가는 곳만)' : `갈래의 조건 · ${s.cond}`, h('b', {}, '조건'), s.cond) : null,
+        // Polish round fixes 1: a condition cell that is only another row's ID (「CD06」) says so in words; the ID stays in the tip.
+        s.cond ? line(`sl-if${s.condBlank ? ' blank' : ''}`, s.condBlank ? '이 갈래를 고르는 조건을 기록이 적지 않았다 (조건·분기 칸에 조건이 없거나 가는 곳만)' : idOnly(s.cond) ? `갈래의 조건 · 기록의 조건 행 ${s.cond}을 가리킴 (원문에서)` : `갈래의 조건 · ${s.cond}`, h('b', {}, '조건'), ' ', idOnly(s.cond) ? '기록의 다른 조건 행' : plainIds(s.cond)) : null,
         s.notes.length ? line('sl-notes', `조건·분기 칸 · ${s.notes.join(' · ')}`, h('b', {}, '갈림'), s.notes.join(' · ')) : null,
         s.exits.length ? line('sl-exits', s.exits.map(e => e.tip).join('\n'), ...s.exits.map(e => h('span', { class: `sl-exit k-${e.kind}` }, e.text))) : null,
         own.length ? h('span', { class: 'dv-conds sl-conds', role: 'list', 'aria-label': '조건 출구' }, ...own.map(condEl)) : null),
@@ -1922,7 +1941,7 @@ function renderDetail(id: string) {
       ...gr.edges.map(e => h('span', { class: `vg-ev${e.label === '사건 미기재' ? ' blank' : ''}`, title: e.pill.tip, style: `left:${e.pill.x}px;top:${e.pill.y}px;width:${e.pill.w}px;height:${e.pill.h}px` }, e.label)));
     return h('section', { class: `xp-sec dv-states f-${fam}`, 'aria-label': '상태 전이' },
       h('h4', { class: 'xp-title' }, '상태 전이', h('small', {}, `상태 ${gr.nodes.length} · 전이 ${gr.edges.length}`)),
-      h('p', { class: 'vg-caption', title: 'C-STATE 행: 상태 · 떠나는 사건 · 다음 상태 · 원 위의 자리는 행에 처음 나온 차례일 뿐' }, STATE_CAPTION),
+      h('p', { class: 'vg-caption', title: '기록의 상태 행: 상태 · 떠나는 사건 · 다음 상태 · 원 위의 자리는 행에 처음 나온 차례일 뿐' }, STATE_CAPTION),
       h('div', { class: 'vg-scroll' }, canvas),
       h('p', { class: 'vg-more-note', hidden: '' }, '상태 그래프가 칸보다 넓음 · 옆으로 밀면 나머지 상태'),
       ...shared.map(x => h('p', { class: 'vg-shared', title: `같은 이름 · ${x.shared.join(', ')} · 같은 상태인지 기록이 말하지 않아 합치지 않음` }, `같은 이름의 상태가 ‘${x.name}’에도 있음 · 합치지 않음`,
@@ -2115,12 +2134,14 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     return h('span', { class: `frame-links${card ? ' c-chip' : ''}`, ...(card ? { 'data-tip': `${tip}\n눌러서 선택하면 그 선들이 밝아짐` } : { title: tip }) }, h('span', { 'aria-hidden': 'true' }, `연결 ${c.all}`), h('span', { class: 'sr-only' }, `바깥 관계 ${c.all}`));
   };
   // Cards v2 §1: a group card's way in, a quiet icon button (「▸ N」); its tip says what opens.
-  const cardEnter = (p: PartView) => h('button', { type: 'button', class: 'c-enter enter-in', 'data-tip': `안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기 · 부분 ${p.childIds.length}`, onclick: () => go(o.key, null, p.id) },
-    h('span', { 'aria-hidden': 'true' }, '▸'), ` ${p.childIds.length}`);
+  // Polish round fixes 1: a framed control with its word (「안쪽 2 ▸」; the word steps out at 개요), never a bare 「▸2」 glued to 연결 N.
+  const cardEnter = (p: PartView) => h('button', { type: 'button', class: 'c-enter enter-in', 'data-tip': `안으로 들어가기 · 안쪽 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기 · 안쪽 부분 ${p.childIds.length}`, onclick: () => go(o.key, null, p.id) },
+    h('span', { class: 'c-enter-w' }, '안쪽 '), `${p.childIds.length}`, h('span', { class: 'c-enter-g', 'aria-hidden': 'true' }, '▸'));
   // Review: one enter style for frames and cards (「▸ N」, as cardEnter).
   const enterButton = (p: PartView) => h('button', { type: 'button', class: 'enter', title: `‘${p.name}’ 안으로 들어가기 · 부분 ${p.childIds.length}`, 'aria-label': `${p.name} 안으로 들어가기 · 부분 ${p.childIds.length}`, onclick: () => go(o.key, null, p.id) }, h('span', { class: 'enter-g', 'aria-hidden': 'true' }, '▸'), ` ${p.childIds.length}`);
-  const toggleButton = (p: PartView, open: boolean) => h('button', { type: 'button', class: 'toggle', title: open ? '접기' : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '펼치기'}`, 'aria-expanded': String(open),
-    onclick: () => { const k = `${o.key}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, chevron(open));
+  // Polish round fixes 1: a card's 「여기서 펼치기」 is its own glyph (＋, never a third chevron beside ▸ and ⤢) and says what it opens.
+  const toggleButton = (p: PartView, open: boolean, card = false) => h('button', { type: 'button', class: `toggle${card ? ' c-expand' : ''}`, title: open ? '접기' : card ? `여기서 펼치기 · 안쪽 부분 ${p.childIds.length}을 이 자리에` : '여기서 펼치기', 'aria-label': `${p.name} ${open ? '접기' : '여기서 펼치기'}`, 'aria-expanded': String(open),
+    onclick: () => { const k = `${o.key}|${p.id}`; expandState.set(k, !open); tempExpand.delete(k); previewExpand.delete(k); renderSpace('keep'); if (selected) select(selected); } }, card ? plusGlyph() : chevron(open));
   // Enter on the selected card opens it (동작 열기); otherwise Enter and Space select.
   const keySelect = (id: string) => (e: Event) => { const k = (e as KeyboardEvent).key; if ((k === 'Enter' || k === ' ') && e.target === e.currentTarget) { e.preventDefault(); if (k === 'Enter' && selected === id && openable(o, id)) openAction(id); else go(o.key, id); } };
   const boxes = [...lay.boxes.values()].sort((a, b) => (a.kind === 'frame' ? 0 : 1) - (b.kind === 'frame' ? 0 : 1) || a.depth - b.depth);
@@ -2179,7 +2200,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
         // Cards v2 §1: no native title on the card (the hover card says the path and the alias); the group's way in is the ▸ N icon
         // button, 연결 N its own chip in the same style.
         world.append(cardEl(o, p, p.reading, tpl, face, { cls: `${onTint ? 'on-tint ' : ''}s-${p.status}${recentAt(last) ? ' fresh' : ''}`, onkeydown: keySelect(p.id),
-          toggle: b.kids ? toggleButton(p, false) : null, links: b.kids ? linksChip(p.id, true) : null, enter: b.kids ? cardEnter(p) : null, boxH: b.h, filed: filedUnder(view, p.id) }));
+          toggle: b.kids ? toggleButton(p, false, true) : null, links: b.kids ? linksChip(p.id, true) : null, enter: b.kids ? cardEnter(p) : null, boxH: b.h, filed: filedUnder(view, p.id) }));
         continue;
       }
       // An untyped card (no reading): its name, its own first sentence on a unit without an inside, and its state line.
@@ -2203,11 +2224,14 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // A calm head (map design v3 9): the summary (two lines at most, with its way to more), one meta line, one row of chips (the main
   // flow, the rules, the since filter, the state counts); a chosen scenario's line under it.
   const chips = [flowStrip(o), rulesStrip(o), sinceStrip(o), stateStrip(o), opsNoneChip(o)].filter((x): x is HTMLElement => !!x);
-  const title = h('header', { class: 'map-title' }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
+  // Polish round fixes 1: the first screen gives the map, not its bookkeeping: under the name and the purpose one screen-sized
+  // 「기록 정보 ▾」 opens the reading's line, the basis and the chips (주 흐름, 규칙, the request and report counts) in place.
+  const meta = [sp ? null : understoodLine(o), basis, chips.length ? h('div', { class: 'map-chips' }, ...chips) : null].filter((x): x is HTMLElement => !!x);
+  const metaBtn = meta.length ? h('button', { type: 'button', class: 'map-meta-toggle', 'aria-expanded': String(metaOpen), title: metaOpen ? '기록 정보 접기' : '기록 정보 · 읽은 기록, 설계 근거와 판본, 주 흐름, 규칙, 요청·보고 상태',
+    onclick: () => { metaOpen = !metaOpen; renderSpace('keep'); } }, metaOpen ? '기록 정보 접기 ▴' : '기록 정보 ▾') : null;
+  const title = h('header', { class: `map-title${metaOpen ? ' meta-open' : ''}` }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
-    sp ? null : understoodLine(o),
-    basis,
-    chips.length ? h('div', { class: 'map-chips' }, ...chips) : null, scenarioStrip(o),
+    metaBtn, meta.length ? h('div', { class: 'map-meta' }, ...meta) : null, scenarioStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -2582,7 +2606,7 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     // Review: a single badge with no room on its line reads as its own smallest words beside the part (its line named in the tip),
     // never as a 「배지 +1」 longer than the badge it holds.
     const solo = list.length === 1 ? (() => { const f = badgeForms(list[0]!.b, false, tier); return f[f.length - 1] ?? BADGE_GLYPH; })() : null;
-    const el = h('span', { class: `edge-badge b-more${solo ? ` solo b-${list[0]!.b.kind}` : ''}`, 'data-badge-more': from, 'data-tip': `${solo ? '선 위에 자리가 없어 옆에 둔 배지' : `자리가 없어 모은 배지 ${list.length}개`} · 기록의 글자 그대로\n${list.map(x => `${nameOf(x.e.from)} → ${nameOf(x.e.to)} · ${x.b.kind === 'condition' ? x.b.words.map(conditionTip).join(' / ') : x.b.short}`).join('\n')}` }, solo ?? overflowMark(list.length));
+    const el = h('span', { class: `edge-badge b-more${solo ? ` solo b-${list[0]!.b.kind}` : ''}`, 'data-badge-more': from, 'data-tip': `${solo ? '선 위에 자리가 없어 옆에 둔 배지' : `자리가 없어 모은 배지 ${list.length}개`} · 기록의 글자 그대로\n${list.map(x => `${nameOf(x.e.from)} → ${nameOf(x.e.to)} · ${x.b.kind === 'condition' ? x.b.words.map(conditionTip).join(' / ') : x.b.short}`).join('\n')}` }, solo ?? overflowMark(list.length, list.map(x => x.b.kind)));
     box.append(el);
     const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, at = lay.boxes.get(from);
     const along = list.flatMap(x => { const n = x.path.getTotalLength(); return Array.from({ length: 9 }, (_, i) => x.path.getPointAtLength(n * (0.08 + i * 0.1))).map(p => ({ x: p.x - w / 2, y: p.y - hh / 2, w, h: hh })); });
@@ -2783,7 +2807,24 @@ function fitView(explicit: boolean, animate = false) {
   const xoff = free <= 0 ? 12 : free / 2;
   const yoff = mh <= hgt ? (hgt - mh) / 2 : 12;
   camera = { k, x: left + xoff - B.x * k, y: top + yoff - B.y * k };
+  // Polish round fixes 1: a map that does not fit at the opening scale opens on what the first view points at (its emphasised parts,
+  // else the main flow), centred where it can be, never past the map's own edges; not on its top-left corner and title.
+  const f = explicit ? null : openFocus();
+  if (f) {
+    // camera offset along one axis: c mid-room, clamped so the map's edges [lo, lo + size] keep within 12px of the room's.
+    const along = (lo: number, size: number, start: number, room: number, c: number) => Math.min(start + 12 - lo * k, Math.max(start + room - 12 - (lo + size) * k, start + room / 2 - c * k));
+    camera = { k, x: B.w * k <= w ? camera.x : along(B.x, B.w, left, w, f.x + f.w / 2),
+      y: B.h * k <= hgt ? camera.y : along(B.y, B.h, top, hgt, f.h * k > hgt ? f.y + (hgt / 2 - 12) / k : f.y + f.h / 2) };
+  }
   applyCamera(animate);
+}
+/** The parts the opening view centres on when the whole map does not fit (the first view's emphasis, else the main flow): their
+ * boxes' bounds, or null. */
+function openFocus(): Rect | null {
+  const ids = fvOn() && fvRec!.parts.length ? fvRec!.parts : lay.spine;
+  const bs = ids.map(id => lay.boxes.get(id)).filter((b): b is NonNullable<typeof b> => !!b); if (!bs.length) return null;
+  const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y)), r = Math.max(...bs.map(b => b.x + b.w)), btm = Math.max(...bs.map(b => b.y + b.h));
+  return { x, y, w: r - x, h: btm - y };
 }
 /** What the map draws, in map px: the layout's bounds (boxes, heads, the title) with every drawn element that can reach past them
  * (the band captions and the boundary line, the outside partners' heads, a caption's own text, the lines' routes), so 전체 보기
@@ -3595,8 +3636,9 @@ function kindLine(c: PaneCtx): HTMLElement {
   // 「대응 불명확: 루프·엔진」 for a v4 type word whose family is unclear (review N8: this one reads here, never on the card). With a family
   // known and no type word, the family line stands in for 「유형 미상」.
   const fr = u?.familyRead ?? null, fam = paneFamily(fr ? { family: fr.family, role: fr.role, reason: fr.reason, unclear: fr.unclear } : null, t ? TYPE_LABEL[t.type] : null);
+  // Polish round fixes 1: the family word reads without the record's column name 「표현군」 (the tip keeps it).
   const famEl = fam ? h('span', { class: `lens-family${fam.kind === 'family' ? '' : ' lens-undecided'}`,
-    title: `${fam.kind === 'unclear' ? '표현군 · 기록의 유형 낱말이 표현군 하나에 대응하지 않아 낱말 그대로 둠' : fam.kind === 'undecided' ? '표현군 · 기록이 주된 계약을 정하지 못함 · 카드 모양은 기록된 안쪽(단계·반복·묶음)으로만 정함' : '표현군 · 역할 · 기록의 C-PART 행'}${fr?.quote ? ` (“${fr.quote.quote}”)` : ''}` }, fam.text) : null;
+    title: `${fam.kind === 'unclear' ? '표현군 · 기록의 유형 낱말이 표현군 하나에 대응하지 않아 낱말 그대로 둠' : fam.kind === 'undecided' ? '표현군 · 기록이 주된 계약을 정하지 못함 · 카드 모양은 기록된 안쪽(단계·반복·묶음)으로만 정함' : '표현군 · 역할 · 기록의 C-PART 행'}${fr?.quote ? ` (“${fr.quote.quote}”)` : ''}` }, fam.kind === 'family' ? fam.text.replace(/^표현군 /, '') : fam.text) : null;
   const kind0 = famEl && !t && !gw && !c.part.childIds.length ? null : t ? h('span', { class: 'lens-kind', ...(t.quote ? { title: `종류 · 기록의 말 “${t.quote.quote}”` } : {}) }, TYPE_LABEL[t.type])
     // S8: an untyped group says what kind of group it is (its 묶음 뜻) and how many parts it holds, never 「유형 미상」.
     : gw ? h('span', { class: 'lens-kind', title: gw.recorded ? `묶음 뜻 「${gw.word}」 · 기록의 글자 · 종류 단어는 기록에 없음` : `묶음 뜻 「${gw.word}」 · 안의 부분들로 읽음 · 종류 단어는 기록에 없음` }, groupKind(null, gw.word, c.part.childIds.length))
@@ -4281,7 +4323,9 @@ function whereSection(c: PaneCtx): HTMLElement | null {
 /** What readings said each relation hands over (map-reading.7): per relation, the newest reading's line that names a payload. */
 function relationPayloads(project: Project): Map<string, ReadingRelation> {
   const out = new Map<string, ReadingRelation>();
-  for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload) out.set(x.relationId, x);
+  // Polish round fixes 1: what a line hands over reads without the record's row IDs (「D05 전역 변수」 → 「전역 변수」); 원문 keeps them.
+  const g = projectVariantGloss(project);
+  for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload) out.set(x.relationId, { ...x, payload: plainIds(nameVariants(x.payload, g)) });
   return out;
 }
 /** What each relation's line carries and says (map-reading.7–8): per relation, the channel, payload and cadence of the newest
@@ -4296,8 +4340,9 @@ function relationLines(project: Project): Map<string, LineSaid> {
   // Pipeline .44: a line flowing for a variant (its C-LINK 조건·선택 「변형 X03」) says which variant, by what it is; any variant ID in
   // what it hands over reads the same way.
   const payloadOf = (x: ReadingRelation): string | null => {
-    const own = x.payload ? glossVariants(x.payload, g) : null, v = x.variantRef ? `변형 ${glossVariants(x.variantRef, g)}` : null;
-    return own && v && !own.includes(x.variantRef!) ? `${own} · ${v}` : own ?? v;
+    // Polish round fixes 1: the variant said once, by its name, in the 선택 words (never again after the payload); the row IDs off.
+    const own = x.payload ? plainIds(nameVariants(x.payload, g)) : null;
+    return own ?? (x.variantRef ? nameVariants(`변형 ${x.variantRef}`, g) : null);
   };
   project.readings.forEach((r, i) => {
     if (isMapReading(r)) for (const x of r.relations) {
@@ -4305,7 +4350,10 @@ function relationLines(project: Project): Map<string, LineSaid> {
       out.set(x.relationId, { channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: payloadOf(x) ?? cur.payload, cadence: x.cadence ?? cur.cadence,
         mode: x.mode ?? cur.mode, fields: x.payloadFields?.length ? [...x.payloadFields] : cur.fields, quote: x.quote ?? cur.quote, at: r.at,
         // Polish round (spec-cards-v2 §1): the condition as the map says it (the ask's form word 「조건 그대로:」 the record copied left off).
-        when: conditionWords(x.when) ?? cur.when, optional: x.optional ?? cur.optional, variant: x.variantRef ? glossVariants(x.variantRef, g) : cur.variant });
+        // Polish round fixes 1: a variant in the condition reads by its name; a newer reading that makes the relation not optional
+        // drops the older reading's variant, so a 선택 tip never names a stale one.
+        when: (w => (w ? nameVariants(w, g) : cur.when))(conditionWords(x.when)), optional: x.optional ?? cur.optional,
+        variant: x.variantRef ? variantName(x.variantRef, g) ?? x.variantRef : x.optional === false ? null : cur.variant });
     }
   });
   return out;
@@ -4439,6 +4487,8 @@ function markFirstView() {
   const cardMarks = () => [...world.querySelectorAll<HTMLElement>('.node.card.fv-emph, .node.card.fv-preview')].map(el => `${el.dataset.box}${el.classList.contains('fv-emph') ? '+' : ''}${el.classList.contains('fv-preview') ? '^' : ''}`).join('|');
   const was = cardMarks();
   world.querySelectorAll('.fv-emph, .fv-preview').forEach(el => el.classList.remove('fv-emph', 'fv-preview'));
+  // Polish round fixes 1: while the first view emphasises lines, the other control lines step back at rest (styles.css fv-lines).
+  $('space').classList.toggle('fv-lines', fvOn() && fvRec!.lines.length > 0);
   if (fvOn()) {
     const r = fvRec!, rels = new Set(r.lines);
     for (const id of r.parts) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('fv-emph');
@@ -4459,7 +4509,8 @@ function renderFirstView() {
   if (!o || !v || (!r?.reason && !offer && !emph)) { box.hidden = true; box.replaceChildren(); return; }
   const btn = (cls: string, text: string, title: string, on: () => void, extra: Record<string, string> = {}) => h('button', { type: 'button', class: `fv-b ${cls}`, title, onclick: on, ...extra }, text);
   // The reason speaks for the lens it chose: once the person reads with another lens it steps back (「추천 첫 보기로」 offers it again).
-  const why = r?.reason && r.lens === viewLens ? btn('fv-why', r.reason, r.line ? `기록의 첫 구조 줄 “${r.line}” · 눌러서 그 문장과 쓴 연결 보기` : '첫 구조 줄 없이 지도의 선과 반복만 보고 고른 첫 보기 · 눌러서 자세히',
+  // Polish round fixes 1: the toolbar says the first view in a few words (「첫 보기 · 시작·반복 ▾」); its sentence is the tip and the popover.
+  const why = r?.reason && r.lens === viewLens ? btn('fv-why', `첫 보기 · ${LENSES.find(l => l.id === r.lens)?.short ?? FIRST_LENS_NAME[r.lens]} ▾`, `${r.reason}\n${r.line ? `기록의 첫 구조 줄 “${r.line}” · 눌러서 그 문장과 쓴 연결 보기` : '첫 구조 줄 없이 지도의 선과 반복만 보고 고른 첫 보기 · 눌러서 자세히'}`,
     () => { fvMenu = fvMenu === 'why' ? null : 'why'; renderFirstView(); }, { 'aria-expanded': String(fvMenu === 'why') }) : null;
   if (fvMenu === 'why' && !why) fvMenu = null;
   const change = r?.reason || v.alternatives.length ? btn('fv-change', '바꾸기', '렌즈 바꾸기 · 다른 중심', () => { fvMenu = fvMenu === 'change' ? null : 'change'; renderFirstView();
@@ -4956,7 +5007,7 @@ async function commit(o: Opened, next: Project): Promise<string | null> {
     catch (err) { saveFailure = storageErrorCode(err); return saveFailure === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
   } else if (o.kind === 'example') examples.set(o.key, next);
   else return '이 프로젝트는 읽기 전용이에요.';
-  o.project = next; o.view = studioView(next);
+  o.project = next; o.view = plainView(studioView(next));
   // A wide reading open over this project reads the saved data again (said there), keeping its place.
   wide.render();
   return null;
@@ -5450,6 +5501,8 @@ function flowStrip(o: Opened): HTMLElement | null {
  * state of the whole map in one line over its structure. Pointing at a count lights those parts; the others step back. A click
  * holds that until the next click or Escape. */
 let stateHold: string | null = null;
+/** Whether the map title's 기록 정보 is open (polish round fixes 1: closed on the first screen). */
+let metaOpen = false;
 /** The map title's 「운영 기록 없는 부분 n」 (spec forms v1 §4.1): the drawn typed cards whose records give no operations state (their
  * footers no longer repeat it); the names in the tip. */
 function opsNoneChip(o: Opened): HTMLElement | null {
@@ -5462,7 +5515,7 @@ function stateStrip(o: Opened): HTMLElement | null {
   if (cards.length < 2) return null;
   const stage = (p: PartView) => { const l = ladderOf(o.view, p); return l.check ? 'check' : l.report ? 'report' : l.ask ? 'ask' : 'none'; };
   const groups = new Map<string, string[]>(); for (const p of cards) { const k = stage(p); groups.set(k, [...(groups.get(k) ?? []), p.id]); }
-  const WORDS: Record<string, [string, string]> = { check: ['확인됨', '검사나 자료로 확인한 기록이 있는 부분'], report: ['보고됨', '했다는 보고만 있고 아직 확인되지 않은 부분'], ask: ['요청만', '요청만 있고 보고가 없는 부분'], none: ['기록 없음', '요청·보고·확인 기록이 아직 없는 부분'] };
+  const WORDS: Record<string, [string, string]> = { check: ['확인됨', '검사나 자료로 확인한 기록이 있는 부분'], report: ['보고됨', '했다는 보고만 있고 아직 확인되지 않은 부분'], ask: ['요청만', '요청만 있고 보고가 없는 부분'], none: ['요청·보고 없음', '요청·보고·확인 기록이 아직 없는 부분 (운영 기록과는 다름)'] };
   const el = h('p', { class: 'map-states', 'aria-label': '부분의 상태' });
   const show = (k: string | null) => {
     const ids = new Set(k ? groups.get(k) ?? [] : []), sp = $('space');
@@ -6477,6 +6530,10 @@ function bindEdgeHints() {
     world.querySelectorAll('.near-end, .near-self, .edge-labels > .near').forEach(el => el.classList.remove('near-end', 'near-self', 'near'));
     world.querySelectorAll('.edge.near:not(.path)').forEach(x => { if (x !== g) x.classList.remove('near'); });
     g?.classList.add('near');
+    // Polish round fixes 1: the pointed line comes to the top of its layer and its bundle mates step back at once (styles.css
+    // line-near), so it reads apart from the lines running beside it.
+    if (g?.parentNode && g.parentNode.lastChild !== g) g.parentNode.appendChild(g);
+    space.classList.add('line-near');
     // The line's own label, badges and chips light with it (they are the same target).
     world.querySelectorAll(`.edge-labels > [data-key="${CSS.escape(key)}"], .edge-labels > [data-badge="${CSS.escape(key)}"], .edge-labels > [data-once="${CSS.escape(key)}"]`).forEach(el => el.classList.add('near'));
     for (const end of [edge.from, edge.to]) world.querySelector(`[data-box="${CSS.escape(end)}"]`)?.classList.add('near-end');
@@ -6484,7 +6541,7 @@ function bindEdgeHints() {
     linePeek = window.setTimeout(() => { if (g?.classList.contains('near')) space.classList.add('peek'); }, DIM_AFTER_MS);
     if (g?.classList.contains('on')) lightRows(edge.ids);
   };
-  const clearNear = () => { clearTimeout(linePeek); world.querySelectorAll('.edge.near:not(.path)').forEach(x => x.classList.remove('near')); world.querySelectorAll('.near-end, .near-self, .edge-labels > .near').forEach(el => el.classList.remove('near-end', 'near-self', 'near')); space.classList.remove('peek'); lightRows([]); };
+  const clearNear = () => { clearTimeout(linePeek); space.classList.remove('line-near'); world.querySelectorAll('.edge.near:not(.path)').forEach(x => x.classList.remove('near')); world.querySelectorAll('.near-end, .near-self, .edge-labels > .near').forEach(el => el.classList.remove('near-end', 'near-self', 'near')); space.classList.remove('peek'); lightRows([]); };
 
   /* ---- what each target says ---- */
   /* The line tip (review): who → whom, what, when and on what condition; the drawing's own vocabulary (stroke, head) is the
@@ -6498,8 +6555,9 @@ function bindEdgeHints() {
     const arrow = (a: string, b: string, k: string) => `${nameOf(a)} ${k === 'related' ? '—' : '→'} ${nameOf(b)}`;
     const relWords = (r: RelationView | null, badgeSaid = false) => { const s = r ? said.get(r.id) : undefined;
       return [s?.payload ? `넘기는 것 ${s.payload}` : r?.note ? noteHead(r.note) : ch ? CHANNEL_LABEL[ch] : REL_LABEL[r?.kind ?? edge.kind] ?? edge.kind,
-        s?.when && !(badgeSaid && badge?.kind === 'condition') ? conditionTip(s.when) : s?.optional && !s.when && !(badgeSaid && badge?.kind === 'optional') ? `선택${s.variant ? ` · 변형 ${s.variant}일 때만` : ''}` : null,
-        s?.cadence && !(badgeSaid && badge?.kind === 'cadence') ? `박자 “${s.cadence}”` : null, s?.mode && !badgeSaid ? MODE_LABEL[s.mode] : null].filter(Boolean).join(' · '); };
+        s?.when && !(badgeSaid && badge?.kind === 'condition') ? conditionTip(s.when) : s?.optional && !s.when && !(badgeSaid && badge?.kind === 'optional') ? `선택${s.variant ? ` · ${variantWord(s.variant)}일 때만` : ''}` : null,
+        // Polish round fixes 1: no bare 「설계」 at a row's end (the mode reads in the pane's 근거, and in a badge's tip in words).
+        s?.cadence && !(badgeSaid && badge?.kind === 'cadence') ? `박자 “${s.cadence}”` : null].filter(Boolean).join(' · '); };
     const pointed = !!el && (el.classList.contains('edge-badge') || el.classList.contains('edge-once'));
     const out: HTMLElement[] = [h('strong', {}, arrow(edge.from, edge.to, edge.kind))];
     // The quiet tick says what it stands for first (its words follow in the badge's tip).
@@ -6513,11 +6571,12 @@ function bindEdgeHints() {
       out.push(h('span', { class: 'tip-kind' }, restOf(edge) ? `선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? `안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : `관계 ${edge.ids.length}개를 한 선으로 묶음`));
       if (ways) out.push(...ways.split('\n').slice(1).map(t => h('span', { class: 'tip-kind' }, t)));
       // Only some of them conditional (or with a cadence): that count stays, wherever the pointer is.
-      const count = badge?.tip.split('\n').find(t => /^관계 \d+개 중 \d+개가 적음$/.test(t));
+      const count = badge?.tip.split('\n').find(t => COUNT_RE.test(t));
       if (badge && !pointed && count) out.push(h('span', { class: 'tip-badge-w' }, `${badge.kind === 'condition' ? '조건' : badge.kind === 'optional' ? '선택' : '박자'} · ${count}`));
-      out.push(...rels.slice(0, 4).map((r, i) => h('span', { class: `tip-rel${i ? '' : ' first'}` }, h('span', {}, arrow(r.from, r.to, r.kind)), h('span', { class: 'tip-kind' }, relWords(r)))));
-      if (rels.length > 4) { const conds = rels.slice(4).filter(r => said.get(r.id)?.when).length;
-        out.push(h('span', { class: 'tip-kind' }, `${moreTip(rels.length - 4, '관계')}${conds ? ` · 그중 조건 ${conds}개` : ''} · 선을 고르면 모두`)); }
+      // Polish round fixes 1: a short tip (three A → B rows at most, the rest counted), so it never spreads over the cards around.
+      out.push(...rels.slice(0, TIP_RELS).map((r, i) => h('span', { class: `tip-rel${i ? '' : ' first'}` }, h('span', {}, arrow(r.from, r.to, r.kind)), h('span', { class: 'tip-kind' }, relWords(r)))));
+      if (rels.length > TIP_RELS) { const conds = rels.slice(TIP_RELS).filter(r => said.get(r.id)?.when).length;
+        out.push(h('span', { class: 'tip-kind' }, `${moreTip(rels.length - TIP_RELS, '관계')}${conds ? ` · 그중 조건 ${conds}개` : ''} · 선을 고르면 모두`)); }
     }
     if (tp) out.push(h('span', { class: 'tip-kind' }, `데이터 계약 · ${tp.name} · 필드 ${tp.fields.length}${tp.fields.length ? ` (${tp.fields.slice(0, 3).join(' · ')}${tp.fields.length > 3 ? ` ${moreText(tp.fields.length - 3)}` : ''})` : ''}`));
     if (edge.notes.length && edge.notes.every(plannedNote)) out.push(h('span', { class: 'tip-kind' }, '계획된 연결 · 아직 돌지 않음'));
@@ -6534,7 +6593,8 @@ function bindEdgeHints() {
     const role = (r?.role ?? p.note ?? '').replace(/\s+/g, ' ').trim(), io = r ? cardIo(o, p, r) : null;
     const roleRevised = !!r?.roleBasisRevised && !!r.role;
     return [h('span', { class: 'hc-name' }, p.name), path.length || alias ? h('span', { class: 'hc-path' }, [path.join(' › '), alias].filter(Boolean).join(' · ')) : null,
-      t ? h('span', { class: 'hc-kind' }, [t.group && !r?.typeRead ? '묶음' : FAMILY_WORD[t.family], t.kind, life].filter(Boolean).join(' · ')) : null,
+      // Polish round fixes 1: a group's kind word already says it is a group (「구성 · 안쪽 6」): no 「묶음 ·」 before it.
+      t ? h('span', { class: 'hc-kind' }, [t.group && !r?.typeRead ? null : FAMILY_WORD[t.family], t.kind, life].filter(Boolean).join(' · ')) : null,
       role ? h('span', { class: `hc-role${roleRevised ? ' revised' : ''}` }, role) : null,
       roleRevised ? h('span', { class: 'tip-revised' }, `하는 일${REVISED_BASIS}`) : null,
       ops ? h('span', { class: `hc-ops d-${dot?.kind ?? 'none'}` }, ops) : null,
@@ -6556,7 +6616,9 @@ function bindEdgeHints() {
       const edge = edgeOf(x.edge), ends = edge ? [edge.from, edge.to].map(b => world.querySelector(`[data-box="${CSS.escape(b)}"]`)?.getBoundingClientRect()).filter((r): r is DOMRect => !!r).map(rel) : [];
       const mine = x.el instanceof HTMLElement ? rel(x.el.getBoundingClientRect()) : null;
       const pt = mine ? { x: mine.x + mine.w / 2, y: mine.y + mine.h } : x.at ? { x: x.at.x - sr.left, y: x.at.y - sr.top } : { x: bounds.x + bounds.w / 2, y: bounds.y + bounds.h / 2 };
-      at = placeTip({ x: pt.x, y: pt.y, w: 0, h: 0 }, size, bounds, 'point', [...ends, ...lit, ...names], sides.get(x.key) ?? null);
+      // Polish round fixes 1 (spec §7): a line's tip keeps off every card in view, not only the names (the side of the line away from them).
+      const cardsIn = [...world.querySelectorAll<HTMLElement>('.node')].map(el => el.getBoundingClientRect()).filter(seen).map(rel);
+      at = placeTip({ x: pt.x, y: pt.y, w: 0, h: 0 }, size, bounds, 'point', [...ends, ...lit, ...names, ...cardsIn], sides.get(x.key) ?? null);
       sides.set(x.key, at.side);
     } else {
       // Beside the card (never over its name); a chip's tip at the chip's height.

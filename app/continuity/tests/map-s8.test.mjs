@@ -26,7 +26,7 @@ test('S8-1 a group card: its axis and count in the kind line, its first parts in
   // nanoGPT .43 v4: 「로컬 Python 프로세스」, untyped, the record's 묶음 뜻 실행 위치, five parts.
   const names = ['데이터 준비 스크립트', 'train.py', 'sample.py', 'bench.py', '노트북'];
   const t = cardTemplate(facts({ children: 5, members: names, groupAxis: 'place', groupWord: '실행 위치', groupRecorded: true }));
-  assert.equal(t.kind, '실행 위치 · 부분 5');
+  assert.equal(t.kind, '실행 위치 · 안쪽 5');
   assert.doesNotMatch(t.kind, /유형 미상/);
   assert.equal(t.glyph, 'place', 'a place reads as a place: the pin');
   assert.equal(t.family, 'neutral', 'no family is made up for it');
@@ -35,18 +35,18 @@ test('S8-1 a group card: its axis and count in the kind line, its first parts in
   assert.deepEqual(t.group, { axis: 'place', word: '실행 위치', names, recorded: true });
   // No axis known: 묶음, with the composition squares.
   const plain = cardTemplate(facts({ children: 3, members: ['a', 'b', 'c'] }));
-  assert.equal(plain.kind, '묶음 · 부분 3'); assert.equal(plain.glyph, 'composition');
-  // A typed group keeps its type word first (as before for a composition: 「계산 · 구성 2」), and its own glyph.
+  assert.equal(plain.kind, '묶음 · 안쪽 3'); assert.equal(plain.glyph, 'composition');
+  // A typed group keeps its type word first (as before for a composition: 「계산 · 안쪽 2」 since polish round fixes 1), and its own glyph.
   const gpt = cardTemplate(facts({ type: 'compute', children: 2, members: ['GPT.from_pretrained', 'GPT.generate'], groupAxis: 'composition', groupWord: '구성', groupRecorded: true }));
-  assert.equal(gpt.kind, '계산 · 구성 2'); assert.equal(gpt.glyph, 'compute'); assert.equal(gpt.family, 'process');
+  assert.equal(gpt.kind, '계산 · 안쪽 2'); assert.equal(gpt.glyph, 'compute'); assert.equal(gpt.family, 'process');
   assert.equal(gpt.rows[0].value, 'GPT.from_pretrained · GPT.generate');
   // An untyped group with recorded steps is drawn as a group (its stack), not the structural outline; its steps keep their line.
   const steps = cardTemplate(facts({ children: 2, members: ['x', 'y'], steps: [{ name: 'a', does: null }, { name: 'b', does: null }] }));
-  assert.equal(steps.structural, false); assert.equal(steps.kind, '묶음 · 부분 2'); assert.ok(steps.innerLine);
+  assert.equal(steps.structural, false); assert.equal(steps.kind, '묶음 · 안쪽 2'); assert.ok(steps.innerLine);
   // A part with no children is no group: nothing changes for it.
   const lone = cardTemplate(facts());
   assert.equal(lone.group, null); assert.equal(lone.kind, '유형 미상'); assert.equal(lone.rows.length, 0);
-  assert.equal(groupKind(null, '외부', 6), '외부 · 부분 6'); assert.equal(groupKind('loop', null, 3), '루프·엔진 · 구성 3');
+  assert.equal(groupKind(null, '외부', 6), '외부 · 안쪽 6'); assert.equal(groupKind('loop', null, 3), '루프·엔진 · 안쪽 3');
   assert.equal(groupGlyph('place'), 'place'); assert.equal(groupGlyph('participants'), 'composition'); assert.equal(groupGlyph(null), 'composition');
   assert.equal(membersRow([]), null); assert.equal(MEMBER_NAMES, 3);
   assert.equal(membersRow(['a', 'b', 'c']).value, 'a · b · c', 'three names whole, no +0');
@@ -54,11 +54,11 @@ test('S8-1 a group card: its axis and count in the kind line, its first parts in
 
 test('S8-2 a group\'s tip says whether the record named its axis, whether it named a type, and every part in it', () => {
   const t = cardTemplate(facts({ children: 2, members: ['a', 'b'], groupAxis: 'place', groupWord: '실행 위치', groupRecorded: true }));
-  assert.equal(groupTip(t, false), '실행 위치 · 부분 2\n묶음 뜻 「실행 위치」 · 기록의 글자\n기록이 이 묶음의 종류 단어를 말하지 않았다 (종류를 짐작하지 않음)\n안에 2: a · b');
+  assert.equal(groupTip(t, false), '실행 위치 · 안쪽 2\n묶음 뜻 「실행 위치」 · 기록의 글자\n기록이 이 묶음의 종류 단어를 말하지 않았다 (종류를 짐작하지 않음)\n안에 2: a · b');
   const read = cardTemplate(facts({ children: 1, members: ['p'], groupAxis: 'participants', groupWord: '참여자', groupRecorded: false }));
   assert.match(groupTip(read, false), /안의 부분들로 읽음 \(기록의 묶음 뜻 없음\)/);
   const none = cardTemplate(facts({ type: 'compute', children: 1, members: ['q'] }));
-  assert.equal(groupTip(none, true), '계산 · 구성 1\n묶음 뜻 미기록\n안에 1: q');
+  assert.equal(groupTip(none, true), '계산 · 안쪽 1\n묶음 뜻 미기록\n안에 1: q');
 });
 
 test('S8-3 a group\'s axis: the record\'s 묶음 뜻 first (실행 위치 only from a record), else the app\'s reading of its children', () => {

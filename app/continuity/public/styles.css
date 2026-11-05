@@ -276,9 +276,13 @@ button:disabled { opacity: .5; cursor: default; }
 .edge[data-start="none"]:not(.on):not(.near) .edge-line { marker-start: none; }
 /* A line drawn from a folded part summarises relations of its inside: a soft band, wider, its kind's dash kept. */
 .edge.agg .edge-line { stroke: var(--edge-soft); --lw: 3; }
-.edge.near .edge-line { stroke: var(--text-3); --lw: 2; stroke-opacity: 1; }
+.edge.near .edge-line { stroke: var(--accent); --lw: 2.5; stroke-opacity: 1; }
 /* A spine line pointed at reads firmer than at rest, never lighter. */
-.edge.near.spine:not(.on) .edge-line { stroke: var(--text-2); --lw: 2.25; }
+.edge.near.spine:not(.on) .edge-line { stroke: var(--accent); --lw: 2.5; }
+/* Polish round fixes 1: a pointed line's bundle mates step back at once (the pointed and selected lines stay whole). */
+.space.line-near .edge:not(.near):not(.on) .edge-line { opacity: .3; }
+/* Polish round fixes 1: while the first view emphasises its lines, the other control lines are lighter at rest. */
+.space.fv-lines .world .edge.c-control:not(.fv-emph):not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: calc(var(--lo-control, 1) * .45); }
 .edge.near:not(.on)[data-head="filled"] .edge-line { marker-end: url(#m-filled-near); }
 .edge.near:not(.on)[data-head="open"] .edge-line { marker-end: url(#m-open-near); }
 .edge.near:not(.on)[data-head="ref"] .edge-line { marker-end: url(#m-ref-near); }
@@ -294,13 +298,13 @@ button:disabled { opacity: .5; cursor: default; }
 .edge.agg.on .edge-line { stroke: #a9b8f5; --lw: 3; }
 /* The end marks (app.ts endMarkDefs): a filled triangle, open Vs, the ear's ring (canvas inside) and a dot, in their line's
    paint where supported. */
-.mk .mk-fill { fill: var(--edge); } .mk-on .mk-fill { fill: var(--accent); } .mk-near .mk-fill { fill: var(--text-3); }
+.mk .mk-fill { fill: var(--edge); } .mk-on .mk-fill { fill: var(--accent); } .mk-near .mk-fill { fill: var(--accent); }
 .mk .mk-fill { fill: context-stroke; }
 .mk .mk-open { fill: none; stroke: var(--edge); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .mk-ref .mk-open { stroke-width: 1.9; }
-.mk-on .mk-open { stroke: var(--accent); stroke-width: 2.2; } .mk-near .mk-open { stroke: var(--text-3); stroke-width: 2; }
+.mk-on .mk-open { stroke: var(--accent); stroke-width: 2.2; } .mk-near .mk-open { stroke: var(--accent); stroke-width: 2; }
 .mk .mk-open { stroke: context-stroke; }
-.mk .mk-ring { fill: var(--bg); stroke: var(--edge); stroke-width: 2.2; } .mk-on .mk-ring { stroke: var(--accent); stroke-width: 2.6; } .mk-near .mk-ring { stroke: var(--text-3); }
+.mk .mk-ring { fill: var(--bg); stroke: var(--edge); stroke-width: 2.2; } .mk-on .mk-ring { stroke: var(--accent); stroke-width: 2.6; } .mk-near .mk-ring { stroke: var(--accent); }
 .mk .mk-ring { stroke: context-stroke; }
 .space.dim .edge:not(.on):not(.near):not(.sc-path) .edge-line { opacity: .22; }
 /* Pointing at a part (nothing selected): its lines and their other ends stay, the rest of the map steps back. */
@@ -352,6 +356,10 @@ button:disabled { opacity: .5; cursor: default; }
 .edge-badge.beside { color: var(--text-4); border-color: var(--line); }
 .edge-label.revised { outline: 1px dashed var(--line-strong); outline-offset: -1px; }
 .map-title.pinned { opacity: 0; }
+/* Polish round fixes 1: the title's meta lines open from one screen-sized 「기록 정보 ▾」 (closed on the first screen). */
+.map-title:not(.meta-open) > .map-meta { display: none; }
+.map-meta-toggle { display: inline-flex; align-items: center; margin: 8px 0 0; padding: 0 calc(var(--t-kind, 12px) * .5); height: calc(var(--t-kind-lh, 16px) + 6px); border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); cursor: pointer; }
+.map-meta-toggle:hover { color: var(--text); border-color: var(--line-strong); }
 .map-name { margin: 0; word-break: keep-all; font-size: 26px; line-height: 32px; font-weight: var(--fw-title); letter-spacing: -.025em; color: var(--text); overflow-wrap: anywhere; }
 .map-purpose > span:first-child:not(:last-child) { margin-right: var(--s-2); }
 /* Two lines at most; '설명 전체' opens the whole text in the pane. */
@@ -638,7 +646,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.detail-open #world, .space.detail-open > .controls, .space.detail-open #line-key { visibility: hidden; }
 /* Polish round (spec-cards-v2 §1, §4): beside the detail view the pane head keeps a recorded state's words but drops the quiet
  * 「운영 기록 없음」 line under the part name; the map's pane (a click on the card) still states it. */
-.space.detail-open .pane-ops-notes:has(> .pane-ops-line.none) { display: none; }
+.space.detail-open .pane-ops-line.none { display: none; }
 .detail-view { position: absolute; top: 0; left: 0; bottom: 0; right: var(--plan-w, 0px); z-index: 2; display: flex; flex-direction: column; background: var(--bg); }
 .detail-view:focus { outline: none; }
 .dv-head { flex: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 16px 24px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
@@ -1811,8 +1819,8 @@ button:disabled { opacity: .5; cursor: default; }
 /* Review: below 가까이 a card is drawn at its content's height (fitCards fit-auto); the rest of its fixed box (where its lines still
    attach) is a faint dashed outline, so zooming never relays the map and no card reads as a large empty box. */
 .node.card.fit-auto { height: auto !important; overflow: visible; }
-.node.card.fit-auto.fit-ghost::after { content: ''; position: absolute; left: -1px; right: -1px; top: 100%; height: var(--rest, 0px); box-sizing: border-box;
-  border: calc(var(--u, 1) * 1px) dashed var(--line-strong); border-top: 0; border-radius: 0 0 8px 8px; opacity: .55; pointer-events: none; }
+/* Polish round fixes 1: the rest of the box stays invisible (a dashed outline read as an empty placeholder card under many cards). */
+.node.card.fit-auto.fit-ghost::after { content: none; }
 /* Review: at 중간 the inner line is a plain 「단계 N」; the program's provenance chips read only with 근거 꼬리표 on. */
 .space.tier-mid .node.card .c-inner :is(.c-inner-unit, .c-inner-text, .c-more, .prog-chip) { display: none; }
 .node.card .prog-chip { display: none; }
@@ -1821,7 +1829,6 @@ button:disabled { opacity: .5; cursor: default; }
 .space:not(.lens-state) .map-ops-none { display: none; }
 /* Review: where a card is narrow the lens's ops word takes the kind word's room (never both cut). */
 .space.lens-state:is(.tier-far, .tier-dots) .node.card .c-kind-word { display: none; }
-.space.lens-state:is(.tier-far, .tier-dots) .node.card .c-opsw::before { content: none; }
 .space.z-mid .node .node-text { justify-content: center; align-self: stretch; }
 .space.z-mid :is(.node:not(.card) .node-name, .frame-head .frame-name) { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .space.z-mid .node:not(.card) .node-name { font-size: calc(13.5px * var(--grow)); }
@@ -3052,7 +3059,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .dv-grid.has-line > .dv-side, .dv-grid.has-graph > .dv-side { container-type: inline-size; }
 @container (max-width: 159px) {
   .dv-ref .dv-ref-rel { display: none; }
-  .dv-ref .dv-ref-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: normal; word-break: keep-all; }
+  .dv-ref .dv-ref-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; word-break: keep-all; } /* polish round fixes 1: a long path wraps inside its two lines, never cut at the side */
 }
 .vg-more-note { margin: 4px 0 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
 .vg-more-note::before { content: '⇢ '; color: var(--text-4); }
@@ -3234,7 +3241,29 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .node.card .c-entry .c-enter.entry-open { padding: 0; font-size: 14px; }
 .node.card .c-entry .c-enter:hover, .node.card .c-entry .c-chip:hover { border-color: var(--line-strong); color: var(--text); background: var(--surface); }
 .node.card .c-entry .c-enter:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.node.card .c-entry .c-enter.enter-in span { font-size: 11px; }
+/* Polish round fixes 1: the ways in are framed at rest (not only on hover), sized with the type floors so they read when zoomed out,
+   set apart from 연결 N, and carry their word (「안쪽 2 ▸」, 「상세 ⤢」) at 중간 and 가까이. */
+.node.card .c-entry .c-enter { height: calc(var(--t-bottom, 28px) - 6px); min-width: calc(var(--t-bottom, 28px) - 6px); padding: 0 calc(var(--t-kind, 12px) * .4); border-color: var(--line); color: var(--text-2); font-size: var(--t-kind, 12px); gap: calc(var(--t-kind, 12px) * .25); }
+.node.card .c-entry .c-enter.entry-open { padding: 0 calc(var(--t-kind, 12px) * .4); font-size: var(--t-kind, 12px); }
+.node.card .c-entry .c-enter .c-enter-g { font-size: calc(var(--t-kind, 12px) * 1.25); line-height: 1; }
+.node.card .c-entry .c-chip + .c-enter { margin-left: calc(var(--t-kind, 12px) * .5); }
+.space:is(.tier-far, .tier-dots) .node.card .c-enter-w { display: none; }
+/* In a shared foot at 중간 the words step out before anything overlaps (the framed 「1 ▸」 and 「⤢」 stay); the ways in never shrink into each other. */
+.space.tier-mid .node.card .c-bottom .c-enter-w { display: none; }
+.node.card .c-entry > * { flex: none; }
+/* The ways in keep whole in a shared foot: they never shrink or clip (at 중간 a tighter frame); a crowded foot clips its sign chips' end. */
+.node.card .c-bottom .c-entry { flex: 0 0 auto; }
+.node.card .c-bottom .c-signs { flex: 0 1 auto; }
+.space.tier-mid .node.card .c-bottom .c-entry .c-enter { padding: 0 calc(var(--t-kind, 12px) * .2); gap: calc(var(--t-kind, 12px) * .12); }
+.space.tier-mid .node.card .c-bottom .c-entry .c-chip + .c-enter { margin-left: 2px; }
+.space.tier-mid .node.card .c-bottom .c-entry .c-chip { padding: 0 calc(var(--t-kind, 12px) * .2); }
+.space.tier-mid .node.card .c-bottom { gap: 4px; }
+.node.card.open-corner > :is(.c-role, .c-rows, .c-inner) { padding-right: calc(var(--t-bottom, 28px) - 2px); }
+.node.card .c-corner { position: absolute; right: 6px; bottom: 6px; display: inline-flex; z-index: 1; }
+.node.card .c-corner .c-enter { background: var(--surface); }
+.space:is(.tier-far, .tier-dots) .node.card :is(.c-corner, .toggle.c-expand) { display: none; }
+.node.card .toggle.c-expand { color: var(--text-3); border: 1px solid var(--line); width: 20px; height: 20px; margin-left: 2px; }
+.node.card .toggle.c-expand svg { width: 12px; height: 12px; }
 /* The map's hover surface (one at a time, anchored, hoverable: WCAG 1.4.13). */
 .edge-tip.hoverable { pointer-events: auto; }
 .edge-tip .hc-name { color: var(--text); font-weight: var(--fw-name); font-size: 13px; }
@@ -3250,6 +3279,8 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .edge-tip .hc-ops.d-none::before { display: none; }
 .edge-tip .hc-io { color: var(--text-3); font-size: 12px; white-space: pre-line; }
 .edge-tip .hc-line { white-space: pre-line; }
+/* Polish round fixes 1: Korean words never break mid-word in a tip (「“호출마 / 다”」). */
+.edge-tip { word-break: keep-all; overflow-wrap: anywhere; }
 .edge-tip .tip-rel { display: flex; flex-direction: column; padding-top: 3px; margin-top: 2px; border-top: 1px solid var(--hair-2); }
 .edge-tip .tip-rel.first { border-top: 0; padding-top: 0; margin-top: 0; }
 /* Line parts join the line's hover (cards v2 §3): its label, badges, type chip and count chip are hover targets of the line. */
@@ -3283,3 +3314,16 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .lg-dots { margin: 6px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-4); cursor: help; }
 .space.lens-state .node.card .c-opsw { flex: 0 0 auto; max-width: 100%; }
 .space.lens-state .node.card .c-kind-word { min-width: 2em; }
+/* Polish round fixes 1 (the 상태·공백 lens): a recorded state takes the kind line whole (the kind word and its chips step out, so neither
+   is cut), led by its mark in its dot's colour, never the words 「운영 기록 없음」 on every card. A card with no record carries nothing
+   more (its kind word stays whole):
+   the legend's one 「– 운영 기록 없음 N」 is the group's mark, so the recorded states are what stands out. */
+.space.lens-state .node.card .c-kind:has(> .c-opsw:not(.ops-none)) > :not(.c-opsw) { display: none; }
+.space.lens-state .node.card .c-opsw:not(.ops-none) { flex: 0 1 auto; overflow: visible; text-overflow: clip; }
+.space.lens-state .node.card .c-opsw::before { content: attr(data-mark); display: inline-block; min-width: 1em; margin: 0 4px 0 0; color: var(--text-3); font-weight: var(--fw-name); }
+.space.lens-state .node.card .c-opsw.os-running::before { color: var(--dot-run); }
+.space.lens-state .node.card .c-opsw.os-stopped::before { color: var(--dot-stop); }
+.space.lens-state .node.card .c-opsw:is(.os-waiting, .os-conflict)::before { color: var(--dot-wait); }
+.space.lens-state .node.card .c-opsw.ops-none { display: none; }
+/* Polish round fixes 1: the first view's own control lines read firm but not heavy black (after the S10 emphasis rule, which it softens). */
+.space.fv-lines .world .edge.c-control.fv-emph:not(.on):not(.near):not(.agg):not(.sum):not(.s-dotted):not(.s-sparse) .edge-line { --lw: 1.75; stroke: var(--text-2); }

@@ -87,7 +87,8 @@ export function kindLabel(type: PartType | null | undefined, steps: number, loop
  * word (실행 위치 · 구성 · 참여자 · 외부, or the app's own reading of its children; 묶음 when neither says) and how many parts it holds:
  * 「실행 위치 · 부분 5」. Typed, the type word first, then the axis and the count: 「계산 · 구성 2」 (as before for a composition). */
 export function groupKind(type: PartType | null | undefined, axisWord: string | null | undefined, children: number): string {
-  return type ? `${TYPE_LABEL[type]} · ${axisWord ?? '구성'} ${children}` : `${axisWord ?? '묶음'} · 부분 ${children}`;
+  // Polish round fixes 1: one phrase for what a group holds on the card, the hover card and the ▸ control (「안쪽 N」).
+  return type ? `${TYPE_LABEL[type]}${axisWord && axisWord !== '구성' ? ` · ${axisWord}` : ''} · 안쪽 ${children}` : `${axisWord ?? '묶음'} · 안쪽 ${children}`;
 }
 /** The glyph of an untyped group: a place pin for a group the record says is where things run (실행 위치), else the composition
  * squares; a typed group keeps its type's glyph (with the composition badge). */

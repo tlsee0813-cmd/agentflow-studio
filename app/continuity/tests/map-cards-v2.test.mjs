@@ -216,7 +216,7 @@ test('CARD-8 the built card and map: no ops footer, no c-short, no card title; t
   assert.ok(hov.includes("$('viewport').getBoundingClientRect()") && hov.includes('.near-end, .near-self') && hov.includes('.c-head'), 'tips stay in the map area, off lit neighbours and names');
   assert.ok(hov.includes('hoverQuiet') && !hov.includes('누르면 출발 부분을 고르고'), 'a picked card keeps its tip shut; no click hint');
   assert.ok(!hov.includes('실선 · 채운 머리'), 'no stroke vocabulary in the line tip');
-  assert.ok(hov.includes('conditionTip(s.when)') && body(src, 'relationLines').includes('when: conditionWords(x.when)'), 'M3: each relation row says its condition (polish round: 「조건: …」, the form word left off)');
+  assert.ok(hov.includes('conditionTip(s.when)') && body(src, 'relationLines').includes('(conditionWords(x.when))'), 'M3: each relation row says its condition (polish round: 「조건: …」, the form word left off)');
   assert.ok(body(src, 'cardIo').includes('relationEnds('), 'the hover card falls back to the lines the pane reads');
   assert.ok(body(src, 'fitCards').includes("'fit-auto'") && /\.node\.card\.fit-auto \{ height: auto !important/.test(css), 'cards below 가까이 at their content height');
   assert.ok(!/title: `양쪽으로/.test(body(src, 'placeCounts')) && !/title: `데이터 계약/.test(body(src, 'typeChipEl')), 'one hover surface: no native titles on line parts');
@@ -244,10 +244,38 @@ test('CARD-10 polish round (spec-cards-v2 §1): 포트 대응 미기록, 유지 
   assert.ok(/stepChip\(\)/.test(body(src, 'renderDetail')) || /stepChip\(\)/.test(src.slice(src.indexOf('function renderDetail'))), 'the detail view keeps the program chip');
   // The detail view's side and the short expansion: no 「운영 기록 없음」 under the name (a recorded state's words stay); the map's pane keeps it.
   const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
-  assert.ok(css.includes('.space.detail-open .pane-ops-notes:has(> .pane-ops-line.none) { display: none; }'));
+  // Polish round fixes 1: only the quiet line hides beside the detail view; a conflict note in the same block stays.
+  assert.ok(css.includes('.space.detail-open .pane-ops-line.none { display: none; }') && !/\.space\.detail-open \.pane-ops-notes[^{]*\{ display: none/.test(css));
+  assert.ok(card.includes("'data-tip': `${x.label} · 기록에서 프로그램이 옮긴 값`"), 'a program row says so in its tip');
   assert.ok(body(src, 'shortContent').includes("r.stateRead ? h('span', { class: 'xp-ops'"));
   assert.ok(body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'));
   // The map head's basis line: the time and the version only; the rest in its tip.
   const basis = body(src, 'basisLine');
   assert.ok(basis.includes('`설계 근거 · ${last.basisAt ?? \'작성 시각 미상\'} · 판본 ${version}`') && basis.includes('운영: 보고된 상태 (기록 없음은 제공된 자료 기준)'));
+});
+
+test('CARD-11 polish round fixes 1: the 상태·공백 lens marks recorded states and keeps 「운영 기록 없음」 off the cards; framed ways in with their words; no ghost outline; ⤢ alone takes no foot; a short first screen', () => {
+  const src = app(), card = body(src, 'cardEl'), css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
+  // The lens: a recorded state takes the kind line whole, led by its mark; no record is the quiet 「–」 (its words hidden).
+  assert.ok(card.includes("'data-mark'") && card.includes('OPS_MARK[dot.kind]') && card.includes("'c-opsw-t'"));
+  assert.ok(css.includes('.space.lens-state .node.card .c-kind:has(> .c-opsw:not(.ops-none)) > :not(.c-opsw) { display: none; }'));
+  assert.ok(css.includes('.space.lens-state .node.card .c-opsw.ops-none { display: none; }'));
+  assert.ok(!css.includes('.space.lens-state:is(.tier-far, .tier-dots) .node.card .c-opsw::before { content: none; }'), 'the mark stays when zoomed out');
+  // The ways in: 「안쪽 N ▸」 and 「상세 ⤢」 framed at rest, their words gone only at 개요; the head's 펼치기 is its own glyph.
+  assert.ok(src.includes("'안쪽 '") && card.includes("'상세'") && card.includes("'⤢'"));
+  assert.ok(!card.includes('제자리에 들어가면 펼치고'), 'a short ⤢ tip');
+  assert.match(css, /\.node\.card \.c-entry \.c-enter \{ height: calc\(var\(--t-bottom, 28px\) - 6px\);[^}]*border-color: var\(--line\)/);
+  assert.ok(src.includes('plusGlyph()') && src.includes('toggleButton(p, false, true)'));
+  // No dashed ghost under a card; a card whose only way in is ⤢ has no foot row (its height has none either).
+  assert.ok(css.includes('.node.card.fit-auto.fit-ghost::after { content: none; }'));
+  assert.ok(card.includes('floatOpen') && card.includes("'c-entry c-corner'") && body(src, 'cardFactsOf').includes('foot: p.childIds.length > 0,'));
+  // The first screen: 기록 정보 ▾ folds the title's meta lines; the toolbar's first view is a few words, its sentence the tip; the
+  // opening view centres the first view's parts (else the main flow) when the map does not fit.
+  assert.ok(src.includes("'기록 정보 ▾'") && css.includes('.map-title:not(.meta-open) > .map-meta { display: none; }'));
+  assert.ok(body(src, 'renderFirstView').includes('`첫 보기 · ${'));
+  assert.ok(body(src, 'fitView').includes('openFocus()') && body(src, 'openFocus').includes('lay.spine'));
+  assert.ok(src.includes("'요청·보고 없음'") && !src.includes("none: ['기록 없음'"));
+  // A pointed line reads apart: accent, its mates faded at once, raised in its layer.
+  assert.ok(css.includes('.edge.near .edge-line { stroke: var(--accent); --lw: 2.5;') && css.includes('.space.line-near .edge:not(.near):not(.on) .edge-line { opacity: .3; }'));
+  assert.ok(src.includes("space.classList.add('line-near')") && src.includes("space.classList.remove('line-near')"));
 });
