@@ -10,6 +10,7 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as T from '../dist/public/shared/record-table.js';
 import { studioView } from '../dist/public/shared/studio.js';
+import { groupParentConflicts } from '../dist/public/shared/record-reading.js';
 import * as B from '../server/map-blueprint.mjs';
 
 const page = n => readFileSync(new URL(`./fixtures/record45/page${n}.txt`, import.meta.url), 'utf8');
@@ -123,6 +124,20 @@ test('R48-2 a claim on a v5 row takes its grade from the row\'s own cites (E →
   const past = wire([part(f, 'new:push', '푸시 발송기', '|B07|푸시', { claims: [claim(f, 's7', '|RU01|', { topic: 'rule', kind: 'describes', evidence: 'run' })] })]);
   const r2 = M.validateMapReply(structuredClone(past), f.ask, { setAside: true });
   assert.ok(!r2.parts.flatMap(x => x.claims).some(x => x.key === 's7') && M.readingExclusions(r2).some(x => x.category === 'cite-grade'));
+});
+
+test('R48-5 a C-GROUP row whose 부모 is a part sets its children\'s parent; a parent the model gave is kept and said; no cycle; a 목록 row or a 부모 naming no part sets none', () => {
+  const p1 = page(1).replace('|GR02|B07|B07: FCM 통로 · B07: APNs 통로|목록|F04|', '|GR02|B07|B07: FCM 통로 · B07: APNs 통로|목록|F04|\n|GR03|B03|B05·B09·B04|구성|F02|\n|GR04|B05|B03|구성|F02|');
+  const f = ofPages([p1, page(2), page(3)]);
+  const w = wire([part(f, 'new:app', '물주기 앱', '|B02|'), part(f, 'new:api', '화분 API', '|B03|'), part(f, 'new:login', '로그인 검사', '|B09|', { parent: 'new:app' })]);
+  const read = M.validateMapReply(structuredClone(w), f.ask, { setAside: true }), of = name => read.parts.find(x => x.name === name), ref = name => of(name)?.ref;
+  assert.equal(of('일정 계산기').parent, 'new:api', 'GR03: B05 under B03');
+  assert.equal(of('급수 기록 DB').parent, 'new:api', 'GR03: B04 under B03');
+  assert.equal(of('로그인 검사').parent, 'new:app', 'the model\'s own parent stays');
+  assert.equal(of('화분 API').parent, null, 'GR04 would make B03 its own ancestor: none');
+  assert.equal(of('매시 틱').parent, null, 'GR01\'s 부모 names no part');
+  assert.equal(of('푸시 발송기').parent, null);
+  assert.deepEqual(groupParentConflicts(M.askRecords(f.ask), read.parts), [`GR03: ${ref('로그인 검사')} → new:api (지도: new:app)`, `GR04: new:api → ${ref('일정 계산기')} (지도: 없음)`]);
 });
 
 test('R48-8 a rule a code device keeps (지키는 장치 코드 or 검사, with a file or run cite) describes what the code does; a rule people keep stays a want', () => {

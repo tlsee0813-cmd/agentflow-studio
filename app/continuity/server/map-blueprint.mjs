@@ -6,6 +6,7 @@ import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusio
   portSides, stepRenames, REFUSAL_OUTCOME, LOOP_TYPES, listItems, sameSetting, VERSION_WORD, namesWord, fieldGroupHead, programLoopStep, programSteps, tableCells, MAP_SUMMARY_MAX, STEP_NAME_MAX, CADENCE_MAX, FILE_ROLE_MAX } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
 import { rowsOf, readRecordTables, v5PartNames, familyType } from '../dist/public/shared/record-table.js';
+import { groupParentConflicts } from '../dist/public/shared/record-reading.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
 // .31: a first map plans up to 36 parts (twelve fragments of three; the two KORU records need about 33: 24 table rows and nine
@@ -1583,7 +1584,7 @@ function aliasExclusion(path, category, alias, ask) {
 // condition row with no code device (anchor-enforce).
 // .40: and the steps whose parenthesised tail went to does (step-name). .41: and the 4절 rows no step stands on (steps-cut).
 // .42: and the artifact table's product lines merged into a kept line or left out as shortcuts (product-lines).
-export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'record-lines', 'lines-set-aside', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count', 'type-unmapped']);
+export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'record-lines', 'lines-set-aside', 'group-parent', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count', 'type-unmapped']);
 export const FINAL_DIAGNOSTICS_MAX = 16;
 /** Recipe .48: the v5 C-PART rows of a family whose role the type table (familyType) does not map, 「B07 name: 표현군·역할」. */
 export function unmappedTypes(ask) {
@@ -1606,6 +1607,9 @@ export function finalDiagnostics(fragments, global, ask, blueprint) {
     if (coverage && coverage.covered < coverage.rows) found.push({ path: 'parts', rule: 'coverage', expected: coverage.rows, actual: coverage.covered, names: coverage.missing });
     if (folds.length) found.push({ path: 'parts', rule: 'store-dup', expected: 0, actual: folds.length, names: folds });
     if (products.length) found.push({ path: 'relations', rule: 'product-lines', expected: null, actual: products.length, names: products });
+    // Recipe .48: the C-GROUP rows whose parent a child does not take (the model's own parent kept, or a cycle kept out).
+    const conflicts = read ? groupParentConflicts(askRecords(ask), read.parts) : [];
+    if (conflicts.length) found.push({ path: 'parts', rule: 'group-parent', expected: null, actual: conflicts.length, names: conflicts });
     // Recipe .48: the C-PART rows whose role the type table does not map (no type, quietly said; never one invented).
     const unmapped = unmappedTypes(ask);
     if (unmapped.length) found.push({ path: 'parts', rule: 'type-unmapped', expected: null, actual: unmapped.length, names: unmapped });

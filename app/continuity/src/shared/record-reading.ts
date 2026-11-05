@@ -556,6 +556,10 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
         ctx.read43.recordDiagnostics.push({ category: 'part-no-row', table: 'C-PART', column: null, record: q.record, from: q.from!, to: q.to! });
     }
   }
+  // Recipe .48: a C-GROUP row (실행 위치, 구성, 참여자, 외부; never a 목록) whose 부모 is one part's B ID is its children's parent: each child
+  // the row names by B ID takes that part as its parent where the reply gave it none; a parent the reply gave is kept (groupParents says
+  // where the two differ), and none is set that would make a part its own ancestor.
+  if (latest) for (const g of groupParents(latest, parts)) if (!g.child.parent && !ancestorOf(parts, g.child.ref, g.parent.ref)) g.child.parent = g.parent.ref;
   // Every part with no family yet: from its type word, the unambiguous ones only (a v4 or v3 record; 12.3).
   for (const b of parts) {
     if (b.family !== undefined || b.familyRole !== undefined || !b.type || !b.typeQuote) continue;
@@ -596,6 +600,31 @@ export function variantGloss(variants: Iterable<{ recordRef: string; implementer
 export function glossVariants(text: string, gloss: ReadonlyMap<string, string>): string {
   if (!gloss.size) return text;
   return text.replace(/\bX\d{1,3}\b(?!\s*[(（])/g, id => gloss.has(id) ? `${id}(${gloss.get(id)})` : id);
+}
+/** Recipe .48: the parent each v5 C-GROUP row gives its children: a row other than 목록 whose 부모 cell is one B ID of a C-PART row, each
+ * child B ID of its 자식들 cell (the parent itself left out), as the parts that stand on those rows ({ row, parent, child }). */
+export function groupParents(f: FoldedRecord, parts: readonly Part43[]): { row: string; parent: Part43; child: Part43 }[] {
+  const byRef = (id: string) => f.byId.get(id)?.table === 'C-PART' ? parts.find(b => b.recordRef === id) : undefined, out: { row: string; parent: Part43; child: Part43 }[] = [];
+  for (const r of f.rows.get('C-GROUP') ?? []) {
+    if (fixedWord(r.row.byColumn['묶음 뜻'] ?? '', GROUP_WORDS)?.value === 'members') continue;
+    const cell = (r.row.byColumn['부모'] ?? '').replace(/\s*:\s*.+$/, '').trim();
+    if (!/^B\d{1,3}$/.test(cell)) continue;
+    const parent = byRef(cell); if (!parent) continue;
+    for (const id of partRefs(r.row.byColumn['자식들'])) { const child = id === cell ? undefined : byRef(id); if (child && child !== parent) out.push({ row: r.id, parent, child }); }
+  }
+  return out;
+}
+/** Recipe .48 (diagnostic): the C-GROUP rows of the latest v5 record whose parent the read reply does not give a child, 「GR01: child
+ * → parent (지도: other)」 (a parent the reply gave of its own, or one a cycle kept out). */
+export function groupParentConflicts(texts: Texts, parts: readonly Part43[]): string[] {
+  const latest = latestFold45(texts, foldPages([...texts].map(([record, { text }]) => ({ record, text })), 'newest-first')); if (!latest) return [];
+  return groupParents(latest, parts).filter(g => g.child.parent !== g.parent.ref).map(g => `${g.row}: ${g.child.ref} → ${g.parent.ref} (지도: ${g.child.parent ?? '없음'})`);
+}
+/** Whether `ancestor` is `ref` or stands above it among the parts (by parent refs, a chain of at most the parts' count). */
+function ancestorOf(parts: readonly Part43[], ancestor: string, ref: string): boolean {
+  let at: string | null | undefined = ref;
+  for (let k = 0; at && k <= parts.length; k++) { if (at === ancestor) return true; at = parts.find(b => b.ref === at)?.parent; }
+  return false;
 }
 /** Recipe .48: the column of a v5 table that dates its row (C-CHANGE 날짜, C-RULE 정한 이·언제, C-ISSUE 언제부터, C-GATE 언제쯤). */
 const DATE_COLUMNS: Readonly<Record<string, string>> = { 'C-CHANGE': '날짜', 'C-RULE': '정한 이·언제', 'C-ISSUE': '언제부터', 'C-GATE': '언제쯤' };
