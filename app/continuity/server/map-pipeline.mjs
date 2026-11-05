@@ -512,7 +512,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
   const reconcile = (signal = null) => typeof store.reconcileLost === 'function' && openaiKey
     ? store.reconcileLost(responseId => readResponseUsage({ apiKey: openaiKey, responseId, fetchImpl, ...(signal ? { signal } : {}) })) : Promise.resolve([]);
   async function read(ask, signal, reportProgress = null) {
-    ask = validateMapAsk(ask);
+    ask = validateMapAsk(ask, { route: 'divided' });
     if (!eligible(ask)) throw new ApiError('MAP_PIPELINE_SCOPE', 400);
     if (!ready()) throw new ApiError('MAP_PIPELINE_NOT_CONFIGURED', 503);
     if (signal?.aborted) throw new ApiError('CANCELLED', 499);

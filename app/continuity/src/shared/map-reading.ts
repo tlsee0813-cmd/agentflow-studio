@@ -1542,14 +1542,20 @@ function str(v: unknown, max: number, empty = false, code?: string): asserts v i
 }
 function arr(v: unknown, max: number, code?: string): asserts v is unknown[] { check(Array.isArray(v) && v.length <= max, code); }
 
+/** Recipe .48 (.47 review N1): the route an ask is read for. Only the divided first-map route (the pipeline, its stages and the map
+ * jobs it runs) takes the first-map bounds of askLimits; every other reader (/api/studio/map, a preview executor's job) the shared ones. */
+export interface MapAskRoute { route?: 'divided' | 'shared' }
+/** The shared bounds of every ask off the divided route. */
+export const SHARED_ASK_LIMITS: Readonly<Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>>> = Object.freeze({ records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES, spans: SPANS_PER_RECORD });
 /** The whole request within MAP_BYTES of UTF-8 JSON; known aliases, parents and claim keys; nothing is clipped here. */
-export function validateMapAsk(value: unknown): MapAsk {
+export function validateMapAsk(value: unknown, at: MapAskRoute = {}): MapAsk {
   const version = !!value && typeof value === 'object' ? (value as { schemaVersion?: unknown }).schemaVersion : null;
   const four = version === MAP4_SCHEMA || version === MAP5_SCHEMA || version === MAP6_SCHEMA || version === MAP7_SCHEMA, three = four || version === MAP3_SCHEMA, two = three || version === MAP2_SCHEMA;
   obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records', ...(two ? ['requests'] : []), ...(three ? ['priors'] : [])]);
   if (value.schemaVersion !== MAP_SCHEMA && !two) throw new Error('UNSUPPORTED_VERSION');
   // Recipe .47: a first map.6 ask is held to the first-map bounds (a whole folded v5 record), every other ask to the shared ones.
-  const bound = askLimits(value);
+  // Recipe .48 (review N1): on the divided route only; any other route keeps the shared bounds whatever the ask's shape.
+  const bound = at.route === 'divided' ? askLimits(value) : SHARED_ASK_LIMITS;
   if (bytes(value) > bound.bytes) throw new Error('INPUT_TOO_LARGE');
   obj(value.project, ['name', 'purpose']); str(value.project.name, 120); if (value.project.purpose !== null) str(value.project.purpose, 2000);
   arr(value.parts, 200);

@@ -5,8 +5,13 @@
 // a fixed table (never invented); a claim's grade and date come from its own row's cites and cells. No model is called.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import * as D from '../dist/public/shared/domain.js';
+import * as J from '../dist/public/shared/map-job.js';
+import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
+import { openMapJobs } from '../server/map-jobs.mjs';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as T from '../dist/public/shared/record-table.js';
 import { studioView } from '../dist/public/shared/studio.js';
@@ -178,6 +183,33 @@ test('R48-5 a C-GROUP row whose 부모 is a part sets its children\'s parent; a 
   assert.equal(of('매시 틱').parent, null, 'GR01\'s 부모 names no part');
   assert.equal(of('푸시 발송기').parent, null);
   assert.deepEqual(groupParentConflicts(M.askRecords(f.ask), read.parts), [`GR03: ${ref('로그인 검사')} → new:api (지도: new:app)`, `GR04: new:api → ${ref('일정 계산기')} (지도: 없음)`]);
+});
+
+test('R48-6 the first-map bounds are the divided route\'s alone: a first-map-sized ask reads there, and a preview executor\'s job of it is refused (413) before it is kept', async () => {
+  // Three pages of the 공방 예약 record with 300 long steps: past the shared 64 KiB, within the first-map bounds.
+  const head = (n, prev) => `〔기록 AF5-0a0b0c0e · 쪽 ${n} · 기준 abc1234 · 앞 쪽 ${prev ?? '—'}〕 공방 예약 기록 v5 (시험 세션, 2026-11-05 12:3${n})`;
+  const stepPage = (n, from) => [head(n, n - 1), table('C-STEP', Array.from({ length: 150 }, (_, k) => { const i = from + Math.floor(k / 10), s = (k % 10) + 1;
+    return [`${b(i)}:S${pad(s)}`, `단계 ${pad(i)}-${pad(s)}`, `작업대 예약 기록을 읽고 회원의 대기 순서를 확인한 뒤 다음 단계로 넘긴다(시험용 긴 설명 ${pad(i)}-${pad(s)})`, `step_${i}_${s}()`, '—', '—', 'F01']; })),
+    table('C-END', [['C-STEP', '끝남', `${b(from)}:S01–${b(from + 14)}:S10`, '—', '—']]), '완료 단계: 상세 완료'].join('\n');
+  const first = workshop().replace(/^〔[^〕]*〕[^\n]*/, head(1));
+  let p = D.createProject(); for (const t of [first, stepPage(2, 1), stepPage(3, 16)]) p = D.pasteRecord(p, t, null).project;
+  p = { ...p, pasted: p.pasted.map((r, i) => ({ ...r, at: new Date(Date.UTC(2026, 10, 5, 12, i)).toISOString() })) };
+  const inp = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA, { records: M.MAP_FIRST_RECORDS, recordChars: M.MAP_FIRST_RECORD_CHARS, bytes: M.MAP_FIRST_BYTES, spans: M.MAP_FIRST_SPANS });
+  assert.ok(new TextEncoder().encode(JSON.stringify(inp.ask)).length > M.MAP_BYTES);
+  M.validateMapAsk(inp.ask, { route: 'divided' });
+  assert.throws(() => M.validateMapAsk(inp.ask), /INPUT_TOO_LARGE/, 'the shared bounds by default');
+  assert.equal(J.decodeMapInput(JSON.parse(JSON.stringify(J.encodeMapInput(inp)))).ask.records.length, inp.ask.records.length, 'a job may carry it');
+  // A preview host's job of it: refused at binding, never kept (the executor is never asked).
+  const dir = mkdtempSync(join(tmpdir(), 'r48-jobs-')), jobs = await openMapJobs({ dir });
+  try {
+    const used = () => { throw new Error('the executor was used'); };
+    const h = createStudioHandler({ env: {}, jobs, mapExecutor: { ready: () => true, model: 'x', describe: () => ({}), prepare: used, acquire: used, call: used } });
+    const wire = J.encodeMapInput(inp), id = `MJ_${crypto.randomUUID()}`, cap = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64url');
+    const binding = { entryId: 'E_r4800000-01', projectId: p.id, lifecycle: 1, seq: 1, after: inp.after, schemaVersion: inp.ask.schemaVersion, prompt: await mapPromptId(), model: 'x', askHash: await J.jobHash(inp.ask), inputHash: await J.jobHash(wire) };
+    const res = await h(new Request('http://127.0.0.1/api/studio/jobs', { method: 'POST', headers: { 'x-agentflow-request': '1', 'x-studio-operation': cap, 'content-type': 'application/json' }, body: JSON.stringify({ version: 'map-job.1', id, binding, input: wire }) }));
+    assert.equal(res.status, 413, JSON.stringify(await res.clone().json()));
+    assert.equal((await res.json()).error?.code ?? 'INPUT_TOO_LARGE', 'INPUT_TOO_LARGE');
+  } finally { await jobs.close(); rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('R48-8 a rule a code device keeps (지키는 장치 코드 or 검사, with a file or run cite) describes what the code does; a rule people keep stays a want', () => {

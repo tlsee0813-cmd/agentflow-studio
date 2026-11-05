@@ -132,7 +132,7 @@ corrections는 이번 원문이 같은 대상·범위의 기존 current 주장�
 /** Exact bounded blueprint, with every pointer resolved against original span.2 records. No text is repaired or clipped. */
 export function validateMapBlueprint(value, ask) {
   try {
-    const checkedAsk = validateMapAsk(ask);
+    const checkedAsk = validateMapAsk(ask, { route: 'divided' });
     const later = checkedAsk.schemaVersion === 'studio.map.7';
     if (!exact(value, later ? ['parts', 'global', 'corrections'] : ['parts', 'global']) || !Array.isArray(value.parts) || value.parts.length > blueprintPartsMax(checkedAsk)
       || !Array.isArray(value.global) || value.global.length > blueprintGlobalMax(ask)) invalid();
@@ -182,7 +182,7 @@ export function blueprintStageIssues(value, ask) {
     if (issues.length < 12 && !issues.some(issue => issue.path === path && issue.rule === rule)) issues.push({ path, rule, expected, actual });
   };
   try {
-    const checked = validateMapAsk(ask), later = checked.schemaVersion === 'studio.map.7';
+    const checked = validateMapAsk(ask, { route: 'divided' }), later = checked.schemaVersion === 'studio.map.7';
     if (!value || typeof value !== 'object' || Array.isArray(value)) { add('reply', 'shape'); return issues; }
     if (!exact(value, later ? ['parts', 'global', 'corrections'] : ['parts', 'global'])) add('reply', 'keys');
     const anchors = originalAnchors(checked), existing = new Map(checked.parts.map(part => [part.id, part]));

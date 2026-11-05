@@ -76,6 +76,9 @@ export async function map7PromptId() {
 }
 /** The recipe id a map ask of this schema is asked and bound with (a job's binding.prompt). */
 const promptFor = schema => schema === 'studio.map.7' ? map7PromptId() : mapPromptId();
+/** Recipe .48: an ask off the divided route is held to the shared bounds (validateMapAsk's default). A job's ask already read whole on the
+ * divided route's bounds, so whatever refuses it here is a bound it runs past: INPUT_TOO_LARGE. */
+const sharedAsk = ask => { try { validateMapAsk(ask); } catch { throw new ApiError('INPUT_TOO_LARGE', 413); } };
 
 /** The studio settings from env, and the names of the settings that were given but could not be used (each falls back to
  * its default). A setting is never half applied: an out-of-range number, a malformed model name or origin is set aside whole. */
@@ -318,7 +321,8 @@ export function createStudioHandler({ env = {}, fetchImpl = globalThis.fetch, co
   // AF100: durable map jobs, only when the host gives a job service (the local Node server, server/map-jobs.mjs). The job owns
   // its call: the same map model and recipe as /map, the same limiter (taken when it is accepted), never the request's signal.
   const runJob = executor ? {
-    configured: () => executor.ready(), prompt: promptFor, model: executor.model, prepare: ask => executor.prepare(ask),
+    // Recipe .48 (.47 review N1): a preview executor reads an ask within the shared bounds; the first-map bounds are the divided route's.
+    configured: () => executor.ready(), prompt: (schema, ask) => { sharedAsk(ask); return promptFor(schema, ask); }, model: executor.model, prepare: ask => executor.prepare(ask),
     acquire: id => { const own = executor.acquire(id); try { const shared = limiter.acquire(id); return () => { shared(); own(); }; } catch (e) { own(); throw e; } },
     call: async (ask, signal, execution) => { const out = await executor.call(ask, signal, execution); return { model: executor.model, reply: out.wire, evidence: evidenceOf(ask), observed: out.observed }; }
   } : {
