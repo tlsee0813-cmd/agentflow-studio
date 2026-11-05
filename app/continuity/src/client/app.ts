@@ -36,7 +36,7 @@ import { zoomLevel, zoomTier, tierText, tierFit, entryParts, type EntryCounts, t
 import { cardTemplate, cardHeights, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
-import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
+import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, stateText as wellStateText, type Well, type WellRow } from './container-view.js';
@@ -1346,8 +1346,13 @@ const stepsOf = (r: PartUnderstanding): ActionStep[] => r.steps ?? [];
  * place that reads them: the entry line ('조건 K'), the short expansion's 분기 출구, the detail view's step exits and the pane. */
 // Pipeline .44: a variant ID a condition names (「then=X01」) reads with what the variant is (its C-VARIANT row: the implementing part and
 // its choice condition); the stored words stay as written.
-const conditionsOf = (r: PartUnderstanding): PartUnderstanding['conditions'] => {
-  const list = r.conditions ?? [], g = opened ? projectVariantGloss(opened.project) : null;
+// Recipe .48 fix (A7): a condition whose 거짓이면 a reading blanked for its length (condition-else, on the condition's own row) is marked
+// incomplete, so its else exit reads 「미상 …」 (never as a condition with nothing to do otherwise).
+const conditionsOf = (r: PartUnderstanding): NonNullable<PartUnderstanding['conditions']> => {
+  const g = opened ? projectVariantGloss(opened.project) : null;
+  const blanked = opened ? mapReadings(opened).flatMap(x => (x.exclusions ?? []).filter(e => e.category === 'condition-else')) : [];
+  let list: NonNullable<PartUnderstanding['conditions']> = r.conditions ?? [];
+  if (blanked.length) list = list.map(c => (c.else === null && elseBlanked(c.quote, blanked) ? { ...c, incomplete: true } : c));
   if (!g?.size || !list.some(c => /\bX\d{1,3}\b/.test(`${c.when} ${c.then} ${c.else ?? ''}`))) return list;
   return list.map(c => ({ ...c, when: glossVariants(c.when, g), then: glossVariants(c.then, g), else: c.else === null ? null : glossVariants(c.else, g) }));
 };

@@ -115,7 +115,8 @@ test('R46-5 the page cap is 20 pages, and a record stopped by it says so (never 
 
 test('R46-6 the base request names every table\'s row-ID form (one line, and at each table), the short clarifications, about 11.5K characters', () => {
   const ask = R.recordAskV5('AF5-12345678');
-  assert.ok(ask.length <= 11500, String(ask.length));
+  // Recipe .48 (v5.1): the type role words and the setting note add under 200 characters, within about 11.6K.
+  assert.ok(ask.length <= 11600, String(ask.length));
   assert.ok(ask.includes(R.ROW_ID_FORMS) && R.ROW_ID_FORMS.includes('C-GROUP GR01 · C-LINK LN01 · C-LOOP B03:L01 · C-STATE SM01 · C-WITHDRAW WD01 · C-STATUS ST01 · C-CHECK CK1'));
   for (const id of [...T.Q1_TABLES, ...T.Q2_TABLES, 'C-SRC', 'C-EVID']) {
     const t = T.V5_TABLE_DEFS.get(id), form = T.rowIdForm(t);

@@ -450,8 +450,103 @@ export function rowsOf(texts: Texts & object, ids: readonly string[]): TableRow[
 }
 /** The v4 type word of a v5 role whose type is clear (ROLE_TYPES), for the v4 passes; '' for any other role. */
 const V4_WORD_OF: Readonly<Record<string, string>> = { person: '사람', external: '외부 시스템', session: '세션', store: '행 파일·저장소', ai: 'AI 판단', timer: '타이머·일정', compute: '계산',
-  collector: '수집기', actor: '집행·외부 호출', screen: '화면', automation: '빌드·배포 자동화' };
-export const roleType = (cell: string): string | null => { const f = readFamily(cell); return f.ok && f.role ? fixedWord(f.role, ROLE_TYPES)?.value ?? null : null; };
+  collector: '수집기', actor: '집행·외부 호출', screen: '화면', automation: '빌드·배포 자동화', loop: '루프·엔진' };
+/** Recipe .48 fix (A7): what a v5 record's own structure says of one C-PART row (by its B ID), the facts a role word's type must stand on:
+ * loopOwner, a C-LOOP row names it as owner (소유 부분, or the loop ID's own part); timeUnit, a time or cycle unit is written for it (a
+ * C-LOOP unit of its loop, a C-ENTRY 일정 entry it owns); boundary, a C-GROUP 외부 row lists it as a child; allowBlock, a C-COND row of it,
+ * or a 조건·분기 of its own C-STEP rows, records an allow or block outcome (거부, 차단, 허용, 통과, 403…). */
+export interface PartStructure { loopOwner: boolean; timeUnit: boolean; boundary: boolean; allowBlock: boolean }
+export const NO_STRUCTURE: PartStructure = Object.freeze({ loopOwner: false, timeUnit: false, boundary: false, allowBlock: false });
+const TIME_UNIT = /주기|간격|타이머|cron|정각|매\s*(?:일|주|월|시간?|분|초)|\d+\s*(?:초|분|시간)(?=마다|간격|\s|$|[,·)])|interval|tick|틱|시각/i;
+// An outcome that lets through or stops: a refusal, a block, an error raised, a wait for someone's answer, an approval.
+const ALLOW_BLOCK = /거부|거절|차단|막(?:음|는다|고|아|힘|기)|허용|통과|불허|금지|승인|중단|멈춤|멈춘다|기다림|대기|오류|예외|에러|reject|den(?:y|ied)|block|allow|forbid|unauthori[sz]ed|[A-Za-z]Error\b|Exception\b|throw|raise|\b40[13]\b/i;
+export function partStructure(f: FoldedRecord | undefined, id: string): PartStructure {
+  if (!f || !/^B\d{1,3}$/.test(id)) return NO_STRUCTURE;
+  const loops = (f.rows.get('C-LOOP') ?? []).filter(r => partRefs(r.row.byColumn['소유 부분']).includes(id) || r.id.startsWith(`${id}:L`));
+  const entries = (f.rows.get('C-ENTRY') ?? []).filter(r => partRefs(r.row.byColumn['소유 부분']).includes(id));
+  const boundary = (f.rows.get('C-GROUP') ?? []).some(r => fixedWord(r.row.byColumn['묶음 뜻'] ?? '', GROUP_WORDS)?.value === 'boundary' && partRefs(r.row.byColumn['자식들']).includes(id));
+  const conds = (f.rows.get('C-COND') ?? []).filter(r => partRefs(r.row.byColumn['부분']).includes(id));
+  // A C-GATE row of the part: what lets it through (무엇이 확인되면 → 무엇을 한다) and what holds it (막고 있는 것) are recorded.
+  const gates = (f.rows.get('C-GATE') ?? []).filter(r => partRefs(r.row.byColumn['부분']).includes(id) && !!(r.row.byColumn['무엇을 한다'] ?? '').trim() && !/^[—–-]+$/.test((r.row.byColumn['무엇을 한다'] ?? '').trim()));
+  const steps = (f.rows.get('C-STEP') ?? []).filter(r => r.id.startsWith(`${id}:S`));
+  return { loopOwner: loops.length > 0, timeUnit: loops.some(r => TIME_UNIT.test(r.row.byColumn['반복 단위'] ?? '')) || entries.some(r => fixedWord(r.row.byColumn['호출 방식'] ?? '', ENTRY_WORDS)?.value === 'schedule'),
+    boundary, allowBlock: conds.some(r => ALLOW_BLOCK.test(`${r.row.byColumn['참이면'] ?? ''} ${r.row.byColumn['거짓이면'] ?? ''}`)) || steps.some(r => ALLOW_BLOCK.test(r.row.byColumn['조건·분기'] ?? '')) || gates.length > 0 };
+}
+/** A C-PART row's type (familyType): type, the one the structure confirms (null otherwise); unmapped, the app could not map the role to
+ * any type (apart from 미정, the record's own undecided, which is neither); held, the type the role proposed that the structure did not
+ * confirm, or the types that compete (「loop?」, 「compute|loop」), null when none was held. */
+export interface FamilyTypeRead { type: string | null; unmapped: boolean; held: string | null }
+/** A word that names a person (one piece of a role, 「소유자·병합 담당」's 「소유자」), and a last word that names a thing, not a person. */
+const PERSON_WORD = /^(?:사람|소유자|메인테이너|기여자|방문자|사용자|운영자|관리자|작성자|검토자|개발자|회원|고객|승인자|리뷰어|유지보수자|병합자|담당자|실행자|제안자|열람자|팀|사람들)$/;
+const THING_HEAD = /^(?:코드|함수|구현|플러그인|라이브러리|실행기|세션|봇|시스템|서비스|API|모듈|패키지|프로그램|도구|스크립트|소비자)$/i;
+/** A display or input point (화면, UI, 대시보드, 클라이언트, 표시) and words that only handle screen data (상태 전환, 자료 변환). */
+const DISPLAY_WORD = /^(?:화면|UI|페이지|대시보드|폼|입력창|뷰|표시)$/i, DISPLAY_DATA = /^(?:변환|전환|처리|상태|자료|데이터|파싱|계산)$/;
+/** Recipe .48: a C-PART row's type from its 표현군 and the words of its role, by a fixed table (never a guess from the part's name or what it
+ * does). Recipe .48 fix (A7, binding): a role word only proposes a type; the record's structure (partStructure) confirms it, and when two
+ * types compete, or none is confirmed, the type is null (never one picked by the table's order):
+ * - 저장 → store.
+ * - 촉발 → timer only where a time or cycle unit is written (its loop's unit, a 일정 entry, a time word in the role: 주기, 간격, cron, 매일,
+ *   10분, 분 단위; 「스케줄러」 alone may be an assigner); automation for a build or deploy (빌드·배포·자동화·CI).
+ * - 관문 → only where an allow or block is recorded (its C-COND outcomes, its step branches, a C-GATE row of it): person for a person's
+ *   approval (사람, or 승인·검토 that no 자동·봇·CI·토큰 does), else compute; a gate with none recorded has no type (its family says 관문).
+ * - 참여 → person when a word of the role names a person and its last word names no thing (「외부 기여자」, 「플러그인 작성자」, 「소유자·병합
+ *   담당」 are people; 「사용자 코드」, 「방문자 세션」 are not); session for an AI 세션 only; external for a bot, a service, an outside system or
+ *   the user's code, only where the record states the boundary (a C-GROUP 외부 row, or the role itself: 외부 시스템·서비스·API·라이브러리,
+ *   사용자 코드, 프로젝트 밖; 「봇」 alone says nothing of inside or outside).
+ * - 처리 → loop only for the owner of a C-LOOP row (「실행 조정」 alone is not); collector for collecting (수집, never 측정 of values it holds);
+ *   ai (AI 판단·LLM·모델 판단); screen only where a piece of the role ends in a display or input point (화면, UI, 페이지, 대시보드, 폼, 표시)
+ *   and the role is not about screen data (「화면 상태 전환」, 「화면 자료 변환」); actor only where a piece of the role is running an outside
+ *   command (외부 호출, 명령·프로세스·셸 실행, 실행기, 집행); compute (계산·변환·파싱·검증·측정·판정).
+ * Two proposed types compete (confirmed or not) and give none. A row of a family whose role proposes no type says so (unmapped); a row of
+ * no family (미정, a cell outside the words) gives nothing. */
+export function familyType(cell: string, s: PartStructure = NO_STRUCTURE): FamilyTypeRead {
+  const f = readFamily(cell); if (!f.ok || !f.family) return { type: null, unmapped: false, held: null };
+  const role = (f.role ?? '').trim(), has = (re: RegExp) => re.test(role);
+  // The role's words (a bracketed note left off) and its pieces (「·」, 「/」, 「,」), each piece's last word its head.
+  const plainRole = role.replace(/[(（][^)）]*[)）]/g, ' ').trim(), words = plainRole.split(/[\s·,/]+/).filter(Boolean), head = words.at(-1) ?? '';
+  const heads = plainRole.split(/\s*[·,/]\s*/).map(p => p.split(/\s+/).filter(Boolean).at(-1) ?? '').filter(Boolean);
+  // Each proposed type, and whether the structure (or, where no structure is asked for, the family and role) confirms it.
+  const proposed: { type: string; ok: boolean }[] = [];
+  const put = (type: string, ok: boolean) => { if (!proposed.some(p => p.type === type)) proposed.push({ type, ok }); };
+  switch (f.family) {
+    case 'store': put('store', true); break;
+    case 'trigger': {
+      const clock = TIME_UNIT.test(role) || /(?:초|분|시간)\s*단위/.test(role);
+      if (clock || has(/일정|타이머|cron|스케줄|schedule/i)) put('timer', s.timeUnit || clock);
+      if (has(/빌드|배포|자동화|\bCI\b|워크플로/i)) put('automation', true);
+      break;
+    }
+    case 'gate': {
+      const human = has(/사람/) || (has(/승인|검토|리뷰/) && !has(/자동|봇|\bbot\b|\bCI\b|토큰|검사기|스크립트/i));
+      put(human ? 'person' : 'compute', s.allowBlock);
+      break;
+    }
+    case 'participant':
+      // A person whatever the boundary (「외부 기여자」, 「소유자·병합 담당」), unless the role's last word is a thing (「사용자 코드」, 「방문자 세션」).
+      if (words.some(w => PERSON_WORD.test(w)) && !THING_HEAD.test(head)) put('person', true);
+      else if (has(/AI\s*세션/i)) put('session', true);
+      else if (has(/사용자\s*(?:코드|실행기|함수|구현|플러그인)|실행기|플러그인|라이브러리|봇|외부|서비스|시스템|\bAPI\b|\bbot\b/i))
+        put('external', s.boundary || has(/외부\s*(?:시스템|서비스|API|프로그램|도구|라이브러리|패키지|모듈|의존성)|사용자\s*(?:코드|함수|구현|플러그인|실행기)|프로젝트\s*밖|저장소\s*밖/i));
+      break;
+    case 'process':
+      // Recipe .48 fix (A7): a structural type the role proposes stands as a proposal (confirmed or not); a display or command word whose
+      // piece is about something else (「화면 상태 전환」, 「명령 실행 결과 판정」) proposes nothing.
+      if (has(/반복|루프|실행\s*조정|스케줄|\bloop\b/i)) put('loop', s.loopOwner);
+      if (has(/수집/)) put('collector', true);
+      if (has(/AI\s*판단|LLM|모델\s*판단/i)) put('ai', true);
+      if ((heads.some(h => DISPLAY_WORD.test(h)) || (head === '클라이언트' && words.some(w => /^(?:화면|UI)$/i.test(w)))) && !DISPLAY_DATA.test(head)) put('screen', true);
+      if (has(/외부\s*호출|실행기|집행|(?:명령|프로세스|셸|외부\s*도구)\s*실행/) && heads.some(h => /^(?:호출|실행기|집행|실행)$/.test(h))) put('actor', true);
+      if (has(/계산|변환|파싱|검증|측정|판정|산출|집계/)) put('compute', true);
+      break;
+    default: break;
+  }
+  if (!proposed.length) return { type: null, unmapped: true, held: null };
+  // Two proposed types compete, confirmed or not (「변환·어댑터 실행 조정」: compute or a loop; 「페이지 수집·판정」): none is picked.
+  if (proposed.length === 1 && proposed[0]!.ok) return { type: proposed[0]!.type, unmapped: false, held: null };
+  return { type: null, unmapped: false, held: proposed.map(p => `${p.type}${p.ok ? '' : '?'}`).join('|') };
+}
+/** The type a v5 C-PART row's role and structure give (familyType), its folded record's structure when given. */
+export const roleType = (cell: string, s: PartStructure = NO_STRUCTURE): string | null => familyType(cell, s).type;
 /** A v5 row read as a v4 row (see TableRow): B IDs in a cell as their parts' names (「B07: 통로」 as 「푸시 발송기: 통로」), F IDs as paths. */
 export function v5View(f: FoldedRecord, r: FoldRow): Record<string, string> {
   const c = r.row.byColumn, nameOf = (id: string) => (f.byId.get(id)?.table === 'C-PART' ? (f.byId.get(id)!.row.byColumn['이름'] ?? '').trim() : '') || id;
@@ -459,7 +554,7 @@ export function v5View(f: FoldedRecord, r: FoldRow): Record<string, string> {
   const paths = (cell: string | undefined) => (cell ?? '').replace(/(?<![A-Za-z0-9])F\d{1,3}(?!\d)/g, id => f.ledger.files.get(id)?.path || id);
   const base: Record<string, string> = { ...c };
   switch (r.table) {
-    case 'C-PART': { const t = roleType(c['표현군·역할'] ?? ''); return { 이름: c['이름'] ?? '', 유형: t ? V4_WORD_OF[t] ?? '' : '', '하는 일 한 줄': c['하는 일 한 줄'] ?? '', '담당 파일·폴더': paths(c['담당 F']).replace(/\s*\+\s*/g, '·'), '구현 상태': c['구현 상태'] ?? '', '행 ID': r.id, 근거: c['근거'] ?? '', '표현군·역할': c['표현군·역할'] ?? '' }; }
+    case 'C-PART': { const t = roleType(c['표현군·역할'] ?? '', partStructure(f, r.id)); return { 이름: c['이름'] ?? '', 유형: t ? V4_WORD_OF[t] ?? '' : '', '하는 일 한 줄': c['하는 일 한 줄'] ?? '', '담당 파일·폴더': paths(c['담당 F']).replace(/\s*\+\s*/g, '·'), '구현 상태': c['구현 상태'] ?? '', '행 ID': r.id, 근거: c['근거'] ?? '', '표현군·역할': c['표현군·역할'] ?? '' }; }
     case 'C-GROUP': {
       const list = fixedWord(c['묶음 뜻'] ?? '', GROUP_WORDS)?.value === 'members';
       const kids = list ? (c['자식들'] ?? '').split(/\s*·\s*(?=B\d{1,3}\s*:)|\s+·\s+/).map(x => x.replace(/^B\d{1,3}\s*:\s*/, '').trim()).filter(Boolean).join('·') : names(c['자식들']);
@@ -622,10 +717,22 @@ export function readCites(cell: string, ledger: Ledger): { cites: Cite[]; proble
   const tagGrade: Readonly<Record<string, CiteGrade>> = { 파일: 'file', 보고: 'report', 실행: 'run', 추정: 'guess', 모름: 'unknown' };
   for (const m of cell.matchAll(/\[(파일|보고|실행|추정|모름)(?:\s*[:：]\s*([^\]]*))?\]/g)) cites.push({ ref: `[${m[1]}]`, grade: tagGrade[m[1]!]!, source: said5(m[2]), place: null, quote: null });
   if (/\[=\]/.test(cell)) problems.push({ kind: 'cite-equals', ref: '=' });
-  for (const raw of cell.replace(/\[[^\]]*\]/g, ' ').split('+')) {
+  // Recipe .48 fix (review B1): 「추정(E49+F03+F13)」 is one guess cite, read before the cell is split on 「+」: the IDs in its brackets are
+  // what the guess rests on, never cites of their own (split first, its 「F03」 read as a file cite and raised the row's grade to file).
+  const rest = cell.replace(/\[[^\]]*\]/g, ' ').replace(/추정\s*[(（]([^)）]*)[)）]/g, (_, inner: string) => {
+    cites.push({ ref: '추정', grade: 'guess', source: said5(inner), place: null, quote: null }); return ' '; });
+  for (const raw of rest.split('+')) {
     const t = raw.trim();
     if (!t || /^[—–-]+$/.test(t)) continue;
     if (t === '=') { problems.push({ kind: 'cite-equals', ref: '=' }); continue; }
+    // Recipe .48 fix (review B1): a file the cell itself marks unread (「F02(안 읽음)」, 「F02(미확인)」) is cited unread, grade unknown.
+    const unreadMark = /^(F\d{1,3})\s*[(（]\s*(?:안\s*읽음|못\s*읽음|읽지\s*않음|미확인)\s*[)）]$/.exec(t);
+    if (unreadMark) {
+      const id = unreadMark[1]!, f = ledger.files.get(id);
+      if (!f) problems.push({ kind: 'cite-missing', ref: id });
+      else { cites.push({ ref: id, grade: 'unknown', source: f.path, place: null, quote: null }); problems.push({ kind: 'cite-unread', ref: id }); }
+      continue;
+    }
     if (/^F\d{1,3}$/.test(t)) {
       const f = ledger.files.get(t);
       if (!f) problems.push({ kind: 'cite-missing', ref: t });
@@ -692,6 +799,13 @@ export function readReserved(cell: string): { id: string; name: string }[] {
   return [...cell.matchAll(/((?:B\d{1,3}:[SL]\d{1,3}[a-z]?)|(?:[A-Z]{1,2}\d{1,3}))(?![\d:])\s*([^·,，]*)/g)].map(m => ({ id: m[1]!, name: m[2]!.trim() }));
 }
 /** The part IDs (B05), loop IDs (B05:L01) and other row IDs (D02, X01, N01, K01, B05:S02) a cell names. */
+/** Recipe .48: the names of the parts a v5 row's cell names by B ID (its 「: 통로」 tail left off), each as its C-PART row's 이름 cell; []
+ * for a v4 or v3 row. A name holding 「·」 (「진입·종료 조정」) stays one name: the view's text joins names with the same mark. */
+export function v5PartNames(x: TableRow, column: string): string[] {
+  if (x.dialect !== 'v5' || !x.fold || !x.folded) return [];
+  const raw = (x.fold.row.byColumn[column] ?? '').replace(/\s*:\s*.+$/, '');
+  return partRefs(raw).flatMap(id => { const r = x.folded!.byId.get(id); const n = r?.table === 'C-PART' ? (r.row.byColumn['이름'] ?? '').trim() : ''; return n ? [n] : []; });
+}
 export const partRefs = (cell: string | undefined): string[] => [...new Set([...(cell ?? '').matchAll(/(?<![A-Za-z0-9])B\d{1,3}(?![\d:])/g)].map(m => m[0]))];
 export const loopRefs = (cell: string | undefined): string[] => [...new Set([...(cell ?? '').matchAll(/(?<![A-Za-z0-9])B\d{1,3}:L\d{1,3}(?!\d)/g)].map(m => m[0]))];
 // A step a branch names (→ B05:S01) may stand on a later page and is no reference checked here.
@@ -711,7 +825,9 @@ export type FoldCategory = 'page-conflict' | 'page-gap' | 'page-prev' | 'duplica
   | 'page-replaced' | 'row-id-prefix' | 'drop-ambiguous';
 export interface FoldDiagnostic { category: FoldCategory; table: string | null; ref: string | null; record: string; page: number | null; from: number; to: number }
 /** A current row: its table, ID, the page and record it stands on, the row as read, whether it was written as 교체·정정 or 추가, its cites. */
-export interface FoldRow { table: string; id: string; record: string; page: number; row: RecordRow; source: RecordTable; mark: 'replace' | 'add' | null; cites: Cite[] }
+export interface FoldRow { table: string; id: string; record: string; page: number; row: RecordRow; source: RecordTable; mark: 'replace' | 'add' | null; cites: Cite[];
+  /** Recipe .48 fix: the kinds of problem its 근거 cell's cites had (a word no cite reads, an ID the ledgers do not hold, an unread file). */
+  citeProblems?: CiteProblem['kind'][] }
 export interface PageEnd { page: number; table: string; state: string | null; written: string[]; reserved: { id: string; name: string }[]; remaining: string | null; record: string; from: number; to: number }
 export interface FoldPage { record: string; n: number; prev: number | null; basis: string; title: string; hash: string; conflict: boolean; repeated: number; from: number; to: number }
 export type ObligationKind = 'fix' | 'reservation' | 'table-skipped' | 'table-open' | 'table-next' | 'loop-body' | 'entry-unlinked' | 'folder-part' | 'page-gap' | 'page-conflict';
@@ -951,7 +1067,7 @@ function foldGroup(key: string, srcs: Src[]): FoldedRecord {
   // Cites: every current row's 근거 (the ledgers' own rows cite nothing), each C-SUMMARY sentence's 「(F02)」.
   const cited = new Map<string, string[]>();
   const citeRow = (r: FoldRow) => {
-    const got = readCites(r.row.byColumn['근거'] ?? '', ledger); r.cites = got.cites;
+    const got = readCites(r.row.byColumn['근거'] ?? '', ledger); r.cites = got.cites; r.citeProblems = got.problems.map(p => p.kind);
     for (const p of got.problems) d(p.kind, r.record, r.page, r.table, `${r.id}·${p.ref}`.slice(0, 40), r.row.from, r.row.to);
     for (const c of got.cites) if (/^E\d/.test(c.ref)) cited.set(c.ref, [...cited.get(c.ref) ?? [], r.id]);
   };

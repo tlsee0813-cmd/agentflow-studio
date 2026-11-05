@@ -73,7 +73,9 @@ export function decodeMapInput(value: unknown): MapInput {
   keys(value, ['version', 'ask', 'parts', 'records', 'claims', 'coverage', 'after', 'requestCoverage', 'fullRequests', 'priors']);
   check(value.version === MAP_INPUT_CODEC || value.version === MAP_INPUT_CODEC2);
   const two = value.version === MAP_INPUT_CODEC2;
-  const ask = validateMapAsk(value.ask);
+  // Recipe .48: a job may carry a divided first map (its route is checked when the job is bound: jobPrompt's withinRoute, a preview
+  // executor's shared bounds).
+  const ask = validateMapAsk(value.ask, { route: 'divided' });
   check(JOB_SCHEMAS.includes(ask.schemaVersion) && JSON.stringify(ask) === JSON.stringify(value.ask));
   const pairs = <T>(v: unknown, alias: RegExp, item: (x: unknown) => x is T, max: number): Map<string, T> => {
     check(Array.isArray(v) && v.length <= max); const out = new Map<string, T>();

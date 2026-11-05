@@ -5,7 +5,8 @@ import { askRecords, validateMapAsk, validateMapReply, setAside, readingExclusio
   artifactRows, heldPlaces, carriesArtifact, LOOP_UNIT, programLoop, unrecordedAt, conditionRows, fileMapRows, programPortMap, carriesQuery, contentWords,
   portSides, stepRenames, REFUSAL_OUTCOME, LOOP_TYPES, listItems, sameSetting, VERSION_WORD, namesWord, fieldGroupHead, programLoopStep, programSteps, tableCells, MAP_SUMMARY_MAX, STEP_NAME_MAX, CADENCE_MAX, FILE_ROLE_MAX } from '../dist/public/shared/map-reading.js';
 import { resolveRange } from '../dist/public/shared/evidence-span.js';
-import { rowsOf, readRecordTables } from '../dist/public/shared/record-table.js';
+import { rowsOf, readRecordTables, v5PartNames, familyType, partStructure } from '../dist/public/shared/record-table.js';
+import { groupParentConflicts, ledgerOf } from '../dist/public/shared/record-reading.js';
 import { CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS } from '../dist/public/shared/types.js';
 
 // .31: a first map plans up to 36 parts (twelve fragments of three; the two KORU records need about 33: 24 table rows and nine
@@ -131,7 +132,7 @@ corrections는 이번 원문이 같은 대상·범위의 기존 current 주장�
 /** Exact bounded blueprint, with every pointer resolved against original span.2 records. No text is repaired or clipped. */
 export function validateMapBlueprint(value, ask) {
   try {
-    const checkedAsk = validateMapAsk(ask);
+    const checkedAsk = validateMapAsk(ask, { route: 'divided' });
     const later = checkedAsk.schemaVersion === 'studio.map.7';
     if (!exact(value, later ? ['parts', 'global', 'corrections'] : ['parts', 'global']) || !Array.isArray(value.parts) || value.parts.length > blueprintPartsMax(checkedAsk)
       || !Array.isArray(value.global) || value.global.length > blueprintGlobalMax(ask)) invalid();
@@ -181,7 +182,7 @@ export function blueprintStageIssues(value, ask) {
     if (issues.length < 12 && !issues.some(issue => issue.path === path && issue.rule === rule)) issues.push({ path, rule, expected, actual });
   };
   try {
-    const checked = validateMapAsk(ask), later = checked.schemaVersion === 'studio.map.7';
+    const checked = validateMapAsk(ask, { route: 'divided' }), later = checked.schemaVersion === 'studio.map.7';
     if (!value || typeof value !== 'object' || Array.isArray(value)) { add('reply', 'shape'); return issues; }
     if (!exact(value, later ? ['parts', 'global', 'corrections'] : ['parts', 'global'])) add('reply', 'keys');
     const anchors = originalAnchors(checked), existing = new Map(checked.parts.map(part => [part.id, part]));
@@ -283,24 +284,22 @@ export function sectionRows(ask, title) {
 /** .30: the data rows of every table of the records whose header names a sender and a receiver column (「보내는 부분 | 받는 부분」),
  * each as [sender, receiver] loosely compared, wherever the table stands. */
 export function connectionRows(ask) {
-  const rows = [];
-  for (const { text } of askRecords(ask).values()) {
-    let columns = null;
-    for (const raw of text.split('\n')) {
-      const line = raw.trim();
-      if (!line.startsWith('|')) { columns = null; continue; }
-      const cells = tableCells(line);
-      if (!columns) { const from = cells.findIndex(c => /보내는\s*부분/.test(c)), to = cells.findIndex(c => /받는\s*부분/.test(c)); columns = from >= 0 && to >= 0 ? [from, to] : false; continue; }
-      if (columns === false || cells.every(cell => !cell || /^:?-{2,}:?$/.test(cell))) continue;
-      rows.push([plainName(cells[columns[0]] ?? ''), plainName(cells[columns[1]] ?? '')]);
-    }
-  }
-  return rows.filter(([from, to]) => from && to);
+  return connectionPayloadRows(ask).map(([from, to]) => [from, to]);
+}
+/** Recipe .48: a v5 record's C-LINK rows (the current rows of its fold), each end the name of the part its B ID names (the raw cells
+ * hold B IDs: the .47 diagnostics read 「b01 → b07」, named no part and counted every connection missing, 42 → 0), with its 넘기는 것. */
+function v5ConnectionRows(texts) {
+  const rows = rowsOf(texts, ['C-LINK']).filter(r => r.dialect === 'v5');
+  return { records: new Set(rows.map(r => r.record)), rows: rows.flatMap(r => {
+    const a = v5PartNames(r, '보내는 부분')[0] ?? r.byColumn['보내는 부분'] ?? '', b = v5PartNames(r, '받는 부분')[0] ?? r.byColumn['받는 부분'] ?? '';
+    return [[plainName(a.replace(/\s*:\s*.+$/, '')), plainName(b.replace(/\s*:\s*.+$/, '')), r.byColumn['넘기는 것'] ?? '']];
+  }) };
 }
 /** .39: the same rows with their 넘기는 것 cell as written ('' where the table has none), as [sender, receiver, payload]. */
 export function connectionPayloadRows(ask) {
-  const rows = [];
-  for (const { text } of askRecords(ask).values()) {
+  const texts = askRecords(ask), v5 = v5ConnectionRows(texts), rows = [...v5.rows];
+  for (const [record, { text }] of texts) {
+    if (v5.records.has(record)) continue;
     let columns = null;
     for (const raw of text.split('\n')) {
       const line = raw.trim();
@@ -788,7 +787,7 @@ const cellNames39 = cell => String(cell).split(/[·,/]/).map(plainName).filter(B
  * diagnostic said so of six lines a step names); up to 24 names, candidates first (the .39 KORU list lost three lines at twelve).
  * anchor-enforce names a rule whose code device the program added (「프로그램이 채움」) apart from one still kept by none. step-name names
  * the steps whose parenthesised tail went to does (renamed: 「ref 「as written」 → 「as kept」」, given by the caller). */
-export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [], asideLines = [], portMap = null, readParts = null, readPortMap = null, renamed = [] }) {
+export function readingDiagnostics({ ask, summary, parts, relations, blueprint = null, exclusions = [], downgrades = [], asideLines = [], portMap = null, readParts = null, readPortMap = null, renamed = [], readRelations = null }) {
   const issues = [];
   try {
     const claims = (Array.isArray(parts) ? parts : []).flatMap(part => Array.isArray(part?.claims) ? part.claims : []).filter(claim => claim && typeof claim === 'object');
@@ -904,7 +903,8 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
       const rows = connectionRows(ask), list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === 'object');
       const refOf = new Map(list.flatMap(part => typeof part.name === 'string' ? [[plainName(part.name), part.ref]] : []));
       const stores = new Set(list.filter(part => part.type === 'store').map(part => part.ref));
-      const lines = relations.filter(r => r && typeof r === 'object'), joined = (a, b) => lines.some(r => r.from === a && r.to === b);
+      // Recipe .48: the lines the map shows (the read reply's, the program's C-LINK lines with them) when given.
+      const lines = (Array.isArray(readRelations) ? readRelations : relations).filter(r => r && typeof r === 'object'), joined = (a, b) => lines.some(r => r.from === a && r.to === b);
       const through = (a, b) => joined(a, b) || [...stores].some(s => joined(a, s) && joined(s, b));
       // .37: the lines set aside whole join what they would have joined, for telling a set-aside line from a missing one.
       const aside = (Array.isArray(asideLines) ? asideLines : []).filter(x => x && typeof x.from === 'string' && typeof x.to === 'string');
@@ -1154,7 +1154,7 @@ function withoutSetAside(raw, exclusions) {
   const mark = (list, index) => { if (!drop.has(list)) drop.set(list, new Set()); drop.get(list).add(index); };
   // .37: a relation's cadence or its format fields (the list, or one field) left out alone; the line stays. .38: and its channel
   // (a wrong word, or control on a line carrying an artifact), written null.
-  const relationUnsaid = new Set();
+  const relationUnsaid = new Set(), itemUnsaid = new Set();
   for (const x of exclusions) {
     const count = x.rule === 'contract' && x.category === 'count';
     let m;
@@ -1181,6 +1181,8 @@ function withoutSetAside(raw, exclusions) {
     // .30 (map-reading.9): a step or a kept state is left out at its index, a wrong list or loop (or its line) is written null, a
     // loop's own item is written null in the loop; a port-map row is left out, a wrong port map written null.
     // .39 (map-reading.14): and a file-map role row, or a wrong list of them.
+    // Recipe .48: a condition's 거짓이면 or a step's 하는 일 past its bound is written null there; the condition or step stays.
+    else if ((m = /^parts\[(\d{1,3})\]\.(conditions|steps)\[(\d{1,4})\]\.(else|does)$/.exec(x.path)) && ((m[2] === 'conditions') === (m[4] === 'else'))) itemUnsaid.add(`${m[1]}.${m[2]}.${m[3]}.${m[4]}`);
     else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|conditions|fileRoles)\[(\d{1,4})\](?:\.|$)/.exec(x.path))) mark(`parts.${m[1]}.${m[2]}`, Number(m[3]));
     else if ((m = /^parts\[(\d{1,3})\]\.(steps|stateVars|loop|conditions|fileRoles)(?:\.at)?$/.exec(x.path))) blank(Number(m[1]), [m[2]]);
     else if ((m = /^parts\[(\d{1,3})\]\.loop\.(unit|stop|resume)$/.exec(x.path))) blank(Number(m[1]), [`loop.${m[2]}`]);
@@ -1216,6 +1218,7 @@ function withoutSetAside(raw, exclusions) {
       return out;
     });
     if (Array.isArray(part?.steps)) part.steps = part.steps.map((step, j) => drop.has(`parts.${i}.steps.${j}.uses`) && step && Array.isArray(step.uses) ? { ...step, uses: keep(`parts.${i}.steps.${j}.uses`, step.uses) } : step);
+    for (const [key, field] of [['steps', 'does'], ['conditions', 'else']]) if (Array.isArray(part?.[key])) part[key] = part[key].map((item, j) => itemUnsaid.has(`${i}.${key}.${j}.${field}`) && item && typeof item === 'object' && Object.hasOwn(item, field) ? { ...item, [field]: null } : item);
     for (const key of ['basis', 'claims', 'steps', 'stateVars', 'conditions', 'fileRoles', 'files', 'inputs', 'outputs', 'fields', 'config']) if (Array.isArray(part?.[key])) part[key] = keep(`parts.${i}.${key}`, part[key]);
     for (const key of unsaid.get(i) ?? []) {
       if (!part || typeof part !== 'object') continue;
@@ -1265,29 +1268,42 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
   // .42 (fix 4): the artifact table's product lines merged into a kept line between the same two parts, or drawn already through another
   // part (productLines); a merged line's port rows follow the line it joined, a shortcut's are left out with it.
   const products = productLines({ ...combined, parts: kept.map(i => combined.parts[i]) }, ask, cut);
-  const mergedAway = products.merges.map(m => m.index), shortcutAway = products.shortcuts.map(s => s.index), removed = [...cut, ...mergedAway, ...shortcutAway];
+  const mergedAway = products.merges.map(m => m.index), shortcutAway = products.shortcuts.map(s => s.index);
   const merging = new Map(); for (const m of products.merges) merging.set(m.into, [...(merging.get(m.into) ?? []), m.index]);
   const unfitted = [], lineAt = i => { if (!merging.has(i)) return lines[i]; const got = mergeLine(lines[i], merging.get(i).map(k => lines[k])); unfitted.push(...got.left); return got.line; };
-  const keptLines = lines.flatMap((_, i) => removed.includes(i) ? [] : [i]), rows = Array.isArray(combined.portMap) ? combined.portMap : null;
+  const rows = Array.isArray(combined.portMap) ? combined.portMap : null;
   const targetOf = r => products.merges.find(m => m.index === r)?.into ?? r;
-  const cutRows = rows ? rows.flatMap((row, k) => row && typeof row === 'object' && (cut.includes(row.relation) || shortcutAway.includes(row.relation)) ? [k] : []) : [], keptRows = rows ? rows.flatMap((_, k) => cutRows.includes(k) ? [] : [k]) : [];
-  const reduced = payload.length || dup.length || mergedAway.length || shortcutAway.length ? { ...combined, parts: kept.map(i => combined.parts[i]),
-    ...(removed.length ? { relations: keptLines.map(lineAt) } : {}),
-    ...(rows && removed.length ? { portMap: keptRows.map(k => { const row = rows[k];
-      if (!(row && typeof row === 'object' && Number.isSafeInteger(row.relation) && row.relation >= 0)) return row;
-      const to = targetOf(row.relation); return { ...row, relation: to - removed.filter(i => i < to).length }; }) } : {}) } : combined;
-  let soft;
-  try { soft = validateMapReply(reduced, ask, { ...DIVIDED_SET_ASIDE, owners: planned.parts.map(part => part.name) }); } catch (error) { invalid(error); }
+  // Recipe .48: capAway, the model's own lines (on no C-LINK, C-DATA or C-ENTRY row) left out so the record's undrawn C-LINK rows fit the
+  // 48 lines (lineCapAway); a port row naming one is left out with it.
+  const build = capAway => {
+    const removed = [...cut, ...mergedAway, ...shortcutAway, ...capAway];
+    const keptLines = lines.flatMap((_, i) => removed.includes(i) ? [] : [i]);
+    const cutRows = rows ? rows.flatMap((row, k) => row && typeof row === 'object' && (cut.includes(row.relation) || shortcutAway.includes(row.relation) || capAway.includes(row.relation)) ? [k] : []) : [], keptRows = rows ? rows.flatMap((_, k) => cutRows.includes(k) ? [] : [k]) : [];
+    unfitted.length = 0;
+    const reduced = payload.length || dup.length || mergedAway.length || shortcutAway.length || capAway.length ? { ...combined, parts: kept.map(i => combined.parts[i]),
+      ...(removed.length ? { relations: keptLines.map(lineAt) } : {}),
+      ...(rows && removed.length ? { portMap: keptRows.map(k => { const row = rows[k];
+        if (!(row && typeof row === 'object' && Number.isSafeInteger(row.relation) && row.relation >= 0)) return row;
+        const to = targetOf(row.relation); return { ...row, relation: to - removed.filter(i => i < to).length }; }) } : {}) } : combined;
+    let soft;
+    try { soft = validateMapReply(reduced, ask, { ...DIVIDED_SET_ASIDE, owners: planned.parts.map(part => part.name) }); } catch (error) { invalid(error); }
+    return { capAway, keptLines, cutRows, keptRows, reduced, soft };
+  };
+  let built = build([]);
+  const capAway = lineCapAway(built, lines, ask);
+  if (capAway.length) built = build(capAway);
+  const { keptLines, cutRows, keptRows, reduced, soft } = built;
   const inner = structuredClone(readingExclusions(soft));
   // .30: a first map's global first pass sets its relations, port-map rows and basis fields aside like its correction does (only a
   // later map refuses them for its one correction); what is structural still refuses below and in validateMapReply.
-  if (inner.length + payload.length + dup.length + cut.length + mergedAway.length + shortcutAway.length + cutRows.length > DIVIDED_EXCLUSIONS_MAX) invalid({ validation: { path: 'reply', rule: 'contract' } });
+  if (inner.length + payload.length + dup.length + cut.length + mergedAway.length + shortcutAway.length + capAway.length + cutRows.length > DIVIDED_EXCLUSIONS_MAX) invalid({ validation: { path: 'reply', rule: 'contract' } });
   const wire = withoutSetAside(reduced, inner);
   const exclusions = [...payload.map(i => payloadExclusion(combined.parts[i], i, ask)),
     ...dup.map(i => aliasExclusion(`parts[${i}]`, splits.includes(i) ? 'list-split' : 'store-dup', Array.isArray(combined.parts[i]?.basis) ? combined.parts[i].basis.find(b => typeof b === 'string') : null, ask)),
     ...cut.map(i => aliasExclusion(`relations[${i}]`, splitRefs.has(lines[i]?.from) || splitRefs.has(lines[i]?.to) ? 'list-split' : 'store-dup', lines[i]?.at, ask)),
     ...mergedAway.map(i => aliasExclusion(`relations[${i}]`, 'product-merge', lines[i]?.at, ask)), ...shortcutAway.map(i => aliasExclusion(`relations[${i}]`, 'product-shortcut', lines[i]?.at, ask)),
-    ...cutRows.map(k => aliasExclusion(`portMap[${k}]`, cut.includes(rows[k]?.relation) ? 'store-dup' : 'product-shortcut', rows[k]?.at, ask)),
+    ...capAway.map(i => aliasExclusion(`relations[${i}]`, 'line-cap', lines[i]?.at, ask)),
+    ...cutRows.map(k => aliasExclusion(`portMap[${k}]`, cut.includes(rows[k]?.relation) ? 'store-dup' : capAway.includes(rows[k]?.relation) ? 'line-cap' : 'product-shortcut', rows[k]?.at, ask)),
     ...inner.map(x => ({ ...x, path: x.path.replace(/^parts\[(\d+)\]/, (_, k) => `parts[${kept[Number(k)]}]`)
       .replace(/^relations\[(\d+)\]/, (_, k) => `relations[${keptLines[Number(k)] ?? k}]`).replace(/^portMap\[(\d+)\]/, (_, k) => `portMap[${rows ? keptRows[Number(k)] ?? k : k}]`) }))];
   try {
@@ -1314,6 +1330,55 @@ export function combineRenderedReading(fragments, global, ask, blueprint, strict
   return { wire, exclusions, folds: folds.map(f => `${f.name} → ${f.into}`), asideLines, products: productNames, linkCandidates: (products.candidates ?? []).map(c => said(c.index)) };
 }
 
+/** Recipe .48: the records' C-LINK rows (v4 and v5, current rows only) a read reply draws no line for, as { rows, missing: ['A → B: 넘기는 것'] }.
+ * A row is drawn by a line standing on it (its span meets the row), by a line between its two ends, or through a store part between them;
+ * a row whose ends name no part of the reply is not counted (no line can draw it). */
+export function undrawnRecordLines(read, ask) {
+  try {
+    const texts = askRecords(ask), parts = Array.isArray(read?.parts) ? read.parts : [], lines = Array.isArray(read?.relations) ? read.relations : [];
+    const refOf = new Map(parts.flatMap(p => typeof p?.name === 'string' ? [[plainName(p.name), p.ref]] : []));
+    const stores = new Set(parts.filter(p => p?.type === 'store' || p?.family === 'store').map(p => p.ref));
+    const joined = (a, b) => lines.some(l => l.from === a && l.to === b), through = (a, b) => joined(a, b) || [...stores].some(s => joined(a, s) && joined(s, b));
+    const end = (r, column) => plainName(((v5PartNames(r, column)[0] ?? r.byColumn[column] ?? '')).replace(/\s*:\s*.+$/, ''));
+    let rows = 0; const missing = [];
+    for (const r of rowsOf(texts, ['C-LINK']).filter(x => x.dialect !== 'v3')) {
+      const a = refOf.get(end(r, '보내는 부분')), b = refOf.get(end(r, '받는 부분'));
+      if (!a || !b || a === b) continue;
+      rows++;
+      const on = lines.some(l => l.record === r.record && l.span && l.span.from < r.to && r.from < l.span.to);
+      if (!on && !through(a, b)) missing.push(`${r.fold?.id ?? r.id} ${a} → ${b}${r.byColumn['넘기는 것'] ? `: ${opening(r.byColumn['넘기는 것'])}` : ''}`);
+    }
+    return { rows, missing };
+  } catch { return { rows: 0, missing: [] }; }
+}
+/** Recipe .48: the model's own lines (by index among the combined lines) to leave out so the record's undrawn C-LINK rows fit the first
+ * map's 48 lines: only when the read reply is at the cap with C-LINK rows undrawn; only a line standing on no C-LINK, C-DATA or C-ENTRY row
+ * (a line on a step, design or part row; one the record draws stays), the last such line first, and never a part's last line (both its
+ * ends keep another line). [] when nothing need go. */
+export function lineCapAway(built, lines, ask) {
+  try {
+    const read = built.soft, drawn = Array.isArray(read?.relations) ? read.relations : [];
+    if (ask.schemaVersion !== 'studio.map.6' || drawn.length < MAP6_RELATIONS) return [];
+    const undrawn = undrawnRecordLines(read, ask).missing.length; if (!undrawn) return [];
+    const texts = askRecords(ask), recorded = rowsOf(texts, ['C-LINK', 'C-DATA', 'C-ENTRY']).filter(x => x.dialect !== 'v3');
+    const aside = new Set(readingExclusions(read).flatMap(x => { const m = /^relations\[(\d+)\]$/.exec(x.path); return m ? [built.keptLines[Number(m[1])]] : []; }));
+    const where = alias => {
+      if (typeof alias !== 'string' || !alias.includes('.')) return null;
+      const record = alias.slice(0, alias.indexOf('.')), source = texts.get(record), range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
+      return range ? { record, from: range.from, to: range.to } : null;
+    };
+    const degree = new Map(); for (const l of drawn) for (const ref of [l.from, l.to]) degree.set(ref, (degree.get(ref) ?? 0) + 1);
+    const out = [];
+    for (const i of [...built.keptLines].reverse()) {
+      if (out.length >= undrawn) break;
+      const l = lines[i]; if (!l || typeof l !== 'object' || aside.has(i)) continue;
+      const at = where(l.at); if (!at || recorded.some(r => r.record === at.record && r.from < at.to && at.from < r.to)) continue;
+      if ((degree.get(l.from) ?? 0) < 2 || (degree.get(l.to) ?? 0) < 2) continue;
+      degree.set(l.from, degree.get(l.from) - 1); degree.set(l.to, degree.get(l.to) - 1); out.push(i);
+    }
+    return out.sort((a, b) => a - b);
+  } catch { return []; }
+}
 /** .45 (13.7d): the combined wire's new parts (none a parent) that split one part-table row: several parts every basis of which stands on
  * the same v4 or v5 C-PART row (the one named as the row is kept, else the first), and a part standing only on a C-GROUP 목록 row that is one
  * of its items and no C-PART row's name; by combined index. */
@@ -1522,19 +1587,85 @@ function aliasExclusion(path, category, alias, ask) {
 // condition row with no code device (anchor-enforce).
 // .40: and the steps whose parenthesised tail went to does (step-name). .41: and the 4절 rows no step stands on (steps-cut).
 // .42: and the artifact table's product lines merged into a kept line or left out as shortcuts (product-lines).
-export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'lines-set-aside', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count']);
-export const FINAL_DIAGNOSTICS_MAX = 16;
+// Recipe .48 fix: and each C-LINK row kept, held or changed (line-rows), the claims whose row cites nothing (grade-no-cite) apart from those
+// whose cites the app could not resolve or that mix graded with guess or unknown cites (grade-unresolved), and the role types the record's
+// structure did not confirm or that compete (type-held), apart from the roles no type maps (type-unmapped).
+export const FINAL_DIAGNOSTICS = Object.freeze(['connections', 'plan-relations', 'record-lines', 'line-rows', 'lines-set-aside', 'group-parent', 'product-lines', 'store-dup', 'store-island', 'coverage', 'uncited', 'loop-missing', 'plan-claims', 'anchor-kind', 'anchor-enforce', 'portmap-missing', 'step-name', 'steps-cut', 'unbacked', 'withdrawn-count', 'unknown-count', 'grade-no-cite', 'grade-unresolved', 'type-unmapped', 'type-held']);
+export const FINAL_DIAGNOSTICS_MAX = 24;
+/** Recipe .48: the v5 C-PART rows of a family whose role the type table (familyType) does not map, 「B07 name: 표현군·역할」. Recipe .48 fix:
+ * held, the rows whose role proposed a type the record's structure did not confirm, or proposed types that compete, 「B07 name: 표현군·역할
+ * → loop?」 (no type; the family stays). */
+export function unmappedTypes(ask, held = false) {
+  try {
+    return rowsOf(askRecords(ask), ['C-PART']).filter(r => r.dialect === 'v5').flatMap(r => {
+      const t = familyType(r.byColumn['표현군·역할'] ?? '', partStructure(r.folded, r.fold?.id ?? ''));
+      if (held ? !t.held : !t.unmapped) return [];
+      return [`${r.fold?.id ?? ''} ${opening(r.byColumn['이름'] ?? '')}: ${opening(r.byColumn['표현군·역할'] ?? '')}${held ? ` → ${t.held}` : ''}`.trim()];
+    });
+  } catch { return []; }
+}
+/** Recipe .48 fix (A7): each v5 C-LINK row (current rows) as the read reply draws it, by row ID: kept, a line stands on the row between its
+ * two ends in its direction (or through a store part between them), or another line joins its ends so; changed, lines stand on the row but
+ * none joins its ends in its direction; held, no line draws it (a row whose ends name no part of the reply is held too, 「(끝 없음)」). */
+export function recordLineRows(read, ask) {
+  try {
+    const texts = askRecords(ask), parts = Array.isArray(read?.parts) ? read.parts : [], lines = Array.isArray(read?.relations) ? read.relations : [];
+    const refOf = new Map(parts.flatMap(p => typeof p?.name === 'string' ? [[plainName(p.name), p.ref]] : []));
+    const stores = new Set(parts.filter(p => p?.type === 'store' || p?.family === 'store').map(p => p.ref));
+    const joinedIn = (list, a, b) => list.some(l => l.from === a && l.to === b), throughIn = (list, a, b) => joinedIn(list, a, b) || [...stores].some(s => joinedIn(list, a, s) && joinedIn(list, s, b));
+    const end = (r, column) => plainName(((v5PartNames(r, column)[0] ?? r.byColumn[column] ?? '')).replace(/\s*:\s*.+$/, ''));
+    const out = { kept: [], held: [], changed: [] };
+    for (const r of rowsOf(texts, ['C-LINK']).filter(x => x.dialect === 'v5')) {
+      const id = r.fold?.id ?? r.id, a = refOf.get(end(r, '보내는 부분')), b = refOf.get(end(r, '받는 부분'));
+      if (!a || !b || a === b) { out.held.push(`${id} (끝 없음)`); continue; }
+      const on = lines.filter(l => l.record === r.record && l.span && l.span.from < r.to && r.from < l.span.to);
+      if (throughIn(on, a, b) || (!on.length && throughIn(lines, a, b))) out.kept.push(id);
+      else if (on.length) out.changed.push(id);
+      else out.held.push(id);
+    }
+    return out;
+  } catch { return { kept: [], held: [], changed: [] }; }
+}
+/** Recipe .48 fix (A7): the claims the evidence ledger set no grade for, by cause: none, their row cites nothing; unresolved, the app could
+ * not resolve a cite of the row, or the row mixes graded cites with guess or unknown ones (「ref row 섞임」); 「ref row」 each. */
+export function ledgerGaps(read) {
+  const none = [], unresolved = [];
+  for (const p of Array.isArray(read?.parts) ? read.parts : []) for (const c of Array.isArray(p?.claims) ? p.claims : []) {
+    const x = c && typeof c === 'object' ? ledgerOf(c) : null; if (!x || c.evidence) continue;
+    if (x.state === 'none') none.push(`${p.ref} ${x.row}`);
+    else if (x.state === 'unresolved' || x.state === 'mixed') unresolved.push(`${p.ref} ${x.row}${x.state === 'mixed' ? ' 섞임' : ''}`);
+  }
+  return { none, unresolved };
+}
 export function finalDiagnostics(fragments, global, ask, blueprint) {
   try {
     const { wire, exclusions, folds, asideLines, products = [] } = combineRenderedReading(fragments, global, ask, blueprint);
     // .35: what was set aside on a row lands its plan unit; the places the reading took as inferred are named (anchor-kind).
     let downgrades = [], read = null, renamed = [];
     try { read = validateMapReply(wire, ask); downgrades = anchorDowngrades(read).map(x => `${x.ref} ${x.key ?? "?"}: ${x.text}`); renamed = stepRenames(read).map(x => `${x.ref} 「${x.from}」 → 「${x.to}」`); } catch { downgrades = []; }
-    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades, asideLines, portMap: wire.portMap ?? null, readParts: read?.parts ?? null, readPortMap: read?.portMap ?? null, renamed });
+    const found = readingDiagnostics({ ask, summary: wire.summary, parts: wire.parts, relations: wire.relations, blueprint, exclusions, downgrades, asideLines, portMap: wire.portMap ?? null, readParts: read?.parts ?? null, readPortMap: read?.portMap ?? null, renamed, readRelations: read?.relations ?? null });
+    // Recipe .48: the records' C-LINK rows the map draws no line for, counted (record-lines; never a silent zero).
+    const undrawn = read ? undrawnRecordLines(read, ask) : null;
+    if (undrawn?.missing.length) found.push({ path: 'relations', rule: 'record-lines', expected: undrawn.rows, actual: undrawn.rows - undrawn.missing.length, names: undrawn.missing });
     const refs = new Set(wire.parts.map(part => part.ref)), coverage = blueprintCoverage({ parts: blueprint.parts.filter(part => refs.has(part.ref)) }, ask);
     if (coverage && coverage.covered < coverage.rows) found.push({ path: 'parts', rule: 'coverage', expected: coverage.rows, actual: coverage.covered, names: coverage.missing });
     if (folds.length) found.push({ path: 'parts', rule: 'store-dup', expected: 0, actual: folds.length, names: folds });
     if (products.length) found.push({ path: 'relations', rule: 'product-lines', expected: null, actual: products.length, names: products });
+    // Recipe .48: the C-GROUP rows whose parent a child does not take (the model's own parent kept, or a cycle kept out).
+    const conflicts = read ? groupParentConflicts(askRecords(ask), read.parts) : [];
+    if (conflicts.length) found.push({ path: 'parts', rule: 'group-parent', expected: null, actual: conflicts.length, names: conflicts });
+    // Recipe .48: the C-PART rows whose role the type table does not map (no type, quietly said; never one invented).
+    const unmapped = unmappedTypes(ask), held = unmappedTypes(ask, true);
+    if (unmapped.length) found.push({ path: 'parts', rule: 'type-unmapped', expected: null, actual: unmapped.length, names: unmapped });
+    if (held.length) found.push({ path: 'parts', rule: 'type-held', expected: null, actual: held.length, names: held });
+    // Recipe .48 fix: each C-LINK row kept, held or changed (the counts first, then the held and changed row IDs).
+    const lineRows = read ? recordLineRows(read, ask) : null, rowCount = lineRows ? lineRows.kept.length + lineRows.held.length + lineRows.changed.length : 0;
+    if (lineRows && rowCount) found.push({ path: 'relations', rule: 'line-rows', expected: rowCount, actual: lineRows.kept.length,
+      names: [`kept ${lineRows.kept.length} · held ${lineRows.held.length} · changed ${lineRows.changed.length}`, ...lineRows.held.map(id => `held ${id}`), ...lineRows.changed.map(id => `changed ${id}`)] });
+    // Recipe .48 fix: the claims the evidence ledger left ungraded, by cause (no cite apart from unresolved).
+    const gaps = read ? ledgerGaps(read) : { none: [], unresolved: [] };
+    if (gaps.none.length) found.push({ path: 'parts', rule: 'grade-no-cite', expected: null, actual: gaps.none.length, names: gaps.none });
+    if (gaps.unresolved.length) found.push({ path: 'parts', rule: 'grade-unresolved', expected: null, actual: gaps.unresolved.length, names: gaps.unresolved });
     const count = n => Number.isSafeInteger(n) && n >= 0 && n <= 9999 ? n : null;
     return FINAL_DIAGNOSTICS.flatMap(rule => found.filter(x => x.rule === rule)).slice(0, FINAL_DIAGNOSTICS_MAX).map(x => ({ path: x.path, rule: x.rule,
       expected: count(x.expected), actual: count(x.actual), names: (Array.isArray(x.names) ? x.names : []).flatMap(n => typeof n === 'string' ? [n.replace(/\s+/g, ' ').trim().slice(0, 160)] : [])

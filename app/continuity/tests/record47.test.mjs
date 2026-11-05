@@ -126,7 +126,7 @@ test('R47-1 the divided first map sends the whole fold: Q1 first, page by page, 
   for (const r of inp.records.values()) assert.ok(X.piecesStand(p.pasted.find(x => x.id === r.id).text, r.total, r.text, r.pieces));
   assert.ok(all.includes(X.GAP_ROW), 'the replaced step stands as an empty row in its table');
   // Within the bounds: the server reads it as asked and cuts it into at most 24 partitions.
-  M.validateMapAsk(inp.ask);
+  M.validateMapAsk(inp.ask, { route: 'divided' });
   assert.ok(new TextEncoder().encode(JSON.stringify(inp.ask)).length <= M.MAP_FIRST_BYTES);
   assert.ok(planMapPartitions(inp.ask, { targetChars: 3500, maxPartitions: 24 }).length <= 24);
   assert.ok(Route.withinRoute(inp.ask, route));
@@ -214,16 +214,18 @@ test('R47-6 v4 and v3 asks are byte for byte what .46 built (golden), whatever b
   const golden = JSON.parse(readFileSync(new URL('./fixtures/record47/v4-golden.json', import.meta.url), 'utf8')), mods = { D, M, S: St, J };
   assert.deepEqual(goldenDigests(mods), golden);
   assert.deepEqual(goldenDigests(mods, Route.mapRoute({ schemaVersion: M.MAP6_SCHEMA, parts: [], requests: [], priors: [] }, OFFER).limits), golden);
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.47', 'later-map-divided.47']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.48', 'later-map-divided.48']);
 });
 
 test('R47-7 the bounds: a first map.6 ask may be a whole fold, every other ask keeps 64 KiB, four records and 12,000 characters each', () => {
   const p = project(), { inp } = divided(p), big = new TextEncoder().encode(JSON.stringify(inp.ask)).length;
   assert.ok(big > M.MAP_BYTES, String(big));
-  M.validateMapAsk(inp.ask);
+  M.validateMapAsk(inp.ask, { route: 'divided' });
+  // Recipe .48 (review N1): only on the divided route; read for any other route (/api/studio/map, a preview executor) it is past the shared bounds.
+  assert.throws(() => M.validateMapAsk(inp.ask), /INPUT_TOO_LARGE/);
   // The same records asked as a later map (map.7: a part already on the map) are past the shared bounds.
   const later = { ...structuredClone(inp.ask), schemaVersion: M.MAP7_SCHEMA, parts: [{ id: 'P01', name: '도서관 부분 03', note: '', parentId: null, readAs: null, role: '', roleBy: null, roleAbout: null, current: [] }] };
-  assert.throws(() => M.validateMapAsk(later), /INPUT_TOO_LARGE|INVALID/);
+  assert.throws(() => M.validateMapAsk(later, { route: 'divided' }), /INPUT_TOO_LARGE|INVALID/);
   // A host offering no divided first map routes it single, and refuses it past the shared bounds.
   const single = Route.mapRoute(inp.ask, { model: 'deepseek-flash', prompt: 'm6-000000000000' });
   assert.equal(single.route, 'single'); assert.ok(!Route.withinRoute(inp.ask, single));

@@ -13,7 +13,7 @@ const has = (text, w) => /^[A-Za-z]+$/.test(w) ? new RegExp(`(?<![A-Za-z])${w}(?
 
 test('ASK-13 the base request: Q1 and Q2 header rows as the parser defines them, no supplementary table named, the five sentences against invention, the family criteria, explicit-ID cites (no 「=」), about 11K characters', () => {
   const ask = R.recordAskV5('AF5-12345678');
-  assert.ok(ask.startsWith('[AgentFlow 기록 요청 v5]'));
+  assert.ok(ask.startsWith('[AgentFlow 기록 요청 v5.1]'));
   for (const id of [...T.Q1_TABLES, ...T.Q2_TABLES, ...T.PAGE_END_TABLES]) {
     const t = T.V5_TABLE_DEFS.get(id);
     assert.ok(ask.includes(`\n${t.id} ${t.title}\n`), id);
@@ -46,7 +46,7 @@ test('ASK-14 the page request: the app\'s own remaining obligations, the rows wr
   const plan = R.pageAsk([page(1)]);
   assert.deepEqual([plan.recordId, plan.basis, plan.project, plan.page, plan.level], ['AF5-3b7e0c19', '9f2c1ab', '물주기', 2, 1]);
   assert.deepEqual(plan.tables, T.Q2_TABLES);
-  assert.ok(plan.text.startsWith('[AgentFlow 기록 쪽 요청 v5 · 기록 AF5-3b7e0c19 · 쪽 2]'));
+  assert.ok(plan.text.startsWith('[AgentFlow 기록 쪽 요청 v5.1 · 기록 AF5-3b7e0c19 · 쪽 2]'));
   assert.ok(plan.text.includes('「〔기록 AF5-3b7e0c19 · 쪽 2 · 기준 9f2c1ab · 앞 쪽 1〕 물주기 기록 v5 (쓴 세션, 날짜·시각)」'));
   // Recipe .46: grouped by table with a count per group (the record's own reservations under 「기록」); each next ID with its table.
   assert.ok(plan.text.includes('예약 풀기 D01: 등록 요청') && plan.text.includes('- C-LOOP (2): 단계 미전개 반복 B06:L01, B05:L01'));

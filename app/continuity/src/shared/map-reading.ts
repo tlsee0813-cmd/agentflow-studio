@@ -13,7 +13,7 @@ import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
-import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
+import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun } from './record-excerpt.js';
 export { glossVariants };
@@ -285,7 +285,12 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // Recipe .45 (13.7d): a part splitting one part-table row (a list row, a contributors row) or a C-GROUP 목록 item written as a part.
   | 'list-split'
   // Recipe .45 (review N9): a claim on a v5 row whose grade its row's cites do not reach (a run-grade claim on a row citing reports only).
-  | 'cite-grade';
+  | 'cite-grade'
+  // Recipe .48: a model line on no record row left out so the record's undrawn C-LINK rows fit the first map's lines (line-cap, set aside by
+  // the server); a condition's 거짓이면 or a step's 하는 일 past its bound written null alone (the condition or step stays).
+  | 'line-cap' | 'condition-else' | 'step-does'
+  // Recipe .48 fix (A7): a step whose overlong 하는 일 says what it does not do, and a rule whose scope breaks the contract, held whole.
+  | 'step-held' | 'scope-held';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
 const PART_FIELD_GUARDS: ReadonlySet<string> = new Set(['state', 'state-at', 'state-when', 'files', 'type', 'type-at', 'inputs', 'outputs', 'fields', 'config']);
 /** map-reading.8: the reply's own optional fields, left null alone when wrong. */
@@ -1385,6 +1390,56 @@ export function stepWhen(texts: Map<string, { text: string; spans: Span[] | null
   const k = row ? column(row.header, /조건/) : -1, cell = k >= 0 ? (row!.cells[k] ?? '').trim() : '';
   return !cell || /^[—–-]+$/.test(cell) ? null : cell.length <= 120 ? cell : `${cell.slice(0, 119)}…`;
 }
+/** Recipe .48 (from the blind judging of the .47 maps, whose central parts lost their loop bodies to the 24-step bound: a reply keeping
+ * the first and last rows cut the middle, where the loop runs): a v5 part with more C-STEP rows than PART_LIST_MAX.steps keeps, within the
+ * bound, its rows in this order: the rows of a loop body (a 소속 반복 cell naming a loop), the rows something links to (a branch of another
+ * row, a step a port-map row names), its first and last rows, then the rest in row order; kept rows stay in row order. The reply's step on
+ * a kept row stays as written; a kept row the reply left out becomes the program's step (its row's 단계 이름 and 하는 일, using nothing as every program step, marked
+ * program); a reply step on a row left out goes (steps-cut names that row). A part the reply gave no steps, one with a step on no row of its own or on material, is
+ * left as the reply wrote it. */
+function stepCut48(texts: Map<string, { text: string; spans: Span[] | null }>, parts: MapReplyPart[], relations: readonly { from: string; to: string }[],
+  portMap: readonly { relation: number; step: string }[], onMaterial: (q: { record: string; from: number; to: number }) => boolean): void {
+  const max = PART_LIST_MAX.steps, stepRows = rowsOf(texts, ['C-STEP']).filter(r => r.dialect === 'v5' && r.fold), partRows = rowsOf(texts, ['C-PART']).filter(r => r.dialect === 'v5' && r.fold);
+  if (!stepRows.length) return;
+  const meets = (q: { record: string; from?: number; to?: number }, r: { record: string; from: number; to: number }) => q.record === r.record && q.from !== undefined && q.to !== undefined && q.from < r.to && r.from < q.to;
+  for (const b of parts) {
+    if (b.name === null || !Array.isArray(b.steps) || !b.steps.length) continue;
+    const own = partRows.find(r => plainName(r.byColumn['이름'] ?? '') === plainName(b.name!)) ?? partRows.find(r => b.basis.some(q => meets(q, r)));
+    const id = own?.fold?.id; if (!id) continue;
+    const rows = stepRows.filter(r => r.fold!.id.startsWith(`${id}:S`)).sort((x, y) => x.record === y.record ? x.from - y.from : 0);
+    if (rows.length <= max) continue;
+    const onRow = b.steps.map(s => rows.findIndex(r => meets(s.quote, r)));
+    if (onRow.some(k => k < 0) || b.steps.some(s => s.quote.from !== undefined && s.quote.to !== undefined && onMaterial({ record: s.quote.record, from: s.quote.from, to: s.quote.to }))) continue;
+    const branchTo = new Set(rows.flatMap(r => (r.fold!.row.byColumn['조건·분기'] ?? '').match(/B\d{1,3}:S\d{1,3}[a-z]?/g) ?? []));
+    const named = new Set(portMap.filter(m => { const l = relations[m.relation]; return !!l && (l.from === b.ref || l.to === b.ref); }).map(m => plainName(m.step)));
+    const rank = (r: TableRow, k: number): number => {
+      if (/B\d{1,3}:L\d{1,3}/.test(r.fold!.row.byColumn['소속 반복'] ?? '')) return 0;
+      const step = b.steps![onRow.indexOf(k)];
+      if (branchTo.has(r.fold!.id) || (step && named.has(plainName(step.name)))) return 1;
+      return k === 0 || k === rows.length - 1 ? 2 : 3;
+    };
+    const order = rows.map((r, k) => ({ r, k, rank: rank(r, k) })).sort((x, y) => x.rank - y.rank || x.k - y.k);
+    // Recipe .48 fix (review N4): every reply step on a kept row stays (a row the reply wrote two steps for keeps both), not its first
+    // only; the rows kept are as many as the bound holds with those steps (the lowest-ranked row gives way, never a loop body's).
+    const mineOn = (k: number) => b.steps!.filter((_, i) => onRow[i] === k);
+    let n = max, keep = new Set(order.slice(0, n).map(x => x.k));
+    while (n > 0 && [...keep].reduce((sum, k) => sum + Math.max(1, mineOn(k).length), 0) > max) keep = new Set(order.slice(0, --n).map(x => x.k));
+    if (onRow.every(k => keep.has(k)) && b.steps.length >= Math.min(max, keep.size)) continue;
+    const cut60 = (t: string, n: number) => { const s = t.replace(/\s+/g, ' ').trim(); return s.length <= n ? s : `${s.slice(0, n - 1)}…`; };
+    // The names the kept reply steps hold come first: a program step never takes one (a reading's step names are unique).
+    const steps: MapReplyStep[] = [], names = new Set<string>([...keep].flatMap(k => mineOn(k).map(s => plainName(s.name))));
+    for (const k of [...keep].sort((x, y) => x - y)) {
+      const mine = mineOn(k);
+      if (mine.length) { for (const s of mine) { steps.push(s); names.add(plainName(s.name)); } continue; }
+      const r = rows[k]!, c = r.byColumn, name = cut60(c['단계 이름'] ?? '', STEP_NAME_MAX), text = texts.get(r.record)?.text;
+      if (!name || names.has(plainName(name)) || text === undefined || secretLike(name) || onMaterial({ record: r.record, from: r.from, to: r.to })) continue;
+      const doesCell = (c['하는 일 한 줄'] ?? '').trim(), does = doesCell && !/^[—–-]+$/.test(doesCell) && !secretLike(doesCell) ? cut60(doesCell, 120) : null;
+      const to = Math.min(r.to, r.from + 600);
+      steps.push({ name, does, uses: [], quote: { record: r.record, quote: text.slice(r.from, to), from: r.from, to }, program: true }); names.add(plainName(name));
+    }
+    b.steps = steps;
+  }
+}
 /** map-reading.14: a 「파일 지도」 row of a part: its path and its 역할 한 줄 as written, with the quote of the row. */
 export interface MapReplyFileRole { path: string; role: string; quote: MapReplyQuote;
   /** map-reading.18: set by the validator's own pass only (a 「(실행 시)」 path). */
@@ -1443,6 +1498,8 @@ export function askRecords(ask: MapAsk): Map<string, { text: string; spans: Span
 export const crossesGap = (text: string, from: number, to: number): boolean => /\n[ \t]*\r?\n|(?:^|\n)[ \t]*\|[ \t]*\|[ \t]*\r?(?:\n|$)/.test(text.slice(from, to)) && readRecordTables(text).version === 'v5';
 const KEY = /^s\d{1,3}$/, PART = /^P\d{2,3}$/, NEW = /^new:[a-z0-9_-]{1,24}$/, RECORD = /^[NR]\d{2,3}$/, CLAIM = /^C\d{2,3}$/, PRIOR = /^M\d{2}$/;
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+/** Recipe .48 fix (A7): words that say what something does not do or has not (a negation): a cell holding one is never blanked. */
+export const NEGATION = /않|안\s*(?:함|한다|된다|됨|하고|해)|못\s|못한다|금지|없(?:다|음|으면|이|는)|아니|\bnot\b|\bnever\b|\bno\b|n't/i;
 const bytes = (v: unknown) => new TextEncoder().encode(JSON.stringify(v)).length;
 /** Where a quote stands in a record, as the record's own text. Exactly (white space read loosely, as quoteAt); else, narrowly, when
  * the quote only leaves out the delimiters of paired Markdown strong emphasis ('**Error handling**', '__x__') that the record
@@ -1493,14 +1550,20 @@ function str(v: unknown, max: number, empty = false, code?: string): asserts v i
 }
 function arr(v: unknown, max: number, code?: string): asserts v is unknown[] { check(Array.isArray(v) && v.length <= max, code); }
 
+/** Recipe .48 (.47 review N1): the route an ask is read for. Only the divided first-map route (the pipeline, its stages and the map
+ * jobs it runs) takes the first-map bounds of askLimits; every other reader (/api/studio/map, a preview executor's job) the shared ones. */
+export interface MapAskRoute { route?: 'divided' | 'shared' }
+/** The shared bounds of every ask off the divided route. */
+export const SHARED_ASK_LIMITS: Readonly<Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>>> = Object.freeze({ records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES, spans: SPANS_PER_RECORD });
 /** The whole request within MAP_BYTES of UTF-8 JSON; known aliases, parents and claim keys; nothing is clipped here. */
-export function validateMapAsk(value: unknown): MapAsk {
+export function validateMapAsk(value: unknown, at: MapAskRoute = {}): MapAsk {
   const version = !!value && typeof value === 'object' ? (value as { schemaVersion?: unknown }).schemaVersion : null;
   const four = version === MAP4_SCHEMA || version === MAP5_SCHEMA || version === MAP6_SCHEMA || version === MAP7_SCHEMA, three = four || version === MAP3_SCHEMA, two = three || version === MAP2_SCHEMA;
   obj(value, ['schemaVersion', 'project', 'parts', 'relations', 'records', ...(two ? ['requests'] : []), ...(three ? ['priors'] : [])]);
   if (value.schemaVersion !== MAP_SCHEMA && !two) throw new Error('UNSUPPORTED_VERSION');
   // Recipe .47: a first map.6 ask is held to the first-map bounds (a whole folded v5 record), every other ask to the shared ones.
-  const bound = askLimits(value);
+  // Recipe .48 (review N1): on the divided route only; any other route keeps the shared bounds whatever the ask's shape.
+  const bound = at.route === 'divided' ? askLimits(value) : SHARED_ASK_LIMITS;
   if (bytes(value) > bound.bytes) throw new Error('INPUT_TOO_LARGE');
   obj(value.project, ['name', 'purpose']); str(value.project.name, 120); if (value.project.purpose !== null) str(value.project.purpose, 2000);
   arr(value.parts, 200);
@@ -1607,6 +1670,13 @@ const exclusionExplanation = (e: MapReplyError): string => {
     : e.rule === 'contract' && e.target === 'condition' ? '부분의 조건 행 하나가 규칙에 맞지 않거나 그 부분의 「조건·거부·분기」 행에서 찾을 수 없어 그 조건만 제외했어요.'
     : e.rule === 'contract' && e.target === 'list-split' ? '부분 표의 한 행(목록·기여자 목록)이나 묶음 표의 목록 항목을 따로 세운 부분이어서 그 부분과 연결을 제외했어요. 그 행은 부분 하나이고 항목은 목록으로 남아요.'
     : e.rule === 'contract' && e.target === 'cite-grade' ? '주장의 근거 등급이 그 행이 인용한 근거(장부의 등급)보다 높아서 제외했어요. 보고만 인용한 행에서 실행·파일 등급 주장을 만들지 않아요.'
+    // Recipe .48: a model line set aside for the record's own lines; a field past its bound written null alone.
+    : e.rule === 'contract' && e.target === 'line-cap' ? '첫 지도의 선 48개 안에 기록의 연결 행을 모두 그리려고, 기록 행(연결·산출물·진입)에 서지 않은 모델의 선을 뺐어요. 기록의 연결 행 선은 남아요.'
+    : e.rule === 'contract' && e.target === 'condition-else' ? '조건 행의 거짓이면 칸이 지도 칸 길이(60자)를 넘어 그 칸만 비우고 조건은 남겼어요. 원문 행은 그대로 보여요.'
+    : e.rule === 'contract' && e.target === 'step-does' ? '단계의 하는 일 칸이 지도 칸 길이(120자)를 넘어 그 칸만 비우고 단계는 남겼어요. 원문 행은 그대로 보여요.'
+    // Recipe .48 fix (A7): a cell that carries meaning is never blanked; the step or rule is held whole instead.
+    : e.rule === 'contract' && e.target === 'step-held' ? '단계의 하는 일 칸이 지도 칸 길이(120자)를 넘었고 하지 않는 일(부정)을 담고 있어, 비우면 뜻이 뒤집혀 그 단계를 보류했어요. 원문 행은 그대로 보여요.'
+    : e.rule === 'contract' && e.target === 'scope-held' ? '규칙의 적용 범위 칸이 규칙에 맞지 않아 그 규칙을 보류했어요. 범위를 비우면 부분 전체의 규칙으로 넓게 읽혀 비우지 않아요. 원문 행은 그대로 보여요.'
     : e.rule === 'contract' && e.target === 'store-dup' ? '같은 「있는 곳」을 이미 다른 저장소 부분이 맡고 있어 겹친 저장소 부분과 그 연결을 제외했어요. 다른 부분으로 다시 잇지 않았어요.'
     : e.rule === 'contract' && e.target === 'unrecorded' ? '기록의 연결 표·산출물·부분별 설계·안의 단계 행이나 화살표 줄이 아닌 줄에서 만든 연결이어서 제외했어요.'
     // pipeline .38: the channel alone is written null; the line stays.
@@ -1950,6 +2020,11 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         need(named ? name !== null : !said(c, 'scopeName'), `${at}.scope`, 'scope');
         return [sc, name];
       }, `${at}.scope`, 'scope', [null, null]);
+      // Recipe .48 fix (A7): a narrow scope the reply gave (a step, port or field) is never blanked in a divided first map: blanked, the
+      // rule would lose what it is narrowed to, so a rule whose step, port or field scope breaks the contract (no name, a name past 40) is
+      // held whole (scope-held), its reason kept. A scope word outside RULE_SCOPES, or a stray name on a part scope, is still blanked
+      // alone (.33): the pane reads a blank scope as 「범위 미상」, never as the whole part's.
+      if (divided && lenient && rule && ['step', 'port', 'field'].includes(c.scope as string) && held.some(e => e.path === `${at}.scope`)) throw new MapReplyError(at, 'contract', 'scope-held');
       // A place: stated or inferred, as written, on the line that places it (each once).
       const lowered: string[] = [];
       const anchors = alone10((): MapReplyAnchor[] => {
@@ -2134,7 +2209,12 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       // step) once the step itself is read; the step keeps its other names. A uses that is not a list or runs past four still sets
       // the step aside.
       steps = items('steps', 'step', (o, path) => {
-        const name = words(o, 'name', STEP_NAME_MAX, path, 'step', true)!, does = words(o, 'does', 120, path, 'step'), held: MapReplyError[] = [], uses: string[] = [];
+        const name = words(o, 'name', STEP_NAME_MAX, path, 'step', true)!, held: MapReplyError[] = [], uses: string[] = [];
+        // Recipe .48: a 하는 일 past its bound is written null alone (step-does); the step stays. Recipe .48 fix (A7): never one that says
+        // what the step does not do (a negation, 「저장하지 않는다」, 「없으면」): blanked it would read as the opposite, so the step is held (step-held).
+        const doesLong = lenient && typeof o.does === 'string' && o.does.length > 120 && !!o.does.trim() && !CONTROL.test(o.does), does = doesLong ? null : words(o, 'does', 120, path, 'step');
+        if (doesLong && NEGATION.test(o.does as string)) throw new MapReplyError(path, 'contract', 'step-held');
+        if (doesLong) held.push(new MapReplyError(`${path}.does`, 'contract', 'step-does'));
         if (said(o, 'uses')) {
           need(Array.isArray(o.uses) && o.uses.length <= 4, path, 'step');
           for (const [k, x] of (o.uses as unknown[]).entries()) {
@@ -2199,7 +2279,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
           try {
             need(!!o && typeof o === 'object' && !Array.isArray(o), path, 'condition');
             const x = o as Record<string, unknown>;
-            const when = words(x, 'when', 80, path, 'condition', true)!, then = words(x, 'then', 60, path, 'condition', true)!, otherwise = words(x, 'else', 60, path, 'condition');
+            const when = words(x, 'when', 80, path, 'condition', true)!, then = words(x, 'then', 60, path, 'condition', true)!, overlong = (key: string, max: number) => lenient && typeof x[key] === 'string' && (x[key] as string).length > max && !!(x[key] as string).trim() && !CONTROL.test(x[key] as string);
+            // Recipe .48: a 거짓이면 past its bound is written null alone (condition-else); the condition stays when the rest stands.
+            const elseLong = overlong('else', 60), otherwise = elseLong ? null : words(x, 'else', 60, path, 'condition');
             need(said(x, 'at'), path, 'condition');
             let quote: MapReplyQuote;
             try { quote = cite(x.at, `${path}.at`); } catch (e) { if (e instanceof MapReplyError && lenient && !tooLong(e)) throw new MapReplyError(path, 'contract', 'condition'); throw e; }
@@ -2212,7 +2294,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
                 need(!!row && plainName(row.cells[column(row.header, /부분/, 0)] ?? '') === own12 && [when, then, ...(otherwise === null ? [] : [otherwise])].every(w => text.includes(plainName(w.replace(/\\\|/g, '|')))), path, 'condition');
               }
             }
-            out.push({ when, then, else: otherwise, quote });
+            out.push({ when, then, else: otherwise, quote }); if (elseLong) aside.push(new MapReplyError(`${path}.else`, 'contract', 'condition-else'));
           } catch (e) {
             if (!(e instanceof MapReplyError)) throw e;
             if (lenient) aside.push(e.rule === 'contract' && e.path === path ? e : new MapReplyError(path, 'contract', 'condition'));
@@ -2403,7 +2485,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
           if (x === r.to && meets(ownRows ??= [...rowsUnder(texts, DESIGN_TABLE), ...rowsUnder(texts, STEP_TABLE)])) continue;
           if (!!own && artifactRows(ask).some(w => w.record === q.record && w.from < q.to! && q.from! < w.to && w.makers.includes(own))) continue;
         }
-        const placed = line.row ? (byRef.get(x)?.type === 'store' ? !!own && line.row.slice(1).some(cell => cellNames(cell).includes(own)) : holds(line.row.slice(1).join(' | ')))
+        const placed = line.row ? (byRef.get(x)?.type === 'store' ? !!own && line.row.slice(1).some(cell => cellNamesPart(cell, own)) : holds(line.row.slice(1).join(' | ')))
           : holds(line.head) || (!!own && plainName(line.head).includes(own));
         need(placed, `relations[${i}]`, 'sender');
       }
@@ -2415,7 +2497,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
         const endName = (ref: unknown) => plainName(typeof ref === 'string' ? byRef.get(ref)?.name ?? parts.get(ref)?.name ?? '' : '');
         const storeRows = rowsOf(texts, ['C-PART']).filter(x => x.dialect === 'v5' && /^\s*저장/.test(x.byColumn['표현군·역할'] ?? ''));
         const isStore = (ref: unknown, n: string) => (typeof ref === 'string' && byRef.get(ref)?.type === 'store') || storeRows.some(x => plainName(x.byColumn['이름'] ?? '') === n);
-        const a = endName(r.from), b = endName(r.to), cell = (x: TableRow, c: string) => cellNames(String(x.byColumn[c] ?? '').replace(/\s*:\s*.+$/, ''));
+        // Recipe .48: a row's ends are the parts its B IDs name, whole (the .47 replays set aside 86 recorded lines whose part name holds
+        // 「·」, 「진입·종료 조정」 read as 「진입」 and 「종료 조정」); the view's words split on 「·」 still count for a cell naming no B ID.
+        const a = endName(r.from), b = endName(r.to), cell = (x: TableRow, c: string) => [...v5PartNames(x, c).map(plainName), ...cellNames(String(x.byColumn[c] ?? '').replace(/\s*:\s*.+$/, ''))];
         need(!a || !b || linkRows5.some(x => {
           const s = cell(x, '보내는 부분'), t = cell(x, '받는 부분'), on = (n: string) => s.includes(n) || t.includes(n);
           return (s.includes(a) && t.includes(b)) || (s.includes(b) && t.includes(a)) || (isStore(r.from, a) && t.includes(b)) || (isStore(r.to, b) && s.includes(a) && !on(b));
@@ -2445,7 +2529,9 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       if (s13.payloadFields.length) {
         // pipeline .42: a row's field group also goes by its name with its members elided (「hardware_counters(…)」).
         const rows = formatRows(ask, nameOf(r.from as string), nameOf(r.to as string), s7.payload), known = new Set(rows.flatMap(x => x.fields.flatMap(f => [f, fieldGroupHead(f) ?? f])).map(plainName));
-        if (!rows.length) { held7.push(new MapReplyError(`relations[${i}].payloadFields`, 'contract', 'payload-fields')); s13.payloadFields = []; }
+        // Recipe .48: a list none of whose fields the rows know is left out as one list (one reason, as a list no row backs), never as a
+        // reason per field (a recorded line's fourteen fields would spend fourteen of the divided map's 64 reasons and refuse it whole).
+        if (!rows.length || !s13.payloadFields.some(x => known.has(plainName(x)))) { held7.push(new MapReplyError(`relations[${i}].payloadFields`, 'contract', 'payload-fields')); s13.payloadFields = []; }
         else {
           const raw = Array.isArray(r.payloadFields) ? (r.payloadFields as unknown[]).map(x => typeof x === 'string' ? (x.trim().length > FIELD_ITEM_MAX ? fieldGroupHead(x) ?? x.trim() : x.trim()) : null) : [];
           s13.payloadFields = s13.payloadFields.filter(x => {
@@ -2988,6 +3074,8 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       portMap.push({ relation: row.relation, port: row.port, step: step.name, direction: row.direction, quote: step.quote, program: true });
     }
   }
+  // Recipe .48: a v5 part with more C-STEP rows than it holds steps keeps its loop bodies (stepCut48).
+  if (six && ask.schemaVersion === MAP6_SCHEMA) stepCut48(texts, outParts, relations, portMap, q => material.some(m => m.record === q.record && m.from < q.to && q.from < m.to));
   // map-reading.17 (pipeline .42, E): each step carries its own 「안의 단계」 row's 조건·분기 cell as written (stepWhen; the record's words).
   if (six) for (const b of outParts) for (const s of b.steps ?? []) { const when = stepWhen(texts, s.quote); if (when) s.when = when; }
   // map-reading.18 (pipeline .43, RECORD_ASKS_V4_KO.md 4.3–4.6): the program's reading of the records' v4 tables (record-reading.ts): parts'

@@ -59,10 +59,11 @@ test('.45 golden: the KORU 11-03 v3 records read under .45 as .44 read them; a t
 
 test('.45 parts are the program\'s: every C-PART row is a part (two the wire left out are added, one the wire named otherwise joins by its row), each with its family, role, 미정 reason, cites; the type only from a clear role', () => {
   const { read } = read45();
+  // Recipe .48: a gate reads as a check (compute) by the family table; its family stays 관문.
   assert.deepEqual(read.parts.map(p => [p.name, p.recordRef, p.family, p.familyRole, p.type ?? null]), [
     ['사용자', 'B01', 'participant', '사용자', 'person'], ['물주기 앱', 'B02', 'process', '화면', 'screen'], ['화분 API', 'B03', 'process', '요청 처리', null],
     ['일정 계산기', 'B05', 'process', '계산', 'compute'], ['매시 틱', 'B06', 'trigger', '일정', 'timer'], ['푸시 발송기', 'B07', 'process', '외부 호출', 'actor'],
-    ['로그인 검사', 'B09', 'gate', '인증', null], ['config 모음', 'B10', 'process', '설정 읽기', null], ['급수 기록 DB', 'B04', 'store', 'DB 테이블', 'store'], ['푸시 게이트웨이', 'B08', 'participant', '외부 시스템', 'external']]);
+    ['로그인 검사', 'B09', 'gate', '인증', 'compute'], ['config 모음', 'B10', 'process', '설정 읽기', null], ['급수 기록 DB', 'B04', 'store', 'DB 테이블', 'store'], ['푸시 게이트웨이', 'B08', 'participant', '외부 시스템', 'external']]);
   assert.deepEqual(read.parts.slice(-2).map(p => [p.ref, p.basis.length, p.role]), [['new:rec-b04', 1, '화분과 급수 기록을 지닌다'], ['new:rec-b08', 1, '휴대폰으로 푸시를 전한다']]);
   assert.deepEqual(byName(read, '일정 계산기').cites.map(c => [c.ref, c.grade, c.source]), [['F03', 'file', 'server/schedule/']]);
   // Page 1 alone: B10 is 미정 with its reason, its loops unexpanded (no C-STEP row names them yet).
@@ -207,7 +208,7 @@ test('.45 cards: the record family first (a gate in the trigger tint with its ow
 });
 
 test('.45 recipe: first-map-divided.45 and later-map-divided.45; the prompts read v5 records with their key sets', () => {
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.47', 'later-map-divided.47']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.48', 'later-map-divided.48']);
   assert.ok(P.RENDER_RULES.includes('기록 v5(첫 줄이 「〔기록 … · 쪽 n · 기준 … · 앞 쪽 …〕」인 기록)') && B.MAP_BLUEPRINT_PROMPT.includes('INPUT 옆의 keys'));
   assert.ok(P.EXTRACTION_PROMPT.includes('input.keys'));
   assert.equal(T.recordVersion(page(1)), 'v5');
