@@ -228,8 +228,12 @@ export function routeEdges(boxes: Map<string, Box>, edges: Edge[], opts: { quick
   const fx = facePorts(boxes, edges), faceKept = new Map<string, { a: PortFace; b: PortFace }>(), faceRoutes = new Map<string, Route>();
   for (const e of edges) {
     const f = e.faces, a = boxes.get(e.from), b = boxes.get(e.to); if (!f || !a || !b) continue;
-    const fa: PortFace = (f.a === 'top' || f.a === 'bottom') && a.kind === 'node' ? f.a : f.a === 'ear' ? 'ear' : 'side';
-    const fb: PortFace = (f.b === 'top' || f.b === 'bottom') && b.kind === 'node' ? f.b : f.b === 'ear' ? 'ear' : 'side';
+    // A face is taken only toward where the other end lies: a bottom when the other end's middle is below this card, a top when
+    // it is above. Into the top of a card on the same row the line had to climb over the map and come down again (map hygiene
+    // H1: no perimeter runs); such an end keeps its side.
+    const toward = (x: Box, o: Box, face: PortFace) => face === 'bottom' ? o.y + o.h / 2 > x.y + x.h : face === 'top' ? o.y + o.h / 2 < x.y : true;
+    const fa: PortFace = (f.a === 'top' || f.a === 'bottom') && a.kind === 'node' && toward(a, b, f.a) ? f.a : f.a === 'ear' ? 'ear' : 'side';
+    const fb: PortFace = (f.b === 'top' || f.b === 'bottom') && b.kind === 'node' && toward(b, a, f.b) ? f.b : f.b === 'ear' ? 'ear' : 'side';
     if ((fa !== 'top' && fa !== 'bottom' && fb !== 'top' && fb !== 'bottom') || sideOf(a, b, boxes) === 'in') { if (fa === 'ear' || fb === 'ear') faceKept.set(e.key, { a: fa, b: fb }); continue; }
     const px = fx.get(e.key) ?? {}, at = (box: Box, face: PortFace, x?: number) => ({ face, at: face === 'top' || face === 'bottom' ? x ?? box.x + box.w / 3 : mid(box) });
     const r = opts.quick ? quickFace(a, b, at(a, fa, px.a), at(b, fb, px.b)) : faceRoute(a, b, boxes.values(), at(a, fa, px.a), at(b, fb, px.b));

@@ -763,6 +763,11 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
     // The corridor at an end's own height leaves a repeated point there: only the corners are kept, since the router moves
     // runs by their points and a run of no length would be moved both ways (a slanted line).
     const pts = corners([{ x: x1, y: acy }, { x: xa, y: acy }, { x: xa, y: yc }, { x: xb, y: yc }, { x: xb, y: bcy }, { x: x2, y: bcy }]);
+    // A corridor out past both ends (round the outside of what lies between them) competes with the way through the gaps,
+    // under the search's own cost model (map hygiene H1); the gap way is taken only when it really stays nearer the ends (a
+    // route along the same outside row is no better, and the corridor's shape is kept).
+    const lo = Math.min(acy, bcy), hi = Math.max(acy, bcy), reach = (ps: Point[]) => Math.max(0, ...ps.map(p => Math.max(lo - p.y, p.y - hi)));
+    if (reach(pts) > 40) { const g = around(); if (g.clear && reach(g.pts) < reach(pts) - 24 && routeCost(g.pts) < routeCost(pts)) return g; }
     return { d: rounded(pts), pts, mx: (xa + xb) / 2, my: yc, detour: true, clear: true };
   }
   return around();
@@ -823,12 +828,14 @@ function gapRoute(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w
 function gapRouteAt(a: Box, b: Box, dir: number, blocks: { x: number; y: number; w: number; h: number }[], segFree: (x1: number, y1: number, x2: number, y2: number) => boolean, given: Ports, rims: { x: number; y: number; w: number; h: number }[], LEAD: number): { pts: Point[]; mid: Point } | null {
   const SIDE = 0, END = 34, END_FAR = 600;
   // A part's top or bottom is a cheap way in only from an end that really lies above or below it; from an end beside it, a
-  // line into the top reads as coming from nowhere, so that way costs more than a turn (600 > a 400 turn).
-  const above = (x: Box, o: Box) => o.y + o.h < x.y - 8 || o.y > x.y + x.h + 8;
+  // line into the top reads as coming from nowhere, so that way costs more than a turn (600 > a ROUTE_TURN turn).
+  // Each face on its own: the top is cheap only toward an end above, the bottom only toward an end below (a top port toward an
+  // end below sent the line up over the map and down again: a perimeter run, map hygiene H1).
+  const above = (x: Box, o: Box) => o.y + o.h < x.y - 8, below = (x: Box, o: Box) => o.y > x.y + x.h + 8;
   const ports = (x: Box, face: number, other: Box, port?: number): Port[] => {
-    const cy = port ?? (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2), cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x, end = above(x, other) ? END : END_FAR;
+    const cy = port ?? (x.kind === 'frame' ? x.y + x.head / 2 : x.y + x.h / 2), cx = x.x + x.w / 2, sx = face > 0 ? x.x + x.w : x.x;
     const out: Port[] = [{ at: { x: sx, y: cy }, lead: { x: sx + face * LEAD, y: cy }, cost: SIDE }];
-    if (x.kind !== 'frame') out.push({ at: { x: cx, y: x.y + x.h }, lead: { x: cx, y: x.y + x.h + LEAD }, cost: end }, { at: { x: cx, y: x.y }, lead: { x: cx, y: x.y - LEAD }, cost: end });
+    if (x.kind !== 'frame') out.push({ at: { x: cx, y: x.y + x.h }, lead: { x: cx, y: x.y + x.h + LEAD }, cost: below(x, other) ? END : END_FAR }, { at: { x: cx, y: x.y }, lead: { x: cx, y: x.y - LEAD }, cost: above(x, other) ? END : END_FAR });
     return out.filter(p => segFree(p.at.x + (p.lead.x - p.at.x) / LEAD, p.at.y + (p.lead.y - p.at.y) / LEAD, p.lead.x, p.lead.y));
   };
   // The side ports the router assigned (lines meeting one side spread along it) hold for the search too, so a line that goes
@@ -839,6 +846,33 @@ function gapRouteAt(a: Box, b: Box, dir: number, blocks: { x: number; y: number;
   return searchRoute(from, to, blocks, segFree, { x0, x1, y0, y1 }, false, rims);
 }
 type Port = { at: Point; lead: Point; cost: number };
+/** The route search's cost model (map hygiene H1): a turn costs ROUTE_TURN px of run; run outside the span of the two ends
+ * (their leads' box grown by ROUTE_SPAN_PAD) costs ROUTE_OUT more per px. With a 400 turn and free length, a two-turn run
+ * round the outside of the map beat a four-turn way through the gaps; now length counts and leaving the span counts double. */
+export const ROUTE_TURN = 140, ROUTE_OUT = 1, ROUTE_SPAN_PAD = 24, ROUTE_SPAN_RAMP = 48;
+type Span = { x0: number; x1: number; y0: number; y1: number };
+function spanOf(from: Port[], to: Port[]): Span {
+  // The ports each end prefers (its cheapest): a dear top or bottom port far from the other end must not widen the span.
+  const best = (ps: Port[]) => { const c = Math.min(...ps.map(p => p.cost)); return ps.filter(p => p.cost === c); };
+  const ps = [...best(from), ...best(to)].map(p => p.lead);
+  return { x0: Math.min(...ps.map(p => p.x)) - ROUTE_SPAN_PAD, x1: Math.max(...ps.map(p => p.x)) + ROUTE_SPAN_PAD, y0: Math.min(...ps.map(p => p.y)) - ROUTE_SPAN_PAD, y1: Math.max(...ps.map(p => p.y)) + ROUTE_SPAN_PAD };
+}
+/** How much of a straight (orthogonal) run lies outside the span: the part past either end of it along the run, and a run
+ * beside the span by how far it lies off it (in full from ROUTE_SPAN_RAMP out, so a run just past a port's row costs little and
+ * a run round the outside of the map costs its whole length). */
+export function outside(s: Span, xa: number, ya: number, xb: number, yb: number): number {
+  const part = (lo: number, hi: number, s0: number, s1: number) => Math.max(0, Math.min(hi, s0) - lo) + Math.max(0, hi - Math.max(lo, s1));
+  const off = (v: number, s0: number, s1: number) => Math.min(1, Math.max(0, s0 - v, v - s1) / ROUTE_SPAN_RAMP);
+  if (Math.abs(ya - yb) < 0.01) { const lo = Math.min(xa, xb), hi = Math.max(xa, xb), o = off(ya, s.y0, s.y1); return o * (hi - lo) + (1 - o) * part(lo, hi, s.x0, s.x1); }
+  const lo = Math.min(ya, yb), hi = Math.max(ya, yb), o = off(xa, s.x0, s.x1); return o * (hi - lo) + (1 - o) * part(lo, hi, s.y0, s.y1);
+}
+/** The cost of a whole route under the same model (turns, length, run outside the span of its two ends). */
+export function routeCost(pts: Point[]): number {
+  if (pts.length < 2) return 0;
+  const a = pts[0]!, b = pts[pts.length - 1]!, pad = ROUTE_SPAN_PAD + 16, s: Span = { x0: Math.min(a.x, b.x) - pad, x1: Math.max(a.x, b.x) + pad, y0: Math.min(a.y, b.y) - pad, y1: Math.max(a.y, b.y) + pad };
+  let c = 0; for (let i = 1; i < pts.length; i++) { const p = pts[i - 1]!, q = pts[i]!; c += Math.abs(q.x - p.x) + Math.abs(q.y - p.y) + outside(s, p.x, p.y, q.x, q.y) * ROUTE_OUT; }
+  return c + Math.max(0, pts.length - 2) * ROUTE_TURN;
+}
 /** The search behind gapRoute: an orthogonal path from one of the from ports to one of the to ports through the lanes between
  * the blocks near the bounds (fewest turns, then shortest), every step tested with segFree. null when none is found. clip: no
  * lane past the bounds (a line kept inside its group); gapRoute's lanes are never clipped (a lane just past its search edge
@@ -847,15 +881,16 @@ function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w
   const { x0, x1, y0, y1 } = bounds;
   // The edges of the groups around the ends give lanes too (just inside and outside them), now that a run may not lie on them.
   const near = [...blocks, ...rims].filter(o => o.x < x1 && x0 < o.x + o.w && o.y < y1 && y0 < o.y + o.h);
-  // Lanes: just outside each nearby box, the middle of every gap between box edges, the ports' own lines and the search edge
-  // (past the search edge only when not clipped).
+  // Lanes: just outside each nearby box, the middle of every gap between box edges and the ports' own lines. The search edge is
+  // a lane only inside a group (clip: the group's own margin); on the open map it is not, so no line is drawn round the map
+  // along the edge of its search window (a perimeter bus).
   const lanes = (edges: number[], extra: number[], lo: number, hi: number) => {
     const e = [...new Set(edges)].sort((p, q) => p - q), out = new Set(extra), half = (v: number) => Math.round(v * 2) / 2;
     for (let i = 0; i < e.length; i++) { out.add(e[i]! - 8); out.add(e[i]! + 8); if (i) out.add((e[i - 1]! + e[i]!) / 2); }
     return [...new Set([...out].map(half))].filter(v => !clip || (v >= lo && v <= hi)).sort((p, q) => p - q);
   };
-  const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [x0, x1, ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)], x0, x1);
-  const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [y0, y1, ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)], y0, y1);
+  const xs = lanes(near.flatMap(o => [o.x, o.x + o.w]), [...(clip ? [x0, x1] : []), ...from.map(p => p.lead.x), ...to.map(p => p.lead.x)], x0, x1);
+  const ys = lanes(near.flatMap(o => [o.y, o.y + o.h]), [...(clip ? [y0, y1] : []), ...from.map(p => p.lead.y), ...to.map(p => p.lead.y)], y0, y1);
   const X = xs.length, Y = ys.length, N = X * Y, ix = new Map(xs.map((v, i) => [v, i])), iy = new Map(ys.map((v, i) => [v, i]));
   const key = (p: Point) => { const i = ix.get(Math.round(p.x * 2) / 2), j = iy.get(Math.round(p.y * 2) / 2); return i === undefined || j === undefined ? -1 : j * X + i; };
   // Free steps between neighbouring lane crossings (right: 0, down: 1), each tested once.
@@ -864,8 +899,9 @@ function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w
     if (i + 1 < X && segFree(xs[i]!, ys[j]!, xs[i + 1]!, ys[j]!)) step[(j * X + i) * 2] = 1;
     if (j + 1 < Y && segFree(xs[i]!, ys[j]!, xs[i]!, ys[j + 1]!)) step[(j * X + i) * 2 + 1] = 1;
   }
-  // Dijkstra over (crossing, heading); a turn costs as much as a long run, so the fewest-turn path wins and then the shortest.
-  const TURN = 400, dist = new Float64Array(N * 4).fill(Infinity), prev = new Int32Array(N * 4).fill(-1), heap: [number, number][] = [];
+  // Dijkstra over (crossing, heading). A turn costs ROUTE_TURN of run, and run that leaves the span of the two ends' leads
+  // costs ROUTE_OUT more per px: a way through the gaps between cards beats a two-turn run round the outside of the map.
+  const TURN = ROUTE_TURN, span = spanOf(from, to), out = (xa: number, ya: number, xb: number, yb: number) => outside(span, xa, ya, xb, yb) * ROUTE_OUT, dist = new Float64Array(N * 4).fill(Infinity), prev = new Int32Array(N * 4).fill(-1), heap: [number, number][] = [];
   const push = (d: number, s: number) => { heap.push([d, s]); for (let c = heap.length - 1; c > 0;) { const q = (c - 1) >> 1; if (heap[q]![0] <= heap[c]![0]) break; [heap[q], heap[c]] = [heap[c]!, heap[q]!]; c = q; } };
   const pop = () => { const top = heap[0]!, last = heap.pop()!; if (heap.length) { heap[0] = last; for (let c = 0; ;) { const l = 2 * c + 1, r = l + 1; let m = c; if (l < heap.length && heap[l]![0] < heap[m]![0]) m = l; if (r < heap.length && heap[r]![0] < heap[m]![0]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c]!, heap[m]!]; c = m; } } return top; };
   const heading = (p: Port) => (p.lead.x > p.at.x ? 0 : p.lead.x < p.at.x ? 2 : p.lead.y > p.at.y ? 1 : 3); // 0 right, 1 down, 2 left, 3 up
@@ -879,7 +915,7 @@ function searchRoute(from: Port[], to: Port[], blocks: { x: number; y: number; w
     const moves: [number, number, boolean][] = [[0, k + 1, i + 1 < X && !!step[k * 2]], [1, k + X, j + 1 < Y && !!step[k * 2 + 1]], [2, k - 1, i > 0 && !!step[(k - 1) * 2]], [3, k - X, j > 0 && !!step[(k - X) * 2 + 1]]];
     for (const [h, n, ok] of moves) {
       if (!ok || (h + 2) % 4 === hd) continue;
-      const len = Math.abs(xs[n % X]! - xs[i]!) + Math.abs(ys[(n - (n % X)) / X]! - ys[j]!), nd = d + len + (h === hd ? 0 : TURN), ns = n * 4 + h;
+      const nx = xs[n % X]!, ny = ys[(n - (n % X)) / X]!, len = Math.abs(nx - xs[i]!) + Math.abs(ny - ys[j]!), nd = d + len + out(xs[i]!, ys[j]!, nx, ny) + (h === hd ? 0 : TURN), ns = n * 4 + h;
       if (nd < dist[ns]!) { dist[ns] = nd; prev[ns] = s; push(nd, ns); }
     }
   }
