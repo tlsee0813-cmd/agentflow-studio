@@ -14,6 +14,7 @@ import { createStudioHandler, mapPromptId } from '../server/studio.mjs';
 import { openMapJobs } from '../server/map-jobs.mjs';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as T from '../dist/public/shared/record-table.js';
+import * as R from '../dist/public/shared/report-ask.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { groupParentConflicts } from '../dist/public/shared/record-reading.js';
 import * as B from '../server/map-blueprint.mjs';
@@ -210,6 +211,18 @@ test('R48-6 the first-map bounds are the divided route\'s alone: a first-map-siz
     assert.equal(res.status, 413, JSON.stringify(await res.clone().json()));
     assert.equal((await res.json()).error?.code ?? 'INPUT_TOO_LARGE', 'INPUT_TOO_LARGE');
   } finally { await jobs.close(); rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('R48-7 the v5.1 ask names the role words the app reads as a type (each one the table maps) and a setting steering a step, within about 11.6K', () => {
+  const ask = R.recordAskV5('AF5-12345678');
+  assert.ok(ask.startsWith('[AgentFlow 기록 요청 v5.1]') && ask.length <= 11600, String(ask.length));
+  assert.ok(ask.includes('처리는 반복·실행 조정 / 수집·측정 / AI 판단 / 화면 / 외부 호출 / 계산(변환·검증), 참여는 사람(소유자·메인테이너·기여자) / 봇 / 외부 시스템 / AI 세션(제품 안의 것)'));
+  assert.ok(ask.includes('「(기본값: 키=값)」'));
+  const words = { 처리: [['반복', 'loop'], ['실행 조정', 'loop'], ['수집', 'collector'], ['측정', 'collector'], ['AI 판단', 'ai'], ['화면', 'screen'], ['외부 호출', 'actor'], ['계산', 'compute'], ['변환', 'compute'], ['검증', 'compute']],
+    참여: [['사람', 'person'], ['소유자', 'person'], ['메인테이너', 'person'], ['기여자', 'person'], ['봇', 'external'], ['외부 시스템', 'external'], ['AI 세션', 'session']] };
+  for (const [family, list] of Object.entries(words)) for (const [w, type] of list) assert.equal(T.familyType(`${family} · ${w}`).type, type, `${family} · ${w}`);
+  // Nothing else of the ask changed: the same tables, the same header rows.
+  for (const id of [...T.Q1_TABLES, ...T.Q2_TABLES]) assert.ok(ask.includes(`\n${T.headerLine(T.V5_TABLE_DEFS.get(id))}\n`) || !T.V5_TABLE_DEFS.get(id).columns.length, id);
 });
 
 test('R48-8 a rule a code device keeps (지키는 장치 코드 or 검사, with a file or run cite) describes what the code does; a rule people keep stays a want', () => {
