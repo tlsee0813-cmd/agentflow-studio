@@ -31,7 +31,7 @@ test('S8-1 a group card: its axis and count in the kind line, its first parts in
   assert.equal(t.glyph, 'place', 'a place reads as a place: the pin');
   assert.equal(t.family, 'neutral', 'no family is made up for it');
   assert.equal(t.structural, false);
-  assert.deepEqual(t.rows[0], { label: '안에', value: '데이터 준비 스크립트 · train.py · sample.py · +2', members: true });
+  assert.deepEqual(t.rows[0], { label: '안에', value: '데이터 준비 스크립트 · train.py · sample.py 외 2', members: true }); // cards v2 §1: 「외 N」
   assert.deepEqual(t.group, { axis: 'place', word: '실행 위치', names, recorded: true });
   // No axis known: 묶음, with the composition squares.
   const plain = cardTemplate(facts({ children: 3, members: ['a', 'b', 'c'] }));

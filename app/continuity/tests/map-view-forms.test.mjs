@@ -285,9 +285,11 @@ test('FORM-17 the detail view\'s form code never lays out the map, never queries
   assert.ok(!/class: [`'](?:[^`']*\s)?edge[\s`'$]/.test(detail) &&!detail.includes("'data-box'") && !detail.includes("'data-drag'"));
   // Section 4.1 / override 10: a part with no operations record keeps the word for screen readers and its tip; the pane says it.
   const card = body('cardEl');
-  assert.ok(card.includes('ops-none') && card.includes('sr-only'));
-  assert.ok(body('kindLine').includes('운영 기록 없음'));
+  // Moved by spec cards v2 §1/§4: the card draws no footer word at all; its ops words sit in the kind line behind the display setting
+  // (and the 상태·공백 lens, 「운영 기록 없음」 as .ops-none); the pane's head says it as a line of its own.
+  assert.ok(card.includes('ops-none') && card.includes('c-opsw') && !card.includes('c-short') && !card.includes("'c-ops'"));
+  assert.ok(body('opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'));
   const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
-  assert.ok(/\.node\.card \.c-short\.ops-none \{ display: none/.test(css));
+  assert.ok(/\.node\.card \.c-opsw \{ display: none/.test(css) && /\.space\.show-ops \.node\.card \.c-opsw:not\(\.ops-none\), \.space\.show-ops-all \.node\.card \.c-opsw \{ display: inline/.test(css));
   assert.ok(!/\.edge\.spine[^{]*\{[^}]*stroke-width/.test(css.slice(css.indexOf('Hierarchy pass (spec forms v1'))), 'the spine is not thickened (override 8)');
 });

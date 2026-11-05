@@ -54,7 +54,7 @@ export function typeChipForms(name: string, fields: readonly string[], max = CHI
   return out;
 }
 /** A form as one line of text (its title and what a reader hears): 'name · a · b · c +N'. */
-export const chipText = (f: ChipForm): string => [f.name, ...f.cells].join(' · ') + (f.more ? ` +${f.more}` : '');
+export const chipText = (f: ChipForm): string => [f.name, ...f.cells].join(' · ') + (f.more ? ` 필드 +${f.more}` : '');
 /** The fields a drawn line carries: only when every relation it draws hands over the same thing (as its label says one payload);
  * then each field once, in the relations' order. [] otherwise. */
 export function edgeFields(ids: readonly string[], said: ReadonlyMap<string, { payload: string | null; fields: readonly string[] }>): string[] {

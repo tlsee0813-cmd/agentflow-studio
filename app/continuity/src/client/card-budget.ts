@@ -92,10 +92,15 @@ export interface CardShapeIn { nameLines: number; rows: number; contract: number
   /** 1 when one of the kind rows is the defining blank 「?」 (drawn last; never shown below 가까이). */
   blank?: number;
   /** 1 when the first row is a group's 안에 row (S8): at 중간 it reads before the bottom line. */
-  members?: number }
+  members?: number;
+  /** Cards v2 (spec cards v2 §1): 1 when the card has its 「하는 일」 line (it takes the room the ops line took, right after the kind
+   * line); foot: 0 when the card draws no foot (no way in, no signs), absent or 1 when it does. */
+  role?: number; foot?: number }
 /** What a card shows at a tier: its name lines, the kind line, the short status line (개요), how many kind rows and value rows,
  * and whether the contract area, the inner line, the sign row and the bottom line are drawn. */
-export interface CardFit { nameLines: number; kind: boolean; status: boolean; rows: number; vals: number; contract: boolean; inner: boolean; signs: boolean; bottom: boolean }
+export interface CardFit { nameLines: number; kind: boolean; status: boolean; rows: number; vals: number; contract: boolean; inner: boolean; signs: boolean; bottom: boolean;
+  /** cards v2: the role line */
+  role: boolean }
 /** The card's padding above and below (map px), as card-family draws it. */
 const FIT_PAD = 12 * 2 + 2;
 /** What fits a card's fixed box at a tier and scale (5.2–5.4): what does not fit is hidden, never shrunk or overlapped. 가까이 shows
@@ -110,7 +115,8 @@ const FIT_PAD = 12 * 2 + 2;
 export interface FitPriority { preview?: boolean; alt?: boolean }
 export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPriority = {}): CardFit {
   const nl = Math.min(2, Math.max(1, c.nameLines));
-  if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, vals: c.vals ?? 0, contract: true, inner: c.inner > 0, signs: c.signs > 0, bottom: true };
+  const foot = c.foot !== 0, hasRole = !!c.role;
+  if (tier === 'near') return { nameLines: nl, kind: true, status: false, rows: c.rows, vals: c.vals ?? 0, contract: true, inner: c.inner > 0, signs: c.signs > 0, bottom: foot, role: hasRole };
   const T = tierText(k, tier);
   let room = c.total - FIT_PAD;
   const take = (h: number) => { if (room >= h) { room -= h; return true; } return false; };
@@ -126,7 +132,7 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPrior
     const far = tier === 'far' && kind && (!!pri.preview || !!pri.alt), rowFirst = said0 > 0 && (!!c.members || !(pri.preview && c.inner > 0));
     const lead = far && rowFirst && (!!pri.preview || (!!pri.alt && !c.members)) && take(T.rowLh) ? 1 : 0;
     const innerLead = far && !lead && !!pri.preview && c.inner > 0 && take(Math.max(24, T.rowLh + 4));
-    return { nameLines: names, kind, status, rows: lead, vals: 0, contract: false, inner: innerLead, signs: false, bottom: false };
+    return { nameLines: names, kind, status, rows: lead, vals: 0, contract: false, inner: innerLead, signs: false, bottom: false, role: false };
   }
   // 중간: the kind line, the bottom line (it says the status) under the head's gap, then a second name line, the inner line, the
   // kind rows but the blank, the value rows and the sign row, each while it fits.
@@ -135,9 +141,11 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPrior
   const after = T.gap * 0.75, said = Math.max(0, c.rows - (c.blank ? 1 : 0));
   // A group's 안에 row (S8, its first row) reads before the bottom line: what belongs to the group is what a folded group says.
   let rows = c.members && said > 0 && take(T.rowLh + after) ? 1 : 0;
+  // Cards v2: the role line next (what the part does reads before its footer and its rows).
+  const role = hasRole && take(T.rowLh + after * (2 / 3));
   // A name that took two lines at 가까이 keeps its second line first; one that kept one line there takes a second (the larger type
   // here may wrap it) only with the room the rows leave, so the body is never left empty for a line the name may not need.
-  const bottom = take(T.bottom), alt = !!pri.alt;
+  const bottom = foot && take(T.bottom), alt = !!pri.alt;
   // An emphasised card's name reads at least as fully as the same card's unemphasised (A6: the emphasised names must be readable):
   // Alt-mode takes the name lines the plain fit shows first, and its rows use only the room left after them.
   const want = alt ? tierFit(c, k, tier).nameLines : nl;
@@ -149,5 +157,5 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPrior
   if (alt && c.inner > 0) inner = take(Math.max(24, T.rowLh + 4));
   const signs = c.signs > 0 && take(Math.max(24, T.rowLh + 4));
   if (names === 1 && take(T.titleLh)) names = 2;
-  return { nameLines: names, kind, status: false, rows, vals, contract: vals > 0, inner, signs, bottom };
+  return { nameLines: names, kind, status: false, rows, vals, contract: vals > 0, inner, signs, bottom, role };
 }

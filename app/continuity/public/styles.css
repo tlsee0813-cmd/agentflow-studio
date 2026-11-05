@@ -3128,3 +3128,91 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .lens-ops.none { color: var(--text-3); }
 .space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp) { background: var(--fam-bg); }
 .space:is(.tier-far, .tier-dots) .node.card:not(.life):not(.f-neutral):not(.grp):not(.selected):not(:focus-visible):not(.plan-impact):not(.lit) { outline: 2px solid var(--fam-edge); outline-offset: -2px; }
+
+/* ---------- Cards v2 (spec cards v2 §1–§5, §7) ----------
+   The card face at rest: the family silhouette and glyph, the name, the kind word, the lifecycle / maintenance / 미정 chips, the
+   status dot (a recorded operations state only), 「하는 일」 on one line, the kind rows that say something, the pins, the inner line,
+   and a foot with the sign chips at the bottom-left and the ways in at the bottom-right. The ops words, the evidence chip and the
+   value rows are behind the 「표시」 settings (the 상태·공백 lens shows the ops words on every card while it is on). */
+:root { --dot-run: #4f8f66; --dot-stop: #9c8a62; --dot-wait: #7d8796; --dot-conflict: #6f6a8f; }
+:root[data-theme="dark"] { --dot-run: #7fbf96; --dot-stop: #c8b48a; --dot-wait: #a3acb9; --dot-conflict: #a9a3cc; }
+@media (prefers-color-scheme: dark) { :root[data-theme="auto"]:not([data-theme="light"]) { --dot-run: #7fbf96; --dot-stop: #c8b48a; --dot-wait: #a3acb9; --dot-conflict: #a9a3cc; } }
+.c-state { flex: none; display: inline-flex; align-items: center; gap: 4px; height: var(--t-title-lh, 20px); }
+.c-dot { position: relative; flex: none; width: 16px; height: 16px; padding: 0; border: 0; border-radius: 4px; background: none; display: grid; place-items: center; cursor: pointer; }
+.c-dot::before { content: ''; display: block; box-sizing: border-box; width: 9px; height: 9px; }
+.c-dot.d-running::before { border-radius: 50%; background: var(--dot-run); }
+.c-dot.d-stopped::before { width: 8px; height: 8px; border-radius: 1.5px; background: var(--dot-stop); }
+.c-dot.d-waiting::before { border-radius: 50%; border: 2px solid var(--dot-wait); }
+.c-dot.d-conflict::before { width: 7px; height: 7px; border: 1.5px solid var(--dot-conflict); transform: rotate(45deg); }
+.c-dot:hover, .c-dot:focus-visible { background: var(--chip); }
+.c-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.node.card .c-ev { display: none; }
+.space.show-ev .node.card .c-ev { display: inline-block; background: none; border-color: var(--line-strong); color: var(--text-3); font-size: 11px; line-height: 14px; }
+/* The ops words live in the kind line (no layout change when shown); recorded ones behind the setting, every card's in the lens. */
+.node.card .c-opsw { display: none; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.node.card .c-opsw::before { content: '· '; color: var(--text-4); }
+.space.show-ops .node.card .c-opsw:not(.ops-none), .space.show-ops-all .node.card .c-opsw { display: inline; }
+.space.lens-state .node.card .c-opsw { color: var(--text); font-weight: var(--fw-name); }
+.space.lens-state .node.card .c-opsw.ops-none { color: var(--text-3); font-weight: var(--fw-meta); }
+.space.lens-state .node.card .c-kind-word { flex: 0 3 auto; }
+/* 「하는 일」: one line, ellipsis (the whole in the hover card and the pane). */
+.c-role { flex: none; height: var(--t-row-lh, 20px); margin-bottom: calc(var(--t-gap, 16px) * .5); font-size: var(--t-row, 13px); line-height: var(--t-row-lh, 20px); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.node.card.fit-norole .c-role { display: none; }
+.node.card.life .c-role { color: var(--text-3); }
+.space.dim .node.card:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) .c-role { color: var(--text-4); }
+/* The foot: the sign chips at the bottom-left, the ways in at the bottom-right (24px quiet icon buttons, a border on hover). */
+.node.card .c-bottom .c-signs { height: auto; flex: 0 1 auto; min-width: 0; overflow: hidden; }
+.node.card .c-bottom .c-signs .node-signs { gap: 3px; }
+.node.card .c-bottom .c-signs .sign-tab { height: 20px; padding: 0 5px; border-color: transparent; background: none; font-size: var(--t-kind, 12px); line-height: 18px; color: var(--text-3); letter-spacing: .01em; }
+.node.card .c-bottom .c-signs .sign-tab:hover, .node.card .c-bottom .c-signs .sign-tab:focus-visible { border-color: var(--line-strong); color: var(--text); }
+.node.card .c-bottom .c-signs .sign-tab.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.node.card .c-entry { gap: 2px; }
+.node.card .c-entry :is(.c-enter, .c-chip) { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 3px; min-width: 24px; height: 24px; padding: 0 6px; border: 1px solid transparent; border-radius: 6px; background: none; color: var(--text-3); font-size: var(--t-kind, 12px); line-height: 1; font-weight: var(--fw-name); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.node.card .c-entry .c-enter.entry-open { padding: 0; font-size: 14px; }
+.node.card .c-entry .c-enter:hover, .node.card .c-entry .c-chip:hover { border-color: var(--line-strong); color: var(--text); background: var(--surface); }
+.node.card .c-entry .c-enter:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.node.card .c-entry .c-enter.enter-in span { font-size: 10px; }
+/* The map's hover surface (one at a time, anchored, hoverable: WCAG 1.4.13). */
+.edge-tip.hoverable { pointer-events: auto; }
+.edge-tip .hc-name { color: var(--text); font-weight: var(--fw-name); font-size: 13px; }
+.edge-tip .hc-path { font-size: 11.5px; color: var(--text-4); }
+.edge-tip .hc-kind { font-size: 11.5px; color: var(--text-3); }
+.edge-tip .hc-role { color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.edge-tip .hc-ops { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.edge-tip .hc-ops::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--dot-wait); vertical-align: 1px; }
+.edge-tip .hc-ops.d-running::before { background: var(--dot-run); }
+.edge-tip .hc-ops.d-stopped::before { border-radius: 1px; background: var(--dot-stop); }
+.edge-tip .hc-ops.d-waiting::before { background: none; box-shadow: inset 0 0 0 1.5px var(--dot-wait); }
+.edge-tip .hc-ops.d-conflict::before { background: none; transform: rotate(45deg); border-radius: 0; box-shadow: inset 0 0 0 1.5px var(--dot-conflict); }
+.edge-tip .hc-ops.d-none::before { display: none; }
+.edge-tip .hc-io { color: var(--text-3); font-size: 12px; }
+.edge-tip .hc-line { white-space: pre-line; }
+.edge-tip .tip-rel { display: flex; flex-direction: column; padding-top: 3px; margin-top: 2px; border-top: 1px solid var(--hair-2); }
+.edge-tip .tip-rel.first { border-top: 0; padding-top: 0; margin-top: 0; }
+/* Line parts join the line's hover (cards v2 §3): its label, badges, type chip and count chip are hover targets of the line. */
+.edge-labels > :is(.edge-label, .edge-badge, .edge-count, .edge-once) { pointer-events: auto; cursor: default; }
+.edge-labels > .edge-label.near:not(.on) { color: var(--text); background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); }
+.edge-labels > .edge-badge.near:not(.on) { border-color: var(--text-3); color: var(--text); }
+/* 선 이름표 off: the labels at rest step out (badges stay: a condition never reads as unconditional); a pointed or selected line keeps its own. */
+.space.no-labels .edge-labels > .edge-label:not(.on):not(.near):not(.type-chip) { visibility: hidden; }
+/* 「표시」: a popover over the bottom toolbar. */
+.display-wrap { position: relative; display: inline-flex; }
+.controls .display-toggle { padding: 0 10px; }
+.controls .display-toggle.on { background: var(--accent-soft); color: var(--accent); }
+.display-menu { position: absolute; left: 0; bottom: calc(100% + 10px); z-index: 5; width: 248px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); font-size: 12.5px; color: var(--text-2); }
+.display-menu[hidden] { display: none; }
+.dm-head { margin: 0 0 4px; font: var(--label); letter-spacing: var(--label-track); color: var(--text-4); }
+.dm-row { display: flex; align-items: center; gap: 8px; min-height: 28px; cursor: pointer; }
+.dm-row input { margin: 0; accent-color: var(--accent); }
+.dm-own { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--hair-2); color: var(--text-3); }
+.dm-note { margin: 4px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-4); }
+/* The pane's explicit operations line (cards v2 §4). */
+.pane-ops-notes { display: flex; flex-direction: column; gap: 2px; margin-top: 6px; }
+.pane-ops-line.none { margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-3); }
+.pane-ops-line.none::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--text-4); vertical-align: 1px; }
+.pane-ops-note { margin: 0; font-size: 12px; line-height: 17px; color: var(--text-3); }
+.pane-ops-note.conflict { color: var(--text-2); }
+.pane-ops-line.flash { animation: ops-flash 1.6s ease-out 1; border-radius: 4px; }
+@keyframes ops-flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+.lens-blanks { margin: 4px 0 0; font-size: 12px; line-height: 17px; color: var(--text-4); }
+.lg-dots { margin: 6px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-4); cursor: help; }

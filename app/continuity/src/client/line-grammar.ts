@@ -112,7 +112,8 @@ export function multiWord(payloads: readonly (string | null)[], clip = (t: strin
   if (!uniq.length) return null;
   if (uniq.length === 1) return clip(uniq[0]!);
   const shown = uniq.slice(0, 2), rest = payloads.length - payloads.filter(p => !!p && shown.includes(p)).length;
-  return `${shown.map(clip).join(' · ')}${rest > 0 ? ` +${rest}` : ''}`;
+  // Cards v2 §1: a count says what it counts (「외 N」 after the names: the relations past the two named).
+  return `${shown.map(clip).join(' · ')}${rest > 0 ? ` 외 ${rest}` : ''}`;
 }
 
 /* ---------- the text badge (6.2) ---------- */
@@ -200,7 +201,8 @@ export const quietAt = (b: Pick<LineBadge, 'kind' | 'quiet'>, on: boolean, tier:
 /** The quiet tick's tip: what it stands for, then the badge's own tip (the words as written). */
 export const quietTip = (b: Pick<LineBadge, 'tip'>): string => `한 번 · 가까이 보거나 선을 고르면 글자로\n${b.tip}`;
 /** Badges that found no place of their own on one part's side gather in one marker: '+N' (each line's words in its tip). */
-export const overflowMark = (n: number): string => `+${n}`;
+// Cards v2 §1: the marker names what it gathers (「배지 +2」).
+export const overflowMark = (n: number): string => `배지 +${n}`;
 
 /* ---------- label priority (6.3) ---------- */
 /** The protected order of what a line carries, highest first (6.3 items 5–9; 1–4 are part and region names, which a label never

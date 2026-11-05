@@ -81,7 +81,7 @@ test('LINE-3b S7: a badge never reads the bare kind word; it falls back from its
   assert.deepEqual(badgeForms(call, true, 'far'), ['호출마다 · 설계', '호출마다', BADGE_GLYPH]);
   assert.deepEqual(badgeForms(lineBadge([{ when: 'wandb_log면' }]), false, 'far'), ['wandb_log면', 'wandb_…', '조건']);
   assert.deepEqual(badgeForms(lineBadge([{ optional: true }]), true), ['선택']);
-  assert.equal(overflowMark(3), '+3');
+  assert.equal(overflowMark(3), '배지 +3'); // cards v2 §1: the marker says what it counts
 });
 
 test('LINE-3c S7: an unresolved reference of the record reads as written, marked unresolved; never resolved', () => {
@@ -131,9 +131,9 @@ test('LINE-4 one stroke per pair, direction and channel: a flow and a need of on
   assert.equal(s1.find(e => e.ids.includes('r1')).key, s2[0].key);
   assert.ok(s1.every(e => e.key.startsWith('sum:')));
   // The label of a stroke handing over different things.
-  assert.equal(multiWord(['결과', '설정', '로그']), '결과 · 설정 +1');
+  assert.equal(multiWord(['결과', '설정', '로그']), '결과 · 설정 외 1');
   assert.equal(multiWord(['결과', '결과']), '결과');
-  assert.equal(multiWord(['결과', null, '설정']), '결과 · 설정 +1');
+  assert.equal(multiWord(['결과', null, '설정']), '결과 · 설정 외 1');
   assert.equal(multiWord([null, null]), null);
 });
 

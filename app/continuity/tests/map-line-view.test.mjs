@@ -40,8 +40,8 @@ test('the loop line in parts reads as loopLine; a program loop with only a unit 
 test('the type chip: the name with up to three fields and +N, then one field fewer each time down to the name', () => {
   const forms = typeChipForms('주문 요청', ['order_id', 'amount', 'currency', 'items', 'idempotency_key']);
   assert.equal(CHIP_FIELDS, 3);
-  assert.deepEqual(forms.map(chipText), ['주문 요청 · order_id · amount · currency +2', '주문 요청 · order_id · amount +3', '주문 요청 · order_id +4', '주문 요청 +5']);
-  assert.deepEqual(typeChipForms('응답', ['status', 'tracking_no']).map(chipText), ['응답 · status · tracking_no', '응답 · status +1', '응답 +2'], 'two fields: no count until one gives way');
+  assert.deepEqual(forms.map(chipText), ['주문 요청 · order_id · amount · currency 필드 +2', '주문 요청 · order_id · amount 필드 +3', '주문 요청 · order_id 필드 +4', '주문 요청 필드 +5'] /* cards v2 §1: the count names its noun */);
+  assert.deepEqual(typeChipForms('응답', ['status', 'tracking_no']).map(chipText), ['응답 · status · tracking_no', '응답 · status 필드 +1', '응답 필드 +2'], 'two fields: no count until one gives way');
   assert.deepEqual(typeChipForms('x', []).map(chipText), ['x']);
 });
 

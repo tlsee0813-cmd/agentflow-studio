@@ -98,13 +98,13 @@ test('tierText: the screen floors hold at every scale; 가까이 keeps the line 
 const shape = (x = {}) => ({ nameLines: 1, rows: 3, contract: 32, inner: 24, signs: 24, total: 264, status: 1, ...x });
 test('tierFit: 54% shows title, kind and short status only; 77% the head, the bottom line and the rows that fit; 100% everything', () => {
   const far = tierFit(shape(), 0.54, 'far');
-  assert.deepEqual({ ...far, nameLines: undefined }, { nameLines: undefined, kind: true, status: true, rows: 0, vals: 0, contract: false, inner: false, signs: false, bottom: false });
+  assert.deepEqual({ ...far, nameLines: undefined }, { nameLines: undefined, kind: true, status: true, rows: 0, vals: 0, contract: false, inner: false, signs: false, bottom: false, role: false }); // cards v2: no role line at 개요
   assert.ok(far.nameLines >= 1);
   const mid = tierFit(shape(), 0.77, 'mid');
   assert.equal(mid.kind, true); assert.equal(mid.bottom, true); assert.equal(mid.contract, false, 'the pins and names hide at 중간');
   assert.ok(mid.rows >= 1 && mid.rows <= 3, 'the kind rows that fit, so the fixed box is used');
   assert.equal(mid.status, false, 'the bottom line says the status at 중간');
-  assert.deepEqual(tierFit(shape(), 1, 'near'), { nameLines: 1, kind: true, status: false, rows: 3, vals: 0, contract: true, inner: true, signs: true, bottom: true });
+  assert.deepEqual(tierFit(shape(), 1, 'near'), { nameLines: 1, kind: true, status: false, rows: 3, vals: 0, contract: true, inner: true, signs: true, bottom: true, role: false });
   // 중간 never shows the 「?」 blank (drawn last); the value rows follow the kind rows while they fit; the name's second line comes
   // after them unless the name took two lines at 가까이.
   const blanked = tierFit(shape({ rows: 2, blank: 1, vals: 2, inner: 0, signs: 0, total: 208 }), 0.77, 'mid');

@@ -64,13 +64,16 @@ test('kind rows (3.4): at most three, only what the record says, with the kind\'
   assert.deepEqual(kindRows(facts({ type: 'loop', config: ['폴링 60 s'] }))[0], { label: '반복', value: '폴링 60 s', unlinked: true }, 'a beat-like setting stands for the unit (a setting: no line of its own)');
   assert.deepEqual(kindRows(facts({ type: 'loop', loop: { unit: '60 s', stop: null, resume: null }, loopProgram: { unit: true, stop: false, resume: false } }))[0], { label: '반복', value: '60 s', program: true }, 'the program\'s unit keeps its chip');
   // A store: writers and readers counted from the relations, retention from config[0]; the blank by what is missing.
-  assert.deepEqual(kindRows(facts({ type: 'store', writers: 1, readers: 2 })), [{ label: '관계', value: '쓰는 쪽 1 · 읽는 쪽 2' }, { label: '행 형식', value: '?', blank: true }]);
+  // Cards v2 §1: no 「관계 쓰는 쪽 N · 읽는 쪽 M」 row (the pane names them); the blank stays the definition's (the card draws none: blanks: false).
+  assert.deepEqual(kindRows(facts({ type: 'store', writers: 1, readers: 2 })), [{ label: '행 형식', value: '?', blank: true }]);
+  assert.deepEqual(kindRows(facts({ type: 'store', writers: 1, readers: 2 }), { blanks: false }), []);
+  assert.deepEqual(cardTemplate(facts({ type: 'store' })).blanks, ['행 형식']);
   assert.deepEqual(kindRows(facts({ type: 'store', fields: ['a'] })), [{ label: '보존 기간', value: '?', blank: true }]);
   assert.deepEqual(kindRows(facts({ type: 'store', fields: ['a'], config: ['30일'] })), [{ label: '설정', value: '30일', unlinked: true }], 'a setting is not called a retention');
   // A timer: up to two beats, the time basis when the schedule names one, the parts it starts; no schedule: 「일정 ?」.
   assert.deepEqual(kindRows(facts({ type: 'timer', config: ['매일 00:15Z', '5분마다', '매시 정각'], controlOut: ['수집기'] })),
     [{ label: '주기', value: '매일 00:15Z', unlinked: true }, { label: '주기', value: '5분마다', unlinked: true }, { label: '시간 기준', value: 'UTC', unlinked: true }]);
-  assert.deepEqual(kindRows(facts({ type: 'timer', config: ['토큰 키'], controlOut: ['수집기', '정리', '보고', '알림'] })), [{ label: '일정', value: '?', blank: true }, { label: '대상', value: '수집기 · 정리 · +2' }]);
+  assert.deepEqual(kindRows(facts({ type: 'timer', config: ['토큰 키'], controlOut: ['수집기', '정리', '보고', '알림'] })), [{ label: '일정', value: '?', blank: true }, { label: '대상', value: '수집기 · 정리 외 2' }]);
   // AI 판단: 맥락 · 기준 · 반환 (blank 「반환 형식 ?」), 출구 from the condition rows when there is room.
   assert.deepEqual(kindRows(facts({ type: 'ai', inputs: ['review 행'], config: ['rung 표'] })),
     [{ label: '맥락', value: 'review 행', unlinked: true }, { label: '기준', value: 'rung 표', unlinked: true }, { label: '반환 형식', value: '?', blank: true }]);
@@ -84,7 +87,7 @@ test('kind rows (3.4): at most three, only what the record says, with the kind\'
   assert.deepEqual(kindRows(facts({ type: 'person' })), [], 'a person keeps only what is recorded');
   assert.deepEqual(kindRows(facts({ type: 'session', controlIn: ['소유자'], fileRoles: 3, config: ['--fast'] })), [{ label: '요청자', value: '소유자' }, { label: '다루는 파일', value: '3' }, { label: '설정', value: '--fast', unlinked: true }]);
   assert.deepEqual(kindRows(facts({ type: 'external', steps: [step(), step()] })), [{ label: '내부', value: '기록 범위 밖 · 단계 2' }]);
-  assert.deepEqual(kindRows(facts({ type: 'collector', dataIn: ['거래소', '시세', '뉴스'], dataInCadence: ['1 s'] })), [{ label: '출처', value: '거래소 · 시세 · +1' }, { label: '박자', value: '1 s' }]);
+  assert.deepEqual(kindRows(facts({ type: 'collector', dataIn: ['거래소', '시세', '뉴스'], dataInCadence: ['1 s'] })), [{ label: '출처', value: '거래소 · 시세 외 1' }, { label: '박자', value: '1 s' }]);
   assert.deepEqual(kindRows(facts({ type: 'compute', steps: [step('평균을 낸다')], config: ['창 20'] })), [{ label: '계산', value: '평균을 낸다' }, { label: '설정', value: '창 20', unlinked: true }]);
   assert.deepEqual(kindRows(facts({ type: 'compute', steps: [step('a'), step('b')] })), [], 'more than one step: no 계산 row (the steps are the inside)');
   assert.deepEqual(kindRows(facts({ config: ['x'] })), [{ label: '설정', value: 'x', unlinked: true }]);
@@ -124,16 +127,20 @@ test('contract (3.3, principle 9, 0.1): list values by name until items carry th
 
 test('heights (3.8, 5.3): the near content on an 8px grid; the timer mock-up is 208; the name lines change the head only', () => {
   const timer = cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'] }));
-  // 12 · head 52 · rows (2 × 20 + 12) · no contract (nothing recorded) · bottom 28 · 12 = 156 → 160.
+  // Cards v2: 12 · head 52 · rows (2 × 20 + 12) · no contract (nothing recorded) · no foot (no way in, no signs) · 12 = 128.
   const h1 = cardHeights(timer, 1);
-  assert.equal(h1.head, 52); assert.equal(h1.rows, 52); assert.equal(h1.contract, 0); assert.equal(h1.bottom, 28); assert.equal(h1.total % GRID, 0); assert.equal(h1.total, 160);
+  assert.equal(h1.head, 52); assert.equal(h1.rows, 52); assert.equal(h1.contract, 0); assert.equal(h1.bottom, 0); assert.equal(h1.total % GRID, 0); assert.equal(h1.total, 128);
+  // A way in draws the 28px foot; the role line adds one line and its gap (20 + 8).
+  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'], foot: true })), 1).total, 160);
+  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다'], controlOut: ['수집기'], role: '매일 수집을 시작한다.' })), 1).rows, 52 + 28);
   const h2 = cardHeights(timer, 2);
   assert.equal(h2.head, 72); assert.equal(h2.total - h1.total >= 16, true);
   assert.equal(cardHeights(timer, 5).head, 72, 'two name lines at most');
-  // Three rows: 12 + 52 + 72 + 28 + 12 = 176 (the mock-up's 208 held a contract line the record does not fill); value rows add 20 each
+  // Three rows: 12 + 52 + 72 + 12 = 148 → 152 (no foot); value rows (behind the display setting, cards v2) add 20 each
   // and their 12.
-  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다', '매시 00:00Z'], controlOut: ['수집기'] })), 1).total, 176);
-  assert.equal(cardHeights(cardTemplate(facts({ inputs: ['a'], outputs: ['b'] })), 1).contract, 2 * 20 + 12);
+  assert.equal(cardHeights(cardTemplate(facts({ type: 'timer', config: ['5분마다', '매시 00:00Z'], controlOut: ['수집기'] })), 1).total, 152);
+  assert.equal(cardHeights(cardTemplate(facts({ inputs: ['a'], outputs: ['b'], values: true })), 1).contract, 2 * 20 + 12);
+  assert.equal(cardHeights(cardTemplate(facts({ inputs: ['a'], outputs: ['b'] })), 1).contract, 0, 'cards v2: no value rows by default');
   // Pins: title 16 + rows 24 + 8; each pin's centre on its row; the contact point the pin rows' middle.
   const pinned = cardTemplate(facts({ type: 'loop', loop: { unit: '명령별', stop: null, resume: null }, pins: { in: ['명령 목록'], out: ['측정 결과', '요약'] }, unmapped: 0 }));
   const hp = cardHeights(pinned, 1), top = 1 + 12 + 52 + 32;
