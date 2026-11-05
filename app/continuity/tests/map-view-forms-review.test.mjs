@@ -77,9 +77,9 @@ test('FORM-20 an alternative\'s condition is its clauses\' when (or a plain clau
   const l = stepLine(st, [], []), a = l.stations.find(s => s.ref === 'B03:S03a'), b = l.stations.find(s => s.ref === 'B03:S03b');
   assert.equal(a.cond, ALT_NO_COND); assert.equal(a.condBlank, true);
   assert.equal(b.cond, '캐시 없음'); assert.equal(b.condBlank, false);
-  assert.match(l.forks[0].tag.tip, /S03a: 조건 미기재/); assert.match(l.forks[0].tag.tip, /S03b: 캐시 없음/);
+  assert.match(l.forks[0].tag.tip, /\b3a: 조건 미기재/); assert.match(l.forks[0].tag.tip, /\b3b: 캐시 없음/);
   assert.ok(!/S03a: →/.test(l.forks[0].tag.tip));
-  assert.ok(l.arcs.some(x => x.label === '→ S05'), 'the jump stays an arc');
+  assert.ok(l.arcs.some(x => x.label === '→ 단계 5'), 'the jump stays an arc');
   noOverlap(l);
 });
 

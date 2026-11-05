@@ -8,7 +8,7 @@ import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, re
 import { parseScenarioRecord, applyScenario, scenarioUnderstanding, projectLedger, type ScenarioUnderstanding } from '../shared/scenario-record.js';
 import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace, headTexts, scenarioLabel, scenarioResultLine, saidText, visitNumber, linkTitle, LINK_WORD, LINK_GLYPH, KIND_WORD, type BrokenPlace,
   grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits, type GrammarMark } from './scenario-view.js';
-import { plainIds, idOnly, nameVariants, variantName, plainView } from './plain-ids.js';
+import { plainIds, idOnly, nameVariants, variantName, plainView, projectIdGloss, type IdGloss } from './plain-ids.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, projectVariantGloss, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, structureSummary, structureConditions, structureKeep, whereRows, fileRoleOf, enforcePlace, type DisputedItem, type HistoryEntry,
   PANE_TABS, tabLabel, entryTab, tabKeyMove, STRUCTURE_TITLE, structureSections, jumpChips, PANE_SHOWN, foldRows, behaviourSummary, cautionRows, unlinkedNames, listLabels, kindLead, UNLINKED_HEAD, UNLINKED_HINT,
@@ -43,7 +43,8 @@ import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { stateMark } from './view-lens.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, covers, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
@@ -338,7 +339,7 @@ function projectFor(key: string): Opened | null {
   if (!project) return null;
   let alias: Opened['alias'] = null;
   if (kind === 'example') { const toId = key === CONVERTER_KEY ? converterKeys(project) : key === UI62_KEY ? ui62Keys(project) : exampleKeys(key.slice(3), project); alias = { toId, toKey: new Map([...toId].map(([k, id]) => [id, k])) }; }
-  return { key, kind, project, ref, view: plainView(studioView(project)), alias };
+  return { key, kind, project, ref, view: plainMapView(project), alias };
 }
 
 /* ---------- rendering ---------- */
@@ -881,7 +882,8 @@ function ladderLine(view: StudioView, p: PartView): HTMLElement {
   const el = ladder(view, p), lit = [...el.querySelectorAll('.rung.on')].map(r => r.className);
   const check = lit.some(c => c.includes('r-check')), report = lit.some(c => c.includes('r-report')), ask = lit.some(c => c.includes('r-ask'));
   // S9: plain words (pane-plain ladderWords), never the ladder's own terms (「했다는 보고가 있음 · 아직 확인 전」).
-  return h('p', { class: 'lens-ladder' }, el, h('span', {}, ladderWords({ ask, report, check })));
+  const words = h('span', { class: 'ladder-words', 'aria-hidden': 'true' }, ...(['요청', '보고', '확인'] as const).map((n, i) => h('span', { class: [ask, report, check][i] ? 'on' : '' }, n)));
+  return h('p', { class: 'lens-ladder ev-ladder', title: '이 부분의 기록이 어디까지 가는지 · 요청 · 결과 보고 · 확인 자료(시험·점검)' }, words, h('span', {}, ladderWords({ ask, report, check })));
 }
 /* The panel head's state line (map-reading.7) is kindLine (map design v3 8.2): the type word, the operations line in its full
  * form and the author's tag of the line that says it; never a status the app verified. */
@@ -980,6 +982,8 @@ const dimNow = () => !!selected || !!scView || !!sinceSpan(opened);
  * a tab citing a claim after its time carries the accent ring. */
 /** Cards v2 §1: on the card the sign tabs are small icon+count chips (§ rule · ◇ gate · Δ change), their first texts on hover. */
 const SIGN_GLYPH: Readonly<Record<SignKind, string>> = { rule: '§', gate: '◇', change: 'Δ' };
+/** Polish round fixes 2: at 가까이 the foot's chips read by their words (규칙 4 · 변경 2), the glyphs where the foot is small. */
+const SIGN_WORD: Readonly<Record<SignKind, string>> = { rule: '규칙', gate: '관문', change: '변경' };
 function signTabsEl(o: Opened, p: PartView, r: PartUnderstanding, compact = false): HTMLElement | null {
   const sg = signsOf(r), tabs = signTabs(sg); if (!tabs.length) return null;
   const f = sinceSpan(o), split = gateSplit(sg.gates), unplaced = unplacedCount(sg.rules, placesOf(r));
@@ -988,13 +992,14 @@ function signTabsEl(o: Opened, p: PartView, r: PartUnderstanding, compact = fals
   const mark = split.run.length ? h('span', { class: 'gate-mark', role: 'img', 'aria-label': `실행 관문 ${split.run.length}`, title: `실행 관문 ${split.run.length} · 경로 위의 판정 (읽기면의 관문에서)` }, '관문') : null;
   return h('span', { class: 'node-signs', role: 'group', 'aria-label': `${p.name}의 표지` }, ...tabs.map(t => {
     const list = t.kind === 'rule' ? sg.rules : t.kind === 'gate' ? sg.gates : sg.changes, hit = !!f && list.some(c => sinceHit(c, f));
-    const tip = t.kind === 'rule' ? `이 부분의 규칙 · 범위·적용 위치·보장을 읽기면에서 함께${unplaced ? `\n배치 미정 ${unplaced} · 정확한 단계·포트·필드에 놓이지 않음` : ''}`
+    // Polish round fixes 2: a hover tip in a reader's words (no 배치 미정 · 읽기면); the rule tab keeps the record's terms.
+    const tip = t.kind === 'rule' ? `이 부분의 규칙 ${sg.rules.length}개 · 눌러서 어디에 적용되는지 읽기${unplaced ? `\n어느 단계에 붙는지 기록에 없음 ${unplaced}` : ''}`
       : t.kind === 'gate' ? `이 부분의 관문 · ${gateSplitLine(split)} · 읽기면에서${split.guessed.length ? `\n${GATE_BLANK_HINT}` : ''}`
         : `이 부분의 이전 → 지금 비교 · 읽기면에서 (지도는 바뀌지 않음)${sg.changes.some(c => changeRow(c).guessed) ? `\n${NATURE_HINT}` : ''}`;
     return h('button', { type: 'button', class: `sign-tab k-${t.kind}${hit ? ' since-hit' : ''}${signOpen?.part === p.id && signOpen.kind === t.kind ? ' on' : ''}`, 'data-sign': t.kind,
       'aria-pressed': String(signOpen?.part === p.id && signOpen.kind === t.kind), 'aria-label': `${p.name} ${SIGN_LABEL[t.kind]} ${t.count}개 읽기${hit ? ' · 기준 시각 이후 기록 있음' : ''}`,
       ...(compact ? { 'data-tip': `${SIGN_LABEL[t.kind]} ${t.count}\n${list.slice(0, 3).map(c => `· ${c.text}`).join('\n')}${list.length > 3 ? `\n${moreTip(list.length - 3, SIGN_LABEL[t.kind])}` : ''}\n${tip}${hit ? '\n기준 시각 이후 작성된 기록이 있음' : ''}` }
-        : { title: `${tip}${hit ? '\n기준 시각 이후 작성된 기록이 있음' : ''}` }), onclick: () => openSign(p.id, t.kind) }, compact ? `${SIGN_GLYPH[t.kind]} ${t.count}` : t.text);
+        : { title: `${tip}${hit ? '\n기준 시각 이후 작성된 기록이 있음' : ''}` }), onclick: () => openSign(p.id, t.kind) }, ...(compact ? [h('span', { class: 'sg-g', 'aria-hidden': 'true' }, SIGN_GLYPH[t.kind]), h('span', { class: 'sg-w' }, SIGN_WORD[t.kind]), ` ${t.count}`] : [t.text]));
   }), mark);
 }
 /** pick: the one rule a detail-view chip stands for; opening from a chip never closes the section (another chip may pick another). */
@@ -1388,7 +1393,8 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
         c.outs[i] ? h('span', { class: 'c-pin out', 'data-tip': `${c.outTitle} · ${c.outs[i]} · 포트 대응 행(모델)이 이 포트에 선을 잇는다` }, h('span', { class: 'c-pin-name' }, c.outs[i]!), h('i', { class: 'pin', 'aria-hidden': 'true' })) : h('span', { class: 'c-pin empty' }))));
   // Polish round (spec-cards-v2 §1): 「포트 대응 미기록 N」 is off the card face: the 데이터 and 상태·공백 lenses count it and the detail
   // view marks each port; the pin head's tip says how many lines meet the card-level contact point.
-  const words = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 });
+  // Polish round fixes 2: the ⤢ tip says the unplaced rules in a reader's words (the counts keep entryParts' order).
+  const words = entryParts(entryCountsOf(p, r), { config: 0, fields: 0 }).map(w => w.replace(/^배치 미정 (\d+)$/, '단계 미정 규칙 $1'));
   // The inner line: '단계 N' and the first recorded steps' names (each step carries its quote), in the record's row order.
   const il = t.innerLine;
   // Review: at 중간 the inner line is a plain 「단계 N」 (styles.css hides the unit, the names and their count there; the ⤢ tip says the rest).
@@ -1711,9 +1717,9 @@ function renderDetail(id: string) {
     x.place ? `단계 ‘${steps[x.place.step]!.name}’ · ${x.place.by === 'when' ? '조건' : '결과'} 쪽 말이 이 단계의 ${x.place.key === 'name' ? '이름' : '쓰는 것'}${x.place.how === 'equal' ? '과 같음' : '을 담음'}`
       : `${CONDITION_BLANK} · 조건의 말이 이 부분의 어느 단계 이름·쓰는 것도 짚지 않음 · 추측으로 놓지 않음`, `원문: “${x.condition.quote.quote}”`].join('\n');
   const condEl = (x: PlacedCondition<(typeof conds)[number]>) => h('span', { class: `dv-cond${x.place ? '' : ' apart'}`, role: 'listitem', 'data-cond': String(x.index), title: condTip(x) },
-    ...conditionLines(x.condition).map((t, k) => h('span', { class: k ? 'dv-cond-else' : 'dv-cond-if' }, t)), x.place ? null : h('small', { class: 'dv-cond-blank' }, CONDITION_BLANK));
+    ...conditionLines(x.condition).map((t, k) => h('span', { class: k ? 'dv-cond-else' : 'dv-cond-if' }, plainIds(t, idGloss(o.project, o.view)))), x.place || cp.unplaced.includes(x) ? null : h('small', { class: 'dv-cond-blank' }, plainBlank(CONDITION_BLANK)));
   const condsApart = cp.unplaced.length ? h('div', { class: 'dv-conds-apart' },
-    h('p', { class: 'dv-apart-head', title: '조건의 말이 이 부분의 어느 단계도 이름으로 짚지 않아 경계에 둔 조건 행 · 추측으로 단계에 잇지 않음' }, CONDITION_UNPLACED, h('small', {}, String(cp.unplaced.length))),
+    h('p', { class: 'dv-apart-head', title: '조건의 말이 이 부분의 어느 단계도 이름으로 짚지 않아 경계에 둔 조건 행 · 추측으로 단계에 잇지 않음' }, '어느 단계의 조건인지 기록에 없음', h('small', {}, String(cp.unplaced.length))),
     h('span', { class: 'dv-conds', role: 'list', 'aria-label': CONDITION_UNPLACED }, ...cp.unplaced.map(condEl))) : null;
   const chain = detailChain(steps, r?.portMap ?? [], ins.filter(x => !x.unnamed).map(x => x.name), outs.filter(x => !x.unnamed).map(x => x.name));
   // spec 5.1: each rule at the step, port or ledger cell its scope's name or its anchors name (by name only), a part rule at the
@@ -1784,7 +1790,7 @@ function renderDetail(id: string) {
   // Pipeline .44: every C-LOOP row of the part (the record's loop table), a nested one under the loop it runs in; the part's variants
   // (C-VARIANT rows: the implementing part, its choice condition and whether it goes beside the others).
   const recLoops = r?.recordLoops ?? [], variants = r?.variants ?? [];
-  const loopRow = (l: (typeof recLoops)[number]) => `${recLoops.some(x => x.recordRef === l.parentRef) ? '└ ' : ''}${l.recordRef} · ${l.unit ?? '단위 미상'}${l.count ? ` · ${l.count}` : ''}${l.stop ? ` · 끝: ${l.stop}` : ''}`
+  const loopRow = (l: (typeof recLoops)[number]) => `${recLoops.some(x => x.recordRef === l.parentRef) ? '└ ' : ''}${l.unit ?? '단위 미상'}${l.count ? ` · ${l.count}` : ''}${l.stop ? ` · 끝: ${l.stop}` : ''}`
     + (l.parentRef && !recLoops.some(x => x.recordRef === l.parentRef) ? ` · 안: ${l.parentRef}${l.parentPart ? ` ${l.parentPart}` : ''}` : '');
   const ordered: typeof recLoops = [], visit = (l: (typeof recLoops)[number]): void => { if (ordered.includes(l)) return; ordered.push(l); for (const x of recLoops) if (x.parentRef === l.recordRef) visit(x); };
   for (const l of recLoops) if (!recLoops.some(x => x.recordRef === l.parentRef)) visit(l);
@@ -1794,7 +1800,7 @@ function renderDetail(id: string) {
   const TOGETHER: Record<string, string> = { exclusive: '배타', combined: '병용 가능', unknown: '병용 모름' };
   const variantsEl = variants.length ? h('section', { class: 'xp-sec dv-variants' }, h('h4', { class: 'xp-title' }, '변형', h('small', {}, String(variants.length))),
     h('ul', { class: 'xp-lines' }, ...variants.map(x => h('li', { title: `변형 표 ${x.recordRef} · 접점 ${x.interfaceRef}${x.selector.who ? ` · 고르는 이 ${x.selector.who}` : ''}${x.selector.when ? ` · ${x.selector.when}` : ''}\n원문: “${x.quote.quote}”` },
-      `${x.recordRef} ${x.implementer === 'user' ? '사용자 지정' : x.implementer}${x.condition ? ` · ${x.condition}` : ''} · ${TOGETHER[x.together] ?? x.together}${x.togetherScope ? `(${x.togetherScope})` : ''}`)))) : null;
+      `${x.implementer === 'user' ? '사용자 지정' : x.implementer}${x.condition ? ` · ${plainIds(x.condition, idGloss(o.project, o.view))}` : ''} · ${TOGETHER[x.together] ?? x.together}${x.togetherScope ? `(${x.togetherScope})` : ''}`)))) : null;
   const keepEl = loop || vars.length || recLoops.length ? h('section', { class: 'xp-sec dv-keep' },
     h('h4', { class: 'xp-title' }, (loop || recLoops.length) && vars.length ? '반복 · 유지 상태' : loop || recLoops.length ? '반복' : '유지 상태'),
     loop ? h('p', { class: 'dv-loop', title: loopLine(loop) }, ...loopNodes(loopSegs(r!))) : null, loopsEl,
@@ -1845,7 +1851,7 @@ function renderDetail(id: string) {
     gate: decisions.filter(x => offLine.includes(x.d.index)).length, rule: offLine.reduce((n, i) => n + (ds?.steps.get(i)?.length ?? 0), 0),
     port: chain.links.filter(l => offLine.includes(l.step)).length };
   const offWords = [offCounts.cond ? `조건 ${offCounts.cond}` : null, offCounts.gate ? `관문 ${offCounts.gate}` : null, offCounts.rule ? `규칙 ${offCounts.rule}` : null, offCounts.port ? `포트 대응 ${offCounts.port}` : null].filter(Boolean);
-  const lineOpts = (width: number) => ({ width, owner: fi.owner, elsewhere: fi.elsewhere, ownerNames: fi.ownerNames,
+  const lineOpts = (width: number) => ({ width, owner: fi.owner, elsewhere: fi.elsewhere, ownerNames: fi.ownerNames, gloss: idGloss(o.project, o.view),
     extra: fi.steps.map((_, i) => { const li = fi.listIndex[i]; if (li === null || li === undefined) return 0; const dec = decisions.filter(x => x.d.index === li);
       return (dec.some(x => x.d.source === 'conditions') ? 0 : (cp.steps.get(li) ?? []).length) + dec.length * 2; }) });
   const pre = form === 'line' ? stepLine(fi.steps, fi.loops, fi.entries, lineOpts(0)) : null;
@@ -1865,11 +1871,11 @@ function renderDetail(id: string) {
     return h('div', { class: `sl-st${sign ? ' has-sign' : ''}${s.col ? ' alt' : ''}`, style: `left:${s.left}px;top:${s.top}px;width:${s.right - s.left}px;height:${s.h}px` },
       h('button', { type: 'button', class: `dv-step sl-btn${on ? ' on' : ''}${dec.length ? ' decision' : ''}${s.program ? ' program' : ''}`, ...(li !== null ? { 'data-step': String(li) } : {}), 'data-station': String(s.index), 'aria-pressed': String(on), title: tip, onclick: () => pickStep(id, s.name) },
         h('span', { class: 'sl-dot', 'aria-hidden': 'true' }),
-        h('span', { class: 'dv-step-head' }, ...progIn.map(l => portChip('step', l.port)), h('span', { class: 'dv-step-n sl-ref' }, shortRef(s.ref)), h('span', { class: 'dv-step-name' }, s.name), s.program ? stepChip() : null,
+        h('span', { class: 'dv-step-head' }, ...progIn.map(l => portChip('step', l.port)), h('span', { class: 'dv-step-n sl-ref' }, s.no), h('span', { class: 'dv-step-name' }, s.name), s.program ? stepChip() : null,
           dec.length ? h('span', { class: 'dv-diamond', role: 'img', 'aria-label': '판정 단계' }) : null, progOut.length ? h('span', { class: 'dv-prog-out' }, ...progOut.map(l => portChip('step', l.port))) : null),
         fs.does && !s.program ? h('span', { class: 'dv-step-does' }, fs.does) : null,
         // Polish round fixes 1: a condition cell that is only another row's ID (「CD06」) says so in words; the ID stays in the tip.
-        s.cond ? line(`sl-if${s.condBlank ? ' blank' : ''}`, s.condBlank ? '이 갈래를 고르는 조건을 기록이 적지 않았다 (조건·분기 칸에 조건이 없거나 가는 곳만)' : idOnly(s.cond) ? `갈래의 조건 · 기록의 조건 행 ${s.cond}을 가리킴 (원문에서)` : `갈래의 조건 · ${s.cond}`, h('b', {}, '조건'), ' ', idOnly(s.cond) ? '기록의 다른 조건 행' : plainIds(s.cond)) : null,
+        s.cond ? line(`sl-if${s.condBlank ? ' blank' : ''}`, s.condBlank ? '이 갈래를 고르는 조건을 기록이 적지 않았다 (조건·분기 칸에 조건이 없거나 가는 곳만)' : idOnly(s.cond) ? `갈래의 조건 · 기록의 조건 행 ${s.cond}을 가리킴 (원문에서)` : `갈래의 조건 · ${s.cond}`, h('b', {}, '조건'), ' ', idOnly(s.cond) ? (idGloss(o.project, o.view).names.get(s.cond.trim()) ?? '기록의 다른 조건 행') : plainIds(s.cond, idGloss(o.project, o.view))) : null,
         s.notes.length ? line('sl-notes', `조건·분기 칸 · ${s.notes.join(' · ')}`, h('b', {}, '갈림'), s.notes.join(' · ')) : null,
         s.exits.length ? line('sl-exits', s.exits.map(e => e.tip).join('\n'), ...s.exits.map(e => h('span', { class: `sl-exit k-${e.kind}` }, e.text))) : null,
         own.length ? h('span', { class: 'dv-conds sl-conds', role: 'list', 'aria-label': '조건 출구' }, ...own.map(condEl)) : null),
@@ -1883,7 +1889,10 @@ function renderDetail(id: string) {
     const titled = (el: SVGElement, tip: string) => { if (tip) { const t = svg('title', {}); t.textContent = tip; el.append(t); } return el; };
     l.brackets.forEach(b => g.append(titled(svg('path', { class: `sl-bracket d${Math.min(b.depth, 4)}`, d: `M${b.xEnd},${b.y1} H${b.x + 8} Q${b.x},${b.y1} ${b.x},${b.y1 + 8} V${b.y2 - 8} Q${b.x},${b.y2} ${b.x + 8},${b.y2} H${b.xEnd}` }), b.tip)));
     l.segments.forEach((s, k) => {
-      const d = s.curve ? `M${s.x1},${s.y1} C${s.x1},${(s.y1 + s.y2) / 2} ${s.x2},${(s.y1 + s.y2) / 2} ${s.x2},${s.y2}` : `M${s.x1},${s.y1} L${s.x2},${s.y2}`;
+      // Polish round fixes 2: a fork's branch leaves the line as an elbow (along the split, then down), so several branches share one
+      // run instead of fanning into a dark band of curves.
+      const r0 = Math.min(10, Math.abs(s.x2 - s.x1) / 2, Math.abs(s.y2 - s.y1) / 2), sx = Math.sign(s.x2 - s.x1) || 1;
+      const d = s.curve ? `M${s.x1},${s.y1} H${s.x2 - sx * r0} Q${s.x2},${s.y1} ${s.x2},${s.y1 + r0} V${s.y2}` : `M${s.x1},${s.y1} L${s.x2},${s.y2}`;
       const p = svg('path', { class: `sl-seg${s.kind === 'cond' ? ' cond' : ''}${s.open ? ' open' : ''}${s.tail ? ' tail' : ''}${s.skip ? ' skip' : ''}`, d });
       if (s.open) { const gid = `sl-fade-${k}`, lg = svg('linearGradient', { id: gid, gradientUnits: 'userSpaceOnUse', x1: String(s.x1), y1: String(s.y1), x2: String(s.x2), y2: String(s.y2) });
         lg.append(svg('stop', { offset: '0', class: 'sl-fade-a' }), svg('stop', { offset: '1', class: 'sl-fade-b' })); defs.append(lg); p.style.stroke = `url(#${gid})`; }
@@ -1902,14 +1911,19 @@ function renderDetail(id: string) {
   };
   if (form === 'line') { let drawnW = -1;
     formDraw = () => { const sc = v.querySelector<HTMLElement>('.sl-route .sl-scroll'), canvas = sc?.querySelector<HTMLElement>('.sl-canvas'); if (!sc || !canvas) return;
-      const w = Math.floor(sc.clientWidth); if (w === drawnW) return; drawnW = w; paintLine(canvas, stepLine(fi.steps, fi.loops, fi.entries, lineOpts(w))); }; }
+      const w = Math.floor(sc.clientWidth); if (w === drawnW) return; drawnW = w; const l = stepLine(fi.steps, fi.loops, fi.entries, lineOpts(w)); paintLine(canvas, l);
+      // Polish round fixes 2: a line wider than its strip (three branches side by side) says so and fades at the edge it scrolls past.
+      const wide = l.width > w + 1; sc.classList.toggle('wide', wide); const note = v.querySelector<HTMLElement>('.sl-route .sl-wide-note'); if (note) note.hidden = !wide; }; }
   const lineTip = [LINE_RULE, stationCount > steps.length ? `목록은 ${steps.length}개까지 · 노선은 저장된 C-STEP 행 ${stationCount}개${pre?.skipped ? '' : ' 모두'}` : null,
-    pre?.skipped ? `저장된 행 사이에서 건너뛴 C-STEP 행 ${pre.skipped}개는 기록에 있으나 저장된 단계에 없음 · 그 구간은 끊긴 선과 「사이 행 n개 없음」` : null,
+    pre?.skipped ? `저장된 행 사이에서 건너뛴 C-STEP 행 ${pre.skipped}개는 기록에 있으나 저장된 단계에 없음 · 그 구간은 끊긴 선과 「기록에만 있는 단계 n개」` : null,
     pre?.crossings ? `엇갈린 분기 ${pre.crossings}쌍은 오른쪽 길이 서로 건넘` : null, '단계가 쓰는 것(씀)은 정거장의 풍선 도움말과 목록에'].filter(Boolean).join('\n');
   const lineSec = pre ? h('section', { class: `xp-sec x-steps sl-route f-${fam}`, 'aria-label': '노선 · 기록에 적힌 실행 순서' },
     h('h4', { class: 'xp-title' }, '기록된 단계', h('small', {}, String(stationCount))),
-    h('p', { class: 'sl-caption', title: lineTip }, LINE_CAPTION),
+    // Polish round fixes 2: the line's disclaimers fold into one ⓘ (their words in its tip).
+    h('p', { class: 'sl-caption', title: `${LINE_CAPTION}
+${lineTip}` }, h('span', { class: 'sl-info', 'aria-hidden': 'true' }, 'ⓘ'), ' 기록에 적힌 순서'),
     h('div', { class: 'sl-scroll' }, h('div', { class: 'sl-canvas' })),
+    h('p', { class: 'sl-wide-note', hidden: '' }, '노선이 칸보다 넓음 · 옆으로 밀면 나머지 갈래'),
     pre.loopsApart.length ? h('ul', { class: 'sl-apart', 'aria-label': '선 위에 괄호로 두지 않은 반복' }, ...pre.loopsApart.map(x => h('li', { title: `${x.label}\n${x.why} · 몸통 전체가 이 노선에 이어져 있을 때만 괄호로 그림` },
       h('span', { class: 'sl-apart-mark', 'aria-hidden': 'true' }, '↻'), h('span', {}, x.text),
       ...x.parts.filter(q => fi.ownerPart[q]).map(q => h('button', { type: 'button', class: 'link-button sl-open', title: `‘${fi.ownerNames[q]}’ 상세 열기`, onclick: () => openDetail(fi.ownerPart[q]!, true) }, `${fi.ownerNames[q]} 보기`))))) : null,
@@ -1927,8 +1941,10 @@ function renderDetail(id: string) {
     // cut silently at the scroll edge). Run again when the column's width changes (drawDetailLines, the grid's resize).
     formDraw = () => {
       const sc = v.querySelector<HTMLElement>('.dv-states .vg-scroll'), cv = sc?.querySelector<HTMLElement>('.vg-canvas'), more = v.querySelector<HTMLElement>('.dv-states .vg-more-note'); if (!sc || !cv) return;
-      const W = Number(cv.dataset.w) || 1, avail = sc.clientWidth, k = W > avail ? Math.max(STATE_FIT_MIN, avail / W) : 1;
-      cv.style.zoom = k < 1 ? String(Math.floor(k * 1000) / 1000) : '';
+      // Polish round fixes 2: the graph fills its column (up to STATE_FIT_MAX) and never shrinks its words below 12px (the events'
+      // own size): one wider than the column scrolls sideways and says so, instead of reading at 7–8px.
+      const W = Number(cv.dataset.w) || 1, avail = sc.clientWidth, k = Math.min(STATE_FIT_MAX, Math.max(STATE_FIT_MIN, avail / W));
+      cv.style.zoom = k !== 1 ? String(Math.floor(k * 1000) / 1000) : '';
       if (more) more.hidden = W * k <= avail + 1;
     };
     const s = svg('svg', { class: 'vg-svg', width: String(gr.width), height: String(gr.height), 'aria-hidden': 'true' }), defs = svg('defs', {});
@@ -1946,7 +1962,7 @@ function renderDetail(id: string) {
       h('p', { class: 'vg-more-note', hidden: '' }, '상태 그래프가 칸보다 넓음 · 옆으로 밀면 나머지 상태'),
       ...shared.map(x => h('p', { class: 'vg-shared', title: `같은 이름 · ${x.shared.join(', ')} · 같은 상태인지 기록이 말하지 않아 합치지 않음` }, `같은 이름의 상태가 ‘${x.name}’에도 있음 · 합치지 않음`,
         h('button', { type: 'button', class: 'link-button', onclick: () => openDetail(x.part, true) }, '열기'))),
-      steps.length ? h('p', { class: 'vg-steps-note', title: '단계는 다른 보기에서 · 보기를 바꾸거나 V' }, fi.offer.line.ok ? `단계는 노선(${stationCount}개) · 목록(${steps.length}개)에서` : `단계 ${counts.program ? `${listRecorded}개(+${counts.program} 프로그램)` : `${steps.length}개`}는 목록에서`) : null,
+      steps.length ? h('p', { class: 'vg-steps-note', title: '단계는 다른 보기에서 · 보기를 바꾸거나 V' }, fi.offer.line.ok ? (stationCount > steps.length ? `단계 ${stationCount}개는 노선에서 (목록은 앞의 ${steps.length}개)` : `단계 ${stationCount}개는 노선·목록에서`) : `단계 ${counts.program ? `${listRecorded}개(+${counts.program} 프로그램)` : `${steps.length}개`}는 목록에서`) : null,
       steps.length ? condsApart : null);
   })() : null;
   const inner = h('div', { class: 'dv-body' },
@@ -1976,11 +1992,11 @@ function renderDetail(id: string) {
         svg('svg', { class: 'dv-lines dv-inlines', 'aria-hidden': 'true' }),
         h('div', { class: 'dv-bhead' }, r?.typeRead ? h('span', { class: 'node-type' }, TYPE_LABEL[r.typeRead.type]) : null, h('strong', { class: 'dv-bname' }, p.name), ops && r?.stateRead ? h('span', { class: 'xp-ops', title: ops.tip }, ops.full) : null,
           ds?.boundary.length ? h('span', { class: 'dv-scope-signs' }, signChip(ds.boundary, `‘${p.name}’ 전체`, `범위 규칙 ${ds.boundary.length}`),
-            ds.open.length ? h('span', { class: 'sg-blank', title: '이 부분 전체에 미치는 규칙: 정확한 단계·포트·필드는 기록이 정하지 않았거나 이 지도에 그 자리가 없음' }, ds.open.length < ds.boundary.length ? `세부 접점 미정 ${ds.open.length}` : '세부 접점 미정') : null) : null),
+            ds.open.length ? h('span', { class: 'sg-blank', title: '이 부분 전체에 미치는 규칙: 정확한 단계·포트·필드는 기록이 정하지 않았거나 이 지도에 그 자리가 없음' }, ds.open.length < ds.boundary.length ? `단계 미정 ${ds.open.length}` : '어느 단계인지 기록에 없음') : null) : null),
         h('div', { class: `dv-inner${steps.length ? ' has-steps' : ''}${form === 'line' ? ' has-line' : form === 'states' ? ' has-states' : ''}` },
-          h('ul', { class: 'dv-ports p-in', 'aria-label': '받는 것' }, ...(ins.length ? ins.map(x => portEl(x, false)) : [h('li', { class: 'dv-port blank' }, '받는 것 미기재')]), ...blankEls('write')),
+          h('ul', { class: 'dv-ports p-in', 'aria-label': '받는 것' }, ...(ins.length ? ins.map(x => portEl(x, false)) : [h('li', { class: 'dv-port blank' }, '받는 것 기록에 없음')]), ...blankEls('write')),
           inner,
-          h('ul', { class: 'dv-ports p-out', 'aria-label': '내는 것' }, ...(outs.length ? outs.map(x => portEl(x, true)) : [h('li', { class: 'dv-port blank' }, '내는 것 미기재')]), ...blankEls('exit')))),
+          h('ul', { class: 'dv-ports p-out', 'aria-label': '내는 것' }, ...(outs.length ? outs.map(x => portEl(x, true)) : [h('li', { class: 'dv-port blank' }, '내는 것 기록에 없음')]), ...blankEls('exit')))),
       h('div', { class: 'dv-side s-out', role: 'list', 'aria-label': '나가는 쪽의 바깥 부분' }, ...order(true).map(f => refCard(f, true))))));
   detailLinks = ends.map(e => ({ ref: `${e.out ? 'o' : 'i'}|${e.far}`, port: `${e.out ? 'o' : 'i'}|${e.port}`, out: e.out, ch: e.ch, plain: e.rel.kind === 'related' }));
   // Inside the boundary, only where the record maps a line to a port and a step: the port to the step (in), the step to the port
@@ -2009,7 +2025,7 @@ function renderDetail(id: string) {
 /** The detail grid's size watch (one at a time; its lines are drawn again when the grid's width or height changes). */
 let detailResize: ResizeObserver | null = null;
 /** The smallest scale the state graph is drawn at to fit its column (14px names read at about 10px; past that it scrolls, said). */
-const STATE_FIT_MIN = 0.65;
+const STATE_FIT_MIN = 1, STATE_FIT_MAX = 1.3;
 /** The condition row a rule's 「조건」 chip opened (its part, its index in the part's conditions), waiting for the detail view. */
 let pendingCondition: { part: string; index: number } | null = null;
 /** 「조건」 on a rule's 적용 위치 (its anchor's row is a condition row of the part): the part's detail view with that condition marked. */
@@ -2046,6 +2062,9 @@ function drawDetailLines() {
   const inl = bound.querySelector<SVGSVGElement>(':scope > .dv-inlines'); if (!inl) return;
   inl.setAttribute('width', String(Math.ceil(B.width))); inl.setAttribute('height', String(Math.ceil(B.height)));
   inl.replaceChildren();
+  // Polish round fixes 2: over the 노선 a port's line to its station crossed the stations' words as a straight diagonal: there the lines
+  // draw only for the port or station pointed at (styles.css .dv-bound.hover-lines).
+  bound.classList.toggle('hover-lines', !!bound.querySelector('.sl-route')); bindStepLineHover(bound);
   // The svg sits in the boundary's padding box (inside its border).
   const bx = B.left + bound.clientLeft, by = B.top + bound.clientTop;
   // 노선: a station may sit past the line's visible strip (it scrolls sideways): its line ends at the strip's edge, never beyond it.
@@ -2057,8 +2076,18 @@ function drawDetailLines() {
     const P = port.getBoundingClientRect(), S = step.getBoundingClientRect(), py = P.top + Math.min(P.height / 2, 12) - by, sy = S.top + Math.min(S.height / 2, 14) - by;
     const [x1, y1, x2, y2] = l.out ? [inStrip(S.right, step) - bx, sy, P.left - bx, py] : [P.right - bx, py, inStrip(S.left, step) - bx, sy];
     const mx = (x1 + x2) / 2;
-    inl.append(svg('path', { class: `dv-line in-step${l.ch ? ` c-${l.ch}` : ''}${l.plain ? ' plain' : ''}${l.program ? ' program' : ''}`, d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, ...(l.plain ? {} : { 'marker-end': l.ch === 'data' ? 'url(#dv-arrow)' : 'url(#dv-open)' }) }));
+    inl.append(svg('path', { class: `dv-line in-step${l.ch ? ` c-${l.ch}` : ''}${l.plain ? ' plain' : ''}${l.program ? ' program' : ''}`, 'data-port': l.port, 'data-step': String(l.step), d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, ...(l.plain ? {} : { 'marker-end': l.ch === 'data' ? 'url(#dv-arrow)' : 'url(#dv-open)' }) }));
   }
+}
+/** Pointing at a port or a station lights the lines that join it (one listener per boundary element). */
+function bindStepLineHover(bound: HTMLElement) {
+  if (bound.dataset.hoverBound) return; bound.dataset.hoverBound = '1';
+  const light = (t: EventTarget | null) => { const el = (t as HTMLElement | null)?.closest?.('.dv-port[data-port], .dv-step[data-step]') as HTMLElement | null;
+    bound.querySelectorAll('.dv-inlines .hot').forEach(x => x.classList.remove('hot')); if (!el) return;
+    const sel = el.dataset.port !== undefined ? `.in-step[data-port="${CSS.escape(el.dataset.port)}"]` : `.in-step[data-step="${CSS.escape(el.dataset.step!)}"]`;
+    bound.querySelectorAll(`.dv-inlines ${sel}`).forEach(x => x.classList.add('hot')); };
+  bound.addEventListener('pointerover', e => light(e.target)); bound.addEventListener('pointerleave', () => light(null));
+  bound.addEventListener('focusin', e => light(e.target)); bound.addEventListener('focusout', () => light(null));
 }
 /** The detail view's links inside the boundary (steps-view detailChain): port key, step index, direction and channel. */
 /** program (map-reading.14): the program made the correspondence: the line is dashed, its chip on the step box's end. */
@@ -2371,6 +2400,10 @@ function positionWorld() {
     // A line that crosses nothing it does not belong to reads above the group surfaces, so its run inside the groups of its own
     // ends is seen up to its part; one that has to cross another box stays under them.
     g.classList.toggle('clear', r.clear); layerEdge(g);
+    // Polish round fixes 2: a route shorter than its own head (two cards stacked tight) draws only a stray arrowhead: not drawn (its
+    // relation still reads in both cards' hover and the pane).
+    let len = 99; try { len = g.querySelector<SVGPathElement>('.edge-line')?.getTotalLength() ?? 99; } catch { /* not rendered */ }
+    g.classList.toggle('stub', len < 14);
   });
   placeScenarioHeads();
   placeEdgeLabels();
@@ -2552,6 +2585,7 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
   const offParts = (r: Rect) => !parts.some(o => r.x < o.x + o.w + 2 && o.x < r.x + r.w + 2 && r.y < o.y + o.h + 2 && o.y < r.y + r.h + 2);
   const mine: Rect[] = [], inv = labelInv(), order = [...lines].sort((a, b) => Number(b.classList.contains('on') || b.classList.contains('sc-path')) - Number(a.classList.contains('on') || a.classList.contains('sc-path')));
   const apart = (r: Rect) => !mine.some(o => r.x < o.x + o.w + 2 && o.x < r.x + r.w + 2 && r.y < o.y + o.h + 2 && o.y < r.y + r.h + 2);
+  const labels = [...blocks], offLabels = (r: Rect) => !labels.some(o => r.x < o.x + o.w + 2 && o.x < r.x + r.w + 2 && r.y < o.y + o.h + 2 && o.y < r.y + r.h + 2);
   const set = (el: HTMLElement, spot: Rect) => { mine.push(spot); el.style.left = `${spot.x}px`; el.style.top = `${spot.y}px`; blocks.push(spot); };
   const nameOf = (id: string) => (opened ? partOf(opened, id.startsWith('ghost:') ? id.slice(6) : id)?.name ?? '부분' : '부분');
   /** Badges with no place of their own, by the part their line leaves: they gather in one 「+N」 marker there. */
@@ -2559,6 +2593,9 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
   for (const g of order) {
     const e = edgeOf(g.dataset.key), b = e && lineBadges.get(e.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !b || !path) continue;
     const on = g.classList.contains('on') || g.classList.contains('sc-path'), beside = !!selected && !on;
+    // Polish round fixes 2 (the user: show what is wanted where it is looked at): below 가까이 a line at rest carries no cue chip (조건,
+    // 선택, 박자, ◷, the 「한 번」 tick): its words read in the line's tip on hover, and on the lines of a picked card.
+    if (!on && tier !== 'near') continue;
     const el = h('span', { class: `edge-badge b-${b.kind}${on ? ' on' : ''}${beside ? ' beside' : ''}${b.unresolved ? ' unres' : ''}`, 'data-badge': e.key });
     box.append(el);
     const pts = edgePts(e.key, path), len = path.getTotalLength();
@@ -2585,7 +2622,8 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     }
     // Forced: its smallest form anywhere on its line off every part and every badge set so far, over other lines or labels if it
     // must (a line whose record says when it flows never reads as one that always flows). A part's name is never covered.
-    if (!spot) { const f = find(); spot = [...f.spots, ...f.along].find(r => offParts(r) && apart(r)) ?? null; if (spot) el.classList.add('forced'); }
+    // Polish round fixes 2: off the line labels as well (a forced badge sat on 「넘겨줌」); over a label only when nothing else is left.
+    if (!spot) { const f = find(); spot = [...f.spots, ...f.along].find(r => offParts(r) && apart(r) && offLabels(r)) ?? [...f.spots, ...f.along].find(r => offParts(r) && apart(r)) ?? null; if (spot) el.classList.add('forced'); }
     if (!spot) { el.remove(); const k = e.from; (over.get(k) ?? over.set(k, []).get(k)!).push({ e, b, path }); continue; }
     set(el, spot);
   }
@@ -2599,7 +2637,7 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
       box.append(one);
       const w = one.offsetWidth * inv, hh = one.offsetHeight * inv, n = path.getTotalLength();
       const pts = Array.from({ length: 25 }, (_, i) => path.getPointAtLength(n * (0.02 + i * 0.04))).map(p => ({ x: p.x - w / 2, y: p.y - hh / 2, w, h: hh }));
-      const spot = pts.find(r => offParts(r) && apart(r)) ?? null;
+      const spot = pts.find(r => offParts(r) && apart(r) && offLabels(r)) ?? pts.find(r => offParts(r) && apart(r)) ?? null;
       if (spot) { set(one, spot); continue; }
       one.remove();
     }
@@ -2707,7 +2745,9 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     if (tp) { const chip = typeChipEl(e, tp); box.append(chip);
       for (const form of typeChipForms(tp.name, tp.fields)) { fillTypeChip(chip, form); mine = spotsFor(chip); if (mine.length) break; }
       if (mine.length) label = chip; else chip.remove(); }
-    if (!label) { const word = restWord(e), cutWord = short ? shortLabel(word) : word;
+    if (!label) { const word = restWord(e), cutWord = short ? wholeWords(word) : word;
+      // Polish round fixes 2: a label that does not fit in whole words is left to the line's tip (no 「기동 · 명령 torch…」).
+      if (!cutWord) { hidden.push(g); continue; }
       label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}${short ? ' brief' : ''}`, 'data-key': e.key, ...(cutWord !== word ? { 'data-full': word } : {}) }, cutWord); box.append(label); mine = spotsFor(label); }
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
     // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
@@ -3629,7 +3669,7 @@ function setRail(on: boolean) {
  * reading's state in the panel's full form ('가동 보고 · 10-31 16:03Z · 현재 가동 여부 미확인', ops-line opsHead) with the author's
  * tag of the line that says it (the 근거 chip: a tag, never the app's verdict). No state given: the ladder line as before. A report
  * is not a status: no colour says more than the words. */
-function kindLine(c: PaneCtx): HTMLElement {
+function kindLine(c: PaneCtx): HTMLElement | null {
   const u = c.u, t = u?.typeRead ?? null, s = u?.stateRead ?? null;
   const filed = filedUnder(c.o.view, c.part.id), gw = c.part.childIds.length ? groupWordOf(c.o.view, c.part.id, recordedAxis(c.o.project, c.part.id)) : null;
   // Recipe .45 (merged with S9): the record's family and role word beside the kind word (「표현군 처리 · 실행 조정」), or 「미정: 이유」, or
@@ -3663,8 +3703,8 @@ function kindLine(c: PaneCtx): HTMLElement {
         s.when ? null : h('small', { class: 'lens-ops-at', title: fullTime(s.at) }, ` · 정리 ${ago(s.at)}`)),
       fnMarks(c, ['state'], '운영 한 줄', false));
   }
-  const lad = ladderLine(c.o.view, c.part); if (kind) lad.prepend(kind, ...(typeMark ? [typeMark] : [sep()]));
-  return lad;
+  // Polish round fixes 2: the record's bookkeeping (요청·보고·확인 and its dots) is no head line: it reads in 근거, with its words.
+  return kind ? h('p', { class: 'lens-ladder lens-kind-line' }, kind, typeMark) : null;
 }
 /** Cards v2 §4: the pane head always says operations. With no recorded state, a quiet line above the ladder sentence (the card
  * draws no dot then); records that disagree are listed, never one picked; a state on file evidence alone is said (the card has
@@ -3679,7 +3719,9 @@ function opsLineEl(c: PaneCtx): HTMLElement | null {
   const fileOnly = s && !dot && (s.state === 'running' || s.state === 'stopped') && claimEvidence({ quote: s.quote?.quote ?? '' }) === 'file'
     ? h('p', { class: 'pane-ops-note', title: '지도의 상태 점은 파일 근거만으로 그리지 않음' }, '파일 근거만 · 지도에 상태 점 없음') : null;
   if (s) return conflict || fileOnly || waiting ? h('div', { class: 'pane-ops-notes' }, conflict, waiting, fileOnly) : null;
-  return h('div', { class: 'pane-ops-notes' }, h('p', { class: 'pane-ops-line none', title: '기록이 이 부분의 운영 상태를 말하지 않았다 (멈춤이라는 뜻이 아님) · 지도에는 상태 점 없음' }, '운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'), conflict);
+  // Polish round fixes 2 (the user: 「운영 기록 없음」 is not needed on the map): no line at all when no state was recorded; the 표시 menu's
+  // dot note says what no dot means. Records that disagree still read.
+  return conflict ? h('div', { class: 'pane-ops-notes' }, conflict) : null;
 }
 /** Cards v2 §4: the kind's definition blanks the card no longer draws, as concrete phrases (「행 형식 미기록」). */
 function blanksLine(c: PaneCtx): HTMLElement | null {
@@ -4250,6 +4292,7 @@ function behaviourSection(c: PaneCtx): HTMLElement | null {
   }
   if (steps.length) {
     const lines = outLines(o, part.id);
+    const ig = idGloss(o.project, o.view), usesShown = (us: readonly string[]) => us.map(u => [u, plainIds(u, ig)] as const).filter(([, x]) => !idOnly(x));
     const item = (s: (typeof steps)[number]) => {
       const i = steps.indexOf(s), on = pickedStep?.part === part.id && pickedStep.name === s.name;
       // map-reading.14: a program step is a name only (stepFace), a port only the program mapped to it reads 「표에서 채움」.
@@ -4263,8 +4306,9 @@ function behaviourSection(c: PaneCtx): HTMLElement | null {
           face.program ? plainChip(PROGRAM_STEP_HINT) : null,
           fnMarks(c, [`step:${i}`], `단계 ${s.name}`)),
         face.does ? h('p', { class: 'stp-does' }, face.does) : null,
-        face.uses.length ? h('ul', { class: 'where-chips stp-uses', 'aria-label': '쓰는 것' }, ...face.uses.map(u => { const f = fileRoleOf(u, fr); return h('li', { class: 'wh', title: f ? `${u}
-파일 지도 · ${f.path} · ${f.role}` : u }, u); })) : null,
+        // Polish round fixes 2: what a step uses reads by its name (a part's 「B04」 → its name); an ID nothing names is left off the chip.
+        usesShown(face.uses).length ? h('ul', { class: 'where-chips stp-uses', 'aria-label': '쓰는 것' }, ...usesShown(face.uses).map(([u, said]) => { const f = fileRoleOf(u, fr); return h('li', { class: 'wh', title: f ? `${said}
+파일 지도 · ${f.path} · ${f.role}` : said }, said); })) : null,
         on ? h('div', { class: 'stp-more' },
           sp.ins.length || sp.outs.length ? h('p', { class: 'stp-ports' }, ...portWords('⇥', sp.ins), sp.ins.length && sp.outs.length ? '  ' : null, ...portWords('⇤', sp.outs)) : null,
           h('p', { class: 'stp-label' }, cons!.mapped ? '받아 가는 쪽 · 이 단계에서 나가는 선' : '받아 가는 쪽 · 이 부분에서 나가는 선 (이 단계와 이어진다는 말은 기록에 없음)'),
@@ -4299,7 +4343,7 @@ function conditionsSection(c: PaneCtx): HTMLElement | null {
   const conds = conditionsOf(r); if (!conds.length) return null;
   const f = folded(c, 'conds', structureConditions(conds, r.steps ?? []), PANE_SHOWN.list);
   return secEl('conditions', String(conds.length), '', h('ul', { class: 'stp-conds', title: '기록의 조건·거부·분기 표, 행마다 · 조건 → 그때의 결과 · 아니면의 결과는 기록이 적은 때만' },
-    ...f.shown.map(x => h('li', { 'data-cond': String(x.index) }, h('span', { class: 'stp-cond' }, conditionPlain(x.text)),
+    ...f.shown.map(x => h('li', { 'data-cond': String(x.index) }, h('span', { class: 'stp-cond' }, plainIds(conditionPlain(x.text), idGloss(c.o.project, c.o.view))),
       h('small', { class: `stp-cond-at${x.step === null ? ' stp-blank' : ''}`, title: x.step === null ? `${CONDITION_BLANK} · 조건의 말이 이 부분의 어느 단계도 이름으로 짚지 않음` : '조건의 말이 이 단계를 이름으로 짚음' }, x.step === null ? plainBlank(CONDITION_BLANK) : `단계 ‘${x.step}’`),
       fnMarks(c, [`condition:${x.index}`], `조건 ${x.condition.when}`)))), f.more);
 }
@@ -4320,12 +4364,19 @@ function whereSection(c: PaneCtx): HTMLElement | null {
       fnMarks(c, [`file:${pathKey(x.path)}`], `파일 ${x.path}`)))) : null, f.more,
     w.plain.length ? h('ul', { class: 'where-chips' }, ...w.plain.map(x => h('li', { class: 'wh', title: x }, x))) : null, sessions);
 }
+/** Polish round fixes 2: what the project's record row IDs stand for (a data item, a part, a condition, a variant by its name) and
+ * which IDs the record defines; every map surface reads its words through it (plainIds). */
+function idGloss(project: Project, v?: StudioView): IdGloss {
+  let view = v; return projectIdGloss(project, id => (view ??= studioView(project)).parts.find(p => p.id === id)?.name ?? null, projectVariantGloss(project));
+}
+/** The map's view with its ports said without the record's row IDs (an ID the record names said by that name). */
+function plainMapView(project: Project): StudioView { const v = studioView(project); return plainView(v, idGloss(project, v)); }
 /** What readings said each relation hands over (map-reading.7): per relation, the newest reading's line that names a payload. */
 function relationPayloads(project: Project): Map<string, ReadingRelation> {
   const out = new Map<string, ReadingRelation>();
   // Polish round fixes 1: what a line hands over reads without the record's row IDs (「D05 전역 변수」 → 「전역 변수」); 원문 keeps them.
-  const g = projectVariantGloss(project);
-  for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload) out.set(x.relationId, { ...x, payload: plainIds(nameVariants(x.payload, g)) });
+  const g = projectVariantGloss(project), ig = idGloss(project);
+  for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload) out.set(x.relationId, { ...x, payload: plainIds(nameVariants(x.payload, g), ig) });
   return out;
 }
 /** What each relation's line carries and says (map-reading.7–8): per relation, the channel, payload and cadence of the newest
@@ -4336,12 +4387,12 @@ function relationPayloads(project: Project): Map<string, ReadingRelation> {
  * line's condition badge and its tip rows never read a conditional relation as unconditional. */
 interface LineSaid { channel: Channel | null; chAt: number; payload: string | null; cadence: string | null; mode: RelationMode | null; fields: string[]; quote: ReadingQuote | null; at: string | null; when: string | null; optional: boolean; variant: string | null }
 function relationLines(project: Project): Map<string, LineSaid> {
-  const out = new Map<string, LineSaid>(), g = projectVariantGloss(project);
+  const out = new Map<string, LineSaid>(), g = projectVariantGloss(project), ig = idGloss(project);
   // Pipeline .44: a line flowing for a variant (its C-LINK 조건·선택 「변형 X03」) says which variant, by what it is; any variant ID in
   // what it hands over reads the same way.
   const payloadOf = (x: ReadingRelation): string | null => {
     // Polish round fixes 1: the variant said once, by its name, in the 선택 words (never again after the payload); the row IDs off.
-    const own = x.payload ? plainIds(nameVariants(x.payload, g)) : null;
+    const own = x.payload ? plainIds(nameVariants(x.payload, g), ig) : null;
     return own ?? (x.variantRef ? nameVariants(`변형 ${x.variantRef}`, g) : null);
   };
   project.readings.forEach((r, i) => {
@@ -4606,7 +4657,7 @@ function renderDisplayMenu() {
     if ((k === 'values' || k === 'evidence') && o) { renderSpace('keep'); if (selected) select(selected); } else { applyDisplay(); if (k === 'labels' && o) placeEdgeLabels(); }
     pop.querySelector<HTMLElement>(`[data-display="${k}"]`)?.focus();
   };
-  const tip: Record<keyof DisplaySettings, string> = { ops: '카드의 종류 줄에 운영 상태 글자 (기록된 것만) · 상태·공백 렌즈는 켜져 있는 동안 모든 카드에', values: '카드에 받는 것 · 내는 것 · 필드 이름 행 (카드 높이가 바뀌어 다시 배치)',
+  const tip: Record<keyof DisplaySettings, string> = { ops: '카드의 종류 줄에 운영 상태 글자 (기록된 것만) · 상태·공백 렌즈는 켜져 있는 동안 모든 카드에', values: '선이 닿지 않는 받는 것 · 내는 것 · 필드 이름 행 (선이 닿는 것은 늘 보임 · 카드 높이가 바뀌어 다시 배치)',
     labels: '선 위의 이름표 (가리키거나 고른 선은 늘 보임)', evidence: '상태 점 옆에 근거 꼬리표 (보고 · 파일 · 실행 …)' };
   pop.replaceChildren(h('p', { class: 'dm-head' }, '표시'),
     ...DISPLAY_KEYS.map(k => h('label', { class: 'dm-row', title: tip[k] }, h('input', { type: 'checkbox', 'data-display': k, ...(d[k] ? { checked: '' } : {}), onchange: (e: Event) => set(k, (e.target as HTMLInputElement).checked) }), h('span', {}, DISPLAY_WORD[k]))),
@@ -4617,7 +4668,7 @@ function renderDisplayMenu() {
         else if (o) { clearDisplayOverride(kv, o.key); const was = display.settings; display = { ...readDisplay(kv, o.key), key: o.key }; if (was.values !== display.settings.values) renderSpace('keep'); }
         applyDisplay(); pop.querySelector<HTMLElement>('[data-display="own"]')?.focus(); } }), h('span', {}, '이 프로젝트에서만')),
     ...(viewLens === 'state' ? [h('p', { class: 'dm-note' }, '상태·공백 렌즈: 모든 카드에 운영 상태 글자 (렌즈를 나가면 원래대로)')] : []),
-    h('p', { class: 'dm-note' }, DOT_LEGEND));
+    ...(document.querySelector('#world .node.card.has-dot') ? [h('p', { class: 'dm-note' }, DOT_LEGEND)] : []));
 }
 /** Cards v2 §7: a click on a card's status dot opens the pane at its operations line. */
 let opsFocus = false;
@@ -4659,10 +4710,14 @@ function applyLegendMarks() {
     if (m.hide.has(from)) el.classList.add('lg-hide'); else if (m.fade.has(from) || m.dim.has(from)) el.classList.add('lg-fade'); });
   // S8 (critique 9): a lens steps back the cards it is not about (view-lens lensOffTopic), so switching lens changes what the map
   // says at a glance; nothing moves, nothing hides.
-  const o = opened, off = o ? lensOffTopic(viewLens, [...lay.boxes.values()].filter(b => b.kind === 'node').map(b => ({ id: b.id, family: cardTpls.get(b.id)?.family ?? 'neutral', loop: !!partOf(o, b.id)?.reading?.loop })), lensLinesOf()) : new Set<string>();
+  const o = opened, lp = o ? lensPartsOf(o) : [], off = o ? lensOffTopic(viewLens, lp, lensLinesOf()) : new Set<string>();
   // S10: an emphasised part of the first view is never stepped back by the lens.
   const emph = new Set(fvOn() ? fvRec!.parts : []);
-  world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => el.classList.toggle('lens-off', off.has(el.dataset.box!) && !emph.has(el.dataset.box!)));
+  // Polish round fixes 2: under 상태와 공백 a part with something to say carries its mark in a corner (screen-sized at every zoom).
+  const marks = new Map(viewLens === 'state' ? lp.map(p => [p.id, stateMark(p)] as const) : []);
+  world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => { const id = el.dataset.box!, m = marks.get(id);
+    el.classList.toggle('lens-off', off.has(id) && !emph.has(id));
+    if (m) el.dataset.lensMark = m; else delete el.dataset.lensMark; });
   markFirstView();
 }
 /** Pointing at a legend item: after ~150 ms its parts and lines keep an outline until the pointer leaves (7.2: no blinking). */
@@ -5007,7 +5062,7 @@ async function commit(o: Opened, next: Project): Promise<string | null> {
     catch (err) { saveFailure = storageErrorCode(err); return saveFailure === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
   } else if (o.kind === 'example') examples.set(o.key, next);
   else return '이 프로젝트는 읽기 전용이에요.';
-  o.project = next; o.view = plainView(studioView(next));
+  o.project = next; o.view = plainMapView(next);
   // A wide reading open over this project reads the saved data again (said there), keeping its place.
   wide.render();
   return null;
@@ -5839,6 +5894,8 @@ function evidenceTab(c: PaneCtx): HTMLElement[] {
   const { o, part, u } = c, out: HTMLElement[] = [];
   const back = returnStrip(c); if (back) out.push(back);
   if (u) {
+    // Polish round fixes 2: how far the part's records go (요청 · 보고 · 확인), moved here from the pane's head, each rung with its word.
+    out.push(ladderLine(o.view, part));
     out.push(evidenceBar(c));
     if (evidenceView === 'records') out.push(u.claims.length ? originSection(c, c.wide ? 'sheet' : 'lens') : h('p', { class: 'stp-blank ev-none' }, '이 부분에 대해 기록이 한 지금의 말이 없어요'));
     else out.push(...evidenceByItem(c));
@@ -6559,7 +6616,11 @@ function bindEdgeHints() {
         // Polish round fixes 1: no bare 「설계」 at a row's end (the mode reads in the pane's 근거, and in a badge's tip in words).
         s?.cadence && !(badgeSaid && badge?.kind === 'cadence') ? `박자 “${s.cadence}”` : null].filter(Boolean).join(' · '); };
     const pointed = !!el && (el.classList.contains('edge-badge') || el.classList.contains('edge-once'));
-    const out: HTMLElement[] = [h('strong', {}, arrow(edge.from, edge.to, edge.kind))];
+    // Polish round fixes 2: a bundle that runs both ways reads 「A ↔ B」 in its head; a row of the head's own pair and direction says
+    // only its words (never the head again as its first row).
+    const both = rels.some(r => r.from === edge.to && r.to === edge.from) && rels.some(r => r.from === edge.from && r.to === edge.to);
+    const sameWay = (r: RelationView) => !both && r.from === edge.from && r.to === edge.to;
+    const out: HTMLElement[] = [h('strong', {}, both ? `${nameOf(edge.from)} ↔ ${nameOf(edge.to)}` : arrow(edge.from, edge.to, edge.kind))];
     // The quiet tick says what it stands for first (its words follow in the badge's tip).
     if (el?.classList.contains('edge-once') && badge) out.push(h('span', { class: 'tip-badge' }, quietTip(badge).split('\n')[0]!));
     if (full) out.push(h('span', { class: 'tip-kind' }, `이름표 · ${full}`));
@@ -6570,11 +6631,9 @@ function bindEdgeHints() {
     else {
       out.push(h('span', { class: 'tip-kind' }, restOf(edge) ? `선택한 부분의 관계를 뺀 나머지 ${edge.ids.length}개` : edge.agg ? `안쪽 관계 ${edge.ids.length}개의 요약 · 선택하면 실제 끝점` : `관계 ${edge.ids.length}개를 한 선으로 묶음`));
       if (ways) out.push(...ways.split('\n').slice(1).map(t => h('span', { class: 'tip-kind' }, t)));
-      // Only some of them conditional (or with a cadence): that count stays, wherever the pointer is.
-      const count = badge?.tip.split('\n').find(t => COUNT_RE.test(t));
-      if (badge && !pointed && count) out.push(h('span', { class: 'tip-badge-w' }, `${badge.kind === 'condition' ? '조건' : badge.kind === 'optional' ? '선택' : '박자'} · ${count}`));
+      // Polish round fixes 2: no 「박자 · 관계 2개 중 1개에 기록됨」 line: each relation's row below says its own condition or cadence.
       // Polish round fixes 1: a short tip (three A → B rows at most, the rest counted), so it never spreads over the cards around.
-      out.push(...rels.slice(0, TIP_RELS).map((r, i) => h('span', { class: `tip-rel${i ? '' : ' first'}` }, h('span', {}, arrow(r.from, r.to, r.kind)), h('span', { class: 'tip-kind' }, relWords(r)))));
+      out.push(...rels.slice(0, TIP_RELS).map((r, i) => h('span', { class: `tip-rel${i ? '' : ' first'}` }, sameWay(r) ? null : h('span', {}, arrow(r.from, r.to, r.kind)), h('span', { class: 'tip-kind' }, relWords(r)))));
       if (rels.length > TIP_RELS) { const conds = rels.slice(TIP_RELS).filter(r => said.get(r.id)?.when).length;
         out.push(h('span', { class: 'tip-kind' }, `${moreTip(rels.length - TIP_RELS, '관계')}${conds ? ` · 그중 조건 ${conds}개` : ''} · 선을 고르면 모두`)); }
     }
@@ -6618,7 +6677,9 @@ function bindEdgeHints() {
       const pt = mine ? { x: mine.x + mine.w / 2, y: mine.y + mine.h } : x.at ? { x: x.at.x - sr.left, y: x.at.y - sr.top } : { x: bounds.x + bounds.w / 2, y: bounds.y + bounds.h / 2 };
       // Polish round fixes 1 (spec §7): a line's tip keeps off every card in view, not only the names (the side of the line away from them).
       const cardsIn = [...world.querySelectorAll<HTMLElement>('.node')].map(el => el.getBoundingClientRect()).filter(seen).map(rel);
-      at = placeTip({ x: pt.x, y: pt.y, w: 0, h: 0 }, size, bounds, 'point', [...ends, ...lit, ...names, ...cardsIn], sides.get(x.key) ?? null);
+      // Polish round fixes 2: the other cards are a preference only; the line's ends, the lit neighbours and every name stay hard (a
+      // dense map no longer pushes the tip over an end card's name).
+      at = placeTip({ x: pt.x, y: pt.y, w: 0, h: 0 }, size, bounds, 'point', [...ends, ...lit, ...names], sides.get(x.key) ?? null, 8, cardsIn);
       sides.set(x.key, at.side);
     } else {
       // Beside the card (never over its name); a chip's tip at the chip's height.

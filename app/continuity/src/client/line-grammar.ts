@@ -180,13 +180,14 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
     const words = [...new Set(said.map(s => s.replace(/\s+/g, ' ').trim()))], word = kind === 'condition' ? '조건' : kind === 'optional' ? '선택' : '박자';
     const modes = [...new Set(rels.map(r => r.mode).filter(Boolean))], mode = modes.length === 1 ? (modes[0] === 'design' ? ' · 설계' : ' · 관찰') : '';
     // Polish round fixes 1: the count says what it counts (「관계 2개 중 1개에 기록됨」, never 「…1개가 적음」, which reads as 'few').
-    const count = rels.length > 1 ? `\n${countWords(rels.length, said.length)}` : '', modeLine = mode ? `\n${mode.slice(3)}` : '';
+    // Polish round fixes 2: the count only when some of the bundle's relations do not carry it (all of them: nothing to add).
+    const count = rels.length > 1 && said.length < rels.length ? `\n${countWords(rels.length, said.length)}` : '';
     // Polish round (spec-cards-v2 §1): a condition or an optional mark is a small cue of fixed words on the line (「조건」, 「선택」;
     // 「조건 1/3」 when only some of the stroke's relations carry it, so a bundle never reads wholly conditional), never the record's
     // words cut short: those read whole in the tip, one 「조건: …」 a wording.
     const cue = `${word}${said.length < rels.length ? ` ${said.length}/${rels.length}` : ''}`;
     // The mode in words a reader can take without the legend (설계: what the code or docs define; 관찰: what a run showed).
-    const modeSaid = modes.length === 1 ? (modes[0] === 'design' ? '\n설계상의 흐름 (코드·문서)' : '\n실행에서 관찰된 흐름') : '';
+    const modeSaid = modes.length === 1 ? (modes[0] === 'design' ? '\n코드·문서에서 읽은 흐름' : '\n실행에서 본 흐름') : '';
     if (kind === 'condition') {
       // A condition that only points at another row of the record (「위와 같음」) is said as such, muted, never resolved here.
       const unresolved = words.every(isRelativeRef);
@@ -200,7 +201,7 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
       return { kind, short: cue, full: cue, tip, words: vs, n: said.length, unresolved: false };
     }
     const unresolved = words.every(isRelativeRef);
-    const tip = `${word} · 기록의 글자 그대로${unresolved ? ' · 기록 안의 상대 참조 (풀지 않음)' : ''}\n${words.map(w => `“${w}”`).join('\n')}${count}${modeLine}`;
+    const tip = `${word} · 기록의 글자 그대로${unresolved ? ' · 기록 안의 상대 참조 (풀지 않음)' : ''}\n${words.map(w => `“${w}”`).join('\n')}${count}${modeSaid}`;
     // S8: a stroke whose words include more than the bare 「한 번」 leads with the first that does ('항목마다 외 2', not '한 번 외 2');
     // the words themselves and their count are the record's, only their order on the badge changes.
     const told = words.filter(w => !isOnceWord(w)), quiet = !told.length;
@@ -274,6 +275,16 @@ export function restLabelShown(mode: RestLabels, _x: { spine?: boolean; path?: b
 /** A middle-tier label keeps this many characters, then an ellipsis (its whole words on hover and nearer). */
 export const LABEL_SHORT = 14;
 export const shortLabel = (t: string, n = LABEL_SHORT): string => cut(t, n);
+/** Polish round fixes 2: a label shortened only to whole words (split at spaces and 「·」), never cut mid-word with 「…」; '' when even
+ * its first word does not fit (the label is left to the line's tip then). */
+export function wholeWords(t: string, n = LABEL_SHORT): string {
+  const s = t.trim(); if (s.length <= n) return s;
+  let out = '';
+  for (const tok of s.split(/(\s*·\s*|\s+)/)) { if ((out + tok).length > n) break; out += tok; }
+  // A quotation cut open (「고정 질의 "Is AI」) keeps only the words before it.
+  if (((out.match(/["“”]/g) ?? []).length % 2) === 1) out = out.slice(0, out.search(/["“][^"“”]*$/));
+  return out.replace(/(\s*·\s*|\s+)$/, '').trim();
+}
 /** A line label's size on screen at zoom k: it follows the zoom a little (12.5 × √k) between 11 and 14px, so it never outweighs a
  * card's name (14px or more on screen, 5.2) far out and is not left tiny near in. */
 export const labelPx = (k: number): number => Math.min(14, Math.max(11, 12.5 * Math.sqrt(Math.max(0.01, k))));

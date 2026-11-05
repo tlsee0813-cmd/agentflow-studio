@@ -94,7 +94,7 @@ export const DISPLAY_KEY = 'agentflow.studio.display.1';
 /** ops: the ops words on the card; values: 받는·내는 것 rows; labels: line labels; evidence: the evidence chip by the status dot. */
 export interface DisplaySettings { ops: boolean; values: boolean; labels: boolean; evidence: boolean }
 export const DISPLAY_DEFAULT: Readonly<DisplaySettings> = Object.freeze({ ops: false, values: false, labels: true, evidence: false });
-export const DISPLAY_WORD: Readonly<Record<keyof DisplaySettings, string>> = { ops: '운영 상태 글자', values: '받는·내는 것 행', labels: '선 이름표', evidence: '근거 꼬리표' };
+export const DISPLAY_WORD: Readonly<Record<keyof DisplaySettings, string>> = { ops: '운영 상태 글자', values: '선 없는 받는·내는 것', labels: '선 이름표', evidence: '근거 꼬리표' };
 export const DISPLAY_KEYS: readonly (keyof DisplaySettings)[] = ['ops', 'values', 'labels', 'evidence'];
 /** The stored shape: the global default and each project's explicit override (at most PROJECTS_MAX projects, newest kept). */
 interface DisplayStore { global?: Partial<DisplaySettings>; projects?: Record<string, Partial<DisplaySettings>> }

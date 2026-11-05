@@ -200,5 +200,8 @@ test('S9 N2 구조 and 근거 call the same groups by the same names (the 「근
   assert.match(body('behaviourSection'), /fnMarks\(c, \[`recordLoop:\$\{i\}`\]/);
   assert.doesNotMatch(body('contractSection'), /이름은 기록에 없음/);
   const kl = body('kindLine');
-  assert.match(kl, /kind && !typeMark \? sep\(\)/); assert.match(kl, /typeMark \? \[typeMark\] : \[sep\(\)\]/);
+  assert.match(kl, /kind && !typeMark \? sep\(\)/);
+  // Polish round fixes 2: the head's kind line carries no record bookkeeping (the 요청 · 보고 · 확인 ladder reads in 근거).
+  assert.match(kl, /return kind \? h\('p', \{ class: 'lens-ladder lens-kind-line' \}, kind, typeMark\) : null;/); assert.ok(!kl.includes('ladderLine('));
+  assert.match(body('evidenceTab'), /out\.push\(ladderLine\(o\.view, part\)\)/);
 });

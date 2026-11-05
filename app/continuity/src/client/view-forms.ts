@@ -15,6 +15,7 @@
  * - the state graph places states on a circle in first-appearance order (no layer, no rank, no first-state emphasis), draws only
  *   recorded transitions, and marks a start only for a state the record calls initial.
  * Pure and deterministic: no DOM, unit-free numbers the detail view positions its own elements by. */
+import { plainIds, idOnly, type IdGloss } from './plain-ids.js';
 
 export type FormId = 'list' | 'line' | 'states';
 export const FORM_IDS: readonly FormId[] = ['list', 'line', 'states'];
@@ -110,9 +111,10 @@ export const FORK_OPEN = '갈래 뒤 합류는 기록에 없음';
 export const COND_TAG = '조건에 따라';
 export const APART_OUT = '몸통 단계가 이 노선 밖', APART_SPLIT = '몸통이 떨어져 있음', APART_NONE = '몸통 미기록', APART_UNREAD = '몸통 일부가 이 지도에 없음';
 /** A segment over C-STEP numbers the stored steps skip (the rows are in the record, not in the stored steps). */
-// Polish round fixes 1: what is missing in words (the steps the record's table has that this map did not keep), never 「사이 행」.
-export const skipWord = (n: number) => `표에 없는 단계 ${n}개`;
-export const UNSTORED = '저장 안 된 행';
+// Polish round fixes 2: the rows ARE in the record's table; only the map's stored steps lack them (「기록에만 있는 단계」, never
+// 「표에 없는」, which said the opposite of the segment's own tip).
+export const skipWord = (n: number) => `기록에만 있는 단계 ${n}개`;
+export const UNSTORED = '기록에만 있는 단계';
 /** An alternative whose 조건·분기 cell gives no condition (only a jump, or nothing). */
 export const ALT_NO_COND = '조건 미기재';
 export const ENTRY_WORD: Readonly<Record<string, string>> = { command: '명령', call: '호출', request: '요청', message: '메시지·사건', schedule: '일정', resident: '상주', script: '스크립트' };
@@ -128,7 +130,8 @@ export interface Rect { x: number; y: number; w: number; h: number }
 export interface Pill extends Rect { text: string; tip: string }
 export type ExitKind = 'out' | 'exit' | 'end' | 'note';
 export interface StationExit { kind: ExitKind; text: string; tip: string }
-export interface Station { index: number; row: number; col: number; kind: 'recorded'; ref: string; name: string;
+/** no: the station's number on the line, 1, 2, 3… by row (an alternative 2a, 2b), as the pane numbers its steps; the row ID is its tip's. */
+export interface Station { index: number; row: number; col: number; kind: 'recorded'; ref: string; no: string; name: string;
   /** a C-STEP row the program kept as a step (the reply left it out): drawn, marked the program's, its name only */
   program: boolean;
   /** the dot's centre (on the line) and the station block (the button: from the dot's left edge to its label's right end) */
@@ -159,12 +162,16 @@ export interface LineOptions {
   elsewhere?: readonly { ref: string | null; loopIds: readonly string[] }[];
   /** C-PART ID → the part's name, for 「몸통이 ‘…’에도 있음」 */
   ownerNames?: Readonly<Record<string, string>>;
+  /** Polish round fixes 2: the record's row IDs and their names (a condition row by its words), so a clause reads no row ID */
+  gloss?: IdGloss;
 }
+/** A loop said by what it repeats over (「‘주문마다’ 반복」), never by its row ID. */
+const loopWord = (l: Pick<FormLoop, 'unit'>) => (l.unit ? `‘${l.unit}’ 반복` : '반복');
 
 /** The loop's tag: 「↻ {unit} · {count} · 끝: {stop}」 with only the items the row has. */
 export function loopLabel(l: Pick<FormLoop, 'ref' | 'unit' | 'count' | 'stop'>): string {
   const bits = [l.unit, l.count, l.stop ? `끝: ${l.stop}` : null].filter((x): x is string => !!x);
-  return `↻ ${bits.length ? bits.join(' · ') : l.ref}`;
+  return `↻ ${bits.length ? bits.join(' · ') : '반복'}`;
 }
 const SPLIT = /\s*;\s*|\s+\/\s+/;
 const clauseText = (b: FormBranch) => [b.when, b.to.length || b.outcome || b.max ? `→ ${[...b.to, b.max, b.outcome].filter(Boolean).join(', ')}` : null].filter(Boolean).join(' ');
@@ -192,6 +199,14 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     return inGap(p, nums) ? 'unstored' : null;
   };
   const isFork = (ri: number) => rows[ri]!.items.length > 1;
+  // Polish round fixes 2: a station is numbered 1, 2, 3… by its row (an alternative by its letter, 2a, 2b), never S01/S02a; a clause
+  // names a step by that number, another part's step by the part, a condition row by its words. The row IDs stay in the tips.
+  const g = opts.gloss, said = (t: string | null) => (t ? plainIds(t, g) : t);
+  const noOf = (ri: number, index: number) => { const r = rows[ri]!; if (r.items.length < 2) return String(ri + 1);
+    const k = r.items.findIndex(x => x.index === index), sfx = parseStepRef(r.items[k]?.s.ref)?.sfx; return `${ri + 1}${sfx || String.fromCharCode(97 + Math.max(0, k))}`; };
+  const elsewhereWord = (t: string) => { const o = ownerOf(t), n = o ? opts.ownerNames?.[o] : null; return n ? `‘${n}’의 단계` : '다른 부분의 단계'; };
+  /** An outcome that only points at a condition row (「CD13」): that condition's words, or 「조건으로」 when the record names none. */
+  const condTarget = (o: string) => (idOnly(o) ? (g?.names.get(o.trim()) ? `조건 ‘${g.names.get(o.trim())}’` : '조건으로') : null);
 
   // Clauses read per station: jumps on the line, exits beside it, and what they do to the segment after the station.
   // alt: an alternative's own condition, from its clauses with a when (their when) or a plain clause with no arrow and no step (the
@@ -203,22 +218,25 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     const cells = (s.cell ?? '').trim().split(SPLIT).filter(Boolean);
     s.branch.forEach((b, k) => {
       const tip = `조건·분기 칸 · ${cells[k] ?? clauseText(b)}`, arrowLed = !b.when && /^\s*(?:→|->)/.test(cells[k] ?? '');
-      const tail = `${b.max ? ` · ${b.max}` : ''}${b.outcome ? ` · ${b.outcome}` : ''}`;
+      const when = said(b.when), cTarget = b.outcome ? condTarget(b.outcome) : null, outcome = cTarget ?? said(b.outcome);
+      const tail = `${b.max ? ` · ${b.max}` : ''}${outcome ? ` · ${outcome}` : ''}`;
       const inside = b.to.map(t => ({ t, at: resolve(t) })), on = inside.filter(x => !!x.at && typeof x.at === 'object') as { t: string; at: { row: number; index: number } }[];
       const out = inside.filter(x => x.at === 'outside'), unstored = inside.filter(x => x.at === 'unstored');
-      if (s.alt) { if (b.when) r.alt.push(b.when); else if (!b.to.length && b.outcome && !arrowLed) r.alt.push(cells[k] ?? b.outcome); }
+      if (s.alt) { if (when) r.alt.push(when); else if (!b.to.length && outcome && !arrowLed && !cTarget) r.alt.push(said(cells[k] ?? null) ?? outcome); }
       const next = on.length > 0 && on.every(x => x.at.row === ri + 1);
-      for (const x of on) if (!next) r.jumps.push({ to: x.at.row, toIndex: x.at.index, label: `${b.when ? `${b.when} ` : ''}→ ${shortRef(x.t)}${tail}`, tip, uncond: !b.when });
-      for (const x of out) r.exits.push({ kind: 'out', text: `${b.when ? `${b.when} ` : ''}→ ${x.t}${tail}`, tip: `${tip}\n이 노선 밖의 단계로 · ${x.t}` });
-      for (const x of unstored) r.exits.push({ kind: 'out', text: `${b.when ? `${b.when} ` : ''}→ ${shortRef(x.t)} · ${UNSTORED}${tail}`, tip: `${tip}\n${x.t} · 기록의 C-STEP 행 번호이나 저장된 단계에 없음 · 선으로 잇지 않음` });
-      if (!b.to.length && b.outcome) {
-        if (b.when) r.exits.push({ kind: 'exit', text: `${b.when} → ${b.outcome}${b.max ? ` · ${b.max}` : ''}`, tip });
-        else if (arrowLed) r.exits.push({ kind: 'end', text: `→ ${b.outcome}`, tip: `${tip}\n조건 없이 이 단계에서 끝나거나 거부함 (기록의 말)` });
-        else if (!s.alt) r.notes.push(b.outcome);
+      for (const x of on) if (!next) r.jumps.push({ to: x.at.row, toIndex: x.at.index, label: `${when ? `${when} ` : ''}→ 단계 ${noOf(x.at.row, x.at.index)}${tail}`, tip, uncond: !b.when });
+      for (const x of out) r.exits.push({ kind: 'out', text: `${when ? `${when} ` : ''}→ ${elsewhereWord(x.t)}${tail}`, tip: `${tip}\n이 노선 밖의 단계로 · ${x.t}` });
+      for (const x of unstored) r.exits.push({ kind: 'out', text: `${when ? `${when} ` : ''}→ ${UNSTORED}${tail}`, tip: `${tip}\n${x.t} · 기록의 C-STEP 행 번호이나 저장된 단계에 없음 · 선으로 잇지 않음` });
+      if (!b.to.length && outcome) {
+        if (cTarget) r.exits.push({ kind: 'exit', text: `${when ? `${when} ` : ''}→ ${cTarget}`, tip: `${tip}\n기록의 조건 행 ${b.outcome!.trim()}을 가리킴 · 그 조건에 따라 갈림` });
+        else if (when) r.exits.push({ kind: 'exit', text: `${when} → ${outcome}${b.max ? ` · ${b.max}` : ''}`, tip });
+        else if (arrowLed) r.exits.push({ kind: 'end', text: `→ ${outcome}`, tip: `${tip}\n조건 없이 이 단계에서 끝나거나 거부함 (기록의 말)` });
+        else if (!s.alt) r.notes.push(outcome);
       }
       // A clause with a condition (or one written without an arrow: the cell is the 조건·분기 column) makes the next step conditional;
-      // one with no condition that jumps or ends breaks the line after the station.
-      const uncond = !b.when && ((on.length > 0 && !next) || out.length > 0 || unstored.length > 0 || (!b.to.length && !!b.outcome && arrowLed));
+      // one with no condition that jumps or ends breaks the line after the station. One that points at a condition row decides by
+      // that condition: the next step is conditional, the line not broken.
+      const uncond = !b.when && ((on.length > 0 && !next) || out.length > 0 || unstored.length > 0 || (!b.to.length && !!b.outcome && arrowLed && !cTarget));
       if (uncond) r.broken = true; else if (b.when || (!b.to.length && b.outcome)) r.cond.push(tip);
     });
     reads.set(index, r);
@@ -239,25 +257,25 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     if (seenLoop.has(l.ref)) continue;
     const body = wholeBody(l); if (!touches(l, body)) continue; seenLoop.add(l.ref);
     const label = loopLabel(l);
-    if (!body.size) { apart.push({ ref: l.ref, label, why: APART_NONE, text: `${l.ref} 반복 · ${APART_NONE}${l.bodyState === 'unexpanded' ? ' (몸통 단계 펼치지 않음)' : ''}`, parts: [] }); continue; }
+    if (!body.size) { apart.push({ ref: l.ref, label, why: APART_NONE, text: `${loopWord(l)} · ${APART_NONE}${l.bodyState === 'unexpanded' ? ' (몸통 단계 펼치지 않음)' : ''}`, parts: [] }); continue; }
     const others = [...new Set([...body].map(t => ownerOf(t)).filter((o): o is string => !!o && o !== owner))];
     const rowsIn = new Set<number>(); let missing = false;
     let unread = false;
     for (const t of body) { const p = parseStepRef(t); if (!p) { missing = true; continue; } if (p.owner !== owner) continue; const r0 = keyRow.get(refKey(p)); if (r0 === undefined) { missing = true; unread = true; } else rowsIn.add(r0); }
     if (others.length) {
-      const names = others.map(o => opts.ownerNames?.[o] ? `‘${opts.ownerNames[o]}’` : o);
-      apart.push({ ref: l.ref, label, why: APART_OUT, text: `${l.ref} 반복의 일부 · 몸통이 ${names.join(', ')}에도 있음`, parts: others }); continue;
+      const names = others.map(o => opts.ownerNames?.[o] ? `‘${opts.ownerNames[o]}’` : '다른 부분');
+      apart.push({ ref: l.ref, label, why: APART_OUT, text: `${loopWord(l)}의 일부 · 몸통이 ${names.join(', ')}에도 있음`, parts: others }); continue;
     }
     // A body row of this part the map's reading does not hold (a skipped C-STEP number): part of the body is not on this map.
-    if (missing || !rowsIn.size) { apart.push({ ref: l.ref, label, why: unread ? APART_UNREAD : APART_OUT, text: `${l.ref} 반복의 일부 · ${unread ? APART_UNREAD : APART_OUT}`, parts: [] }); continue; }
+    if (missing || !rowsIn.size) { apart.push({ ref: l.ref, label, why: unread ? APART_UNREAD : APART_OUT, text: `${loopWord(l)}의 일부 · ${unread ? APART_UNREAD : APART_OUT}`, parts: [] }); continue; }
     const top = Math.min(...rowsIn), bottom = Math.max(...rowsIn);
     // A body over skipped C-STEP rows is not known contiguous (the rows between are not read): never a bracket.
     let overGap = false; for (let r0 = top; r0 < bottom; r0++) if (rowNum(r0 + 1) - rowNum(r0) > 1) overGap = true;
-    if (overGap) { apart.push({ ref: l.ref, label, why: APART_SPLIT, text: `${l.ref} 반복의 일부 · ${APART_SPLIT} (사이 행이 이 지도에 없음)`, parts: [] }); continue; }
+    if (overGap) { apart.push({ ref: l.ref, label, why: APART_SPLIT, text: `${loopWord(l)}의 일부 · ${APART_SPLIT} (그 사이 단계가 기록에만 있음)`, parts: [] }); continue; }
     const bodyKeys = new Set([...body].map(t => parseStepRef(t)).filter((p): p is StepRef => !!p).map(refKey));
     let whole = true;
     for (let r0 = top; r0 <= bottom; r0++) for (const x of rows[r0]!.items) { const p = parseStepRef(x.s.ref); if (!p || !bodyKeys.has(refKey(p))) whole = false; }
-    if (!whole) { apart.push({ ref: l.ref, label, why: APART_SPLIT, text: `${l.ref} 반복의 일부 · ${APART_SPLIT}`, parts: [] }); continue; }
+    if (!whole) { apart.push({ ref: l.ref, label, why: APART_SPLIT, text: `${loopWord(l)}의 일부 · ${APART_SPLIT}`, parts: [] }); continue; }
     cands.push({ l, top, bottom });
   }
   // Depth: inner (shorter) loops first, a loop nested in another (by its parentRef chain) before it on a tie; each sits one gutter
@@ -287,9 +305,12 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
   const maxCols = Math.max(1, ...rows.map(r => r.items.length));
   const natural = x0 + (maxCols - 1) * COL_W + DOT_R + 220 + jumpArea + 8;
   const width = Math.max(Math.round(opts.width ?? 0), natural);
+  // Polish round fixes 2: what the view shows without scrolling: an entry or a loop's tag is cut (its words whole in its tip) at that
+  // edge, never past it where the strip clips it with no ellipsis.
+  const vis = Math.round(opts.width ?? 0) > 0 ? Math.round(opts.width!) : width;
   // With jumps, the labels end where a name and its line need (LABEL_MAX), so the arcs stay beside the stations, not across the view.
   const need = Math.max(220, ...rows.map(r => { const x = r.items.at(-1)!, rd = reads.get(x.index)!;
-    return (r.items.length - 1) * COL_W + 32 + Math.max(textWidth(`${shortRef(x.s.ref ?? '')}  ${x.s.name}`, 15), textWidth(x.s.does ?? '', 13), textWidth(rd.exits.map(e => e.text).join('  '), 12) + rd.exits.length * 16); }));
+    return (r.items.length - 1) * COL_W + 32 + Math.max(textWidth(`${noOf(rows.indexOf(r), x.index)}  ${x.s.name}`, 15), textWidth(x.s.does ?? '', 13), textWidth(rd.exits.map(e => e.text).join('  '), 12) + rd.exits.length * 16); }));
   const labelRight = lanes ? Math.min(width - 8 - jumpArea, x0 + DOT_R + Math.min(LABEL_MAX + (maxCols - 1) * COL_W, need + 24)) : width - 8 - jumpArea;
 
   // Vertical layout: entries, then each row with the bands of the tags that open on it.
@@ -297,13 +318,13 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
   let y = PAD;
   for (const e of entries) {
     const text = `진입 · ${e.kind ? ENTRY_WORD[e.kind] ?? e.kind : '방식 미상'} · ${e.name}`;
-    const w = Math.min(textWidth(text, 12.5) + 24, labelRight - (x0 - DOT_R));
+    const w = Math.min(textWidth(text, 12.5) + 24, labelRight - (x0 - DOT_R), vis - (x0 - DOT_R) - 8);
     terminals.push({ x: x0 - DOT_R, y, w, h: 24, text, tip: `진입점 ${e.ref} · ${text}\n기록의 C-ENTRY 행 · 첫 단계와 잇지 않음 (진입이 어느 단계로 드는지는 기록에 없음)` });
     y += ENTRY_H;
   }
   if (entries.length) y += 6;
   const rowTop: number[] = [], rowBottom: number[] = [], rowY: number[] = [], bandTop = new Map<number, number>();
-  const tagRight = (text: string, x: number) => Math.min(textWidth(text, 12) + 22, Math.max(80, labelRight - x));
+  const tagRight = (text: string, x: number) => Math.min(textWidth(text, 12) + 22, Math.max(80, Math.min(labelRight, vis - 8) - x));
   rows.forEach((r, ri) => {
     // Loop tags opening on this row, outer first (higher), then the fork's tag and its split.
     const opening = cands.filter(c => c.top === ri).sort((a, b) => depthOf.get(b.l.ref)! - depthOf.get(a.l.ref)!);
@@ -318,7 +339,7 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
     if (isFork(ri)) {
       const whens = r.items.map(x => reads.get(x.index)!.alt.join(' · '));
       forkTag = { x: x0 + 18, y: y + 3, w: tagRight(FORK_TAG, x0 + 18), h: TAG_H - 6, text: FORK_TAG,
-        tip: `갈래 ${r.group} · ${r.items.map(x => x.s.ref).join(' · ')} 중 하나 (기록의 C-STEP 갈래 ID)${whens.some(Boolean) ? `\n${r.items.map((x, k) => `${shortRef(x.s.ref!)}: ${whens[k] || ALT_NO_COND}`).join('\n')}` : '\n갈래를 고르는 조건은 기록에 없음'}` };
+        tip: `갈래 ${r.group} · ${r.items.map(x => x.s.ref).join(' · ')} 중 하나 (기록의 C-STEP 갈래 ID)${whens.some(Boolean) ? `\n${r.items.map((x, k) => `${noOf(ri, x.index)}: ${whens[k] || ALT_NO_COND}`).join('\n')}` : '\n갈래를 고르는 조건은 기록에 없음'}` };
       tags.push(forkTag); bandTop.set(ri, y); y += TAG_H + SPLIT_H;
     }
     rowTop[ri] = y; rowY[ri] = y + NAME_H / 2;
@@ -329,7 +350,7 @@ export function stepLine(steps: readonly FormStep[], loops: readonly FormLoop[],
       const lines = (x.s.does && !x.s.program ? 1 : 0) + (cond ? 1 : 0) + (rd.notes.length ? 1 : 0) + (rd.exits.length ? 1 : 0) + extra;
       const h = NAME_H + lines * LINE_H, sx = x0 + c * COL_W;
       const right = c < r.items.length - 1 ? sx + COL_W - 30 : labelRight;
-      stations.push({ index: x.index, row: ri, col: c, kind: 'recorded', program: x.s.program, ref: x.s.ref ?? '', name: x.s.name, x: sx, y: rowY[ri]!, top: y, h, left: sx - DOT_R, right,
+      stations.push({ index: x.index, row: ri, col: c, kind: 'recorded', program: x.s.program, ref: x.s.ref ?? '', no: noOf(ri, x.index), name: x.s.name, x: sx, y: rowY[ri]!, top: y, h, left: sx - DOT_R, right,
         cond, condBlank: cond === ALT_NO_COND, notes: rd.notes, exits: rd.exits, extra, loops: cands.filter(q => q.top <= ri && ri <= q.bottom).map(q => q.l.ref) });
       bottom = Math.max(bottom, y + h);
     });

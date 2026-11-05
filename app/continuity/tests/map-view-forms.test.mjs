@@ -63,7 +63,7 @@ test('FORM-4 a fork: alternatives share a row side by side, carry 「조건에 �
   const [a, b, c, d] = l.stations;
   assert.equal(b.row, c.row); assert.deepEqual([b.col, c.col], [0, 1]); assert.equal(d.col, 0); assert.ok(d.row > b.row);
   assert.equal(l.forks.length, 1); assert.equal(l.forks[0].open, true); assert.equal(l.forks[0].tag.text, FORK_TAG);
-  assert.match(l.forks[0].tag.tip, /S02a: 카드면/); assert.equal(b.cond, '카드면');
+  assert.match(l.forks[0].tag.tip, /\b2a: 카드면/); assert.deepEqual(l.stations.map(s => s.no), ['1', '2a', '2b', '3'], 'stations by number, never S01/S02a'); assert.equal(b.cond, '카드면');
   assert.equal(l.forks[0].gap.text, FORK_OPEN);
   // Open stubs from both branches; nothing joins them to S03.
   const stubs = l.segments.filter(s => s.open);
@@ -104,12 +104,12 @@ test('FORM-6 loop brackets only for the full contiguous body; partial bodies are
   const outer = l.brackets.find(b => b.ref === 'B03:L01'), inner = l.brackets.find(b => b.ref === 'B03:L02');
   assert.ok(outer.depth > inner.depth); assert.ok(outer.x < inner.x);
   assert.equal(outer.label, '↻ 주문마다 · 목록 끝까지 · 끝: 취소');
-  assert.equal(loopLabel({ ref: 'B03:L09', unit: null, count: null, stop: null }), '↻ B03:L09');
+  assert.equal(loopLabel({ ref: 'B03:L09', unit: null, count: null, stop: null }), '↻ 반복', 'never the row ID');
   assert.ok(outer.y1 < inner.y1 && outer.y2 > inner.y2);
   // Non-contiguous body: no bracket.
   const split = stepLine(steps, [loop('B03:L03', ['B03:S01', 'B03:S03'])], []);
   assert.equal(split.brackets.length, 0); assert.equal(split.loopsApart[0].why, APART_SPLIT);
-  assert.match(split.loopsApart[0].text, /B03:L03 반복의 일부 · 몸통이 떨어져 있음/);
+  assert.match(split.loopsApart[0].text, /^반복의 일부 · 몸통이 떨어져 있음/);
   // A body step on another part (by the body list or by another part's step naming the loop): apart, the other part named.
   const other = stepLine(steps, [loop('B03:L04', ['B03:S02', 'B11:S01'])], [], { ownerNames: { B11: '결제 처리' } });
   assert.equal(other.brackets.length, 0); assert.deepEqual(other.loopsApart[0].parts, ['B11']);
@@ -135,7 +135,7 @@ test('FORM-7 jumps: a branch to a step of this line is an arc (back when upward)
   const l = stepLine(steps, [], []);
   assert.equal(l.arcs.length, 3);
   const inner = l.arcs.find(a => a.label.startsWith('검증 실패')), outer = l.arcs.find(a => a.label.startsWith('다시')), fwd = l.arcs.find(a => a.label.startsWith('건너뜀'));
-  assert.equal(inner.label, '검증 실패 → S02 · 최대 3번'); assert.equal(inner.back, true); assert.equal(fwd.back, false);
+  assert.equal(inner.label, '검증 실패 → 단계 2 · 최대 3번'); assert.equal(inner.back, true); assert.equal(fwd.back, false);
   assert.ok(inner.lane < outer.lane, 'the nested (shorter) arc nearer the stations');
   assert.equal(fwd.lane, 0, 'a disjoint arc reuses the first lane');
   assert.equal(l.crossings, 0);
@@ -148,7 +148,8 @@ test('FORM-8 exits: a branch to another part\'s step and an outcome-only clause 
   const steps = [step('B03:S01', 'a', { branch: [{ when: '승인 필요', to: ['B11:S02'], max: null, outcome: null }, { when: '인증 실패', to: [], max: null, outcome: '거부: E401' }] }), step('B03:S02', 'b'), step('B03:S03', 'c')];
   const l = stepLine(steps, [], []);
   assert.equal(l.arcs.length, 0);
-  assert.deepEqual(l.stations[0].exits.map(e => e.text), ['승인 필요 → B11:S02', '인증 실패 → 거부: E401']);
+  assert.deepEqual(l.stations[0].exits.map(e => e.text), ['승인 필요 → 다른 부분의 단계', '인증 실패 → 거부: E401']);
+  assert.equal(stepLine(steps, [], [], { ownerNames: { B11: '결제 서버' } }).stations[0].exits[0].text, '승인 필요 → ‘결제 서버’의 단계', 'another part\'s step by the part');
   assert.equal(l.stations[0].exits[0].kind, 'out');
   // An unconditional jump out breaks the line after it.
   const u = stepLine([step('B03:S01', 'a', { branch: [{ when: null, to: ['B11:S01'], max: null, outcome: null }], cell: '→ B11:S01' }), step('B03:S02', 'b'), step('B03:S03', 'c')], [], []);
@@ -288,7 +289,7 @@ test('FORM-17 the detail view\'s form code never lays out the map, never queries
   // Moved by spec cards v2 §1/§4: the card draws no footer word at all; its ops words sit in the kind line behind the display setting
   // (and the 상태·공백 lens, 「운영 기록 없음」 as .ops-none); the pane's head says it as a line of its own.
   assert.ok(card.includes('ops-none') && card.includes('c-opsw') && !card.includes('c-short') && !card.includes("'c-ops'"));
-  assert.ok(body('opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'));
+  assert.ok(!body('opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'), 'polish round fixes 2: no such line');
   const css = readFileSync(new URL('../dist/public/styles.css', import.meta.url), 'utf8');
   assert.ok(/\.node\.card \.c-opsw \{ display: none/.test(css) && /\.space\.show-ops \.node\.card \.c-opsw:not\(\.ops-none\), \.space\.show-ops-all \.node\.card \.c-opsw \{ display: inline/.test(css));
   assert.ok(!/\.edge\.spine[^{]*\{[^}]*stroke-width/.test(css.slice(css.indexOf('Hierarchy pass (spec forms v1'))), 'the spine is not thickened (override 8)');

@@ -43,7 +43,8 @@ test('LENS-3 the legend lists what the map draws, counted; nothing it does not h
   const start = legendItems('start', PARTS, LINES);
   assert.deepEqual(start.map(i => [i.id, i.count]), [['line-control', 1], ['family-trigger', 1], ['loop', 1], ['badge', 2]]);
   const state = legendItems('state', PARTS, LINES);
-  assert.deepEqual(state.map(i => [i.label, i.count]), [['가동 보고', 2], ['폐기', 1], ['운영 기록 없음', 2], ['항목 근거 미연결', 1], ['포트 대응 미기록', 2]]);
+  // Polish round fixes 2: what was recorded first, then what to check; no 「운영 기록 없음」 item and no author-only 포트 대응 미기록.
+  assert.deepEqual(state.map(i => [i.label, i.count]), [['가동 보고', 2], ['폐기', 1], ['확인이 필요한 부분', 1]]);
   assert.deepEqual(legendItems('scenario', PARTS, LINES), [], 'a path reads in the scenario strip');
   assert.deepEqual(legendItems('data', [], []), [], 'an empty map lists nothing');
 });
@@ -148,7 +149,7 @@ test('LENS-9 a plain click is visible: the picked targets outlined, everything e
 
 test('LENS-10 the folded legend is one chip (lens and first items with counts); it folds when, opened, it would cover a card', () => {
   const items = legendItems('compose', PARTS, LINES);
-  assert.equal(legendChip('compose', items), '구성 · 참여자 1 · 처리 2 · +2');
+  assert.equal(legendChip('compose', items), '구성 · 참여자 1 · 처리 2 · 외 2개');
   assert.equal(legendChip('data', legendItems('data', PARTS, LINES), 4), '데이터 · 데이터 선 2 · 저장 1 · 박자·조건 배지 (기록의 글자) 2 · 포트 대응 미기록 2');
   assert.equal(legendChip('scenario', []), '시나리오');
   const box = { x: 16, y: 500, w: 280, h: 200 };

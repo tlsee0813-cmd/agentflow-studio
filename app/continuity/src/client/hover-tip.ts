@@ -17,7 +17,9 @@ export type TipSide = 'right' | 'left' | 'below' | 'above';
 /** Where the popup goes for a target (all in one coordinate space): 'beside' a box (right, left, below, above: the first that fits
  * inside bounds and covers nothing in avoid), or at a 'point' (a line's midpoint: below-right, above-right, below-left, above-left
  * of it, off avoid). prefer: the side it took last time on this target (kept while it still fits). Clamped into bounds. */
-export function placeTip(target: Rect, size: { w: number; h: number }, bounds: Rect, mode: 'beside' | 'point', avoid: readonly Rect[] = [], prefer: TipSide | null = null, gap = 8): { x: number; y: number; side: TipSide } {
+/** soft (polish round fixes 2): what the popup should rather not cover (every other card in view): kept off when a place allows it,
+ * else given up before anything in avoid (the line's own end cards and the names stay hard obstacles: spec §7). */
+export function placeTip(target: Rect, size: { w: number; h: number }, bounds: Rect, mode: 'beside' | 'point', avoid: readonly Rect[] = [], prefer: TipSide | null = null, gap = 8, soft: readonly Rect[] = []): { x: number; y: number; side: TipSide } {
   const { w, h } = size;
   const at: Record<TipSide, Rect> = mode === 'beside'
     ? { right: { x: target.x + target.w + gap, y: target.y, w, h }, left: { x: target.x - gap - w, y: target.y, w, h },
@@ -36,14 +38,17 @@ export function placeTip(target: Rect, size: { w: number; h: number }, bounds: R
     for (let s = 32; s <= Math.max(-lo, hi); s += 32) for (const d of [s, -s]) if (d >= lo && d <= hi) out.push(vertical ? { ...r, y: r.y + d } : { ...r, x: r.x + d });
     return out;
   };
-  for (const side of order) for (const r of slides(side)) if (inside(r, bounds) && ![...avoid, ...self].some(a => overlap(r, a))) return { ...clamp(r), side };
-  for (const side of order) for (const r of slides(side)) { const c = clamp(r), cr = { ...c, w, h }; if (![...avoid, ...self].some(a => overlap(cr, a))) return { ...c, side }; }
+  const hard = [...avoid, ...self], all = [...hard, ...soft];
+  for (const list of soft.length ? [all, hard] : [hard]) {
+    for (const side of order) for (const r of slides(side)) if (inside(r, bounds) && !list.some(a => overlap(r, a))) return { ...clamp(r), side };
+    for (const side of order) for (const r of slides(side)) { const c = clamp(r), cr = { ...c, w, h }; if (!list.some(a => overlap(cr, a))) return { ...c, side }; }
+  }
   // Nothing clear (review): the side that covers the least of what it should avoid (the target itself counts most), clamped.
   const area = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
   let best = order[0]!, least = Infinity;
   for (const side of order) {
     const c = clamp(at[side]), cr = { ...c, w, h };
-    const cost = avoid.reduce((s, a) => s + area(cr, a), 0) + self.reduce((s, a) => s + 4 * area(cr, a), 0);
+    const cost = avoid.reduce((s, a) => s + 10 * area(cr, a), 0) + self.reduce((s, a) => s + 40 * area(cr, a), 0) + soft.reduce((s, a) => s + area(cr, a), 0);
     if (cost < least) { least = cost; best = side; }
   }
   return { ...clamp(at[best]), side: best };

@@ -3327,3 +3327,63 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space.lens-state .node.card .c-opsw.ops-none { display: none; }
 /* Polish round fixes 1: the first view's own control lines read firm but not heavy black (after the S10 emphasis rule, which it softens). */
 .space.fv-lines .world .edge.c-control.fv-emph:not(.on):not(.near):not(.agg):not(.sum):not(.s-dotted):not(.s-sparse) .edge-line { --lw: 1.75; stroke: var(--text-2); }
+
+/* Polish round fixes 2: how far the part's records go reads in 근거, each rung by its word (lit when the record has it). */
+.ev-ladder { margin: 0 0 10px; flex-wrap: wrap; }
+.ladder-words { display: inline-flex; gap: 4px; }
+.ladder-words > span { padding: 0 6px; height: 18px; line-height: 16px; border: 1px solid var(--hair-2); border-radius: 9px; font-size: 11.5px; color: var(--text-4); }
+.ladder-words > span.on { border-color: var(--accent-line); color: var(--text-2); background: var(--accent-soft); }
+.lens-kind-line { margin-top: 4px; }
+/* Polish round fixes 2: the 상태·공백 lens marks a part with something to say (a recorded state's mark, 「?」 for something to check)
+   by a ring and a corner mark kept at screen size (--u = 1/zoom), so the lens reads at the whole-map view too; the rest step back. */
+.space.lens-state .node.card[data-lens-mark] { box-shadow: 0 0 0 calc(2px * var(--u, 1)) var(--accent-line), 0 1px 2px rgb(15 23 42 / 6%); }
+.space.lens-state .node.card[data-lens-mark]::after { content: attr(data-lens-mark); position: absolute; top: 0; right: 0; z-index: 3; min-width: calc(18px * var(--u, 1)); height: calc(18px * var(--u, 1));
+  padding: 0 calc(4px * var(--u, 1)); border-bottom-left-radius: calc(6px * var(--u, 1)); background: var(--accent); color: var(--surface); font-size: calc(12px * var(--u, 1)); line-height: calc(18px * var(--u, 1)); font-weight: 700; text-align: center; pointer-events: none; }
+/* Polish round fixes 2: at the whole-map tiers the name takes the card's whole width and up to two lines: no glyph tile (the card's
+   colour says its family there), no ↻ loop tab and no head icons beside it, so nothing covers it; it breaks at spaces, dots and
+   underscores (the <wbr> breakable puts there), a word too long for a line breaking only as a last resort. */
+.space:is(.tier-far, .tier-dots) .node.card :is(.glyph-tile, .c-loop-tab) { display: none; }
+.space:is(.tier-far, .tier-dots) .node.card .c-head { gap: 0; }
+.space:is(.tier-far, .tier-dots) .node.card .c-title { min-width: 0; flex: 1 1 auto; }
+.space:is(.tier-far, .tier-dots) .node.card .c-name { word-break: keep-all; overflow-wrap: break-word; }
+/* Polish round fixes 2: a step-list head chip is a block of text (an inline-flex box never draws text-overflow's ellipsis, so the
+   chip was cut mid-character), sized to its words: the stop chip no longer stretches empty across the head. */
+.w-badge { display: inline-block; vertical-align: middle; flex: 0 1 auto; min-width: 0; }
+.w-badge.stop { flex: 0 1 auto; }
+/* Polish round fixes 2: over the 노선 the port → station lines show only for the port or station pointed at (they crossed the
+   stations' words as diagonals); a line wider than its strip fades at the edge it scrolls past and says so. */
+.dv-bound.hover-lines .dv-inlines .in-step { opacity: 0; transition: opacity .12s; }
+.dv-bound.hover-lines .dv-inlines .in-step.hot { opacity: 1; }
+.sl-scroll.wide { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+.sl-scroll.wide:hover, .sl-scroll.wide:focus-within { -webkit-mask-image: none; mask-image: none; }
+.sl-wide-note { margin: 4px 0 0; font-size: 11.5px; line-height: 16px; color: var(--text-3); }
+/* Polish round fixes 2: under 시작·반복 the control lines read thin and grey at rest (they wrapped half the map as thick black dashes),
+   dark on the line pointed at or a picked card's lines. */
+.space.lens-start .edge.c-control .edge-line { --lw: 1.5; stroke: var(--text-3); }
+.space.lens-start .edge.c-control:is(.on, .hover, :hover, .lit, .lg-pick, .lg-hover) .edge-line { --lw: 2; stroke: var(--text-2); }
+/* Polish round fixes 2: a card's foot reads in words at 가까이 (규칙 4 · 변경 2), its glyphs only where the foot is small (중간);
+   「안쪽 N ▸」 always says 안쪽; the ＋ (expand here) shows on the card pointed at or picked only. */
+.sign-tab .sg-w { display: none; }
+.space.tier-near .node.card .sign-tab .sg-w { display: inline; }
+.space.tier-near .node.card .sign-tab .sg-g { display: none; }
+.space.tier-mid .node.card .c-bottom .enter-in .c-enter-w { display: inline; }
+.node.card:not(:hover):not(:focus-within):not(.selected) .toggle.c-expand { visibility: hidden; }
+/* Polish round fixes 2: the corner's framed 「상세 ⤢」 is about 4 em wide: the lines it sits over keep that room (the role line's end and
+   its ellipsis stay visible); at the whole-map tiers the corner is not drawn, so nothing is kept. */
+.node.card.open-corner > :is(.c-role, .c-rows, .c-inner) { padding-right: calc(var(--t-kind, 12px) * 4.2 + 8px); }
+.space:is(.tier-far, .tier-dots) .node.card.open-corner > :is(.c-role, .c-rows, .c-inner) { padding-right: 0; }
+/* Polish round fixes 2: the region captions (참여자 · 시스템 경계) keep about 11px on screen at every zoom (--u = 1/zoom), growing
+   upward from their place over the region; never smaller than at 100%. */
+.band-head { transform: scale(max(1, calc(var(--u, 1) * .92))); transform-origin: 0 100%; }
+/* Polish round fixes 2: below 가까이 the inner line's type grows with the tier (--t-row) while its line height stayed 16px, so its
+   glyphs were cut in half by the card's edge (스케줄러 at the whole-map view): the line height follows the type. */
+.space:not(.tier-near) .node.card .c-inner { line-height: var(--t-row-lh, 20px); }
+/* Polish round fixes 2: a route shorter than its head is not drawn (a lone arrowhead between two stacked cards). */
+#world .edge.stub { display: none; }
+/* Polish round fixes 2: beside the 노선 the port columns take the room the line leaves (up to 220px), so a port reads 「updateDisplay」,
+   not 「updateD…」, while the line keeps its 520px. */
+.dv-inner.has-line { grid-template-columns: minmax(88px, max-content) minmax(520px, 1fr) minmax(88px, max-content); }
+.dv-inner.has-line > .dv-ports, .dv-inner.has-line .dv-ports { max-width: 220px; }
+/* Below 가까이 the card's box lets its overflow show: the mark sits on the card's corner, off its name. */
+.space.lens-state .node.card.fit-auto[data-lens-mark]::after { top: calc(-9px * var(--u, 1)); right: calc(-9px * var(--u, 1)); border-radius: calc(9px * var(--u, 1)); }
+.w-badge:not(.stop) { flex: none; }

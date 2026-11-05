@@ -127,11 +127,13 @@ export function tierFit(c: CardShapeIn, k: number, tier: ZoomTier, pri: FitPrior
   // and a second name line when there is still room (a name that kept one line at 가까이 may need two at the larger type here).
   room -= T.titleLh;
   if (tier !== 'mid') {
-    const kind = take(T.kindLh), said0 = Math.max(0, c.rows - (c.blank ? 1 : 0));
-    // The head is fixed (A6): the status line, then the name's second line, take their room exactly as on a plain card; a preview or
-    // an emphasised card's first row takes only the room they leave, so it yields first and never pushes the status out. A preview
-    // with no row of its own (a loop container: its steps read on the inner line) shows that inner line instead.
-    const status = !!c.status && take(T.kindLh), names = take(T.titleLh) ? 2 : 1;
+    // Polish round fixes 2: at the whole-map view the name comes first: its second line before the kind line (the names were cut to
+    // 2–4 characters while a kind word like 「사람」 kept its line). A box too small for both keeps the name's line.
+    const said0 = Math.max(0, c.rows - (c.blank ? 1 : 0)), names = room >= T.titleLh + T.kindLh * (c.status ? 2 : 1) ? (take(T.titleLh) ? 2 : 1) : 1, kind = take(T.kindLh);
+    // The head is fixed (A6): the status line takes its room exactly as on a plain card; a preview or an emphasised card's first row
+    // takes only the room it leaves, so it yields first and never pushes the status out. A preview with no row of its own (a loop
+    // container: its steps read on the inner line) shows that inner line instead.
+    const status = !!c.status && take(T.kindLh);
     const far = tier === 'far' && kind && (!!pri.preview || !!pri.alt), rowFirst = said0 > 0 && (!!c.members || !(pri.preview && c.inner > 0));
     const lead = far && rowFirst && (!!pri.preview || (!!pri.alt && !c.members)) && take(T.rowLh) ? 1 : 0;
     const innerLead = far && !lead && !!pri.preview && c.inner > 0 && take(Math.max(24, T.rowLh + 4));

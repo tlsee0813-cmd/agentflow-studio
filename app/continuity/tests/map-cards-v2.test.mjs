@@ -170,7 +170,8 @@ test('CARD-9 review fixes: the legend marks, the record\'s own 모름, one word 
   assert.equal(opsText('unknown', null), '상태 미상(기록)', 'reads apart from 운영 기록 없음');
   const parts = [{ id: 'a', short: '운영 기록 없음' }, { id: 'b', short: '상태 미상(기록)' }, { id: 'c', short: '운영 기록 충돌' }].map(x => ({ family: 'process', type: null, loop: false, unlinked: false, unmapped: 0, ...x }));
   const marks = Object.fromEntries(legendItems('state', parts, []).filter(x => x.id.startsWith('short-')).map(x => [x.label, x.sample.text]));
-  assert.deepEqual(marks, { '운영 기록 충돌': '◇', '상태 미상(기록)': '…', '운영 기록 없음': '–' });
+  // Polish round fixes 2: the record's 「모름」 in a reader's words; a part with no record is no legend item (it steps back on the map).
+  assert.deepEqual(marks, { '운영 기록 충돌': '◇', '기록에 「모름」으로 적힘': '…' });
   assert.equal(OP_VALUE_WORD.idle, '유휴·대기');
   // Nothing clear anywhere: the side that covers the least (never simply the first side over a lit neighbour's name).
   const bounds = { x: 0, y: 0, w: 600, h: 400 }, card = { x: 200, y: 100, w: 200, h: 150 }, size = { w: 190, h: 140 };
@@ -195,7 +196,8 @@ test('CARD-8 the built card and map: no ops footer, no c-short, no card title; t
   assert.ok(/'data-key': e\.key/.test(body(src, 'placeCounts')), 'the count chip joins its line');
   assert.ok(body(src, 'lineHit').includes('edge-labels'), 'a press on a label picks its line');
   // The pane: the operations line always, the blanks in words, the store's writers and readers by name.
-  assert.ok(body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음') && body(src, 'opsLineEl').includes('하나로 고르지 않음'));
+  // Polish round fixes 2: no 「운영 기록 없음」 line in the pane; records that disagree still read.
+  assert.ok(!body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음') && body(src, 'opsLineEl').includes('하나로 고르지 않음'));
   assert.ok(body(src, 'blanksLine').includes('미기록'));
   assert.ok(body(src, 'storeLine').includes('nm(writerIds)') && !body(src, 'storeLine').includes('`쓰기 ${writers} · 읽기 ${readers}`'));
   assert.ok(body(src, 'kindLine').includes('pane-ops-line'));
@@ -248,7 +250,7 @@ test('CARD-10 polish round (spec-cards-v2 §1): 포트 대응 미기록, 유지 
   assert.ok(css.includes('.space.detail-open .pane-ops-line.none { display: none; }') && !/\.space\.detail-open \.pane-ops-notes[^{]*\{ display: none/.test(css));
   assert.ok(card.includes("'data-tip': `${x.label} · 기록에서 프로그램이 옮긴 값`"), 'a program row says so in its tip');
   assert.ok(body(src, 'shortContent').includes("r.stateRead ? h('span', { class: 'xp-ops'"));
-  assert.ok(body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'));
+  assert.ok(/return conflict \? h\('div', \{ class: 'pane-ops-notes' \}, conflict\) : null;/.test(body(src, 'opsLineEl')), 'no record: no line');
   // The map head's basis line: the time and the version only; the rest in its tip.
   const basis = body(src, 'basisLine');
   assert.ok(basis.includes('`설계 근거 · ${last.basisAt ?? \'작성 시각 미상\'} · 판본 ${version}`') && basis.includes('운영: 보고된 상태 (기록 없음은 제공된 자료 기준)'));
