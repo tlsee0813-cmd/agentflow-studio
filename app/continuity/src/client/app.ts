@@ -32,7 +32,7 @@ import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, su
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
-import { routeEdges, samplePath, mixPath, type Routed } from './map-route.js';
+import { routeEdges, samplePath, mixPath, openCorridors, stripShift, type Routed } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
 import { CARD_H, CARD_H_TALL, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
@@ -44,9 +44,9 @@ import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, labelRank, mergeByChannel, pairWays, multiWord, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, labelRank, mergeByChannel, multiWord, relationSig, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
-import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
@@ -840,18 +840,34 @@ const heldPositions = (o: Opened): Positions => {
     out[c] = { ...(ov?.hold[c] ?? {}), ...(held?.[c] ?? {}), ...(pos[c] ?? {}), ...(ov?.push[c] ?? {}) };
   return out;
 };
-const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(); lay = layoutScope(o.view, scope, isExpanded(o), heldPositions(o), measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; core = { ...lay.bounds }; withTitle(); };
+const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
+/** Beauty v2 B3: where the routed lines still crowd, strips open across the map (map-route openCorridors), for the lines drawn at rest
+ * (a busy map's summary lines, else each line). Only an automatic arrangement: once a part of this view has a place of the person's
+ * (stored, or held while a part is dragged), nothing is moved for the lines. Positions only. */
+function openRoom(o: Opened, held: Positions) {
+  if (dragQuick || Object.keys(held[scope ?? ROOT] ?? {}).length) return;
+  const set = lay.edges.length > 6 ? sumLines(o, summaryEdges(lay.boxes, lay.edges)) : lay.edges, strips = openCorridors(lay.boxes, set);
+  if (!strips.length) return;
+  lay.heads = lay.heads.map(x => ({ ...x, ...stripShift(strips, x.x, x.y) }));
+  lay.bounds = unionRect([...lay.boxes.values(), ...lay.heads]) ?? lay.bounds;
+}
 /** The map's lines in the line grammar (map design v3 6.5, 3.6): one stroke per pair, direction and channel (data and control
  * never share one), each with the faces its ends take (a control line the reading called so: out of its card's bottom, in at
  * the top; a reference: from its ear). */
 function grammarEdges(o: Opened, edges: Edge[]): Edge[] {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
-  return mergeByChannel(edges, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id)).map(e => {
+  return mergeByChannel(edges, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), false, sigFor(said, notes)).map(e => {
     const ch = edgeChannel(e, said), f = portFaces(e.kind, ch, e.ids.some(id => !!said.get(id)?.channel));
-    return f.a === 'side' && f.b === 'side' ? e : { ...e, faces: f };
+    const st = lineStyle(e.kind, ch), marks = { head: st.head, start: st.start };
+    return f.a === 'side' && f.b === 'side' ? { ...e, marks } : { ...e, faces: f, marks };
   });
 }
 
+/** Beauty v2 (B4): a relation's signature of condition, timing and status (line-grammar relationSig), from its reading and note:
+ * relations of one pair, direction and channel share a stroke only when these are the same. */
+const sigFor = (said: Map<string, LineSaid>, notes: Map<string, string>) => (id: string): string => {
+  const s = said.get(id); return relationSig({ when: s?.when, optional: s?.optional, variant: s?.variant, cadence: s?.cadence, planned: plannedNote(notes.get(id) ?? '') });
+};
 /** Two real parts with one name under one parent ('Types' and 'Types'): told apart by the first clause of their own note, as
  * written ('원명 extHostTypes.ts'), only where the name is really ambiguous. Never merged, renamed or guessed: null when the name
  * is not shared, or when their own words do not tell them apart. */
@@ -2148,7 +2164,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // A busy map at rest reads as its summary (summaryEdges: one line per pair of groups and kind, with its count); a selection,
   // the change plan or a map of a few lines draws each line. Both sets are drawn; .rest-sum on the space shows one of them.
   restSums = sums = lay.edges.length > 6 ? sumLines(o, summaryEdges(lay.boxes, lay.edges)) : [];
-  const relInfo = relationLines(o.project), present = new Set<Channel>();
+  const relInfo = relationLines(o.project), present = new Set<Channel>(), sigOf = sigFor(relInfo, new Map(view.relations.map(r => [r.id, r.note])));
   lineWords = new Map(); lineChans = new Map(); lineTypes = new Map(); lineBadges = new Map(); lineMulti = new Set();
   for (const e of [...lay.edges, ...sums]) {
     const fa = frames(e.from), inner = [...frames(e.to)].some(f => fa.has(f)), sum = e.key.startsWith('sum:'), ch = edgeChannel(e, relInfo);
@@ -2162,7 +2178,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     // dashed with an open head, a reference dotted from its ear to a small V, a shared use dotted with ears, a plain relation
     // sparse dots with a dot at both ends); a planned, corrected or summary line keeps its kind's dash.
     const st = lineStyle(e.kind, ch);
-    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''} s-${st.stroke}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}${badge ? ' badged' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key, 'data-head': st.head, 'data-start': e.both ? st.head : st.start });
+    const g = svg('g', { class: `edge${sum ? ' sum' : ''} k-${e.kind}${ch ? ` c-${ch}` : ''} s-${st.stroke}${e.agg ? ' agg' : ''}${inner ? ' inner' : ''}${!sum && edgeRevised(e) ? ' revised' : ''}${e.spine ? ' spine' : ''}${!sum && e.notes.length && e.notes.every(plannedNote) ? ' planned' : ''}${badge ? ' badged' : ''}`, 'data-from': e.from, 'data-to': e.to, 'data-key': e.key, 'data-head': st.head, 'data-start': e.both ? st.head : st.start,
+      // Beauty v2 (B4): the relations a stroke holds (every one restorable), and how many signatures they have (always one).
+      'data-ids': e.ids.join(','), 'data-back': (e.back ?? []).join(','), 'data-sigs': String(new Set(e.ids.map(sigOf)).size), 'data-cond': e.ids.some(id => !!relInfo.get(id)?.when || !!relInfo.get(id)?.optional) ? '1' : '0' });
     g.append(svg('path', { class: 'edge-line' }), svg('path', { class: 'edge-hit' }));
     edges.append(g);
   }
@@ -2713,7 +2731,7 @@ function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect
     const nm = (id: string) => (opened ? partOf(opened, id)?.name ?? '부분' : '부분'), back = e.both ? e.back?.length ?? 0 : 0;
     // One hover surface (review): the per-direction counts read in the line's own tip (data-ways), never a native title beside it.
     const chip = h('span', { class: `edge-count k-${e.kind}${beside ? ' beside' : ''}${e.both ? ' both' : ''}`, 'data-key': e.key, ...(e.both ? { 'data-ways': `양쪽으로 · 관계 ${e.ids.length}\n${nm(e.from)} → ${nm(e.to)} ${e.ids.length - back}\n${nm(e.to)} → ${nm(e.from)} ${back}` } : {}) },
-      `${e.both ? '⇄ ' : ''}${REL_LABEL[e.kind] ?? e.kind} ${e.ids.length}`); box.append(chip);
+      `${e.both ? '⇄ ' : ''}관계 ${e.ids.length}개`); box.append(chip);
     const inv = labelInv(), w = chip.offsetWidth * inv, hh = chip.offsetHeight * inv;
     // On a straight run of its own line, clear of corners, parts and other lines; a count with no such place is left off.
     const spot = labelSpots(edgePts(e.key, path), w, hh, 'long').find(r => off(r) && !lineUnder(r, e.key, shown)) ?? null;
@@ -3524,8 +3542,8 @@ function mergeHeads() {
 function endMarkDefs(): SVGElement {
   const defs = svg('defs', {});
   const shapes: Record<Exclude<Head, 'none'>, { ref: string; el: () => SVGElement }> = {
-    filled: { ref: '9', el: () => svg('path', { class: 'mk-fill', d: 'M0,1 L10,5 L0,9 z' }) },
-    open: { ref: '9', el: () => svg('path', { class: 'mk-open', d: 'M1,1 L9,5 L1,9' }) },
+    filled: { ref: '9', el: () => svg('path', { class: 'mk-fill', d: 'M0,1.5 L10,5 L0,8.5 z' }) },
+    open: { ref: '9', el: () => svg('path', { class: 'mk-open', d: 'M1,1.5 L9.2,5 L1,8.5' }) },
     ref: { ref: '9', el: () => svg('path', { class: 'mk-open', d: 'M1.5,1.5 L9,5 L1.5,8.5' }) },
     ear: { ref: '5', el: () => svg('circle', { class: 'mk-ring', cx: '5', cy: '5', r: '3.4' }) },
     dot: { ref: '5', el: () => svg('circle', { class: 'mk-fill', cx: '5', cy: '5', r: '4' }) } };
@@ -3544,9 +3562,10 @@ function syncMarks(k: number) {
 /** The summary lines of a busy map in the line grammar: one per pair of groups, direction and channel; a pair that runs both ways
  * is one stroke with a head at each end (S8, line-grammar pairWays). keep: the two-way strokes drawn at rest (a selection's summary
  * keeps their keys, so a stroke left holding one direction is still the one drawn). */
-function sumLines(o: Opened, list: Edge[], keep: ReadonlySet<string> = new Set()): Edge[] {
+// Beauty v2 (B4): no stroke runs both ways any more (pairWays): a bundle holds one direction, one kind and one signature only.
+function sumLines(o: Opened, list: Edge[], _keep: ReadonlySet<string> = new Set()): Edge[] {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
-  return pairWays(mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true), keep);
+  return mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true, sigFor(said, notes)).map(e => { const st = lineStyle(e.kind, edgeChannel(e, said)); return { ...e, marks: { head: st.head, start: st.start } }; });
 }
 /** A badge chosen: that visit in the pane (a part selected before steps back, as choosing another part would), the map unmoved. */
 function selectVisit(id: string | null) {
@@ -4858,6 +4877,14 @@ function applyLegendMarks() {
     if (x.startsWith('line:')) { const k = CSS.escape(x.slice(5)); world.querySelectorAll(`.edge[data-key="${k}"], .edge-label[data-key="${k}"], .edge-badge[data-badge="${k}"], .edge-once[data-once="${k}"], .edge-cue[data-cue="${k}"]`).forEach(el => el.classList.add(cls)); }
     else world.querySelector(`[data-box="${CSS.escape(x)}"]`)?.classList.add(cls); } };
   mark(m.fade, 'lg-fade'); mark(m.dim, 'lg-dim'); mark(m.hide, 'lg-hide'); mark(m.picked, 'lg-pick');
+  // Beauty v2 B5 (the lens contract): each line in the lens's foreground (.lf-fg, 2.25px, whole) or its background (.lf-bg, 1.15px,
+  // faded to view-lens BG_LINE and never fainter). The selected part's lines, a selected relation and a scenario path's lines are
+  // always foreground. Classes only: nothing moves.
+  const selBox = selected && selected === scope ? `ghost:${selected}` : selected;
+  world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
+    const fg = g.classList.contains('on') || g.classList.contains('sc-path') || g.classList.contains('lit') || lensLineFg(viewLens, { key: g.dataset.key!, channel: lineChans.get(g.dataset.key!) ?? null, from: g.dataset.from!, to: g.dataset.to! }, { selected: selBox });
+    g.classList.toggle('lf-fg', fg); g.classList.toggle('lf-bg', !fg);
+  });
   // A 「+N」 marker of gathered badges steps back or hides with the lines it gathers only when all of them do.
   world.querySelectorAll<HTMLElement>('.edge-badge.b-more').forEach(el => { const from = el.dataset.badgeMore ?? '';
     if (m.hide.has(from)) el.classList.add('lg-hide'); else if (m.fade.has(from) || m.dim.has(from)) el.classList.add('lg-fade'); });

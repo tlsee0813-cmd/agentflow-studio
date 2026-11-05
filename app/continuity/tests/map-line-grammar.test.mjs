@@ -15,24 +15,26 @@ const edge = (from, to, kind = 'flow', faces, ids = [`${from}${to}`]) => ({ key:
 
 test('LINE-1 the stroke and the head say the relation, never its colour: data, control, reference, shared use, plain relation', () => {
   assert.deepEqual(lineStyle('flow', 'data'), { stroke: 'solid', dash: [], head: 'filled', start: 'none' });
-  assert.deepEqual(lineStyle('flow', 'control'), { stroke: 'dashed', dash: [6, 4], head: 'open', start: 'none' });
-  assert.deepEqual(lineStyle('needs', 'uses'), { stroke: 'dotted', dash: [0, 4], head: 'ref', start: 'ear' });
-  assert.deepEqual(lineStyle('shares', null), { stroke: 'dotted', dash: [0, 4], head: 'ear', start: 'ear' });
+  // Beauty v2 B1 (the binding ruling): control is a SOLID line with an open head; a reference a faint long dash 8 5, direction kept.
+  assert.deepEqual(lineStyle('flow', 'control'), { stroke: 'solid', dash: [], head: 'open', start: 'none' });
+  assert.deepEqual(lineStyle('needs', 'uses'), { stroke: 'long', dash: [8, 5], head: 'ref', start: 'ear' });
+  assert.deepEqual(lineStyle('shares', null), { stroke: 'long', dash: [8, 5], head: 'ear', start: 'ear' });
   assert.deepEqual(lineStyle('related', 'data'), { stroke: 'sparse', dash: [0, 8], head: 'dot', start: 'dot' }, 'a plain relation keeps its dots whatever its channel');
   // A channel the reading did not give: the kind's default (a flow hands data over, a need refers).
-  assert.equal(lineStyle('flow', null).stroke, 'solid'); assert.equal(lineStyle('needs', null).stroke, 'dotted');
+  assert.equal(lineStyle('flow', null).stroke, 'solid'); assert.equal(lineStyle('needs', null).stroke, 'long');
   // Every kind of relation is told apart by its stroke and head alone (greyscale, colour-blind).
   const sigs = [lineStyle('flow', 'data'), lineStyle('flow', 'control'), lineStyle('needs', 'uses'), lineStyle('shares', null), lineStyle('related', null)].map(s => `${s.stroke}|${s.head}|${s.start}`);
   assert.equal(new Set(sigs).size, sigs.length);
-  assert.deepEqual([...DASH.control], [6, 4]); assert.deepEqual([...DASH.uses], [0, 4]); assert.deepEqual([...DASH.related], [0, 8]);
-  assert.deepEqual({ ...HEAD_PX }, { filled: 9, open: 10, ref: 8, ear: 6, dot: 4 });
+  assert.deepEqual([...DASH.control], []); assert.deepEqual([...DASH.uses], [8, 5]); assert.deepEqual([...DASH.related], [0, 8]);
+  // Heads keep a least screen size (about 7–9 long, 5–7 wide) at every zoom.
+  assert.deepEqual({ ...HEAD_PX }, { filled: 9, open: 10, ref: 9.5, ear: 6, dot: 4 });
 });
 
-test('LINE-2 widths are screen pixels: never under 1.25 at rest, 1.5 nearer, 2 pointed at, 3 selected (a reference 2.5)', () => {
-  assert.equal(WIDTH_FLOOR, 1.25);
-  for (const t of ['dots', 'far', 'mid', 'near', null]) assert.ok(lineWidth(t, 'rest') >= WIDTH_FLOOR, String(t));
-  assert.equal(lineWidth('far', 'rest'), 1.25); assert.equal(lineWidth('mid', 'rest'), 1.5); assert.equal(lineWidth('near', 'rest'), 1.5);
-  assert.equal(lineWidth('far', 'hover'), 2); assert.equal(lineWidth('far', 'selected'), 3); assert.equal(lineWidth('near', 'selected', 'uses'), 2.5);
+// Beauty v2 B1 changed the widths: by the reading focus, never by tier or traffic (background 1–1.25, foreground 2–2.5, selected 3).
+test('LINE-2 widths are screen pixels by the reading focus: background 1.15, foreground 2.25, pointed at 2.5, selected 3', () => {
+  assert.equal(WIDTH_FLOOR, 1);
+  for (const t of ['dots', 'far', 'mid', 'near', null]) { assert.equal(lineWidth(t, 'rest'), 1.15, String(t)); assert.equal(lineWidth(t, 'fg'), 2.25); }
+  assert.equal(lineWidth('far', 'hover'), 2.5); assert.equal(lineWidth('far', 'selected'), 3); assert.equal(lineWidth('near', 'selected', 'uses'), 3);
 });
 
 test('LINE-3 the badge comes only from what the reading wrote of when the line flows; never from a name, a payload or a kind', () => {
@@ -192,13 +194,16 @@ test('LINE-7 a control line leaves its card\'s bottom and comes in at the top wh
   assert.equal(faceRoute(a, b, [a, b, lid], { face: 'bottom', at: 90 }, { face: 'top', at: 490 }), null);
 });
 
-test('LINE-8 a reference starts at its ear (the head band of the side it leaves), never spread with the side\'s other lines', () => {
+// Beauty v2 B2 changed this deliberately: every reference leaving one side stood on its ear's one point (the head band), so several
+// references stacked there; the ruling's port order has every end take its place in the side's order, never two on one point.
+test('LINE-8 a reference starts on its side in the side\'s order like any other end (its ear mark kept), never on another end\'s point', () => {
   const a = box('a', 0, 0, 272, 208, { ear: 23 }), b = box('b', 400, 0), c = box('c', 400, 300);
   const r = routeEdges(boxes([a, b, c]), [edge('a', 'b', 'needs', { a: 'ear', b: 'side' }), edge('a', 'c', 'flow'), edge('a', 'b', 'flow')]);
-  const ref = r.get('a|b|needs');
-  assert.equal(ref.pts[0].y, 23, 'the ear'); assert.equal(ref.pts[0].x, a.x + a.w);
-  assert.equal(earY(a), 23); assert.equal(earY(box('u', 0, 0, 200, 52)), 20, 'an untyped card: the head band, at most halfway');
-  assert.ok(r.get('a|c|flow').pts[0].y !== 23 && r.get('a|b|flow').pts[0].y !== 23, 'the data lines spread round the contact point');
+  const ref = r.get('a|b|needs'), ys = ['a|b|needs', 'a|c|flow', 'a|b|flow'].map(k => r.get(k).pts[0].y);
+  assert.equal(ref.pts[0].x, a.x + a.w, 'it leaves the side');
+  assert.equal(new Set(ys).size, 3, 'three ends, three points');
+  assert.ok(r.get('a|c|flow').pts[0].y > Math.max(ref.pts[0].y, r.get('a|b|flow').pts[0].y), 'in the order of their other ends');
+  assert.equal(earY(a), 23); assert.equal(earY(box('u', 0, 0, 200, 52)), 20, 'earY still says where an ear band is');
 });
 
 test('LINE-9 corners are rounded at 8', () => {

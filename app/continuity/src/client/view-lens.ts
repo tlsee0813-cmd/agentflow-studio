@@ -29,16 +29,33 @@ export function stepLens(cur: LensId, dir: 1 | -1, usable: (id: LensId) => boole
 }
 
 /* ---------- what a lens does to the map (classes only) ---------- */
-/** How a lens draws each channel's lines (an opacity from 1 down; 7.1: data 0.35 / reference 0.2 under 데이터 이동, data 0.35
- * under 시작과 반복, every line 0.3 under 상태와 공백) and which card families it lifts. Never a position, a size or a label place. */
+/** How a lens draws each channel's lines and which card families it lifts. Never a position, a size or a label place.
+ * Beauty v2 B5 (the binding lens contract): a lens has a foreground and a background, and the background stays visible: a
+ * channel the lens is about is drawn whole (1), every other line at BG_LINE (never fainter). 구성: no channel is the subject (the
+ * parts, their containment and the selected part's own lines are); 데이터: data lines; 시작·반복: control lines; 상태·공백: no line
+ * (the recorded states are); 시나리오: no channel (the recorded path is, drawn on top). */
+export const BG_LINE = 0.55;
 export interface LensLook { lines: Record<Channel | 'related', number>; lift: readonly string[]; badges: boolean; rails: boolean; ops: boolean }
 export function lensLook(id: LensId): LensLook {
   switch (id) {
-    case 'data': return { lines: { data: 1, control: 0.35, uses: 0.2, related: 0.2 }, lift: ['store'], badges: true, rails: false, ops: false };
-    case 'start': return { lines: { data: 0.35, control: 1, uses: 0.35, related: 0.2 }, lift: ['trigger'], badges: true, rails: true, ops: false };
-    case 'state': return { lines: { data: 0.3, control: 0.3, uses: 0.3, related: 0.3 }, lift: [], badges: false, rails: false, ops: true };
-    case 'scenario': return { lines: { data: 1, control: 1, uses: 1, related: 1 }, lift: [], badges: true, rails: false, ops: false };
-    default: return { lines: { data: 1, control: 1, uses: 1, related: 1 }, lift: [], badges: true, rails: false, ops: false };
+    case 'data': return { lines: { data: 1, control: BG_LINE, uses: BG_LINE, related: BG_LINE }, lift: ['store'], badges: true, rails: false, ops: false };
+    case 'start': return { lines: { data: BG_LINE, control: 1, uses: BG_LINE, related: BG_LINE }, lift: ['trigger'], badges: true, rails: true, ops: false };
+    case 'state': return { lines: { data: BG_LINE, control: BG_LINE, uses: BG_LINE, related: BG_LINE }, lift: [], badges: false, rails: false, ops: true };
+    case 'scenario': return { lines: { data: BG_LINE, control: BG_LINE, uses: BG_LINE, related: BG_LINE }, lift: [], badges: true, rails: false, ops: false };
+    default: return { lines: { data: BG_LINE, control: BG_LINE, uses: BG_LINE, related: BG_LINE }, lift: [], badges: true, rails: false, ops: false };
+  }
+}
+/** Beauty v2 B5: whether a drawn line is in the lens's foreground (drawn 2.25px and whole) or its background (1.15px, BG_LINE).
+ * 구성: the selected part's own lines; 데이터: data lines; 시작·반복: control lines; 상태·공백: none (ordinary relations are its
+ * background); 시나리오: the recorded path's lines. A selected relation and the selected part's lines are always foreground
+ * (selected: the selected part's id; path: the scenario path's line keys; picked: line keys the selection lifts). */
+export function lensLineFg(id: LensId, l: Pick<LensLine, 'key' | 'channel' | 'from' | 'to'>, ctx: { selected?: string | null; path?: ReadonlySet<string>; picked?: ReadonlySet<string> } = {}): boolean {
+  if (ctx.picked?.has(l.key) || (!!ctx.selected && (l.from === ctx.selected || l.to === ctx.selected))) return true;
+  switch (id) {
+    case 'data': return l.channel === 'data';
+    case 'start': return l.channel === 'control';
+    case 'scenario': return !!ctx.path?.has(l.key);
+    default: return false;
   }
 }
 /** The cards a lens is not about (S8, critique 9: switching lens barely changed the map): they step back (styles.css .lens-off,

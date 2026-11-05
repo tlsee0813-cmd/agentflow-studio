@@ -266,11 +266,9 @@ button:disabled { opacity: .5; cursor: default; }
 /* The spine: the longest chain of flows through the scope, read first; its lines are darker and a little wider. */
 .edge.spine .edge-line { stroke: var(--edge-spine); --lw: 1.75; }
 .edge-hit { fill: none; stroke: transparent; stroke-width: calc(16px * var(--u, 1)); pointer-events: stroke; cursor: pointer; }
-.edge.s-dashed .edge-line { stroke-linecap: butt; stroke-dasharray: calc(6px * var(--u, 1)) calc(4px * var(--u, 1)); }
-.edge.s-dotted .edge-line { stroke-dasharray: 0 calc(4px * var(--u, 1)); }
+/* Beauty v2 B1: control is solid (its open head says it); a reference or a shared use a faint long dash 8 5. */
+.edge.s-long .edge-line { stroke-linecap: butt; stroke-dasharray: calc(8px * var(--u, 1)) calc(5px * var(--u, 1)); }
 .edge.s-sparse .edge-line { stroke-dasharray: 0 calc(8px * var(--u, 1)); --lw: 2; }
-/* A dotted line's dots are as wide as the line; at rest far out a reference keeps 1.5 so its dots stay visible. */
-.edge.s-dotted .edge-line { --lw: 1.5; }
 /* A data or control line's start dot only where the line is being read (hovered or selected); an ear and a plain relation's
    dots are always drawn. */
 .edge[data-start="none"]:not(.on):not(.near) .edge-line { marker-start: none; }
@@ -281,14 +279,11 @@ button:disabled { opacity: .5; cursor: default; }
 .edge.near.spine:not(.on) .edge-line { stroke: var(--accent); --lw: 2.5; }
 /* Polish round fixes 1: a pointed line's bundle mates step back at once (the pointed and selected lines stay whole). */
 .space.line-near .edge:not(.near):not(.on) .edge-line { opacity: .3; }
-/* Polish round fixes 1: while the first view emphasises its lines, the other control lines are lighter at rest. */
-.space.fv-lines .world .edge.c-control:not(.fv-emph):not(.on):not(.near):not(.lg-pick):not(.sc-path) .edge-line { opacity: calc(var(--lo-control, 1) * .45); }
 .edge.near:not(.on)[data-head="filled"] .edge-line { marker-end: url(#m-filled-near); }
 .edge.near:not(.on)[data-head="open"] .edge-line { marker-end: url(#m-open-near); }
 .edge.near:not(.on)[data-head="ref"] .edge-line { marker-end: url(#m-ref-near); }
 /* A selected line: 3px in the accent (2.5 for a reference). */
 .edge.on .edge-line { stroke: var(--accent); --lw: 3; stroke-opacity: 1; }
-.edge.on.s-dotted .edge-line { --lw: 2.5; }
 .edge.agg.near .edge-line { stroke: #a9b1bd; --lw: 3; }
 /* A line resting only on a withdrawn report keeps its kind's dash; lighter at rest, its 「보고 정정됨」 mark on its label. */
 .edge.revised:not(.on):not(.near) .edge-line { stroke-opacity: .6; }
@@ -826,7 +821,7 @@ button:disabled { opacity: .5; cursor: default; }
 .line-key svg { flex: none; width: 28px; height: 10px; overflow: visible; }
 .line-key path { fill: none; stroke: var(--text-3); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 .line-key .lk-head.filled { fill: var(--text-3); stroke: none; }
-.line-key .lk-control .lk-line { stroke-dasharray: 6 4; stroke-linecap: butt; }
+.line-key .lk-control .lk-head { fill: none; stroke-linejoin: round; }
 .line-key .lk-related .lk-line { stroke-dasharray: 0 5; stroke-width: 2; } .line-key .lk-dot { fill: var(--text-3); stroke: none; }
 /* The legend (map design v3 7.2): the lens's name and question, then one row per item this map has (sample, name, count, ⋯).
    A click selects the item (a sustained outline on the map); the ⋯ menu dims, hides, solos or shows all. It takes the pointer. */
@@ -894,8 +889,8 @@ button:disabled { opacity: .5; cursor: default; }
   outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: calc(3px * var(--u, 1)); }
 /* A firmer stroke only where it is firmer: never on a selected, summary, picked or path line (each is wider already); a dotted or
    sparse line keeps its dots (its stroke darkens instead). */
-.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):not(.s-dotted):not(.s-sparse) .edge-line { --lw: 2.25; }
-.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):is(.s-dotted, .s-sparse) .edge-line { stroke: var(--text-2); }
+.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):not(.s-long):not(.s-sparse) .edge-line { --lw: 2.25; }
+.space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):is(.s-long, .s-sparse) .edge-line { stroke: var(--text-2); }
 .space .world .edge-label.fv-emph { color: var(--text); border-color: var(--text-3); }
 /* What a lens does to the map (view-lens lensLook): each channel's lines at its opacity, lifted families with a firmer edge.
    Selection, hover, a scenario path and the legend's own marks stay over it. */
@@ -917,7 +912,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space .edge.lg-hover .edge-line { stroke: var(--text-2); --lw: 2.25; opacity: 1; }
 .space .node.lg-dim, .space .ghost.lg-dim { opacity: .3; } .space .edge.lg-dim .edge-line { opacity: .15; } .edge-label.lg-dim, .edge-badge.lg-dim { opacity: .3; }
 .space .lg-hide, .edge-label.lg-hide, .edge-badge.lg-hide { visibility: hidden; }
-.line-key .lk-uses .lk-line { stroke-dasharray: 0 4; stroke-width: 1.8; }
+.line-key .lk-uses .lk-line { stroke-dasharray: 5 3.5; stroke-linecap: butt; opacity: .8; }
 .line-key .lk-ear { fill: var(--surface); stroke: var(--text-3); stroke-width: 1.3; }
 /* Popovers above the tools (찾기, 최근 기록, 도움말): one radius, one shadow, one padding, the same distance from the pill. */
 .help, .recent, .find { position: absolute; left: var(--s-4); bottom: 66px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); z-index: 3; animation: pop-in .14s ease; }
@@ -936,7 +931,7 @@ button:disabled { opacity: .5; cursor: default; }
 .line-legend svg { width: 48px; height: 10px; overflow: visible; }
 .line-legend path { stroke: var(--text-3); stroke-width: 1.6; stroke-linecap: round; fill: none; }
 .line-legend .m { fill: var(--text-3); stroke: none; }
-.line-legend .d-control { stroke-dasharray: 6 4; stroke-linecap: butt; } .line-legend .d-uses, .line-legend .d-shares { stroke-dasharray: 0 4; stroke-width: 1.9; }
+.line-legend .d-uses, .line-legend .d-shares { stroke-dasharray: 6 4; stroke-linecap: butt; opacity: .8; }
 .line-legend .d-related { stroke-dasharray: 0 8; stroke-width: 2.2; }
 .line-legend .e { fill: var(--surface); stroke: var(--text-3); stroke-width: 1.4; }
 .line-legend .b { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
@@ -3320,7 +3315,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space.lens-state .node.card .c-opsw:is(.os-waiting, .os-conflict)::before { color: var(--dot-wait); }
 .space.lens-state .node.card .c-opsw.ops-none { display: none; }
 /* Polish round fixes 1: the first view's own control lines read firm but not heavy black (after the S10 emphasis rule, which it softens). */
-.space.fv-lines .world .edge.c-control.fv-emph:not(.on):not(.near):not(.agg):not(.sum):not(.s-dotted):not(.s-sparse) .edge-line { --lw: 1.75; stroke: var(--text-2); }
+.space.fv-lines .world .edge.c-control.fv-emph:not(.on):not(.near):not(.agg):not(.sum):not(.s-long):not(.s-sparse) .edge-line { --lw: 1.75; stroke: var(--text-2); }
 
 /* Polish round fixes 2: how far the part's records go reads in 근거, each rung by its word (lit when the record has it). */
 .ev-ladder { margin: 0 0 10px; flex-wrap: wrap; }
@@ -3531,3 +3526,21 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* The hover card's rows (beauty v2 A1: the kind rows and the inner line that left the card face). */
 .edge-tip .hc-row { font-size: 12px; line-height: 17px; color: var(--text-2); }
 .edge-tip .hc-row-l { color: var(--text-3); }
+
+/* ---------- beauty v2 B · lines, ports, corridors, lens contract ----------
+   B1 widths by the reading focus (never by importance or traffic), in screen pixels at every zoom: a background line 1.15, a
+   foreground line (the lens's subject: .lf-fg) 2.25, a pointed-at line 2.5, a selected or path line 3. One declaration of the
+   stroke's width (--bw on the line's group) replaces the older per-tier and per-kind widths. */
+.space .world .edge { --bw: 1.15; }
+.space .world .edge.lf-fg { --bw: 2.25; }
+.space .world .edge:is(.near, .lg-hover) { --bw: 2.5; }
+.space .world .edge:is(.on, .lit, .sc-path, .lg-pick) { --bw: 3; }
+.space .world .edge .edge-line { stroke-width: calc(var(--bw) * var(--u, 1) * 1px); }
+/* A reference's long dash is faint (B1): lighter than a line of the same role. */
+.space .world .edge.s-long:not(.on):not(.near):not(.lit):not(.lg-pick):not(.sc-path) .edge-line { stroke-opacity: .75; }
+/* B5: a background line stays visible: the lens fades it to --lo (0.55), nothing fainter; a route round other parts on a busy map
+   is not ghosted any more (B3 gives it its own room). */
+.space.dense-lines .world .edge.detour:not(.planned):not(.revised):not(.s-long) .edge-line { stroke-opacity: 1; }
+.space.rest-sum.dense-lines .world .edge.sum.agg.detour:not(.planned):not(.revised):not(.s-long) .edge-line { stroke-opacity: 1; }
+/* B1: the open head is drawn a little heavier than the line so open and filled read apart in greyscale at every zoom. */
+.mk:not(.mk-on):not(.mk-near) .mk-open { stroke-width: 1.7; }

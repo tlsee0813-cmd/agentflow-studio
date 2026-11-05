@@ -306,6 +306,6 @@ test('S10-18 the emphasis keeps the family edge and never thins a selected or su
     const last = cards.filter(r => r.sel.includes(one) && /outline-offset:/.test(r.body)).at(-1);
     assert.ok(last, one); assert.match(last.body, /outline-offset: (?:0|-[\d.]+)px/, `on the edge, no gap: ${last.sel}`);
   }
-  for (const r of rules.filter(x => /--lw/.test(x.body))) for (const not of ['.on', '.agg', '.sum', '.s-dotted', '.s-sparse'])
+  for (const r of rules.filter(x => /--lw/.test(x.body))) for (const not of ['.on', '.agg', '.sum', '.s-long', '.s-sparse']) // beauty v2 B1: a reference is the long dash (.s-long), no longer dotted
     assert.ok(r.sel.includes(`:not(${not})`), `a firmer stroke never on ${not}: ${r.sel}`);
 });

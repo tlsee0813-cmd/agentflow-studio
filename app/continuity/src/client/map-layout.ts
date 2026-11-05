@@ -30,6 +30,11 @@ export const FRAME_GUTTER = 40;
 /** The scope's bands (map-regions bandsOf, map design v3 2.1): the gap between the 참여자 band and the middle, between the middle and
  * the system boundary (its quiet line runs in the middle of it), and above the 실행 위치 미기록 shelf (its caption's room). */
 export const BAND_GAP = 76, BOUNDARY_GAP = 96, SHELF_GAP = 64;
+/** Beauty v2 B3 (corridor room): a gap that n lines must pass is at least laneRoom(n) wide: LANE_MARGIN clear of the cards on each
+ * side and LANE_TRACK between neighbouring lines (map units: at the least card-face zoom, 0.9, about 12.6 and 9 screen pixels; the
+ * ruling's six strands need about 64px + stroke on screen). map-route's TRACK_GAP is LANE_TRACK. */
+export const LANE_MARGIN = 14, LANE_TRACK = 10;
+export const laneRoom = (n: number): number => (n <= 0 ? 0 : 2 * LANE_MARGIN + (n - 1) * LANE_TRACK + 2);
 export interface Point { x: number; y: number }
 /** layoutScope's extra for a part the readings typed (map design v3 3.3, 5.3): a card of CARD_W, as a unit and as a row inside a
  * group alike, whose name takes one line or two in nameRoom (the name's room beside the glyph, and the fold toggle when it has an
@@ -68,7 +73,10 @@ export interface Edge { key: string; from: string; to: string; kind: RelationVie
   faces?: { a: PortFace; b: PortFace };
   /** A summary stroke that holds both directions between its two ends (line-grammar pairWays, S8): a head at each end; back: the
    * relations that run from its 'to' to its 'from'. */
-  both?: boolean; back?: string[] }
+  both?: boolean; back?: string[];
+  /** Beauty v2 B2: the marks at its two ends (line-grammar Head: the head where it arrives, the start where it leaves), so a side with
+   * more ends than it has room for may share one port between ends that arrive (or leave) with the same mark. */
+  marks?: { head: string; start: string } }
 /** heads: over each run of outside partners that belong to the same place, that place once ('밖 · 확장 실행과 연결'). */
 export interface GhostHead { key: string; x: number; y: number; w: number; h: number; text: string }
 export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: GhostHead[]; bounds: { x: number; y: number; w: number; h: number };
@@ -241,6 +249,20 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     for (const [i, b] of band) bandOf.set(i, b);
     const ids = kidsOf(container).filter(i => !band.has(i)), set = new Set(ids);
     const lift = (id: string) => { let cur = byId.get(id), guard = 0; while (cur && !set.has(cur.id) && guard++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
+    // Beauty v2 B3: the lines between a band (참여자 on the left, the boundary on the right) and the middle, each pair once: they
+    // pass the band's gap and the middle's columns on their way, so the room for them is made before anything is routed.
+    const bandLines: { band: Band; mid: string }[] = [];
+    if (band.size) {
+      const all = new Set(kidsOf(container)), liftAll = (id: string) => { let cur = byId.get(id), g = 0; while (cur && !all.has(cur.id) && g++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && all.has(cur.id) ? cur.id : null; };
+      const seen = new Set<string>();
+      for (const r of v.relations) {
+        const a = liftAll(r.from), b = liftAll(r.to); if (!a || !b || a === b) continue;
+        const bd = band.has(a) && set.has(b) ? a : band.has(b) && set.has(a) ? b : null, which = bd ? band.get(bd)! : null;
+        if (!bd || !which || which === 'shelf') continue;
+        const k = `${a}|${b}|${r.kind}`; if (seen.has(k)) continue; seen.add(k); bandLines.push({ band: which, mid: bd === a ? b : a });
+      }
+    }
+    const bandRoom = { outside: 0, boundary: 0 };
     if (listOf(container)) {
       // A list keeps its own order in columns. Rows linked outward sit in the last column and rows linked from outside in the
       // first, so their lines leave the list at its edge instead of running under other rows.
@@ -406,6 +428,59 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
         }
       }
     };
+    /** Beauty v2 B3 (corridor room, the ruling's 노드·포트 순서 → 통로 폭 → 라우팅): how many lines must pass each gap of one block,
+     * counted from its relations before anything is routed, and each gap widened to laneRoom of that many (never narrowed).
+     * - A line between two columns turns in the gap beside each end (one track there; a level line between neighbours none).
+     * - A line that skips columns crosses each column between at the row gap nearest either end's height (the corridor the router
+     *   tries first); that row gap is opened, the parts under it moving down together (the reading order stays left to right).
+     * - A line between two parts of one column that are not neighbours goes round beside it (a track in the gap after it).
+     * - A band's lines (참여자, the boundary) cross the columns between it and their middle end the same way, and their count sets
+     *   the band's own gap (placeBands).
+     * Returns the width added. Only the automatic arrangement; a stored place is the person's. */
+    const makeRoom = (cs: Col[]): number => {
+      const colOf = new Map<string, number>(); cs.forEach((c, k) => c.ids.forEach(i => colOf.set(i, k)));
+      const n = cs.length, cy = (i: string) => top(i) + sizes.get(i)!.h / 2;
+      const lines: { i: number; j: number; ya: number; yb: number; same?: [string, string] }[] = [], seen = new Set<string>();
+      for (const p of pairs) {
+        if (!colOf.has(p.a) || !colOf.has(p.b)) continue;
+        const k = `${p.a}|${p.b}|${p.kind}`; if (seen.has(k)) continue; seen.add(k);
+        const i = colOf.get(p.a)!, j = colOf.get(p.b)!;
+        lines.push(i < j ? { i, j, ya: cy(p.a), yb: cy(p.b) } : i > j ? { i: j, j: i, ya: cy(p.b), yb: cy(p.a) } : { i, j, ya: cy(p.a), yb: cy(p.b), same: [p.a, p.b] });
+      }
+      for (const l of bandLines) {
+        const m = colOf.get(l.mid); if (m === undefined) continue;
+        if (l.band === 'outside') { lines.push({ i: -1, j: m, ya: cy(l.mid), yb: cy(l.mid) }); bandRoom.outside++; }
+        else { lines.push({ i: m, j: n, ya: cy(l.mid), yb: cy(l.mid) }); bandRoom.boundary++; }
+      }
+      const vert = new Array<number>(n).fill(0), pass = new Map<string, number>();
+      const rows = (c: number) => [...cs[c]!.ids].sort((p, q) => top(p) - top(q));
+      for (const l of lines) {
+        if (l.same) { const r = rows(l.i); if (Math.abs(r.indexOf(l.same[0]) - r.indexOf(l.same[1])) > 1) vert[l.i] = vert[l.i]! + 1; continue; }
+        if (l.j === l.i + 1 && Math.abs(l.ya - l.yb) < 1) continue;
+        if (l.i >= 0 && l.i < n - 1) vert[l.i] = vert[l.i]! + 1;
+        if (l.j - 1 !== l.i && l.j - 1 >= 0 && l.j - 1 < n - 1) vert[l.j - 1] = vert[l.j - 1]! + 1;
+        for (let c = Math.max(0, l.i + 1); c < Math.min(n, l.j); c++) {
+          const r = rows(c); let best = -1, bd = Infinity;
+          for (let g = -1; g < r.length; g++) {
+            const y0 = g < 0 ? -Infinity : top(r[g]!) + sizes.get(r[g]!)!.h, y1 = g + 1 < r.length ? top(r[g + 1]!) : Infinity;
+            const d = Math.min(...[l.ya, l.yb].map(y => (y < y0 ? y0 - y : y > y1 ? y - y1 : 0)));
+            if (d < bd - 1e-6) { bd = d; best = g; }
+          }
+          if (best >= 0 && best < r.length - 1) pass.set(`${c}|${best}`, (pass.get(`${c}|${best}`) ?? 0) + 1);
+        }
+      }
+      for (const [k, m] of [...pass].sort()) {
+        const [c, g] = k.split('|').map(Number) as [number, number], r = rows(c), gap = top(r[g + 1]!) - (top(r[g]!) + sizes.get(r[g]!)!.h), d = laneRoom(m) - gap;
+        if (d > 0) for (const i of r.slice(g + 1)) setTop(i, top(i) + d);
+      }
+      let added = 0;
+      const x0 = (i: string) => at.get(i)!.x + sizes.get(i)!.ox;
+      for (let c = 0; c + 1 < n; c++) {
+        const right = Math.max(...cs[c]!.ids.map(i => x0(i) + sizes.get(i)!.w)), next = Math.min(...cs[c + 1]!.ids.map(x0)), d = laneRoom(vert[c]!) - (next - right);
+        if (d > 0) { for (let k = c + 1; k < n; k++) for (const i of cs[k]!.ids) at.get(i)!.x += d; added += d; }
+      }
+      return added;
+    };
     let yBlock = 0, xWall = 0;
     blocks.forEach((cs, bi) => {
       const heights = cs.map(c => stackH(c.ids)), tallest = Math.max(0, ...heights);
@@ -419,6 +494,8 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       xWall = Math.max(xWall, x);
       // Stored places are not levelled (the person's own); the automatic arrangement is.
       level(cs, yBlock + tallest / 2, new Set(spineAt.get(bi) ?? []));
+      // Beauty v2 B3: room for the lines, counted before routing (rows first, then the gaps between columns).
+      xWall = Math.max(xWall, x + makeRoom(cs));
       const all = cs.flatMap(c => c.ids), lo = Math.min(...all.map(top)), hi = Math.max(...all.map(i => top(i) + sizes.get(i)!.h));
       // The block starts where it was stacked: a levelled block that rose above it or sank below it moves back as a whole, so
       // the gap between blocks is the block gap and nothing more.
@@ -447,13 +524,13 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
         x += w + (inFrame ? GAP : WRAP_GAP);
       });
     }
-    if (band.size) placeBands(band, at, sizes);
+    if (band.size) placeBands(band, at, sizes, bandRoom);
     return at;
   };
   /** The bands around the arranged middle (map design v3 2.1): the 참여자 band as a column left of it, the external systems as a
    * column right of it past the boundary's lane, the lifecycle groups in a row under everything (the shelf). Each in the scope's
    * order; nothing in the middle moves. */
-  const placeBands = (band: Map<string, Band>, at: Map<string, Point>, sizes: Map<string, Measure>) => {
+  const placeBands = (band: Map<string, Band>, at: Map<string, Point>, sizes: Map<string, Measure>, room: { outside: number; boundary: number } = { outside: 0, boundary: 0 }) => {
     const box = (i: string) => { const p = at.get(i)!, z = sizes.get(i)!; return { x: p.x + z.ox, y: p.y + z.oy, w: z.w, h: z.h }; };
     const mid = [...at.keys()].map(box), x0 = mid.length ? Math.min(...mid.map(b => b.x)) : 0, y0 = mid.length ? Math.min(...mid.map(b => b.y)) : 0;
     const x1 = mid.length ? Math.max(...mid.map(b => b.x + b.w)) : 0;
@@ -463,8 +540,9 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       const w = Math.max(...list.map(i => sizes.get(i)!.w)), left = x(w); let y = y0;
       for (const i of list) { const z = sizes.get(i)!; at.set(i, { x: left - z.ox, y: y - z.oy }); y += z.h + ROW_GAP; }
     };
-    column(of('outside'), w => x0 - BAND_GAP - w);
-    column(of('boundary'), () => x1 + BOUNDARY_GAP);
+    // Beauty v2 B3: a band's gap holds its lines (laneRoom), the boundary's quiet rule in the middle of its own.
+    column(of('outside'), w => x0 - Math.max(BAND_GAP, laneRoom(room.outside)) - w);
+    column(of('boundary'), () => x1 + Math.max(BOUNDARY_GAP, laneRoom(room.boundary) + 16));
     const shelf = of('shelf'); if (!shelf.length) return;
     const all = [...at.keys()].map(box), bottom = Math.max(...all.map(b => b.y + b.h)), left = Math.min(x0, ...all.map(b => b.x));
     let x = left; for (const i of shelf) { const z = sizes.get(i)!; at.set(i, { x: x - z.ox, y: bottom + SHELF_GAP - z.oy }); x += z.w + WRAP_GAP; }

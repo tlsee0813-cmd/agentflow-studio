@@ -1,8 +1,9 @@
 /* The line grammar of the map (map design v3 6, principle 7), the client's pure part. One visual channel carries one meaning:
- * - the stroke and the head say what the relation is: data a solid line with a filled head; control (a start, a trigger) a
- *   dashed line (6 4) with an open head; a reference (uses, needs) a dotted line with a port-less ear where it starts and a small
- *   open V where it points; a shared use dotted with an ear at both ends; a plain relation sparse dots with a dot at both ends.
- *   A planned, corrected or summary line keeps the dash of its kind (its mark is a badge or a colour on top, never a new dash).
+ * - the stroke and the head say what the relation is (beauty v2 B1, the binding ruling): data a solid line with a filled head;
+ *   control (a start, a trigger) a SOLID line with an open head (the open and the filled head read apart in greyscale); a
+ *   reference (uses, needs) a faint long dash (8 5) with a port-less ear where it starts and a small open V where it points (its
+ *   direction kept); a shared use the same long dash with an ear at both ends; a plain relation sparse dots with a dot at both ends.
+ *   A planned, reported or unconfirmed line keeps the stroke of its kind (its mark is a badge or a tone on top, never a dash).
  * - a text badge says what the record wrote of when the line flows: today its cadence words as written (a condition the record
  *   put there reads in them: 'init_from=resume', 'wandb_log일 때'), and once the contract carries them the condition (when) and
  *   optional fields. Nothing is read into the words (no '마다' parsed into a beat); a line without such a field has no badge.
@@ -14,29 +15,32 @@ import type { ZoomTier } from './card-budget.js';
 export type RelKind = 'flow' | 'needs' | 'shares' | 'related';
 /** The end marks (marker ids without their state suffix). */
 export type Head = 'filled' | 'open' | 'ref' | 'ear' | 'dot' | 'none';
-export interface LineStyle { stroke: 'solid' | 'dashed' | 'dotted' | 'sparse'; dash: readonly number[]; head: Head; start: Head }
-/** Dash patterns in screen pixels (9.6): control 6 4, a reference or a shared use dots 0 4 with round caps (a dot as wide as the
- * line), a plain relation 0 8. */
-export const DASH = { data: [], control: [6, 4], uses: [0, 4], shares: [0, 4], related: [0, 8] } as const;
-/** End marks in screen pixels (9.6): the filled triangle 9, the open V 10, a reference's V 8, the ear's ring 6, a dot 4. */
-export const HEAD_PX = { filled: 9, open: 10, ref: 8, ear: 6, dot: 4 } as const;
+export interface LineStyle { stroke: 'solid' | 'long' | 'sparse'; dash: readonly number[]; head: Head; start: Head }
+/** Dash patterns in screen pixels (beauty v2 B1): data and control solid, a reference or a shared use a long dash 8 5 (butt caps),
+ * a plain relation sparse dots 0 8. */
+export const DASH = { data: [], control: [], uses: [8, 5], shares: [8, 5], related: [0, 8] } as const;
+/** End marks' boxes in screen pixels at every zoom (beauty v2 B1: about 7–9 long and 5–7 wide): the filled triangle 9 (9 × 6.3), the
+ * open V 10 (8.2 × 7), a reference's V 9.5 (7.1 × 6.7), the ear's ring 6, a dot 4. */
+export const HEAD_PX = { filled: 9, open: 10, ref: 9.5, ear: 6, dot: 4 } as const;
 /** The style of a line from its kind and its channel (a line with no channel read keeps its kind's default: a flow hands data
  * over, a need or a shared use refers). */
 export function lineStyle(kind: RelKind, channel: Channel | null): LineStyle {
   if (kind === 'related') return { stroke: 'sparse', dash: DASH.related, head: 'dot', start: 'dot' };
-  if (kind === 'shares' && channel !== 'control') return { stroke: 'dotted', dash: DASH.shares, head: 'ear', start: 'ear' };
+  if (kind === 'shares' && channel !== 'control') return { stroke: 'long', dash: DASH.shares, head: 'ear', start: 'ear' };
   const ch = channel ?? (kind === 'flow' ? 'data' : 'uses');
   if (ch === 'data') return { stroke: 'solid', dash: DASH.data, head: 'filled', start: 'none' };
-  if (ch === 'control') return { stroke: 'dashed', dash: DASH.control, head: 'open', start: 'none' };
-  return { stroke: 'dotted', dash: DASH.uses, head: 'ref', start: 'ear' };
+  if (ch === 'control') return { stroke: 'solid', dash: DASH.control, head: 'open', start: 'none' };
+  return { stroke: 'long', dash: DASH.uses, head: 'ref', start: 'ear' };
 }
-/** Screen widths (6.1, 9.6): at rest 1.25 at the overview and the dot map, 1.5 nearer; 2 hovered; 3 selected (2.5 for a
- * reference). Never under 1.25 on screen. */
-export const WIDTH_FLOOR = 1.25;
-export function lineWidth(tier: ZoomTier | null, state: 'rest' | 'hover' | 'selected', channel: Channel | null = 'data'): number {
-  if (state === 'selected') return channel === 'uses' ? 2.5 : 3;
-  if (state === 'hover') return 2;
-  return tier === 'mid' || tier === 'near' ? 1.5 : WIDTH_FLOOR;
+/** Screen widths (beauty v2 B1): by the current reading focus, never by importance or traffic: a background line 1.15, a
+ * foreground line (the lens's subject) 2.25, a pointed-at line 2.5, a selected line 3. Never under 1 on screen. The zoom tier
+ * no longer changes a width (kept in the signature for callers). */
+export const WIDTH_FLOOR = 1;
+export const LINE_W = { bg: 1.15, fg: 2.25, hover: 2.5, selected: 3 } as const;
+export function lineWidth(_tier: ZoomTier | null, state: 'rest' | 'fg' | 'hover' | 'selected', _channel: Channel | null = 'data'): number {
+  if (state === 'selected') return LINE_W.selected;
+  if (state === 'hover') return LINE_W.hover;
+  return state === 'fg' ? LINE_W.fg : LINE_W.bg;
 }
 
 /* ---------- ports: which face of a card a line end takes (3.6, S4b) ---------- */
@@ -64,22 +68,40 @@ export interface MergeEdge { key: string; from: string; to: string; kind: RelKin
  * hover and the pane. Data and control never share a stroke; a plain relation stays its own; a line holding relations of two
  * channels is split by channel first (each part its own stroke, keyed '<key>~<channel>'). The kind of a merged stroke is its
  * first line's (the order of the input). */
-export function mergeByChannel<E extends MergeEdge>(edges: readonly E[], chanOf: (relationId: string, kind: RelKind) => Channel | null, noteOf: (relationId: string) => string | null | undefined = () => null, stable = false): E[] {
+export function mergeByChannel<E extends MergeEdge>(edges: readonly E[], chanOf: (relationId: string, kind: RelKind) => Channel | null, noteOf: (relationId: string) => string | null | undefined = () => null, stable = false, sigOf: (relationId: string) => string = () => ''): E[] {
   const out = new Map<string, E>();
   for (const e of edges) {
     if (e.kind === 'related') { out.set(e.key, { ...e }); continue; }
-    const by = new Map<Channel, string[]>();
-    for (const id of e.ids) { const c = chanOf(id, e.kind) ?? (e.kind === 'flow' ? 'data' : 'uses'); (by.get(c) ?? by.set(c, []).get(c)!).push(id); }
-    for (const [ch, ids] of by) {
-      // One stroke per pair, direction, channel and drawn style (a shared use's ears are not a need's ear and V). stable: the
-      // stroke is keyed by those alone (a summary line keeps its key whatever relations it is left with beside a selection).
-      const k = `${e.key.startsWith('sum:') ? 'sum:' : ''}${e.from}|${e.to}|${ch}|${lineStyle(e.kind, ch).head}`, cur = out.get(k);
-      const notes = by.size > 1 ? ids.map(noteOf).filter((n): n is string => !!n) : [...e.notes];
-      if (!cur) out.set(k, { ...e, key: stable ? k : by.size > 1 ? `${e.key}~${ch}` : e.key, ids: [...ids], notes });
-      else { cur.ids.push(...ids); cur.notes.push(...notes); cur.agg ||= e.agg; if (e.spine) cur.spine = true; }
+    // Beauty v2 (B4): one stroke holds only relations with the same condition, timing and status (sigOf: a relation's signature of
+    // those, '' when it has none); relations that differ in any of them are strokes of their own, never covered by one.
+    const by = new Map<Channel, Map<string, string[]>>();
+    for (const id of e.ids) {
+      const c = chanOf(id, e.kind) ?? (e.kind === 'flow' ? 'data' : 'uses'), s = sigOf(id), m = by.get(c) ?? by.set(c, new Map()).get(c)!;
+      (m.get(s) ?? m.set(s, []).get(s)!).push(id);
+    }
+    const parts = [...by.values()].reduce((n, m) => n + m.size, 0);
+    for (const [ch, sigs] of by) {
+      [...sigs].forEach(([sig, ids], si) => {
+        // One stroke per pair, direction, channel, drawn style (a shared use's ears are not a need's ear and V) and signature.
+        // stable: the stroke is keyed by those alone (a summary line keeps its key whatever relations it is left with beside a
+        // selection).
+        const k = `${e.key.startsWith('sum:') ? 'sum:' : ''}${e.from}|${e.to}|${ch}|${lineStyle(e.kind, ch).head}${sig ? `|${sigKey(sig)}` : ''}`, cur = out.get(k);
+        const notes = parts > 1 ? ids.map(noteOf).filter((n): n is string => !!n) : [...e.notes];
+        if (!cur) out.set(k, { ...e, key: stable ? k : parts > 1 ? `${e.key}~${ch}${sigs.size > 1 ? `~${si}` : ''}` : e.key, ids: [...ids], notes });
+        else { cur.ids.push(...ids); cur.notes.push(...notes); cur.agg ||= e.agg; if (e.spine) cur.spine = true; }
+      });
     }
   }
   return [...out.values()];
+}
+/** A short stable key for a signature (a stroke's key carries it, so the same relations keep the same stroke). */
+export const sigKey = (sig: string): string => { let h = 2166136261; for (let i = 0; i < sig.length; i++) h = Math.imul(h ^ sig.charCodeAt(i), 16777619) >>> 0; return `s${h.toString(36)}`; };
+/** A relation's signature for one stroke (B4): its condition words, its optional mark and variant, its cadence words and whether
+ * the record states it as planned. Relations of one pair, direction and channel share a stroke only when these are the same. */
+export function relationSig(r: { when?: string | null | undefined; optional?: boolean | null | undefined; variant?: string | null | undefined; cadence?: string | null | undefined; planned?: boolean | undefined }): string {
+  const t = (x?: string | null) => (x ?? '').replace(/\s+/g, ' ').trim();
+  const parts = [t(r.when), r.optional ? `선택:${t(r.variant)}` : '', t(r.cadence), r.planned ? '계획' : ''];
+  return parts.some(Boolean) ? parts.join('\u0001') : '';
 }
 /** Two summary strokes of one pair, one channel and one drawn style that run opposite ways, drawn as one stroke with a head at each
  * end (S8): on a busy map a folded group's lines to and from the same parts otherwise run side by side down one gap (nanoGPT .43

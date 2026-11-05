@@ -19,11 +19,16 @@ test('LENS-1 five lenses, by name, question and key; the default reads the compo
   assert.equal(stepLens('state', 1, id => id !== 'scenario'), 'compose', '시나리오 without a record is skipped');
 });
 
-test('LENS-2 a lens only emphasises: each channel\'s opacity and the families it lifts (7.1); nothing is hidden, nothing has a place', () => {
-  assert.deepEqual(lensLook('compose').lines, { data: 1, control: 1, uses: 1, related: 1 });
-  assert.deepEqual(lensLook('data').lines, { data: 1, control: 0.35, uses: 0.2, related: 0.2 });
-  assert.deepEqual(lensLook('start').lines, { data: 0.35, control: 1, uses: 0.35, related: 0.2 });
-  assert.deepEqual(lensLook('state').lines, { data: 0.3, control: 0.3, uses: 0.3, related: 0.3 });
+// Beauty v2 B5 (the binding lens contract) changed the opacities: a lens has a foreground and a background, and the background stays
+// visible at one level (BG_LINE 0.55, never fainter; it was 0.2–0.35). 구성, 상태·공백 and 시나리오 put no channel in front (their
+// foreground is parts, recorded states and the path).
+test('LENS-2 a lens only emphasises: its foreground channel whole, the background at one visible level, and the families it lifts; nothing is hidden, nothing has a place', () => {
+  const B = 0.55;
+  assert.deepEqual(lensLook('compose').lines, { data: B, control: B, uses: B, related: B });
+  assert.deepEqual(lensLook('data').lines, { data: 1, control: B, uses: B, related: B });
+  assert.deepEqual(lensLook('start').lines, { data: B, control: 1, uses: B, related: B });
+  assert.deepEqual(lensLook('state').lines, { data: B, control: B, uses: B, related: B });
+  assert.deepEqual(lensLook('scenario').lines, { data: B, control: B, uses: B, related: B });
   assert.deepEqual(lensClasses('data'), ['lens-data', 'lens-lift-store']);
   assert.deepEqual(lensClasses('start'), ['lens-start', 'lens-lift-trigger']);
   for (const l of LENSES) {

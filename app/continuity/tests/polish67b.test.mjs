@@ -29,15 +29,16 @@ test('every text grey reads at 4.5:1 or more on white and on the canvas, and the
 test('lines are stronger at rest than before and gain width, not only colour, on hover and selection', () => {
   assert.ok(lum(token('edge')) < lum('#b4bcc7'));
   const rest = width('.edge-line');
-  assert.ok(rest >= 1.25, 'never under 1.25 on screen at rest');
+  assert.ok(rest >= 1, 'never under 1 on screen at rest');
   assert.ok(width('.edge.near .edge-line') > rest && width('.edge.on .edge-line') > rest);
   assert.equal(width('.edge.on .edge-line'), 3, 'selected 3px');
   assert.match(rule('.edge-line'), /stroke-width:\s*calc\(var\(--lw\) \* var\(--u, 1\) \* 1px\)/, 'screen pixels at every zoom');
-  // a reference's dots and a plain relation's sparse dots are told apart by their dots, not only by their end marks
+  // a reference's long dash and a plain relation's sparse dots are told apart by their pattern, not only by their end marks
+  // (beauty v2 B1: control is solid, so there is no dashed rule any more; a reference is a long dash 8 5).
   const dash = sel => /stroke-dasharray:\s*([^;]+)/.exec(rule(sel))[1];
-  assert.notEqual(dash('.edge.s-dotted .edge-line'), dash('.edge.s-sparse .edge-line'));
-  assert.match(dash('.edge.s-dashed .edge-line'), /calc\(6px \* var\(--u, 1\)\) calc\(4px \* var\(--u, 1\)\)/, 'control dashed 6 4 on screen');
-  assert.match(dash('.edge.s-dotted .edge-line'), /^0 calc\(4px/, 'a reference dotted 0 4');
+  assert.notEqual(dash('.edge.s-long .edge-line'), dash('.edge.s-sparse .edge-line'));
+  assert.ok(!css.includes('\n.edge.s-dashed .edge-line {'), 'no dashed control line');
+  assert.match(dash('.edge.s-long .edge-line'), /^calc\(8px \* var\(--u, 1\)\) calc\(5px/, 'a reference: long dash 8 5');
 });
 
 // Map design v3 6.1: the legend reads the line grammar (data: solid, filled head; control: dashed, open V; reference: dotted
@@ -56,7 +57,7 @@ test('the help is a legend: the line grammar with its end marks, the plain relat
   assert.doesNotMatch(related, /<path class="m"/);
   assert.match(badge, /<rect class="b"/);
   for (const k of ['/', 'Enter', 'Space', 'Esc']) assert.ok(help.includes(`<kbd>${k}</kbd>`), k);
-  for (const label of ['데이터', '채운 삼각, 실선', '제어·기동', '열린 V, 파선', '참조', '점렬', '관련', '철회', '계획된 연결', '함께 쓰는', '글자 배지', '색만으로 뜻을 싣지 않아요']) assert.ok(help.includes(label), label);
+  for (const label of ['데이터', '채운 삼각, 실선', '제어·기동', '열린 V, 실선', '참조', '옅은 긴 대시', '관련', '철회', '계획된 연결', '함께 쓰는', '글자 배지', '색만으로 뜻을 싣지 않아요']) assert.ok(help.includes(label), label);
 });
 
 test('the reading modes are one segmented group and the home actions a primary and a secondary button', () => {
