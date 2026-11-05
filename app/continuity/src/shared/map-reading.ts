@@ -1297,7 +1297,11 @@ export const askLimits = (ask: { schemaVersion?: unknown; parts?: unknown; reque
   ask.schemaVersion === MAP6_SCHEMA && Array.isArray(ask.parts) && !ask.parts.length && (!Array.isArray(ask.requests) || !ask.requests.length) && (!Array.isArray(ask.priors) || !ask.priors.length)
     ? { records: MAP_FIRST_RECORDS, recordChars: MAP_FIRST_RECORD_CHARS, bytes: MAP_FIRST_BYTES, spans: MAP_FIRST_SPANS }
     : { records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES, spans: SPANS_PER_RECORD };
-const MIN_RECORD_CHARS = 1500, META_BYTES = 30000;
+const MIN_RECORD_CHARS = 1500;
+/** The map (parts, relations, project) of an ask takes at most this many bytes; records keep the rest of MAP_BYTES. */
+export const META_BYTES = 30000;
+/** Recipe .49 (brief-parts.1): what a map over META_BYTES is shrunk to, step by step (fitMap). */
+export const BRIEF_ROLE = 60, BRIEF_NOTE = 300, BRIEF_RELATION_NOTE = 60;
 export const CLAIM_LABEL: Record<ClaimKind, string> = {
   // A report of work says what it says: it may say something was not built. Neither label reads as built.
   want: '원함', idea: '구상', reported: '작업 보고', checked: '확인 보고', describes: '설명', open: '남은 선택', differs: '다른 근거'
@@ -1309,7 +1313,9 @@ export const stateLabel = (u: Pick<PartUnderstanding, 'state' | 'revised'>): str
 const STATE_ORDER: ClaimKind[] = ['reported', 'checked', 'want', 'idea', 'describes'];
 const RELS: RelationKind[] = ['flow', 'needs', 'shares', 'related'];
 
-export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; current: { key: string; kind: ClaimKind; text: string; about: string | null }[] }
+/** brief (recipe .49, brief-parts.1, map.7 only): a part sent in short form for size: its note and current left out and its role cut
+ * to BRIEF_ROLE characters. It is a known, current part (never new, absent or retired because its details are missing). */
+export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; current: { key: string; kind: ClaimKind; text: string; about: string | null }[]; brief?: true }
 /** text: studio.map.1–3. lead + spans: studio.map.4 (the same excerpt as span.2 pieces; never both). */
 export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text?: string; lead?: string; spans?: SpanWire[]; note: string; basis: string; addedAt?: string }
 /** studio.map.3: an earlier current match the records may explicitly take back, by alias (M01…), with what it said and the one
@@ -1569,7 +1575,10 @@ export function validateMapAsk(value: unknown, at: MapAskRoute = {}): MapAsk {
   arr(value.parts, 200);
   const parts = new Set<string>(), claims = new Set<string>();
   for (const p of value.parts) {
-    obj(p, ['id', 'name', 'note', 'parentId', 'readAs', 'role', 'roleBy', 'roleAbout', 'current']); check(typeof p.id === 'string' && PART.test(p.id) && !parts.has(p.id)); parts.add(p.id);
+    // Recipe .49: a part sent in short form says so (brief: true, map.7 only), with nothing of its note or current and its role short.
+    const brief = !!p && typeof p === 'object' && Object.hasOwn(p, 'brief');
+    obj(p, ['id', 'name', 'note', 'parentId', 'readAs', 'role', 'roleBy', 'roleAbout', 'current', ...(brief ? ['brief'] : [])]); check(typeof p.id === 'string' && PART.test(p.id) && !parts.has(p.id)); parts.add(p.id);
+    if (brief) check(version === MAP7_SCHEMA && p.brief === true && p.note === '' && Array.isArray(p.current) && !p.current.length && typeof p.role === 'string' && p.role.length <= BRIEF_ROLE);
     str(p.name, 60); str(p.note, 2000, true); if (p.readAs !== null) str(p.readAs, 60); str(p.role, 300, true);
     check(p.roleBy === null ? p.role === '' : (p.roleBy === 'reading' || p.roleBy === 'person') && !!(p.role as string).trim());
     if (p.roleAbout !== null) { str(p.roleAbout, 80); check(p.roleBy === 'reading'); }
@@ -3494,6 +3503,85 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
+/* ---------- recipe .49 (brief-parts.1): a large map shrunk by relevance, never by leaving a part out ---------- */
+// An ASCII word ends where an ASCII letter, digit or _ does not follow: a Korean particle after it (API를, Redis가) still says it.
+const ASCII_WORD = /^[\x00-\x7f]+$/, WORD_CHAR = /[a-z0-9_]/;
+const fold = (t: string) => t.normalize('NFKC').toLowerCase().replace(/\s+/g, ' ');
+/** The words a part is known by, NFKC-folded and lowercased: names (its whole name and readAs, from 2 characters) and words (those split
+ * at anything but letters, digits and _, an ASCII word from 3 characters and any other from 2, and the code-like words of its current
+ * claims: dotted, slashed, snake or camel names such as file_watcher, parsers.py or jobQueue, from 4 characters). */
+export function partWords(x: Pick<MapAskPart, 'name' | 'readAs' | 'current'>): { names: string[]; words: string[] } {
+  const names = new Set<string>(), words = new Set<string>();
+  for (const n of [x.name, x.readAs ?? '']) {
+    const whole = normName(n); if (whole.length >= 2) names.add(whole);
+    for (const w of whole.split(/[^\p{L}\p{N}_]+/u)) if (w.length >= (ASCII_WORD.test(w) ? 3 : 2)) words.add(w);
+  }
+  for (const c of x.current) for (const w of c.text.normalize('NFKC').match(/[A-Za-z][A-Za-z0-9]*(?:[_./-][A-Za-z0-9]+)+|[a-z][a-z0-9]*[A-Z][A-Za-z0-9]*/g) ?? []) if (w.length >= 4) words.add(w.toLowerCase());
+  for (const n of names) words.delete(n);
+  return { names: [...names], words: [...words] };
+}
+/** How many times a folded text says the word: anywhere for a word with letters other than ASCII (a Korean word takes its particles),
+ * never inside a longer ASCII word for an ASCII one (api is not in rapid; API를 says api). */
+function saidTimes(text: string, w: string): number {
+  let n = 0;
+  for (let at = text.indexOf(w); at >= 0; at = text.indexOf(w, at + 1)) {
+    if (!ASCII_WORD.test(w)) { n++; continue; }
+    const before = text[at - 1], after = text[at + w.length];
+    if ((!before || !WORD_CHAR.test(before)) && (!after || !WORD_CHAR.test(after))) n++;
+  }
+  return n;
+}
+export interface PartRelevance { tier: 0 | 1 | 2; hits: number }
+/** How relevant each part of an ask is to the record text it will send. A part's own words are its names and those of its words no
+ * other part of the ask has (as a name or a word: 소비 shared by four parts names none of them); hits counts how often the text says
+ * them. tier 2: named (hits > 0); 1: next to a named part (its parent, a child, or the other end of a direct relation); 0: otherwise.
+ * Deterministic: the same ask and text give the same result. */
+export function partRelevance(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string): Map<string, PartRelevance> {
+  const folded = fold(text), all = new Map(ask.parts.map(x => [x.id, partWords(x)])), owners = new Map<string, number>();
+  for (const { names, words } of all.values()) for (const w of new Set([...names, ...words])) owners.set(w, (owners.get(w) ?? 0) + 1);
+  const out = new Map<string, PartRelevance>();
+  for (const [id, { names, words }] of all) {
+    const hits = [...names, ...words.filter(w => owners.get(w) === 1)].reduce((n, w) => n + saidTimes(folded, w), 0);
+    out.set(id, { tier: hits > 0 ? 2 : 0, hits });
+  }
+  const named = new Set([...out].filter(([, r]) => r.tier === 2).map(([id]) => id));
+  const near = (id: string | null) => { const r = id ? out.get(id) : undefined; if (r && r.tier === 0) r.tier = 1; };
+  for (const x of ask.parts) { if (named.has(x.id)) near(x.parentId); if (x.parentId && named.has(x.parentId)) near(x.id); }
+  for (const r of ask.relations) { if (named.has(r.from)) near(r.to); if (named.has(r.to)) near(r.from); }
+  return out;
+}
+/** A part in short form: no note, no current claims, its role cut to BRIEF_ROLE; marked brief only when something was left out. */
+function briefPart(x: MapAskPart): void {
+  if (!x.note && !x.current.length && x.role.length <= BRIEF_ROLE) return;
+  x.note = ''; x.current = []; x.role = cut(x.role, BRIEF_ROLE); x.brief = true;
+}
+/** Shrinks the map of an ask until fits() holds, in fixed steps, stopping as soon as it fits; true when it fits. Every part keeps its
+ * alias, name, readAs, parent, roleBy and roleAbout; every relation its ends and kind; nothing is ever left out of the map.
+ * (1) Each part in ask order: current to 2 claims, role to 120 characters. (2) Every note to BRIEF_NOTE.
+ * brief (a map.7 ask, whose instructions say what brief means), by partRelevance of `text`: (3) the parts of tier 0 go brief one by one.
+ * (4) Every relation note to BRIEF_RELATION_NOTE; brief: the notes of relations with an end of tier 0 left out, then the parts of tier 1
+ * and then of tier 2 go brief one by one (within a tier the fewest hits first, then ask order). (5) Every relation note left out.
+ * What still does not fit is TOO_LARGE for the caller: names, parents and relations alone are over the budget. */
+export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, brief: boolean, fits: () => boolean): boolean {
+  if (fits()) return true;
+  for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (fits()) return true; }
+  for (const x of ask.parts) x.note = cut(x.note, BRIEF_NOTE);
+  if (fits()) return true;
+  const rel = brief ? partRelevance(ask, text) : null, rank = ask.parts.map((x, i) => ({ x, i, ...(rel?.get(x.id) ?? { tier: 0, hits: 0 }) }));
+  const shorten = (tier: 0 | 1 | 2) => {
+    for (const { x } of rank.filter(r => r.tier === tier).sort((a, b) => a.hits - b.hits || a.i - b.i)) { briefPart(x); if (fits()) return true; }
+    return false;
+  };
+  if (rel && shorten(0)) return true;
+  for (const r of ask.relations) r.note = cut(r.note, BRIEF_RELATION_NOTE);
+  if (fits()) return true;
+  if (rel) {
+    for (const r of ask.relations) if (!rel.get(r.from)!.tier || !rel.get(r.to)!.tier) r.note = '';
+    if (fits() || shorten(1) || shorten(2)) return true;
+  }
+  for (const r of ask.relations) r.note = '';
+  return fits();
+}
 /** anchored: true for m4, MAP5_SCHEMA for m5 (only after the server advertises that capability); records go as span.2 pieces, ending
  * where a piece ends (a cut excerpt never leaves its last sentence half sent), with requests and priors always present.
  * MAP7_SCHEMA (a server that also advertises the later m7 recipe): the ask is built as map.6 and, once complete, goes as map.7 when it
@@ -3558,10 +3646,18 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     }
     ask.priors = priors; input.priors = refs;
   }
-  // Structure first, bounded: the earlier understanding of each part shrinks before any record is left out.
+  const bound: Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>> & AskLimits = { records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES, spans: SPANS_PER_RECORD, ...(limits ?? {}) } as Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>> & AskLimits;
+  const sources = new Map(unread.map(r => [r.id, r]));
+  const pastedOrder = new Map(p.pasted.map((r, i) => [r.id, i]));
+  const byNewest = folds.map(f => ({ f, at: Math.max(-1, ...f.pastes.filter(x => v5Sendable.has(x.id)).map(x => pastedOrder.get(x.id) ?? -1)) })).filter(x => x.at >= 0).sort((a, b) => b.at - a.at);
+  // Structure first, bounded: the earlier understanding of each part shrinks before any record is left out (fitMap). Recipe .49: past
+  // the old steps a later map.7 ask sends the parts its records do not name in short form (brief), judged against the text this ask
+  // can send, in the order it is placed below: each v5 fold's unread runs of pages in page order (the fold standing now first), then
+  // the other unread records newest first, as many as the bounds take records, each up to recordChars characters of its unread part.
   const mapBytes = () => bytes({ ...ask, ...(ask.requests ? { requests: [] } : {}), ...(ask.priors ? { priors: [] } : {}) });
-  if (mapBytes() > META_BYTES) for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (mapBytes() <= META_BYTES) break; }
-  if (mapBytes() > META_BYTES) return { ...input, problem: 'TOO_LARGE' };
+  const said = [...byNewest.flatMap(({ f }) => f.runs.filter(x => v5Sendable.has(x.paste.id) && x.to > (unreadFrom.get(x.paste.id) ?? 0)).map(x => x.paste.text.slice(Math.max(x.from, unreadFrom.get(x.paste.id) ?? 0), x.to))),
+    ...unread.filter(r => !v5Ids.has(r.id)).map(r => r.text.slice(r.from))].slice(0, bound.records).map(t => cut(t, bound.recordChars)).join('\n');
+  if (!fitMap(ask, said, anchored === MAP7_SCHEMA && ask.parts.length > 0, () => mapBytes() <= META_BYTES)) return { ...input, problem: 'TOO_LARGE' };
   // Priors give way first (the oldest go): they never keep a report from being read.
   while (ask.priors?.length && bytes(ask) > MAP_BYTES - MIN_RECORD_CHARS * 3) input.priors!.delete(ask.priors.pop()!.key);
   if (bytes(ask) > MAP_BYTES - MIN_RECORD_CHARS * 3) return { ...input, problem: 'REQUEST_CONTEXT_TOO_LARGE' };
@@ -3590,10 +3686,6 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   // page heads, 쪽 끝 rows and the cited ledger rows always go. Within any other bounds, and when even that does not fit, the runs go in
   // page order as far as they fit, the last cut at a line: what is cut is read next time (its read interval ends where the cut begins),
   // and no later page goes before it.
-  const bound: Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>> & AskLimits = { records: MAP_RECORDS, recordChars: MAP_RECORD_CHARS, bytes: MAP_BYTES, spans: SPANS_PER_RECORD, ...(limits ?? {}) } as Required<Pick<AskLimits, 'records' | 'recordChars' | 'bytes' | 'spans'>> & AskLimits;
-  const sources = new Map(unread.map(r => [r.id, r]));
-  const pastedOrder = new Map(p.pasted.map((r, i) => [r.id, i]));
-  const byNewest = folds.map(f => ({ f, at: Math.max(-1, ...f.pastes.filter(x => v5Sendable.has(x.id)).map(x => pastedOrder.get(x.id) ?? -1)) })).filter(x => x.at >= 0).sort((a, b) => b.at - a.at);
   type Placed = { rec: MapAskRecord; ref: MapRecordRef; ex: PasteExcerpt; run: PageRun };
   for (const { f } of byNewest) {
     // A run an earlier reading read to its end is not sent again (only its page head and closing lines would go).

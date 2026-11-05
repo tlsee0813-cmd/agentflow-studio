@@ -2,7 +2,7 @@ import { ApiError } from '../../server/errors.mjs';
 import { validateMapAsk, validateMapReply, conditionRows, ruleConditionRows, askRecords, MAP_RECORD_CHARS, MAP_BYTES } from '../dist/public/shared/map-reading.js';
 import { segmentKeys } from '../dist/public/shared/record-table.js';
 import { isFirstMap, dividedKind } from '../dist/public/shared/map-route.js';
-import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, map7Prompt } from './map-prompt.mjs';
+import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, MAP7_BRIEF, map7Prompt, mapBriefRule } from './map-prompt.mjs';
 import { planMapPartitions, validateExtraction, extractionStageIssues, EXTRACTION_CANDIDATES_MAX } from './map-partition.mjs';
 import { callMapProvider, readResponseUsage } from './map-provider.mjs';
 import { mapPipelineKey } from './map-pipeline-store.mjs';
@@ -440,8 +440,14 @@ export const LINES_CORRECTION_USD = 0.07;
 // comes from its 표현군·역할 by a fixed table (type-unmapped where none fits); a claim's grade and date come from its own row's cites and
 // cells; a step or condition keeps its row when only an optional cell is past its bound; C-GROUP rows set children's parents; a rule a
 // code device keeps with a cite describes; the divided route alone takes the first-map bounds; the v5 ask is v5.1.
-export const PIPELINE_RECIPE = 'first-map-divided.48';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.48';
+// .49 (map-reading.19 kept; from a growing-map test whose 50-part map could not be read again): a map over its 30,000-byte budget is
+// shrunk by relevance and never by leaving a part out: claims to 2 and roles to 120 characters, notes to 300, then the parts the records
+// to be sent do not name go brief (brief: true: no note, no current, role to 60; map.7 only), relation notes to 60 and then empty for
+// relations with an unnamed end, then the neighbours and at last the named parts brief, fewest mentions first; every part keeps its
+// alias, name, readAs and parent, every relation its ends and kind. A later ask with a brief part is told so (brief-parts.1, in the
+// map.7 instructions and the plan stage): a brief part is known and current, matched by name and relations, never new or absent.
+export const PIPELINE_RECIPE = 'first-map-divided.49';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.49';
 /** .45 (RECORD_ASKS_V5_KO.md 12.4 (d)): the key sets beside a stage's INPUT: for each v5 record, the B, F and E IDs its own text cites
  * (each B with its name and one-line responsibility, F with its path, E with its grade and source), a closed set; nothing for an ask with
  * no v5 record (its stage inputs stay as .44 sent them). */
@@ -501,7 +507,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
     deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, targetChars, maxPartitions, firstMaxPartitions, extractionTokens, mergeTokens, renderTokens, globalTokens, reasoning: 'high', planReasoning };
   const identity = mapPipelineKey(recipe);
   const laterRecipe = { ...recipe, version: LATER_PIPELINE_RECIPE, blueprint: LATER_BLUEPRINT_PROMPT, merge: MAP7_PROMPT + MAP7_VOCABULARY + LATER_MERGE_RULES, firstGlobal: null, firstFinalGlobal: null,
-    schemaRecipe: MAP7_RECIPE, guidance: MAP7_GUIDANCE_FRAME };
+    schemaRecipe: MAP7_RECIPE, guidance: MAP7_GUIDANCE_FRAME, brief: MAP7_BRIEF };
   const laterIdentity = mapPipelineKey(laterRecipe);
   // The batch's name: each distinct model once, in stage order (unchanged when the global model is the render model).
   const model = [...new Set([deepseekModel, mergeModel, renderModel, globalModel])].join('_');
@@ -669,7 +675,7 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
         if (controller.signal.aborted) throw new ApiError('CANCELLED', 499);
         if (results.some(x => !x) || next !== partitions.length) throw new ApiError('MAP_PIPELINE_INCOMPLETE', 502);
         const blueprint = await stage('plan', { provider: 'openai', model: mergeModel,
-          system: later ? LATER_BLUEPRINT_PROMPT : MAP_BLUEPRINT_PROMPT, input: { INPUT: ask, ...keysOf(ask), extraction: results }, maxOutputTokens: mergeTokens, timeout: planTimeoutMs, reasoning: planReasoning,
+          system: later ? LATER_BLUEPRINT_PROMPT + mapBriefRule(ask) : MAP_BLUEPRINT_PROMPT, input: { INPUT: ask, ...keysOf(ask), extraction: results }, maxOutputTokens: mergeTokens, timeout: planTimeoutMs, reasoning: planReasoning,
           // .36: a first map's plan whose first pass stands two store parts on one place (store-dup) is refused for its one correction,
           // whose feedback names each fold (blueprintStageIssues); the correction's plan is taken as it is (combine sets a duplicate aside).
           check: (value, corrected) => { validateMapBlueprint(value, ask); if (!later && !corrected && planStoreFolds(value, ask).length) throw new ApiError('INVALID_RESPONSE', 502); },

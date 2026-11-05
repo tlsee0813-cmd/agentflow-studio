@@ -305,6 +305,18 @@ export const MAP7_VOCABULARY = `
 - 새 부분의 ref는 "new:" 뒤에 ASCII 소문자 a–z, 숫자 0–9, 밑줄(_), 하이픈(-)만으로 1~24자인 키를 붙인다. 전체 형식은 ^new:[a-z0-9_-]{1,24}$이다. 예: "new:label_guide", "new:label-lookup", "new:a0". 대문자("new:labelGuide"), 공백, 한글 등 그 밖의 문자, 빈 키, 25자 이상의 키는 응답 전체가 거절된다.
 - 사용자에게 보이는 이름은 name에 쓴다. name은 사용자의 언어로 써도 되며 ID와 같을 필요가 없다.
 - 같은 응답에서 새 부분을 parent, relations의 from·to, candidates의 parts로 가리킬 때는 그 부분의 parts[].ref에 쓴 ID를 철자 그대로 쓴다. 기존 부분은 P01 같은 id 그대로 쓴다. parts에 같은 ref를 두 번 쓰지 않는다.`;
-/** The one renderer of the map.7 instructions, for the standard provider and the CLI executor alike. */
-export const map7Prompt = ask => MAP7_PROMPT + MAP7_VOCABULARY + map7Guidance(ask);
-export const MAP7_RECIPE = 'map7-recipe.3: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null; instructions = MAP7_PROMPT + condition-length-guidance.1 (rows [start, last end <= 80 | null, last end <= 200 | null] per sent piece in sent order, ends contiguous from the start, trimmed UTF-16 of whole pieces of one record, no record text, <= 1600 rows, block <= 65536 UTF-8 bytes, else INPUT_TOO_LARGE before sending); part-id-vocabulary.1 between them (new part ids exactly ^new:[a-z0-9_-]{1,24}$, references spelled as parts[].ref; validator unchanged)';
+// Recipe .49 (brief-parts.1): a map over its byte budget sends the parts its records do not name in short form, marked brief: true
+// (map-reading.ts fitMap). Said only to an ask that has such a part, after the vocabulary; every other ask renders byte for byte as before.
+export const MAP7_BRIEF = `
+
+간추린 기존 부분(brief-parts.1):
+- parts에서 "brief":true인 부분은 지금 지도에 있고 현재 유효한 기존 부분이다. 보낼 분량 때문에 note와 current를 비우고 role은 앞 60자까지만 보냈을 뿐이다. 비어 있는 note·current는 알려진 것이 없다는 뜻이 아니다.
+- brief 부분이 같은 대상인지는 name·readAs·부모(parentId)·relations와 남은 role로 맞춘다. 기록이 그 부분을 말하면 그 id(P01 등)로 쓰고, 같은 대상을 새 부분으로 만들지 않는다. 가를 수 없으면 candidates에 쓴다.
+- 세부가 빠졌다는 이유로 brief 부분을 새로 생긴 것·없는 것·폐기되거나 멈춘 것·미구현으로 읽거나 쓰지 않는다. 그런 내용은 원문이 직접 말할 때만 쓴다.
+- brief 부분의 보내지 않은 current에는 키가 없으므로 replaces나 corrections로 가리키지 않는다. 원문이 그 부분의 앞선 내용을 철회·정정하면 그 철회·정정을 새 주장으로 쓴다. 보내지 않은 설명을 짐작해 role을 다시 쓰지 않는다.`;
+/** The brief-parts rule for an ask that has a part in short form, else nothing. */
+export const mapBriefRule = ask => Array.isArray(ask?.parts) && ask.parts.some(p => p?.brief === true) ? MAP7_BRIEF : '';
+/** The one renderer of the map.7 instructions, for the standard provider and the CLI executor alike. Recipe .49: the brief-parts rule
+ * after the vocabulary when the ask has a brief part. */
+export const map7Prompt = ask => MAP7_PROMPT + MAP7_VOCABULARY + mapBriefRule(ask) + map7Guidance(ask);
+export const MAP7_RECIPE = 'map7-recipe.4: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null; instructions = MAP7_PROMPT + condition-length-guidance.1 (rows [start, last end <= 80 | null, last end <= 200 | null] per sent piece in sent order, ends contiguous from the start, trimmed UTF-16 of whole pieces of one record, no record text, <= 1600 rows, block <= 65536 UTF-8 bytes, else INPUT_TOO_LARGE before sending); part-id-vocabulary.1 between them (new part ids exactly ^new:[a-z0-9_-]{1,24}$, references spelled as parts[].ref; validator unchanged); brief-parts.1 after the vocabulary only when a part is brief: true (note empty, current empty, role <= 60: a known current part sent short for size, matched by name, readAs, parent and relations, never new, absent or retired for missing details)';

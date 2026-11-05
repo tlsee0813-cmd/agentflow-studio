@@ -122,7 +122,7 @@ test('.43 the reading\'s own fields: basis scope, focus (never a fact), gates ch
 });
 
 test('.43 recipe and table prompts: first-map-divided.43; the plan prompt and render rules name the v4 table IDs; the plan reasons at medium by default', () => {
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.48', 'later-map-divided.48']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.49', 'later-map-divided.49']);
   assert.ok(B.MAP_BLUEPRINT_PROMPT.includes('C-STEP 행 ID B03:S02의 B03은 C-PART 행 ID다'));
   assert.ok(P.RENDER_RULES.includes('C-RULE의 지키는 장치·장치 위치 열') && P.RENDER_RULES.includes('screen(화면)·automation(빌드·배포 자동화)'));
   assert.ok(P.GLOBAL_RULES.includes('C-SUMMARY 두 문장'));
