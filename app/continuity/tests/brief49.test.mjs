@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as J from '../dist/public/shared/map-job.js';
+import * as T from '../dist/public/shared/record-table.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import { parseProject } from '../dist/public/shared/validation.js';
 import * as P from '../server/map-prompt.mjs';
@@ -152,4 +153,55 @@ test('49-7 instructions: the brief-parts rule goes only with a brief part; the l
     assert.ok(P.MAP7_BRIEF.includes(said), said);
   assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.4:') && P.MAP7_RECIPE.includes('brief-parts.1'));
   assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.49', 'later-map-divided.49']);
+});
+
+/* ---------- review of .49: what names a part ---------- */
+const pad = n => String(n).padStart(2, '0');
+const v5head = (n, prev) => `〔기록 AF5-7d1e2f30 · 쪽 ${n} · 기준 c0ffee1 · 앞 쪽 ${prev ?? '—'}〕 도서관 기록 v5 (시험 세션, 2026-11-05 11:${pad(n)})`;
+const v5table = (id, rows) => { const d = T.V5_TABLE_DEFS.get(id); return [`${id} ${d.title}`, T.headerLine(d), `|${d.columns.map(() => '---').join('|')}|`, ...rows.map(r => `|${r.join('|')}|`)].join('\n'); };
+const v5ends = (list, level) => `${v5table('C-END', list.map(([t, w]) => [t, '끝남', w, '—', '—']))}\n완료 단계: ${level}`;
+const libName = i => `도서관 부분 ${pad(i)}`;
+
+test('49-8 a later v5 page that names parts only by their B IDs (the C-PART rows read before) keeps those parts whole', () => {
+  const page1 = [v5head(1), v5table('C-SRC', [['F01', 'src/', 'B01', '읽음', '코드']]), v5table('C-EVID', [['E01', '파일', 'F01', 'main()', '연다']]),
+    v5table('C-HEAD', T.HEAD_ITEMS.map((item, k) => [item, `값 ${k + 1}`, 'F01'])), 'C-SUMMARY 요약\n도서관 대출 서비스 (F01).',
+    v5table('C-PART', Array.from({ length: 40 }, (_, k) => [`B${pad(k + 1)}`, libName(k + 1), '처리 · 계산', `부분 ${pad(k + 1)}의 일`, 'F01', '구현됨', 'F01'])),
+    v5ends([['C-HEAD', '—'], ['C-PART', 'B01–B40']], '진행 중'), '다음: C-GROUP'].join('\n');
+  const page2 = [v5head(2, 1),
+    v5table('C-LINK', [['LN01', 'B07', 'B33', '반납 알림', '호출마다', '—', '같은 프로세스', '정의된 관계', 'F01'], ['LN02', 'B33', 'B21', '연체 표시', '사건 때', '—', '같은 프로세스', '정의된 관계', 'F01']]),
+    v5table('C-WITHDRAW', [['WD01', 'B21', '종이 카드', '전산 기록', '제거', '—', 'F01']]),
+    v5ends([['C-LINK', 'LN01–LN02'], ['C-WITHDRAW', 'WD01']], '첫 구조 완료')].join('\n');
+  let p = { ...D.createProject(), name: '도서관' };
+  p = D.pasteRecord(p, page1, null).project;
+  // Page 1 is read by a first reading (its C-PART rows make the parts); the person then writes long notes on every part.
+  const first = M.buildMapAsk(p, studioView(p), [], undefined, M.MAP6_SCHEMA);
+  const at = first.ask.records.flatMap(r => r.spans).find(s => s.t.startsWith('|B01|')).s;
+  const reply = M.validateMapReply({ summary: '첫 지도.', candidates: [], gaps: [], matches: [], material: [], relations: [],
+    parts: [{ ref: 'new:p01', name: libName(1), parent: null, role: '대출을 받는다', roleAbout: null, roleReplaces: null, basis: [at], claims: [] }] }, first.ask);
+  p = M.applyReading(p, first, reply, { id: 'R1', at: '2026-11-05T03:00:00.000Z', model: 'stub', prompt: 'm6-000000000049', hash: '1'.repeat(64) }).project;
+  for (const a of [...p.space.areas]) p = D.editArea(p, a.id, a.name, `${a.name}: `.padEnd(1500, '사람이 적은 긴 메모. '));
+  const ids = p.space.areas.map(a => a.id);
+  for (let i = 0; i < ids.length - 1; i++) p = D.addRelation(p, ids[i], ids[i + 1], 'flow', '관계 설명 '.padEnd(200, '긴 설명. '));
+  p = parseProject(JSON.stringify(D.pasteRecord(p, page2, null).project));
+  const inp = build(p), ask = inp.ask, sent = M.askRecords(ask);
+  assert.equal(inp.problem, null); assert.equal(ask.records.length, 1);
+  const cited = [7, 21, 33].map(i => ask.parts.find(x => x.name === libName(i)));
+  assert.ok(cited.every(Boolean) && cited.every(x => ![...sent.values()].some(r => r.text.includes(x.name))), 'the page says them by B ID only');
+  assert.ok(ask.parts.some(x => x.brief), 'the map is over its budget: some parts go brief');
+  for (const x of cited) assert.equal(x.brief, undefined, `${x.name}, cited by its B ID, stays whole`);
+  const fold = { fold: T.foldPages(p.pasted.map(r => ({ record: r.id, text: r.text })))[0] };
+  assert.deepEqual(M.citedPartNames(fold, '| LN01 | B07 | B33 |\n| WD01 | B21 | B7 | XB21 | B210 |'), [libName(7), libName(33), libName(21)]);
+});
+
+test('49-9 a code word of a claim the first step leaves out still names its part; an earlier name (readAs) names it too', () => {
+  const claim = (k, t) => ({ key: k, kind: 'reported', text: t, about: null });
+  const mk = () => ({ parts: Array.from({ length: 6 }, (_, i) => ({ id: `P0${i + 1}`, name: `부분${'가나다라마바'[i]}`, note: '긴 메모. '.repeat(40), parentId: null,
+    readAs: i === 2 ? '옛 서고 관리' : null, role: '', roleBy: null, roleAbout: null,
+    current: Array.from({ length: 6 }, (_, j) => claim(`C${i}${j}`, i === 1 && j === 4 ? 'shelf_sync 작업이 밤마다 돈다고 보고했다.' : `주장 ${j}: `.padEnd(200, '긴 주장 문장. '))) })), relations: [] });
+  const text = 'shelf_sync 설정을 고쳤고 옛 서고 관리 화면도 손봤다.';
+  const all = mk(); for (const x of all.parts) { x.current = []; x.note = ''; x.brief = true; }
+  for (const i of [1, 2]) { all.parts[i].current = mk().parts[i].current.slice(0, 2); all.parts[i].note = mk().parts[i].note; delete all.parts[i].brief; }
+  const ask = mk(), budget = bytes(all);
+  assert.ok(M.fitMap(ask, text, true, () => bytes(ask) <= budget));
+  assert.deepEqual(ask.parts.map(x => !!x.brief), [true, false, false, true, true, true], 'P02 (its fifth claim says shelf_sync) and P03 (once 옛 서고 관리) stay whole');
 });

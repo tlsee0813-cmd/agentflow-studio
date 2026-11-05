@@ -442,7 +442,7 @@ export const LINES_CORRECTION_USD = 0.07;
 // code device keeps with a cite describes; the divided route alone takes the first-map bounds; the v5 ask is v5.1.
 // .49 (map-reading.19 kept; from a growing-map test whose 50-part map could not be read again): a map over its 30,000-byte budget is
 // shrunk by relevance and never by leaving a part out: claims to 2 and roles to 120 characters, notes to 300, then the parts the records
-// to be sent do not name go brief (brief: true: no note, no current, role to 60; map.7 only), relation notes to 60 and then empty for
+// to be sent do not name (by name, readAs, an own word or code word of any claim, or a v5 row's B ID through its C-PART row) go brief (brief: true: no note, no current, role to 60; map.7 only), relation notes to 60 and then empty for
 // relations with an unnamed end, then the neighbours and at last the named parts brief, fewest mentions first; every part keeps its
 // alias, name, readAs and parent, every relation its ends and kind. A later ask with a brief part is told so (brief-parts.1, in the
 // map.7 instructions and the plan stage): a brief part is known and current, matched by name and relations, never new or absent.

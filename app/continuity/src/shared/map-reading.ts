@@ -15,7 +15,7 @@ import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
 import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
-import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun } from './record-excerpt.js';
+import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun, type V5Fold } from './record-excerpt.js';
 export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -3531,6 +3531,13 @@ function saidTimes(text: string, w: string): number {
   }
   return n;
 }
+/** Review of .49: a 기록 v5 row names a part by its C-PART row ID (B05), and the name stands on that C-PART row, often on a page an
+ * earlier reading read. The names of the B IDs a sent text of a fold cites, from the fold's C-PART rows, once per citation, so the text a
+ * part is judged against says them: a part the records talk about only by its ID counts as named. */
+const PART_CITE = /(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g;
+export function citedPartNames(f: Pick<V5Fold, 'fold'>, text: string): string[] {
+  return (text.match(PART_CITE) ?? []).flatMap(id => { const r = f.fold.byId.get(id), n = r?.table === 'C-PART' ? r.row.byColumn['이름']?.trim() : ''; return n ? [n] : []; });
+}
 export interface PartRelevance { tier: 0 | 1 | 2; hits: number }
 /** How relevant each part of an ask is to the record text it will send. A part's own words are its names and those of its words no
  * other part of the ask has (as a name or a word: 소비 shared by four parts names none of them); hits counts how often the text says
@@ -3558,16 +3565,19 @@ function briefPart(x: MapAskPart): void {
 /** Shrinks the map of an ask until fits() holds, in fixed steps, stopping as soon as it fits; true when it fits. Every part keeps its
  * alias, name, readAs, parent, roleBy and roleAbout; every relation its ends and kind; nothing is ever left out of the map.
  * (1) Each part in ask order: current to 2 claims, role to 120 characters. (2) Every note to BRIEF_NOTE.
- * brief (a map.7 ask, whose instructions say what brief means), by partRelevance of `text`: (3) the parts of tier 0 go brief one by one.
+ * brief (a map.7 ask, whose instructions say what brief means), by partRelevance of `text`, judged on the map as built (every claim it
+ * carried, before step 1 cut any): (3) the parts of tier 0 go brief one by one.
  * (4) Every relation note to BRIEF_RELATION_NOTE; brief: the notes of relations with an end of tier 0 left out, then the parts of tier 1
  * and then of tier 2 go brief one by one (within a tier the fewest hits first, then ask order). (5) Every relation note left out.
  * What still does not fit is TOO_LARGE for the caller: names, parents and relations alone are over the budget. */
 export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, brief: boolean, fits: () => boolean): boolean {
   if (fits()) return true;
+  // Review of .49: judged before step 1, so a code word of a claim that step leaves out still names its part.
+  const rel = brief ? partRelevance(ask, text) : null;
   for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (fits()) return true; }
   for (const x of ask.parts) x.note = cut(x.note, BRIEF_NOTE);
   if (fits()) return true;
-  const rel = brief ? partRelevance(ask, text) : null, rank = ask.parts.map((x, i) => ({ x, i, ...(rel?.get(x.id) ?? { tier: 0, hits: 0 }) }));
+  const rank = ask.parts.map((x, i) => ({ x, i, ...(rel?.get(x.id) ?? { tier: 0, hits: 0 }) }));
   const shorten = (tier: 0 | 1 | 2) => {
     for (const { x } of rank.filter(r => r.tier === tier).sort((a, b) => a.hits - b.hits || a.i - b.i)) { briefPart(x); if (fits()) return true; }
     return false;
@@ -3653,10 +3663,12 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   // Structure first, bounded: the earlier understanding of each part shrinks before any record is left out (fitMap). Recipe .49: past
   // the old steps a later map.7 ask sends the parts its records do not name in short form (brief), judged against the text this ask
   // can send, in the order it is placed below: each v5 fold's unread runs of pages in page order (the fold standing now first), then
-  // the other unread records newest first, as many as the bounds take records, each up to recordChars characters of its unread part.
+  // the other unread records newest first, as many as the bounds take records, each up to recordChars characters of its unread part;
+  // after each run, the C-PART names of the B IDs it cites (review of .49: a later page names its parts by ID only).
   const mapBytes = () => bytes({ ...ask, ...(ask.requests ? { requests: [] } : {}), ...(ask.priors ? { priors: [] } : {}) });
-  const said = [...byNewest.flatMap(({ f }) => f.runs.filter(x => v5Sendable.has(x.paste.id) && x.to > (unreadFrom.get(x.paste.id) ?? 0)).map(x => x.paste.text.slice(Math.max(x.from, unreadFrom.get(x.paste.id) ?? 0), x.to))),
-    ...unread.filter(r => !v5Ids.has(r.id)).map(r => r.text.slice(r.from))].slice(0, bound.records).map(t => cut(t, bound.recordChars)).join('\n');
+  const said = [...byNewest.flatMap(({ f }) => f.runs.filter(x => v5Sendable.has(x.paste.id) && x.to > (unreadFrom.get(x.paste.id) ?? 0)).map(x => ({ f, t: x.paste.text.slice(Math.max(x.from, unreadFrom.get(x.paste.id) ?? 0), x.to) }))),
+    ...unread.filter(r => !v5Ids.has(r.id)).map(r => ({ f: null, t: r.text.slice(r.from) }))].slice(0, bound.records)
+    .map(({ f, t }) => { const c = cut(t, bound.recordChars); return f ? [c, ...citedPartNames(f, c)].join('\n') : c; }).join('\n');
   if (!fitMap(ask, said, anchored === MAP7_SCHEMA && ask.parts.length > 0, () => mapBytes() <= META_BYTES)) return { ...input, problem: 'TOO_LARGE' };
   // Priors give way first (the oldest go): they never keep a report from being read.
   while (ask.priors?.length && bytes(ask) > MAP_BYTES - MIN_RECORD_CHARS * 3) input.priors!.delete(ask.priors.pop()!.key);
