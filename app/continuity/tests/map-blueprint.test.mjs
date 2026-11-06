@@ -9,7 +9,7 @@ import { validateProject } from '../dist/public/shared/validation.js';
 import { ApiError } from '../../server/errors.mjs';
 import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fragmentSetAside, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues,
   isMapRevision, validateMapRevision, revisionGroups,
-  missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
+  missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT, LATER_BLUEPRINT_BASE, LATER_IDENTITY_SWAP,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
   BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows,
   BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, planShort, loopRows, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS, planStoreFolds, storeDupParts, droppedItems, summarySentences, connectionPayloadRows, REFUSAL_OUTCOME, versionFacts } from '../server/map-blueprint.mjs';
@@ -350,7 +350,8 @@ test('later blueprints require corrections while first-map shape/prompt remain u
   const first = fixture(), firstPlan = planned(first);
   assert.deepEqual(Object.keys(firstPlan), ['parts', 'global']); validateMapBlueprint(firstPlan, first.ask);
   refused(() => validateMapBlueprint({ ...firstPlan, corrections: [] }, first.ask));
-  assert.ok(LATER_BLUEPRINT_PROMPT.startsWith(MAP_BLUEPRINT_PROMPT)); assert.ok(!MAP_BLUEPRINT_PROMPT.includes('corrections'));
+  // Recipe .50 step 3: the later plan starts with the first-map text with its one 판본-beside-identity line said without 판본.
+  assert.equal(LATER_BLUEPRINT_BASE, MAP_BLUEPRINT_PROMPT.replace(...LATER_IDENTITY_SWAP)); assert.ok(LATER_BLUEPRINT_PROMPT.startsWith(LATER_BLUEPRINT_BASE)); assert.ok(!MAP_BLUEPRINT_PROMPT.includes('corrections'));
   assert.ok(LATER_BLUEPRINT_PROMPT.includes('같은 대상·범위'));
   assert.ok(LATER_BLUEPRINT_PROMPT.includes('다른 판본·브랜치') && LATER_BLUEPRINT_PROMPT.includes('roleBy=person'));
   const later = fixture(1), part = later.ask.parts[0], plan = { parts: [{ ref: part.id, name: part.name, parent: part.parentId,

@@ -81,7 +81,7 @@ test('120-3 map.1–6 keep their plain refusal and the same accepted set', () =>
 
 test('120-4 instructions: base MAP7, map1–6/FIRST6 and the guidance frame as before; the vocabulary is the validator\'s own grammar; new recipe', async () => {
   const { inp } = later(), prompt = P.map7Prompt(inp.ask);
-  assert.equal(prompt, P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_VOCABULARY + P.map7Guidance(inp.ask));
+  assert.equal(prompt, P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_IDENTITY + P.MAP7_VOCABULARY + P.map7Guidance(inp.ask));
   assert.equal(sha(P.MAP7_PROMPT), '73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b');
   assert.equal(sha(JSON.stringify(P.MAP7_GUIDANCE_FRAME)), '9d497d4cb2021b0cdfcc833e5798675a3d8556ed72e45f45a1111cf41f5487ca', 'the 118 guidance frame (pre120)');
   assert.deepEqual(JSON.parse(P.map7Guidance(inp.ask).replace(/^[\s\S]*?\n\[\n/, '[\n').replace(/\n\][\s\S]*$/, '\n]')), G.conditionGuidance(inp.ask), 'the same rows');
@@ -93,7 +93,7 @@ test('120-4 instructions: base MAP7, map1–6/FIRST6 and the guidance frame as b
   assert.ok(v.includes('^new:[a-z0-9_-]{1,24}$') && v.includes('철자 그대로') && v.includes('name은 사용자의 언어로'));
   const quoted = [...v.matchAll(/"(new:[^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(quoted.map(x => NEW.test(x)), [true, true, true, false], `examples: ${quoted.join(' ')}`);
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.5:') && P.MAP7_RECIPE.includes('part-id-vocabulary.1') && P.MAP7_RECIPE.includes(G.CONDITION_GUIDANCE));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.6:') && P.MAP7_RECIPE.includes('part-id-vocabulary.1') && P.MAP7_RECIPE.includes(G.CONDITION_GUIDANCE));
   const m7 = await map7PromptId(); assert.match(m7, /^m7-[0-9a-f]{12}$/);
   assert.ok(!['m7-82631aa43efc', 'm7-1a2625a62324'].includes(m7), 'not the pre120 (recipe.2) nor the pre118 (recipe.1) id');
   assert.ok(!P.MAP6_PROMPT.includes('part-id-vocabulary') && !P.MAP6_FIRST_PROMPT.includes('part-id-vocabulary'), 'map.6 asks keep their text');

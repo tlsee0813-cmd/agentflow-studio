@@ -123,11 +123,28 @@ global은64개 이하(그중 relation 항목 48개까지), text240자 이하. �
 부분 표의 한 행(목록 한 줄, 기여자 목록 한 줄)은 부분 하나다. 그 행이 적은 항목·사람을 각각 부분으로 세우지 않고 그 부분의 focus에 항목으로 적는다. C-GROUP 묶음 뜻이 「목록」인 행의 자식들도 부분이 아니라 부모 부분의 항목이다(자기 C-PART 행이 있는 항목만 부분이다).`;
 export const BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT;
 // Keep the first-map prompt and its cache identity unchanged. Only later map.7 planning registers current-claim obligations.
-export const LATER_BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT + `
+// Recipe .50 step 3 (later-identity.1, ruling F5 Q1/Q7(3)): a later plan reads the map as this project's earlier understanding. The one
+// first-map line that put 판본 beside identity is said without it here (a checked swap: the first-map text itself stays byte for byte),
+// the corrections line is said of claims, and a positive identity paragraph follows the obligations.
+export const IDENTITY_VERSION = 'later-identity.1';
+const swapOnce = (text, from, to) => { if (text.split(from).length !== 2) throw new Error(`later plan: '${from.slice(0, 40)}' not found once`); return text.replace(from, () => to); };
+export const LATER_IDENTITY_RULES = `
+기존 부분의 정체(later-identity.1):
+- INPUT.parts는 같은 프로젝트를 앞 기록들로 읽은 지금까지의 이해다. 이번 기록은 같은 프로젝트의 나중 기준 커밋에서 쓰였을 수 있다. 기준 커밋·판본·작성 세션이 다르다는 것만으로 다른 대상이 되지 않는다. 판본 주의는 current 주장의 대체(corrections·replaces)에만 쓰고 부분의 정체에는 쓰지 않는다.
+- 기록의 부분 행이 기존 부분과 같은 책임(하는 일), 같은 자리(부모·연결 상대), 같은 파일(files)을 말하는지 원문 근거로 대조해, 같은 대상이면 그 Pxx로 계획한다. 파일·부모·구현 방식·이름이 바뀌어도 같은 책임을 이어 맡으면 같은 부분이다. 반대로 책임·파일·연결은 같은 대상의 근거일 뿐 자동으로 같다는 뜻이 아니다: 같은 코드로 도는 별개의 실행 단위(다른 프로세스·인스턴스·사람)는 따로 둔다. 이름이 같거나 괄호 설명만 다른 것은 후보일 뿐이며 이름이 비슷하다는 것만으로 합치지 않는다.
+- 기존 Pxx로 계획하면 name과 parent는 기존 값 그대로 쓰고(위 규칙), 기록이 부르는 다른 이름은 focus에 「기록 이름: …」으로 적는다. 이름이 다르다는 이유로 같은 대상을 새 부분으로 세우지 않는다.
+- 같은 대상인지 가를 수 없으면 새 부분을 만들어 비켜 가지 않는다: 그 Pxx를 parts에 두고 kind=uncertain 항목 「<기록 이름> ↔ Pxx 같은 대상인지 미정: 이유 → Pxx」를 남기며, 그 행은 이번에 부분으로 세우지 않는다. 기준이 다르다는 것은 미정의 이유가 아니다. 분명히 새로운 대상만 새 부분으로 세운다. 새 부분은 지도에 처음 오른다는 뜻이며 소프트웨어에 새로 생겼다는 뜻이 아니다.
+- 명시적 제거·대체(C-PART 상태 「제거됨」, C-WITHDRAW의 제거·폐기·대체, C-CHANGE의 실제 변화)는 그 대상(어느 기존 부분인지), 범위(전부인지 일부인지), 효력 시점(이미 일어났는지 계획인지)을 원문으로 확인한 뒤 그 기존 부분에 맡긴다. 기준이 다르다는 이유로 material로 미루지 않는다. 일부만 바뀐 것은 부분 전체의 제거가 아니고, 계획된 대체는 아무것도 없애지 않는다.
+- C-ISSUE(오류·미해결)의 결함·문제 행은 철회가 아니다: corrections로 등록하지 않는다. 「구현됨」은 같은 기능·범위의 미구현 주장만 끝내며 돌고 있다·검사됐다는 뜻이 아니다.
+- INPUT.parts의 state(앞 읽기가 그 부분에 적은 상태 단어), lastBasis(그 부분을 마지막으로 읽은 기록의 기준 커밋·시점), files(앞 읽기가 그 부분의 것으로 읽은 파일, 최대3개)는 지난 읽기의 요약이며 원문 근거가 아니고 at가 될 수 없다. lastBasis가 이번 기록의 기준과 다르다는 것은 시간이 흘렀다는 뜻이지 다른 대상이라는 뜻이 아니다.`;
+export const LATER_IDENTITY_SWAP = Object.freeze(['같은 이름만으로 다른 대상·판본을 합치지 않는다.', '같은 이름만으로 다른 대상을 합치지 않는다(기준 커밋·판본의 차이는 대상의 차이가 아니다: 아래 「기존 부분의 정체」).']);
+/** The first-map plan text with that one line said without 판본 (the later plan's base). */
+export const LATER_BLUEPRINT_BASE = swapOnce(MAP_BLUEPRINT_PROMPT, ...LATER_IDENTITY_SWAP);
+export const LATER_BLUEPRINT_PROMPT = LATER_BLUEPRINT_BASE + `
 이번 INPUT.schemaVersion은 studio.map.7이며 parts는 총24개 이하(위의 36개가 아니다), 새 부분은 12개 이하, global은 32개 이하, 그중 relation 항목은 16개까지다. 출력 키는 정확히 parts, global, corrections 세 개다. 앞의 두 키 규칙을 유지하고 corrections 배열을 반드시 추가한다(없으면 []).
 corrections는 이번 원문이 같은 대상·범위의 기존 current 주장을 명시적으로 철회·정정·대체한다고 밝힌 경우만 등록하는 후속 작성 의무다. 각 항목은 정확히 {"part":"기존 Pxx","claim":"그 부분 current의 실제 C키","at":["이번 원문에 실제 있는 구간 별칭"]}다. part는 이번 parts 계획에도 포함하고, 최대24항목·부분마다4항목·동일(part,claim)은 한 번만 쓴다. at는 원래 기록의 실제 개별 별칭1~8개이며 사용자 기재 metadata나 이전 current/요청/보조해석은 근거가 아니다.
-다른 판본·브랜치의 사실이 함께 성립하거나 원문이 현재 주장을 명시적으로 철회하지 않은 경우는 corrections에 넣지 않는다. 뒤에 도착했다는 이유로 대체하지 않는다. 같은 범위인지 미정이면 대체를 강요하지 않는다. 사용자 직접 역할(roleBy=person)은 이 목록으로 바꾸지 않는다. current가 비어 있으면 그 부분에는 corrections를 등록할 수 없다.
-등록한 의무는 이후 해당 부분의 유효한 claim.replaces가 그 current 키를 지목해야 충족된다. 요약·미정 후보·역할 설명·요청 대응만으로 기존 현재 주장을 철회했다고 처리하지 않는다. 모든 의미를 기계적으로 감지한다는 보증이 아니라 원문에서 명시적으로 확인한 정정을 잃지 않기 위한 목록이다.`;
+다른 판본·브랜치의 주장이 함께 성립하거나 원문이 현재 주장을 명시적으로 철회하지 않은 경우는 corrections에 넣지 않는다(이 판본 문장은 current 주장의 대체에 관한 것이며 부분의 정체와 무관하다). 뒤에 도착했다는 이유로 대체하지 않는다. 같은 범위인지 미정이면 대체를 강요하지 않는다. 사용자 직접 역할(roleBy=person)은 이 목록으로 바꾸지 않는다. current가 비어 있으면 그 부분에는 corrections를 등록할 수 없다.
+등록한 의무는 이후 해당 부분의 유효한 claim.replaces가 그 current 키를 지목해야 충족된다. 요약·미정 후보·역할 설명·요청 대응만으로 기존 현재 주장을 철회했다고 처리하지 않는다. 모든 의미를 기계적으로 감지한다는 보증이 아니라 원문에서 명시적으로 확인한 정정을 잃지 않기 위한 목록이다.` + LATER_IDENTITY_RULES;
 
 /** Exact bounded blueprint, with every pointer resolved against original span.2 records. No text is repaired or clipped. */
 export function validateMapBlueprint(value, ask) {

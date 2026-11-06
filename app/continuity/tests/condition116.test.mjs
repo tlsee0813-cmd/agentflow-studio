@@ -48,7 +48,10 @@ const refusal = f => { let r; try { r = f(); } catch (e) { return e; } const a =
 test('116-1 the builder: a later ask goes as map.7 with the map.6 content, a first map stays map.6, map.7 is never a first map', () => {
   const { p, rq, inp } = later(), six = M.buildMapAsk(p, studioView(p), [rq], rq.id, M.MAP6_SCHEMA);
   assert.equal(inp.problem, null); assert.equal(inp.ask.schemaVersion, 'studio.map.7'); assert.equal(six.ask.schemaVersion, 'studio.map.6');
-  assert.deepEqual({ ...inp.ask, schemaVersion: 'studio.map.6' }, six.ask, 'the same records, parts, requests and priors; only the schema differs');
+  // Recipe .50 step 3 (part-facts.1): a map.7 part also carries state, lastBasis and files; nothing else differs.
+  assert.ok(inp.ask.parts.every(x => ['state', 'lastBasis', 'files'].every(k => Object.hasOwn(x, k))) && six.ask.parts.every(x => !Object.hasOwn(x, 'files')));
+  const unfacted = { ...inp.ask, parts: inp.ask.parts.map(({ state, lastBasis, files, ...x }) => x) };
+  assert.deepEqual({ ...unfacted, schemaVersion: 'studio.map.6' }, six.ask, 'the same records, parts, requests and priors; only the schema and the part facts differ');
   assert.deepEqual([...inp.records], [...six.records]); assert.deepEqual(inp.fullRequests, [rq]);
   assert.deepEqual(M.validateMapAsk(JSON.parse(JSON.stringify(inp.ask))), inp.ask);
   // A first map with the later capability: map.6 exactly as without it.

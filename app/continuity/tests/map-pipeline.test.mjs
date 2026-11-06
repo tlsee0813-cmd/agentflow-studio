@@ -1845,7 +1845,7 @@ test('.36 rule sentences: condition rows to conditions outside the cap and the c
   for (const rule of ['저장소 부분은 「있는 곳」 하나에 하나다', '「있는 곳」이 HTTP·메모리·외부 검사(GitHub 검사)이면 저장소 부분도 그 산출물의 부분도 세우지 않고',
     '만드는 부분과 읽는 부분이 같은 산출물 행도 「있는 곳」이 부분 표의 저장소 부분이면', '「있는 곳」이 부분 표의 어느 저장소도 이름 대지 않는 폴더(「/var/lib/koru-desk/cards/」)일 때만 행의 파일마다 따로 세운다'])
     assert.ok(B.MAP_BLUEPRINT_PROMPT.includes(rule), rule);
-  assert.ok(B.LATER_BLUEPRINT_PROMPT.startsWith(B.MAP_BLUEPRINT_PROMPT));
+  assert.ok(B.LATER_BLUEPRINT_PROMPT.startsWith(B.LATER_BLUEPRINT_BASE) && B.LATER_BLUEPRINT_BASE === B.MAP_BLUEPRINT_PROMPT.replace(...B.LATER_IDENTITY_SWAP));
 });
 
 // ---- first-map-divided.37 (map-reading.13, from the blind judging of the .36 KORU and web-app maps): lines the contract set aside are

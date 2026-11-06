@@ -13,7 +13,7 @@ import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
-import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
+import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PAGE_HEAD, CHUNK_HEAD, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun, type V5Fold } from './record-excerpt.js';
 import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, type LedgerRow } from './row-ledger.js';
@@ -1324,7 +1324,29 @@ const RELS: RelationKind[] = ['flow', 'needs', 'shares', 'related'];
 
 /** brief (recipe .49, brief-parts.1, map.7 only): a part sent in short form for size: its note and current left out and its role cut
  * to BRIEF_ROLE characters. It is a known, current part (never new, absent or retired because its details are missing). */
-export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; current: { key: string; kind: ClaimKind; text: string; about: string | null }[]; brief?: true }
+/** Recipe .50 step 3 (part-facts.1, map.7 only, all three or none): what earlier readings say of the part as fields of its own, so the
+ * role need not carry them: state (the newest state a reading gave it), lastBasis (the basis of the newest record that quoted it:
+ * `<sha7>` or `<sha7> · YYYY-MM-DD`) and files (up to PART_FILES_MAX of its read files, newest reading first). A summary of earlier
+ * readings, never evidence. */
+export interface MapAskPart { id: string; name: string; note: string; parentId: string | null; readAs: string | null; role: string; roleBy: 'reading' | 'person' | null; roleAbout: string | null; state?: PartState | null; lastBasis?: string | null; files?: string[]; current: { key: string; kind: ClaimKind; text: string; about: string | null }[]; brief?: true }
+export const PART_FACTS = 'part-facts.1';
+export const PART_FILES_MAX = 3, PART_FILE_CHARS = 60, LAST_BASIS_CHARS = 40;
+// A role a reading wrote as 「기준 8f5809d에서 …」 / 「기준 86d9c94의 …」: the stamp scopes a version, not the part (ruling F5 Q7(3)).
+const ROLE_STAMP = /^\s*기준\s+([0-9a-f]{7,40})\s*(?:에서는|에서도|에서|의)\s+/i;
+/** The role without a leading basis stamp, and the stamp's short sha (null when there is none or nothing would be left). */
+export function unstampRole(role: string): { role: string; sha: string | null } {
+  const m = ROLE_STAMP.exec(role), rest = m ? role.slice(m[0].length).trim() : '';
+  return m && rest ? { role: rest, sha: m[1]!.toLowerCase().slice(0, 7) } : { role, sha: null };
+}
+const BASIS_DATE = /기준\s*시점\s*(\d{4}-\d{2}-\d{2})/;
+/** The basis a record's head line names: a v5 page head or a v4 chunk head, as `<sha7>` (a hex basis cut to 7) or the basis word as
+ * written, with ` · YYYY-MM-DD` when the head line names its 기준 시점; null for a record without such a head. */
+export function recordBasis(text: string): string | null {
+  const nl = text.indexOf('\n'), first = (nl >= 0 ? text.slice(0, nl) : text).trim(), m = PAGE_HEAD.exec(first) ?? CHUNK_HEAD.exec(first);
+  if (!m) return null;
+  const sha = m[3] ?? '', word = /^[0-9a-f]{7,40}$/i.test(sha) ? sha.toLowerCase().slice(0, 7) : cut(sha, 20), date = BASIS_DATE.exec(first)?.[1];
+  return date ? `${word} · ${date}` : word;
+}
 /** text: studio.map.1–3. lead + spans: studio.map.4 (the same excerpt as span.2 pieces; never both). */
 export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text?: string; lead?: string; spans?: SpanWire[]; note: string; basis: string; addedAt?: string }
 /** studio.map.3: an earlier current match the records may explicitly take back, by alias (M01…), with what it said and the one
@@ -1586,11 +1608,18 @@ export function validateMapAsk(value: unknown, at: MapAskRoute = {}): MapAsk {
   for (const p of value.parts) {
     // Recipe .49: a part sent in short form says so (brief: true, map.7 only), with nothing of its note or current and its role short.
     const brief = !!p && typeof p === 'object' && Object.hasOwn(p, 'brief');
-    obj(p, ['id', 'name', 'note', 'parentId', 'readAs', 'role', 'roleBy', 'roleAbout', 'current', ...(brief ? ['brief'] : [])]); check(typeof p.id === 'string' && PART.test(p.id) && !parts.has(p.id)); parts.add(p.id);
+    // Recipe .50 step 3 (part-facts.1): state, lastBasis and files go together, on a map.7 part only.
+    const facts = !!p && typeof p === 'object' ? ['state', 'lastBasis', 'files'].filter(k => Object.hasOwn(p, k)).length : 0;
+    check(facts === 0 || (facts === 3 && version === MAP7_SCHEMA));
+    obj(p, ['id', 'name', 'note', 'parentId', 'readAs', 'role', 'roleBy', 'roleAbout', ...(facts ? ['state', 'lastBasis', 'files'] : []), 'current', ...(brief ? ['brief'] : [])]); check(typeof p.id === 'string' && PART.test(p.id) && !parts.has(p.id)); parts.add(p.id);
     if (brief) check(version === MAP7_SCHEMA && p.brief === true && p.note === '' && Array.isArray(p.current) && !p.current.length && typeof p.role === 'string' && p.role.length <= BRIEF_ROLE);
     str(p.name, 60); str(p.note, 2000, true); if (p.readAs !== null) str(p.readAs, 60); str(p.role, 300, true);
     check(p.roleBy === null ? p.role === '' : (p.roleBy === 'reading' || p.roleBy === 'person') && !!(p.role as string).trim());
     if (p.roleAbout !== null) { str(p.roleAbout, 80); check(p.roleBy === 'reading'); }
+    if (facts) {
+      check(p.state === null || PART_STATES.includes(p.state as PartState)); if (p.lastBasis !== null) str(p.lastBasis, LAST_BASIS_CHARS);
+      arr(p.files, PART_FILES_MAX); for (const x of p.files) str(x, PART_FILE_CHARS);
+    }
     arr(p.current, 8); for (const c of p.current) { obj(c, ['key', 'kind', 'text', 'about']); if (c.about !== null) str(c.about, 80); check(typeof c.key === 'string' && CLAIM.test(c.key) && !claims.has(c.key)); claims.add(c.key); check(CLAIM_KINDS.includes(c.kind as ClaimKind)); str(c.text, 240); }
   }
   for (const p of value.parts as MapAskPart[]) check(p.parentId === null || (parts.has(p.parentId) && p.parentId !== p.id));
@@ -3529,6 +3558,31 @@ export function unreadRecords(p: Project, view: StudioView): MapRecordSource[] {
   const own: MapRecordSource[] = view.records.map(r => ({ id: r.id, kind: r.kind, text: r.text, at: r.at, label: '프로젝트 기록', from: readTo.get(r.id) ?? 0 }));
   return [...pasted, ...own].filter(r => r.from < r.text.length).sort((a, b) => b.at.localeCompare(a.at));
 }
+/* ---------- recipe .50 step 3 (part-facts.1): a part's identity apart from its claims' versions ---------- */
+/** The ask part of a later map.7 ask with its facts (state, lastBasis, files, in that place among the keys) and, for a role a reading
+ * wrote, the role without a leading basis stamp and a roleAbout that is a record table row (a C-HEAD 「작성 시각」 row) left out (its
+ * basis is lastBasis). lastBasis: the basis of a record the newest reading that quoted the part quoted it from (the latest 기준 시점
+ * when its quotes name more than one), else the role stamp's sha, else null. A person's role goes as written. */
+export function partFacts(part: MapAskPart, u: PartUnderstanding | null, texts: ReadonlyMap<string, string>): MapAskPart {
+  let role = part.role, roleAbout = part.roleAbout, stamp: string | null = null;
+  if (part.roleBy === 'reading') {
+    const un = unstampRole(role); role = un.role; stamp = un.sha;
+    if (roleAbout !== null && roleAbout.trimStart().startsWith('|')) roleAbout = null;
+  }
+  let lastBasis: string | null = null;
+  for (const h of [...(u?.history ?? [])].reverse()) {
+    const bases = [...new Set([...h.basis, ...h.claims].map(q => q.record))].map(id => texts.get(id)).flatMap(t => { const b = t ? recordBasis(t) : null; return b ? [b] : []; });
+    if (!bases.length) continue;
+    lastBasis = bases.reduce((a, b) => (b.split(' · ')[1] ?? '') > (a.split(' · ')[1] ?? '') ? b : a);
+    break;
+  }
+  lastBasis = lastBasis ?? stamp;
+  // A file named both by its path and by its bare name (consumer.py beside src/documents/consumer.py) goes once, as the path.
+  const read = (u?.files ?? []).map(f => clean(f).trim()).filter(Boolean);
+  const files = read.filter(f => !read.some(g => g !== f && g.endsWith(`/${f}`))).map(f => cut(f, PART_FILE_CHARS)).slice(0, PART_FILES_MAX);
+  const { current, brief, ...head } = part;
+  return { ...head, role, roleAbout, state: u?.stateRead?.state ?? null, lastBasis: lastBasis ? cut(lastBasis, LAST_BASIS_CHARS) : null, files, current, ...(brief ? { brief } : {}) };
+}
 /* ---------- recipe .49 (brief-parts.1): a large map shrunk by relevance, never by leaving a part out ---------- */
 // An ASCII word ends where an ASCII letter, digit or _ does not follow: a Korean particle after it (API를, Redis가) still says it.
 const ASCII_WORD = /^[\x00-\x7f]+$/, WORD_CHAR = /[a-z0-9_]/;
@@ -3583,10 +3637,13 @@ export function partRelevance(ask: Pick<MapAsk, 'parts' | 'relations'>, text: st
   for (const r of ask.relations) { if (named.has(r.from)) near(r.to); if (named.has(r.to)) near(r.from); }
   return out;
 }
-/** A part in short form: no note, no current claims, its role cut to BRIEF_ROLE; marked brief only when something was left out. */
+/** A part in short form: no note, no current claims, its role cut to BRIEF_ROLE; marked brief only when something was left out. Recipe
+ * .50 step 3: a brief part with facts keeps its state, lastBasis and its first BRIEF_FILES files (what it is known by). */
+export const BRIEF_FILES = 1;
 function briefPart(x: MapAskPart): void {
-  if (!x.note && !x.current.length && x.role.length <= BRIEF_ROLE) return;
+  if (!x.note && !x.current.length && x.role.length <= BRIEF_ROLE && (x.files?.length ?? 0) <= BRIEF_FILES) return;
   x.note = ''; x.current = []; x.role = cut(x.role, BRIEF_ROLE); x.brief = true;
+  if (x.files) x.files = x.files.slice(0, BRIEF_FILES);
 }
 /** Shrinks the map of an ask until fits() holds, in fixed steps, stopping as soon as it fits; true when it fits. Every part keeps its
  * alias, name, readAs, parent, roleBy and roleAbout; every relation its ends and kind; nothing is ever left out of the map.
@@ -3595,7 +3652,8 @@ function briefPart(x: MapAskPart): void {
  * carried, before step 1 cut any): (3) the parts of tier 0 go brief one by one.
  * (4) Every relation note to BRIEF_RELATION_NOTE; brief: the notes of relations with an end of tier 0 left out, then the parts of tier 1
  * and then of tier 2 go brief one by one (within a tier the fewest hits first, then ask order). (5) Every relation note left out.
- * What still does not fit is TOO_LARGE for the caller: names, parents and relations alone are over the budget. */
+ * (6) Recipe .50 step 3: every part's files left out (its state and lastBasis stay).
+ * What still does not fit is TOO_LARGE for the caller: names, parents, facts and relations alone are over the budget. */
 export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, brief: boolean, fits: () => boolean): boolean {
   if (fits()) return true;
   // Review of .49: judged before step 1, so a code word of a claim that step leaves out still names its part.
@@ -3616,6 +3674,8 @@ export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, b
     if (fits() || shorten(1) || shorten(2)) return true;
   }
   for (const r of ask.relations) r.note = '';
+  if (fits()) return true;
+  for (const x of ask.parts) if (x.files) x.files = [];
   return fits();
 }
 /** anchored: true for m4, MAP5_SCHEMA for m5 (only after the server advertises that capability); records go as span.2 pieces, ending
@@ -3627,11 +3687,15 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   const parts = new Map<string, string>(), alias = new Map<string, string>(), claims = new Map<string, { reading: string; index: number }>();
   view.parts.slice(0, 200).forEach((x, i) => { const a = `P${String(i + 1).padStart(2, '0')}`; parts.set(a, x.id); alias.set(x.id, a); });
   let c = 0;
+  // Recipe .50 step 3 (part-facts.1): a later map.7 ask says what earlier readings found of each part as fields of its own (partFacts)
+  // and sends a role a reading wrote without its leading basis stamp; the stored understanding is unchanged.
+  const facts = anchored === MAP7_SCHEMA, pastedText = facts ? new Map(p.pasted.map(r => [r.id, r.text])) : null;
   const askParts: MapAskPart[] = view.parts.slice(0, 200).map(x => {
     const u = partUnderstanding(p, x.id);
     const current = (u?.claims ?? []).slice(0, 6).map(cl => { const key = `C${String(++c).padStart(2, '0')}`; claims.set(key, { reading: cl.reading, index: cl.index }); return { key, kind: cl.kind, text: cut(cl.text, 240), about: cl.about }; });
-    return { id: alias.get(x.id)!, name: x.name, note: cut(clean(x.note), 2000), parentId: x.parentId ? alias.get(x.parentId) ?? null : null,
+    const part: MapAskPart = { id: alias.get(x.id)!, name: x.name, note: cut(clean(x.note), 2000), parentId: x.parentId ? alias.get(x.parentId) ?? null : null,
       readAs: u?.createdName && normName(u.createdName) !== normName(x.name) ? u.createdName : null, role: cut(u?.role ?? '', 300), roleBy: u?.role ? (u.corrected ? 'person' : 'reading') : null, roleAbout: u?.role && !u.corrected ? u.roleAbout : null, current };
+    return facts ? partFacts(part, u, pastedText!) : part;
   });
   const ask: MapAsk = {
     schemaVersion: MAP_SCHEMA,
