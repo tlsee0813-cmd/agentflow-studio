@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { plainIds, idOnly, nameVariants, variantName, plainView } from '../dist/public/client/plain-ids.js';
+import { plainIds, idOnly, nameVariants, variantName, plainView, labelWords, hasRowId } from '../dist/public/client/plain-ids.js';
 
 test('IDS-1 leading row IDs leave labels, list items and brackets; an ID alone, three-digit names and one-digit names stay', () => {
   assert.equal(plainIds('D08 wandb.log 기록'), 'wandb.log 기록');
@@ -64,4 +64,25 @@ test('IDS-4 the app reads every map surface through the plain view and the plain
   const forms = readFileSync(new URL('../src/client/view-forms.ts', import.meta.url), 'utf8');
   assert.match(forms, /STATE_CAPTION = '이 부분에 기록된 상태 전이만/);
   assert.ok(!/STATE_CAPTION = '[^']*C-STATE/.test(forms));
+});
+
+test('IDS-5 beauty v4 (P3): a line label never shows a record row ID: the row\'s own words, else the rest without it, else none (hover)', () => {
+  const g = { ids: new Set(['CD01', 'CD02', 'B12', 'LN13']), names: new Map([['CD01', 'pb.skipBootstrap()'], ['B12', 'serve-HTTP 서버']]) };
+  // Named by the record: its words stand where the ID stood, the particle kept.
+  assert.equal(labelWords('CD01이 거짓일 때', g), 'pb.skipBootstrap()이 거짓일 때');
+  assert.equal(labelWords('B12로 넘김', g), 'serve-HTTP 서버로 넘김');
+  // Named by nothing: the ID goes with the sign joining it, the rest stays.
+  assert.equal(labelWords('CD02 && 컬렉션 있음', g), '컬렉션 있음');
+  assert.equal(labelWords('컬렉션 있음 && CD02', g), '컬렉션 있음');
+  assert.equal(labelWords('N02.63 기준 요청', g), '기준 요청');
+  // Nothing of its own left: the label is left to the hover.
+  assert.equal(labelWords('CD02가 거짓일 때', g), null);
+  assert.equal(labelWords('LN13', g), null);
+  // No ID: unchanged; technical names of the ID shape outside the record prefixes stay.
+  for (const keep of ['요청마다', 'FP16 가중치', 'H100 GPU', '명령 python…']) assert.equal(labelWords(keep, g), keep, keep);
+  for (const t of ['CD01이 거짓일 때', 'B12로 넘김', 'CD02 && 컬렉션 있음', 'N02.63 기준 요청']) { const w = labelWords(t, g); assert.ok(w === null || !hasRowId(w), t); }
+  assert.ok(hasRowId('S03 단계') && hasRowId('LN27') && !hasRowId('H100') && !hasRowId('V8'));
+  // The app reads every line label through it, with a last guard over every label on the map.
+  const app = readFileSync(new URL('../src/client/app.ts', import.meta.url), 'utf8');
+  assert.match(app, /function dropRowIds\(\)/); assert.match(app, /placeLineLabels\(\); dropRowIds\(\);/); assert.match(app, /const said = labelPlain\(w\)/);
 });

@@ -110,7 +110,10 @@ export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: Gh
    * parts were not laid out in layers (a list). */
   channels: Map<string, Channel>;
   /** The scope's columns, each top to bottom (its parts in layers; the unlinked and the shelf are not in them). */
-  layers: string[][] }
+  layers: string[][];
+  /** Beauty v4 (P2): each laid part's connected block, and the layout roles the record gives the scope's parts (a participant: the
+   * 참여자 band or the record's family 참여; an external system: the boundary band or the type 외부 시스템). */
+  blocks: Map<string, number>; roles: Map<string, 'outside' | 'external'> }
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number; contact?: number; pins?: Record<string, number>; ear?: number }
 export const ghostId = (id: string) => `ghost:${id}`;
@@ -267,7 +270,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const cross = boundaryCounts(v), chip = (id: string) => (kidsOf(id).length ? linkChipW(cross.get(id)?.all ?? 0) : 0);
   // Automatic arrangement of siblings: layered placement over the relations lifted to the siblings (beauty v3, layered.ts).
   const bandOf = new Map<string, Band>();
-  let scopeLaid: LResult | null = null;
+  let scopeLaid: LResult | null = null; const scopeRoles = new Map<string, 'outside' | 'external'>();
   const autoArrange = (container: string | null, sizes: Map<string, Measure>): Map<string, Point> => {
     // The scope's own outside roles, external systems and lifecycle groups keep to their bands (map-regions): the middle is
     // arranged without them, then they are set beside and under it. A list keeps its own order whole.
@@ -320,9 +323,14 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     const rank = new Map(ids.map((i, k) => [i, k]));
     // A store as the record says it (its family, else its type): read back by the part that writes it, it sits after that part.
     const isStore = (i: string) => { const r = byId.get(i)?.reading; return (r?.familyRead?.family ?? (r?.typeRead?.type === 'store' ? 'store' : null)) === 'store'; };
+    // Beauty v4 (P1, P2): a participant as the record says it (the 참여자 band, or its family 참여 in the record) reads before what it calls;
+    // an external system (the boundary band, or its type 외부 시스템) sits past the system's last layer.
+    const familyOf = (i: string) => byId.get(i)?.reading?.familyRead?.family ?? null, typeOf = (i: string) => byId.get(i)?.reading?.typeRead?.type ?? null;
+    const roleOf = (i: string, b: Band | undefined): 'outside' | 'external' | 'store' | null => (b === 'boundary' || (container === scope && typeOf(i) === 'external' && !kidsOf(i).length) ? 'external'
+      : b === 'outside' || familyOf(i) === 'participant' ? 'outside' : isStore(i) ? 'store' : null);
     const lnodes: LNode[] = ids.filter(i => linked.has(i)).map(i => {
       const s = sizes.get(i)!, b = band.get(i);
-      return { id: i, w: s.w, h: s.h, order: rank.get(i)!, anchor: s.head > 0 ? s.head / 2 : s.contact ?? s.h / 2, ...(s.pins ? { pins: s.pins } : {}), role: b === 'outside' ? 'outside' : b === 'boundary' ? 'external' : isStore(i) ? 'store' : null, ...(s.head > 0 ? { gutter: FRAME_GUTTER } : {}) };
+      return { id: i, w: s.w, h: s.h, order: rank.get(i)!, anchor: s.head > 0 ? s.head / 2 : s.contact ?? s.h / 2, ...(s.pins ? { pins: s.pins } : {}), role: roleOf(i, b), ...(s.head > 0 ? { gutter: FRAME_GUTTER } : {}) };
     });
     let flowW = 0, flowH = 0, lastFrame = false;
     if (lnodes.length) {
@@ -338,7 +346,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       } else {
         for (const [i, p] of L.pos) put(i, p.x, p.y);
         flowW = L.size.w; flowH = L.size.h; lastFrame = (L.order.at(-1) ?? []).some(isFrame);
-        if (container === scope) { scopeLaid = L; }
+        if (container === scope) { scopeLaid = L; for (const n of lnodes) if (n.role === 'outside' || n.role === 'external') scopeRoles.set(n.id, n.role); }
       }
       if (container === scope || container === null) spines.set(container ?? ROOT, L.spine);
     }
@@ -570,7 +578,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const own = scope ?? ROOT, autoAt = autoMemo.get(own), placed = pos[own] ?? {};
   const moved = (id: string | undefined) => { const s = id ? placed[id] : undefined, a = id ? autoAt?.get(id) : undefined; return !!s && (!a || Math.abs(s.x - a.x) > 0.5 || Math.abs(s.y - a.y) > 0.5); };
   const channels = new Map([...((scopeLaid as LResult | null)?.channels ?? new Map<string, Channel>())].filter(([k]) => { const [a, b] = k.split('|'); return !moved(a) && !moved(b); }));
-  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands, channels, layers: (scopeLaid as LResult | null)?.order ?? [] };
+  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands, channels, layers: (scopeLaid as LResult | null)?.order ?? [], blocks: (scopeLaid as LResult | null)?.block ?? new Map(), roles: scopeRoles };
 }
 
 /** Where a column of outside partners goes (the parts it meets: near): beside them on the free side nearest to them (outgoing to

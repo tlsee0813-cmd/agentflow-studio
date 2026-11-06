@@ -3552,3 +3552,24 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space.lens-compose .edge-labels > .edge-label.fit[data-lens="compose"] { display: block; }
 .space.lens-compose .edge-labels > :is(.edge-label:not(.fit), .edge-cue, .edge-count)[data-fit~="compose"] { display: none; }
 .edge-labels > .edge-label.whole[data-full]::after { content: none; }
+/* Beauty v4 (P6): hierarchy without inventing importance (classes and colours only; no box moves or changes size).
+ * - A card with an inside (a folded group or container) and an open group: a slightly heavier frame and title.
+ * - An external system: the external tint, behind the system boundary's rule; its glyph and kind word kept.
+ * - Port marks (◇ a condition, ◌ an optional line): drawn 5px (their 8px hover target kept), at full ink on the lens's foreground lines,
+ *   on a hovered or picked line and beside a selection; quiet on every other line (구성 included), never gone: a conditional line still
+ *   never reads as unconditional. */
+:root { --ext-bg: #f3f5f8; --ext-edge: #b9c1cc; --ext-ink: #46536a; }
+:root[data-theme="dark"] { --ext-bg: #eef1f5; }
+.node.card.has-inside { border-right-width: 1.5px; border-bottom-width: 1.5px; border-color: var(--card-edge-firm); }
+.node.card.has-inside:not(.f-store) { border-left-width: 1.5px; }
+.node.card.has-inside:not(.f-trigger) { border-top-width: 1.5px; }
+.node.card.has-inside.f-store { border-left-color: var(--fam-edge); }
+.node.card.has-inside.f-trigger { border-top-color: var(--fam-edge); }
+.node.card.has-inside :is(.c-name, .c-tag-line:first-child) { font-weight: 700; color: var(--text); }
+.frame.group:not(.shelf) { border-color: var(--line-strong); }
+.frame.group:not(.shelf) > .frame-head .frame-name { font-weight: 700; }
+.node.card.k-external { background: var(--ext-bg); border-color: var(--ext-edge); }
+.node.card.k-external :is(.c-kind, .c-tag-line:not(:first-child)) { color: var(--ext-ink); }
+.edge-cue.q-condition::before { left: 2.2px; top: 2.2px; width: 3.6px; height: 3.6px; border-width: 1.25px; }
+.edge-cue.q-optional::before { inset: 1.5px; border-width: 1.25px; }
+.edge-labels > .edge-cue.cue-bg:not(.near):not(:hover):not(.lg-pick) { opacity: .32; }

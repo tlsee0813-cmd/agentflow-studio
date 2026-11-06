@@ -117,7 +117,9 @@ test('routed crossings and length are not worse than the old placement on the ce
     const L = layered(lnodes(m), ledges(m), { ...OPT, spend: true });
     const hinted = edges.map(e => { const ch = L.channels.get(e.key); return ch ? { ...e, hint: ch } : e; });
     const o = measure(new Map(m.boxes.map(b => [b.id, box(b, b)])), edges), n = measure(new Map(m.boxes.map(b => [b.id, box(b, L.pos.get(b.id))])), hinted);
-    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len * 1.15, `${m.map}: length ${Math.round(n.len)} ≤ 1.15 × ${Math.round(o.len)} (a hub's lines may run longer for fewer crossings; the eight together stay at 0.8)`);
+    // Beauty v4 (P1): a participant reads before every part it calls, so the lines back to it run the other way (m1: the user whose results
+    // come back from four parts; 1.23 × there); the crossings stay under the old placement's on every map and the eight together keep 0.8.
+    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len * 1.3, `${m.map}: length ${Math.round(n.len)} ≤ 1.3 × ${Math.round(o.len)} (a hub's lines may run longer for fewer crossings; the eight together stay at 0.8)`);
     oldC += o.c; newC += n.c; oldL += o.len; newL += n.len;
   }
   assert.ok(newC <= oldC * 0.5, `all maps: crossings ${newC} ≤ 0.5 × ${oldC}`); assert.ok(newL <= oldL * 0.8, `all maps: length ${Math.round(newL)} ≤ 0.8 × ${Math.round(oldL)}`);

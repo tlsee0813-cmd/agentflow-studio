@@ -82,7 +82,7 @@ export function pinOf(box: Box, e: Edge, end: 'a' | 'b'): number | undefined {
  * lies on its side, passes no other port of that side (the order that keeps lines from crossing at the part holds) and the
  * straight run between them crosses no box. The spine's steps go first, then the smallest steps. */
 function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<string, { a: PortFace; b: PortFace }> = new Map()): Map<string, { a?: number; b?: number }> {
-  type End = { key: string; end: 'a' | 'b'; far: number };
+  type End = { key: string; end: 'a' | 'b'; far: number; d: number };
   const out = new Map<string, { a?: number; b?: number }>(), at = new Map<string, End[]>(), sides = new Map<string, { a: string; b: string; e: Edge }>();
   for (const e of edges) {
     const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
@@ -91,8 +91,10 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
     // An end that keeps a card's top or bottom (a control line) takes no place on a side.
     // Beauty v3 (C): a line with a reserved route is ordered by where it goes next (its first or last row through the columns).
     const ha = e.hint?.ys[0], hb = e.hint?.ys[e.hint.ys.length - 1];
-    if (f?.a !== 'top' && f?.a !== 'bottom') (at.get(sa) ?? at.set(sa, []).get(sa)!).push({ key: e.key, end: 'a', far: ha ?? mid(b) });
-    if (f?.b !== 'top' && f?.b !== 'bottom') (at.get(sb) ?? at.set(sb, []).get(sb)!).push({ key: e.key, end: 'b', far: hb ?? mid(a) });
+    // Beauty v4 (P5): how far from the side its reserved track stands, for ends that go the same way (below).
+    const da = e.hint ? Math.abs(e.hint.xs[0]! - (side === 'r' ? a.x + a.w : a.x)) : 0, db = e.hint ? Math.abs(e.hint.xs[e.hint.xs.length - 1]! - (other === 'r' ? b.x + b.w : b.x)) : 0;
+    if (f?.a !== 'top' && f?.a !== 'bottom') (at.get(sa) ?? at.set(sa, []).get(sa)!).push({ key: e.key, end: 'a', far: ha ?? mid(b), d: da });
+    if (f?.b !== 'top' && f?.b !== 'bottom') (at.get(sb) ?? at.set(sb, []).get(sb)!).push({ key: e.key, end: 'b', far: hb ?? mid(a), d: db });
     sides.set(e.key, { a: sa, b: sb, e });
   }
   const put = (key: string, end: 'a' | 'b', y: number) => { const port = out.get(key) ?? {}; port[end] = y; out.set(key, port); };
@@ -116,7 +118,9 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
   }
   for (const [k, list] of at) {
     const box = boxes.get(k.split('|')[0]!)!, side = box.kind === 'frame' ? box.head : box.h;
-    list.sort((p, q) => p.far - q.far);
+    // Beauty v4 (P5): ends that go the same way (one partner's height: two lines of one pair, both ways) take the order their reserved
+    // tracks need not to cross at the side: going down, the end whose track stands further off sits higher; going up, lower.
+    list.sort((p, q) => p.far - q.far || (p.far > mid(box) ? q.d - p.d : p.d - q.d));
     // Beauty v2 review (H3): a side that also has ends tied to pins spreads its free ends round them (they were spread over the side as
     // if the pins' lines were not there, and a free end met the card a pixel or two from a pinned one).
     const fixedYs = pinnedAt.get(k) ?? [];

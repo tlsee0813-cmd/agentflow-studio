@@ -49,6 +49,8 @@ export interface LResult {
   pos: Map<string, { x: number; y: number }>;
   /** Each node's column (over all blocks), and each column's nodes top to bottom. */
   layer: Map<string, number>; order: string[][];
+  /** Beauty v4: each node's connected block (0: the main block, then the packed ones in order). */
+  block: Map<string, number>;
   /** LEdge keys turned for the layout only (never drawn so). */
   reversed: Set<string>;
   channels: Map<string, Channel>;
@@ -271,7 +273,26 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       if (opts.length) { opts.sort((p, q) => p.d - q.d); const tot = opts.reduce((a, o) => a + o.w, 0); let acc = 0; for (const o of opts) { acc += o.w; if (acc >= tot / 2 - 1e-9) { shift = o.d; break; } } }
       for (const v of c) rank.set(v, compRank.get(v)! + shift);
     }
-    { const lo = Math.min(...B.nodes.map(v => rank.get(v)!)); for (const v of B.nodes) rank.set(v, rank.get(v)! - lo); }
+    // Beauty v4 (P1): the reading direction of callers. A participant, or a part whose every line leaves it, sits in a layer before
+    // every part it calls or starts (its lines out, a plain shares/related line aside), whatever the cycle breaking chose: a line back
+    // into it is then laid backward (for the layout only; never drawn so). A participant that two parts call each other through keeps
+    // the place the passes reach (a recorded cycle).
+    const isExt = (v: number) => nodes[v]!.role === 'external';
+    const hasIn = new Set<number>(), callees = new Map<number, number[]>();
+    for (const i of bes) { if (edges[i]!.kind === 'plain') continue; hasIn.add(to[i]!); if (!isExt(to[i]!)) (callees.get(from[i]!) ?? callees.set(from[i]!, []).get(from[i]!)!).push(to[i]!); }
+    const caller = (v: number) => !isExt(v) && callees.has(v) && (nodes[v]!.role === 'outside' || !hasIn.has(v));
+    for (let pass = 0; pass < 4; pass++) {
+      let moved = false;
+      for (const v of B.nodes) { if (!caller(v)) continue; const m = Math.min(...callees.get(v)!.map(t => rank.get(t)!)); if (rank.get(v)! >= m) { rank.set(v, m - 1); moved = true; } }
+      if (!moved) break;
+    }
+    // Beauty v4 (P2): the external systems take the block's last layer, after every part of the system (stacked there by their lines),
+    // so one rule between the two reads as the system boundary. A block of externals only keeps its own layers.
+    { const sys = B.nodes.filter(v => !isExt(v)); if (sys.length && sys.length < n) { const last = Math.max(...sys.map(v => rank.get(v)!)); for (const v of B.nodes) if (isExt(v)) rank.set(v, last + 1); } }
+    // No empty layer is kept (a part moved out of one leaves no gap): the ranks in use, in order, from 0.
+    { const used = [...new Set(B.nodes.map(v => rank.get(v)!))].sort((p, q) => p - q), re = new Map(used.map((r, i) => [r, i])); for (const v of B.nodes) rank.set(v, re.get(rank.get(v)!)!); }
+    // What the passes turned is listed as turned; what they set forward again is not.
+    for (const i of allDrives) { const k = edges[i]!.key, back = rank.get(from[i]!)! > rank.get(to[i]!)!; if (back) reversed.add(k); else if (rank.get(from[i]!)! < rank.get(to[i]!)!) reversed.delete(k); }
     // Initial order (A.6): depth first from the sources in record order.
     const R = Math.max(0, ...B.nodes.map(v => rank.get(v)!)) + 1;
     const adjOut = new Map<number, number[]>(B.nodes.map(v => [v, []]));
@@ -326,17 +347,56 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       for (const s of segs) if (s.key === edges[i!]!.key) s.spine = true;
     }
     // Crossing reduction (A.6).
-    orderLayers(layers, segs, opt.sweeps ?? 32, nodeOf, bes.filter(i => final.get(from[i]!) === final.get(to[i]!)).map(i => ({ a: lid.get(from[i]!)!, b: lid.get(to[i]!)!, w: ordW(i) })));
-    laid.push({ layers, segs, chains, isDummy, h, anc, wd, spineSet, spine, wrapAfter, nodeOf, gut: nodeOf.map(v => (v >= 0 ? nodes[v]!.gutter ?? 0 : 0)) });
+    // Beauty v4 (P4): the long lines into one part, of one kind, pass the columns between as one bundle (their dummies side by side in
+    // each column, one track apart): never joined into one stroke (each keeps its own ends, port and hover), only kept together.
+    const bundle = new Map<number, string>();
+    for (const [i, ch] of chains) { if (ch.path.length < 3) continue; const k = `${to[i]}|${edges[i]!.kind}`; for (const d of ch.path.slice(1, -1)) bundle.set(d, k); }
+    orderLayers(layers, segs, opt.sweeps ?? 32, nodeOf, bes.filter(i => final.get(from[i]!) === final.get(to[i]!)).map(i => ({ a: lid.get(from[i]!)!, b: lid.get(to[i]!)!, w: ordW(i) })), bundle);
+    const gut = nodeOf.map(v => (v >= 0 ? nodes[v]!.gutter ?? 0 : 0));
+    // Beauty v4 (P4): no line runs round the top or the bottom of its block while a way between its parts is left at a small price. A
+    // long line whose rows the placement would set above the block's highest part (or under its lowest) moves, in each column it passes,
+    // in under that column's first part (or over its last), when that adds at most INSIDE_COST weighted crossings; the heights are then
+    // found again (at most three times). A column of one part or none keeps it; a line that would cross more keeps its rail outside.
+    {
+      const INSIDE_COST = 2;
+      const sep0 = (u: number, v: number) => { const du = isDummy[u]!, dv = isDummy[v]!; const g = du && dv ? opt.laneTrack : du || dv ? opt.laneMargin : Math.max(opt.rowGap, gut[u]!, gut[v]!); return (h[u]! - anc[u]!) + g + anc[v]!; };
+      const tried = new Set<number>(), layerOf0 = new Map<number, number>(); layers.forEach((l, li) => l.forEach(k => layerOf0.set(k, li)));
+      const byGap = new Map<number, Seg[]>(); for (const s of segs) { const g = layerOf0.get(s.u)!; (byGap.get(g) ?? byGap.set(g, []).get(g)!).push(s); }
+      const near = (lis: Set<number>) => { const gs = new Set<number>(); for (const li of lis) { gs.add(li - 1); gs.add(li); } return [...gs].reduce((a, g) => a + gapCrossings(layers, byGap.get(g) ?? [], g), 0); };
+      for (let it = 0; it < 3; it++) {
+        const ys0 = brandesKoepf(layers, segs, isDummy, sep0, spineSet); polish(layers, segs, ys0, sep0, isDummy, opt.laneTrack);
+        const real = layers.flat().filter(k => !isDummy[k]); if (!real.length) break;
+        const top = Math.min(...real.map(k => ys0[k]! - anc[k]!)), bot = Math.max(...real.map(k => ys0[k]! - anc[k]! + h[k]!));
+        let moved = false;
+        for (const [i, ch] of [...chains].sort((p, q) => p[0] - q[0])) {
+          const ds = ch.path.slice(1, -1).filter(k => ys0[k]! < top - 0.5 || ys0[k]! > bot + 0.5); if (!ds.length || tried.has(i)) continue;
+          tried.add(i);
+          const keep = layers.map(l => [...l]), lis = new Set(ds.map(k => layerOf0.get(k)!)), c0 = near(lis);
+          layers.forEach((l, li) => {
+            if (!lis.has(li)) return;
+            const reals = l.filter(k => !isDummy[k]); if (reals.length < 2) return;
+            const above = l.filter(k => ds.includes(k) && ys0[k]! < top && l.indexOf(k) < l.indexOf(reals[0]!)), below = l.filter(k => ds.includes(k) && ys0[k]! > bot && l.indexOf(k) > l.indexOf(reals.at(-1)!));
+            if (!above.length && !below.length) return;
+            const rest = l.filter(k => !above.includes(k) && !below.includes(k));
+            rest.splice(rest.indexOf(reals[0]!) + 1, 0, ...above); rest.splice(rest.indexOf(reals.at(-1)!), 0, ...below);
+            layers[li] = rest;
+          });
+          const c1 = near(lis);
+          if (c1 - c0 <= INSIDE_COST + 1e-9 && layers.some((l, li) => l.some((k, j) => keep[li]![j] !== k))) moved = true; else keep.forEach((l, li) => { layers[li] = l; });
+        }
+        if (!moved) break;
+      }
+    }
+    laid.push({ layers, segs, chains, isDummy, h, anc, wd, spineSet, spine, wrapAfter, nodeOf, gut });
   }
 
   // Coordinates under one spacing; the slack spending tries wider spacings (F.3).
   const place = (rowGap: number, laneMargin: number, layerGap: number) => {
-    const out: { ys: number[]; xs: number[]; colX: number[]; colW: number[]; gaps: number[]; tracks: Map<string, number>[]; w: number; h: number; y0: number; fold: number; dx: number; dy: number }[] = [];
+    const out: { ys: number[]; xs: number[]; colX: number[]; colW: number[]; gaps: number[]; tracks: Map<string, number>[]; w: number; h: number; y0: number; fold: number; dx: number; dy: number; gapY: number; indent: number }[] = [];
     for (const b of laid) {
       const sep = (u: number, v: number) => { const du = b.isDummy[u]!, dv = b.isDummy[v]!; const g = du && dv ? opt.laneTrack : du || dv ? laneMargin : Math.max(rowGap, b.gut[u]!, b.gut[v]!); return (b.h[u]! - b.anc[u]!) + g + b.anc[v]!; };
       const ys = brandesKoepf(b.layers, b.segs, b.isDummy, sep, b.spineSet);
-      polish(b.layers, b.segs, ys, sep, b.isDummy);
+      polish(b.layers, b.segs, ys, sep, b.isDummy, opt.laneTrack);
       for (let k = 0; k < ys.length; k++) ys[k] = half(ys[k]!);
       // Columns: as wide as their widest member, left-aligned; each gap as wide as the tracks its height-changing runs need.
       const colW = b.layers.map(l => Math.max(0, ...l.map(k => b.wd[k]!)));
@@ -363,10 +423,10 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       const real = b.layers.flat().filter(k => !b.isDummy[k]);
       const extent = (ls: number[][]) => { const ks = ls.flat(); return { top: Math.min(...ks.map(k => ys[k]! - (b.isDummy[k] ? 0 : b.anc[k]!))), bot: Math.max(...ks.map(k => ys[k]! + (b.isDummy[k] ? 0 : b.h[k]! - b.anc[k]!))) }; };
       const top = Math.min(...real.map(k => ys[k]! - b.anc[k]!)), bot = Math.max(...real.map(k => ys[k]! - b.anc[k]! + b.h[k]!));
-      const o = { ys, xs: [] as number[], colX, colW, gaps, tracks, w: colX.at(-1)! + colW.at(-1)!, h: bot - top, y0: top, fold: -1, dx: 0, dy: 0 };
+      const o = { ys, xs: [] as number[], colX, colW, gaps, tracks, w: colX.at(-1)! + colW.at(-1)!, h: bot - top, y0: top, fold: -1, dx: 0, dy: 0, gapY: 0, indent: 0 };
       // Fold (F.3, for one long chain): the main block, far wider than the window's shape, continues on a second row under its first
       // half, as text wraps, cut after the column whose gap one line alone crosses (nearest the middle, within its middle 40%); that line
-      // finds its own route. Both rows read left to right; a fold that would not bring the drawing nearer the window's shape is not made.
+      // takes the reserved route round the cut (below). Both rows read left to right; a fold that would not bring the drawing nearer the window's shape is not made.
       if (opt.spend && out.length === 0 && b.layers.length >= 6 && o.w / Math.max(1, o.h) > 1.6 * Math.max(0.5, opt.aspect)) {
         const layerOf = new Map<number, number>(); b.layers.forEach((l, li) => l.forEach(k => layerOf.set(k, li)));
         let best = -1, bestD = Infinity;
@@ -377,9 +437,12 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
           const d = Math.abs(share - 0.5); if (d < bestD) { bestD = d; best = L; }
         }
         if (best >= 0) {
-          const A = extent(b.layers.slice(0, best + 1)), B = extent(b.layers.slice(best + 1)), dx = -colX[best + 1]!, dy = A.bot - B.top + 2 * Math.max(rowGap, opt.laneMargin * 2 + opt.laneTrack);
+          // Beauty v4 (P4): the second row starts one lane in, so the line across the fold turns down inside the drawing (past the first
+          // row's end, along the space between the rows, back in at the second row's start), never round its top or bottom.
+          const indent = laneRoomOf(1, opt.laneMargin, opt.laneTrack), band = Math.max(rowGap, opt.laneMargin * 2 + opt.laneTrack);
+          const A = extent(b.layers.slice(0, best + 1)), B = extent(b.layers.slice(best + 1)), dx = -colX[best + 1]! + indent, dy = A.bot - B.top + 2 * band;
           const w2 = Math.max(colX[best]! + colW[best]!, o.w + dx), t2 = Math.min(A.top, B.top + dy), b2 = Math.max(A.bot, B.bot + dy), asp = Math.max(0.5, opt.aspect);
-          if (Math.abs(Math.log(w2 / Math.max(1, b2 - t2) / asp)) < Math.abs(Math.log(o.w / Math.max(1, o.h) / asp))) Object.assign(o, { fold: best, dx, dy, w: w2, h: b2 - t2, y0: t2 });
+          if (Math.abs(Math.log(w2 / Math.max(1, b2 - t2) / asp)) < Math.abs(Math.log(o.w / Math.max(1, o.h) / asp))) Object.assign(o, { fold: best, dx, dy, w: w2, h: b2 - t2, y0: t2, gapY: A.bot + band, indent });
         }
       }
       out.push(o);
@@ -412,14 +475,14 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     }
   }
   // Results.
-  const pos = new Map<string, { x: number; y: number }>(), layer = new Map<string, number>(), order: string[][] = [], channels = new Map<string, Channel>();
+  const pos = new Map<string, { x: number; y: number }>(), layer = new Map<string, number>(), order: string[][] = [], channels = new Map<string, Channel>(), block = new Map<string, number>();
   let colBase = 0, crossings = 0, length = 0;
   laid.forEach((b, bi) => {
     const o = P.out[bi]!, d = P.off[bi]!, nodeOf = b.nodeOf;
     b.layers.forEach((l, L) => {
       const col: string[] = [];
       const fx = o.fold >= 0 && L > o.fold ? o.dx : 0, fy = o.fold >= 0 && L > o.fold ? o.dy : 0;
-      for (const k of l) { if (b.isDummy[k]) continue; const nd = nodes[nodeOf[k]!]!; pos.set(nd.id, { x: half(d.x + o.colX[L]! + fx), y: half(d.y + o.ys[k]! - b.anc[k]! - o.y0 + fy) }); layer.set(nd.id, colBase + L); col.push(nd.id); }
+      for (const k of l) { if (b.isDummy[k]) continue; const nd = nodes[nodeOf[k]!]!; pos.set(nd.id, { x: half(d.x + o.colX[L]! + fx), y: half(d.y + o.ys[k]! - b.anc[k]! - o.y0 + fy) }); layer.set(nd.id, colBase + L); block.set(nd.id, bi); col.push(nd.id); }
       order.push(col);
     });
     colBase += b.layers.length;
@@ -427,10 +490,16 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     const L = new Map<number, number>(); b.layers.forEach((l, li) => l.forEach(k => L.set(k, li)));
     for (const [i, ch] of b.chains) {
       const p = ch.path; length += L.get(p.at(-1)!)! - L.get(p[0]!)!;
-      // The line across a fold has no reserved route (the router finds its own); the second row's routes move with it.
-      const after = (li: number) => o.fold >= 0 && li > o.fold, lo = Math.min(...p.map(k => L.get(k)!)), hi = Math.max(...p.map(k => L.get(k)!));
-      if (o.fold >= 0 && lo <= o.fold && hi > o.fold) continue;
+      // The second row's routes move with it. The line across the fold (P4) leaves its first-row end into the gap beside it, runs down to
+      // the space between the rows, along it to the gap before its second-row end and in: inside the drawing, never round it.
+      const after = (li: number) => o.fold >= 0 && li > o.fold;
       const xs: number[] = [], ys: number[] = [];
+      const l0 = L.get(p[0]!)!, l1 = L.get(p.at(-1)!)!;
+      if (o.fold >= 0 && l0 <= o.fold && l1 > o.fold) {
+        const xa = half(d.x + o.colX[l0]! + o.colW[l0]! + opt.laneMargin), xb = half(d.x + o.colX[l1]! + o.dx - opt.laneMargin), yg = half(d.y + o.gapY - o.y0);
+        channels.set(edges[i]!.key, ch.rev ? { xs: [xb, xa], ys: [yg] } : { xs: [xa, xb], ys: [yg] });
+        continue;
+      }
       for (let j = 0; j + 1 < p.length; j++) {
         const Lj = L.get(p[j]!)!, gl = o.colX[Lj]! + o.colW[Lj]!, gw = o.gaps[Lj]!, t = o.tracks[Lj]!.get(edges[i]!.key);
         const n = o.tracks[Lj]!.get('#') ?? 0, mid = gl + gw / 2;
@@ -441,7 +510,7 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     }
   });
   const main = laid[0], spine = main ? main.spine.map(v => nodes[v]!.id) : [];
-  return { pos, layer, order, reversed, channels, gaps: P.out[0]?.gaps ?? [], spine, size: { w: P.W, h: P.H },
+  return { pos, layer, order, block, reversed, channels, gaps: P.out[0]?.gaps ?? [], spine, size: { w: P.W, h: P.H },
     metrics: { crossings, length, dummies, ms: now() - t0, pivots, rowGap, layerGap } };
 }
 
@@ -464,7 +533,7 @@ function trackOf(runs: { key: string; a: number; b: number }[]): { n: number; at
   return { n, at };
 }
 /* ---------- ordering ---------- */
-function orderLayers(layers: number[][], segs: Seg[], sweeps: number, nodeOf: number[], flat: { a: number; b: number; w: number }[]) {
+function orderLayers(layers: number[][], segs: Seg[], sweeps: number, nodeOf: number[], flat: { a: number; b: number; w: number }[], bundle: ReadonlyMap<number, string> = new Map()) {
   const pos = new Map<number, number>(); const index = () => layers.forEach(l => l.forEach((k, i) => pos.set(k, i)));
   index();
   const ins = new Map<number, Seg[]>(), outs = new Map<number, Seg[]>();
@@ -478,6 +547,9 @@ function orderLayers(layers: number[][], segs: Seg[], sweeps: number, nodeOf: nu
   const sweep = (li: number, down: boolean) => {
     const l = layers[li]!, m = new Map<number, number>();
     for (const k of l) { const nb = down ? (ins.get(k) ?? []).map(s => ({ p: pos.get(s.u)! + s.pu, w: s.w })) : (outs.get(k) ?? []).map(s => ({ p: pos.get(s.v)! + s.pv, w: s.w })); if (nb.length) m.set(k, median(nb)); }
+    // A bundle's dummies (P4) take their mean place, so they sort side by side.
+    const grp = new Map<string, number[]>(); for (const k of l) { const g = bundle.get(k); if (g !== undefined && m.has(k)) (grp.get(g) ?? grp.set(g, []).get(g)!).push(k); }
+    for (const ks of grp.values()) if (ks.length > 1) { const a = ks.reduce((x, k) => x + m.get(k)!, 0) / ks.length; for (const k of ks) m.set(k, a); }
     const mov = l.filter(k => m.has(k)).sort((a, b) => m.get(a)! - m.get(b)! || pos.get(a)! - pos.get(b)! || tie(a) - tie(b));
     let j = 0; layers[li] = l.map(k => (m.has(k) ? mov[j++]! : k));
     layers[li]!.forEach((k, i) => pos.set(k, i));
@@ -518,6 +590,17 @@ function orderLayers(layers: number[][], segs: Seg[], sweeps: number, nodeOf: nu
     if (it + 1 >= 24 && (stale >= 8 || bs === 0)) break;
   }
   best.forEach((l, i) => { layers[i] = l; });
+}
+/** Weighted crossings between the segments of one gap (layer g to g + 1), at the layers' present order. */
+function gapCrossings(layers: number[][], list: Seg[], g: number): number {
+  if (g < 0 || g + 1 >= layers.length || list.length < 2) return 0;
+  const pos = new Map<number, number>(); layers[g]!.forEach((k, i) => pos.set(k, i)); layers[g + 1]!.forEach((k, i) => pos.set(k, i));
+  let c = 0;
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    const a = list[i]!, b = list[j]!; if (a.u === b.u && a.v === b.v) continue;
+    if ((pos.get(a.u)! + a.pu - pos.get(b.u)! - b.pu) * (pos.get(a.v)! + a.pv - pos.get(b.v)! - b.pv) < -1e-9) c += a.w * b.w;
+  }
+  return c;
 }
 /** Crossings between the segments of each pair of neighbouring layers (weighted unless plain: each pair once). */
 function totalCrossings(layers: number[][], segs: Seg[], plain: boolean): number {
@@ -604,7 +687,7 @@ function brandesKoepf(layers: number[][], segs: Seg[], isDummy: boolean[], sep: 
 /** Priority polish (A.7-5): each real node (the spine's too: B–K already set it straight, and a hub on it pulled to its partners' middle
  * reads better than one held at the top) moves toward the weighted median of its neighbours' anchors, inside the room
  * its layer's order leaves. */
-function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, v: number) => number, isDummy: boolean[]) {
+function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, v: number) => number, isDummy: boolean[], track = 10) {
   const nb = new Map<number, { k: number; w: number }[]>();
   // The spine's own steps weigh four times: the main flow stays one straight line unless most of a part's lines pull it away.
   for (const s of segs) { const w = s.spine ? 4 * s.w : s.w; (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w }); }
@@ -617,7 +700,8 @@ function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, 
   const rows = () => { for (const c of chains.values()) {
     if (!c.ds.length || c.a < 0 || c.b < 0) continue;
     let lo = -Infinity, hi = Infinity; for (const d of c.ds) { const [p, q] = room(d); lo = Math.max(lo, p); hi = Math.min(hi, q); }
-    const y = [ys[c.a]!, ys[c.b]!].find(t => t >= lo - 1e-6 && t <= hi + 1e-6); if (y !== undefined) for (const d of c.ds) ys[d] = y;
+    const tb = ys[c.b]!, near = [1, -1, 2, -2, 3, -3].map(j => tb + j * track);
+    const y = [ys[c.a]!, tb, ...near].find(t => t >= lo - 1e-6 && t <= hi + 1e-6); if (y !== undefined) for (const d of c.ds) ys[d] = y;
   } };
   for (let pass = 0; pass < 8; pass++) for (const l of (pass % 2 ? [...layers].reverse() : layers)) l.forEach((k, i) => {
     if (isDummy[k]) return;

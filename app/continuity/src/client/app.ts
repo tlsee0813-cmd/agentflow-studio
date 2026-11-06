@@ -8,7 +8,7 @@ import { editArea, addArea, addChildArea, createProject, rename, pasteRecord, re
 import { parseScenarioRecord, applyScenario, scenarioUnderstanding, projectLedger, type ScenarioUnderstanding } from '../shared/scenario-record.js';
 import { scenarioRecordLike, badgePlaces, pathRelations, visitLinks, brokenPlace, headTexts, scenarioLabel, scenarioResultLine, saidText, visitNumber, linkTitle, LINK_WORD, LINK_GLYPH, KIND_WORD, type BrokenPlace,
   grammarMarks, linkDirection, fromSource, pointAlong, diamondMark, parallelBar, loopFrame, frameLabelSpots, waitDash, conditionChoice, conditionPath, gateVisits, type GrammarMark } from './scenario-view.js';
-import { plainIds, idOnly, nameVariants, variantName, plainView, projectIdGloss, type IdGloss } from './plain-ids.js';
+import { plainIds, idOnly, nameVariants, variantName, plainView, projectIdGloss, labelWords, hasRowId, type IdGloss } from './plain-ids.js';
 import { CLAIM_LABEL, stateLabel, revisedRelations, candidateReading, projectVariantGloss, type Applied, type CurrentClaim, type PartUnderstanding } from '../shared/map-reading.js';
 import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, readDisputes, addDispute, dropDispute, disputesOf, disputeTitle, disputeSection, withDisputes, ROLE_KEY, HISTORY_SHOWN, structureSummary, structureConditions, structureKeep, whereRows, fileRoleOf, enforcePlace, type DisputedItem, type HistoryEntry,
   PANE_TABS, tabLabel, entryTab, tabKeyMove, STRUCTURE_TITLE, structureSections, jumpChips, PANE_SHOWN, foldRows, behaviourSummary, cautionRows, unlinkedNames, listLabels, kindLead, UNLINKED_HEAD, UNLINKED_HINT,
@@ -179,7 +179,7 @@ function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(
 
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope: string | null = null;
-let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [], bands: { outside: [], boundary: [], shelf: [] }, channels: new Map(), layers: [] };
+let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [], bands: { outside: [], boundary: [], shelf: [] }, channels: new Map(), layers: [], blocks: new Map(), roles: new Map() };
 const cameras = new Map<string, { x: number; y: number; k: number; win?: [number, number] }>();
 const winSize = (): [number, number] => [window.innerWidth, window.innerHeight];
 /** Whether a camera saved in a window of that size still fits this one: both sides within a quarter. An unknown size is taken. */
@@ -882,16 +882,21 @@ function openRoom(o: Opened, held: Positions) {
  * the top; a reference: from its ear). */
 function grammarEdges(o: Opened, edges: Edge[]): Edge[] {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
-  return withHints(o, mergeByChannel(edges, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), false, sigFor(said, notes)).map(e => {
+  return withHints(o, mergeByChannel(edges, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), false, bundleSig(notes)).map(e => {
     const ch = edgeChannel(e, said), f = portFaces(e.kind, ch, e.ids.some(id => !!said.get(id)?.channel));
     const st = lineStyle(e.kind, ch), marks = { head: st.head, start: st.start };
     return f.a === 'side' && f.b === 'side' ? { ...e, marks } : { ...e, faces: f, marks };
   }));
 }
+/** Beauty v4 (P5): what keeps two relations of one pair, channel and direction on strokes of their own at every zoom: only a status that
+ * changes what the line means (the record states one as planned). Relations that differ in condition or timing share one stroke, which
+ * says it holds several (「관계 N개」, or its label's count) and never one relation's condition as its own; each reads in its hover tip
+ * and the pane when picked (the ruling's bundle: same ends, direction and kind, counted, restorable). */
+const bundleSig = (notes: Map<string, string>) => (id: string): string => (plannedNote(notes.get(id) ?? '') ? relationSig({ planned: true }) : '');
 /** Beauty v3 (A, C): the grain the layout lays a relation's line at, as the map strokes it: its channel (the newest reading's, else by
- * kind) and its signature of condition, timing and status (mergeByChannel splits a stroke by both). */
+ * kind) and, since beauty v4 (P5), only a planned status (bundleSig): mergeByChannel splits a stroke by both. */
 function lineGrain(o: Opened): (id: string, kind: RelationView['kind']) => string {
-  const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note])), sig = sigFor(said, notes);
+  const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note])), sig = bundleSig(notes);
   return (id, kind) => { const ch = said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), s = sig(id); return s ? `${ch}~${sigKey(s)}` : ch; };
 }
 /** Beauty v3 (C.3): each stroke between two of the scope's own parts takes the route its layout line reserved (Edge.hint), keyed by its
@@ -2397,18 +2402,15 @@ function placeLoneHead(crossing?: Map<string, { all: number }>) {
   const el = h('div', { class: 'lone-head', 'aria-hidden': 'true' }, `이은 선 없음 · ${loneIds.length}`);
   world.append(el); moveLoneHead();
 }
-/** Beauty v3 (B.2): the system boundary and the participants' caption, beside the parts they name, never a zone or a column.
- * - External systems that sit together in one column (consecutive in its order, nothing of the system between them) are one cluster.
- *   A cluster at the system's edge in its rows (its lines arrive from one side only, and nothing of the system lies on its other side
- *   across those rows) has a quiet 1px rule 14px off it on the side its lines arrive from, spanning the cluster; a rule that would touch
- *   any box, or that a line of other parts would cross, is not drawn. An external system in the middle of a chain reads by its own
- *   external mark alone. The caption 「시스템 경계 · 기록 기준」 reads once, beside the first rule in reading order, off every box and
- *   every routed line, measured at the size it is drawn. It claims what the old long rule claimed: lines crossing here leave the
- *   system, as recorded.
- * - Participants: two or more together in one column carry the small caption 「참여자」 over them (a caption of recorded kinds, not a
- *   group); a single one reads by its glyph and kind word.
- * Placed from the boxes and the routes (a drag moves them with their parts); nothing is drawn for an empty band. The captions' places
- * are kept (bandRects) so no line label is set over them. */
+/** Beauty v4 (P2): the system boundary and the participants' caption, at the parts they name, never a zone or a column.
+ * - The external systems of a connected block sit in its last column (layered.ts): one quiet 1px rule stands between them and the
+ *   system's parts, spanning that column, off every box and every line's upright run, with the caption 「시스템 경계 · 기록 기준」 at its
+ *   top. No rule for a block with no external system. It claims what the old long rule claimed: lines crossing here leave the system,
+ *   as recorded.
+ * - Participants: 「참여자」 over the topmost participant of a block's first column, only where two or more participants share it (a
+ *   caption of recorded kinds, not a group); a single one reads by its glyph and kind word.
+ * Placed from the boxes and the routes (a drag moves them with their parts). The captions' places are kept (bandRects) so no line
+ * label is set over them. */
 let bandRects: Rect[] = [];
 function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   const world = $('world'); world.querySelectorAll('.band-head, .band-line').forEach(x => x.remove());
@@ -2425,65 +2427,41 @@ function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   // A caption is drawn scaled up at low zoom (styles.css .band-head): its place is checked at that size (at least the fit view's).
   const u = parseFloat($('space').style.getPropertyValue('--u')) || 1, capScale = Math.max(1.3, Math.min(u, Math.max(u * 0.7692, 1.5385)));
   const capSize = (cls: string, text: string) => { const el = h('div', { class: `band-head ${cls}`, style: 'left:0;top:0;visibility:hidden' }, text); world.append(el); const w = el.offsetWidth * capScale, hh = el.offsetHeight * capScale; el.remove(); return { w, h: hh }; };
-  const inLayers = new Set(lay.layers.flat());
-  const clusters = (ids: string[]) => {
-    const set = new Set(ids), out: Box[][] = [];
-    // The layers' columns, and the parts no line places (each its own column).
-    const cols = [...(lay.layers.length ? lay.layers : [ids.filter(i => inLayers.has(i))]), ...ids.filter(i => !inLayers.has(i)).map(i => [i])];
-    for (const col of cols) {
-      const list = col.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b && b.kind !== 'ghost').sort((p, q) => p.y - q.y);
-      let run: Box[] = [];
-      const flush = () => { if (run.length) out.push(run); run = []; };
-      for (const b of list) {
-        if (!set.has(b.id)) { flush(); continue; }
-        const last = run[run.length - 1];
-        if (last && b.y - (last.y + last.h) > 100) flush();
-        run.push(b);
-      }
-      flush();
-    }
-    return out.sort((p, q) => p[0]!.x - q[0]!.x || p[0]!.y - q[0]!.y);
+  // Beauty v4 (P2): per connected block, one rule between the system's parts and its external systems (laid in the block's last
+  // column), spanning that column, with the caption 「시스템 경계 · 기록 기준」 at its top; no rule for a block with no external system,
+  // or where no clean gap parts the two (the kind marks say it then). It claims what the old long rule claimed: lines crossing here
+  // leave the system, as recorded. Never a zone, a hull or a membership.
+  const roles = lay.roles, isExt = (id: string) => roles.get(id) === 'external' || lay.bands.boundary.includes(id), isPart = (id: string) => roles.get(id) === 'outside' || lay.bands.outside.includes(id);
+  const byBlock = new Map<number, Box[]>();
+  for (const [id, bi] of lay.blocks) { const b = lay.boxes.get(id); if (b && b.kind !== 'ghost') (byBlock.get(bi) ?? byBlock.set(bi, []).get(bi)!).push(b); }
+  const verticals = [...routed.values()].flatMap(q => q.pts.slice(1).map((p, i) => ({ a: q.pts[i]!, b: p })).filter(s => Math.abs(s.a.x - s.b.x) < 0.5));
+  const placeCap = (cls: string, text: string, tip: string, x: number, y: number) => {
+    const { w, h: hh } = capSize(cls, text);
+    // At its place, else a step up (clear of every box and head; of the lines too when it can).
+    const tries = [0, 1, 2, 3].map(i => ({ x, y: y - hh - i * (hh * 0.5 + 2), w, h: hh }));
+    const cap = tries.find(r => !hit(r) && !onLine(r)) ?? tries.find(r => !hit(r)); if (!cap) return;
+    // Drawn from its top left: its box grows down and right from there (transform-origin 0 100% is its bottom left).
+    world.append(h('div', { class: `band-head ${cls}`, title: tip, style: `left:${cap.x}px;top:${cap.y + cap.h - cap.h / capScale}px` }, text)); bandRects.push(cap);
   };
-  const external = new Set(lay.bands.boundary), outside = new Set(lay.bands.outside);
-  const system = boxes.filter(b => b.kind !== 'ghost' && !external.has(b.id) && !outside.has(b.id) && !external.has(b.container) && !outside.has(b.container));
-  let captioned = false;
-  for (const c of clusters(lay.bands.boundary)) {
-    const x0 = Math.min(...c.map(b => b.x)), x1 = Math.max(...c.map(b => b.x + b.w)), top = Math.min(...c.map(b => b.y)) - 10, bottom = Math.max(...c.map(b => b.y + b.h)) + 10;
-    const ids = new Set(c.map(b => b.id)), sides = new Set<'l' | 'r'>();
-    for (const r of routed.values()) {
-      const e = edgeOf(r.key); if (!e || !r.pts.length) continue;
-      for (const [id, q] of [[e.from, r.pts[0]!], [e.to, r.pts[r.pts.length - 1]!]] as const) {
-        const b = lay.boxes.get(id); if (!b || !ids.has(id)) continue;
-        if (Math.abs(q.x - b.x) < 1.5) sides.add('l'); else if (Math.abs(q.x - b.x - b.w) < 1.5) sides.add('r');
-      }
-    }
-    let tick: { x: number; s: 'l' | 'r' } | null = null;
-    const rows = (b: Box) => b.y < bottom + 40 && b.y + b.h > top - 40;
-    if (sides.size === 1) {
-      const s = [...sides][0]!, x = s === 'l' ? x0 - 14 : x1 + 14;
-      const beyond = system.some(b => rows(b) && (s === 'l' ? b.x >= x1 : b.x + b.w <= x0));
-      const rect = { x: x - 1, y: top, w: 2, h: bottom - top };
-      const foreign = [...routed.values()].some(q => { const e = edgeOf(q.key); return !!e && !ids.has(e.from) && !ids.has(e.to) && crosses(q, rect); });
-      if (!beyond && !foreign && !hit(rect)) {
-        world.append(h('div', { class: 'band-line band-tick', title: BOUNDARY_TIP, style: `left:${x}px;top:${top}px;height:${bottom - top}px` }));
-        tick = { x, s };
-      }
-    }
-    if (!captioned && tick) {
-      // Over the cluster, else under it, else over or under the rule on its outer side: off every box and every routed line.
-      const { w, h: hh } = capSize('band-boundary', BOUNDARY_TITLE), gap = 4;
-      const cap = [{ x: x0, y: top - hh - gap }, { x: x0, y: bottom + gap }, { x: x1 - w, y: top - hh - gap }, { x: x1 - w, y: bottom + gap },
-        { x: tick.s === 'l' ? tick.x - w : tick.x, y: top - hh - gap }, { x: tick.s === 'l' ? tick.x - w : tick.x, y: bottom + gap }]
-        .map(p => ({ ...p, w, h: hh })).find(r => !hit(r) && !onLine(r));
-      // Drawn from its top left: its box grows down and right from there (transform-origin 0 100% is its bottom left).
-      if (cap) { world.append(h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${cap.x}px;top:${cap.y + cap.h - cap.h / capScale}px` }, BOUNDARY_TITLE)); bandRects.push(cap); captioned = true; }
-    }
+  for (const [, list] of [...byBlock].sort((p, q) => p[0] - q[0])) {
+    const ext = list.filter(b => isExt(b.id)), sys = list.filter(b => !isExt(b.id)); if (!ext.length || !sys.length) continue;
+    const x1 = Math.min(...ext.map(b => b.x)), x0 = Math.max(...sys.map(b => b.x + b.w)); if (x0 > x1 - 12) continue;
+    const top = Math.min(...ext.map(b => b.y)) - 10, bottom = Math.max(...ext.map(b => b.y + b.h)) + 10;
+    // Close to the externals, off every line's upright run (a rule on a line would read as part of it) and every box.
+    const clearAt = (x: number) => !verticals.some(s => Math.abs(s.a.x - x) < 6 && Math.max(s.a.y, s.b.y) > top && Math.min(s.a.y, s.b.y) < bottom) && !hit({ x: x - 1, y: top, w: 2, h: bottom - top });
+    const cands = [10, 7, 13, 16, 5, 20, 24, 30].map(d => x1 - d).filter(x => x > x0 + 4); if (!cands.length) continue;
+    const x = cands.find(clearAt) ?? cands[0]!;
+    world.append(h('div', { class: 'band-line band-tick', title: BOUNDARY_TIP, style: `left:${x}px;top:${top}px;height:${bottom - top}px` }));
+    placeCap('band-boundary', BOUNDARY_TITLE, BOUNDARY_TIP, x - 2, top - 2);
   }
-  for (const c of clusters(lay.bands.outside)) {
-    if (c.length < 2) continue;
-    const { w, h: hh } = capSize('band-outside', OUTSIDE_TITLE);
-    const x0 = Math.min(...c.map(b => b.x)), cap = { x: x0, y: Math.min(...c.map(b => b.y)) - hh - 4, w, h: hh };
-    if (!hit(cap) && !onLine(cap)) { world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${cap.x}px;top:${cap.y + cap.h - cap.h / capScale}px` }, OUTSIDE_TITLE)); bandRects.push(cap); }
+  // 「참여자」: over the topmost participant of a block's first column, only where two or more participants share that column (one alone
+  // reads by its glyph and kind word). A caption of recorded kinds, not a group.
+  const firstCol = new Map<number, string[]>();
+  for (const col of lay.layers) { const bi = col.length ? lay.blocks.get(col[0]!) : undefined; if (bi !== undefined && !firstCol.has(bi)) firstCol.set(bi, col); }
+  for (const [, col] of firstCol) {
+    const ps = col.filter(isPart).map(id => lay.boxes.get(id)).filter((b): b is Box => !!b && b.kind !== 'ghost').sort((p, q) => p.y - q.y);
+    if (ps.length < 2) continue;
+    placeCap('band-outside', OUTSIDE_TITLE, OUTSIDE_TIP, ps[0]!.x, ps[0]!.y - 2);
   }
 }
 function moveLoneHead() {
@@ -2658,7 +2636,21 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); }
+function placeEdgeLabels() { placeLineLabels(); dropRowIds(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); }
+/** Beauty v4 (P3): the last guard that no line label, badge or chip on the map shows a record row ID (CD01, B12, N02.63, LN13): each
+ * reads the record's own words for that row where the map has them, else without the ID; a label with nothing of its own left goes
+ * (its words read on hover, as written). A condition's or 선택 badge keeps its kind word then (a conditional line never reads as one
+ * that always flows). */
+function dropRowIds() {
+  for (const el of $('world').querySelectorAll<HTMLElement>('.edge-labels > *')) {
+    if (!hasRowId(el.textContent ?? '')) continue;
+    const texts: Text[] = []; const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); for (let n = walk.nextNode(); n; n = walk.nextNode()) texts.push(n as Text);
+    let gone = false;
+    const kindWord = el.classList.contains('b-condition') ? '조건' : el.classList.contains('b-optional') ? '선택' : null;
+    for (const t of texts) { if (!hasRowId(t.data)) continue; const w = labelPlain(t.data); if (w === null && !kindWord) { gone = true; break; } t.data = w ?? kindWord!; }
+    if (gone) el.remove();
+  }
+}
 function placeLineLabels() {
   const world = $('world'), o = opened; if (!o) return;
   let box = world.querySelector<HTMLElement>('.edge-labels');
@@ -2722,6 +2714,12 @@ function placeLineLabels() {
       });
     if (rest.length) placeRestLabels(box, rest, clear, mode === 'short');
     if (fit.size) giveWay('.edge-label:not(.fit)');
+    // Beauty v4 (P5): at every zoom a line holding several relations says so: one whose own label (with its count) is not shown carries
+    // the overview's 「관계 N개」 chip, clear of the labels set; under a lens it gives way to that lens's label of it, as at the overview.
+    const inv = labelInv(), labelled = new Set<string>(), labRects: Rect[] = [];
+    for (const l of box.querySelectorAll<HTMLElement>('.edge-label:not(.fit), .edge-badge')) { if (l.dataset.key) labelled.add(l.dataset.key); const x = parseFloat(l.style.left), y = parseFloat(l.style.top); if (Number.isFinite(x)) labRects.push({ x, y, w: l.offsetWidth * inv, h: l.offsetHeight * inv }); }
+    placeCounts(box, r => clear(r) && !labRects.some(o => r.x < o.x + o.w + 3 && o.x < r.x + r.w + 3 && r.y < o.y + o.h + 3 && o.y < r.y + r.h + 3), blocks, false, drawn, true, labelled);
+    giveWay('.edge-count');
     return;
   }
   placedTier = tier;
@@ -2814,7 +2812,10 @@ function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Se
       const b = lineBadges.get(e.key);
       // A condition in the record's own words (the relation's 조건 column as read), never the bare word 「조건」 nor the note that the
       // record holds none (COND_UNSAID: a fact for the hover, not for the map).
-      const words = b?.kind === 'condition' ? e.ids.map(id => conditionWords(said.get(id)?.when)).find(w => !!w && w !== '조건' && w !== COND_UNSAID) ?? null : null;
+      // Beauty v4: a stroke holding relations of different conditions (P5) says none of them as its own (never one covering the rest); a
+      // condition whose words are only a record row ID that nothing names (P3) is left to the hover.
+      const cw = b?.kind === 'condition' ? [...new Set(e.ids.map(id => conditionWords(said.get(id)?.when) ?? ''))] : [];
+      const words = cw.length === 1 && cw[0] && cw[0] !== '조건' && cw[0] !== COND_UNSAID ? labelPlain(cw[0]) : null;
       // Else what it sends or what starts it; the lens already says a line is a start, so 「기동 · 」 is left off, and a bare channel
       // or kind word (기동, 제어, 넘겨줌) says nothing the lens does not: that line is left to its hover.
       const cond = !!words, said0 = (words ?? restWord(e)).replace(/[「」『』‘’“”"]/g, '').trim(), full = cond ? said0 : said0.replace(/^기동\s*·\s*/, '').trim();
@@ -2959,21 +2960,22 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional', besi
       return edgeOf(c.dataset.cue)?.from === e.from && r0.x < x + s + 2 && x < r0.x + s + 2 && r0.y < y + s + 2 && y < r0.y + s + 2; });
     if (same) { same.dataset.also = [...(same.dataset.also ?? '').split(' ').filter(Boolean), e.key].join(' '); return; }
   }
-  spot ??= [...near, ...far].find(offParts) ?? null;
+  // Beauty v4: a short line squeezed between two cards (no place off them) still carries its mark, at its port: never bare.
+  spot ??= [...near, ...far].find(offParts) ?? near[0] ?? (len > 0 ? at(path.getPointAtLength(Math.min(len / 2, (6 + CUE_PX / 2) * inv))) : null);
   if (!spot) return;
   const el = h('span', { class: `edge-cue q-${cue}${beside ? ' beside' : ''}`, 'data-cue': e.key, role: 'img', 'aria-label': cue === 'condition' ? '조건 있는 관계' : '선택 관계' });
   box.append(el); set(el, spot);
 }
 /** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none).
  * Beside a selection (dimmed, .beside) a count that finds no clear place is left off rather than set over a part or a verb. */
-function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], beside = false, shown = shownLines(), every = false) {
+function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], beside = false, shown = shownLines(), every = false, skip: ReadonlySet<string> = new Set()) {
   // Beside a selection a count also keeps off the selection's own lines, where it would read as theirs.
   const onPts = beside ? [...$('world').querySelectorAll<SVGPathElement>('.edge.on .edge-line')].flatMap(p => { const n = p.getTotalLength(); return Array.from({ length: Math.ceil(n / 6) + 1 }, (_, i) => p.getPointAtLength(Math.min(n, i * 6))); }) : [];
   const off = (r: Rect) => clear(r) && !onPts.some(q => q.x > r.x - 4 && q.x < r.x + r.w + 4 && q.y > r.y - 4 && q.y < r.y + r.h + 4);
   // every: the overview's counts (5.5): each drawn line holding several relations, a summary line or not.
   const gs = every ? [...$('world').querySelectorAll<SVGGElement>('.edge:not(.hit)')].filter(g => shown.has(g.dataset.key!)) : [...$('world').querySelectorAll<SVGGElement>('.edge.sum:not(.hit)')];
   for (const g of gs) {
-    const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2) continue;
+    const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path || e.ids.length < 2 || skip.has(e.key)) continue;
     // The verb with the count ('넘겨줌 3'): a bare number on a line reads as nothing in particular.
     // A two-way stroke (S8) says so before its verb and how many run each way in its tip.
     const nm = (id: string) => (opened ? partOf(opened, id)?.name ?? '부분' : '부분'), back = e.both ? e.back?.length ?? 0 : 0;
@@ -2992,8 +2994,12 @@ function placeCounts(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect
 function restWord(e: Edge): string {
   let w = wordOf(e);
   if (lineChans.get(e.key) === 'data' && w === (REL_LABEL[e.kind] ?? e.kind) && e.notes.length === 1 && !plannedNote(e.notes[0]!)) w = noteHead(e.notes[0]!) || w;
-  return `${w}${countOf(e)}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+  // Beauty v4 (P3): never a record row ID on the map; a label with nothing of its own left reads on hover.
+  const said = labelPlain(w); if (said === null) return '';
+  return `${said}${countOf(e)}${edgeRevised(e) ? REVISED_EDGE : ''}`;
 }
+/** Beauty v4 (P3): a label's words with no record row ID (plain-ids labelWords over the project's gloss); null: leave it to the hover. */
+function labelPlain(t: string): string | null { return opened ? labelWords(t, idGloss(opened.project, opened.view)) : t; }
 /** How many relations a stroke holds, after its label: ' 3' when they hand over one thing (or name none); nothing when the label
  * already names them ('a · b +1', line-grammar multiWord). */
 function countOf(e: Edge): string {
@@ -3826,7 +3832,7 @@ function syncMarks(k: number) {
 // Beauty v2 (B4): no stroke runs both ways any more (pairWays): a bundle holds one direction, one kind and one signature only.
 function sumLines(o: Opened, list: Edge[], _keep: ReadonlySet<string> = new Set()): Edge[] {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
-  return withHints(o, mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true, sigFor(said, notes)).map(e => { const st = lineStyle(e.kind, edgeChannel(e, said)); return { ...e, marks: { head: st.head, start: st.start } }; }));
+  return withHints(o, mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true, bundleSig(notes)).map(e => { const st = lineStyle(e.kind, edgeChannel(e, said)); return { ...e, marks: { head: st.head, start: st.start } }; }));
 }
 /** A badge chosen: that visit in the pane (a part selected before steps back, as choosing another part would), the map unmoved. */
 function selectVisit(id: string | null) {
@@ -5148,8 +5154,9 @@ function applyLegendMarks() {
     g.classList.toggle('lf-fg', fg); g.classList.toggle('lf-bg', !fg);
     if (fg && drawnNow.has(g.dataset.key!)) { fgEnds.add(g.dataset.from!); fgEnds.add(g.dataset.to!); }
   });
-  // A port mark steps back with its line when the lens has a foreground (구성 has none: every mark reads as it is).
-  const bgLines = fgEnds.size ? new Set([...world.querySelectorAll<SVGGElement>('.edge.lf-bg')].map(g => g.dataset.key!)) : new Set<string>();
+  // A port mark steps back with its line (beauty v4 P6: under every lens, 구성 included): full ink only on the lens's foreground lines,
+  // on a hovered or picked line and beside a selection (its lines are foreground then).
+  const bgLines = new Set([...world.querySelectorAll<SVGGElement>('.edge.lf-bg')].map(g => g.dataset.key!));
   world.querySelectorAll<HTMLElement>('.edge-cue').forEach(c => c.classList.toggle('cue-bg', bgLines.has(c.dataset.cue ?? '')));
   // Beauty v3 (G): hierarchy from the record only: a card with an inside (.has-inside) and the ends of the lens's foreground lines
   // (.lens-fg) are drawn a little firmer; no card is sized by importance. Classes only: a lens switch toggles them, nothing moves.

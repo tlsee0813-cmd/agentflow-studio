@@ -58,9 +58,10 @@ test('bandsOf: outside roles left, external systems right, lifecycle groups on t
   assert.equal(filedUnder(v, 'run'), null);
 });
 
-// Beauty v3 (B, the ruling Q1 참여자·외부 띠): the fixed far-left and far-right columns are released; a participant and an external
-// system sit next to what they link to (one layer before or after it), keeping their kind marks; the shelf stays under everything.
-test('layout: a participant sits just before what it starts, an external system just after what feeds it; the shelf under everything', () => {
+// Beauty v3 (B, the ruling Q1 참여자·외부 띠): the fixed far-left and far-right columns are released; a participant sits next to what
+// it starts, keeping its kind marks; the shelf stays under everything. Beauty v4 (P2): an external system takes its connected block's
+// last column (after every part of the system, stacked by its lines), so one rule between them reads as the system boundary.
+test('layout: a participant sits just before what it starts, an external system in its block’s last column; the shelf under everything', () => {
   const v = view([
     ['u', '사용자', null, reading('person')], ['run', '실행기', null, reading('compute')], ['out', '결과 파일', null, reading('store')],
     ['bot', 'dependabot', null, reading('external')], ['L', '폐기', null, null], ['l1', '옛 수집기', 'L', reading('collector', 'retired')],
@@ -69,7 +70,7 @@ test('layout: a participant sits just before what it starts, an external system 
   assert.deepEqual(L.bands, { outside: ['u'], boundary: ['bot'], shelf: ['L'] });
   assert.ok(box('u').x + box('u').w < box('run').x, 'the participant reads before the part it starts');
   assert.ok(box('bot').x > box('run').x + box('run').w, 'the external system reads after the part that feeds it');
-  assert.equal(box('bot').x, box('out').x, 'beside what it links to: in the column after its partner, not a column of its own');
+  assert.ok(box('bot').x > box('out').x + box('out').w, 'past every part of the system: the block’s last column (P2)');
   const bottom = Math.max(...['u', 'run', 'out', 'bot'].map(id => box(id).y + box(id).h));
   assert.ok(box('L').y > bottom, 'the shelf is under everything');
   assert.ok(box('run').x < box('out').x, 'the middle reads left to right along its lines');

@@ -105,3 +105,30 @@ export function plainView(v: StudioView, g: IdGloss = NO_GLOSS): StudioView {
   return { ...v, parts: v.parts.map(p => (p.reading ? { ...p, reading: { ...p.reading, inputs: strip(p.reading.inputs), outputs: strip(p.reading.outputs),
     ...(p.reading.portMap ? { portMap: p.reading.portMap.map(m => ({ ...m, port: plainIds(m.port, g) })) } : {}) } } : p)) };
 }
+
+/** Beauty v4 (P3): a record row ID anywhere in a line label (「CD01이 거짓일 때」, 「N02.63」, 「LN13」), with a numbered tail and the particle
+ * that leans on it. A label is read at a glance, so every token of the ID shape counts here, defined by the record or not. */
+const LABEL_ID = new RegExp(String.raw`${NOT_WORD_BEFORE}((?:${PREFIX})\d{2}(?!\d)[a-z]?(?::[A-Z]{1,2}\d{1,3}[a-z]?)?(?:\.\d+)?)${NOT_WORD_AFTER}(이|가|은|는|을|를|의|에서|에|와|과|으로|로|도|만)?`, 'g');
+/** A label with a row ID in it. */
+export const hasRowId = (t: string): boolean => { LABEL_ID.lastIndex = 0; const r = LABEL_ID.test(t); LABEL_ID.lastIndex = 0; return r; };
+/** What is left when an ID is taken out says nothing of its own: only joining signs, truth words and 「때·경우」. */
+const EMPTY_REST = /^(?:[\s,.;:·&|!=<>()（）\[\]{}\-→←+]|참|거짓|아님|아닐|아니|이면|일|인|때|경우|및|또는|그리고|이고|이며|면|을|를|이|가|은|는|의|에|와|과|도|만|이후|이전|후|전)*$/;
+/** Beauty v4 (P3): a line label's words as the map shows them: never a record row ID. Each ID reads as the record's own words for that
+ * row when the gloss has them (「CD01이 거짓일 때」 → 「pb.skipBootstrap()이 거짓일 때」); else it is left off with the particle or joining
+ * sign that leans on it and the rest is kept; null when nothing of the label's own is left (the label is then left to the hover, which
+ * reads the record as written). Display only. */
+export function labelWords(t: string, g: IdGloss = NO_GLOSS): string | null {
+  if (!t || !hasRowId(t)) return t;
+  const named = (id: string) => g.names.get(id) ?? g.names.get(head(id)) ?? g.names.get(id.replace(/\.\d+$/, '')) ?? null;
+  // The IDs the record names read as its words, held apart while plainIds tidies the rest (its tidying reads 「()」 as an empty bracket).
+  const held: string[] = [];
+  let s = t.replace(LABEL_ID, (all: string, id: string, particle: string | undefined) => { const n = named(id); if (!n) return all; held.push(`${n}${particle ?? ''}`); return `\u0001${held.length - 1}\u0001`; });
+  s = plainIds(s, g).replace(LABEL_ID, '\u0000');
+  if (s.includes('\u0000')) {
+    // An ID nothing names: off with the sign that joins it to the words beside it (「A && CD02」 → 「A」, 「CD02 && A」 → 「A」).
+    s = s.replace(/\s*(?:&&|\|\||→|->|←|,|·|와|과|및|또는|and|or)?\s*\u0000\s*(?:&&|\|\||→|->|,|·)?\s*/g, ' ');
+  }
+  s = s.replace(/\s{2,}/g, ' ').replace(/^[\s,.;:·&|]+|[\s,.;:·&|]+$/g, '').trim().replace(/\u0001(\d+)\u0001/g, (_a: string, i: string) => held[Number(i)] ?? '');
+  if (!s || hasRowId(s) || EMPTY_REST.test(s)) return null;
+  return s;
+}

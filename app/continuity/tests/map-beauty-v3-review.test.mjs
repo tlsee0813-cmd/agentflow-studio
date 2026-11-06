@@ -44,7 +44,9 @@ test('the aspect step keeps across a one-pixel resize over a midpoint, and chang
   assert.equal(stickyAspect(3, 1.4), 2.4, 'far away: the nearest');
 });
 
-test('one long chain folds onto a second row under its first half; both rows read left to right; the line across has no reserved route', () => {
+// Beauty v4 (P4): the line across the fold has a reserved route inside the drawing (out past the first row's end, along the space between
+// the rows, back in at the second row's start, one lane in), never round the top or the bottom.
+test('one long chain folds onto a second row under its first half; both rows read left to right; the line across turns inside the drawing', () => {
   const N = (id, order) => ({ id, w: 224, h: 80, anchor: 40, order });
   const ns = Array.from({ length: 10 }, (_, i) => N(`n${i}`, i)), es = ns.slice(1).map((n, i) => ({ key: `n${i}|${n.id}|d`, from: `n${i}`, to: n.id, kind: 'drive', weight: 1, relIds: [`r${i}`] }));
   const opt = { layerGap: 76, rowGap: 22, laneMargin: 14, laneTrack: 10, aspect: 2, wrapGap: 36 };
@@ -60,9 +62,14 @@ test('one long chain folds onto a second row under its first half; both rows rea
     assert.equal(rowOf(ns[i].id) >= rowOf(ns[i - 1].id), true, 'the first row first');
     if (i !== cut) assert.ok(folded.pos.get(ns[i].id).x > folded.pos.get(ns[i - 1].id).x, `left to right at ${i}`);
   }
-  assert.equal(folded.pos.get(ns[cut].id).x, 0, 'the second row starts at the left edge');
-  assert.ok(!folded.channels.has(es[cut - 1].key), 'the line across the fold finds its own route');
-  assert.equal(folded.channels.size, es.length - 1);
+  const lane = 30; // laneRoomOf(1, 14, 10): the second row starts one lane in, the line across turns down in that lane
+  assert.equal(folded.pos.get(ns[cut].id).x, lane, 'the second row starts one lane in from the left edge');
+  const across = folded.channels.get(es[cut - 1].key);
+  assert.ok(across, 'the line across the fold has its reserved route');
+  const y0 = Math.min(...ns.map(n => folded.pos.get(n.id).y)), y1 = Math.max(...ns.map(n => folded.pos.get(n.id).y + 80));
+  assert.ok(across.ys.every(y => y > y0 && y < y1) && across.xs.every(x => x >= 0 && x <= folded.size.w), 'inside the drawing, never round it');
+  assert.ok(across.ys.some(y => y > folded.pos.get(ns[cut - 1].id).y + 80 && y < folded.pos.get(ns[cut].id).y), 'along the space between the rows');
+  assert.equal(folded.channels.size, es.length);
   // A drawing that already fits the window's shape never folds.
   const short = layered(ns.slice(0, 4), es.slice(0, 3), { ...opt, spend: true });
   assert.equal(new Set(ns.slice(0, 4).map(n => short.pos.get(n.id).y)).size, 1);
