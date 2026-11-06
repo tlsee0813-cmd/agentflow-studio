@@ -584,12 +584,25 @@ function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, 
   // The spine's own steps weigh four times: the main flow stays one straight line unless most of a part's lines pull it away.
   for (const s of segs) { const w = s.spine ? 4 * s.w : s.w; (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w }); }
   void spine;
+  // A long line's dummy rows move as one row (a stair of rows would add turns): to the height of its source, else of its target, where
+  // every row it passes leaves room; else it stays.
+  const chains = new Map<string, { ds: number[]; a: number; b: number }>();
+  for (const s of segs) { const c = chains.get(s.key) ?? chains.set(s.key, { ds: [], a: -1, b: -1 }).get(s.key)!; if (!isDummy[s.u]) c.a = s.u; else c.ds.push(s.u); if (!isDummy[s.v]) c.b = s.v; }
+  const where = new Map<number, [number, number]>(); layers.forEach((l, li) => l.forEach((k, i) => where.set(k, [li, i])));
+  const room = (k: number): [number, number] => { const [li, i] = where.get(k)!, l = layers[li]!; return [i > 0 ? ys[l[i - 1]!]! + sep(l[i - 1]!, k) : -Infinity, i + 1 < l.length ? ys[l[i + 1]!]! - sep(k, l[i + 1]!) : Infinity]; };
+  const rows = () => { for (const c of chains.values()) {
+    if (!c.ds.length || c.a < 0 || c.b < 0) continue;
+    let lo = -Infinity, hi = Infinity; for (const d of c.ds) { const [p, q] = room(d); lo = Math.max(lo, p); hi = Math.min(hi, q); }
+    const y = [ys[c.a]!, ys[c.b]!].find(t => t >= lo - 1e-6 && t <= hi + 1e-6); if (y !== undefined) for (const d of c.ds) ys[d] = y;
+  } };
   for (let pass = 0; pass < 8; pass++) for (const l of (pass % 2 ? [...layers].reverse() : layers)) l.forEach((k, i) => {
-    void isDummy;
+    if (isDummy[k]) return;
+    if (i === 0 && l === (pass % 2 ? layers[layers.length - 1] : layers[0])) rows();
     const list = nb.get(k); if (!list?.length) return;
     const v = list.map(x => ({ y: ys[x.k]!, w: x.w })).sort((a, b) => a.y - b.y), tot = v.reduce((a, x) => a + x.w, 0);
     let acc = 0, m = v[0]!.y; for (let j = 0; j < v.length; j++) { acc += v[j]!.w; if (Math.abs(acc - tot / 2) < 1e-9 && j + 1 < v.length) { m = (v[j]!.y + v[j + 1]!.y) / 2; break; } if (acc > tot / 2) { m = v[j]!.y; break; } }
     const lo = i > 0 ? ys[l[i - 1]!]! + sep(l[i - 1]!, k) : -Infinity, hi = i + 1 < l.length ? ys[l[i + 1]!]! - sep(k, l[i + 1]!) : Infinity;
     ys[k] = Math.min(hi, Math.max(lo, m));
   });
+  rows();
 }
