@@ -379,9 +379,15 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
   if (opt.spend && laid.length && P.H > 0) {
     const asp = Math.max(0.5, opt.aspect), maxRow = opt.maxRowGap ?? 48, maxLane = opt.maxLaneMargin ?? 20, maxLayer = opt.maxLayerGap ?? 140;
     if (P.W / P.H > 1.15 * asp) {
-      for (let g = rowGap + 2; g <= maxRow + 1e-9 && P.W / P.H > asp; g += 2) { const lm = Math.min(maxLane, opt.laneMargin + ((g - opt.rowGap) / (maxRow - opt.rowGap)) * (maxLane - opt.laneMargin)); const Q = place(g, lm, layerGap); rowGap = g; laneMargin = lm; P = Q; }
+      // The height grows about linearly with the row gap: the cap first, then the gap that meets the aspect (on the 2px grid).
+      const lmOf = (g: number) => Math.min(maxLane, opt.laneMargin + ((g - opt.rowGap) / Math.max(1, maxRow - opt.rowGap)) * (maxLane - opt.laneMargin));
+      const P0 = P, Pm = place(maxRow, lmOf(maxRow), layerGap);
+      if (Pm.W / Pm.H >= asp || Pm.H <= P0.H) { P = Pm; rowGap = maxRow; laneMargin = lmOf(maxRow); }
+      else { const g = Math.min(maxRow, Math.max(opt.rowGap, Math.ceil((opt.rowGap + ((P0.W / asp - P0.H) / (Pm.H - P0.H)) * (maxRow - opt.rowGap)) / 2) * 2)); P = place(g, lmOf(g), layerGap); rowGap = g; laneMargin = lmOf(g); }
     } else if (P.W / P.H < asp / 1.15) {
-      for (let g = layerGap + 8; g <= maxLayer + 1e-9 && P.W / P.H < asp; g += 8) { const Q = place(rowGap, laneMargin, g); layerGap = g; P = Q; }
+      const P0 = P, Pm = place(rowGap, laneMargin, maxLayer);
+      if (Pm.W / Pm.H <= asp || Pm.W <= P0.W) { P = Pm; layerGap = maxLayer; }
+      else { const g = Math.min(maxLayer, Math.max(opt.layerGap, Math.ceil((opt.layerGap + ((asp * P0.H - P0.W) / (Pm.W - P0.W)) * (maxLayer - opt.layerGap)) / 4) * 4)); P = place(rowGap, laneMargin, g); layerGap = g; }
     }
   }
   // Results.
@@ -477,11 +483,14 @@ function orderLayers(layers: number[][], segs: Seg[], sweeps: number, nodeOf: nu
   };
   const score = () => totalCrossings(layers, segs, false) + 0.25 * flatCost();
   let best = layers.map(l => [...l]), bs = score();
+  let stale = 0;
   for (let it = 0; it < sweeps; it++) {
     const down = it % 2 === 0;
     if (down) for (let li = 1; li < layers.length; li++) sweep(li, true); else for (let li = layers.length - 2; li >= 0; li--) sweep(li, false);
     transpose();
-    const s = score(); if (s < bs - 1e-9) { bs = s; best = layers.map(l => [...l]); }
+    const s = score(); if (s < bs - 1e-9) { bs = s; best = layers.map(l => [...l]); stale = 0; } else stale++;
+    // At least 24 sweeps (A.6); past them, stop once 8 sweeps in a row found nothing better, or nothing crosses.
+    if (it + 1 >= 24 && (stale >= 8 || bs === 0)) break;
   }
   best.forEach((l, i) => { layers[i] = l; });
 }
