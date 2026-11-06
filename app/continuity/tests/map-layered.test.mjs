@@ -8,7 +8,6 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { layered, networkSimplex, laneRoomOf } from '../dist/public/client/layered.js';
 import { routeEdges } from '../dist/public/client/map-route.js';
-import { portFaces } from '../dist/public/client/line-grammar.js';
 
 const OPT = { layerGap: 76, rowGap: 22, laneMargin: 14, laneTrack: 10, aspect: 2, wrapGap: 36 };
 const N = (id, order, h = 80) => ({ id, w: 224, h, anchor: 40, order });
@@ -107,16 +106,17 @@ test('routed crossings and length are not worse than the old placement on the ce
     let c = 0; for (let i = 0; i < segs.length; i++) for (let j = i + 1; j < segs.length; j++) { const s = segs[i], t = segs[j]; if (s.k === t.k) continue; const sh = Math.abs(s.A.y - s.B.y) < 0.5, th = Math.abs(t.A.y - t.B.y) < 0.5; if (sh === th) continue;
       const H = sh ? s : t, V = sh ? t : s; if (V.A.x > Math.min(H.A.x, H.B.x) + 0.5 && V.A.x < Math.max(H.A.x, H.B.x) - 0.5 && H.A.y > Math.min(V.A.y, V.B.y) + 0.5 && H.A.y < Math.max(V.A.y, V.B.y) - 0.5) c++; }
     return { c, len }; };
-  let oldC = 0, newC = 0;
+  let oldC = 0, newC = 0, oldL = 0, newL = 0;
   for (const m of FIX) {
-    const edges = m.edges.map(e => { const f = portFaces(e.kind, e.channel, true); return { key: `${e.from}|${e.to}|${e.channel}`, from: e.from, to: e.to, kind: e.kind, notes: [], ids: e.ids, agg: false, ...(f.a === 'side' && f.b === 'side' ? {} : { faces: f }) }; });
+    // The lines drawn at rest on these maps are summary strokes, which meet their cards' sides.
+    const edges = m.edges.map(e => ({ key: `${e.from}|${e.to}|${e.channel}`, from: e.from, to: e.to, kind: e.kind, notes: [], ids: e.ids, agg: false }));
     const L = layered(lnodes(m), ledges(m), { ...OPT, spend: true });
     const hinted = edges.map(e => { const ch = L.channels.get(e.key); return ch ? { ...e, hint: ch } : e; });
     const o = measure(new Map(m.boxes.map(b => [b.id, box(b, b)])), edges), n = measure(new Map(m.boxes.map(b => [b.id, box(b, L.pos.get(b.id))])), hinted);
-    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len, `${m.map}: length ${Math.round(n.len)} ≤ ${Math.round(o.len)}`);
-    oldC += o.c; newC += n.c;
+    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len * 1.2, `${m.map}: length ${Math.round(n.len)} ≤ 1.2 × ${Math.round(o.len)} (a hub's lines may run longer for fewer crossings)`);
+    oldC += o.c; newC += n.c; oldL += o.len; newL += n.len;
   }
-  assert.ok(newC <= oldC * 0.8, `all maps: ${newC} ≤ 0.8 × ${oldC}`);
+  assert.ok(newC <= oldC * 0.5, `all maps: crossings ${newC} ≤ 0.5 × ${oldC}`); assert.ok(newL <= oldL * 0.8, `all maps: length ${Math.round(newL)} ≤ 0.8 × ${Math.round(oldL)}`);
 });
 
 test('speed: 60 parts and 120 lines lay out well under the budget (median of 5)', () => {

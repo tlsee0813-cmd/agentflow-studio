@@ -44,7 +44,7 @@ import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, labelRank, mergeByChannel, multiWord, relationSig, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
@@ -179,7 +179,7 @@ function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(
 
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope: string | null = null;
-let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [], bands: { outside: [], boundary: [], shelf: [] } };
+let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [], bands: { outside: [], boundary: [], shelf: [] }, channels: new Map(), layers: [] };
 const cameras = new Map<string, { x: number; y: number; k: number; win?: [number, number] }>();
 const winSize = (): [number, number] => [window.innerWidth, window.innerHeight];
 /** Whether a camera saved in a window of that size still fits this one: both sides within a quarter. An unknown size is taken. */
@@ -265,7 +265,7 @@ function budgetFolded(o: Opened): Set<string> {
       else { const parent = partOf(o, p.parentId); v = !!parent && depth <= 3 && parent.childIds.length === 1 && open(parent.id, depth - 1); }
       memo.set(id, v); return v;
     };
-    const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect(), typedRoom(o)), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
+    const L = layoutScope(o.view, scope, open, positionsOf(o), measureName, undefined, mapAspect(), typedRoom(o), lineGrain(o)), titleRoom = 100 + (scope ? 34 * relationGroups(scopeEnds(o)).length : 0);
     return { L, ok: (L.bounds.w + 40) * 0.85 <= window.innerWidth - 48 && (L.bounds.h + titleRoom + 40) * 0.85 <= window.innerHeight - 152 };
   };
   for (let g = 0; g < ids.length; g++) {
@@ -841,7 +841,7 @@ const heldPositions = (o: Opened): Positions => {
     out[c] = { ...(ov?.hold[c] ?? {}), ...(held?.[c] ?? {}), ...(pos[c] ?? {}), ...(ov?.push[c] ?? {}) };
   return out;
 };
-const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
+const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
 /** Beauty v2 B3: where the routed lines still crowd, strips open across the map (map-route openCorridors), for the lines drawn at rest
  * (a busy map's summary lines, else each line). Positions only.
  * Beauty v2 review (H1, H4): the strips belong to the automatic arrangement, never to the person's places. They are found on the
@@ -852,6 +852,10 @@ const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), 
 let roomMemo: { sig: string; view: string; strips: Strip[] } | null = null;
 const restSet = (o: Opened, L: ScopeLayout) => (L.edges.length > 6 ? sumLines(o, summaryEdges(L.boxes, L.edges)) : L.edges);
 function openRoom(o: Opened, held: Positions) {
+  // Beauty v3 (C.5): a scope laid out in layers has its room from the layering itself (every gap laneRoom of its tracks, every row gap
+  // of its lines); no strip is opened on the path at rest.
+  if (lay.channels.size) { $('world').dataset.strips = '0'; return; }
+  delete $('world').dataset.strips;
   const level = scope ?? ROOT, mine = new Set(Object.keys(held[level] ?? {})), view = `${o.key}|${level}`;
   const tops = [...lay.boxes.values()].filter(b => !lay.boxes.has(b.container)).sort((p, q) => (p.id < q.id ? -1 : 1));
   const sig = [view, mapAspect().toFixed(3), ...tops.map(b => `${b.id}:${b.w}x${b.h}${mine.has(b.id) ? '' : `@${b.x},${b.y}`}`), '#', ...lay.edges.map(e => `${e.key}>${e.to}`)].join('|');
@@ -861,7 +865,7 @@ function openRoom(o: Opened, held: Positions) {
   if (!strips) {
     if (mine.size) {
       const pos: Positions = { ...held }; delete pos[level];
-      const L = layoutScope(o.view, scope, isExpanded(o), pos, measureName, planRows ?? undefined, mapAspect(), typedRoom(o));
+      const L = layoutScope(o.view, scope, isExpanded(o), pos, measureName, planRows ?? undefined, mapAspect(), typedRoom(o), lineGrain(o));
       L.edges = grammarEdges(o, L.edges); strips = openCorridors(L.boxes, restSet(o, L));
     } else { strips = openCorridors(lay.boxes, restSet(o, lay)); laid = true; }
     roomMemo = { sig, view, strips };
@@ -876,10 +880,28 @@ function openRoom(o: Opened, held: Positions) {
  * the top; a reference: from its ear). */
 function grammarEdges(o: Opened, edges: Edge[]): Edge[] {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
-  return mergeByChannel(edges, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), false, sigFor(said, notes)).map(e => {
+  return withHints(o, mergeByChannel(edges, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), false, sigFor(said, notes)).map(e => {
     const ch = edgeChannel(e, said), f = portFaces(e.kind, ch, e.ids.some(id => !!said.get(id)?.channel));
     const st = lineStyle(e.kind, ch), marks = { head: st.head, start: st.start };
     return f.a === 'side' && f.b === 'side' ? { ...e, marks } : { ...e, faces: f, marks };
+  }));
+}
+/** Beauty v3 (A, C): the grain the layout lays a relation's line at, as the map strokes it: its channel (the newest reading's, else by
+ * kind) and its signature of condition, timing and status (mergeByChannel splits a stroke by both). */
+function lineGrain(o: Opened): (id: string, kind: RelationView['kind']) => string {
+  const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note])), sig = sigFor(said, notes);
+  return (id, kind) => { const ch = said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), s = sig(id); return s ? `${ch}~${sigKey(s)}` : ch; };
+}
+/** Beauty v3 (C.3): each stroke between two of the scope's own parts takes the route its layout line reserved (Edge.hint), keyed by its
+ * ends and the grain of its first relation that runs its way; a second stroke of the same line searches its own. */
+function withHints(o: Opened, list: Edge[]): Edge[] {
+  if (!lay.channels.size) return list;
+  const grain = lineGrain(o), used = new Set<string>(), kinds = new Map(o.view.relations.map(r => [r.id, r.kind]));
+  return list.map(e => {
+    const id = e.ids.find(x => !(e.back ?? []).includes(x)) ?? e.ids[0]; if (!id) return e;
+    const k = `${e.from}|${e.to}|${grain(id, kinds.get(id) ?? e.kind)}`, ch = lay.channels.get(k);
+    if (!ch || used.has(k)) return e;
+    used.add(k); return { ...e, hint: ch };
   });
 }
 
@@ -2373,24 +2395,63 @@ function placeLoneHead(crossing?: Map<string, { all: number }>) {
   const el = h('div', { class: 'lone-head', 'aria-hidden': 'true' }, `이은 선 없음 · ${loneIds.length}`);
   world.append(el); moveLoneHead();
 }
-/** The scope's bands (map design v3 2.1, map-layout placeBands): the 참여자 caption over the outside roles' column (no outline, no
- * surface) and the quiet system boundary: a 1px solid line between the middle and the external systems, its caption at its top.
- * Placed from the boxes (a drag moves them with their parts); nothing is drawn for an empty band. */
-function placeBands() {
+/** Beauty v3 (B.2): the system boundary and the participants' caption, beside the parts they name, never a zone or a column.
+ * - External systems that sit together in one column (consecutive in its order, nothing of the system between them) are one cluster.
+ *   Each cluster has a quiet 1px rule 14px off it on each side its lines really arrive from (read from the routed ends), spanning the
+ *   cluster; a rule that would touch any box is not drawn (the cards keep their external marks). The caption 「시스템 경계 · 기록 기준」
+ *   reads once, over the first cluster in reading order. It claims what the old long rule claimed: lines crossing here leave the
+ *   system, as recorded.
+ * - Participants: two or more together in one column carry the small caption 「참여자」 over them (a caption of recorded kinds, not a
+ *   group); a single one reads by its glyph and kind word.
+ * Placed from the boxes and the routes (a drag moves them with their parts); nothing is drawn for an empty band. */
+function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   const world = $('world'); world.querySelectorAll('.band-head, .band-line, .band-zone').forEach(x => x.remove());
-  // Map hygiene H7: each band is a zone of plain canvas behind its column (the dot grid stops there, as inside a region).
-  const zone = (x: number, y: number, x2: number, y2: number) => world.prepend(h('div', { class: 'band-zone', 'aria-hidden': 'true', style: `left:${x}px;top:${y}px;width:${x2 - x}px;height:${y2 - y}px` }));
-  const rect = (ids: string[]) => { const bs = ids.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b); if (!bs.length) return null;
-    const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y)); return { x, y, x2: Math.max(...bs.map(b => b.x + b.w)), y2: Math.max(...bs.map(b => b.y + b.h)) }; };
-  const out = rect(lay.bands.outside), ext = rect(lay.bands.boundary);
-  if (out) { zone(out.x - 20, out.y - 34, out.x2 + 20, out.y2 + 20); world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${out.x}px;top:${out.y - 22}px` }, OUTSIDE_TITLE)); }
-  if (ext) {
-    const banded = new Set(lay.bands.boundary), rest = [...lay.boxes.values()].filter(b => b.kind !== 'ghost' && !banded.has(b.id) && b.container === (scope ?? ROOT));
-    const midR = rest.length ? Math.max(...rest.map(b => b.x + b.w)) : ext.x - 48, x = Math.round((Math.max(midR, ext.x - 96) + ext.x) / 2);
-    const top = Math.min(ext.y, ...rest.map(b => b.y)) - 22, bottom = Math.max(ext.y2, ...rest.map(b => b.y + b.h));
-    zone(x + 8, top - 12, ext.x2 + 20, Math.max(bottom, ext.y2 + 20));
-    world.append(h('div', { class: 'band-line', 'aria-hidden': 'true', style: `left:${x}px;top:${top}px;height:${bottom - top}px` }),
-      h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${ext.x}px;top:${ext.y - 22}px` }, BOUNDARY_TITLE));
+  const boxes = [...lay.boxes.values()], hit = (r: Rect) => boxes.some(b => r.x < b.x + b.w + 1 && b.x < r.x + r.w + 1 && r.y < b.y + b.h + 1 && b.y < r.y + r.h + 1);
+  const clusters = (ids: string[]) => {
+    const set = new Set(ids), out: Box[][] = [];
+    const cols = lay.layers.length ? lay.layers : [ids];
+    for (const col of cols) {
+      const list = col.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b && b.kind !== 'ghost').sort((p, q) => p.y - q.y);
+      let run: Box[] = [];
+      const flush = () => { if (run.length) out.push(run); run = []; };
+      for (const b of list) {
+        if (!set.has(b.id)) { flush(); continue; }
+        const last = run[run.length - 1];
+        if (last && b.y - (last.y + last.h) > 100) flush();
+        run.push(b);
+      }
+      flush();
+    }
+    return out.sort((p, q) => p[0]!.x - q[0]!.x || p[0]!.y - q[0]!.y);
+  };
+  const ext = clusters(lay.bands.boundary);
+  let captioned = false;
+  for (const c of ext) {
+    const x0 = Math.min(...c.map(b => b.x)), x1 = Math.max(...c.map(b => b.x + b.w)), top = Math.min(...c.map(b => b.y)) - 10, bottom = Math.max(...c.map(b => b.y + b.h)) + 10;
+    const ids = new Set(c.map(b => b.id)), sides = new Set<'l' | 'r'>();
+    for (const r of routed.values()) {
+      const e = edgeOf(r.key); if (!e || !r.pts.length) continue;
+      for (const [id, q] of [[e.from, r.pts[0]!], [e.to, r.pts[r.pts.length - 1]!]] as const) {
+        const b = lay.boxes.get(id); if (!b || !ids.has(id)) continue;
+        if (Math.abs(q.x - b.x) < 1.5) sides.add('l'); else if (Math.abs(q.x - b.x - b.w) < 1.5) sides.add('r');
+      }
+    }
+    let drawn = false;
+    for (const s of ['l', 'r'] as const) {
+      if (!sides.has(s)) continue;
+      const x = s === 'l' ? x0 - 14 : x1 + 14;
+      if (hit({ x: x - 1, y: top, w: 2, h: bottom - top })) continue;
+      world.append(h('div', { class: 'band-line band-tick', title: BOUNDARY_TIP, style: `left:${x}px;top:${top}px;height:${bottom - top}px` })); drawn = true;
+    }
+    if (!captioned && (drawn || sides.size === 0)) {
+      const cap = { x: x0, y: top - 18, w: 150, h: 16 };
+      if (!hit(cap)) { world.append(h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${cap.x}px;top:${cap.y}px` }, BOUNDARY_TITLE)); captioned = true; }
+    }
+  }
+  for (const c of clusters(lay.bands.outside)) {
+    if (c.length < 2) continue;
+    const x0 = Math.min(...c.map(b => b.x)), cap = { x: x0, y: Math.min(...c.map(b => b.y)) - 20, w: 50, h: 16 };
+    if (!hit(cap)) world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${cap.x}px;top:${cap.y}px` }, OUTSIDE_TITLE));
   }
 }
 function moveLoneHead() {
@@ -2430,7 +2491,7 @@ function afterRedraw(world: HTMLElement, was: Redraw) {
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {
   const world = $('world');
-  moveLoneHead(); placeBands();
+  moveLoneHead();
   // Heads of the outside partners' runs follow their layout (it can change while a part is dragged).
   const heads = new Map(lay.heads.map(x => [x.key, x]));
   world.querySelectorAll<HTMLElement>('.ghost-head').forEach(el => {
@@ -2450,6 +2511,7 @@ function positionWorld() {
   // shapes, so they follow the hand continuously; after the drop, the full routes, each morphing from the shape it had.
   const routed = new Map([...routeEdges(lay.boxes, lay.edges, { quick: dragQuick }), ...routeEdges(lay.boxes, sums, { quick: dragQuick })]);
   lastRouted = restRouted = routed; shownKey = '';
+  placeBands(routed);
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const r = routed.get(g.dataset.key!); if (!r) return;
     const from = morphFrom?.get(g.dataset.key!) ?? null;
@@ -3618,7 +3680,7 @@ function syncMarks(k: number) {
 // Beauty v2 (B4): no stroke runs both ways any more (pairWays): a bundle holds one direction, one kind and one signature only.
 function sumLines(o: Opened, list: Edge[], _keep: ReadonlySet<string> = new Set()): Edge[] {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note]));
-  return mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true, sigFor(said, notes)).map(e => { const st = lineStyle(e.kind, edgeChannel(e, said)); return { ...e, marks: { head: st.head, start: st.start } }; });
+  return withHints(o, mergeByChannel(list, (id, kind) => said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), id => notes.get(id), true, sigFor(said, notes)).map(e => { const st = lineStyle(e.kind, edgeChannel(e, said)); return { ...e, marks: { head: st.head, start: st.start } }; }));
 }
 /** A badge chosen: that visit in the pane (a part selected before steps back, as choosing another part would), the map unmoved. */
 function selectVisit(id: string | null) {

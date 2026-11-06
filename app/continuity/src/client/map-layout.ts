@@ -8,6 +8,8 @@
  *   among them reads as a list. Heights follow the lines a part really needs (two-line names, a state line); text never shrinks. */
 import type { StudioView, RelationView } from '../shared/studio.js';
 import { bandsOf, type Band } from './map-regions.js';
+import { layered, type LNode, type LEdge, type LKind, type LResult, type Channel } from './layered.js';
+export type { Channel } from './layered.js';
 
 /** Frames are a little wider than a node so the head keeps its name beside the fold and go-inside controls. */
 export const FRAME_MIN_W = 228;
@@ -27,9 +29,11 @@ export const FLOW_GAP = 44;
 export const LIST_GAP = 18, LIST_ROW_GAP = 2;
 /** Between an open group and a sibling: a lane wide enough for a line to pass between them. */
 export const FRAME_GUTTER = 40;
-/** The scope's bands (map-regions bandsOf, map design v3 2.1): the gap between the 참여자 band and the middle, between the middle and
- * the system boundary (its quiet line runs in the middle of it), and above the 실행 위치 미기록 shelf (its caption's room). */
-export const BAND_GAP = 76, BOUNDARY_GAP = 96, SHELF_GAP = 64;
+/** Above the 실행 위치 미기록 shelf (map-regions bandsOf, map design v3 2.2): its caption's room. */
+export const SHELF_GAP = 64;
+/** Beauty v3 (F.3): the layout's target aspect is the window's, quantised so a small resize never lays the map out again. */
+export const ASPECTS = [1.4, 1.6, 1.8, 2.0, 2.4] as const;
+export const quantAspect = (a: number): number => ASPECTS.reduce((b, x) => (Math.abs(x - a) < Math.abs(b - a) - 1e-9 ? x : b), ASPECTS[0]);
 /** Beauty v2 B3 (corridor room): a gap that n lines must pass is at least laneRoom(n) wide: LANE_MARGIN clear of the cards on each
  * side and LANE_TRACK between neighbouring lines (map units: at the least card-face zoom, 0.9, about 12.6 and 9 screen pixels; the
  * ruling's six strands need about 64px + stroke on screen). map-route's TRACK_GAP is LANE_TRACK. */
@@ -76,7 +80,10 @@ export interface Edge { key: string; from: string; to: string; kind: RelationVie
   both?: boolean; back?: string[];
   /** Beauty v2 B2: the marks at its two ends (line-grammar Head: the head where it arrives, the start where it leaves), so a side with
    * more ends than it has room for may share one port between ends that arrive (or leave) with the same mark. */
-  marks?: { head: string; start: string } }
+  marks?: { head: string; start: string };
+  /** Beauty v3 (C): the route the layered layout reserved for this stroke (its tracks in the gaps and its rows through the columns),
+   * which the router tries first from the ports it assigns; absent: the router searches. */
+  hint?: Channel }
 /** heads: over each run of outside partners that belong to the same place, that place once ('밖 · 확장 실행과 연결'). */
 export interface GhostHead { key: string; x: number; y: number; w: number; h: number; text: string }
 export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: GhostHead[]; bounds: { x: number; y: number; w: number; h: number };
@@ -85,7 +92,12 @@ export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: Gh
   spine: string[];
   /** The scope's own parts by band (map-regions bandsOf): the 참여자 band on the left, the system boundary on the right, the
    * 실행 위치 미기록 shelf at the bottom; each in its order. Empty lists when nothing is banded. */
-  bands: Record<Band, string[]> }
+  bands: Record<Band, string[]>;
+  /** Beauty v3 (C): each scope line's reserved route, keyed '<from>|<to>|<grain>' (siblings of the scope only); empty when the scope's
+   * parts were not laid out in layers (a list). */
+  channels: Map<string, Channel>;
+  /** The scope's columns, each top to bottom (its parts in layers; the unlinked and the shelf are not in them). */
+  layers: string[][] }
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number; contact?: number; pins?: Record<string, number>; ear?: number }
 export const ghostId = (id: string) => `ghost:${id}`;
@@ -227,7 +239,7 @@ export function isListGroup(v: StudioView, container: string | null): boolean {
  * line and typed body, drawn by the client); list items never take it. Absent, every card keeps the height its lines give.
  * A unit the readings typed may answer with a TypedCard instead: it is drawn at UNIT_W with its typed lines in place of its
  * note (map spec 2.1: the note reads on selection), and its room is asked with the lines its name takes there. */
-export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>, aspect = 1.6, extra?: (id: string, face: Face) => number | TypedCard): ScopeLayout {
+export function layoutScope(v: StudioView, scope: string | null, expanded: (id: string, depth: number) => boolean, pos: Positions, measureText: TextMeasure = estimate, planned?: ReadonlyMap<string, readonly string[]>, aspect = 1.6, extra?: (id: string, face: Face) => number | TypedCard, lineOf?: (relationId: string, kind: RelationView['kind']) => string | null): ScopeLayout {
   const more = (id: string, face: Face) => { const x = extra?.(id, face); return typeof x === 'number' ? Math.max(0, x) : 0; };
   const typedCard = (id: string, face: Face = 'unit') => { const x = extra?.(id, face); return x && typeof x === 'object' ? x : null; };
   const byId = new Map(v.parts.map(p => [p.id, p]));
@@ -240,29 +252,16 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const names = new Map<string, number>(); for (const p of v.parts) names.set(p.name, (names.get(p.name) ?? 0) + 1);
   // A part with an inside keeps room beside its name for its boundary count.
   const cross = boundaryCounts(v), chip = (id: string) => (kidsOf(id).length ? linkChipW(cross.get(id)?.all ?? 0) : 0);
-  // Automatic arrangement of siblings: longest-path columns over relations lifted to the siblings; long columns wrap.
+  // Automatic arrangement of siblings: layered placement over the relations lifted to the siblings (beauty v3, layered.ts).
   const bandOf = new Map<string, Band>();
+  let scopeLaid: LResult | null = null;
   const autoArrange = (container: string | null, sizes: Map<string, Measure>): Map<string, Point> => {
     // The scope's own outside roles, external systems and lifecycle groups keep to their bands (map-regions): the middle is
     // arranged without them, then they are set beside and under it. A list keeps its own order whole.
     const band = container === scope && !listOf(container) ? bandsOf(v, kidsOf(container)) : new Map<string, Band>();
     for (const [i, b] of band) bandOf.set(i, b);
-    const ids = kidsOf(container).filter(i => !band.has(i)), set = new Set(ids);
+    const ids = kidsOf(container).filter(i => band.get(i) !== 'shelf'), set = new Set(ids);
     const lift = (id: string) => { let cur = byId.get(id), guard = 0; while (cur && !set.has(cur.id) && guard++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
-    // Beauty v2 B3: the lines between a band (참여자 on the left, the boundary on the right) and the middle, each pair once: they
-    // pass the band's gap and the middle's columns on their way, so the room for them is made before anything is routed.
-    const bandLines: { band: Band; mid: string }[] = [];
-    if (band.size) {
-      const all = new Set(kidsOf(container)), liftAll = (id: string) => { let cur = byId.get(id), g = 0; while (cur && !all.has(cur.id) && g++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && all.has(cur.id) ? cur.id : null; };
-      const seen = new Set<string>();
-      for (const r of v.relations) {
-        const a = liftAll(r.from), b = liftAll(r.to); if (!a || !b || a === b) continue;
-        const bd = band.has(a) && set.has(b) ? a : band.has(b) && set.has(a) ? b : null, which = bd ? band.get(bd)! : null;
-        if (!bd || !which || which === 'shelf') continue;
-        const k = `${a}|${b}|${r.kind}`; if (seen.has(k)) continue; seen.add(k); bandLines.push({ band: which, mid: bd === a ? b : a });
-      }
-    }
-    const bandRoom = { outside: 0, boundary: 0 };
     if (listOf(container)) {
       // A list keeps its own order in columns. Rows linked outward sit in the last column and rows linked from outside in the
       // first, so their lines leave the list at its edge instead of running under other rows.
@@ -279,45 +278,19 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       }
       return at;
     }
-    // Relations lifted to these siblings. Layers run left to right along the directed relations, as their arrows are read: a
-    // flow from a to b puts b right of a, and so does a need (the arrows of a map all point one way). 'shares' and 'related'
-    // have no direction: they set no layer, but keep their ends near each other (ordering, levelling), and a part tied by them
-    // alone takes its partners' layer.
-    type Pair = { a: string; b: string; kind: RelationView['kind'] };
-    const pairs: Pair[] = [];
-    for (const r of v.relations) { const a = lift(r.from), b = lift(r.to); if (a && b && a !== b) pairs.push({ a, b, kind: r.kind }); }
-    const partners = (i: string) => pairs.filter(p => p.a === i || p.b === i).map(p => (p.a === i ? p.b : p.a));
-    const linked = new Set<string>(); for (const p of pairs) { linked.add(p.a); linked.add(p.b); }
-    // Linked parts form blocks (the parts a chain of relations connects), the largest first; each has its own columns and the
-    // blocks are stacked top to bottom, so two unrelated flows never read as one.
-    const comps: string[][] = [], compOf = new Map<string, number>();
-    { const seen = new Set<string>(); for (const i of ids) { if (!linked.has(i) || seen.has(i)) continue; const c: string[] = [], st = [i]; seen.add(i); while (st.length) { const x = st.pop()!; c.push(x); for (const y of partners(x)) if (!seen.has(y)) { seen.add(y); st.push(y); } } comps.push(c); } }
-    comps.sort((p, q) => q.length - p.length);
-    comps.forEach((c, k) => c.forEach(i => compOf.set(i, k)));
-    // A block tied by undirected relations alone (a catalogue of correspondences) still reads left to right along them, in the
-    // order they were recorded: without that it would be one column of parts with lines running up and down between them.
-    const hasDirected = new Set<number>(); for (const p of pairs) if (p.kind === 'flow' || p.kind === 'needs') hasDirected.add(compOf.get(p.a)!);
-    const out = new Map<string, Set<string>>(ids.map(i => [i, new Set<string>()]));
-    const reaches = (a: string, b: string) => { const seen = new Set<string>(), st = [a]; while (st.length) { const x = st.pop()!; if (x === b) return true; if (seen.has(x)) continue; seen.add(x); st.push(...out.get(x)!); } return false; };
-    const weight = new Map<string, number>(); // of a directed step: a flow counts twice what a need does (the spine follows flows first)
-    for (const p of pairs) {
-      if ((p.kind === 'shares' || p.kind === 'related') && hasDirected.has(compOf.get(p.a)!)) continue;
-      const { a, b } = p;
-      if (reaches(b, a)) continue;
-      out.get(a)!.add(b); weight.set(`${a}|${b}`, Math.max(weight.get(`${a}|${b}`) ?? 0, p.kind === 'flow' ? 2 : p.kind === 'needs' ? 1 : 0.5));
+    // Beauty v3 (A): the relations lifted to these siblings, one line per pair, direction and stroke grain (lineOf: the channel the
+    // map draws the relation in, with its signature), placed by the in-house layered layout (layered.ts). Data and control lines
+    // decide the layers in their direction; a reference joins softly; shares and related set no layer but keep their ends near.
+    // Participants and external systems are ordinary parts here (B): they sit next to what they link to, with their kind marks.
+    const grain = (r: RelationView) => (r.kind === 'shares' || r.kind === 'related' ? r.kind : lineOf?.(r.id, r.kind) ?? (r.kind === 'flow' ? 'data' : 'uses'));
+    const lk = new Map<string, LEdge>();
+    for (const r of v.relations) {
+      const a = lift(r.from), b = lift(r.to); if (!a || !b || a === b) continue;
+      const g = grain(r), key = `${a}|${b}|${g}`, ch = g.split('~')[0];
+      const kind: LKind = r.kind === 'shares' || r.kind === 'related' ? 'plain' : ch === 'data' || ch === 'control' ? 'drive' : 'ref';
+      (lk.get(key) ?? lk.set(key, { key, from: a, to: b, kind, weight: 1, relIds: [] }).get(key)!).relIds.push(r.id);
     }
-    const layer = new Map<string, number>();
-    const depthOf = (id: string, guard = 0): number => {
-      if (layer.has(id)) return layer.get(id)!;
-      let d = 0; for (const [from, tos] of out) if (tos.has(id) && guard < 64) d = Math.max(d, depthOf(from, guard + 1) + 1);
-      layer.set(id, d); return d;
-    };
-    ids.forEach(i => depthOf(i));
-    const directed = new Set<string>(); for (const [x, tos] of out) if (tos.size) { directed.add(x); tos.forEach(t => directed.add(t)); }
-    for (const i of ids) if (linked.has(i) && !directed.has(i)) {
-      const ls = partners(i).filter(x => directed.has(x)).map(x => layer.get(x)!).sort((p, q) => p - q);
-      if (ls.length) layer.set(i, ls[Math.floor(ls.length / 2)]!);
-    }
+    const lines = [...lk.values()], linked = new Set(lines.flatMap(e => [e.from, e.to]));
     // A part the scope's outside refers to and nothing inside links (a shared definition) opens the scope's order, as rows linked
     // from outside open a list: its outside partners then sit beside it. The order is the scope's own; nothing here depends on
     // what is selected, and a stored position still wins.
@@ -325,59 +298,38 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     const lone = ids.filter(i => !linked.has(i) && !fromOut.includes(i)), inFrame = container !== scope;
     const maxPer = Math.max(4, Math.min(8, Math.ceil(Math.sqrt(ids.length * 1.3))));
     const wrap = (c: string[]) => { if (c.length <= maxPer) return [c]; const per = Math.ceil(c.length / Math.ceil(c.length / maxPer)), o: string[][] = []; for (let i = 0; i < c.length; i += per) o.push(c.slice(i, i + per)); return o; };
-    // Within a block, each layer's parts are ordered by where their neighbours in the layers beside it sit (their barycentre),
-    // sweeping right then left a few times: lines between the layers cross less. Ties keep the order the parts came in.
-    const order = (layers: string[][]) => {
-      const pos = new Map<string, number>(), index = () => layers.forEach(l => l.forEach((i, k) => pos.set(i, k)));
-      index();
-      const sweep = (li: number, ref: number) => {
-        const l = layers[li]!, bc = new Map(l.map(i => { const ns = partners(i).filter(x => layers[ref]!.includes(x)).map(x => pos.get(x)!); return [i, ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : pos.get(i)!]; }));
-        l.sort((p, q) => bc.get(p)! - bc.get(q)! || pos.get(p)! - pos.get(q)!); index();
-      };
-      for (let it = 0; it < 4; it++) { for (let li = 1; li < layers.length; li++) sweep(li, li - 1); for (let li = layers.length - 2; li >= 0; li--) sweep(li, li + 1); }
-    };
-    // The spine of a block: the chain of directed steps with the most flows (then the most steps); one line through the block.
-    const spineOf = (comp: string[]): string[] => {
-      const set = new Set(comp), best = new Map<string, { w: number; next: string | null }>();
-      const walk = (i: string, guard = 0): { w: number; next: string | null } => {
-        const hit = best.get(i); if (hit) return hit;
-        let r: { w: number; next: string | null } = { w: 0, next: null };
-        if (guard < 64) for (const t of out.get(i)!) if (set.has(t)) { const w = weight.get(`${i}|${t}`)! + 0.01 + walk(t, guard + 1).w; if (w > r.w) r = { w, next: t }; }
-        best.set(i, r); return r;
-      };
-      const head = comp.map(i => [i, walk(i).w] as const).sort((p, q) => q[1] - p[1])[0];
-      if (!head || head[1] < 1) return [];
-      const path = [head[0]]; for (let cur = best.get(head[0])!.next, g = 0; cur && g < 64; cur = best.get(cur)!.next, g++) path.push(cur);
-      return path;
-    };
-    // Each column: its parts, the gap after it, whether it is centred against its block's tallest column, and its block.
-    type Col = { ids: string[]; gap: number; centre: boolean; block: number };
-    const cols: Col[] = [], spineIds = new Set<string>(), spineAt = new Map<number, string[]>();
-    comps.forEach((comp, bi) => {
-      const lo = Math.min(...comp.map(i => layer.get(i)!)), layers: string[][] = [];
-      for (const i of comp) (layers[layer.get(i)! - lo] ??= []).push(i);
-      const flow = layers.filter(Boolean);
-      order(flow);
-      const sp = spineOf(comp); sp.forEach(i => spineIds.add(i)); spineAt.set(bi, sp);
-      if (bi === 0 && fromOut.length) flow.unshift(fromOut);
-      // Inside a group a plain chain (one part per layer) runs top to bottom, as a list of steps.
-      if (inFrame && flow.every(l => l.length === 1)) cols.push(...wrap(flow.map(l => l[0]!)).map(c => ({ ids: c, gap: GAP, centre: false, block: bi })));
-      // A layer wrapped into columns keeps a lane between them wide enough for two routed tracks (lines that pass between
-      // the columns would otherwise share one gap).
-      else flow.forEach(l => { const w = wrap(l); w.forEach((c, k) => cols.push({ ids: c, gap: k < w.length - 1 ? (inFrame ? WRAP_LANE : WRAP_GAP) : inFrame ? FLOW_GAP : COL_GAP, centre: w.length === 1, block: bi })); });
-    });
-    if (!comps.length && fromOut.length) cols.push({ ids: fromOut, gap: inFrame ? FLOW_GAP : COL_GAP, centre: false, block: 0 });
-    if (container === scope || container === null) spines.set(container ?? ROOT, spineAt.get(0) ?? []);
     const colW = (c: string[]) => Math.max(...c.map(i => sizes.get(i)!.w)), colH = (c: string[]) => c.reduce((a, i) => a + sizes.get(i)!.h, 0) + ROW_GAP * (c.length - 1);
-    const gapY = inFrame ? GAP : ROW_GAP;
+    const gapY = inFrame ? GAP : ROW_GAP, colGap = inFrame ? FLOW_GAP : COL_GAP;
     // An open group beside or under another sibling keeps a lane (FRAME_GUTTER) so lines can pass between them instead of under one.
     const isFrame = (i: string) => sizes.get(i)!.head > 0, pairGap = (p: string, q: string) => (isFrame(p) || isFrame(q) ? Math.max(gapY, FRAME_GUTTER) : gapY);
-    cols.forEach((c, ci) => { const n = cols[ci + 1]; if (n && n.block === c.block && (c.ids.some(isFrame) || n.ids.some(isFrame))) c.gap = Math.max(c.gap, FRAME_GUTTER); });
-    const stackH = (c: string[]) => c.reduce((acc, i, k) => acc + sizes.get(i)!.h + (k ? pairGap(c[k - 1]!, i) : 0), 0);
-    const blocks = comps.length ? comps.map((_, bi) => cols.filter(c => c.block === bi)) : cols.length ? [cols] : [];
-    const blockW = (cs: Col[]) => cs.reduce((a, x) => a + colW(x.ids) + x.gap, 0), blockH = (cs: Col[]) => Math.max(0, ...cs.map(c => stackH(c.ids)));
-    const blockGap = inFrame ? GAP * 2 : ROW_GAP * 2;
-    const flowCols = cols.length, flowW = Math.max(0, ...blocks.map(blockW)), flowH = blocks.reduce((a, cs) => a + blockH(cs), 0) + blockGap * Math.max(0, blocks.length - 1);
+    const at = new Map<string, Point>();
+    const put = (i: string, x: number, y: number) => { const sz = sizes.get(i)!; at.set(i, { x: x - sz.ox, y: y - sz.oy }); };
+    const rank = new Map(ids.map((i, k) => [i, k]));
+    // A store as the record says it (its family, else its type): read back by the part that writes it, it sits after that part.
+    const isStore = (i: string) => { const r = byId.get(i)?.reading; return (r?.familyRead?.family ?? (r?.typeRead?.type === 'store' ? 'store' : null)) === 'store'; };
+    const lnodes: LNode[] = ids.filter(i => linked.has(i)).map(i => {
+      const s = sizes.get(i)!, b = band.get(i);
+      return { id: i, w: s.w, h: s.h, order: rank.get(i)!, anchor: s.head > 0 ? s.head / 2 : s.contact ?? s.h / 2, ...(s.pins ? { pins: s.pins } : {}), role: b === 'outside' ? 'outside' : b === 'boundary' ? 'external' : isStore(i) ? 'store' : null, ...(s.head > 0 ? { gutter: FRAME_GUTTER } : {}) };
+    });
+    let flowW = 0, flowH = 0, lastFrame = false;
+    if (lnodes.length) {
+      const L = layered(lnodes, lines, { layerGap: colGap, rowGap: gapY, laneMargin: LANE_MARGIN, laneTrack: LANE_TRACK, aspect: quantAspect(aspect), wrapGap: inFrame ? WRAP_LANE : WRAP_GAP, blockGap: inFrame ? GAP * 2 : ROW_GAP * 2, spend: !inFrame });
+      // Inside a group a plain chain (one part per layer) runs top to bottom, as a list of steps.
+      if (inFrame && L.order.every(c => c.length === 1)) {
+        let x = 0;
+        for (const c of wrap(L.order.map(c => c[0]!))) { let y = 0; c.forEach((i, k) => { if (k) y += pairGap(c[k - 1]!, i); put(i, x, y); y += sizes.get(i)!.h; }); x += colW(c) + GAP; flowW = Math.max(flowW, x - GAP); flowH = Math.max(flowH, y); }
+      } else {
+        for (const [i, p] of L.pos) put(i, p.x, p.y);
+        flowW = L.size.w; flowH = L.size.h; lastFrame = (L.order.at(-1) ?? []).some(isFrame);
+        if (container === scope) { scopeLaid = L; }
+      }
+      if (container === scope || container === null) spines.set(container ?? ROOT, L.spine);
+    }
+    if (fromOut.length) {
+      // Left of the arranged block, in the scope's order.
+      const w = colW(fromOut); let y = 0;
+      for (const i of fromOut) { put(i, -colGap - w, y); y += sizes.get(i)!.h + gapY; }
+    }
     const need = (W: number, H: number) => Math.max(W, H * aspect);
     let side = wrap(lone), below: string[][] | null = null;
     if (!inFrame && lone.length) {
@@ -387,7 +339,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
         const sc = need(flowW + cs.reduce((a, x) => a + colW(x), 0) + WRAP_GAP * (cs.length - 1), Math.max(flowH, ...cs.map(colH)));
         if (sc < score - 1e-6) { score = sc; side = cs; }
       }
-      if (flowCols) {
+      if (lnodes.length) {
         // Rows under the linked block are a grid: one cell width (the widest unlinked part), so the rows' left edges line up.
         const cell = Math.max(...lone.map(i => sizes.get(i)!.w)), room = Math.max(flowW - WRAP_GAP, cell), rows: string[][] = [];
         const per = Math.max(1, Math.floor((room + WRAP_GAP) / (cell + WRAP_GAP)));
@@ -397,159 +349,41 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
         if (sc < score - 1e-6) below = rows;
       }
     }
-    const at = new Map<string, Point>();
-    const top = (i: string) => at.get(i)!.y + sizes.get(i)!.oy, setTop = (i: string, y: number) => { at.get(i)!.y = y - sizes.get(i)!.oy; };
-    const centreOf = (i: string) => top(i) + sizes.get(i)!.h / 2;
-    // Levelling within a block: each part is pulled to the median height of its neighbours in the other columns, the spine's
-    // parts to the block's one spine line, and the parts of a column then keep their order and their gaps (pushed apart from
-    // a spine part, or down then up). A few sweeps, left to right and back, settle it.
-    const level = (cs: Col[], spineY: number, spine: Set<string>) => {
-      const colIdx = new Map<string, number>(); cs.forEach((c, k) => c.ids.forEach(i => colIdx.set(i, k)));
-      // The spine line only levels a chain that runs across columns: a chain stacked in one column (a group's list of steps)
-      // has no line to share, and pulling its every part to one height would push the whole column down, leaving a gap.
-      const sp = new Set([...colIdx.entries()].filter(([i]) => spine.has(i)).map(([, k]) => k)).size >= 2 ? spine : new Set<string>();
-      const nbrs = (i: string) => partners(i).filter(x => colIdx.has(x) && colIdx.get(x) !== colIdx.get(i));
-      const median = (xs: number[]) => { const a = [...xs].sort((p, q) => p - q), m = a.length >> 1; return a.length % 2 ? a[m]! : (a[m - 1]! + a[m]!) / 2; };
-      for (let pass = 0; pass < 6; pass++) {
-        const fwd = pass % 2 === 0;
-        for (const c of fwd ? cs : [...cs].reverse()) {
-          const n = c.ids.length, h = c.ids.map(i => sizes.get(i)!.h), gap = c.ids.map((i, k) => (k ? pairGap(c.ids[k - 1]!, i) : 0));
-          const want = c.ids.map(i => {
-            if (sp.has(i)) return spineY - sizes.get(i)!.h / 2;
-            const near = nbrs(i).filter(x => (fwd ? colIdx.get(x)! < colIdx.get(i)! : colIdx.get(x)! > colIdx.get(i)!)), list = (near.length ? near : nbrs(i)).map(centreOf);
-            return list.length ? median(list) - sizes.get(i)!.h / 2 : top(i);
-          });
-          const ys = [...want], s = c.ids.findIndex(i => sp.has(i));
-          if (s >= 0) { for (let k = s + 1; k < n; k++) ys[k] = Math.max(ys[k]!, ys[k - 1]! + h[k - 1]! + gap[k]!); for (let k = s - 1; k >= 0; k--) ys[k] = Math.min(ys[k]!, ys[k + 1]! - h[k]! - gap[k + 1]!); }
-          else { for (let k = 1; k < n; k++) ys[k] = Math.max(ys[k]!, ys[k - 1]! + h[k - 1]! + gap[k]!); for (let k = n - 2; k >= 0; k--) ys[k] = Math.min(ys[k]!, ys[k + 1]! - h[k]! - gap[k + 1]!); }
-          // A column pulled apart from its targets both ways keeps the pull even: the whole column shifts by the mean offset.
-          if (s < 0 && n > 1) { const off = ys.reduce((a, y, k) => a + (y - want[k]!), 0) / n; for (let k = 0; k < n; k++) ys[k]! -= off; }
-          c.ids.forEach((i, k) => setTop(i, ys[k]!));
-        }
-      }
-    };
-    /** Beauty v2 B3 (corridor room, the ruling's 노드·포트 순서 → 통로 폭 → 라우팅): how many lines must pass each gap of one block,
-     * counted from its relations before anything is routed, and each gap widened to laneRoom of that many (never narrowed).
-     * - A line between two columns turns in the gap beside each end (one track there; a level line between neighbours none).
-     * - A line that skips columns crosses each column between at the row gap nearest either end's height (the corridor the router
-     *   tries first); that row gap is opened, the parts under it moving down together (the reading order stays left to right).
-     * - A line between two parts of one column that are not neighbours goes round beside it (a track in the gap after it).
-     * - A band's lines (참여자, the boundary) cross the columns between it and their middle end the same way, and their count sets
-     *   the band's own gap (placeBands).
-     * Returns the width added. Only the automatic arrangement; a stored place is the person's. */
-    const makeRoom = (cs: Col[]): number => {
-      const colOf = new Map<string, number>(); cs.forEach((c, k) => c.ids.forEach(i => colOf.set(i, k)));
-      const n = cs.length, cy = (i: string) => top(i) + sizes.get(i)!.h / 2;
-      const lines: { i: number; j: number; ya: number; yb: number; same?: [string, string] }[] = [], seen = new Set<string>();
-      for (const p of pairs) {
-        if (!colOf.has(p.a) || !colOf.has(p.b)) continue;
-        const k = `${p.a}|${p.b}|${p.kind}`; if (seen.has(k)) continue; seen.add(k);
-        const i = colOf.get(p.a)!, j = colOf.get(p.b)!;
-        lines.push(i < j ? { i, j, ya: cy(p.a), yb: cy(p.b) } : i > j ? { i: j, j: i, ya: cy(p.b), yb: cy(p.a) } : { i, j, ya: cy(p.a), yb: cy(p.b), same: [p.a, p.b] });
-      }
-      for (const l of bandLines) {
-        const m = colOf.get(l.mid); if (m === undefined) continue;
-        if (l.band === 'outside') { lines.push({ i: -1, j: m, ya: cy(l.mid), yb: cy(l.mid) }); bandRoom.outside++; }
-        else { lines.push({ i: m, j: n, ya: cy(l.mid), yb: cy(l.mid) }); bandRoom.boundary++; }
-      }
-      const vert = new Array<number>(n).fill(0), pass = new Map<string, number>();
-      const rows = (c: number) => [...cs[c]!.ids].sort((p, q) => top(p) - top(q));
-      for (const l of lines) {
-        if (l.same) { const r = rows(l.i); if (Math.abs(r.indexOf(l.same[0]) - r.indexOf(l.same[1])) > 1) vert[l.i] = vert[l.i]! + 1; continue; }
-        if (l.j === l.i + 1 && Math.abs(l.ya - l.yb) < 1) continue;
-        if (l.i >= 0 && l.i < n - 1) vert[l.i] = vert[l.i]! + 1;
-        if (l.j - 1 !== l.i && l.j - 1 >= 0 && l.j - 1 < n - 1) vert[l.j - 1] = vert[l.j - 1]! + 1;
-        for (let c = Math.max(0, l.i + 1); c < Math.min(n, l.j); c++) {
-          const r = rows(c); let best = -1, bd = Infinity;
-          for (let g = -1; g < r.length; g++) {
-            const y0 = g < 0 ? -Infinity : top(r[g]!) + sizes.get(r[g]!)!.h, y1 = g + 1 < r.length ? top(r[g + 1]!) : Infinity;
-            const d = Math.min(...[l.ya, l.yb].map(y => (y < y0 ? y0 - y : y > y1 ? y - y1 : 0)));
-            if (d < bd - 1e-6) { bd = d; best = g; }
-          }
-          if (best >= 0 && best < r.length - 1) pass.set(`${c}|${best}`, (pass.get(`${c}|${best}`) ?? 0) + 1);
-        }
-      }
-      for (const [k, m] of [...pass].sort()) {
-        const [c, g] = k.split('|').map(Number) as [number, number], r = rows(c), gap = top(r[g + 1]!) - (top(r[g]!) + sizes.get(r[g]!)!.h), d = laneRoom(m) - gap;
-        if (d > 0) for (const i of r.slice(g + 1)) setTop(i, top(i) + d);
-      }
-      let added = 0;
-      const x0 = (i: string) => at.get(i)!.x + sizes.get(i)!.ox;
-      for (let c = 0; c + 1 < n; c++) {
-        const right = Math.max(...cs[c]!.ids.map(i => x0(i) + sizes.get(i)!.w)), next = Math.min(...cs[c + 1]!.ids.map(x0)), d = laneRoom(vert[c]!) - (next - right);
-        if (d > 0) { for (let k = c + 1; k < n; k++) for (const i of cs[k]!.ids) at.get(i)!.x += d; added += d; }
-      }
-      return added;
-    };
-    let yBlock = 0, xWall = 0;
-    blocks.forEach((cs, bi) => {
-      const heights = cs.map(c => stackH(c.ids)), tallest = Math.max(0, ...heights);
-      let x = 0;
-      cs.forEach((c, ci) => {
-        const w = colW(c.ids);
-        let y = yBlock + (c.centre ? (tallest - heights[ci]!) / 2 : 0);
-        c.ids.forEach((i, k) => { const sz = sizes.get(i)!; if (k) y += pairGap(c.ids[k - 1]!, i); at.set(i, { x: x - sz.ox, y: y - sz.oy }); y += sz.h; });
-        x += w + c.gap;
-      });
-      xWall = Math.max(xWall, x);
-      // Stored places are not levelled (the person's own); the automatic arrangement is.
-      level(cs, yBlock + tallest / 2, new Set(spineAt.get(bi) ?? []));
-      // Beauty v2 B3: room for the lines, counted before routing (rows first, then the gaps between columns).
-      xWall = Math.max(xWall, x + makeRoom(cs));
-      const all = cs.flatMap(c => c.ids), lo = Math.min(...all.map(top)), hi = Math.max(...all.map(i => top(i) + sizes.get(i)!.h));
-      // The block starts where it was stacked: a levelled block that rose above it or sank below it moves back as a whole, so
-      // the gap between blocks is the block gap and nothing more.
-      if (Math.abs(lo - yBlock) > 0.5) for (const i of all) setTop(i, top(i) + (yBlock - lo));
-      yBlock = Math.max(...all.map(i => top(i) + sizes.get(i)!.h)) + blockGap; void hi;
-    });
-    const tallest = blocks.length ? yBlock - blockGap : 0;
     // The scope's own unlinked parts: no order between them to keep, so they go where the whole block needs the least zoom in a
     // window of this shape: as columns beside the linked blocks, or in rows under them (never inside a relation layer, which
     // would read as a step). Parts inside a group keep their one readable column.
     if (below) {
-      let y = tallest + ROW_GAP * 2;
+      let y = flowH + ROW_GAP * 2;
       for (const r of below) {
         const cell = Math.max(...lone.map(i => sizes.get(i)!.w));
-        let rx = 0; for (const i of r) { const sz = sizes.get(i)!; at.set(i, { x: rx - sz.ox, y: y - sz.oy }); rx += cell + WRAP_GAP; }
+        let rx = 0; for (const i of r) { put(i, rx, y); rx += cell + WRAP_GAP; }
         y += Math.max(...r.map(i => sizes.get(i)!.h)) + ROW_GAP;
       }
-    } else {
-      let x = xWall;
+    } else if (lone.length) {
+      let x = lnodes.length ? flowW + colGap : 0;
       // A side column beside an open group keeps the lane too.
-      const lastCol = cols.at(-1), gutter = lastCol && side.length && (lastCol.ids.some(isFrame) || side[0]!.some(isFrame)) ? Math.max(0, FRAME_GUTTER - lastCol.gap) : 0;
-      x += gutter;
+      if (lnodes.length && (lastFrame || side[0]!.some(isFrame))) x += Math.max(0, FRAME_GUTTER - colGap);
       side.forEach(c => {
         const w = colW(c); let y = 0;
-        c.forEach((i, k) => { const sz = sizes.get(i)!; if (k) y += pairGap(c[k - 1]!, i); at.set(i, { x: x - sz.ox, y: y - sz.oy }); y += sz.h; });
+        c.forEach((i, k) => { if (k) y += pairGap(c[k - 1]!, i); put(i, x, y); y += sizes.get(i)!.h; });
         x += w + (inFrame ? GAP : WRAP_GAP);
       });
     }
-    if (band.size) placeBands(band, at, sizes, bandRoom);
+    if (band.size) placeBands(band, at, sizes);
     return at;
   };
-  /** The bands around the arranged middle (map design v3 2.1): the 참여자 band as a column left of it, the external systems as a
-   * column right of it past the boundary's lane, the lifecycle groups in a row under everything (the shelf). Each in the scope's
-   * order; nothing in the middle moves. */
-  const placeBands = (band: Map<string, Band>, at: Map<string, Point>, sizes: Map<string, Measure>, room: { outside: number; boundary: number } = { outside: 0, boundary: 0 }) => {
+  /** The 실행 위치 미기록 shelf (map design v3 2.2): the lifecycle groups in a row under everything, in the scope's order. Beauty v3 (B):
+   * the 참여자 band and the system boundary are no longer columns of their own; their parts sit next to what they link to. */
+  const placeBands = (band: Map<string, Band>, at: Map<string, Point>, sizes: Map<string, Measure>) => {
     const box = (i: string) => { const p = at.get(i)!, z = sizes.get(i)!; return { x: p.x + z.ox, y: p.y + z.oy, w: z.w, h: z.h }; };
-    const mid = [...at.keys()].map(box), x0 = mid.length ? Math.min(...mid.map(b => b.x)) : 0, y0 = mid.length ? Math.min(...mid.map(b => b.y)) : 0;
-    const x1 = mid.length ? Math.max(...mid.map(b => b.x + b.w)) : 0;
-    const of = (b: Band) => kidsOf(scope).filter(i => band.get(i) === b);
-    const column = (list: string[], x: (w: number) => number) => {
-      if (!list.length) return;
-      const w = Math.max(...list.map(i => sizes.get(i)!.w)), left = x(w); let y = y0;
-      for (const i of list) { const z = sizes.get(i)!; at.set(i, { x: left - z.ox, y: y - z.oy }); y += z.h + ROW_GAP; }
-    };
-    // Beauty v2 B3: a band's gap holds its lines (laneRoom), the boundary's quiet rule in the middle of its own.
-    column(of('outside'), w => x0 - Math.max(BAND_GAP, laneRoom(room.outside)) - w);
-    column(of('boundary'), () => x1 + Math.max(BOUNDARY_GAP, laneRoom(room.boundary) + 16));
-    const shelf = of('shelf'); if (!shelf.length) return;
-    const all = [...at.keys()].map(box), bottom = Math.max(...all.map(b => b.y + b.h)), left = Math.min(x0, ...all.map(b => b.x));
+    const shelf = kidsOf(scope).filter(i => band.get(i) === 'shelf'); if (!shelf.length) return;
+    const all = [...at.keys()].map(box), bottom = all.length ? Math.max(...all.map(b => b.y + b.h)) : 0, left = all.length ? Math.min(...all.map(b => b.x)) : 0;
     let x = left; for (const i of shelf) { const z = sizes.get(i)!; at.set(i, { x: x - z.ox, y: bottom + SHELF_GAP - z.oy }); x += z.w + WRAP_GAP; }
   };
+  const autoMemo = new Map<string, Map<string, Point>>();
   const anchors = (container: string | null, depth: number) => {
     const ids = kidsOf(container), sizes = new Map(ids.map(i => [i, measure(i, depth, container)]));
-    const auto = autoArrange(container, sizes), stored = pos[container ?? ROOT] ?? {};
+    const mk = container ?? ROOT, auto = autoMemo.get(mk) ?? autoMemo.set(mk, autoArrange(container, sizes)).get(mk)!, stored = pos[container ?? ROOT] ?? {};
     return { sizes, at: new Map(ids.map(i => [i, stored[i] ? { ...stored[i]! } : auto.get(i)!])) };
   };
   const hasRecords = (id: string, guard = 0): boolean => { const p = byId.get(id); return !!p && guard < 64 && (!!p.lastAt || p.childIds.some(c => hasRecords(c, guard + 1))); };
@@ -714,7 +548,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   if (!boxes.size) { bx = by = bx2 = by2 = 0; }
   const bands: Record<Band, string[]> = { outside: [], boundary: [], shelf: [] };
   for (const id of kidsOf(scope)) { const b = bandOf.get(id); if (b && boxes.has(id)) bands[b].push(id); }
-  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands };
+  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands, channels: (scopeLaid as LResult | null)?.channels ?? new Map(), layers: (scopeLaid as LResult | null)?.order ?? [] };
 }
 
 /** Where a column of outside partners goes (the parts it meets: near): beside them on the free side nearest to them (outgoing to
@@ -857,6 +691,38 @@ export function edgePath(a: Box, b: Box, others: Iterable<Box> = [], ports: Port
     return { d: rounded(pts), pts, mx: (xa + xb) / 2, my: yc, detour: true, clear: true };
   }
   return around();
+}
+
+/** Beauty v3 (C.4): the route the layered layout reserved for a line (its hint), from the ports the router assigned: out of a's side to
+ * its first track, along its rows through the columns, into b's side. null when one end holds the other, when the first or last track
+ * does not lie beyond its end's side, or when any run would come within LANE_CLEAR of a box it does not belong to or cross its own
+ * cards (a part moved since the arrangement): the router then searches as before. */
+export function hintPath(a: Box, b: Box, others: Iterable<Box>, ports: Ports, hint: Channel): Route | null {
+  const all = [...others], byId = new Map(all.map(o => [o.id, o]));
+  const within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = byId.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
+  if ((a.kind === 'frame' && within(b, a)) || (b.kind === 'frame' && within(a, b)) || !hint.xs.length || hint.xs.length !== hint.ys.length + 1) return null;
+  type Rect = { x: number; y: number; w: number; h: number };
+  const blocks: Rect[] = all.filter(o => o !== a && o !== b && !(o.kind === 'frame' && (within(a, o) || within(b, o))) && !(a.kind === 'frame' && within(o, a)) && !(b.kind === 'frame' && within(o, b)));
+  for (const o of all) if (o.kind === 'frame' && o !== a && o !== b && o.head > 0 && (within(a, o) || within(b, o))) blocks.push({ x: o.x, y: o.y, w: o.w, h: o.head });
+  const rims: Rect[] = all.filter(o => o.kind === 'frame' && o !== a && o !== b && (within(a, o) || within(b, o)));
+  const hitBox = (o: Rect, x1: number, y1: number, x2: number, y2: number, m: number) => Math.max(x1, x2) > o.x - m && Math.min(x1, x2) < o.x + o.w + m && Math.max(y1, y2) > o.y - m && Math.min(y1, y2) < o.y + o.h + m;
+  const x0 = hint.xs[0]!, x1 = hint.xs[hint.xs.length - 1]!;
+  const sa = x0 >= a.x + a.w + 4 ? a.x + a.w : x0 <= a.x - 4 ? a.x : null, sb = x1 <= b.x - 4 ? b.x : x1 >= b.x + b.w + 4 ? b.x + b.w : null;
+  if (sa === null || sb === null) return null;
+  const portY = (x: Box, p?: number) => p ?? (x.kind === 'frame' ? x.y + x.head / 2 : x.contact !== undefined ? x.y + x.contact : x.y + x.h / 2);
+  const ya = portY(a, ports.a), yb = portY(b, ports.b), raw: Point[] = [{ x: sa, y: ya }, { x: x0, y: ya }];
+  hint.ys.forEach((y, i) => { raw.push({ x: hint.xs[i]!, y }, { x: hint.xs[i + 1]!, y }); });
+  raw.push({ x: x1, y: yb }, { x: sb, y: yb });
+  const pts = corners(raw);
+  for (let i = 1; i < pts.length; i++) {
+    const p = pts[i - 1]!, q = pts[i]!;
+    if (blocks.some(o => hitBox(o, p.x, p.y, q.x, q.y, LANE_CLEAR)) || !offRims(rims, p.x, p.y, q.x, q.y, LANE_CLEAR)) return null;
+    // Its own cards: only the first and last runs touch them, at their ports.
+    const own = [i === 1 ? null : a, i === pts.length - 1 ? null : b].filter((x): x is Box => !!x && x.kind !== 'frame');
+    if (own.some(o => hitBox(o, p.x, p.y, q.x, q.y, -1))) return null;
+  }
+  const m = Math.floor((pts.length - 1) / 2), mid = { x: (pts[m]!.x + pts[m + 1]!.x) / 2, y: (pts[m]!.y + pts[m + 1]!.y) / 2 };
+  return { d: rounded(pts), pts, mx: mid.x, my: mid.y, ...(pts.length > 4 ? { detour: true } : {}), clear: true };
 }
 
 /** A route through a card's top or bottom (map design v3 3.6, S4b): a control line leaves its card's bottom and comes in at the

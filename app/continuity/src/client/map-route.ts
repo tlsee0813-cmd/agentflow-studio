@@ -6,7 +6,7 @@
  *   moved line still touches no box it does not belong to.
  * - quick: while a part is dragged, every line is the plain shape from its ports (no search round other boxes), so lines follow
  *   the hand continuously; the full routing (and a morph from the quick shape) comes when the part is dropped. */
-import { edgePath, faceRoute, rounded, offRims, LANE_CLEAR, LANE_TRACK, type Box, type Edge, type Point, type Route, type PortFace } from './map-layout.js';
+import { edgePath, faceRoute, hintPath, rounded, offRims, LANE_CLEAR, LANE_TRACK, type Box, type Edge, type Point, type Route, type PortFace } from './map-layout.js';
 import { FACE_TURNS, turnsOf } from './line-grammar.js';
 
 /** faces: the faces the route really takes (a control line's top or bottom kept only for a route of few turns). */
@@ -80,8 +80,10 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
     const side = sideOf(a, b, boxes); if (side !== 'l' && side !== 'r') continue;
     const other = side === 'r' ? 'l' : 'r', sa = `${a.id}|${side}`, sb = `${b.id}|${other}`, f = faced.get(e.key);
     // An end that keeps a card's top or bottom (a control line) takes no place on a side.
-    if (f?.a !== 'top' && f?.a !== 'bottom') (at.get(sa) ?? at.set(sa, []).get(sa)!).push({ key: e.key, end: 'a', far: mid(b) });
-    if (f?.b !== 'top' && f?.b !== 'bottom') (at.get(sb) ?? at.set(sb, []).get(sb)!).push({ key: e.key, end: 'b', far: mid(a) });
+    // Beauty v3 (C): a line with a reserved route is ordered by where it goes next (its first or last row through the columns).
+    const ha = e.hint?.ys[0], hb = e.hint?.ys[e.hint.ys.length - 1];
+    if (f?.a !== 'top' && f?.a !== 'bottom') (at.get(sa) ?? at.set(sa, []).get(sa)!).push({ key: e.key, end: 'a', far: ha ?? mid(b) });
+    if (f?.b !== 'top' && f?.b !== 'bottom') (at.get(sb) ?? at.set(sb, []).get(sb)!).push({ key: e.key, end: 'b', far: hb ?? mid(a) });
     sides.set(e.key, { a: sa, b: sb, e });
   }
   const put = (key: string, end: 'a' | 'b', y: number) => { const port = out.get(key) ?? {}; port[end] = y; out.set(key, port); };
@@ -327,7 +329,9 @@ export function routeEdges(boxes: Map<string, Box>, edges: Edge[], opts: { quick
   const ports = assignPorts(boxes, edges, faceKept), out = new Map<string, Routed>();
   for (const e of edges) {
     const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
-    const p = ports.get(e.key) ?? {}, fr = faceRoutes.get(e.key), r = fr ?? (opts.quick ? quickRoute(a, b, p.a, p.b, boxes) : edgePath(a, b, boxes.values(), p));
+    // Beauty v3 (C.4): a line with a reserved route (its hint from the layered layout) takes it when every run of it is free; else the
+    // search as before.
+    const p = ports.get(e.key) ?? {}, fr = faceRoutes.get(e.key), r = fr ?? (opts.quick ? quickRoute(a, b, p.a, p.b, boxes) : (e.hint && hintPath(a, b, boxes.values(), p, e.hint)) || edgePath(a, b, boxes.values(), p));
     // The faces the line really takes: its kept top or bottom, else its sides (an ear stays an ear).
     const f = fr ? faceKept.get(e.key) : e.faces ? { a: e.faces.a === 'ear' ? 'ear' : 'side', b: e.faces.b === 'ear' ? 'ear' : 'side' } as const : undefined;
     out.set(e.key, { key: e.key, ...r, pts: r.pts.map(q => ({ ...q })), ...(f ? { faces: f } : {}) });

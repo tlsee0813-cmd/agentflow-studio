@@ -23,7 +23,9 @@ export interface LNode { id: string; w: number; h: number;
   /** Pins by relation end ('<relId>|in' / '|out'), from the top. */
   pins?: Record<string, number>;
   /** A participant or an external system (a hint only: a line back to a participant is the cheaper one to turn). */
-  role?: 'outside' | 'external' | null }
+  role?: 'outside' | 'external' | 'store' | null;
+  /** Least room above and below it from another part (an open group keeps a lane for lines beside it). */
+  gutter?: number }
 /** drive: a data or control line; ref: a reference (uses, a need with no channel); plain: shares or related. */
 export type LKind = 'drive' | 'ref' | 'plain';
 export interface LEdge { key: string; from: string; to: string; kind: LKind; weight: number; relIds: string[] }
@@ -59,6 +61,8 @@ export interface LResult {
 const cmpId = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const half = (v: number) => Math.round(v * 2) / 2;
 export const laneRoomOf = (n: number, margin: number, track: number) => (n <= 0 ? 0 : 2 * margin + (n - 1) * track + 2);
+/** map-route's PORT_GAP: the ends on one side of a card are spread this far apart. */
+const PORT_STEP = 12;
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
 /* ---------- network simplex (Gansner et al.) on one connected acyclic graph, minlen 1 ---------- */
@@ -139,7 +143,7 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
   const reversed = new Set<string>();
   let pivots = 0, dummies = 0;
   // Per block: ranks, then the layers with dummies, then the order. Coordinates come after (they depend on the spacing spent).
-  type Laid = { layers: number[][]; segs: Seg[]; chains: Map<number, { path: number[]; rev: boolean }>; isDummy: boolean[]; h: number[]; anc: number[]; wd: number[]; spineSet: Set<number>; spine: number[]; wrapAfter: Set<number>; nodeOf: number[] };
+  type Laid = { layers: number[][]; segs: Seg[]; chains: Map<number, { path: number[]; rev: boolean }>; isDummy: boolean[]; h: number[]; anc: number[]; wd: number[]; spineSet: Set<number>; spine: number[]; wrapAfter: Set<number>; nodeOf: number[]; gut: number[] };
   const laid: Laid[] = [];
   for (const B of blocks) {
     const local = new Map(B.nodes.map((v, i) => [v, i])), n = B.nodes.length;
@@ -150,7 +154,18 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     let driveKinds: LKind[] = ['drive'];
     if (reach('drive').size < linked.size / 2) driveKinds = reach('ref').size ? ['drive', 'ref'] : ['drive', 'ref', 'plain'];
     const layW = (i: number) => { const k = edges[i]!.kind, w = edges[i]!.weight || 1; return driveKinds.includes(k) ? (k === 'drive' ? 2 : 1) * w : k === 'ref' ? 0.25 * w : 0; };
-    const drives = bes.filter(i => driveKinds.includes(edges[i]!.kind));
+    const allDrives = bes.filter(i => driveKinds.includes(edges[i]!.kind));
+    // Two parts that drive each other: the line back is decided by what the record says they are, before any count. A store read back
+    // by the part that writes it sits after its writer (the read is the line turned); a part answering a participant sits after it
+    // (the answer is turned). These lines take no part in choosing the order below; the order then turns them as it must.
+    const pairOf = new Map<string, number[]>(); for (const i of allDrives) { const k = `${from[i]}|${to[i]}`; (pairOf.get(k) ?? pairOf.set(k, []).get(k)!).push(i); }
+    const pre = new Set<number>();
+    for (const i of allDrives) {
+      const a = from[i]!, b = to[i]!; if (!pairOf.has(`${b}|${a}`)) continue;
+      const ra = nodes[a]!.role, rb = nodes[b]!.role;
+      if ((ra === 'store' && rb !== 'store') || (rb === 'outside' && ra !== 'outside')) pre.add(i);
+    }
+    const drives = allDrives.filter(i => !pre.has(i));
     // Cycle breaking (A.3, Eades–Lin–Smyth over the driving lines, weighted by what turning them costs).
     const cost = (i: number) => (nodes[to[i]!]!.role === 'outside' ? 1 : 2) * (edges[i]!.weight || 1);
     const seq = (() => {
@@ -175,12 +190,29 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       }
       return [...left, ...right];
     })();
-    const at = new Map(seq.map((v, i) => [v, i]));
+    // The reading from the record's own starts: depth first from the parts nothing drives (in record order), then the participants,
+    // then the rest; a line back to where the reading came from is the one turned. Kept when it turns no more than the greedy order
+    // (a store written by one step and read by the next then sits between them, not before its writer).
+    const dfsSeq = (() => {
+      const outs = new Map<number, number[]>(B.nodes.map(v => [v, []])), hasIn = new Set<number>();
+      for (const i of drives) { outs.get(from[i]!)!.push(to[i]!); hasIn.add(to[i]!); }
+      for (const l of outs.values()) l.sort((p, q) => p - q);
+      const starts = [...B.nodes.filter(v => !hasIn.has(v)), ...B.nodes.filter(v => hasIn.has(v) && nodes[v]!.role === 'outside'), ...B.nodes.filter(v => hasIn.has(v) && nodes[v]!.role !== 'outside')];
+      const seen = new Set<number>(), post: number[] = [];
+      for (const s of starts) {
+        if (seen.has(s)) continue;
+        const st: [number, number][] = [[s, 0]]; seen.add(s);
+        while (st.length) { const top = st[st.length - 1]!, list = outs.get(top[0])!; if (top[1] < list.length) { const nx = list[top[1]++]!; if (!seen.has(nx)) { seen.add(nx); st.push([nx, 0]); } } else { post.push(top[0]); st.pop(); } }
+      }
+      return post.reverse();
+    })();
+    const turned = (sq: number[]) => { const p = new Map(sq.map((v, i) => [v, i])); return drives.reduce((a, i) => a + (p.get(from[i]!)! > p.get(to[i]!)! ? cost(i) : 0), 0); };
+    const at = new Map((turned(dfsSeq) <= turned(seq) ? dfsSeq : seq).map((v, i) => [v, i]));
     // The acyclic driving graph (layout direction), merged per ordered pair.
     const dir = new Map<number, { s: number; t: number }>(); // per edge index: its layout direction
     const dag = new Map<string, number>();
     const succ = new Map<number, Set<number>>(B.nodes.map(v => [v, new Set<number>()]));
-    for (const i of drives) {
+    for (const i of allDrives) {
       let s = from[i]!, t = to[i]!; if (at.get(s)! > at.get(t)!) { [s, t] = [t, s]; reversed.add(edges[i]!.key); }
       dir.set(i, { s, t }); const k = `${s}|${t}`; dag.set(k, (dag.get(k) ?? 0) + layW(i)); succ.get(s)!.add(t);
     }
@@ -277,7 +309,7 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       const walk = (v: number, g = 0): { w: number; next: number | null } => {
         const hit = best.get(v); if (hit) return hit;
         let r: { w: number; next: number | null } = { w: 0, next: null };
-        if (g < 64) for (const i of drives) { const d = dir.get(i)!; if (d.s !== v || reversed.has(edges[i]!.key) || final.get(d.t)! <= final.get(v)!) continue; const w = layW(i) + 0.01 + walk(d.t, g + 1).w; if (w > r.w + 1e-9) r = { w, next: d.t }; }
+        if (g < 64) for (const i of allDrives) { const d = dir.get(i)!; if (d.s !== v || reversed.has(edges[i]!.key) || final.get(d.t)! <= final.get(v)!) continue; const w = layW(i) + 0.01 + walk(d.t, g + 1).w; if (w > r.w + 1e-9) r = { w, next: d.t }; }
         best.set(v, r); return r;
       };
       let head = -1, hw = 0; for (const v of [...B.nodes].sort((p, q) => p - q)) { const w = walk(v).w; if (w > hw + 1e-9) { hw = w; head = v; } }
@@ -294,14 +326,14 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     }
     // Crossing reduction (A.6).
     orderLayers(layers, segs, opt.sweeps ?? 32, nodeOf, bes.filter(i => final.get(from[i]!) === final.get(to[i]!)).map(i => ({ a: lid.get(from[i]!)!, b: lid.get(to[i]!)!, w: ordW(i) })));
-    laid.push({ layers, segs, chains, isDummy, h, anc, wd, spineSet, spine, wrapAfter, nodeOf });
+    laid.push({ layers, segs, chains, isDummy, h, anc, wd, spineSet, spine, wrapAfter, nodeOf, gut: nodeOf.map(v => (v >= 0 ? nodes[v]!.gutter ?? 0 : 0)) });
   }
 
   // Coordinates under one spacing; the slack spending tries wider spacings (F.3).
   const place = (rowGap: number, laneMargin: number, layerGap: number) => {
     const out: { ys: number[]; xs: number[]; colX: number[]; colW: number[]; gaps: number[]; tracks: Map<string, number>[]; w: number; h: number; y0: number }[] = [];
     for (const b of laid) {
-      const sep = (u: number, v: number) => { const du = b.isDummy[u]!, dv = b.isDummy[v]!; const g = du && dv ? opt.laneTrack : du || dv ? laneMargin : rowGap; return (b.h[u]! - b.anc[u]!) + g + b.anc[v]!; };
+      const sep = (u: number, v: number) => { const du = b.isDummy[u]!, dv = b.isDummy[v]!; const g = du && dv ? opt.laneTrack : du || dv ? laneMargin : Math.max(rowGap, b.gut[u]!, b.gut[v]!); return (b.h[u]! - b.anc[u]!) + g + b.anc[v]!; };
       const ys = brandesKoepf(b.layers, b.segs, b.isDummy, sep, b.spineSet);
       polish(b.layers, b.segs, ys, sep, b.isDummy, b.spineSet);
       for (let k = 0; k < ys.length; k++) ys[k] = half(ys[k]!);
@@ -309,7 +341,19 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       const colW = b.layers.map(l => Math.max(0, ...l.map(k => b.wd[k]!)));
       const tracks: Map<string, number>[] = [], gaps: number[] = [];
       for (let L = 0; L + 1 < b.layers.length; L++) {
-        const runs = b.segs.filter(s => b.layers[L]!.includes(s.u) && Math.abs(ys[s.u]! - ys[s.v]!) >= 1).map(s => ({ key: s.key, a: ys[s.u]!, b: ys[s.v]! }));
+        // Each run from its port as the router will set it: the ends on one side of a card spread PORT_GAP apart round its contact
+        // point, in the order of where their lines go next (map-route assignPorts orders them so too, by the hint's first row).
+        const inGap = b.segs.filter(s => b.layers[L]!.includes(s.u));
+        const portY = new Map<Seg, { a: number; b: number }>(inGap.map(s => [s, { a: ys[s.u]!, b: ys[s.v]! }]));
+        for (const end of ['u', 'v'] as const) {
+          const by = new Map<number, Seg[]>(); for (const s of inGap) if (!b.isDummy[s[end]]) (by.get(s[end]) ?? by.set(s[end], []).get(s[end])!).push(s);
+          for (const [k, list] of by) {
+            if (list.length < 2) continue;
+            list.sort((p, q) => ys[end === 'u' ? p.v : p.u]! - ys[end === 'u' ? q.v : q.u]! || cmpId(p.key, q.key));
+            list.forEach((s, i) => { const y = ys[k]! + (i - (list.length - 1) / 2) * PORT_STEP; portY.get(s)![end === 'u' ? 'a' : 'b'] = y; });
+          }
+        }
+        const runs = inGap.map(s => ({ key: s.key, ...portY.get(s)! })).filter(r => Math.abs(r.a - r.b) >= 1);
         const t = trackOf(runs); tracks.push(t.at);
         const base = b.wrapAfter.has(L) ? (opt.wrapGap ?? layerGap / 2) : layerGap;
         gaps.push(Math.max(base, laneRoomOf(t.n, laneMargin, opt.laneTrack)));
@@ -375,18 +419,19 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
  * starting lower). at: '<key>|<hop>' → track index; '#' → the number of tracks. Keys of runs are their segment's key and hop. */
 function trackOf(runs: { key: string; a: number; b: number }[]): { n: number; at: Map<string, number> } {
   const at = new Map<string, number>(); if (!runs.length) { at.set('#', 0); return { n: 0, at }; }
-  // A hop index per key, in the order the segments come (one key crosses one gap at most once).
-  const iv = runs.map(r => ({ ...r, lo: Math.min(r.a, r.b), hi: Math.max(r.a, r.b), score: r.b > r.a ? -r.a : r.a }))
-    .sort((p, q) => p.lo - q.lo || p.hi - q.hi || cmpId(p.key, q.key));
-  const ends: number[] = [], members: (typeof iv)[] = [];
-  for (const r of iv) { let t = ends.findIndex(e => e < r.lo - 0.5); if (t < 0) { t = ends.length; ends.push(r.hi); members.push([]); } else ends[t] = r.hi; members[t]!.push(r); }
-  const score = members.map((m, i) => ({ i, s: m.reduce((a, r) => a + r.score, 0) / m.length }));
-  score.sort((p, q) => p.s - q.s || p.i - q.i);
-  score.forEach(({ i }, rankI) => { for (const r of members[i]!) at.set(r.key, rankI); });
-  at.set('#', ends.length);
-  return { n: ends.length, at };
+  // Of two runs, which goes left: the order whose turns cross the other run less (run i left of j: j's first run, coming from the
+  // left at its start height, crosses i's vertical when that height is inside i's extent; i's last run, going right at its end
+  // height, crosses j's vertical likewise). Pairwise, settled by passes; ties by start height, then key.
+  const inside = (y: number, p: number, q: number) => y > Math.min(p, q) + 0.5 && y < Math.max(p, q) - 0.5;
+  const cost = (i: { a: number; b: number }, j: { a: number; b: number }) => Number(inside(j.a, i.a, i.b)) + Number(inside(i.b, j.a, j.b));
+  const ord = [...runs].sort((p, q) => p.a - q.a || p.b - q.b || cmpId(p.key, q.key));
+  for (let pass = 0; pass < ord.length; pass++) { let sw = false; for (let i = 0; i + 1 < ord.length; i++) { const p = ord[i]!, q = ord[i + 1]!; if (cost(p, q) > cost(q, p)) { ord[i] = q; ord[i + 1] = p; sw = true; } } if (!sw) break; }
+  // Tracks in that order: a run takes the track right of every earlier run whose extent it meets (fewest tracks the order allows).
+  const tr: number[] = [];
+  ord.forEach((r, i) => { let t = 0; for (let j = 0; j < i; j++) { const o = ord[j]!; if (Math.max(o.a, o.b) >= Math.min(r.a, r.b) - 6 && Math.min(o.a, o.b) <= Math.max(r.a, r.b) + 6) t = Math.max(t, tr[j]! + 1); } tr.push(t); at.set(r.key, t); });
+  const n = Math.max(...tr) + 1; at.set('#', n);
+  return { n, at };
 }
-
 /* ---------- ordering ---------- */
 function orderLayers(layers: number[][], segs: Seg[], sweeps: number, nodeOf: number[], flat: { a: number; b: number; w: number }[]) {
   const pos = new Map<number, number>(); const index = () => layers.forEach(l => l.forEach((k, i) => pos.set(k, i)));
@@ -522,13 +567,16 @@ function brandesKoepf(layers: number[][], segs: Seg[], isDummy: boolean[], sep: 
   }
   return ys;
 }
-/** Priority polish (A.7-5): each real node off the spine moves toward the weighted median of its neighbours' anchors, inside the room
+/** Priority polish (A.7-5): each real node (the spine's too: B–K already set it straight, and a hub on it pulled to its partners' middle
+ * reads better than one held at the top) moves toward the weighted median of its neighbours' anchors, inside the room
  * its layer's order leaves. */
 function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, v: number) => number, isDummy: boolean[], spine: Set<number>) {
   const nb = new Map<number, { k: number; w: number }[]>();
-  for (const s of segs) { (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w: s.w }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w: s.w }); }
-  for (let pass = 0; pass < 4; pass++) for (const l of layers) l.forEach((k, i) => {
-    if (isDummy[k] || spine.has(k)) return;
+  // The spine's own steps weigh four times: the main flow stays one straight line unless most of a part's lines pull it away.
+  for (const s of segs) { const w = s.spine ? 4 * s.w : s.w; (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w }); }
+  void spine;
+  for (let pass = 0; pass < 8; pass++) for (const l of (pass % 2 ? [...layers].reverse() : layers)) l.forEach((k, i) => {
+    if (isDummy[k]) return;
     const list = nb.get(k); if (!list?.length) return;
     const v = list.map(x => ({ y: ys[x.k]!, w: x.w })).sort((a, b) => a.y - b.y), tot = v.reduce((a, x) => a + x.w, 0);
     let acc = 0, m = v[0]!.y; for (let j = 0; j < v.length; j++) { acc += v[j]!.w; if (Math.abs(acc - tot / 2) < 1e-9 && j + 1 < v.length) { m = (v[j]!.y + v[j + 1]!.y) / 2; break; } if (acc > tot / 2) { m = v[j]!.y; break; } }

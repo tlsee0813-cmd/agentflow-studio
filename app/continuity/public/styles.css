@@ -3378,7 +3378,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space .frame.region > .frame-head .frame-name { font-weight: 640; color: var(--region-name); }
 .band-head { font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: .04em; color: var(--band-caption); transform: scale(max(1, min(var(--u, 1), max(calc(var(--u, 1) * .7692), 1.5385)))); }
 .band-line { border-left-width: calc(2px * var(--u, 1)); }
-.band-zone { position: absolute; border-radius: 16px; background: var(--bg); pointer-events: none; }
+.band-tick { pointer-events: auto; cursor: default; }
 /* H8: one card surface at every tier. The head, the rows, the inner line and the foot are plain rows with spacing (no tinted head
    band, no hairlines between them); the ways in (⤢, ▸ N, 연결 N) share one quiet button; the first view's emphasis is the card's own
    edge drawn firmer: a 1.5px (on screen) outline laid over its 1px border (no gap, no second ring), a card lifted as well, a group or

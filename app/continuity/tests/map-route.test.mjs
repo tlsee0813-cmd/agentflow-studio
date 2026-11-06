@@ -159,10 +159,13 @@ test('ROUTE-6 a line between two level parts is straight even where a busy side 
   let n = 0;
   for (const { l, routed, label } of shaped()) for (const e of l.edges.filter(e => e.spine)) {
     const A = l.boxes.get(e.from), B = l.boxes.get(e.to), pts = routed.get(e.key).pts;
-    if (A.kind !== 'node' || B.kind !== 'node' || Math.abs(A.y + A.h / 2 - (B.y + B.h / 2)) > 1) continue;
+    // Beauty v3 (A.7): parts are levelled on their line-contact rows (an 80- and a 104-high card share a row), so "level" is read there.
+    if (A.kind !== 'node' || B.kind !== 'node' || Math.abs(A.y + (A.contact ?? A.h / 2) - (B.y + (B.contact ?? B.h / 2))) > 1) continue;
     assert.equal(pts.length, 2, `${label(e)} ${JSON.stringify(pts)}`); n++;
   }
-  assert.ok(n >= 4, String(n));
+  // Beauty v3: the layered layout's polish may pull a spine part toward its other partners (a long line and a line back pull the chain's
+  // fourth step off its row here), so three level steps are sampled, not four.
+  assert.ok(n >= 3, String(n));
 });
 
 test('ROUTE-7 every routed line is orthogonal with no repeated points: a run of no length is never nudged into a slanted line', () => {
