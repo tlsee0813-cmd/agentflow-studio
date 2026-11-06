@@ -542,7 +542,10 @@ export interface ReadingRelation { relationId: string; from: string; to: string;
    * its 경계, its 박자 word, the C-DATA row its 넘기는 것 names first (D03), the 통로 it goes by and the list item (「목록: 항목」) it stands for. */
   when?: string | null; optional?: boolean; variantRef?: string | null; crosses?: CrossKind | null; cadenceKind?: CadenceKind | null; payloadRef?: string | null; via?: string | null; member?: string | null;
   /** map-reading.19, a line on a v5 C-LINK row: its 주장 성격 (12.2; mode observed only for 실행 관측 with a run-grade cite) and the row's cites. */
-  claimNature?: ClaimNature | null; cites?: ReadingCite[] }
+  claimNature?: ClaimNature | null; cites?: ReadingCite[];
+  /** Review of .51 (6b): another relation between the same two parts and kind, on a C-LINK row of its own, kept under that line (the map
+   * draws one line per pair and kind): the views list it beside the line's own facts, never over them. Only ever true. */
+  also?: true }
 /** What a candidate leaves undecided (map-reading.5): whose statement this is (attribution), whether two parts are one
  * (identity), whether a part is inside a parent (parent), or whether a statement holds (holds). An attribution or holds candidate
  * keeps the undecided statement itself (content, kind, version, exact quote): it is in no part's claims. areaIds name the
@@ -555,7 +558,9 @@ export interface ReadingCandidate { text: string; areaIds: string[]; quote: Read
 /** Something the reply proposed that was not applied, and why (kept so the next reading of the same input does not repeat it). */
 export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' | 'material'
   // Recipe .51 (M4, 6d): a group card with no member is never made.
-  | 'empty-group' }
+  | 'empty-group'
+  // Review of .51 (M5): a new part held as an identity candidate because its files are the very files of a live part.
+  | 'same-files' }
 /** map-reading.4: a passage the reading took as material inside the record (an example, a sample under test, another program's
  * words), not as this project's own: [from, to) of the record, with what it is. Nothing of the map rests on it alone. */
 export interface ReadingMaterial { record: string; from: number; to: number; what: string }
@@ -653,7 +658,8 @@ export const ROW_REASONS: Readonly<Record<RowState, readonly string[]>> = Object
   // row, unsupported (it stands only on a reading field the app never shows: kept in the reading, not reflected, not sent again).
   // Recipe .51: held revision (a final review's second revision verdict held the part the row stands on; the row goes once more), then
   // rejected revision (held so again: never sent a third time).
-  rejected: ['material', 'depends', 'unplaced', 'form', 'unknown-part', 'other-project', 'unsupported', 'undecided', 'planned', 'partial', 'unconfirmed', 'revision'] });
+  // Review of .51: rejected empty-group (the only part the row stood on was a group card with no member, no claim and no line: not made).
+  rejected: ['material', 'depends', 'unplaced', 'form', 'unknown-part', 'other-project', 'unsupported', 'undecided', 'planned', 'partial', 'unconfirmed', 'revision', 'empty-group'] });
 /** What a reflected row became: a part (its basis or a field of it), one of its claims (index in this reading's part entry), a relation, or a
  * field of the reading itself (checks, projectStatus, …: id is the field's name). */
 export interface ReadingRowTarget { kind: 'part' | 'claim' | 'relation' | 'reading'; id: string; index: number | null }
@@ -723,6 +729,12 @@ export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at
   record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
 export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15' || e.version === 'map-reading.16' || e.version === 'map-reading.17' || e.version === 'map-reading.18' || e.version === 'map-reading.19' || e.version === 'map-reading.20';
+/** Review of .51: what the readings last said of the whole project: the newest map reading's summary that is not empty (a reading may write
+ * none: a final review's verdict leaves the fragments combined without a global rewrite), or null. Never made up. */
+export const latestMapSummary = (readings: readonly ReadingEntry[]): string | null => {
+  for (let k = readings.length - 1; k >= 0; k--) { const r = readings[k]!; if (isMapReading(r) && r.summary.trim()) return r.summary; }
+  return null;
+};
 export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;

@@ -114,7 +114,7 @@ test('C50-3 a met obligation still applies its replacement; an unjustified one n
 
 test('C50-4 the later recipe names its containment rules and reading contract (the key of a cached run changes with them)', () => {
   const { pipeline } = replayPipeline({});
-  assert.equal(B.CONTAINMENT_VERSION, 'later-containment.3'); assert.equal(M.READING_CONTRACT, 'map-reading.20');
+  assert.equal(B.CONTAINMENT_VERSION, 'later-containment.4'); assert.equal(M.READING_CONTRACT, 'map-reading.20');
   assert.equal(pipeline.describe().laterVersion, LATER_PIPELINE_RECIPE);
   assert.match(pipeline.laterIdentity, /^[0-9a-f]{64}$/);
   assert.notEqual(pipeline.laterIdentity, replayPipeline({}).pipeline.identity);

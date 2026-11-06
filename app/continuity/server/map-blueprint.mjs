@@ -562,7 +562,7 @@ const cellItems = text => listItems(text);
  * 120 characters); an item pointing at no row stays one unit named by its own text (up to 120).
  * .35: and the part's own rows by name (OWN_ROWS, CONDITION_ROWS, [모름] steps, design-cell items; see above), each once per part (a
  * row the plan also assigned to that part is one unit). A unit lands too when one of the given exclusions ({ record, from, to }: a
- * claim, step or anchor set aside on the way) stands on its row. missingUnits says, per missing unit, its ref and whether it may
+ * claim, step or anchor set aside on the way) stands on its row. missingUnits says, per missing unit, its ref, its rows (a plan item on no table row: the places it cites) and whether it may
  * refuse a render's first pass (trigger): a plan item or focus row whose own part cell names another part of the plan only costs a
  * wrong-part exclusion when written there, so it stays the diagnostic's alone. */
 /* Recipe .51 (M3, the cascade): with { survived: true } a unit whose row an item set aside in this very reading stands on is not expected at
@@ -620,7 +620,7 @@ export function planClaims(ask, blueprint, parts, exclusions = [], { survived = 
     const ref = [...g.text.matchAll(ASSIGNED)].at(-1)?.[1];
     if (!ref || !refs.has(ref)) continue;
     const spans = g.at.map(where).filter(Boolean), rows = itemRows.filter(row => spans.some(r => meets(r, row)));
-    if (!rows.length) { items.push({ ref, rows, name: `${ref}: ${opening(g.text)}`, landed: spans.some(r => quoted.some(q => meets(q, r)) || placed.some(q => meets(q, r))), trigger: true }); continue; }
+    if (!rows.length) { items.push({ ref, rows, spans, name: `${ref}: ${opening(g.text)}`, landed: spans.some(r => quoted.some(q => meets(q, r)) || placed.some(q => meets(q, r))), trigger: true }); continue; }
     for (const row of rows) if (!has(ref, row) && !elsewhereWhole(ref, row))
       items.push({ ref, rows: [row], name: `${ref}: ${opening(row.cells.join(' | '))}`, landed: said(row), trigger: !elsewhere(ref, row) && !whole(row) });
   }
@@ -674,7 +674,7 @@ export function planClaims(ask, blueprint, parts, exclusions = [], { survived = 
   }
   const expected = survived ? items.filter(item => !item.rows.some(row => aside.some(r => meets(r, row)))) : items;
   const missing = expected.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref));
-  return { items: expected.length, missing: missing.map(item => item.name), missingUnits: missing.map(item => ({ ref: item.ref, name: item.name, trigger: item.trigger })) };
+  return { items: expected.length, missing: missing.map(item => item.name), missingUnits: missing.map(item => ({ ref: item.ref, name: item.name, trigger: item.trigger, rows: (item.rows.length ? item.rows : item.spans ?? []).map(r => ({ record: r.record, from: r.from, to: r.to })) })) };
 }
 /** .34: the plan items (planClaims, named the same way) no claim of the given parts quotes whose part holds fewer claims than a
  * first map's cap (MAP6_CLAIMS) once read (read: the fragment's checked reply; a part it does not hold counts none). A render's
@@ -1073,9 +1073,11 @@ export function missingMapCorrections(wire, ask, blueprint) {
  *    claim stays current and the part's claims on the obligation's lines, the part's relations inside them and their port-map rows are
  *    left out (holdCorrectionUnits) with their reasons (correction-unmet, correction-held); everything independent applies. */
 // Review of .50 (later-containment.2): a change word said in the negative states no change; a held unit's reasons come first, one per line.
-// Recipe .51 (later-containment.3): a final review's second revision verdict is held with what stands on its parts (holdRevisionParts), never
-// a refusal of the reading.
-export const CONTAINMENT_VERSION = 'later-containment.3';
+// Recipe .51 (later-containment.3): a final review's second revision verdict is held with what stands on its parts, never a refusal of the
+// reading. Review of .51 (later-containment.4): what is held is what is missing (revisionHolds: the missing units' rows and the verdict's
+// unquoted lines; the parts' items apply), its reasons after the reasons of what left the wire; a failed semantic render or final review on
+// the revision path is that revision's verdict.
+export const CONTAINMENT_VERSION = 'later-containment.4';
 const CHANGE_COLUMN = /옛|이전|지금|이후|바뀐|변경|철회|대체|방식/;
 const CHANGE_WORDS = /철회|정정|대체|대신|바뀌|바뀐|바뀜|바꾸|바꿨|바꿈|변경|제거|폐기|되돌|옮겼|옮김|교체|삭제|없앴|없애|채택\s*안|다시\s*도입|revert|remov|deprecat|replac|rollback|instead|renam/gi;
 /* Review of .50 (K10): a change word said in the negative (「삭제되지 않고」, 「제거하지 못했다」, 「교체 안 됨」, 「not removed」) states no change, and
@@ -1193,26 +1195,34 @@ export function holdCorrectionUnits(wire, ask, blueprint, held = []) {
  * The one semantic re-render is spent when global-final asks for another (a second revision): before .51 that refused the whole reading, nothing
  * applied and nothing was recorded, so the next ask was byte-identical and the same refusal replayed for ever. Now the verdict is read as a
  * judgement on the parts it names. A named part the program's own check also finds short (revisionBacking: a plan item of that part no claim,
- * condition, step or place of it quotes, counted over the rows that survived this reading's set-asides) is held with everything standing on it
- * (holdRevisionParts: the part's entry, every new part under a held new part, the relations and candidates naming one and the port-map rows of
- * those relations), each held item's passages and the passages the verdict cites named once (revision-held), and the rest applies on the wire
- * combined without a global rewrite. A verdict the program backs on no part (the model's opinion alone) is only a diagnostic: nothing is held. */
+ * condition, step or place of it quotes, counted over the rows that survived this reading's set-asides) is backed; a verdict the program backs
+ * on no part (the model's opinion alone) is only a diagnostic: nothing is held.
+ * Review of .51: what a backed verdict holds is what is missing, never the part. The part's items as rendered apply (the check found something
+ * missing, not something wrong); the rows of its missing plan units and the lines the verdict cites that no item of the wire quotes are named
+ * (revisionHolds: revision-held, adjacent places of one part as one), so their rows are held once and go with the next ask. Nothing leaves
+ * the wire: no part, relation or candidate is removed, so the wire validates exactly as the combined fragments do. */
 export const REVISION_DIAGNOSTIC = 'revision';
-/** Which of a verdict's parts the program's own check backs: { backed, unbacked, names } (names: the plan units missing on a backed part). */
+/** Which of a verdict's parts the program's own check backs: { backed, unbacked, names, units } (names: the plan units missing on a backed
+ * part; units: those units, each { ref, name, rows }, rows the table rows it stands for, in the ask's coordinates). */
 export function revisionBacking(revision, parts, ask, blueprint, exclusions = []) {
-  const refs = Array.isArray(revision?.reviseParts) ? revision.reviseParts.filter(ref => typeof ref === 'string') : [];
-  let units = [];
-  try { units = planClaims(ask, blueprint, parts, exclusions, { survived: true }).missingUnits; } catch { units = []; }
-  const names = new Map();
-  for (const unit of units) if (refs.includes(unit.ref)) names.set(unit.ref, [...names.get(unit.ref) ?? [], unit.name]);
-  return { backed: refs.filter(ref => names.has(ref)), unbacked: refs.filter(ref => !names.has(ref)), names: [...names.values()].flat() };
+  const refs = Array.isArray(revision?.reviseParts) ? [...new Set(revision.reviseParts.filter(ref => typeof ref === 'string'))] : [];
+  let missing = [];
+  try { missing = planClaims(ask, blueprint, parts, exclusions, { survived: true }).missingUnits; } catch { missing = []; }
+  const units = missing.filter(unit => refs.includes(unit.ref)), on = new Set(units.map(unit => unit.ref));
+  return { backed: refs.filter(ref => on.has(ref)), unbacked: refs.filter(ref => !on.has(ref)), names: units.map(unit => unit.name), units };
+}
+/** Two verdicts as one (the parts of both, the first's reason, the lines of both, eight at most); either may be null. */
+export function joinVerdicts(a, b) {
+  if (!a || !b) return a ?? b ?? null;
+  return { reviseParts: [...new Set([...a.reviseParts ?? [], ...b.reviseParts ?? []])], reason: a.reason ?? b.reason ?? '', at: [...new Set([...a.at ?? [], ...b.at ?? []])].slice(0, 8) };
 }
 /** The stage diagnostic a revision verdict leaves on global-final (fixed shape; the reason is the model's text, untrusted, kept as data):
- * expected the parts it names, actual the parts held, names 「held|noted ref: reason」 then the program's missing units. */
+ * expected the parts it names, actual the parts backed, names 「확인|판정만 ref: reason」 (확인: the program's check also finds a unit of that
+ * part missing; what of it no item quotes is held, revisionHolds) then the program's missing units. */
 export function revisionDiagnostic(revision, backing) {
   const clip = s => String(s ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
   const refs = [...backing.backed, ...backing.unbacked], reason = clip(revision?.reason).slice(0, 120);
-  const names = [...refs.map(ref => `${backing.backed.includes(ref) ? '보류' : '판정만'} ${ref}: ${reason}`.slice(0, 160)),
+  const names = [...refs.map(ref => `${backing.backed.includes(ref) ? '확인' : '판정만'} ${ref}: ${reason}`.slice(0, 160)),
     ...(Array.isArray(revision?.at) ? [`근거 ${revision.at.filter(a => typeof a === 'string').slice(0, 8).join(' ')}`.slice(0, 160)] : []),
     ...backing.names.map(n => clip(n).slice(0, 160))].filter(n => n.length >= 1).slice(0, PLAN_CLAIMS_NAMES);
   return { path: 'parts', rule: REVISION_DIAGNOSTIC, expected: Math.min(refs.length, 9999), actual: Math.min(backing.backed.length, 9999), names };
@@ -1224,33 +1234,29 @@ function quotedPlaces(value, texts, out = new Map()) {
   if (value && typeof value === 'object') for (const x of Object.values(value)) quotedPlaces(x, texts, out);
   return out;
 }
-/** The reasons a held part's places leave (at most this many per reading, the verdict's own lines first). */
-export const REVISION_HELD_MAX = 48;
-/** The wire with the held parts and what stands on them left out, and their reasons (revision-held), naming the wire it was given. A held
- * existing part simply is not touched by this reading (its current understanding stays); a held new part is not created. */
-export function holdRevisionParts(wire, ask, refs, revision = null) {
-  const texts = askRecords(ask), parts = Array.isArray(wire?.parts) ? wire.parts : [], existing = new Set(ask.parts.map(p => p.id));
-  const held = new Set((refs ?? []).filter(ref => parts.some(p => p?.ref === ref)));
-  if (!held.size) return { wire, exclusions: [], held: [] };
-  // A new part whose parent is a held new part stands on it (it could not be placed without it).
-  for (let grew = true; grew;) { grew = false; for (const p of parts) if (p && typeof p.parent === 'string' && held.has(p.parent) && !existing.has(p.parent) && !held.has(p.ref)) { held.add(p.ref); grew = true; } }
-  const exclusions = [], seen = new Set();
-  const named = (path, place) => { const k = `${place.record}:${place.from}:${place.to}`; if (seen.has(k) || exclusions.length >= REVISION_HELD_MAX) return; seen.add(k); exclusions.push(aliasExclusion(path, 'revision-held', place.alias, ask)); };
-  const partAway = parts.flatMap((p, i) => p && held.has(p.ref) ? [i] : []);
-  const first = partAway.find(i => parts[i].ref === revision?.reviseParts?.find(ref => held.has(ref))) ?? partAway[0];
-  for (const alias of Array.isArray(revision?.at) ? revision.at : []) { const p = aliasPlace(alias, texts); if (p) named(`parts[${first}]`, { alias, ...p }); }
-  for (const i of partAway) { const places = [...quotedPlaces(parts[i], texts).values()]; if (!places.length) exclusions.push(aliasExclusion(`parts[${i}]`, 'revision-held', null, ask)); for (const p of places) named(`parts[${i}]`, p); }
-  const lines = Array.isArray(wire.relations) ? wire.relations : [], rows = Array.isArray(wire.portMap) ? wire.portMap : null;
-  const lineAway = lines.flatMap((r, k) => r && (held.has(r.from) || held.has(r.to)) ? [k] : []);
-  const rowAway = rows ? rows.flatMap((m, k) => m && lineAway.includes(m.relation) ? [k] : []) : [];
-  const candidates = Array.isArray(wire.candidates) ? wire.candidates : [];
-  const candidateAway = candidates.flatMap((c, k) => c && Array.isArray(c.parts) && c.parts.some(ref => held.has(ref)) ? [k] : []);
-  for (const k of lineAway) exclusions.push(aliasExclusion(`relations[${k}]`, 'revision-held', lines[k].at, ask));
-  for (const k of rowAway) exclusions.push(aliasExclusion(`portMap[${k}]`, 'revision-held', rows[k].at, ask));
-  for (const k of candidateAway) exclusions.push(aliasExclusion(`candidates[${k}]`, 'revision-held', candidates[k]?.statement?.at ?? null, ask));
-  const out = { ...wire, parts: parts.filter((_, i) => !partAway.includes(i)), relations: lines.filter((_, k) => !lineAway.includes(k)), candidates: candidates.filter((_, k) => !candidateAway.includes(k)),
-    ...(rows ? { portMap: rows.flatMap((m, k) => rowAway.includes(k) ? [] : [m && Number.isSafeInteger(m.relation) ? { ...m, relation: m.relation - lineAway.filter(r => r < m.relation).length } : m]) } : {}) };
-  return { wire: out, exclusions, held: [...held] };
+/** The reasons (revision-held) a backed verdict leaves beside the wire, which it never changes: per backed part (path parts[i], its index
+ * in this wire; 'parts' when the wire has no entry of it), the rows of its missing plan units, then the lines the verdict cites, each only
+ * where no item of the wire quotes it (a row an item stands on is that item's), overlapping or adjacent places of one part and record (only
+ * white space between) as one. At most `room` reasons: the reasons of what the server left out of the wire come first, so the bound never
+ * hides a removed item's reason; a row past it is not held and goes again as any unplaced row does. */
+export function revisionHolds(wire, ask, backing, revision = null, room = DIVIDED_EXCLUSIONS_MAX) {
+  if (!backing?.backed?.length || !(room > 0)) return [];
+  const texts = askRecords(ask), parts = Array.isArray(wire?.parts) ? wire.parts : [], quoted = [...quotedPlaces(wire, texts).values()];
+  const free = place => !quoted.some(q => overlapsPlace(q, place));
+  const pathOf = ref => { const i = parts.findIndex(p => p?.ref === ref); return i >= 0 ? `parts[${i}]` : 'parts'; };
+  const places = [];
+  for (const ref of backing.backed) for (const unit of backing.units.filter(u => u.ref === ref)) for (const row of unit.rows ?? []) if (free(row)) places.push({ path: pathOf(ref), record: row.record, from: row.from, to: row.to });
+  const cited = pathOf(backing.backed[0]);
+  for (const alias of Array.isArray(revision?.at) ? revision.at : []) { const p = aliasPlace(alias, texts); if (p && free(p)) places.push({ path: cited, record: p.record, from: p.from, to: p.to }); }
+  const order = [...new Set(places.map(p => p.path))];
+  places.sort((a, b) => order.indexOf(a.path) - order.indexOf(b.path) || (a.record < b.record ? -1 : a.record > b.record ? 1 : 0) || a.from - b.from);
+  const merged = [];
+  for (const p of places) {
+    const last = merged.at(-1), between = last && last.record === p.record ? (texts.get(p.record)?.text ?? '').slice(last.to, Math.max(last.to, p.from)) : null;
+    if (last && last.path === p.path && between !== null && !between.trim()) { last.to = Math.max(last.to, p.to); continue; }
+    merged.push({ ...p });
+  }
+  return merged.slice(0, room).map(p => ({ path: p.path, rule: 'contract', category: 'revision-held', explanation: explainExclusion(p.path, 'contract', 'revision-held'), record: p.record, from: p.from, to: p.to }));
 }
 
 /** Machine review data for the existing one-pass revision path. The complete blueprint keeps every obligation anchor;

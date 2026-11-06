@@ -74,8 +74,12 @@ interface Aside extends Place { category: string | null; with: string[] }
 /** Recipe .50 step 2: the server's reasons that hold a row for a correction (the obligation and the items on its lines; map-blueprint.mjs). */
 export const CORRECTION_HOLDS: ReadonlySet<string> = new Set(['correction-unmet', 'correction-held']);
 /** Recipe .51 (Astra F5: no deadlock): the server's reason that holds a row for a final review's revision verdict (map-blueprint.mjs
- * holdRevisionParts). Such a row is held (revision) and goes with the next ask once more (resendRows); held so again it is rejected (revision). */
+ * revisionHolds: a backed part's missing row). Such a row is held (revision) with that part and goes with the next ask once more (resendRows);
+ * held so again it is rejected (revision). */
 export const REVISION_HOLD = 'revision-held';
+/** Review of .51 (6d): the app's own reason that a new part was a group card with no member, no claim and no line (applyReading): its rows
+ * end rejected (empty-group), never sent again. */
+export const EMPTY_GROUP = 'empty-group';
 const revisedBefore = (x: { reason: string | null; detail: string | null } | undefined) => !!x && (x.reason === 'revision' || x.detail === REVISION_HOLD);
 const isPlace = (v: unknown): v is Place => !!v && typeof v === 'object' && typeof (v as Place).record === 'string' && Number.isSafeInteger((v as Place).from) && Number.isSafeInteger((v as Place).to);
 /** Every place a value quotes, however deep. */
@@ -106,7 +110,7 @@ function standing(r: MapReading, heldWith: (x: ReadingExclusion) => string[]): {
   for (const [k, v] of Object.entries(r)) if (!OWN_FIELDS.has(k)) for (const q of places(v)) (SHOWN_READING_FIELDS.has(k) ? stands : unshown).push({ ...q, target: { kind: 'reading', id: k, index: null } });
   const holds: Hold[] = r.candidates.flatMap(c => ([c.quote, c.statement?.quote ?? null] as unknown[]).filter(isPlace).map(q => ({ record: q.record, from: q.from, to: q.to, reason: c.target ?? 'identity', with: [...c.areaIds] })));
   const material = (r.material ?? []).map(m => ({ record: m.record, from: m.from, to: m.to }));
-  const asides = (r.exclusions ?? []).filter(x => x.record !== null && x.from !== null && x.to !== null).map(x => ({ record: x.record!, from: x.from!, to: x.to!, category: x.category, with: x.category && CORRECTION_HOLDS.has(x.category) ? heldWith(x).slice(0, 4) : [] }));
+  const asides = (r.exclusions ?? []).filter(x => x.record !== null && x.from !== null && x.to !== null).map(x => ({ record: x.record!, from: x.from!, to: x.to!, category: x.category, with: x.category && (CORRECTION_HOLDS.has(x.category) || x.category === REVISION_HOLD) ? heldWith(x).slice(0, 4) : [] }));
   return { stands, unshown, holds, material, asides };
 }
 const on = (q: Place, t: Tracked) => q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to;
@@ -137,8 +141,10 @@ export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent
         e = { ...base, state: 'held', reason: 'correction', detail: q.category, with: [...new Set(aside.flatMap(y => y.with))].slice(0, 4) }; }
       // Recipe .51: a row a revision verdict's held part stands on is held once (it goes again with the next ask); held so a second time it
       // is rejected with that reason, so a verdict that keeps coming back ends instead of holding the row for ever.
-      else if (aside.some(q => q.category === REVISION_HOLD)) e = revisedBefore(before)
-        ? { ...base, state: 'rejected', reason: 'revision', detail: REVISION_HOLD } : { ...base, state: 'held', reason: 'revision', detail: REVISION_HOLD };
+      else if (aside.some(q => q.category === REVISION_HOLD)) { const w = [...new Set(aside.filter(q => q.category === REVISION_HOLD).flatMap(q => q.with))].slice(0, 4);
+        e = revisedBefore(before) ? { ...base, state: 'rejected', reason: 'revision', detail: REVISION_HOLD } : { ...base, state: 'held', reason: 'revision', detail: REVISION_HOLD, with: w }; }
+      // Review of .51 (6d): a row only an empty group card stood on (not made) ends here with that reason.
+      else if (aside.some(q => q.category === EMPTY_GROUP)) e = { ...base, state: 'rejected', reason: 'empty-group', detail: EMPTY_GROUP };
       else if (material.some(q => on(q, t))) e = { ...base, state: 'rejected', reason: 'material' };
       // Review of .50 (K6): parsed into a field the app never shows is kept in the reading, not reflected, and not sent again.
       else if (unshown.some(q => on(q, t))) e = { ...base, state: 'rejected', reason: 'unsupported', detail: kebab(unshown.find(q => on(q, t))!.target.id) };

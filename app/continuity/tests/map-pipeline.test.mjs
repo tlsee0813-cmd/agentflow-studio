@@ -722,12 +722,28 @@ test('a second semantic sentinel ends the reading without another render or form
   assert.equal(stages.includes('global-final-correction'), false);
   assert.equal(stages.some(id => id.includes('semantic-semantic')), false);
   const count = calls.length; assert.deepEqual(await pipeline.call(ask), result); assert.equal(calls.length, count, 'the verdict replays the same reading at no cost');
-  // A first map's wire with the named part held still reads whole under plain map.6, and its reasons attach (the backed path of a first map).
-  const B = await import('../server/map-blueprint.mjs'), held = B.holdRevisionParts(result, ask, ['new:flow'], revisionFor(ask));
-  assert.ok(held.held.includes('new:flow') && held.exclusions.length > 0 && held.exclusions.every(x => x.category === 'revision-held'));
-  assert.ok(!held.wire.parts.some(p => p.ref === 'new:flow'));
-  const reply = validateMapReply(structuredClone(held.wire), ask); M.attachExclusions(reply, held.exclusions, ask);
+  // Review of .51: a first map's verdict leaves every item of the wire (what is missing is held beside it): its reasons attach under plain
+  // map.6, and a held place is one no item of the wire quotes.
+  const out = await pipeline.read(ask); assert.deepEqual(out.wire, result);
+  M.attachExclusions(validateMapReply(structuredClone(out.wire), ask), out.exclusions, ask);
+  const B = await import('../server/map-blueprint.mjs'), written = JSON.stringify(result);
+  const unquoted = ask.records.flatMap(r => r.spans.map(s => s.s)).filter(alias => !written.includes(`"${alias}"`)), quoted = ask.records.flatMap(r => r.spans.map(s => s.s)).filter(alias => written.includes(`"${alias}"`));
+  const holds = B.revisionHolds(result, ask, { backed: ['new:flow'], units: [] }, { ...revisionFor(ask), at: [unquoted[0], quoted[0]] });
+  assert.equal(holds.length, 1, 'the cited line no item quotes is held; the one an item quotes is that item\'s');
+  assert.ok(holds.every(x => x.category === 'revision-held' && x.path === 'parts[0]' && x.explanation === M.explainExclusion(x.path, 'contract', 'revision-held')));
+  const reply = validateMapReply(structuredClone(result), ask); M.attachExclusions(reply, holds, ask);
   assert.ok(M.readingExclusions(reply).some(x => x.category === 'revision-held'));
+});
+
+test('review .51: a final review whose reply fails its format check twice leaves the revision as its verdict; the reading applies', async t => {
+  const { make } = await setup(t), ask = askFor(), calls = [];
+  // The final review names a part the plan does not hold, on its first pass and on its one correction.
+  const pipeline = make({ callProvider: fakeProvider(ask, calls, call => call.stage === 'global'
+    ? call.input.semanticReview ? { ...revisionFor(ask), reviseParts: ['new:unplanned'] } : revisionFor(ask) : undefined) });
+  const out = await pipeline.read(ask);
+  validateMapReply(structuredClone(out.wire), ask);
+  assert.equal(calls.filter(call => call.stage === 'global' && call.input.semanticReview).length, 2, 'the final review and its one correction, never a third');
+  M.attachExclusions(validateMapReply(structuredClone(out.wire), ask), out.exclusions, ask);
 });
 
 test('malformed global sentinels never trigger semantic re-rendering', async t => {

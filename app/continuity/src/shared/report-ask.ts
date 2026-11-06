@@ -9,7 +9,7 @@ import type { StudioView } from './studio.js';
 import { STATUS_SHORT } from './studio.js';
 import { stateLabel } from './map-reading.js';
 import type { ReadingEntry } from './types.js';
-import { isMapReading } from './types.js';
+import { isMapReading, latestMapSummary } from './types.js';
 import { claimTopic } from './claim-topic.js';
 import { TABLE_DEFS, V4_TABLES, PROFILE_TABLES, headerLine, splitRecordChunks, readRecordTables, recordVersion, fixedWord, DONE_WORDS, CHUNK_HEAD, PAGE_HEAD, V5_TABLE_DEFS, Q1_TABLES, Q2_TABLES,
   PAGE_END_TABLES, latestFold, foldTexts, readFamily, supplementFix, rowIdForm, rowKey, END_WORDS, type TableDef, type FoldedRecord, type Obligation } from './record-table.js';
@@ -686,7 +686,8 @@ export function buildLedger(view: StudioView, readings: readonly ReadingEntry[],
   const pn = (id: string) => `${pid.get(id) ?? '?'} ${one(view.parts.find(p => p.id === id)?.name ?? id, 40)}`;
   // What each relation hands over: the newest reading that names it, else the relation's own note.
   const said = new Map<string, string>();
-  for (const r of maps) for (const x of r.relations) if (x.payload) said.set(x.relationId, x.payload);
+  // Review of .51 (6b): another relation kept under the line (also) is said beside it, never as what the line hands over.
+  for (const r of maps) for (const x of r.relations) if (x.payload && !x.also) said.set(x.relationId, x.payload);
   const l: ScenarioLedger = { version: last?.id ?? null, versionLine: last ? `${last.id} · ${last.at}` : '지도 읽기 없음', parts: [], relations: [], artifacts: [], fields: [], ports: [], steps: [], rules: [], head: [], items: [], cut: 0, shown: [] };
   const items = l.items, push = (id: string, line: string) => items.push({ id, line });
   view.parts.forEach(p => { const id = pid.get(p.id)!, parent = p.parentId && pid.has(p.parentId) ? pid.get(p.parentId)! : null;
@@ -930,7 +931,9 @@ export const plannedNote = (note: string) => /계획|예정|할 것이다|지시
 export function reflectAsk(view: StudioView, readings: readonly ReadingEntry[]): string {
   const last = [...readings].filter(isMapReading).at(-1) ?? null, name = (id: string) => view.parts.find(p => p.id === id)?.name ?? id;
   const lines: string[] = [];
-  if (last?.summary) lines.push(`요약: ${last.summary}`);
+  // Review of .51: a reading that wrote no summary (a final review's verdict) leaves the newest one that did.
+  const summary = latestMapSummary(readings);
+  if (summary) lines.push(`요약: ${summary}`);
   for (const p of view.parts) { const role = p.reading?.role ?? p.summary ?? p.note; lines.push(`부분 ${name(p.id)}${p.parentId ? ` (${name(p.parentId)} 안)` : ''}: ${role ? role.replace(/\s+/g, ' ').slice(0, 160) : '설명 없음'}`); }
   for (const rel of view.relations) lines.push(`연결 ${name(rel.from)} → ${name(rel.to)}: ${rel.note || rel.kind}`);
   for (const g of last?.gaps ?? []) lines.push(`빈틈: ${g}`);

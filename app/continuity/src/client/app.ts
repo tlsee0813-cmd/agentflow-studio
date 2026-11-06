@@ -1,6 +1,6 @@
 /* AgentFlow Studio client: entry → map → focused part. Reads project.7 data (saved projects and built examples) and never
  * rewrites records; the only project write is the user's own part name/note through the domain's editArea. */
-import { isMapReading, isScenarioReading, type Project, type ScenarioReading } from '../shared/types.js';
+import { isMapReading, latestMapSummary, isScenarioReading, type Project, type ScenarioReading } from '../shared/types.js';
 import { FILE_LIMIT, PASTED_LIMIT } from '../shared/types.js';
 import { WorkspaceStore, type EntryRef, storageErrorCode, serializeProject, readViewState, readEntryView, writeViewState, readEntryPositions, writeEntryPositions, importCopy, serializeBackup } from '../shared/storage.js';
 import { parseBackup, cleanPositions } from '../shared/validation.js';
@@ -671,8 +671,9 @@ function miniMap(v: StudioView): SVGSVGElement | null {
  * (marked as the AI's reading, since nobody wrote it); without either, that nothing was written yet. */
 function briefLine(p: Project): HTMLElement {
   if (p.space.brief?.text) return h('span', { class: 'program-brief' }, p.space.brief.text);
-  const last = [...p.readings].reverse().find(isMapReading);
-  if (last?.summary) return h('span', { class: 'program-brief ai', title: 'AI가 기록을 읽고 쓴 요약이에요. 설명은 지도 제목 옆에서 직접 쓸 수 있어요.' }, h('span', { class: 'program-brief-tag' }, 'AI 정리 ·'), ' ', last.summary);
+  // Review of .51: a reading that wrote no summary (a final review's verdict) leaves the newest one that did, never 「아직 설명이 없어요」.
+  const said = latestMapSummary(p.readings);
+  if (said) return h('span', { class: 'program-brief ai', title: 'AI가 기록을 읽고 쓴 요약이에요. 설명은 지도 제목 옆에서 직접 쓸 수 있어요.' }, h('span', { class: 'program-brief-tag' }, 'AI 정리 ·'), ' ', said);
   return h('span', { class: 'program-brief' }, '아직 설명이 없어요.');
 }
 function programCard(key: string, p: Project, example: boolean, keyOf: (id: string) => string): HTMLElement {
@@ -4508,7 +4509,8 @@ function relationPayloads(project: Project): Map<string, ReadingRelation> {
   const out = new Map<string, ReadingRelation>();
   // Polish round fixes 1: what a line hands over reads without the record's row IDs (「D05 전역 변수」 → 「전역 변수」); 원문 keeps them.
   const g = projectVariantGloss(project), ig = idGloss(project);
-  for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload) out.set(x.relationId, { ...x, payload: plainIds(nameVariants(x.payload, g), ig) });
+  // Review of .51 (6b): another relation kept under the line (also) hands over its own thing; it never stands for the line's.
+  for (const r of project.readings) if (isMapReading(r)) for (const x of r.relations) if (x.payload && !x.also) out.set(x.relationId, { ...x, payload: plainIds(nameVariants(x.payload, g), ig) });
   return out;
 }
 /** What each relation's line carries and says (map-reading.7–8): per relation, the channel, payload and cadence of the newest
@@ -4517,7 +4519,10 @@ function relationPayloads(project: Project): Map<string, ReadingRelation> {
  * any) and the line of the newest reading that read it (its quote). */
 /** Cards v2 review: also the relation's condition as written (when, a v4/v5 C-LINK 조건·선택) and whether it is optional, so the
  * line's condition badge and its tip rows never read a conditional relation as unconditional. */
-interface LineSaid { channel: Channel | null; chAt: number; payload: string | null; cadence: string | null; mode: RelationMode | null; fields: string[]; quote: ReadingQuote | null; at: string | null; when: string | null; optional: boolean; variant: string | null }
+/** Review of .51 (6b): also, the other relations between the same two parts and kind the map keeps under this line (each on a C-LINK row of
+ * its own): what each hands over, its condition and cadence and its passage, listed beside the line's own facts and never over them. */
+interface AlsoSaid { payload: string | null; cadence: string | null; when: string | null; quote: ReadingQuote }
+interface LineSaid { channel: Channel | null; chAt: number; payload: string | null; cadence: string | null; mode: RelationMode | null; fields: string[]; quote: ReadingQuote | null; at: string | null; when: string | null; optional: boolean; variant: string | null; also: AlsoSaid[] }
 function relationLines(project: Project): Map<string, LineSaid> {
   const out = new Map<string, LineSaid>(), g = projectVariantGloss(project), ig = idGloss(project);
   // Pipeline .44: a line flowing for a variant (its C-LINK 조건·선택 「변형 X03」) says which variant, by what it is; any variant ID in
@@ -4529,8 +4534,15 @@ function relationLines(project: Project): Map<string, LineSaid> {
   };
   project.readings.forEach((r, i) => {
     if (isMapReading(r)) for (const x of r.relations) {
-      const cur = out.get(x.relationId) ?? { channel: null, chAt: -1, payload: null, cadence: null, mode: null, fields: [], quote: null, at: null, when: null, optional: false, variant: null };
-      out.set(x.relationId, { channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: payloadOf(x) ?? cur.payload, cadence: x.cadence ?? cur.cadence,
+      const cur = out.get(x.relationId) ?? { channel: null, chAt: -1, payload: null, cadence: null, mode: null, fields: [], quote: null, at: null, when: null, optional: false, variant: null, also: [] };
+      if (x.also) {
+        // The same passage read again replaces its own entry (the newest reading's words), never the line's.
+        const said: AlsoSaid = { payload: payloadOf(x), cadence: x.cadence ?? null, when: (w => w ? nameVariants(w, g) : null)(conditionWords(x.when)), quote: x.quote };
+        const same = (q: ReadingQuote) => q.record === x.quote.record && q.from !== undefined && x.quote.from !== undefined && q.from === x.quote.from && q.to === x.quote.to;
+        out.set(x.relationId, { ...cur, also: [...cur.also.filter(a => !same(a.quote)), said] });
+        continue;
+      }
+      out.set(x.relationId, { also: cur.also, channel: x.channel ?? cur.channel, chAt: x.channel ? i : cur.chAt, payload: payloadOf(x) ?? cur.payload, cadence: x.cadence ?? cur.cadence,
         mode: x.mode ?? cur.mode, fields: x.payloadFields?.length ? [...x.payloadFields] : cur.fields, quote: x.quote ?? cur.quote, at: r.at,
         // Polish round (spec-cards-v2 §1): the condition as the map says it (the ask's form word 「조건 그대로:」 the record copied left off).
         // Polish round fixes 1: a variant in the condition reads by its name; a newer reading that makes the relation not optional
@@ -5753,7 +5765,9 @@ function understoodLine(o: Opened): HTMLElement | null {
   const waiting = st.committing || st.ready;
   if (!last && !fresh && !st.pending && !st.error && !waiting && !mapRun.detail().notice) return null;
   const line = h('p', { class: 'map-understood' });
-  if (last?.summary) line.append(h('span', { class: 'mu-text' }, last.summary));
+  // Review of .51: the newest summary a reading wrote (a final review's verdict writes none).
+  const said = latestMapSummary(o.project.readings);
+  if (said) line.append(h('span', { class: 'mu-text' }, said));
   const comparison = last ? requestComparison(o.project, last) : null;
   if (comparison) line.append(h('button', { type: 'button', class: 'map-more mu-comparison', onclick: () => openReturn() }, comparison));
   if (st.pending) line.append(...pendingLine('mu-durable-line', 'map-more', '기록을 읽고 지도를 갱신하는 중…'));
@@ -6795,6 +6809,9 @@ function bindEdgeHints() {
       if (rels.length > TIP_RELS) { const conds = rels.slice(TIP_RELS).filter(r => said.get(r.id)?.when).length;
         out.push(h('span', { class: 'tip-kind' }, `${moreTip(rels.length - TIP_RELS, '관계')}${conds ? ` · 그중 조건 ${conds}개` : ''} · 선을 고르면 모두`)); }
     }
+    // Review of .51 (6b): the other relations kept under a relation of this line, one row each (three at most per relation).
+    const alsoWords = (a: AlsoSaid) => [a.payload ? `넘기는 것 ${a.payload}` : '같은 두 부분 사이의 다른 관계', a.when ? conditionTip(a.when) : null, a.cadence ? `박자 “${a.cadence}”` : null].filter(Boolean).join(' · ');
+    for (const r of rels.slice(0, TIP_RELS)) for (const a of (said.get(r.id)?.also ?? []).slice(0, 3)) out.push(h('span', { class: 'tip-kind tip-also' }, `${rels.length > 1 ? `${arrow(r.from, r.to, r.kind)} · ` : ''}또 다른 관계 · ${alsoWords(a)}`));
     if (tp) out.push(h('span', { class: 'tip-kind' }, `데이터 계약 · ${tp.name} · 필드 ${tp.fields.length}${tp.fields.length ? ` (${tp.fields.slice(0, 3).join(' · ')}${tp.fields.length > 3 ? ` ${moreText(tp.fields.length - 3)}` : ''})` : ''}`));
     if (edge.notes.length && edge.notes.every(plannedNote)) out.push(h('span', { class: 'tip-kind' }, '계획된 연결 · 아직 돌지 않음'));
     if (edgeRevised(edge)) out.push(h('span', { class: 'tip-revised' }, REVISED_BASIS.replace(/^ · /, '')));
