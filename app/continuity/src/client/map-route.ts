@@ -119,8 +119,10 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
   for (const [k, list] of at) {
     const box = boxes.get(k.split('|')[0]!)!, side = box.kind === 'frame' ? box.head : box.h;
     // Beauty v4 (P5): ends that go the same way (one partner's height: two lines of one pair, both ways) take the order their reserved
-    // tracks need not to cross at the side: going down, the end whose track stands further off sits higher; going up, lower.
-    list.sort((p, q) => p.far - q.far || (p.far > mid(box) ? q.d - p.d : p.d - q.d));
+    // tracks need not to cross at the side: going down, the end whose track stands further off sits higher; going up, lower. Beauty v4
+    // review: the two lines of a pair running both ways to a partner level with the card (within a pixel) keep their own order at both
+    // cards; read as up at one end and down at the other, they twisted across each other at the port (hyperfine, dagu).
+    list.sort((p, q) => p.far - q.far || (p.end !== q.end && Math.abs(p.far - mid(box)) <= 1 ? 0 : p.far > mid(box) ? q.d - p.d : p.d - q.d));
     // Beauty v2 review (H3): a side that also has ends tied to pins spreads its free ends round them (they were spread over the side as
     // if the pins' lines were not there, and a free end met the card a pixel or two from a pinned one).
     const fixedYs = pinnedAt.get(k) ?? [];

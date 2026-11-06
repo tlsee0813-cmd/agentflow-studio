@@ -304,7 +304,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       const a = lift(r.from), b = lift(r.to); if (!a || !b || a === b) continue;
       const g = grain(r), key = `${a}|${b}|${g}`, ch = g.split('~')[0];
       const kind: LKind = r.kind === 'shares' || r.kind === 'related' ? 'plain' : ch === 'data' || ch === 'control' ? 'drive' : 'ref';
-      (lk.get(key) ?? lk.set(key, { key, from: a, to: b, kind, weight: 1, relIds: [] }).get(key)!).relIds.push(r.id);
+      (lk.get(key) ?? lk.set(key, { key, from: a, to: b, kind, weight: 1, relIds: [], ...(ch === 'control' ? { control: true } : {}) }).get(key)!).relIds.push(r.id);
     }
     const lines = [...lk.values()], linked = new Set(lines.flatMap(e => [e.from, e.to]));
     // A part the scope's outside refers to and nothing inside links (a shared definition) opens the scope's order, as rows linked

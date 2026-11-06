@@ -117,9 +117,7 @@ test('routed crossings and length are not worse than the old placement on the ce
     const L = layered(lnodes(m), ledges(m), { ...OPT, spend: true });
     const hinted = edges.map(e => { const ch = L.channels.get(e.key); return ch ? { ...e, hint: ch } : e; });
     const o = measure(new Map(m.boxes.map(b => [b.id, box(b, b)])), edges), n = measure(new Map(m.boxes.map(b => [b.id, box(b, L.pos.get(b.id))])), hinted);
-    // Beauty v4 (P1): a participant reads before every part it calls, so the lines back to it run the other way (m1: the user whose results
-    // come back from four parts; 1.23 × there); the crossings stay under the old placement's on every map and the eight together keep 0.8.
-    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len * 1.3, `${m.map}: length ${Math.round(n.len)} ≤ 1.3 × ${Math.round(o.len)} (a hub's lines may run longer for fewer crossings; the eight together stay at 0.8)`);
+    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len * 1.15, `${m.map}: length ${Math.round(n.len)} ≤ 1.15 × ${Math.round(o.len)} (a hub's lines may run longer for fewer crossings; the eight together stay at 0.8)`);
     oldC += o.c; newC += n.c; oldL += o.len; newL += n.len;
   }
   assert.ok(newC <= oldC * 0.5, `all maps: crossings ${newC} ≤ 0.5 × ${oldC}`); assert.ok(newL <= oldL * 0.8, `all maps: length ${Math.round(newL)} ≤ 0.8 × ${Math.round(oldL)}`);
@@ -132,4 +130,43 @@ test('speed: 60 parts and 120 lines lay out well under the budget (median of 5)'
   for (let i = 0; i < 5; i++) { const t = performance.now(); layered(ns, es, { ...OPT, spend: true }); times.push(performance.now() - t); }
   times.sort((a, b) => a - b);
   assert.ok(times[2] < 100, `median ${times[2].toFixed(1)} ms (budget 50, test bar 100 under load)`);
+});
+
+// Beauty v4 review: the reading grammar (callers before what they call, external systems at the block's edge) and the bundles of long
+// lines are kept only where the drawing pays little for them. The layer crossings beauty v3 laid on the eight census structures:
+const V3_CROSSINGS = { m1: 18, m2: 0, m3: 11, m4: 2, m5: 8, m6: 0, m7: 8, m8: 9 };
+test('beauty v4 review: no census structure crosses more than beauty v3 laid it (each within 10% and one, all together within 10%)', () => {
+  let all = 0;
+  for (const m of FIX) {
+    const c = layered(lnodes(m), ledges(m), { ...OPT, spend: true }).metrics.crossings, v3 = V3_CROSSINGS[m.map];
+    assert.ok(c <= Math.floor(v3 * 1.1) + 1, `${m.map}: ${c} crossings ≤ ${v3} (beauty v3) × 1.1 + 1`); all += c;
+  }
+  const v3all = Object.values(V3_CROSSINGS).reduce((a, x) => a + x, 0);
+  assert.ok(all <= v3all * 1.1, `all: ${all} ≤ 1.1 × ${v3all}`);
+});
+
+test('beauty v4 review: external systems at the edge of their block where that costs little; a two-way one stays by its partner', () => {
+  const X = (id, order) => ({ ...N(id, order), role: 'external' });
+  // Only called: past the system's last layer.
+  const a = layered([N('a', 0), N('b', 1), N('c', 2), X('x', 3)], [E('a', 'b'), E('b', 'c'), E('a', 'x')], OPT);
+  assert.ok(a.layer.get('x') > a.layer.get('c'), 'a called-only external sits past every part of the system');
+  // Only calls in: the block's first layer.
+  const b = layered([N('a', 0), N('b', 1), N('c', 2), X('x', 3)], [E('a', 'b'), E('b', 'c'), E('x', 'c')], OPT);
+  assert.ok(b.layer.get('x') <= b.layer.get('a'), 'an external that only calls in sits in the first layer');
+  assert.ok(!b.reversed.has('x|c|drive'), 'its line reads forward');
+  // Called and calling back: beside its partner (moving it past the system would cross no less).
+  const c = layered([N('a', 0), N('b', 1), N('c', 2), X('x', 3)], [E('a', 'b'), E('b', 'c'), E('b', 'x'), E('x', 'b')], OPT);
+  assert.ok(c.layer.get('x') <= c.layer.get('c'), 'a two-way external keeps its place by its partner');
+  // On the census structures with their last sink made external: the same on shuffled input, never more than the guard allows over
+  // the same structure without it, and when it is past the system nothing of the system lies right of it.
+  const rnd = lcg(5);
+  for (const m of FIX) {
+    const outs = new Set(m.edges.map(e => e.from)), sink = [...m.boxes].reverse().find(bx => !outs.has(bx.id) && !bx.role);
+    if (!sink) continue;
+    const ns = lnodes(m).map(n => (n.id === sink.id ? { ...n, role: 'external' } : n)), opt = { ...OPT, spend: true };
+    const r = layered(ns, ledges(m), opt), s = layered(shuffle(ns, rnd), shuffle(ledges(m), rnd), opt);
+    assert.deepEqual(plainOf(r), plainOf(s), `${m.map}: shuffled`);
+    const plain = layered(lnodes(m), ledges(m), opt).metrics.crossings;
+    assert.ok(r.metrics.crossings <= plain + Math.max(2, Math.round(plain * 0.15)), `${m.map}: ${r.metrics.crossings} ≤ ${plain} + guard`);
+  }
 });

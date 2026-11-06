@@ -113,22 +113,29 @@ const LABEL_ID = new RegExp(String.raw`${NOT_WORD_BEFORE}((?:${PREFIX})\d{2}(?!\
 export const hasRowId = (t: string): boolean => { LABEL_ID.lastIndex = 0; const r = LABEL_ID.test(t); LABEL_ID.lastIndex = 0; return r; };
 /** What is left when an ID is taken out says nothing of its own: only joining signs, truth words and 「때·경우」. */
 const EMPTY_REST = /^(?:[\s,.;:·&|!=<>()（）\[\]{}\-→←+]|참|거짓|아님|아닐|아니|이면|일|인|때|경우|및|또는|그리고|이고|이며|면|을|를|이|가|은|는|의|에|와|과|도|만|이후|이전|후|전)*$/;
-/** Beauty v4 (P3): a line label's words as the map shows them: never a record row ID. Each ID reads as the record's own words for that
- * row when the gloss has them (「CD01이 거짓일 때」 → 「pb.skipBootstrap()이 거짓일 때」); else it is left off with the particle or joining
- * sign that leans on it and the rest is kept; null when nothing of the label's own is left (the label is then left to the hover, which
- * reads the record as written). Display only. */
+/** One record row ID of the label shape (with a dotted tail), for the safe drops below. */
+const ONE_ID = String.raw`(?:${PREFIX})\d{2}(?!\d)[a-z]?(?::[A-Z]{1,2}\d{1,3}[a-z]?)?(?:\.\d+)?`;
+/** 「… → B20:S08 / B20:S05」: the steps a condition leads to, after its arrow, at the end (the line's own end says where it goes). */
+const TAIL_IDS = new RegExp(String.raw`\s*(?:→|->)\s*${NOT_WORD_BEFORE}${ONE_ID}(?:\s*(?:/|,|·|또는|or)\s*${ONE_ID})*\s*$`);
+/** 「(B03)」: an ID that is all its bracket holds. */
+const BRACKET_ID = new RegExp(String.raw`\s*[(（]\s*${ONE_ID}\s*[)）]`, 'g');
+/** 「N02.63 기준 요청」, 「D08: wandb.log」: an ID leading words (never a joining sign, an operator or a list mark after it). */
+const LEAD_ID = new RegExp(String.raw`^\s*${ONE_ID}\s*[:：]?\s+(?=[^\s&|!=<>+\-→←,·/~^*%])(?!(?:또는|혹은|그리고|및|and|or|이고|이며)(?:\s|$))`);
+/** Beauty v4 (P3, review): a line label's words as the map shows them: never a record row ID, and never a condition with a part cut out.
+ * Each ID reads as the record's own words for that row when the gloss has them (「CD01이 거짓일 때」 → 「pb.skipBootstrap()이 거짓일 때」).
+ * One nothing names is left off only where that leaves the label's sense whole: the steps after a condition's arrow at its end, an ID
+ * alone in a bracket, an ID leading the words. Anywhere else (beside an operator, a joining word, a count, a particle) the label would
+ * say something else without it (「CD02 && 컬렉션 있음」 is not 「컬렉션 있음」): null, and the label is left to the hover, which reads the
+ * record as written. Display only; nothing else of the label is touched. */
 export function labelWords(t: string, g: IdGloss = NO_GLOSS): string | null {
   if (!t || !hasRowId(t)) return t;
   const named = (id: string) => g.names.get(id) ?? g.names.get(head(id)) ?? g.names.get(id.replace(/\.\d+$/, '')) ?? null;
-  // The IDs the record names read as its words, held apart while plainIds tidies the rest (its tidying reads 「()」 as an empty bracket).
+  // The IDs the record names read as its words, held apart while the rest is looked at.
   const held: string[] = [];
   let s = t.replace(LABEL_ID, (all: string, id: string, particle: string | undefined) => { const n = named(id); if (!n) return all; held.push(`${n}${particle ?? ''}`); return `\u0001${held.length - 1}\u0001`; });
-  s = plainIds(s, g).replace(LABEL_ID, '\u0000');
-  if (s.includes('\u0000')) {
-    // An ID nothing names: off with the sign that joins it to the words beside it (「A && CD02」 → 「A」, 「CD02 && A」 → 「A」).
-    s = s.replace(/\s*(?:&&|\|\||→|->|←|,|·|와|과|및|또는|and|or)?\s*\u0000\s*(?:&&|\|\||→|->|,|·)?\s*/g, ' ');
-  }
-  s = s.replace(/\s{2,}/g, ' ').replace(/^[\s,.;:·&|]+|[\s,.;:·&|]+$/g, '').trim().replace(/\u0001(\d+)\u0001/g, (_a: string, i: string) => held[Number(i)] ?? '');
+  s = s.replace(TAIL_IDS, '').replace(BRACKET_ID, '').replace(LEAD_ID, '');
+  if (hasRowId(s)) return null;
+  s = s.replace(/\s{2,}/g, ' ').trim().replace(/\u0001(\d+)\u0001/g, (_a: string, i: string) => held[Number(i)] ?? '');
   if (!s || hasRowId(s) || EMPTY_REST.test(s)) return null;
   return s;
 }

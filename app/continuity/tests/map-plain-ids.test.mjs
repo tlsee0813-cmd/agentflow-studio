@@ -71,10 +71,17 @@ test('IDS-5 beauty v4 (P3): a line label never shows a record row ID: the row\'s
   // Named by the record: its words stand where the ID stood, the particle kept.
   assert.equal(labelWords('CD01이 거짓일 때', g), 'pb.skipBootstrap()이 거짓일 때');
   assert.equal(labelWords('B12로 넘김', g), 'serve-HTTP 서버로 넘김');
-  // Named by nothing: the ID goes with the sign joining it, the rest stays.
-  assert.equal(labelWords('CD02 && 컬렉션 있음', g), '컬렉션 있음');
-  assert.equal(labelWords('컬렉션 있음 && CD02', g), '컬렉션 있음');
+  // Named by nothing: left off only where the rest still says the same (leading the words, alone in a bracket, the steps after a
+  // condition's arrow at its end); beside an operator, a joining word, a count or a particle the label would say something else
+  // without it (beauty v4 review): left to the hover.
   assert.equal(labelWords('N02.63 기준 요청', g), '기준 요청');
+  assert.equal(labelWords('rCtx.DAG.IsAgent() → B18:S18', g), 'rCtx.DAG.IsAgent()', 'the call keeps its brackets');
+  assert.equal(labelWords('상한 넘으면 accept → B20:S08 / B20:S05', g), '상한 넘으면 accept');
+  assert.equal(labelWords('CD01 → B07:S02a 또는 B07:S02b', g), 'pb.skipBootstrap()');
+  assert.equal(labelWords('재시도 (B12)', { ...g, names: new Map() }), '재시도');
+  for (const cut of ['CD02 && 컬렉션 있음', '컬렉션 있음 && CD02', '… || CD02', 'A && !CD02', '요청 수 > N10', 'error CD03 발생', 'CD02 또는 CD01', 'D07 · D08 외 2', '기동 · CD02 2'])
+    assert.equal(labelWords(cut, g), null, cut);
+  assert.equal(labelWords('error 발생', g), 'error 발생', 'no ID: nothing is touched');
   // Nothing of its own left: the label is left to the hover.
   assert.equal(labelWords('CD02가 거짓일 때', g), null);
   assert.equal(labelWords('LN13', g), null);

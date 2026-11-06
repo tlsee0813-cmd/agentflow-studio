@@ -3327,8 +3327,9 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .edge-labels > .edge-cue { position: absolute; width: 8px; height: 8px; pointer-events: auto; cursor: help; transform: scale(var(--inv, 1)); transform-origin: 0 0; }
 .edge-cue::after { content: ""; position: absolute; inset: -4px; }
 .edge-cue::before { content: ""; position: absolute; box-sizing: border-box; background: var(--surface); }
-.edge-cue.q-condition::before { left: 1.25px; top: 1.25px; width: 5.5px; height: 5.5px; border: 1.5px solid var(--text-3); transform: rotate(45deg); }
-.edge-cue.q-optional::before { inset: 0; border: 1.5px dashed var(--text-3); border-radius: 50%; }
+/* Beauty v4 (P6): drawn 5px (the 8px box and its ::after keep the hover target). */
+.edge-cue.q-condition::before { left: 2.2px; top: 2.2px; width: 3.6px; height: 3.6px; border: 1.25px solid var(--text-3); transform: rotate(45deg); }
+.edge-cue.q-optional::before { inset: 1.5px; border: 1.25px dashed var(--text-3); border-radius: 50%; }
 .edge-cue.beside::before { border-color: var(--text-4); }
 .edge-cue:is(.near, :hover)::before, .edge-cue.lg-pick::before { border-color: var(--text); }
 .edge-cue.lg-dim, .edge-cue.lg-fade { opacity: .3; }
@@ -3548,18 +3549,16 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space.lens-data .edge-labels > :is(.edge-label:not(.fit), .edge-cue)[data-fit~="data"], .space.lens-start .edge-labels > :is(.edge-label:not(.fit), .edge-cue)[data-fit~="start"],
 .space.lens-scenario .edge-labels > :is(.edge-label:not(.fit), .edge-cue)[data-fit~="scenario"] { display: none; }
 /* The marks of the lens's background lines step back with their lines. */
-.edge-labels > .edge-cue.cue-bg:not(.near):not(:hover) { opacity: .45; }
 .space.lens-compose .edge-labels > .edge-label.fit[data-lens="compose"] { display: block; }
 .space.lens-compose .edge-labels > :is(.edge-label:not(.fit), .edge-cue, .edge-count)[data-fit~="compose"] { display: none; }
 .edge-labels > .edge-label.whole[data-full]::after { content: none; }
 /* Beauty v4 (P6): hierarchy without inventing importance (classes and colours only; no box moves or changes size).
  * - A card with an inside (a folded group or container) and an open group: a slightly heavier frame and title.
  * - An external system: the external tint, behind the system boundary's rule; its glyph and kind word kept.
- * - Port marks (◇ a condition, ◌ an optional line): drawn 5px (their 8px hover target kept), at full ink on the lens's foreground lines,
- *   on a hovered or picked line and beside a selection; quiet on every other line (구성 included), never gone: a conditional line still
- *   never reads as unconditional. */
-:root { --ext-bg: #f3f5f8; --ext-edge: #b9c1cc; --ext-ink: #46536a; }
-:root[data-theme="dark"] { --ext-bg: #eef1f5; }
+ * - Port marks (◇ a condition, ◌ an optional line): drawn 5px (their 8px hover target kept). Under a lens with a foreground, a mark on
+ *   a background line steps back with it (half ink; full on a hovered or picked line); 구성 has no foreground at rest and every mark reads
+ *   at full ink. Never gone: a conditional line never reads as unconditional. */
+:root { --ext-bg: #e9edf3; --ext-edge: #a7b1bf; --ext-ink: #46536a; } /* one value in every theme: the map's cards stay light (9.2) */
 .node.card.has-inside { border-right-width: 1.5px; border-bottom-width: 1.5px; border-color: var(--card-edge-firm); }
 .node.card.has-inside:not(.f-store) { border-left-width: 1.5px; }
 .node.card.has-inside:not(.f-trigger) { border-top-width: 1.5px; }
@@ -3570,6 +3569,4 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .frame.group:not(.shelf) > .frame-head .frame-name { font-weight: 700; }
 .node.card.k-external { background: var(--ext-bg); border-color: var(--ext-edge); }
 .node.card.k-external :is(.c-kind, .c-tag-line:not(:first-child)) { color: var(--ext-ink); }
-.edge-cue.q-condition::before { left: 2.2px; top: 2.2px; width: 3.6px; height: 3.6px; border-width: 1.25px; }
-.edge-cue.q-optional::before { inset: 1.5px; border-width: 1.25px; }
-.edge-labels > .edge-cue.cue-bg:not(.near):not(:hover):not(.lg-pick) { opacity: .32; }
+.edge-labels > .edge-cue.cue-bg:not(.near):not(:hover):not(.lg-pick) { opacity: .5; }
