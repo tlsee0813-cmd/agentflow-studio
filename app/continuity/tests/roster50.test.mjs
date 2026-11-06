@@ -87,8 +87,8 @@ test('R50-1 the record ask: v5.1 unchanged without a map; v5.2 carries the roste
   assert.deepEqual(T.readRecordTables(`${headOf(B, B_BASIS, 1)}\nC-IDENT 지도 대응\n대장: ${roster.head}\n${T.headerLine(T.IDENT_TABLE)}\n|---|---|---|---|---|---|\n|ID01|P02|같음|B01|—|F01|`).diagnostics, []);
   // The roster line the reply copies is read back.
   const f = X.v5Folds([{ id: 'x', text: recordB(roster.head, [['P02', '같음', 'B02', '—', 'F01']]) }])[0];
-  assert.deepEqual(I.rosterEcho(f.fold.rows.get('C-IDENT')), { project: p.id, revision: 1, hash: roster.hash, count: 7 });
-  assert.equal(I.ROSTER_VERSION, 'map-roster.1');
+  assert.deepEqual(I.rosterEcho(f.fold.rows.get('C-IDENT')), { project: p.id, revision: 1, hash: roster.hash, count: 7, listed: null });
+  assert.equal(I.ROSTER_VERSION, 'map-roster.2');
 });
 
 test('R50-2 the roster stays within its budget: a 56-part map whole; a larger one cut to its first parts and says so', () => {
@@ -256,7 +256,7 @@ test('R50-7 v5 and v5.1 records read as before (no identity key); stored identit
   assert.throws(bad(rows => { rows[0].at.to = 10 ** 7; }));
   assert.throws(bad(rows => { rows.push(structuredClone(rows[0])); }), 'each row once');
   assert.throws(bad(rows => { rows[0].evidence = ['X1']; }));
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.8: map-roster.1'));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.9: later-identity.2') && P.MAP7_RECIPE.includes('map-roster.2') && P.MAP7_RECIPE.includes('map-roster.1'));
 });
 
 test('R50-R replay: the stored 56-part map\'s roster fits whole; a C-IDENT page folds the map\'s duplicate pipeline card and retires the stage-1 cron card', { skip: !GROWTH || !existsSync(join(GROWTH, 'project/state-after-4.json')) }, () => {
@@ -272,7 +272,11 @@ test('R50-R replay: the stored 56-part map\'s roster fits whole; a C-IDENT page 
   const cron = live.find(a => a.name === 'cronjob'), watcher = live.find(a => a.name === f.fold.byId.get('B13').row.byColumn['이름']);
   assert.ok(f && pipes.length === 2 && cron && watcher, `${pipes.map(a => a.name)} ${cron?.name} ${watcher?.name}`);
   const n = Math.max(...f.fold.pages.map(x => x.n)) + 1, [rid, basis] = f.key.split('@');
-  const q0 = paste(p, identPage(rid, basis, n, roster.head, [[I.partNumber(p, pipes[0].id), '같음', 'B17', '—', 'F10'], [I.partNumber(p, cron.id), '대신함', 'B13', '모름', 'F12']]));
+  // Review of .50 (K3): 대신함 with 바뀐 때 「모름」 shows no change in effect and retires nothing; with the time it happened it retires.
+  const unsure = paste(p, identPage(rid, basis, n, roster.head, [[I.partNumber(p, pipes[0].id), '같음', 'B17', '—', 'F10'], [I.partNumber(p, cron.id), '대신함', 'B13', '모름', 'F12']]));
+  { const inp = ask7(unsure), applied = M.applyReading(unsure, inp, M.validateMapReply(reply7({}), inp.ask), meta('R_ros50q', '7')), [, y] = applied.reading.identity;
+    assert.deepEqual([y.state, y.reason, y.op], ['rejected', 'unconfirmed', null]); assert.ok(I.currentView(applied.project, studioView(applied.project)).parts.some(a => a.id === cron.id)); }
+  const q0 = paste(p, identPage(rid, basis, n, roster.head, [[I.partNumber(p, pipes[0].id), '같음', 'B17', '—', 'F10'], [I.partNumber(p, cron.id), '대신함', 'B13', '8f5809d 2020-11-18', 'F12']]));
   const inp = ask7(q0), applied = M.applyReading(q0, inp, M.validateMapReply(reply7({}), inp.ask), meta('R_ros50r', '8')), q = applied.project, [x, y] = applied.reading.identity;
   console.log(`replay: ${x.id} ${x.state} ${x.op?.kind ?? ''}, ${y.id} ${y.state} ${y.reason ?? ''} ${y.op?.kind ?? ''}`);
   assert.deepEqual([x.op.kind, x.op.areaId, x.op.into], ['fold', pipes[1].id, pipes[0].id], 'the later duplicate is folded onto the stage-3 card');

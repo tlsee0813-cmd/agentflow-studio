@@ -86,21 +86,26 @@ test('I50-3 validation: the three facts go together on a map.7 part, within boun
   const c = byName(shrink, '소비 파이프라인(Consumer)');
   assert.deepEqual([c.brief, c.files, c.lastBasis], [true, ['src/documents/consumer.py'], '8f5809d · 2020-11-18']);
   assert.deepEqual(M.validateMapAsk(structuredClone(shrink)), shrink);
+  // Review of .50 (the size ceiling): past every other step the facts go too, part by part (all three together), so they never make a map
+  // TOO_LARGE that fits without them; what is left still validates.
   const none = consumer();
-  assert.equal(M.fitMap(none, '', true, () => false), false); assert.ok(none.parts.every(x => Array.isArray(x.files) && !x.files.length && Object.hasOwn(x, 'lastBasis')));
+  assert.equal(M.fitMap(none, '', true, () => false), false); assert.ok(none.parts.every(x => !Object.hasOwn(x, 'files') && !Object.hasOwn(x, 'lastBasis') && !Object.hasOwn(x, 'state')));
+  assert.deepEqual(M.validateMapAsk(structuredClone(none)), none);
+  const some = consumer(), budget = JSON.stringify(old).length + 40;
+  assert.ok(M.fitMap(some, '', true, () => JSON.stringify(some).length <= budget), 'a map that fits without its facts fits');
 });
 
 test('I50-4 the later prompts: a positive identity rule, version caution said of claims only, first-map texts byte for byte; the recipes name it', () => {
   // Plan: the one first-map line that put 판본 beside identity is said without it; the corrections line is said of claims.
   assert.ok(B.MAP_BLUEPRINT_PROMPT.includes('같은 이름만으로 다른 대상·판본을 합치지 않는다.'), 'the first-map plan as it was');
   assert.ok(!B.LATER_BLUEPRINT_PROMPT.includes('다른 대상·판본을 합치지') && !B.LATER_BLUEPRINT_PROMPT.includes('다른 판본·브랜치의 사실이'));
-  for (const said of ['기준 커밋·판본의 차이는 대상의 차이가 아니다', '이 판본 문장은 current 주장의 대체에 관한 것이며 부분의 정체와 무관하다', '기존 부분의 정체(later-identity.1)',
+  for (const said of ['기준 커밋·판본의 차이는 대상의 차이가 아니다', '이 판본 문장은 current 주장의 대체에 관한 것이며 부분의 정체와 무관하다', '기존 부분의 정체(later-identity.2)', '대신한 것은 새 부분으로 세우고',
     'INPUT.parts는 같은 프로젝트를 앞 기록들로 읽은 지금까지의 이해다', '기준 커밋·판본·작성 세션이 다르다는 것만으로 다른 대상이 되지 않는다',
     '파일·부모·구현 방식·이름이 바뀌어도 같은 책임을 이어 맡으면 같은 부분이다', '같은 코드로 도는 별개의 실행 단위', '이름이 비슷하다는 것만으로 합치지 않는다',
     '「기록 이름: …」', '새 부분을 만들어 비켜 가지 않는다', '효력 시점', '계획된 대체는 아무것도 없애지 않는다', 'C-ISSUE(오류·미해결)의 결함·문제 행은 철회가 아니다',
     '「구현됨」은 같은 기능·범위의 미구현 주장만 끝내며', 'lastBasis가 이번 기록의 기준과 다르다는 것은 시간이 흘렀다는 뜻'])
     assert.ok(B.LATER_BLUEPRINT_PROMPT.includes(said), said);
-  assert.ok(B.LATER_BLUEPRINT_PROMPT.endsWith(B.LATER_IDENTITY_RULES + B.LATER_ROW_RULES), "step 4: the row-binding paragraph follows"); assert.equal(B.IDENTITY_VERSION, 'later-identity.1');
+  assert.ok(B.LATER_BLUEPRINT_PROMPT.endsWith(B.LATER_IDENTITY_RULES + B.LATER_ROW_RULES), "step 4: the row-binding paragraph follows"); assert.equal(B.IDENTITY_VERSION, 'later-identity.2');
   // Render and global (the later merge rules) and the map.7 instructions.
   assert.ok(!LATER_MERGE_RULES.includes('구간·판본·프로젝트') && LATER_MERGE_RULES.includes('기준 커밋·판본의 차이는 부분의 정체가 아니라 주장의 범위(aboutAt)에 관한 것이다'));
   assert.ok(MERGE_RULES.includes('다른 구간의 같은 이름을 이름만으로 합치지 않는다') && !RENDER_RULES.includes('later-identity'), 'first-map rules untouched');
@@ -110,7 +115,7 @@ test('I50-4 the later prompts: a positive identity rule, version caution said of
     'role·parentId·relations·files·readAs', '새 부분으로 비켜 가지 않고 candidates', '구현·가동·검증을 합친 판정이 아니다', 'at·basis·aboutAt으로 쓰지 않는다',
     'replaces의 근거가 아니다', '기준 머리말로 시작하지 않는다'])
     assert.ok(P.MAP7_IDENTITY.includes(said), said);
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.8:') && P.MAP7_RECIPE.includes('later-identity.1') && P.MAP7_RECIPE.includes('part-facts.1'));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.9:') && P.MAP7_RECIPE.includes('later-identity.1') && P.MAP7_RECIPE.includes('later-identity.2') && P.MAP7_IDENTITY.includes('대신한 것은 새 부분이고') && P.MAP7_RECIPE.includes('part-facts.1'));
   assert.equal(M.PART_FACTS, 'part-facts.1');
 });
 

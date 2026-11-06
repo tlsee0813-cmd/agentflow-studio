@@ -87,15 +87,19 @@ test('B50-1 a v5 row ID is its record\'s own: two records\' B01 in one ask join 
   assert.equal(bound.get(L.ledgerKey('AF5-50d4e5f6@d0c0de2', 'C-PART', 'B01')), areaOf(applied.project, '배달기'));
 });
 
-test('B50-2 the row → part mapping: one live part by its basis or fields; never two parts, a claim alone, an archived part or a name', () => {
-  const row = (to, state = 'reflected') => ({ record: KEY, table: 'C-PART', id: 'B01', state, reason: state === 'reflected' ? null : 'transient', detail: null, sent: 1, to, with: [], paste: 'x', start: 0, end: 1, ends: [], name: '수집기', reading: 'R' });
+test('B50-2 the row → part mapping: the part a reading created on the row; never a part that only quotes it, a claim, an archived part or a name', () => {
+  // Review of .50 (K2, K11): only a creation binds (LedgerRow.bound, set by rowLedger); the row's targets alone never do.
+  const row = (to, bound = null, state = 'reflected') => ({ record: KEY, table: 'C-PART', id: 'B01', state, reason: state === 'reflected' ? null : 'transient', detail: null, sent: 1, to, with: [], paste: 'x', start: 0, end: 1, ends: [], name: '수집기', reading: 'R', stored: true, bound });
   const of = (x, live = () => true) => L.rowBindings(new Map([[L.ledgerKey(KEY, 'C-PART', 'B01'), x]]), live).get(L.ledgerKey(KEY, 'C-PART', 'B01')) ?? null;
-  assert.equal(of(row([{ kind: 'part', id: 'a1', index: null }, { kind: 'claim', id: 'a2', index: 0 }])), 'a1');
-  assert.equal(of(row([{ kind: 'part', id: 'a1', index: null }, { kind: 'part', id: 'a2', index: null }])), null, 'two parts: no guess');
+  assert.equal(of(row([{ kind: 'part', id: 'a1', index: null }, { kind: 'claim', id: 'a2', index: 0 }], 'a1')), 'a1');
+  assert.equal(of(row([{ kind: 'part', id: 'a1', index: null }])), null, 'a part that only quotes the row: no binding');
   assert.equal(of(row([{ kind: 'claim', id: 'a1', index: 0 }])), null, 'a claim quoting the row is no binding');
-  assert.equal(of(row([{ kind: 'part', id: 'a1', index: null }]), id => id !== 'a1'), null, 'an archived part');
-  assert.equal(of(row([], 'waiting')), null);
-  assert.equal(of({ ...row([{ kind: 'part', id: 'a1', index: null }]), table: 'C-LINK' }), null, 'only C-PART rows bind');
+  assert.equal(of(row([{ kind: 'part', id: 'a1', index: null }], 'a1'), id => id !== 'a1'), null, 'an archived part');
+  assert.equal(of(row([], 'a1', 'waiting')), 'a1', 'a binding stays when the row waits again (it was sent again)');
+  assert.equal(of({ ...row([{ kind: 'part', id: 'a1', index: null }], 'a1'), table: 'C-LINK' }), null, 'only C-PART rows bind');
+  // ownPartRow: the only quoted row, else the one named as the part; never one by name alone.
+  const r1 = { name: '수집기' }, r2 = { name: '정리기' };
+  assert.equal(L.ownPartRow([r1], '아무 이름'), r1); assert.equal(L.ownPartRow([r1, r2], '정리기 (작업)'), r2); assert.equal(L.ownPartRow([r1, r2], '저장소'), null); assert.equal(L.ownPartRow([], '수집기'), null);
 });
 
 test('B50-3 a later ask says what the B IDs of its records are on the map (partRows); map.6 and earlier asks are unchanged', () => {
@@ -161,8 +165,14 @@ test('B50-5 names alike raise an identity candidate and hold the part with its r
   // Held rows are not sent again (the same conflict is not asked again) ...
   const next = ask7(applied.project), sent = [...M.askRecords(next.ask).values()].map(x => x.text).join('\n');
   assert.ok(!sent.includes('|B07|') && !sent.includes('|LN19|') && !sent.includes('|LN20|'));
-  // ... until a later reading writes on the part they are held with: then they wait and go again.
-  const changed = M.applyReading(applied.project, next, M.validateMapReply(reply7({ parts: [oldPart(aliasOf(next, near), { claims: [claim(at(next.ask, '|IS01|'), 's1')] })] }), next.ask), meta('R_bind50d', 'd'));
+  // ... a claim landing on the part is no change of what the part is (review of .50, deadlock 4): they stay held ...
+  const claimed = M.applyReading(applied.project, next, M.validateMapReply(reply7({ parts: [oldPart(aliasOf(next, near), { claims: [claim(at(next.ask, '|IS01|'), 's1')] })] }), next.ask), meta('R_bind50d', 'd'));
+  const y = ledgerOf(claimed.project).get(L.ledgerKey(KEY, 'C-PART', 'B07'));
+  assert.deepEqual([y.state, y.reason], ['held', 'identity']);
+  // ... until a later reading changes the part they are held with (here its role): then they wait and go again, within the send bound.
+  const p3 = paste(claimed.project, page1({ record: 'AF5-50e7e7e7', basis: 'e0c0de7', names: ['기타'], pairs: [] })), next2 = ask7(p3);
+  const rec3 = next2.ask.records.find(r => M.askRecords(next2.ask).get(r.id).text.includes('|B01|기타|')).id;
+  const changed = M.applyReading(p3, next2, M.validateMapReply(reply7({ parts: [oldPart(aliasOf(next2, near), { role: '수집기는 원문을 모아 정리기에 넘긴다.', basis: [at(next2.ask, '|B01|', rec3)] })] }), next2.ask), meta('R_bind50g', '7'));
   const x = ledgerOf(changed.project).get(L.ledgerKey(KEY, 'C-PART', 'B07'));
   assert.deepEqual([x.state, x.reason, x.detail], ['waiting', 'transient', 'identity']);
   const again = [...M.askRecords(ask7(changed.project).ask).values()].map(y => y.text).join('\n');
@@ -199,7 +209,7 @@ test('B50-7 the later prompts say what partRows are; first-map texts unchanged; 
   assert.ok(B.LATER_BLUEPRINT_PROMPT.endsWith(B.LATER_ROW_RULES) && B.LATER_ROW_RULES.includes('INPUT.records[].partRows') && B.LATER_ROW_RULES.includes('그 B로 new: 부분을 세우지 않는다'));
   assert.ok(!B.MAP_BLUEPRINT_PROMPT.includes('row-binding') && !P.MAP6_FIRST_PROMPT.includes('row-binding') && !P.MAP7_PROMPT.includes('partRows'));
   assert.equal(B.ROW_BINDING_VERSION, 'row-binding.1');
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.8:') && P.MAP7_RECIPE.includes('row-binding.1'));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.9:') && P.MAP7_RECIPE.includes('row-binding.1'));
 });
 
 test('B50-R replay: R11\'s ask names R10\'s B IDs on the map, and R11\'s stored reply holds 주기 일정 and keeps 분류 모델 파일\'s relations', { skip: !haveGrowth() || !existsSync(join(GROWTH, 'runs/stage4-r3/job.json')) }, () => {

@@ -20,7 +20,9 @@ import { sha256 } from './validation.js';
 import { secretLike } from './secret.js';
 import type { StudioView, PartView, RelationView } from './studio.js';
 
-export const ROSTER_VERSION = 'map-roster.1';
+/** Review of .50 (map-roster.2): a partial roster's copied line says how far it lists; the decisions need in-effect evidence, real evidence,
+ * the hash of a map no reading changed since, and never fold two rows of one record. */
+export const ROSTER_VERSION = 'map-roster.2';
 /** The roster block's bound in characters (the v5.1 request is about 11,000), a name's and a distinguisher's, and the detail lines'. */
 export const ROSTER_CHARS = 8000, ROSTER_NAME_CHARS = 60, ROSTER_NOTE_CHARS = 60, ROSTER_DETAIL_CHARS = 2000;
 /** A reading keeps up to 256 C-IDENT row decisions. */
@@ -107,37 +109,49 @@ export function mapRoster(p: Project, opts: { detail?: readonly string[]; max?: 
       detail: want && !secretLike(want) ? want : null };
   });
   const revision = p.readings.filter(isMapReading).length, count = p.space.areas.length;
-  const hash = sha256(entries.map(e => [e.pid, e.name, e.parent ?? '', e.life].join('\t')).join('\n')).slice(0, 8);
-  const head = `프로젝트 ${p.id} · 판 ${revision} · 해시 ${hash} · P01–P${pad(count)}`;
+  const hash = rosterHash(entries), base = `프로젝트 ${p.id} · 판 ${revision} · 해시 ${hash} · P01–P${pad(count)}`;
+  // Review of .50 (K4): a partial roster says in the line the reply copies how far it lists (「목록 P01–P35」), so a row on a part it does
+  // not list is held.
+  const headOf = (shown: number) => shown >= entries.length ? base : `${base} · 목록 ${entries[0]!.pid}–${entries[shown - 1]!.pid}`;
   const line = (e: RosterEntry, note: number, detail: boolean) => [`${e.pid} ${e.name} · ${e.parent ? `${e.parent} 안` : '—'} · ${e.life}${note && e.note ? ` · ${one(e.note, note)}` : ''}${e.old.length ? ` · 옛 이름 ${e.old.join('·')}` : ''}${e.folded.length ? ` · 옛 ID ${e.folded.join('·')}` : ''}`,
     ...(detail && e.detail ? [`  └ ${e.detail}`] : [])].join('\n');
   const build = (note: number, detail: boolean, shown: number) => {
     const scope = shown >= entries.length ? `범위: 전체 ${entries.length}개` : `범위: 일부 ${shown}/${entries.length}개(${entries[0]!.pid}–${entries[shown - 1]!.pid}만; 나머지 부분은 C-IDENT에 쓰지 않는다)`;
     let room = ROSTER_DETAIL_CHARS;
     const lines = entries.slice(0, shown).map(e => { const withDetail = detail && !!e.detail && room >= e.detail.length; if (withDetail) room -= e.detail!.length; return line(e, note, withDetail); });
-    return [`[대장] ${head}`, scope, 'P ID 공식 이름 · 부모 · 상태 · 구별 말(역할 또는 파일)', ...lines].join('\n');
+    return [`[대장] ${headOf(shown)}`, scope, 'P ID 공식 이름 · 부모 · 상태 · 구별 말(역할 또는 파일)', ...lines].join('\n');
   };
   let text = '', shown = entries.length;
   for (const [note, detail] of [[ROSTER_NOTE_CHARS, true], [ROSTER_NOTE_CHARS, false], [30, false], [0, false]] as const) { text = build(note, detail, shown); if (text.length <= max) break; }
   while (text.length > max && shown > 1) { shown--; text = build(0, false, shown); }
-  return { version: ROSTER_VERSION, projectId: p.id, revision, hash, count, entries, shown, scope: shown >= entries.length ? 'full' : 'partial', head, text };
+  return { version: ROSTER_VERSION, projectId: p.id, revision, hash, count, entries, shown, scope: shown >= entries.length ? 'full' : 'partial', head: headOf(shown), text };
 }
+/** The roster's hash: its P numbers, names, parents and lifecycles (8 hex). */
+export const rosterHash = (entries: readonly Pick<RosterEntry, 'pid' | 'name' | 'parent' | 'life'>[]): string => sha256(entries.map(e => [e.pid, e.name, e.parent ?? '', e.life].join('\t')).join('\n')).slice(0, 8);
 
 /* ---------- the record's C-IDENT table ---------- */
-export interface RosterEcho { project: string | null; revision: number | null; hash: string | null; count: number | null }
+export interface RosterEcho { project: string | null; revision: number | null; hash: string | null; count: number | null; listed: number | null }
 const ECHO = /^대장\s*[:：]\s*(.+)$/;
 /** The roster line the reply copied under its C-IDENT title (「대장: 프로젝트 … · 판 12 · 해시 3f9a2c1d · P01–P56」), or null. */
 export function rosterEcho(rows: readonly FoldRow[]): RosterEcho | null {
   for (const t of new Set(rows.map(r => r.source))) for (const b of t.body) {
     const m = ECHO.exec(b.text.trim()); if (!m) continue;
     const s = m[1]!, num = (re: RegExp) => { const x = re.exec(s); return x ? Number(x[1]) : null; };
-    return { project: /프로젝트\s+([^\s·]+)/.exec(s)?.[1] ?? null, revision: num(/판\s+(\d{1,4})/), hash: /해시\s+([0-9a-f]{8})/i.exec(s)?.[1]?.toLowerCase() ?? null, count: num(/P\d{2,3}\s*[–—~-]\s*P(\d{2,3})/) };
+    return { project: /프로젝트\s+([^\s·]+)/.exec(s)?.[1] ?? null, revision: num(/판\s+(\d{1,4})/), hash: /해시\s+([0-9a-f]{8})/i.exec(s)?.[1]?.toLowerCase() ?? null, count: num(/P\d{2,3}\s*[–—~-]\s*P(\d{2,3})/),
+      listed: num(/목록\s+P\d{2,3}\s*[–—~-]\s*P(\d{2,3})/) };
   }
   return null;
 }
 const ANSWER_WORDS: Readonly<Record<string, IdentityAnswer>> = Object.freeze({ 같음: 'same', '이름 바뀜': 'renamed', 이름바뀜: 'renamed', 대신함: 'replaced', 없어짐: 'gone', 모름: 'unknown', 나뉨: 'split', 합침: 'merged' });
 /** A change the record says is still planned, or partial: neither retires anything (ruling F5 Q3). */
 const PLANNED = /계획|예정|하기로|할\s*것|나중에|아직/, PARTIAL = /일부|부분적|병행|함께\s*남/;
+/** Review of .50 (K3): a 바뀐 때 that says no time (모름, 불명, 미상, ?) shows no change in effect. */
+const NO_TIME = /모름|불명|미상|알\s*수\s*없|unknown|\?/i;
+/** Review of .50 (K3): a successor's C-PART 구현 상태 that is not built in whole: unbuilt or planned, and partly built. */
+const UNBUILT_IMPL = /미구현|계획|예정|안\s*됨/, PARTIAL_IMPL = /일부|부분|진행|작업\s*중/;
+/** Review of .50 (K5): an evidence row whose source is the app's own roster or the request is no evidence of the record: the roster is
+ * what the session was given, not what it found. */
+const ROSTER_SOURCE = /대장|앱이\s*(?:준|보낸|만든|제공)|지도\s*(?:목록|번호)|기록\s*요청|요청\s*(?:문|본문)|roster/i;
 const said = (v: string | undefined, n: number): string | null => { const t = (v ?? '').trim(); return !t || /^[—–-]+$/.test(t) ? null : one(t, n); };
 const COL_P = '지도 부분(Pxx)', COL_B = '이 기록 부분(Bxx)';
 
@@ -151,9 +165,13 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
   const partRows = new Map((f.fold.rows.get('C-PART') ?? []).map(r => [r.id, r]));
   // The map since the record's roster: a part an identity operation of another record changed, a part made after it, a part past its count.
   let status: 'ok' | 'other' | 'unverified' = 'ok'; const affected = new Set<string>();
+  // Review of .50 (K4): no reading since the roster, so its hash must be that of the roster now, the parts made after it aside (this
+  // reading's own); a different one is a map the person changed meanwhile, or a line not copied, and nothing of it is taken as current.
+  const sinceOwn = (n: number | null) => rosterHash((roster?.entries ?? []).filter(e => n === null || index(e.areaId) < n));
   if (!echo || !echo.project || echo.revision === null) status = 'unverified';
   else if (echo.project !== p.id) status = 'other';
-  else if (echo.revision > maps.length) status = 'unverified';
+  else if (echo.hash === null || echo.revision > maps.length) status = 'unverified';
+  else if (echo.revision === maps.length) { if (echo.hash !== roster?.hash && echo.hash !== sinceOwn(echo.count)) status = 'unverified'; }
   else if (echo.hash !== roster?.hash) {
     for (const r of maps.slice(echo.revision)) {
       for (const x of r.identity ?? []) if (x.op && x.record !== f.key) for (const id of [x.op.areaId, x.op.successor, x.op.into]) if (id) affected.add(id);
@@ -166,7 +184,7 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
   for (const fr of rows) {
     const c = fr.row.byColumn, map = /P\d{2,3}/.exec(c[COL_P] ?? '')?.[0] ?? null, answer = fixedWord(c['대응'] ?? '', ANSWER_WORDS)?.value ?? null;
     const bs = [...new Set((c[COL_B] ?? '').match(/(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g) ?? [])];
-    const evidence = [...new Set(fr.cites.filter(x => /^[FE]\d{1,3}$/.test(x.ref) && x.grade !== 'unknown' && x.grade !== 'guess').map(x => x.ref))].slice(0, 8);
+    const evidence = [...new Set(fr.cites.filter(x => /^[FE]\d{1,3}$/.test(x.ref) && x.grade !== 'unknown' && x.grade !== 'guess' && !ROSTER_SOURCE.test(`${x.source ?? ''} ${x.place ?? ''}`)).map(x => x.ref))].slice(0, 8);
     const at = map ? areaOfNumber(p, map) : null;
     const e: ReadingIdentityRow = { record: f.key, id: fr.id, map, answer, part: bs[0] ?? null, state: 'rejected', reason: 'form', areaId: at ? canonicalPart(s, at) : null, op: null,
       when: said(c['바뀐 때'], 60), evidence, at: { record: fr.record, from: fr.row.from, to: fr.row.to } };
@@ -178,6 +196,8 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
     if (status === 'other') { set(e, 'rejected', 'other-project'); continue; }
     if (answer === 'gone' ? bs.length > 0 : bs.length !== 1 || !partRows.has(bs[0]!)) continue;
     if (status === 'unverified' || affected.has(e.areaId) || area(e.areaId)?.archived) { set(e, 'held', 'roster'); continue; }
+    // Review of .50 (K4): a partial roster's row on a part it did not list is held (the session never saw that part's line).
+    if (echo?.listed && Number(map!.slice(1)) > echo.listed) { set(e, 'held', 'roster'); continue; }
     // Ruling F5 Q1: a roster correspondence that cites nothing of the record is a candidate only.
     if (!evidence.length) { set(e, 'held', 'identity'); continue; }
     valid.push(e);
@@ -187,6 +207,15 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
   // the map made with names alike (a duplicate the map made: folded the same way).
   const same = valid.filter(e => e.answer === 'same' || e.answer === 'renamed'), binds = new Map<string, string>();
   const made = (id: string) => s.created.has(id) && !area(id)?.archived;
+  // Review of .50 (K1, deadlock 9): two parts are one duplicate the map made only when both are the map's and no record has them on two
+  // different C-PART rows of its own (two rows of one record are two parts: folding them is a real merge, never applied in .50). A B row the
+  // ledger binds to another part folds with it only when, in addition, their names are alike.
+  const rowsOf = new Map<string, Map<string, Set<string>>>();
+  for (const [k, v] of bound) { const [rec, table, b] = k.split('\u0000'); if (table !== 'C-PART' || !rec || !b) continue; const to = canonicalPart(s, v);
+    const m = rowsOf.get(to) ?? new Map<string, Set<string>>(); m.set(rec, new Set([...m.get(rec) ?? [], b])); rowsOf.set(to, m); }
+  const twoRows = (a: string, b: string) => { const x = rowsOf.get(a), y = rowsOf.get(b); if (!x || !y) return false;
+    for (const [rec, rows] of x) { const other = y.get(rec); if (other && [...other].some(r => !rows.has(r)) && [...rows].some(r => !other.has(r))) return true; } return false; };
+  const duplicates = (ids: readonly string[]) => ids.every(a => made(a) && !s.retired.has(a)) && ids.every(a => ids.every(b => a === b || !twoRows(a, b)));
   const own = (e: ReadingIdentityRow, to: string): ReadingIdentityOp | null => {
     if (e.answer !== 'renamed') return { kind: 'bind', areaId: to, successor: null, into: null, from: null, to: null, renamed: false };
     const name = one((partRows.get(e.part!)!.row.byColumn['이름'] ?? '').replace(/[*`]/g, ''), 60), was = officialName(p, to);
@@ -197,7 +226,7 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
   for (const b of new Set(same.filter(e => e.state !== 'held').map(e => e.part!))) {
     const list = same.filter(e => e.part === b && e.state !== 'held'), areas = [...new Set(list.map(e => e.areaId!))];
     if (areas.length > 1) {
-      if (!areas.every(a => made(a) && !s.retired.has(a))) { for (const e of list) set(e, 'held', 'identity'); continue; }
+      if (!duplicates(areas)) { for (const e of list) set(e, 'held', 'identity'); continue; }
       const canon = areas.reduce((x, y) => index(x) <= index(y) ? x : y);
       for (const e of list) set(e, 'reflected', null, e.areaId === canon ? own(e, canon) : fold(e.areaId!, canon));
       binds.set(b, canon); continue;
@@ -205,7 +234,7 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
     const a = areas[0]!, x0 = bound.get(ledgerKey(f.key, 'C-PART', b)), x = x0 ? canonicalPart(s, x0) : null;
     if (s.retired.has(a)) { for (const e of list) set(e, 'held', 'identity'); continue; }
     if (x && x !== a) {
-      if (!(made(x) && made(a) && !s.retired.has(x) && likeNames(officialName(p, x), officialName(p, a)))) { for (const e of list) set(e, 'held', 'identity'); continue; }
+      if (!duplicates([x, a]) || !likeNames(officialName(p, x), officialName(p, a))) { for (const e of list) set(e, 'held', 'identity'); continue; }
       const canon = index(x) <= index(a) ? x : a, dup = canon === x ? a : x;
       list.forEach((e, i) => set(e, 'reflected', null, i ? null : fold(dup, canon)));
       binds.set(b, canon); continue;
@@ -219,8 +248,10 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
     const a = e.areaId!;
     if (same.some(o => o.areaId === a)) { set(e, 'held', 'identity'); continue; }
     const impl = e.part ? partRows.get(e.part)?.row.byColumn['구현 상태'] ?? '' : '';
-    if (PLANNED.test(e.when ?? '') || /^\s*미구현/.test(impl)) { set(e, 'rejected', 'planned'); continue; }
-    if (PARTIAL.test(e.when ?? '')) { set(e, 'rejected', 'partial'); continue; }
+    if (PLANNED.test(e.when ?? '') || UNBUILT_IMPL.test(impl)) { set(e, 'rejected', 'planned'); continue; }
+    if (PARTIAL.test(e.when ?? '') || PARTIAL_IMPL.test(impl)) { set(e, 'rejected', 'partial'); continue; }
+    // Review of .50 (K3): retirement needs the change in effect: a time it happened, and for 대신함 a successor row that says it is built.
+    if (!e.when || NO_TIME.test(e.when) || e.answer === 'replaced' && !/구현/.test(impl)) { set(e, 'rejected', 'unconfirmed'); continue; }
     const was = s.retired.get(a);
     let successor: string | null = null;
     if (e.answer === 'replaced') {
@@ -244,6 +275,15 @@ export function identityBindings(p: Project, folds: readonly V5Fold[], bound: Re
     const to = canonicalPart(s, e.op?.kind === 'fold' ? e.op.into! : e.areaId!);
     if (live(to)) out.set(ledgerKey(f.key, 'C-PART', e.part), to);
   }
+  return out;
+}
+
+/** Review of .50 (K9, ruling F5 Q1: a conflict is never dodged by a new P): the C-PART rows whose 같음 or 이름 바뀜 row of the folds is held,
+ * each with the part the record says it is (by ledgerKey(record, 'C-PART', B)). A new part on such a row is held with that part, not made. */
+export function identityHolds(p: Project, folds: readonly V5Fold[], bound: ReadonlyMap<string, string>): Map<string, string> {
+  const out = new Map<string, string>(), roster = folds.some(f => f.fold.rows.get(IDENT_TABLE_ID)?.length) ? mapRoster(p) : null;
+  for (const f of folds) for (const e of decideIdentity(p, f, bound, roster))
+    if (e.state === 'held' && e.part && e.areaId && (e.answer === 'same' || e.answer === 'renamed')) out.set(ledgerKey(f.key, 'C-PART', e.part), e.areaId);
   return out;
 }
 

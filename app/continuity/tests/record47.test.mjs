@@ -206,17 +206,18 @@ test('R47-5 within the shared bounds the fold goes in page order, the last recor
   for (const gone of GONE) assert.ok(!texts(inp).join('\n').includes(gone), gone);
   const applied = M.applyReading(p, inp, M.validateMapReply(wireOf(inp), inp.ask), meta('R_record47c', '9'));
   const next = M.buildMapAsk(applied.project, St.studioView(applied.project), [], undefined, M.MAP6_SCHEMA);
-  // Recipe .50 (row-ledger.ts): the next reading first sends again the rows this one read and placed nothing of (named in the note), in
-  // page order, never a row it placed; the rows past the cut follow as room allows and wait, never sent, until they go.
+  // From the cut on: pages 3–4's rows past it, then page 5. Review of .50 (R47-5): rows sent again never push the unread text out, so the
+  // rows this reading read and placed nothing of (B01:S01 among them) wait for a later ask; none of the rows it placed ever goes again.
   assert.equal(next.problem, null);
   const first = [...next.records.values()][0], nextText = texts(next).join('\n'), pasted = p.pasted.find(r => r.id === last.id).text, cutRow = pasted.slice(last.to).match(/\|B\d\d:S\d\d\|/)[0];
   assert.equal(first.id, last.id);
-  assert.ok(nextText.includes('|B01:S01|') && /앞선 정리에서 반영되지 않아 다시 보낸 행 \d+개: C-STEP B01:S01/.test(next.ask.records[0].note), next.ask.records[0].note);
+  assert.ok(nextText.includes(cutRow) && !nextText.includes('|B01:S01|'), cutRow);
+  assert.ok(next.ask.records.some(r => /쪽 5/.test(r.note)));
   const ledger = L.rowLedger(applied.project, X.v5Folds(applied.project.pasted)), placed = [...ledger.values()].filter(x => x.state === 'reflected'), textOf = id => p.pasted.find(r => r.id === id).text;
   assert.ok(placed.length > 0);
   for (const x of placed) assert.ok(!nextText.includes(textOf(x.paste).slice(x.start, x.end)), `${x.table} ${x.id} was placed: never sent again`);
-  const cut = [...ledger.values()].find(x => x.paste === last.id && pasted.slice(x.start, x.end).includes(cutRow));
-  assert.ok(nextText.includes(cutRow) || cut.reason === 'not-yet-sent', cutRow);
+  const s01 = [...ledger.values()].find(x => x.table === 'C-STEP' && x.id === 'B01:S01');
+  assert.deepEqual([s01.state, s01.reason], ['waiting', 'transient'], 'it waits, and goes once the unread text is read');
 });
 
 test('R47-6 v4 and v3 asks are byte for byte what .46 built (golden), whatever bounds are given; the recipe is .47 and the contract map-reading.19', () => {

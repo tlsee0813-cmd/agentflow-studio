@@ -9,7 +9,7 @@ import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CH
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading, editArea } from './domain.js';
-import { decideIdentity, identityBindings, identityState, canonicalPart, mapRoster } from './map-identity.js';
+import { decideIdentity, identityBindings, identityHolds, identityState, canonicalPart, mapRoster, areaOfNumber } from './map-identity.js';
 import { parseProject, sourceText } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
@@ -18,7 +18,7 @@ import { validateFrozenRequest, validateRequestContext, requestContext, validate
 import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PAGE_HEAD, CHUNK_HEAD, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow, type FoldRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun, type V5Fold } from './record-excerpt.js';
-import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, rowBindings, ledgerKey, type LedgerRow } from './row-ledger.js';
+import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, rowBindings, ledgerKey, ownPartRow, type LedgerRow } from './row-ledger.js';
 export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -3199,7 +3199,7 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
   if (aside.length) {
     ASIDE.set(reply, aside);
     // Static diagnostics and source positions only; never the rejected text/target, which could contain a secret.
-    EXCLUSIONS.set(reply, aside.map(e => {
+    EXCLUSIONS.set(reply, collapseCounts(aside.map(e => {
       const steps = e.path.replace(/\[(\d+)\]/g, '.$1').split('.');
       let item: unknown = value, parent: unknown = null;
       for (const step of steps) { parent = item; item = item && typeof item === 'object' ? (item as Record<string, unknown>)[step] : null; }
@@ -3211,9 +3211,25 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
       const io = ioSource.get(e);
       if (io) return { path: e.path, rule: e.rule, category: e.target, explanation: exclusionExplanation(e), record: io.place?.record ?? null, from: io.place?.from ?? null, to: io.place?.to ?? null, ...(io.value !== null ? { value: io.value } : {}) };
       return { path: e.path, rule: e.rule, category: e.rule === 'contract' ? e.target : null, explanation: exclusionExplanation(e), record: range ? record : null, from: range?.from ?? null, to: range?.to ?? null };
-    }));
+    })));
   }
   return reply;
+}
+/** Review of .50 (deadlock 6): items past a count bound are set aside one by one up to COUNT_NAMED_MAX in all; past that, the items of one
+ * list in one record go as one set-aside entry (the first one's path, the range from the first to the last), so a reply far past a bound is
+ * never refused for the number of its set-aside entries (64 for the divided route, 512 stored). The rows inside such a range that nothing
+ * was placed on wait on the limit as before. */
+export const COUNT_NAMED_MAX = 24;
+function collapseCounts(list: ReadingExclusion[]): ReadingExclusion[] {
+  if (list.filter(x => x.category === 'count').length <= COUNT_NAMED_MAX) return list;
+  const out: ReadingExclusion[] = [], groups = new Map<string, ReadingExclusion>(); let named = 0;
+  for (const x of list) {
+    if (x.category !== 'count' || named < COUNT_NAMED_MAX && ++named) { out.push(x); continue; }
+    const key = `${x.path.replace(/\[\d+\]$/, '')}\u0000${x.record ?? ''}`, g = groups.get(key);
+    if (!g) { const y = { ...x }; groups.set(key, y); out.push(y); continue; }
+    if (x.from !== null && x.to !== null) { g.from = g.from === null ? x.from : Math.min(g.from, x.from); g.to = g.to === null ? x.to : Math.max(g.to, x.to); }
+  }
+  return out;
 }
 
 /** Pipeline .32: the fixed explanation this module gives a set-aside reason (for a reason the server reads itself: payload-part). */
@@ -3409,9 +3425,10 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     // The newest reading that gives a state (or a type) wins (readings are oldest first); the lists gather, newest first, each once.
     if (part.state) stateRead = { state: part.state, when: part.stateWhen ?? null, quote: part.stateQuote ?? null, at: r.at };
     // Recipe .50 step 4 (ruling F5: 「구현됨」 ends only the unbuilt claim of the same function and scope): a newer reading that read the
-    // part's own row as built or partial, and gave no state, ends an older unbuilt state (no state now: built is not running or checked),
-    // and the earlier claims standing on the part's own row that said unbuilt end with it. A claim on any other row stays.
-    else if (stateRead?.state === 'unbuilt' && (part.implementation === 'built' || part.implementation === 'partial') && part.implementationQuote) {
+    // part's own row as built, and gave no state, ends an older unbuilt state (no state now: built is not running or checked), and the
+    // earlier claims standing on the part's own row that said unbuilt end with it. A claim on any other row stays. Review of .50: partly
+    // built is not built: it ends nothing (the part of the function not built is still unbuilt).
+    else if (stateRead?.state === 'unbuilt' && part.implementation === 'built' && part.implementationQuote) {
       for (const c of all) if (unbuiltRows.some(q => q.record === c.record && q.from !== undefined && c.from !== undefined && q.from < c.to! && c.from < q.to!)) replaced.add(`${c.reading}:${c.index}`);
       stateRead = null;
     }
@@ -3684,7 +3701,9 @@ function briefPart(x: MapAskPart): void {
  * (4) Every relation note to BRIEF_RELATION_NOTE; brief: the notes of relations with an end of tier 0 left out, then the parts of tier 1
  * and then of tier 2 go brief one by one (within a tier the fewest hits first, then ask order). (5) Every relation note left out.
  * (6) Recipe .50 step 3: every part's files left out (its state and lastBasis stay).
- * What still does not fit is TOO_LARGE for the caller: names, parents, facts and relations alone are over the budget. */
+ * (7) Review of .50 (the size ceiling): the facts (state, lastBasis, files: all three go together) of the parts in short form one by one,
+ * then of every other part, so the facts never make a map TOO_LARGE that fits without them.
+ * What still does not fit is TOO_LARGE for the caller: names, parents and relations alone are over the budget. */
 export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, brief: boolean, fits: () => boolean): boolean {
   if (fits()) return true;
   // Review of .49: judged before step 1, so a code word of a claim that step leaves out still names its part.
@@ -3707,16 +3726,22 @@ export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, b
   for (const r of ask.relations) r.note = '';
   if (fits()) return true;
   for (const x of ask.parts) if (x.files) x.files = [];
+  if (fits()) return true;
+  for (const x of [...ask.parts.filter(y => y.brief), ...ask.parts.filter(y => !y.brief)]) {
+    if (!Object.hasOwn(x, 'state')) continue;
+    delete x.state; delete x.lastBasis; delete x.files;
+    if (fits()) return true;
+  }
   return fits();
 }
 /** Recipe .50 step 4 (row-binding.1): the B IDs an excerpt of a v5 fold's pasted text cites, first appearance order, each once, at most
  * PART_ROWS_MAX: those bound to a part of the ask (part: its alias), and those whose C-PART row neither the excerpt carries nor goes(r)
  * says this ask sends otherwise (name only, part null): an unbound B whose C-PART row goes is named there already. Only IDs of a C-PART row
  * of that fold. */
-export function partRowsOf(f: Pick<V5Fold, 'key' | 'fold'>, paste: string, ex: Pick<PasteExcerpt, 'text' | 'pieces'>, bound: ReadonlyMap<string, string>, alias: ReadonlyMap<string, string>, goes: (r: FoldRow) => boolean = () => false): MapAskPartRow[] {
+export function partRowsOf(f: Pick<V5Fold, 'key' | 'fold'>, paste: string, ex: Pick<PasteExcerpt, 'text' | 'pieces'>, bound: ReadonlyMap<string, string>, alias: ReadonlyMap<string, string>, goes: (r: FoldRow) => boolean = () => false, max = PART_ROWS_MAX): MapAskPartRow[] {
   const out: MapAskPartRow[] = [];
   for (const id of new Set(ex.text.match(PART_CITE) ?? [])) {
-    if (out.length >= PART_ROWS_MAX) break;
+    if (out.length >= max) break;
     const r = f.fold.byId.get(id), name = r?.table === 'C-PART' ? (r.row.byColumn['이름'] ?? '').trim() : ''; if (!r || !name || secretLike(name)) continue;
     const area = bound.get(ledgerKey(f.key, 'C-PART', id)), part = area ? alias.get(area) ?? null : null;
     const carried = r.record === paste && ex.pieces.some(x => x.from <= r.row.from && r.row.to <= x.to) || goes(r);
@@ -3772,7 +3797,13 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   // again, oldest first, and makes its text fresh: what was read no longer hides it. Held, rejected and reflected rows never go again.
   const readEnd = readEnds(p), ledger = folds.length ? rowLedger(p, folds) : new Map<string, LedgerRow>();
   const pasteAt = new Map(p.pasted.map((r, i) => [r.id, i])), newest = [...folds].sort((a, b) => Math.max(...b.pastes.map(x => pasteAt.get(x.id) ?? -1)) - Math.max(...a.pastes.map(x => pasteAt.get(x.id) ?? -1))).map(f => f.key);
-  const again = resendRows(ledger, readEnd, pasteAt, newest), againKeys = new Set(again.map(x => `${x.paste}@${x.start}`));
+  // Review of .50 (budget): rows whose state the ledger derived from readings made before map-reading.20 (a project read earlier) go again
+  // only beside fresh text, never as an ask of their own; rows a reading of this contract stored as waiting may make one.
+  const v5Ids = new Set(folds.flatMap(f => [...f.pastes.map(x => x.id), ...f.stale]));
+  const freshWithout = (() => { const sendable = new Set(folds.flatMap(f => f.runs.filter(x => unreadFrom.has(x.paste.id) && x.to > unreadFrom.get(x.paste.id)!).map(x => x.paste.id)));
+    return folds.length ? unread.filter(r => !v5Ids.has(r.id) || sendable.has(r.id)).length + [...sendable].filter(id => !unread.some(r => r.id === id)).length : unread.length; })();
+  const waitingRows = resendRows(ledger, readEnd, pasteAt, newest), again = freshWithout || waitingRows.some(x => x.stored) ? waitingRows : [];
+  const againKeys = new Set(again.map(x => `${x.paste}@${x.start}`));
   // Recipe .50 step 4 (row-binding.1): a later map.7 ask says, for each record, what the B IDs its sent text cites are on the map (the part
   // its C-PART row was reflected into, by (record, row ID)), so a page that names its parts by ID only is read against the map.
   // Recipe .50 step 5 (map-identity.ts): a binding to a folded duplicate is one to its canonical part, and the records' own C-IDENT rows bind
@@ -3787,7 +3818,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   // A text is fresh while one of its runs of current pages runs past what was read of it (a page waiting after a gap is not yet), or holds a
   // row sent again.
   const pending = (x: PageRun) => unreadFrom.has(x.paste.id) && x.to > unreadFrom.get(x.paste.id)! || againIn(x);
-  const v5Ids = new Set(folds.flatMap(f => [...f.pastes.map(x => x.id), ...f.stale])), v5Sendable = new Set(folds.flatMap(f => f.runs.filter(pending).map(x => x.paste.id)));
+  const v5Sendable = new Set(folds.flatMap(f => f.runs.filter(pending).map(x => x.paste.id)));
   const fresh = folds.length ? unread.filter(r => !v5Ids.has(r.id) || v5Sendable.has(r.id)).length + [...v5Sendable].filter(id => !unread.some(r => r.id === id)).length : unread.length;
   const input: MapInput = { ask, parts, records, claims, coverage: { fresh, sent: 0, partial: 0 }, after: p.readings.filter(isMapReading).at(-1)?.id ?? null, problem: null };
   if (!fresh) return { ...input, problem: 'NOTHING_NEW' };
@@ -3866,7 +3897,10 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
       // A C-PART row a record placed before this one carries (an earlier run of this fold, or a record already in the ask) names its B there;
       // one only a later record carries is left out after placing (below), so the bytes counted here are never exceeded.
       const carries = (pieces: readonly ExcerptPiece[] | undefined, r: FoldRow) => !!pieces?.some(q => q.from <= r.row.from && r.row.to <= q.to);
-      if (bindings) { const rows = partRowsOf(f, px.id, ex, bindings, alias, r => prior.some(x => x.run.paste.id === r.record && carries(x.ex.pieces, r)) || [...records.values()].some(ref => ref.id === r.record && carries(ref.pieces, r)));
+      // Review of .50 (silent cuts): past PART_ROWS_MAX the record's note says how many B IDs went without their entry.
+      let rowsOver = 0;
+      if (bindings) { const all = partRowsOf(f, px.id, ex, bindings, alias, r => prior.some(x => x.run.paste.id === r.record && carries(x.ex.pieces, r)) || [...records.values()].some(ref => ref.id === r.record && carries(ref.pieces, r)), Infinity);
+        const rows = all.slice(0, PART_ROWS_MAX); rowsOver = all.length - rows.length;
         if (rows.length) { rec.partRows = rows; rowsFold.set(rec, f); } }
       const left = ex.left.length ? ` · 분량상 빼고 보낸 행 ${ex.left.length}개: ${leftText(ex.left)}` : '';
       const cutNote = ex.cut !== null ? ` · 분량상 이 원문 ${ex.cut + 1}자부터(행 ${ex.cutRows}개)는 다음 정리에서 읽음` : '';
@@ -3875,7 +3909,12 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
       const earlier = earlierOf(r), before = earlier.length ? ` · 다음 요청문 생성 전에 붙인 이전 자료이며 후속 반환 근거가 아님: ${earlier.join(', ')}` : '';
       // Recipe .50: the rows sent again, named (an earlier reading read them and placed nothing of them).
       const resent = ex.again.length ? ` · 앞선 정리에서 반영되지 않아 다시 보낸 행 ${ex.again.length}개: ${leftText(ex.again.map(k => againOf.get(k)!).map(y => ({ key: '', table: y.table, id: y.id, paste: y.paste, page: 0, queue: 2 as const })))}` : '';
-      rec.note = cut(`기록 v5 ${f.recordId} 접은 판(쪽 ${run.pages.join('·')}): 지금 행만 원문 그대로 보냄. 뒤 판이 대신한 쪽·C-DROP으로 지운 행·교체된 행·인용 안 된 장부 행은 빼고 뺀 자리에 줄 하나(표 안은 빈 행 「| |」, 밖은 빈 줄)${resent}${left}${cutNote}${later}${held}${before}`, 600);
+      // Review of .50 (deadlock 10): a v5.2 record's P IDs are the roster's stable numbers, not this ask's part ids: each one its sent text
+      // says is named with the ask part it is (or none), so a roster ID in a doubt row or prose never names another part.
+      const pids = f.fold.rows.get('C-IDENT')?.length ? [...new Set(ex.text.match(/(?<![A-Za-z0-9])P\d{2,3}(?!\d)/g) ?? [])].slice(0, 12) : [];
+      const roster = pids.length ? ` · 이 기록의 Pxx는 기록 요청 대장 번호이며 이 요청의 부분 id가 아님: ${pids.map(x => { const a = areaOfNumber(p, x), s = identityState(p), to = a ? alias.get(canonicalPart(s, a)) : undefined; return `${x}=${to ?? '없음'}`; }).join(', ')}` : '';
+      const over = rowsOver ? ` · partRows는 앞 ${PART_ROWS_MAX}개만, B ID ${rowsOver}개는 대응 없이 보냄` : '';
+      rec.note = cut(`기록 v5 ${f.recordId} 접은 판(쪽 ${run.pages.join('·')}): 지금 행만 원문 그대로 보냄. 뒤 판이 대신한 쪽·C-DROP으로 지운 행·교체된 행·인용 안 된 장부 행은 빼고 뺀 자리에 줄 하나(표 안은 빈 행 「| |」, 밖은 빈 줄)${roster}${over}${resent}${left}${cutNote}${later}${held}${before}`, 600);
       // The read interval: the run's pages (a later run of the same text is its own record), the last run of a text to the text's end
       // (what is not sent no longer stands); a cut, or a page of the text waiting after a gap, ends it where that begins (that part is
       // read by a later reading).
@@ -3898,16 +3937,23 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     // The runs in page order as far as they fit, the last one cut at a line (cap shrinking by a tenth down to a readable excerpt).
     const prefix = (k: number): Placed[] => {
       const leave = leaveOf(k), out: Placed[] = [];
+      const attempt = (run: PageRun, keys: ReadonlySet<string>): Placed | null => {
+        let cap = Infinity;
+        for (let g = 0; g < 40; g++) {
+          const ex = pasteExcerpt(f, run.paste, leave, sent, cap, run.pages, keys); if (!ex) return null;
+          const one = record(run, ex, out.length, true, out);
+          if (within([...out, one])) return one;
+          const next = Math.floor(Math.min(cap, ex.text.length, bound.recordChars) * (cap === Infinity && ex.text.length > bound.recordChars ? 1 : 0.9));
+          if (next < MIN_RECORD_CHARS) return null; cap = next;
+        }
+        return null;
+      };
       for (const run of runs) {
         if (out.length >= room) break;
-        let cap = Infinity, got: Placed | null = null;
-        for (let g = 0; g < 40; g++) {
-          const ex = pasteExcerpt(f, run.paste, leave, sent, cap, run.pages, againKeys); if (!ex) break;
-          const one = record(run, ex, out.length, true, out);
-          if (within([...out, one])) { got = one; break; }
-          const next = Math.floor(Math.min(cap, ex.text.length, bound.recordChars) * (cap === Infinity && ex.text.length > bound.recordChars ? 1 : 0.9));
-          if (next < MIN_RECORD_CHARS) break; cap = next;
-        }
+        let got = attempt(run, againKeys);
+        // Review of .50 (R47-5): rows sent again never push a record's unread text out: a run that does not go whole with them goes without
+        // them (they wait for a later ask), when it has unread text of its own.
+        if ((!got || got.ex.cut !== null) && againIn(run) && run.to > (unreadFrom.get(run.paste.id) ?? 0) && unread.some(r => r.id === run.paste.id)) got = attempt(run, new Set()) ?? got;
         if (!got) break;
         out.push(got);
         if (got.ex.cut !== null) break;
@@ -3987,8 +4033,9 @@ export function likeNames(a: string, b: string): boolean {
   const x = nameCore(a), y = nameCore(b);
   return x.core.length >= 2 && x.core === y.core && (x.qualifier === y.qualifier || !x.qualifier || !y.qualifier);
 }
-/** A map-reading.20 reading keeps up to 32 candidates (the model's and the same-name ones first, then a held part's relations). */
-export const READING_CANDIDATES_20 = 32;
+/** A map-reading.20 reading keeps up to 64 candidates (the model's and the held new parts first, then a held part's relations). Review of
+ * .50 (silent cuts): a later map.7 reading has at most 6 + 12 + 16 = 34, so none of its candidates is ever cut. */
+export const READING_CANDIDATES_20 = 64;
 
 /* ---------- the one write ---------- */
 export interface Applied { project: Project; reading: MapReading; created: string[]; touched: string[] }
@@ -4168,11 +4215,25 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const ledgerBound = new Map([...(sentFolds.length ? rowBindings(prior, active) : new Map<string, string>())].map(([k, v]) => [k, canonicalPart(idState, v)] as const).filter(([, v]) => active(v)));
   const bound = new Map(ledgerBound), partRowsSent = tracked.filter(t => t.row.table === 'C-PART');
   if (askFolds.length) for (const [k, v] of identityBindings(project, askFolds, ledgerBound, active)) if (!bound.has(k)) bound.set(k, v);
+  const quotedRows = (x: MapReplyPart) => { const quotes = x.basis.map(real); return partRowsSent.filter(t => quotes.some(q => q.from !== undefined && q.to !== undefined && q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to)); };
+  // Review of .50 (K2): the new part's own C-PART row (ownPartRow: the one row it quotes, or the one named as it) decides: bound, the part is
+  // that part; unbound, it is a part of its own (a bound row it also quotes is context). With no own row, it is a bound part only when every
+  // C-PART row it quotes is bound to that one part.
   const boundOf = (x: MapReplyPart): string | null => {
-    const quotes = x.basis.map(real), hit = new Set(partRowsSent.filter(t => quotes.some(q => q.from !== undefined && q.to !== undefined && q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to))
-      .flatMap(t => { const a = bound.get(t.key); return a ? [a] : []; }));
-    return hit.size === 1 ? [...hit][0]! : null;
+    const rows = quotedRows(x), own = ownPartRow(rows, x.name ?? '');
+    if (own) return bound.get(own.key) ?? null;
+    const hit = new Set(rows.map(t => bound.get(t.key) ?? null));
+    return hit.size === 1 && !hit.has(null) ? [...hit][0]! : null;
   };
+  // Review of .50 (K9, ruling F5 Q1): a C-PART row whose C-IDENT correspondence is held (a stale roster, no evidence) is that conflict: a new
+  // part on it is held with the part the record names, never made as a new P beside it.
+  const identityHeld = askFolds.length ? identityHolds(project, askFolds, ledgerBound) : new Map<string, string>();
+  // Review of .50 (deadlock 7): a C-PART row an earlier reading of a former contract read and placed nothing of (its state derived, sent
+  // before) comes again now; a new part on it whose name shares a word with a live part may be that part under another name: held as an
+  // identity candidate, never made and never merged (names are for candidates only).
+  const GENERIC = new Set(['부분', '모듈', '기능', '서비스', '시스템', '도구', '파일', '코드', '처리', '관리', '단계', 'api', 'the', 'and', 'for', 'of']);
+  const words = (n: string) => normName(n).split(/[^\p{L}\p{N}]+/u).filter(w => w.length >= 2 && !GENERIC.has(w));
+  const shareWord = (a: string, b: string) => { const x = words(a), y = words(b); return x.some(w => y.some(v => v === w || v.startsWith(w) || w.startsWith(v))); };
   const rebound: { x: MapReplyPart; areaId: string }[] = [];
   // Recipe .50 step 4: the same-name net of a later map also compares names with their parenthetical qualifiers left out and case and
   // spacing folded (likeNames), against the parts live before this reading under any parent but the new part's own ancestors: a match is
@@ -4188,6 +4249,14 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
       if (x.parent && dropped.has(x.parent)) { dropped.add(x.ref); skipped.push({ what: 'part', name: x.name!, reason: 'parent-skipped' }); continue; }
       const to = boundOf(x);
       if (to) { ids.set(x.ref, to); rebound.push({ x, areaId: to }); continue; }
+      const ownRow = ownPartRow(quotedRows(x), x.name ?? ''), idHold = ownRow ? identityHeld.get(ownRow.key) : undefined;
+      // The skip reason list has no identity entry: the candidate says why.
+      if (idHold && active(idHold)) {
+        dropped.add(x.ref); held.set(x.ref, idHold); skipped.push({ what: 'part', name: x.name!, reason: 'same-name' });
+        candidates.push({ text: cut(`‘${x.name}’: 기록의 대응표(C-IDENT)가 이 행을 기존 부분 ‘${p.space.areas.find(a => a.id === idHold)?.name ?? ''}’과(와) 짝지었지만 확인되지 않아(지도 대장이 바뀌었거나 근거가 없음) 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, 240),
+          areaIds: [idHold], quote: real(x.basis[0]!), ...(six ? { target: 'identity' as const, statement: null } : {}) });
+        continue;
+      }
       const parentId = x.parent ? ids.get(x.parent)! : null, key = normName(x.name!);
       const same = p.space.areas.find(a => !a.archived && parentOf(a.id) === parentId && normName(a.name) === key)
         ?? madeBefore.map(m => p.space.areas.find(a => a.id === m.areaId && !a.archived && m.parentId === parentId && normName(m.name) === key)).find(Boolean);
@@ -4198,10 +4267,13 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
         continue;
       }
       // Recipe .50 step 5: a duplicate folded onto its canonical part is no part of its own to be alike.
-      const up = ancestors(parentId), like = later ? before.find(a => !up.has(a.id) && !idState.folded.has(a.id) && likeNames(a.name, x.name!)) : undefined;
+      const up = ancestors(parentId), backlog = !!ownRow && (prior.get(ownRow.key)?.sent ?? 0) > 0 && prior.get(ownRow.key)?.stored === false;
+      const like = later ? before.find(a => !up.has(a.id) && !idState.folded.has(a.id) && likeNames(a.name, x.name!))
+        ?? (backlog ? before.find(a => !up.has(a.id) && !idState.folded.has(a.id) && !idState.retired.has(a.id) && shareWord(a.name, x.name!)) : undefined) : undefined;
       if (like) {
         dropped.add(x.ref); held.set(x.ref, like.id); skipped.push({ what: 'part', name: x.name!, reason: 'same-name' });
-        candidates.push({ text: cut(`‘${x.name}’: 이름이 거의 같은 부분 ‘${like.name}’이(가) 이미 있어 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, 240), areaIds: [like.id], quote: real(x.basis[0]!), target: 'identity', statement: null });
+        const why = likeNames(like.name, x.name!) ? `이름이 거의 같은 부분 ‘${like.name}’이(가) 이미 있어` : `앞서 반영되지 않았던 행이고 이름에 같은 말이 든 부분 ‘${like.name}’이(가) 이미 있어`;
+        candidates.push({ text: cut(`‘${x.name}’: ${why} 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, 240), areaIds: [like.id], quote: real(x.basis[0]!), target: 'identity', statement: null });
         continue;
       }
       if (madeBefore.some(m => m.parentId === parentId && normName(m.name) === key && p.space.areas.some(a => a.id === m.areaId && a.archived))) {
@@ -4301,7 +4373,10 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // Anchored: a reply that gets nothing out of the records (no part, claim, line, candidate or match) and says why with gaps
   // (material it found lacking) is not kept: the records stay unread for the person to ask again (NOTHING_READ). A reply with
   // nothing to change and no such reason (the records add nothing to the map as it is) is a reading, kept as before.
-  if (four && !parts.length && !relations.length && !candidates.length && !matches.length && reply.gaps.length) throw new Error('NOTHING_READ');
+  // Review of .50 (deadlock 2): an ask that sent rows again is kept even so: the rows' send counts move (and end in rejected), so the next
+  // ask differs and the same refusal never repeats.
+  const resentNow = tracked.some(t => sentOf(t) === 'sent' && (prior.get(t.key)?.sent ?? 0) > 0);
+  if (four && !parts.length && !relations.length && !candidates.length && !matches.length && reply.gaps.length && !resentNow) throw new Error('NOTHING_READ');
   // map-reading.20 (recipe .50): a reading that sent a v5 fold keeps what it did with each row it sent or left out for room (row-ledger.ts).
   // Recipe .50 step 2: a row held for a correction names the part it stands with: the server reason's part index in the wire it was written
   // in, less the parts this browser set aside whole before it (the server never sets a later part aside whole).

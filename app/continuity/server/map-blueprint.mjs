@@ -126,12 +126,13 @@ export const BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT;
 // Recipe .50 step 3 (later-identity.1, ruling F5 Q1/Q7(3)): a later plan reads the map as this project's earlier understanding. The one
 // first-map line that put 판본 beside identity is said without it here (a checked swap: the first-map text itself stays byte for byte),
 // the corrections line is said of claims, and a positive identity paragraph follows the obligations.
-export const IDENTITY_VERSION = 'later-identity.1';
+// Review of .50 (later-identity.2): a full replacement in effect is a successor, not the same part (ruling F5 Q3).
+export const IDENTITY_VERSION = 'later-identity.2';
 const swapOnce = (text, from, to) => { if (text.split(from).length !== 2) throw new Error(`later plan: '${from.slice(0, 40)}' not found once`); return text.replace(from, () => to); };
 export const LATER_IDENTITY_RULES = `
-기존 부분의 정체(later-identity.1):
+기존 부분의 정체(later-identity.2):
 - INPUT.parts는 같은 프로젝트를 앞 기록들로 읽은 지금까지의 이해다. 이번 기록은 같은 프로젝트의 나중 기준 커밋에서 쓰였을 수 있다. 기준 커밋·판본·작성 세션이 다르다는 것만으로 다른 대상이 되지 않는다. 판본 주의는 current 주장의 대체(corrections·replaces)에만 쓰고 부분의 정체에는 쓰지 않는다.
-- 기록의 부분 행이 기존 부분과 같은 책임(하는 일), 같은 자리(부모·연결 상대), 같은 파일(files)을 말하는지 원문 근거로 대조해, 같은 대상이면 그 Pxx로 계획한다. 파일·부모·구현 방식·이름이 바뀌어도 같은 책임을 이어 맡으면 같은 부분이다. 반대로 책임·파일·연결은 같은 대상의 근거일 뿐 자동으로 같다는 뜻이 아니다: 같은 코드로 도는 별개의 실행 단위(다른 프로세스·인스턴스·사람)는 따로 둔다. 이름이 같거나 괄호 설명만 다른 것은 후보일 뿐이며 이름이 비슷하다는 것만으로 합치지 않는다.
+- 기록의 부분 행이 기존 부분과 같은 책임(하는 일), 같은 자리(부모·연결 상대), 같은 파일(files)을 말하는지 원문 근거로 대조해, 같은 대상이면 그 Pxx로 계획한다. 파일·부모·구현 방식·이름이 바뀌어도 같은 책임을 이어 맡으면 같은 부분이다. 다만 기록이 그 책임을 다른 것이 이미 전부 대신했다고 하면(옛 구현을 걷어 내고 새 구현으로 바꿈) 대신한 것은 새 부분으로 세우고, 앞 Pxx는 그대로 두어 대신했다는 원문을 그 부분에 맡긴다(새 부분에 합치지 않는다). 반대로 책임·파일·연결은 같은 대상의 근거일 뿐 자동으로 같다는 뜻이 아니다: 같은 코드로 도는 별개의 실행 단위(다른 프로세스·인스턴스·사람)는 따로 둔다. 이름이 같거나 괄호 설명만 다른 것은 후보일 뿐이며 이름이 비슷하다는 것만으로 합치지 않는다.
 - 기존 Pxx로 계획하면 name과 parent는 기존 값 그대로 쓰고(위 규칙), 기록이 부르는 다른 이름은 focus에 「기록 이름: …」으로 적는다. 이름이 다르다는 이유로 같은 대상을 새 부분으로 세우지 않는다.
 - 같은 대상인지 가를 수 없으면 새 부분을 만들어 비켜 가지 않는다: 그 Pxx를 parts에 두고 kind=uncertain 항목 「<기록 이름> ↔ Pxx 같은 대상인지 미정: 이유 → Pxx」를 남기며, 그 행은 이번에 부분으로 세우지 않는다. 기준이 다르다는 것은 미정의 이유가 아니다. 분명히 새로운 대상만 새 부분으로 세운다. 새 부분은 지도에 처음 오른다는 뜻이며 소프트웨어에 새로 생겼다는 뜻이 아니다.
 - 명시적 제거·대체(C-PART 상태 「제거됨」, C-WITHDRAW의 제거·폐기·대체, C-CHANGE의 실제 변화)는 그 대상(어느 기존 부분인지), 범위(전부인지 일부인지), 효력 시점(이미 일어났는지 계획인지)을 원문으로 확인한 뒤 그 기존 부분에 맡긴다. 기준이 다르다는 이유로 material로 미루지 않는다. 일부만 바뀐 것은 부분 전체의 제거가 아니고, 계획된 대체는 아무것도 없애지 않는다.
@@ -1066,9 +1067,24 @@ export function missingMapCorrections(wire, ask, blueprint) {
  * B. An obligation still unmet after the one semantic re-render is held with its dependents as one unit (correctionUnits): the target
  *    claim stays current and the part's claims on the obligation's lines, the part's relations inside them and their port-map rows are
  *    left out (holdCorrectionUnits) with their reasons (correction-unmet, correction-held); everything independent applies. */
-export const CONTAINMENT_VERSION = 'later-containment.1';
+// Review of .50 (later-containment.2): a change word said in the negative states no change; a held unit's reasons come first, one per line.
+export const CONTAINMENT_VERSION = 'later-containment.2';
 const CHANGE_COLUMN = /옛|이전|지금|이후|바뀐|변경|철회|대체|방식/;
-const CHANGE_WORDS = /철회|정정|대체|대신|바뀌|바뀐|바뀜|바꾸|바꿨|바꿈|변경|제거|폐기|되돌|옮겼|옮김|교체|삭제|없앴|없애|더\s*이상|더는|채택\s*안|다시\s*도입|revert|remov|deprecat|replac|rollback|instead|no longer|renam/i;
+const CHANGE_WORDS = /철회|정정|대체|대신|바뀌|바뀐|바뀜|바꾸|바꿨|바꿈|변경|제거|폐기|되돌|옮겼|옮김|교체|삭제|없앴|없애|채택\s*안|다시\s*도입|revert|remov|deprecat|replac|rollback|instead|renam/gi;
+/* Review of .50 (K10): a change word said in the negative (「삭제되지 않고」, 「제거하지 못했다」, 「교체 안 됨」, 「not removed」) states no change, and
+ * 「더는·더 이상·no longer」 is a change only with a verb of use (「더 이상 쓰지 않는다」), never with a quality (「더는 빠르지 않다」: a defect). */
+const NEG_AFTER = /^[가-힣]{0,3}\s*(?:지\s*(?:않|못|말)|(?:안|못)\s*(?:됨|되|돼|함|했|한|해|하)|불가|실패)/;
+const NEG_BEFORE = /(?:\bnot|\bnever|n't|\bcannot|\bfailed to)\s+(?:been\s+|be\s+|yet\s+)?$/i;
+const NO_LONGER_USE = /(?:더\s*이상|더는)\s*(?:[^\s|]+\s+){0,2}?(?:쓰|사용|두|지원|유지|제공|실행|돌리|돌아가|부르|호출|만들|읽|보내|받|켜|포함|남기)[가-힣]{0,3}\s*(?:지\s*)?않|no longer\s+(?:be\s+)?(?:used|in use|supported|maintained|called|shipped|needed|run|runs|exists?|provided)/i;
+export function changeStated(text) {
+  if (NO_LONGER_USE.test(text)) return true;
+  for (const m of text.matchAll(CHANGE_WORDS)) {
+    const end = m.index + m[0].length;
+    if (NEG_AFTER.test(text.slice(end, end + 12)) || NEG_BEFORE.test(text.slice(Math.max(0, m.index - 20), m.index))) continue;
+    return true;
+  }
+  return false;
+}
 const EMPTY_CELL = /^(?:—|–|-|모름|없음)?$/;
 const OWN_COLUMNS = new Set(['행 ID', '근거']);
 /** Where an alias (N02.63, N02.63-65) stands in its record of the ask, or null. */
@@ -1097,7 +1113,7 @@ export function correctionJustified(obligation, ask) {
     const rows = rowsAtPlace(place);
     if (!rows.length) return true;
     return rows.some(cells => {
-      const effect = cells.some(c => CHANGE_COLUMN.test(c.column) && !EMPTY_CELL.test(c.text)) || cells.some(c => CHANGE_WORDS.test(c.text));
+      const effect = cells.some(c => CHANGE_COLUMN.test(c.column) && !EMPTY_CELL.test(c.text)) || cells.some(c => changeStated(c.text));
       const words = contentWords(cells.map(c => c.text).join(' '));
       return effect && [...words].some(w => target.has(w));
     });
@@ -1141,7 +1157,9 @@ export function correctionUnits(wire, ask, held, kept = []) {
 export function holdCorrectionUnits(wire, ask, blueprint, held = []) {
   const planned = validateMapBlueprint(blueprint, ask), unmet = new Set(held.map(o => `${o.part}:${o.claim}`));
   const kept = (justifiedBlueprint(planned, ask).corrections ?? []).filter(o => !unmet.has(`${o.part}:${o.claim}`));
-  const units = correctionUnits(wire, ask, held, kept), exclusions = [];
+  // Review of .50 (silent cuts): the unit's own reasons, one per line of the obligation, go before any per-item reason, so past the set-aside
+  // bound an item still left out stands inside a reason that holds its row (correction), never as a row waiting with no reason.
+  const units = correctionUnits(wire, ask, held, kept), exclusions = [], heads = [];
   for (const k of unjustifiedCorrections(planned, ask)) {
     const obligation = planned.corrections[k], i = wire.parts.findIndex(p => p?.ref === obligation.part);
     if (i >= 0) exclusions.push(aliasExclusion(`parts[${i}].claims`, 'correction-unjustified', obligation.at[0], ask));
@@ -1149,12 +1167,13 @@ export function holdCorrectionUnits(wire, ask, blueprint, held = []) {
   const claimAway = new Map(), relationAway = new Set(), rowAway = new Set();
   for (const unit of units) {
     if (unit.part < 0) continue;
-    exclusions.push(aliasExclusion(`parts[${unit.part}].claims`, 'correction-unmet', unit.obligation.at[0], ask));
+    for (const at of new Set(unit.obligation.at)) heads.push(aliasExclusion(`parts[${unit.part}].claims`, 'correction-unmet', at, ask));
     for (const j of unit.claims) if (!(claimAway.get(unit.part)?.has(j))) { claimAway.set(unit.part, new Set([...claimAway.get(unit.part) ?? [], j]));
       exclusions.push(aliasExclusion(`parts[${unit.part}].claims[${j}]`, 'correction-held', wire.parts[unit.part].claims[j].at, ask)); }
     for (const k of unit.relations) if (!relationAway.has(k)) { relationAway.add(k); exclusions.push(aliasExclusion(`relations[${k}]`, 'correction-held', wire.relations[k].at, ask)); }
     for (const k of unit.portMap) if (!rowAway.has(k)) { rowAway.add(k); exclusions.push(aliasExclusion(`portMap[${k}]`, 'correction-held', wire.portMap[k].at, ask)); }
   }
+  exclusions.splice(exclusions.filter(x => x.category === 'correction-unjustified').length, 0, ...heads);
   if (!claimAway.size && !relationAway.size && !rowAway.size) return { wire, exclusions: exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX) };
   const removed = [...relationAway].sort((a, b) => a - b);
   const out = { ...wire, parts: wire.parts.map((p, i) => claimAway.has(i) ? { ...p, claims: p.claims.filter((_, j) => !claimAway.get(i).has(j)) } : p),

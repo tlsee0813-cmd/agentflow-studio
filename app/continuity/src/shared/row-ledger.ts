@@ -32,11 +32,26 @@ export interface LedgerRow extends ReadingRow {
   ends: string[];
   /** The C-PART 이름 cell (C-PART rows), for naming the row. */
   name: string | null;
-  /** The reading that decided the row (null: none yet). */
-  reading: string | null }
+  /** The reading that decided the row (null: none yet), and whether that reading stored its row entries (map-reading.20) rather than being
+   * read by the rule on the fly (review of .50: a backlog derived from earlier readings goes again only beside fresh text). */
+  reading: string | null; stored: boolean;
+  /** Review of .50 (C-PART rows): the part a reading created on this very row (the first one), else null. Only a creation binds a row: a
+   * part that merely quotes the row (as context, or an existing part's basis) never does. */
+  bound: string | null }
 export const ledgerKey = (record: string, table: string, id: string): string => `${record}\u0000${table}\u0000${id}`;
 
 interface Tracked { key: string; record: string; row: FoldRow; ends: string[]; name: string | null }
+/** A name's core for picking a part's own row among the C-PART rows its basis quotes: NFKC, case folded, bracketed qualifiers and spacing
+ * left out (as likeNames in map-reading.ts compares them). */
+const nameCore = (n: string) => n.normalize('NFKC').toLowerCase().replace(/[(（[［][^()（）[\]［］]*[)）\]］]/g, ' ').replace(/\s+/g, '');
+/** Review of .50 (K2, K11): the C-PART row a new part stands on as its own, among the C-PART rows its basis quotes: the only one, else the
+ * only one whose name is the part's (cores equal), else none. Never a row by name alone: the row must be quoted. */
+export function ownPartRow<T extends { name: string | null }>(rows: readonly T[], name: string): T | null {
+  const uniq = [...new Set(rows)];
+  if (uniq.length === 1) return uniq[0]!;
+  const k = nameCore(name), named = uniq.filter(t => !!t.name && k.length > 0 && nameCore(t.name) === k);
+  return named.length === 1 ? named[0]! : null;
+}
 /** The tracked rows of a fold, in table order then row order. */
 export function trackedRows(f: V5Fold): Tracked[] {
   const out: Tracked[] = [];
@@ -67,9 +82,13 @@ function places(v: unknown, out: Place[] = []): Place[] {
   for (const x of Object.values(v)) if (x && typeof x === 'object') places(x, out);
   return out;
 }
+/** Review of .50 (K6, parsed is not reflected): the reading fields the app shows (the first-structure lines; artifact names in plain
+ * text). A row that only a field the app never shows stands on is kept in the reading and rejected as unsupported, never reflected. */
+export const SHOWN_READING_FIELDS: ReadonlySet<string> = new Set(['firstLines', 'artifacts']);
+const kebab = (k: string) => k.replace(/[A-Z]/g, c => `-${c.toLowerCase()}`).slice(0, 40);
 /** The reading's own fields that are not map items, candidates, material or diagnostics. */
 const OWN_FIELDS = new Set(['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', 'material', 'exclusions', 'portMap', 'rows', 'identity', 'requests', 'recordDiagnostics', 'obligations', 'pages', 'level', 'firstLines', 'basisAt', 'basisVersion']);
-function standing(r: MapReading, heldWith: (x: ReadingExclusion) => string[]): { stands: Stand[]; holds: Hold[]; material: Place[]; asides: Aside[] } {
+function standing(r: MapReading, heldWith: (x: ReadingExclusion) => string[]): { stands: Stand[]; unshown: Stand[]; holds: Hold[]; material: Place[]; asides: Aside[] } {
   const stands: Stand[] = [];
   for (const p of r.parts) {
     for (const [k, v] of Object.entries(p)) {
@@ -79,11 +98,12 @@ function standing(r: MapReading, heldWith: (x: ReadingExclusion) => string[]): {
   }
   for (const x of r.relations) for (const q of places(x)) stands.push({ ...q, target: { kind: 'relation', id: x.relationId, index: null } });
   for (const x of r.portMap ?? []) for (const q of places(x)) stands.push({ ...q, target: { kind: 'relation', id: x.relationId, index: null } });
-  for (const [k, v] of Object.entries(r)) if (!OWN_FIELDS.has(k)) for (const q of places(v)) stands.push({ ...q, target: { kind: 'reading', id: k, index: null } });
+  const unshown: Stand[] = [];
+  for (const [k, v] of Object.entries(r)) if (!OWN_FIELDS.has(k)) for (const q of places(v)) (SHOWN_READING_FIELDS.has(k) ? stands : unshown).push({ ...q, target: { kind: 'reading', id: k, index: null } });
   const holds: Hold[] = r.candidates.flatMap(c => ([c.quote, c.statement?.quote ?? null] as unknown[]).filter(isPlace).map(q => ({ record: q.record, from: q.from, to: q.to, reason: c.target ?? 'identity', with: [...c.areaIds] })));
   const material = (r.material ?? []).map(m => ({ record: m.record, from: m.from, to: m.to }));
   const asides = (r.exclusions ?? []).filter(x => x.record !== null && x.from !== null && x.to !== null).map(x => ({ record: x.record!, from: x.from!, to: x.to!, category: x.category, with: x.category && CORRECTION_HOLDS.has(x.category) ? heldWith(x).slice(0, 4) : [] }));
-  return { stands, holds, material, asides };
+  return { stands, unshown, holds, material, asides };
 }
 const on = (q: Place, t: Tracked) => q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to;
 
@@ -93,7 +113,7 @@ export type Sent = (t: Tracked) => 'sent' | 'left' | null;
 /** What reading r decided for the rows it sent or left, given the ledger before it (prior) and whether it was the first map. heldWith (recipe
  * .50 step 2): the part areas a server reason holding a correction stands with (applyReading resolves its part index). */
 export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent, prior: ReadonlyMap<string, LedgerRow>, first: boolean, heldWith: (x: ReadingExclusion) => string[] = () => []): ReadingRow[] {
-  const { stands, holds, material, asides } = standing(r, heldWith), allow = first ? ALLOWANCE.first : ALLOWANCE.later;
+  const { stands, unshown, holds, material, asides } = standing(r, heldWith), allow = first ? ALLOWANCE.first : ALLOWANCE.later;
   const made = r.parts.filter(p => p.created).length, out: ReadingRow[] = [];
   const decided = new Map<string, ReadingRow>(), lazy: { t: Tracked; e: ReadingRow }[] = [];
   for (const t of rows) {
@@ -112,6 +132,8 @@ export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent
       else if (aside.some(q => q.category && CORRECTION_HOLDS.has(q.category))) { const q = aside.find(y => y.category && CORRECTION_HOLDS.has(y.category))!;
         e = { ...base, state: 'held', reason: 'correction', detail: q.category, with: [...new Set(aside.flatMap(y => y.with))].slice(0, 4) }; }
       else if (material.some(q => on(q, t))) e = { ...base, state: 'rejected', reason: 'material' };
+      // Review of .50 (K6): parsed into a field the app never shows is kept in the reading, not reflected, and not sent again.
+      else if (unshown.some(q => on(q, t))) e = { ...base, state: 'rejected', reason: 'unsupported', detail: kebab(unshown.find(q => on(q, t))!.target.id) };
       else if (limit) e = { ...base, state: 'waiting', reason: 'limit', detail: 'count' };
       else { e = { ...base, state: 'waiting', reason: 'transient', detail: aside.find(q => q.category)?.category ?? before?.detail ?? null }; if (!aside.length) lazy.push({ t, e }); }
     }
@@ -125,9 +147,11 @@ export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent
     if (ends.some(k => stateOf(k) !== 'reflected')) { e.reason = 'unresolved-endpoint'; continue; }
     if (t.row.table === 'C-PART' && made >= allow.parts || t.row.table === 'C-LINK' && r.relations.length >= allow.relations) { e.reason = 'limit'; e.detail = null; }
   }
-  // Bounded: a row sent as often as allowed is rejected (unplaced); an endpoint wait spends only the overall bound.
-  for (const e of out) if (e.state === 'waiting' && e.reason !== 'budget' && (e.sent >= RESEND_ALL_MAX || e.reason === 'transient' && e.sent >= RESEND_TRANSIENT_MAX)) { e.state = 'rejected'; e.reason = 'unplaced'; }
-  return out.slice(0, READING_ROWS_MAX);
+  // Bounded: a row sent as often as allowed is rejected (unplaced). Review of .50 (loss 3): a row waiting on an end that is not settled is not
+  // bounded here (it is sent again only when its ends are placed or go with it, resendRows, and it follows an end held or rejected: depends).
+  for (const e of out) if (e.state === 'waiting' && e.reason !== 'budget' && e.reason !== 'unresolved-endpoint' && (e.sent >= RESEND_ALL_MAX || e.reason === 'transient' && e.sent >= RESEND_TRANSIENT_MAX)) { e.state = 'rejected'; e.reason = 'unplaced'; }
+  // Review of .50: past READING_ROWS_MAX the rows the ask sent are kept before those it left out for room (a left row keeps its state).
+  return [...out.filter(e => e.reason !== 'budget'), ...out.filter(e => e.reason === 'budget')].slice(0, READING_ROWS_MAX);
 }
 
 /* ---------- the ledger ---------- */
@@ -139,12 +163,12 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
   const out = new Map<string, LedgerRow>(), byPaste = new Map<string, Tracked[]>();
   for (const f of folds) for (const t of trackedRows(f)) {
     out.set(t.key, { record: t.record, table: t.row.table, id: t.row.id, state: 'waiting', reason: 'not-yet-sent', detail: null, sent: 0, to: [], with: [],
-      paste: t.row.record, start: t.row.row.from, end: t.row.row.to, ends: t.ends, name: t.name, reading: null });
+      paste: t.row.record, start: t.row.row.from, end: t.row.row.to, ends: t.ends, name: t.name, reading: null, stored: false, bound: null });
     byPaste.set(t.row.record, [...byPaste.get(t.row.record) ?? [], t]);
   }
   // Recipe .50 step 5: each C-IDENT row waits until a reading weighs it (it is the program's, so it is never sent).
   for (const f of folds) for (const r of f.fold.rows.get(IDENT_TABLE_ID) ?? []) out.set(ledgerKey(f.key, IDENT_TABLE_ID, r.id), { record: f.key, table: IDENT_TABLE_ID, id: r.id,
-    state: 'waiting', reason: 'not-yet-sent', detail: null, sent: 0, to: [], with: [], paste: r.record, start: r.row.from, end: r.row.to, ends: [], name: null, reading: null });
+    state: 'waiting', reason: 'not-yet-sent', detail: null, sent: 0, to: [], with: [], paste: r.record, start: r.row.from, end: r.row.to, ends: [], name: null, reading: null, stored: false, bound: null });
   const all = [...byPaste.values()].flat(), readTo = new Map<string, number>();
   const maps = p.readings.filter(isMapReading);
   maps.forEach((r, i) => {
@@ -152,7 +176,15 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
       const x = r.records.find(y => y.id === t.row.record);
       return x && t.row.row.from >= (readTo.get(x.id) ?? 0) && t.row.row.from >= x.from && t.row.row.to <= x.to ? 'sent' : null;
     }, out, i === 0) : []);
-    for (const e of entries) { const x = out.get(ledgerKey(e.record, e.table, e.id)); if (x) Object.assign(x, { state: e.state, reason: e.reason, detail: e.detail, sent: e.sent, to: structuredClone(e.to), with: [...e.with], reading: r.id }); }
+    for (const e of entries) { const x = out.get(ledgerKey(e.record, e.table, e.id)); if (x) Object.assign(x, { state: e.state, reason: e.reason, detail: e.detail, sent: e.sent, to: structuredClone(e.to), with: [...e.with], reading: r.id, stored: !!r.rows }); }
+    // Review of .50 (K2, K11): a part this reading created binds its own C-PART row, once: among the C-PART rows this reading reflected into
+    // it, the only one, else the one named as it (ownPartRow). A row only an existing part, or another new part, stands on binds nothing.
+    for (const x of r.parts) {
+      if (!x.created) continue;
+      const rows = entries.filter(e => e.table === 'C-PART' && e.state === 'reflected' && e.to.some(t => t.kind === 'part' && t.id === x.areaId))
+        .flatMap(e => { const y = out.get(ledgerKey(e.record, e.table, e.id)); return y ? [y] : []; });
+      const own = ownPartRow(rows, x.created.name); if (own && own.bound === null) own.bound = x.areaId;
+    }
     for (const e of r.identity ?? []) { const x = out.get(ledgerKey(e.record, IDENT_TABLE_ID, e.id)); if (x) Object.assign(x, { state: e.state, reason: e.reason, detail: e.op?.kind ?? null,
       to: e.state === 'reflected' && e.areaId ? [{ kind: 'part' as const, id: e.areaId, index: null }, ...(e.op?.successor ? [{ kind: 'part' as const, id: e.op.successor, index: null }] : [])] : [],
       with: e.state === 'held' && e.areaId ? [e.areaId] : [], reading: r.id }); }
@@ -160,9 +192,16 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
     // part it stands with lets it wait (transient) and go again within the send bounds. A re-pasted row is new text and goes anyway.
     // Recipe .50 step 4: a row held on an identity question likewise, when a later reading writes basis or claims on a part it names (the
     // same conflict is not sent again until its target changes).
-    for (const x of out.values()) if (x.state === 'held' && x.reading !== r.id && (x.reason === 'correction' && r.parts.some(q => x.with.includes(q.areaId) && q.claims.length)
-      || x.reason === 'identity' && r.parts.some(q => x.with.includes(q.areaId) && (q.claims.length || q.basis.length))))
-      Object.assign(x, { state: 'waiting', reason: 'transient', detail: x.reason === 'correction' ? 'correction-unmet' : 'identity', with: [] });
+    // Review of .50 (K12, deadlock 4): the release is bounded like any transient row (a row sent RESEND_TRANSIENT_MAX times stays held, for the
+    // person), and an identity question's target changes only when the part's identity does (an identity operation on it, or a role a
+    // later reading writes), never when a claim or a basis quote lands on it.
+    for (const x of out.values()) {
+      if (x.state !== 'held' || x.reading === r.id || x.table === IDENT_TABLE_ID || x.sent >= RESEND_TRANSIENT_MAX) continue;
+      const touched = x.reason === 'correction' ? r.parts.some(q => x.with.includes(q.areaId) && q.claims.length > 0)
+        : x.reason === 'identity' && ((r.identity ?? []).some(e => !!e.op && [e.op.areaId, e.op.into, e.op.successor].some(a => !!a && x.with.includes(a)))
+          || r.parts.some(q => x.with.includes(q.areaId) && !!q.role));
+      if (touched) Object.assign(x, { state: 'waiting', reason: 'transient', detail: x.reason === 'correction' ? 'correction-unmet' : 'identity', with: [] });
+    }
     for (const x of r.records) readTo.set(x.id, Math.max(readTo.get(x.id) ?? 0, x.to));
   });
   for (const x of out.values()) {
@@ -175,17 +214,13 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
   return out;
 }
 
-/** Recipe .50 step 4 (row-binding.1, ruling F5 Q7(4)): the row → part mapping, from the ledger (so every reading, old or new, gives it): a
- * C-PART row reflected into exactly one part that is live (live(id)) by a part target (its basis, or a part field standing on the row: type,
- * family, implementation) is bound to that part, by (record, row ID). A row reflected into two parts binds nothing; a claim quoting the row
- * never binds; a name never binds. Keyed as the ledger is (ledgerKey(record, 'C-PART', B…)). */
+/** Recipe .50 step 4 (row-binding.1, ruling F5 Q7(4)): the row → part mapping, from the ledger (so every reading, old or new, gives it), by
+ * (record, row ID), keyed as the ledger is (ledgerKey(record, 'C-PART', B…)). Review of .50 (K2, K11): a C-PART row is bound to the part a
+ * reading created on it as its own row (LedgerRow.bound, the first such part), when that part is live (live(id)). A part that only quotes
+ * the row (an existing part's basis, context of another new part) never binds it; a claim never does; a name never does. */
 export function rowBindings(ledger: ReadonlyMap<string, LedgerRow>, live: (id: string) => boolean): Map<string, string> {
   const out = new Map<string, string>();
-  for (const [k, x] of ledger) {
-    if (x.table !== 'C-PART' || x.state !== 'reflected') continue;
-    const ids = [...new Set(x.to.filter(t => t.kind === 'part').map(t => t.id))];
-    if (ids.length === 1 && live(ids[0]!)) out.set(k, ids[0]!);
-  }
+  for (const [k, x] of ledger) if (x.table === 'C-PART' && x.bound && live(x.bound)) out.set(k, x.bound);
   return out;
 }
 /** The waiting rows an ask sends again: every waiting row that lies before what was read of its pasted text (a row past it goes anyway),
@@ -193,8 +228,13 @@ export function rowBindings(ledger: ReadonlyMap<string, LedgerRow>, live: (id: s
  * most RESEND_ROWS_MAX. */
 export function resendRows(ledger: ReadonlyMap<string, LedgerRow>, readTo: ReadonlyMap<string, number>, pasteOrder: ReadonlyMap<string, number>, order: readonly string[] = []): LedgerRow[] {
   const rank = (x: LedgerRow) => { const i = order.indexOf(x.record); return i < 0 ? order.length : i; };
-  return [...ledger.values()].filter(x => x.state === 'waiting' && x.table !== IDENT_TABLE_ID && x.end <= (readTo.get(x.paste) ?? 0))
-    .sort((a, b) => rank(a) - rank(b) || (pasteOrder.get(a.paste) ?? 0) - (pasteOrder.get(b.paste) ?? 0) || a.start - b.start).slice(0, RESEND_ROWS_MAX);
+  const read = (x: LedgerRow) => x.end <= (readTo.get(x.paste) ?? 0), key = (x: LedgerRow) => ledgerKey(x.record, x.table, x.id);
+  const pool = [...ledger.values()].filter(x => x.state === 'waiting' && x.table !== IDENT_TABLE_ID && read(x))
+    .sort((a, b) => rank(a) - rank(b) || (pasteOrder.get(a.paste) ?? 0) - (pasteOrder.get(b.paste) ?? 0) || a.start - b.start);
+  // Review of .50 (loss 3): a row waiting on an end goes only when each end it names is placed, goes with it, or is still unread.
+  const picked = new Set(pool.filter(x => x.reason !== 'unresolved-endpoint').slice(0, RESEND_ROWS_MAX).map(key));
+  const settled = (x: LedgerRow) => x.ends.every(b => { const k = ledgerKey(x.record, 'C-PART', b), y = ledger.get(k); return !y || y.state === 'reflected' || picked.has(k) || !read(y); });
+  return pool.filter(x => x.reason !== 'unresolved-endpoint' ? picked.has(key(x)) : settled(x)).slice(0, RESEND_ROWS_MAX);
 }
 /** How a new reading took each tracked row, from the pieces its ask sent: inside a piece, sent; inside its read interval and waiting before
  * it, left (for room). */
@@ -202,8 +242,10 @@ export function sentByPieces(refs: readonly { id: string; from: number; to: numb
   return t => {
     const own = refs.filter(r => r.id === t.row.record && r.pieces);
     if (own.some(r => r.pieces!.some(p => p.from <= t.row.row.from && t.row.row.to <= p.to))) return 'sent';
+    // Review of .50 (silent cuts): only a row never sent yet is left for room (budget); a waiting row the re-send cap passed over keeps its
+    // own reason and send count.
     const before = prior.get(t.key);
-    return before?.state === 'waiting' && own.some(r => r.from <= t.row.row.from && t.row.row.to <= r.to) ? 'left' : null;
+    return before?.state === 'waiting' && (before.reason === 'not-yet-sent' || before.reason === 'budget') && own.some(r => r.from <= t.row.row.from && t.row.row.to <= r.to) ? 'left' : null;
   };
 }
 /** The ledger in numbers, by state and reason. */
