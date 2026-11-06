@@ -722,6 +722,12 @@ test('a second semantic sentinel ends the reading without another render or form
   assert.equal(stages.includes('global-final-correction'), false);
   assert.equal(stages.some(id => id.includes('semantic-semantic')), false);
   const count = calls.length; assert.deepEqual(await pipeline.call(ask), result); assert.equal(calls.length, count, 'the verdict replays the same reading at no cost');
+  // A first map's wire with the named part held still reads whole under plain map.6, and its reasons attach (the backed path of a first map).
+  const B = await import('../server/map-blueprint.mjs'), held = B.holdRevisionParts(result, ask, ['new:flow'], revisionFor(ask));
+  assert.ok(held.held.includes('new:flow') && held.exclusions.length > 0 && held.exclusions.every(x => x.category === 'revision-held'));
+  assert.ok(!held.wire.parts.some(p => p.ref === 'new:flow'));
+  const reply = validateMapReply(structuredClone(held.wire), ask); M.attachExclusions(reply, held.exclusions, ask);
+  assert.ok(M.readingExclusions(reply).some(x => x.category === 'revision-held'));
 });
 
 test('malformed global sentinels never trigger semantic re-rendering', async t => {

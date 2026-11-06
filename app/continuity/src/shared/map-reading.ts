@@ -3166,6 +3166,22 @@ export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyO
     onMaterial: onRecordMaterial, maxLines: ask.schemaVersion === MAP6_SCHEMA ? MAP6_RELATIONS : ask.schemaVersion === MAP7_SCHEMA ? MAP7_RELATIONS : 12 }) : null;
   // Recipe .45: the v5 pass (families, roles, C-STATE rows, list items, cites; the reading's level, pages, obligations, checks, defaults).
   const read45: Reading45 | null = six ? record45({ texts, parts: outParts as unknown as Part43[], relations: relations as unknown as Line43[], read43, onMaterial: onRecordMaterial }) : null;
+  // Recipe .51 (M4, 6c): a v5 C-PART row the ask binds to a part of the map (its record's partRows: the row a reading created that part on,
+  // or a C-IDENT row's) and whose 구현 상태 says 구현됨 gives that part's entry implementation built on that row, when the reply touches the part
+  // and the record pass joined no row of its own to it (an existing part keeps name null, so no name or basis joined it): the .50 rule then
+  // ends an older 미구현 (partUnderstanding). A row bound to no part, or to a part the reply does not touch, changes nothing.
+  if (six && ask.schemaVersion === MAP7_SCHEMA) {
+    const boundRows = new Map(ask.records.flatMap(r => (r.partRows ?? []).flatMap(x => x.part ? [[`${r.id}\u0000${x.id}`, x.part] as [string, string]] : [])));
+    if (boundRows.size) for (const row of rowsOf(texts, ['C-PART']).filter(x => x.dialect === 'v5')) {
+      const ref = boundRows.get(`${row.record}\u0000${(row.fold?.id ?? row.byColumn['행 ID'] ?? '').trim()}`); if (!ref) continue;
+      const b = outParts.find(x => x.ref === ref) as (MapReplyPart & { implementation?: string | null; implementationQuote?: MapReplyQuote | null }) | undefined;
+      if (!b || b.implementation || !/^\s*구현됨\s*$/.test(row.byColumn['구현 상태'] ?? '')) continue;
+      const text = texts.get(row.record)?.text; if (text === undefined) continue;
+      const q = { record: row.record, quote: text.slice(row.from, Math.min(row.to, row.from + 600)), from: row.from, to: Math.min(row.to, row.from + 600) };
+      if (onRecordMaterial(q)) continue;
+      b.implementation = 'built'; b.implementationQuote = q;
+    }
+  }
   const reply: MapReply = { summary: value.summary.trim(), parts: outParts, relations, candidates, gaps, ...(two ? { matches } : {}), ...(four ? { material } : {}), ...(six ? { basisAt, basisVersion, portMap, ...read43, ...read45 } : {}) };
   // Words the model wrote (never the quotes, which are the person's own records) must not look like a key.
   // map.7 names the first such place (the same strings, the same rule).
@@ -4265,6 +4281,19 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // an identity candidate and the part is held (not created), never merged. held: the new part's ref → the part it may be.
   const later = input.ask.schemaVersion === MAP7_SCHEMA, before = project.space.areas.filter(a => !a.archived), held = new Map<string, string>();
   const ancestors = (id: string | null) => { const out = new Set<string>(); for (let k = id, g = 0; k && g < 64; k = parentOf(k), g++) out.add(k); return out; };
+  // Recipe .51 (M5): whether the ask's records carry a C-IDENT table (then identity is that table's: no files net); a part's files as read
+  // (partUnderstanding), each folded (case, spacing, ./ and a trailing /), compared as a set; an empty set matches nothing.
+  const identityTable = askFolds.some(f => (f.fold.rows.get('C-IDENT')?.length ?? 0) > 0), filesCache = new Map<string, Set<string>>();
+  const fileKey = (f: string) => f.normalize('NFKC').trim().toLowerCase().replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+$/, '').replace(/\s+/g, '');
+  const filesOf = (areaId: string): Set<string> => { if (!filesCache.has(areaId)) filesCache.set(areaId, new Set((partUnderstanding(project, areaId)?.files ?? []).map(fileKey).filter(Boolean))); return filesCache.get(areaId)!; };
+  const sameFiles = (own: readonly string[], other: Set<string>) => { const a = new Set(own.map(fileKey).filter(Boolean)); return a.size > 0 && a.size === other.size && [...a].every(f => other.has(f)); };
+  // Recipe .51 (M4, 6b): whether a stored quote stands on a tracked row of this ask.
+  const sameRowOf = (q: { record: string; from?: number; to?: number } | null | undefined, t: (typeof tracked)[number]) => !!q && q.from !== undefined && q.to !== undefined && q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to;
+  // Recipe .51 (M4, 6d): a new part standing only on the ask's C-GROUP rows, with no claim, no child in the reply and no line, is an empty group.
+  const emptyGroup = (x: MapReplyPart): boolean => {
+    const quotes = x.basis.map(real), rows = tracked.filter(t => quotes.some(q => q.from !== undefined && q.to !== undefined && q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to));
+    return rows.length > 0 && rows.every(t => t.row.table === 'C-GROUP') && x.claims.length === 0 && !reply.parts.some(y => y.parent === x.ref) && !reply.relations.some(r => r.from === x.ref || r.to === x.ref);
+  };
   // New parts, parents first (the reply's own order otherwise).
   const queue = mapParts.filter(x => x.name !== null), dropped = new Set(reply.parts.filter(x => x.name !== null && !mapParts.some(p => p.ref === x.ref)).map(x => x.ref));
   for (let guard = 0; queue.length && guard < 64; guard++) {
@@ -4301,6 +4330,18 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
         candidates.push({ text: cut(`‘${x.name}’: ${why} 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, 240), areaIds: [like.id], quote: real(x.basis[0]!), target: 'identity', statement: null });
         continue;
       }
+      // Recipe .51 (M5, 6a): a record with no C-IDENT table gives the app no identity row: a later map's new part whose files are the very
+      // files of a live part (the same set, folded) may be that part under another name. It is an identity candidate and held (not created),
+      // never merged: the person decides.
+      const twinFiles = later && !identityTable ? before.find(a => !up.has(a.id) && !idState.folded.has(a.id) && !idState.retired.has(a.id) && sameFiles(x.files ?? [], filesOf(a.id))) : undefined;
+      if (twinFiles) {
+        dropped.add(x.ref); held.set(x.ref, twinFiles.id); skipped.push({ what: 'part', name: x.name!, reason: 'same-name' });
+        candidates.push({ text: cut(`‘${x.name}’: 담당 파일이 기존 부분 ‘${twinFiles.name}’과(와) 모두 같아 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, 240), areaIds: [twinFiles.id], quote: real(x.basis[0]!), target: 'identity', statement: null });
+        continue;
+      }
+      // Recipe .51 (M4, 6d): a group card with no member is never made: a new part that stands only on C-GROUP rows, holds no claim, and that
+      // no part of the reply names as its parent and no line of it reaches, is left out (empty-group).
+      if (six && emptyGroup(x)) { dropped.add(x.ref); skipped.push({ what: 'part', name: x.name!, reason: 'empty-group' }); continue; }
       if (madeBefore.some(m => m.parentId === parentId && normName(m.name) === key && p.space.areas.some(a => a.id === m.areaId && a.archived))) {
         dropped.add(x.ref); skipped.push({ what: 'part', name: x.name!, reason: 'archived' }); continue;
       }
@@ -4349,7 +4390,22 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     // map read twice: the second reading of it is kept beside the first, under the same relation, with its own passage.
     const twin = six && r.mode ? relations.find(x => x.from === from && x.to === to && x.kind === r.kind && x.mode && x.mode !== r.mode && !relations.some(y => y.relationId === x.relationId && y.mode === r.mode)) : undefined;
     if (twin) { relations.push({ relationId: twin.relationId, from, to, kind: r.kind, quote: real(lineQuote(r)), payload: r.payload ?? null, cadence: r.cadence ?? null, mode: r.mode!, channel: r.channel ?? null, payloadFields: [...r.payloadFields ?? []], ...line43(r) }); storedAs.set(r, twin.relationId); continue; }
-    if (p.space.relations.some(x => x.from === from && x.to === to && x.kind === r.kind)) { skipped.push({ what: 'relation', name, reason: 'exists' }); continue; }
+    const existing = p.space.relations.find(x => x.from === from && x.to === to && x.kind === r.kind);
+    if (existing) {
+      // Recipe .51 (M4, 6b): the map holds one line per two parts and kind, but a second relation between them that stands on another row (a
+      // record's second C-LINK row between the same two parts, handing over something else) is kept under that line with its own passage and
+      // fields, as a line read twice is (map-reading.7), instead of being dropped as existing (its row then waited and ended unplaced). A line
+      // on a row that line already stands on (by its row ID: the ledger's rows reflected into it, a re-pasted page included) or on the very
+      // passage of an entry of it is the same line again and stays skipped.
+      const quote = real(lineQuote(r)), entries = [...done.flatMap(d => d.relations), ...relations].filter(x => x.relationId === existing.id);
+      const sameRow = (q: { record: string; from?: number; to?: number } | null | undefined) => !!q && q.record === quote.record && q.from !== undefined && q.to !== undefined && quote.from !== undefined && quote.to !== undefined && q.from < quote.to && quote.from < q.to;
+      const onRows = quote.from === undefined || quote.to === undefined ? [] : tracked.filter(t => t.row.record === quote.record && quote.from! < t.row.row.to && t.row.row.from < quote.to!);
+      const lineRows = new Set([...prior.values()].filter(x => x.state === 'reflected' && x.to.some(t => t.kind === 'relation' && t.id === existing.id)).map(x => ledgerKey(x.record, x.table, x.id)));
+      const thisLine = new Set(relations.filter(x => x.relationId === existing.id).flatMap(x => tracked.filter(t => sameRowOf(x.quote, t)).map(t => t.key)));
+      const other = six && !entries.some(x => sameRow(x.quote)) && !onRows.some(t => lineRows.has(t.key) || thisLine.has(t.key));
+      if (other) { relations.push({ relationId: existing.id, from, to, kind: r.kind, quote, payload: r.payload ?? null, cadence: r.cadence ?? null, mode: r.mode ?? null, channel: r.channel ?? null, payloadFields: [...r.payloadFields ?? []], ...line43(r) }); storedAs.set(r, existing.id); continue; }
+      skipped.push({ what: 'relation', name, reason: 'exists' }); continue;
+    }
     if (madeRelations.some(x => x.from === from && x.to === to && x.kind === r.kind && !p.space.relations.some(y => y.id === x.relationId))) { skipped.push({ what: 'relation', name, reason: 'removed' }); continue; }
     p = addRelation(p, from, to, r.kind, r.note);
     relations.push({ relationId: p.space.relations.at(-1)!.id, from, to, kind: r.kind, quote: real(lineQuote(r)), ...(six ? { payload: r.payload ?? null, cadence: r.cadence ?? null, mode: r.mode ?? null, channel: r.channel ?? null, payloadFields: [...r.payloadFields ?? []], ...line43(r) } : {}) });

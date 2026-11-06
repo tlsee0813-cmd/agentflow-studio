@@ -13,7 +13,8 @@ import * as M from '../dist/public/shared/map-reading.js';
 import * as T from '../dist/public/shared/record-table.js';
 import * as X from '../dist/public/shared/record-excerpt.js';
 import * as L from '../dist/public/shared/row-ledger.js';
-import { parseProject } from '../dist/public/shared/validation.js';
+import { parseProject, validateProject } from '../dist/public/shared/validation.js';
+import { serializeProject } from '../dist/public/shared/storage.js';
 import { studioView } from '../dist/public/shared/studio.js';
 import * as B from '../server/map-blueprint.mjs';
 import { PIPELINE_RECIPE, LATER_PIPELINE_RECIPE } from '../server/map-pipeline.mjs';
@@ -201,4 +202,91 @@ test('D51-R2 track R r4: a verdict with no machine issue is only a diagnostic; t
   const diag = store.extra.get('global-final').diagnostics[0];
   assert.deepEqual([diag.rule, diag.expected, diag.actual], ['revision', 1, 0]);
   M.validateMapReply(structuredClone(out.wire), ask);
+});
+
+/* ---------- M4 and M5: a second line between two parts, a bound 구현됨 row, no empty group card, files alike ---------- */
+const pad2 = n => String(n).padStart(2, '0');
+const REC = 'AF5-51b1b2b3', BASE = '51c0de2';
+const head51 = n => `〔기록 ${REC} · 쪽 ${n} · 기준 ${BASE} · 앞 쪽 ${n > 1 ? n - 1 : '—'}〕 지도 시험 기록 v5 (시험 세션, 2026-11-06 16:0${n})`;
+const partRow = (id, name, impl = '구현됨', f = 'F01') => [id, name, '처리 · 계산', `${name}의 일`, f, impl, 'F01'];
+const linkRow = (id, a, b, what) => [id, a, b, what, '호출마다', '—', '같은 프로세스', '정의된 관계', 'F01'];
+function page51({ names = ['수집기', '정리기'], impl = () => '구현됨', links = [['LN01', 'B01', 'B02', '원문 묶음']], groups = [], files = () => 'F01' } = {}) {
+  const parts = names.map((n, k) => partRow(`B${pad2(k + 1)}`, n, impl(k), files(k)));
+  return [head51(1), table('C-SRC', [['F01', 'src/collect.py', 'B01', '읽음', '코드'], ['F02', 'src/log.py', 'B02', '읽음', '코드']]), table('C-EVID', [['E01', '파일', 'F01', 'main()', '연다']]),
+    table('C-HEAD', T.HEAD_ITEMS.map((item, k) => [item, `값 ${k + 1}`, 'F01'])), 'C-SUMMARY 요약\n지도 시험 서비스 (F01).', table('C-PART', parts),
+    ...(links.length ? [table('C-LINK', links.map(l => linkRow(...l)))] : []), ...(groups.length ? [table('C-GROUP', groups)] : []),
+    table('C-ISSUE', [['IS01', 'B01', '수집이 가끔 늦음', '모름', 'F01']]),
+    table('C-END', [['C-HEAD', '끝남', '—', '—', '—'], ['C-PART', '끝남', `B01–B${pad2(names.length)}`, '—', '—'], ...(links.length ? [['C-LINK', '끝남', links.map(l => l[0]).join('·'), '—', '—']] : []), ['C-ISSUE', '끝남', 'IS01', '—', '—']]), '완료 단계: 첫 구조 완료'].join('\n');
+}
+const project51 = (...pages) => { let p = D.addArea({ ...D.createProject(), name: '지도 시험' }, '기존 부분', '사람이 만든 부분'); for (const t of pages) p = D.pasteRecord(p, t, null).project; return parseProject(JSON.stringify(p)); };
+const paste51 = (p, t) => parseProject(JSON.stringify(D.pasteRecord(p, t, null).project));
+const ask51 = p => M.buildMapAsk(p, studioView(p), [], undefined, M.MAP7_SCHEMA);
+const atStart = (ask, words, rec) => { for (const r of ask.records) { if (rec && r.id !== rec) continue; const s = r.spans.find(x => x.t.trimStart().startsWith(words)); if (s) return s.s; } throw new Error(`no piece ${words}`); };
+const newPart = (ref, name, basis, o = {}) => ({ ref, name, parent: null, role: `${name}의 일을 맡는다.`, roleAboutAt: null, roleReplaces: null, basis: [basis], claims: [], ...o });
+const oldPart = (ref, o = {}) => ({ ref, name: null, parent: null, role: null, roleAboutAt: null, roleReplaces: null, basis: [], claims: [], ...o });
+const reply7 = o => ({ summary: '', parts: [], relations: [], candidates: [], gaps: [], matches: [], material: [], ...o });
+const areaOf = (p, name) => p.space.areas.find(a => a.name === name && !a.archived)?.id;
+const aliasOf = (inp, id) => [...inp.parts].find(([, v]) => v === id)?.[0];
+let readings = 0;
+const apply51 = (p, inp, wire) => M.applyReading(p, inp, M.validateMapReply(wire, inp.ask), meta(++readings % 9 + 1));
+/** The first reading: both parts on their C-PART rows and the line on LN01. */
+function first51(p, extra = {}) {
+  const inp = ask51(p), ask = inp.ask;
+  return apply51(p, inp, reply7({ parts: [newPart('new:a', '수집기', atStart(ask, '|B01|'), extra.a ?? {}), newPart('new:b', '정리기', atStart(ask, '|B02|'), extra.b ?? {})],
+    relations: [{ from: 'new:a', to: 'new:b', kind: 'flow', note: '원문 묶음', at: atStart(ask, '|LN01|') }] }));
+}
+
+test('D51-7 (6b) a second relation between the same two parts on another row is kept under that line; the very same line again is skipped', () => {
+  const one = first51(project51(page51())), p = paste51(one.project, page51({ links: [['LN01', 'B01', 'B02', '원문 묶음'], ['LN02', 'B01', 'B02', '오류 보고']] }));
+  const inp = ask51(p), ask = inp.ask, a = aliasOf(inp, areaOf(p, '수집기')), b = aliasOf(inp, areaOf(p, '정리기')), line = p.space.relations[0].id;
+  const two = apply51(p, inp, reply7({ relations: [{ from: a, to: b, kind: 'flow', note: '오류 보고', at: atStart(ask, '|LN02|'), payload: '오류 보고' }, { from: a, to: b, kind: 'flow', note: '원문 묶음', at: atStart(ask, '|LN01|') }] }));
+  assert.equal(two.project.space.relations.length, 1, 'still one line per pair and kind on the map');
+  assert.deepEqual(two.reading.relations.map(r => [r.relationId, r.payload]), [[line, '오류 보고']], 'the second relation is kept, under that line, with its own payload');
+  assert.deepEqual(two.reading.skipped, [{ what: 'relation', name: `${a}→${b}`, reason: 'exists' }], 'the line on LN01 again is the same line');
+  const rows = Object.fromEntries(two.reading.rows.map(x => [x.id, x]));
+  assert.deepEqual([rows.LN02.state, rows.LN02.to[0]], ['reflected', { kind: 'relation', id: line, index: null }], 'its row is reflected, never unplaced');
+});
+
+test('D51-8 (6c) a bound C-PART row that now says 구현됨 ends the part\'s 미구현 even when the record renamed it; a row still 미구현 does not', () => {
+  const one = first51(project51(page51({ impl: k => k === 0 ? '미구현' : '구현됨' }))), area = areaOf(one.project, '수집기');
+  assert.equal(M.partUnderstanding(one.project, area).stateRead.state, 'unbuilt');
+  // The record is pasted again: B01 (bound to 수집기 by its creation) is now 「수집 서비스」 and 구현됨; the reply writes a claim on another row.
+  const p = paste51(one.project, page51({ names: ['수집 서비스', '정리기'] })), inp = ask51(p), ask = inp.ask, ref = aliasOf(inp, area);
+  assert.ok(ask.records.some(r => (r.partRows ?? []).some(x => x.id === 'B01' && x.part === ref)), 'the ask binds B01 to the part');
+  const wire = reply7({ parts: [oldPart(ref, { claims: [{ key: 's1', kind: 'describes', text: '수집이 가끔 늦다.', at: atStart(ask, '|IS01|'), aboutAt: null, replaces: null }] })] });
+  const reply = M.validateMapReply(structuredClone(wire), ask);
+  assert.equal(reply.parts[0].implementation, 'built'); assert.ok(reply.parts[0].implementationQuote.quote.includes('|B01|'));
+  const two = M.applyReading(p, inp, reply, meta(7));
+  assert.equal(M.partUnderstanding(two.project, area).stateRead, null, 'the old 미구현 ends (built says nothing of running)');
+  // A row still 미구현: nothing changes.
+  const q = paste51(one.project, page51({ names: ['수집 서비스', '정리기'], impl: k => k === 0 ? '미구현' : '구현됨' })), inq = ask51(q);
+  const still = M.validateMapReply(reply7({ parts: [oldPart(aliasOf(inq, area), { claims: [{ key: 's1', kind: 'describes', text: '수집이 가끔 늦다.', at: atStart(inq.ask, '|IS01|'), aboutAt: null, replaces: null }] })] }), inq.ask);
+  assert.notEqual(still.parts[0].implementation, 'built');
+});
+
+test('D51-9 (6d) a group card with no member is never made; a group with a member is', () => {
+  const groups = [['GR01', '사람 참여자', '—', '참여자', 'F01']], p = project51(page51({ groups })), inp = ask51(p), ask = inp.ask, gr = atStart(ask, '|GR01|');
+  const made = apply51(p, inp, reply7({ parts: [newPart('new:a', '수집기', atStart(ask, '|B01|')), newPart('new:g', '사람 참여자', gr)] }));
+  assert.ok(!made.project.space.areas.some(a => a.name === '사람 참여자'), 'no empty group card');
+  assert.deepEqual(made.reading.skipped, [{ what: 'part', name: '사람 참여자', reason: 'empty-group' }]);
+  assert.ok(made.project.space.areas.some(a => a.name === '수집기'));
+  const kept = apply51(p, inp, reply7({ parts: [newPart('new:g', '사람 참여자', gr), newPart('new:a', '수집기', atStart(ask, '|B01|'), { parent: 'new:g' })] }));
+  assert.ok(kept.project.space.areas.some(a => a.name === '사람 참여자'), 'a group with a member stays');
+  assert.deepEqual(validateProject(JSON.parse(serializeProject(made.project))), JSON.parse(serializeProject(made.project)));
+});
+
+test('D51-10 (6a) with no C-IDENT table, a new part with the very files of a live part is an identity candidate, held and never merged', () => {
+  const one = first51(project51(page51()), { b: { files: ['src/log.py'] } }), log = areaOf(one.project, '정리기');
+  assert.deepEqual(M.partUnderstanding(one.project, log).files, ['src/log.py']);
+  const p = paste51(one.project, page51({ names: ['수집기', '정리기', '로그 파일'], links: [] })), inp = ask51(p), ask = inp.ask;
+  const count = p.space.areas.length;
+  const two = apply51(p, inp, reply7({ parts: [newPart('new:l', '로그 파일', atStart(ask, '|B03|'), { files: ['./SRC/log.py'] })] }));
+  assert.equal(two.project.space.areas.length, count, 'not created, and nothing merged');
+  assert.deepEqual(two.reading.skipped, [{ what: 'part', name: '로그 파일', reason: 'same-name' }]);
+  const [c] = two.reading.candidates;
+  assert.ok(c.target === 'identity' && c.areaIds[0] === log && /담당 파일/.test(c.text), 'the person sees the candidate');
+  assert.deepEqual([...L.rowLedger(two.project, X.v5Folds(two.project.pasted)).values()].filter(x => x.table === 'C-PART' && x.id === 'B03').map(x => [x.state, x.reason]), [['held', 'identity']]);
+  // Other files: a part of its own.
+  const three = apply51(p, inp, reply7({ parts: [newPart('new:l', '로그 파일', atStart(ask, '|B03|'), { files: ['src/other.py'] })] }));
+  assert.ok(three.project.space.areas.some(a => a.name === '로그 파일'));
 });

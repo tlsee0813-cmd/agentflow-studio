@@ -553,7 +553,9 @@ export interface ReadingCandidate { text: string; areaIds: string[]; quote: Read
   /** map-reading.5 only. */
   target?: CandidateTarget; statement?: CandidateStatement | null }
 /** Something the reply proposed that was not applied, and why (kept so the next reading of the same input does not repeat it). */
-export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' | 'material' }
+export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' | 'material'
+  // Recipe .51 (M4, 6d): a group card with no member is never made.
+  | 'empty-group' }
 /** map-reading.4: a passage the reading took as material inside the record (an example, a sample under test, another program's
  * words), not as this project's own: [from, to) of the record, with what it is. Nothing of the map rests on it alone. */
 export interface ReadingMaterial { record: string; from: number; to: number; what: string }
