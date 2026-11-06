@@ -73,6 +73,10 @@ interface Hold extends Place { reason: string; with: string[] }
 interface Aside extends Place { category: string | null; with: string[] }
 /** Recipe .50 step 2: the server's reasons that hold a row for a correction (the obligation and the items on its lines; map-blueprint.mjs). */
 export const CORRECTION_HOLDS: ReadonlySet<string> = new Set(['correction-unmet', 'correction-held']);
+/** Recipe .51 (Astra F5: no deadlock): the server's reason that holds a row for a final review's revision verdict (map-blueprint.mjs
+ * holdRevisionParts). Such a row is held (revision) and goes with the next ask once more (resendRows); held so again it is rejected (revision). */
+export const REVISION_HOLD = 'revision-held';
+const revisedBefore = (x: { reason: string | null; detail: string | null } | undefined) => !!x && (x.reason === 'revision' || x.detail === REVISION_HOLD);
 const isPlace = (v: unknown): v is Place => !!v && typeof v === 'object' && typeof (v as Place).record === 'string' && Number.isSafeInteger((v as Place).from) && Number.isSafeInteger((v as Place).to);
 /** Every place a value quotes, however deep. */
 function places(v: unknown, out: Place[] = []): Place[] {
@@ -131,6 +135,10 @@ export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent
       // Recipe .50 step 2: a row an unmet correction obligation (or an item on its lines) stands on is held with that unit, not sent again.
       else if (aside.some(q => q.category && CORRECTION_HOLDS.has(q.category))) { const q = aside.find(y => y.category && CORRECTION_HOLDS.has(y.category))!;
         e = { ...base, state: 'held', reason: 'correction', detail: q.category, with: [...new Set(aside.flatMap(y => y.with))].slice(0, 4) }; }
+      // Recipe .51: a row a revision verdict's held part stands on is held once (it goes again with the next ask); held so a second time it
+      // is rejected with that reason, so a verdict that keeps coming back ends instead of holding the row for ever.
+      else if (aside.some(q => q.category === REVISION_HOLD)) e = revisedBefore(before)
+        ? { ...base, state: 'rejected', reason: 'revision', detail: REVISION_HOLD } : { ...base, state: 'held', reason: 'revision', detail: REVISION_HOLD };
       else if (material.some(q => on(q, t))) e = { ...base, state: 'rejected', reason: 'material' };
       // Review of .50 (K6): parsed into a field the app never shows is kept in the reading, not reflected, and not sent again.
       else if (unshown.some(q => on(q, t))) e = { ...base, state: 'rejected', reason: 'unsupported', detail: kebab(unshown.find(q => on(q, t))!.target.id) };
@@ -229,7 +237,8 @@ export function rowBindings(ledger: ReadonlyMap<string, LedgerRow>, live: (id: s
 export function resendRows(ledger: ReadonlyMap<string, LedgerRow>, readTo: ReadonlyMap<string, number>, pasteOrder: ReadonlyMap<string, number>, order: readonly string[] = []): LedgerRow[] {
   const rank = (x: LedgerRow) => { const i = order.indexOf(x.record); return i < 0 ? order.length : i; };
   const read = (x: LedgerRow) => x.end <= (readTo.get(x.paste) ?? 0), key = (x: LedgerRow) => ledgerKey(x.record, x.table, x.id);
-  const pool = [...ledger.values()].filter(x => x.state === 'waiting' && x.table !== IDENT_TABLE_ID && read(x))
+  // Recipe .51: a row held for a revision verdict goes again once (the next reading decides it; held so again, it is rejected).
+  const pool = [...ledger.values()].filter(x => (x.state === 'waiting' || x.state === 'held' && x.reason === 'revision') && x.table !== IDENT_TABLE_ID && read(x))
     .sort((a, b) => rank(a) - rank(b) || (pasteOrder.get(a.paste) ?? 0) - (pasteOrder.get(b.paste) ?? 0) || a.start - b.start);
   // Review of .50 (loss 3): a row waiting on an end goes only when each end it names is placed, goes with it, or is still unread.
   const picked = new Set(pool.filter(x => x.reason !== 'unresolved-endpoint').slice(0, RESEND_ROWS_MAX).map(key));

@@ -190,7 +190,7 @@ test('V50-8 (K10) a change word said in the negative, or 「더는」 with a qua
     records: [{ id: 'N01', kind: 'pasted', note: '', basis: '검토', ...encodeSpans('N01', TEXT) }] }, { route: 'divided' });
   const place = words => ask.records[0].spans.find(x => x.t.includes(words)).s;
   assert.deepEqual(['|IS01|', '|IS02|', '|IS03|'].map(w => B.correctionJustified({ part: 'P01', claim: 'C01', at: [place(w)] }, ask)), [false, false, true]);
-  assert.equal(B.CONTAINMENT_VERSION, 'later-containment.2');
+  assert.equal(B.CONTAINMENT_VERSION, 'later-containment.3');
 });
 
 test('V50-9 (K12, deadlock 4) a held row is released only when its part\'s identity changes, and never past the transient send bound', () => {

@@ -295,6 +295,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // Recipe .50 step 2 (set aside by the server): a later plan's correction obligation its evidence does not justify; one still unmet after
   // the semantic re-render (held with its dependents); a claim, relation or port-map row standing on such an obligation's lines.
   | 'correction-unjustified' | 'correction-unmet' | 'correction-held'
+  // Recipe .51 (set aside by the server): a part a final review's second revision verdict named and the program's check backs, held with what
+  // stands on it (its passages, the relations and candidates naming it, their port-map rows); the rest of the reading applies.
+  | 'revision-held'
   // Recipe .48 fix (A7): a step whose overlong 하는 일 says what it does not do, and a rule whose scope breaks the contract, held whole.
   | 'step-held' | 'scope-held';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
@@ -1703,6 +1706,8 @@ const exclusionExplanation = (e: MapReplyError): string => {
     // Recipe .50 step 2: the later plan's correction obligations, contained (map-blueprint.mjs holdCorrectionUnits).
     : e.rule === 'contract' && e.target === 'correction-unjustified' ? '정리 계획은 이 원문 줄이 이 부분의 기존 주장을 철회·대체한다고 보았지만, 그 줄은 철회·대체·제거 같은 바뀐 결과를 적지 않아 대체 의무로 두지 않았어요. 기존 주장과 이 줄의 주장을 함께 두었어요.'
     : e.rule === 'contract' && e.target === 'correction-unmet' ? '원문이 이 부분의 기존 주장을 철회·대체한다고 정리 계획이 보았지만, 부분 정리는 대체로 쓰지 않았어요. 기존 주장은 그대로 두고, 이 줄에서 나온 주장과 연결은 대체 여부가 정해질 때까지 보류했어요. 원문에서 확인해 주세요.'
+    // Recipe .51: a final review's second revision verdict, held (map-blueprint.mjs holdRevisionParts).
+    : e.rule === 'contract' && e.target === 'revision-held' ? '최종 검토가 이 부분을 한 번 더 고쳐 쓰라고 했지만 다시 쓰는 기회는 이미 썼어요. 이 부분과 그 부분에 기대는 항목은 이번 정리에서 보류하고 나머지는 반영했어요. 이 원문 줄은 다음 요청에 한 번 더 보내요.'
     : e.rule === 'contract' && e.target === 'correction-held' ? '기존 주장을 대체하는지 정해지지 않은 원문 줄에서 나온 항목이어서, 대체 여부가 정해질 때까지 이번 정리에서 보류했어요.'
     : e.rule === 'contract' && e.target === 'count' ? '허용 개수를 넘는 뒤쪽 항목들을 제외했어요.'
     : e.rule === 'contract' && e.target === 'parent-skipped' ? '참조한 새 부분이 제외되어 이 항목도 제외했어요.'
@@ -4400,7 +4405,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // map-reading.20 (recipe .50): a reading that sent a v5 fold keeps what it did with each row it sent or left out for room (row-ledger.ts).
   // Recipe .50 step 2: a row held for a correction names the part it stands with: the server reason's part index in the wire it was written
   // in, less the parts this browser set aside whole before it (the server never sets a later part aside whole).
-  const wholeParts = (EXCLUSIONS.get(reply) ?? []).flatMap(x => { const m = /^parts\[(\d+)\]$/.exec(x.path); return m ? [Number(m[1])] : []; });
+  // Recipe .51: a part the server held for a revision verdict (revision-held) left the wire before it was sent: it is not one of these.
+  const wholeParts = (EXCLUSIONS.get(reply) ?? []).flatMap(x => { const m = /^parts\[(\d+)\]$/.exec(x.path); return m && x.category !== 'revision-held' ? [Number(m[1])] : []; });
   const heldWith = (x: ReadingExclusion): string[] => { const m = /^parts\[(\d+)\]/.exec(x.path); if (!m) return [];
     const i = Number(m[1]), ref = reply.parts[i - wholeParts.filter(k => k < i).length]?.ref, id = ref ? ids.get(ref) : undefined; return id ? [id] : []; };
   if (six && sentFolds.length) { reading.version = READING_CONTRACT; reading.rows = decideRows(tracked, reading, sentOf, prior, done.length === 0, heldWith); }

@@ -224,7 +224,7 @@ test('R47-6 v4 and v3 asks are byte for byte what .46 built (golden), whatever b
   const golden = JSON.parse(readFileSync(new URL('./fixtures/record47/v4-golden.json', import.meta.url), 'utf8')), mods = { D, M, S: St, J };
   assert.deepEqual(goldenDigests(mods), golden);
   assert.deepEqual(goldenDigests(mods, Route.mapRoute({ schemaVersion: M.MAP6_SCHEMA, parts: [], requests: [], priors: [] }, OFFER).limits), golden);
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.50', 'later-map-divided.50']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.51', 'later-map-divided.51']);
 });
 
 test('R47-7 the bounds: a first map.6 ask may be a whole fold, every other ask keeps 64 KiB, four records and 12,000 characters each', () => {

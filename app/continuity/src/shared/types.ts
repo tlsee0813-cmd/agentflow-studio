@@ -644,12 +644,14 @@ export type RowState = typeof ROW_STATES[number];
  * it, map-blueprint.mjs holdCorrectionUnits); rejected: material (the reading kept it as material), depends (a row it names
  * was rejected) or unplaced (sent again as often as the ledger allows, never placed). */
 export const ROW_REASONS: Readonly<Record<RowState, readonly string[]>> = Object.freeze({ reflected: [],
-  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends', 'correction', 'roster'],
+  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends', 'correction', 'roster', 'revision'],
   // Recipe .50 step 5 (C-IDENT rows only): held roster (the map changed under the part since the record's roster, or the reply's roster line is
   // missing); rejected form, unknown-part, other-project, unsupported (나뉨·합침), undecided (모름), planned and partial (nothing is retired).
   // Review of .50: rejected unconfirmed (a C-IDENT retirement with no time it took effect, or a successor not said to be built) and, for any
   // row, unsupported (it stands only on a reading field the app never shows: kept in the reading, not reflected, not sent again).
-  rejected: ['material', 'depends', 'unplaced', 'form', 'unknown-part', 'other-project', 'unsupported', 'undecided', 'planned', 'partial', 'unconfirmed'] });
+  // Recipe .51: held revision (a final review's second revision verdict held the part the row stands on; the row goes once more), then
+  // rejected revision (held so again: never sent a third time).
+  rejected: ['material', 'depends', 'unplaced', 'form', 'unknown-part', 'other-project', 'unsupported', 'undecided', 'planned', 'partial', 'unconfirmed', 'revision'] });
 /** What a reflected row became: a part (its basis or a field of it), one of its claims (index in this reading's part entry), a relation, or a
  * field of the reading itself (checks, projectStatus, …: id is the field's name). */
 export interface ReadingRowTarget { kind: 'part' | 'claim' | 'relation' | 'reading'; id: string; index: number | null }

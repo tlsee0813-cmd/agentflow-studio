@@ -209,7 +209,7 @@ test('.45 cards: the record family first (a gate in the trigger tint with its ow
 });
 
 test('.45 recipe: first-map-divided.45 and later-map-divided.45; the prompts read v5 records with their key sets', () => {
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.50', 'later-map-divided.50']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.51', 'later-map-divided.51']);
   assert.ok(P.RENDER_RULES.includes('기록 v5(첫 줄이 「〔기록 … · 쪽 n · 기준 … · 앞 쪽 …〕」인 기록)') && B.MAP_BLUEPRINT_PROMPT.includes('INPUT 옆의 keys'));
   assert.ok(P.EXTRACTION_PROMPT.includes('input.keys'));
   assert.equal(T.recordVersion(page(1)), 'v5');
