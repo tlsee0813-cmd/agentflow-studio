@@ -3935,8 +3935,11 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
       return out;
     };
     // The runs in page order as far as they fit, the last one cut at a line (cap shrinking by a tenth down to a readable excerpt).
-    const prefix = (k: number): Placed[] => {
+    // A run with unread text of its own (not only rows sent again).
+    const ownUnread = (run: PageRun) => run.to > (unreadFrom.get(run.paste.id) ?? 0) && unread.some(r => r.id === run.paste.id);
+    const prefix = (k: number, againSent: ReadonlySet<string> = againKeys): Placed[] => {
       const leave = leaveOf(k), out: Placed[] = [];
+      const carriesAgain = (run: PageRun) => again.some(y => againSent.has(`${y.paste}@${y.start}`) && y.paste === run.paste.id && run.from <= y.start && y.end <= run.to);
       const attempt = (run: PageRun, keys: ReadonlySet<string>): Placed | null => {
         let cap = Infinity;
         for (let g = 0; g < 40; g++) {
@@ -3950,10 +3953,12 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
       };
       for (const run of runs) {
         if (out.length >= room) break;
-        let got = attempt(run, againKeys);
+        // A run of pages already read goes only for the rows sent again it carries (never as its page head alone).
+        if (!ownUnread(run) && !carriesAgain(run)) continue;
+        let got = attempt(run, againSent);
         // Review of .50 (R47-5): rows sent again never push a record's unread text out: a run that does not go whole with them goes without
         // them (they wait for a later ask), when it has unread text of its own.
-        if ((!got || got.ex.cut !== null) && againIn(run) && run.to > (unreadFrom.get(run.paste.id) ?? 0) && unread.some(r => r.id === run.paste.id)) got = attempt(run, new Set()) ?? got;
+        if ((!got || got.ex.cut !== null) && againIn(run) && ownUnread(run)) got = attempt(run, new Set()) ?? got;
         if (!got) break;
         out.push(got);
         if (got.ex.cut !== null) break;
@@ -3962,6 +3967,21 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
       const final = out.map((x, i) => record(x.run, x.ex, i, i === out.length - 1, out.slice(0, i)));
       while (final.length && !within(final)) final.pop();
       return final;
+    };
+    // Offline replay of .50 (the stage-4 save): rows sent again in runs of pages already read, ahead of the unread pages, never push those
+    // pages out either. The most rows of `again`, in its order (the record standing now first, oldest first), that leave as much unread
+    // text placed as sending none of them would; the rest wait for a later ask with their reasons and send counts unchanged.
+    const unreadPlaced = (out: readonly Placed[]) => out.reduce((s, x) => !ownUnread(x.run) ? s
+      : s + Math.max(0, Math.min(x.run.to, x.ex.cut ?? x.run.to) - Math.max(x.run.from, unreadFrom.get(x.run.paste.id) ?? 0)), 0);
+    const freshFirst = (): Placed[] => {
+      const all = prefix(0);
+      if (!again.length || !runs.some(ownUnread)) return all;
+      const target = unreadPlaced(prefix(0, new Set()));
+      if (unreadPlaced(all) >= target) return all;
+      const keysOf = (m: number) => new Set(again.slice(0, m).map(x => `${x.paste}@${x.start}`));
+      let lo = 0, hi = again.length - 1;
+      while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (unreadPlaced(prefix(0, keysOf(mid))) >= target) lo = mid; else hi = mid - 1; }
+      return prefix(0, keysOf(lo));
     };
     let chosen: Placed[] | null = null;
     if (bound.partitions) {
@@ -3974,7 +3994,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
         chosen = whole(lo);
       } }
       chosen ??= prefix(f.droppable.length);
-    } else chosen = prefix(0);
+    } else chosen = freshFirst();
     for (const x of chosen ?? []) { ask.records.push(x.rec); records.set(x.rec.id, x.ref); n.N++; }
   }
   const v5Placed = ask.records.length > 0;

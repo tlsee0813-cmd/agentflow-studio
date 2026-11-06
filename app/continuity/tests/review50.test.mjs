@@ -327,3 +327,28 @@ test('V50-17 (deadlock 10) a v5.2 record\'s P IDs are named in its note against 
   const q = paste(base, page1({ record: 'AF5-50f3f3f3', basis: 'f0c0de3', names: ['배달기'], pairs: [], summary: '배달 서비스, P03과 겹칠 수 있음 (F01).' }));
   assert.ok(ask7(q).ask.records.every(r => !r.note.includes('기록 요청 대장 번호')));
 });
+
+test('V50-18 (replay of the stage-4 save) rows sent again from pages already read never push the record\'s unread pages out of the ask', () => {
+  // Page 1 read: with backlog, its B05 and B06 were placed nowhere (they wait); without, every part was placed. Pages 2 and 3 then come
+  // unread, each a long run of link rows; under a tight byte bound the unread pages must go as far as they would with no backlog at all.
+  const read = all => { const p0 = project(page1({ pairs: [] })), inp = ask7(p0);
+    return M.applyReading(p0, inp, M.validateMapReply(reply7({ parts: NAMES.slice(0, all ? 6 : 4).map((n, k) => newPart(`new:b${k + 1}`, n, at(inp.ask, `|B${pad(k + 1)}|`))) }), inp.ask), meta(`R_rev50r${all ? 1 : 0}`)).project; };
+  const later = (n, from, to) => [headOf(A, A_BASIS, n), table('C-PART', [partRow(`B${pad(5 + n)}`, `부분 ${n}`)]),
+    table('C-LINK', Array.from({ length: to - from + 1 }, (_, k) => linkRow(`LN${pad(from + k)}`, `B${pad(1 + k % 6)}`, `B${pad(5 + n)}`, `자료 ${from + k}: ${'원문이 길게 설명하는 흐름 '.repeat(6)}`))),
+    ends([['C-PART', `B${pad(5 + n)}`], ['C-LINK', `LN${pad(from)}–LN${pad(to)}`]]), '완료 단계: 첫 구조 완료'].join('\n');
+  const grow = p => paste(paste(p, later(2, 1, 30)), later(3, 31, 60));
+  const backlog = grow(read(false)), settled = grow(read(true)), late = p => new Set(p.pasted.slice(1).map(x => x.id));
+  assert.deepEqual([...ledgerOf(backlog).values()].filter(x => x.state === 'waiting' && x.table === 'C-PART' && x.reading).map(x => x.id), ['B05', 'B06']);
+  const unreadSent = (p, limits) => { const inp = M.buildMapAsk(p, I.currentView(p, studioView(p)), [], undefined, M.MAP7_SCHEMA, limits), ids = late(p);
+    return { inp, chars: [...inp.records.values()].filter(r => ids.has(r.id)).reduce((s, r) => s + (r.to - Math.max(r.from, 0)), 0) }; };
+  const wide = unreadSent(backlog, { records: 4, recordChars: 12000, bytes: M.MAP_BYTES });
+  assert.ok(wide.inp.ask.records.some(r => /다시 보낸 행 2개: C-PART B05·B06/.test(r.note)), 'with room the waiting rows go again, named');
+  const meta0 = new TextEncoder().encode(JSON.stringify({ ...wide.inp.ask, records: [] })).length;
+  let tight = 0;
+  for (let bytes = meta0 + 4000; bytes <= M.MAP_BYTES; bytes += 1500) {
+    const limits = { records: 4, recordChars: 12000, bytes }, a = unreadSent(backlog, limits), b = unreadSent(settled, limits);
+    assert.ok(a.chars >= b.chars, `${bytes} B: unread sent ${a.chars} with backlog, ${b.chars} without`);
+    if (b.chars && !a.inp.ask.records.some(r => /다시 보낸 행/.test(r.note))) tight++;
+  }
+  assert.ok(tight > 0, 'some bound is tight enough that the backlog waits');
+});

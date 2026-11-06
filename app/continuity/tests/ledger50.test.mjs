@@ -188,9 +188,15 @@ test('L50-R replay: a stored later reading keeps its sixteen relations under .50
   assert.ok(parts.length >= 30 && parts.every(x => ['reflected', 'waiting', 'held', 'rejected'].includes(x.state)));
   const waiting = parts.filter(x => x.state === 'waiting').map(x => x.id);
   assert.ok(waiting.length > 0);
+  // Offline replay of .50 (the stage-4 save): the unread pages 5–7 go first, whole as far as they fit, with no row sent again pushing them
+  // out; once they are read (an empty reply stands in for that reading), the waiting part rows go again.
   const next = ask7(applied.project);
   assert.equal(next.problem, null);
   assert.ok(new TextEncoder().encode(JSON.stringify(next.ask)).length <= M.MAP_BYTES);
-  const all = [...M.askRecords(next.ask).values()].map(r => r.text).join('\n');
+  assert.deepEqual(next.ask.records.map(r => /접은 판\(쪽 ([\d·]+)\)/.exec(r.note)?.[1]), ['5', '6', '7']);
+  assert.ok(next.ask.records.every(r => !/다시 보낸 행/.test(r.note)), 'the unread pages go before any row sent again');
+  const after = M.applyReading(applied.project, next, M.validateMapReply(reply7({}), next.ask), meta('R_led50r1', '9')).project, then = ask7(after);
+  assert.equal(then.problem, null);
+  const all = [...M.askRecords(then.ask).values()].map(r => r.text).join('\n');
   for (const id of waiting.slice(0, 8)) assert.ok(all.includes(`| ${id} |`) || all.includes(`|${id}|`), `${id} goes again`);
 });
