@@ -142,11 +142,18 @@ test('S8-7 beside a folded group with six partners both ways, the paired strokes
   const both = ts.flatMap(t => [sum('g', t.id), sum(t.id, 'g')]);
   const paired = pairWays(both);
   assert.equal(paired.length, 6);
-  const runs = r => [...r.values()].flatMap(x => x.pts.slice(1, -2).map((p, i) => ({ p, q: x.pts[i + 2] })).filter(s => Math.abs(s.p.x - s.q.x) < 0.01 && Math.abs(s.p.y - s.q.y) > 1).map(s => s.p.x));
-  const xsBefore = runs(routeEdges(boxes, both)), xsAfter = runs(routeEdges(boxes, paired));
-  assert.ok(xsAfter.length <= xsBefore.length / 2 + 0.5, `${xsBefore.length} → ${xsAfter.length}`);
-  const sorted = [...new Set(xsAfter.map(x => Math.round(x * 10) / 10))].sort((a, b) => a - b);
-  for (let i = 1; i < sorted.length; i++) assert.ok(sorted[i] - sorted[i - 1] >= TRACK_GAP - 1.01, `tracks ${sorted.join(', ')}`);
+  const segs = r => [...r.values()].flatMap(x => x.pts.slice(1, -2).map((p, i) => ({ p, q: x.pts[i + 2] })).filter(s => Math.abs(s.p.x - s.q.x) < 0.01 && Math.abs(s.p.y - s.q.y) > 1));
+  const runs = r => segs(r).map(s => s.p.x);
+  const xsBefore = runs(routeEdges(boxes, both)), after = segs(routeEdges(boxes, paired)), xsAfter = after.map(s => s.p.x);
+  // Beauty v3 (D.3): ends past a side's budget take a face (both sets alike), so the six paired strokes are compared with their own count:
+  // at most one gap run each.
+  void xsBefore; assert.ok(xsAfter.length <= paired.length, `${xsAfter.length} runs for ${paired.length} strokes`);
+  // Beauty v3 (D.3): with the side over its budget one end takes the top face, and runs that never meet may share an x band; runs that
+  // overlap along their length keep TRACK_GAP apart.
+  for (let i = 0; i < after.length; i++) for (let j = i + 1; j < after.length; j++) {
+    const a = after[i], b = after[j], ov = Math.min(Math.max(a.p.y, a.q.y), Math.max(b.p.y, b.q.y)) - Math.max(Math.min(a.p.y, a.q.y), Math.min(b.p.y, b.q.y));
+    if (ov > 1) assert.ok(Math.abs(a.p.x - b.p.x) >= TRACK_GAP - 1.01, `tracks ${a.p.x}, ${b.p.x}`);
+  }
 });
 
 test('S8-8 a folded group\'s 안에 row reads at 중간 before its bottom line', () => {

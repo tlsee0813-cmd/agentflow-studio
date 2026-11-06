@@ -816,7 +816,7 @@ const measureName: TextMeasure = (() => {
 })();
 /* The map's title: the scope's purpose (the project's brief, or the note of the part whose inside is shown), above the map.
  * It belongs to the map, so it moves with it; the layout's bounds include it. */
-const TITLE_GAP = 30;
+const TITLE_GAP = 24;
 let titleH = 0, core = { x: 0, y: 0, w: 0, h: 0 };
 const titleRect = () => ({ x: core.x, y: core.y - titleH - TITLE_GAP, w: Math.min(640, Math.max(360, core.w)), h: titleH });
 function withTitle() {
@@ -2407,6 +2407,7 @@ function placeLoneHead(crossing?: Map<string, { all: number }>) {
 function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   const world = $('world'); world.querySelectorAll('.band-head, .band-line, .band-zone').forEach(x => x.remove());
   const boxes = [...lay.boxes.values()], hit = (r: Rect) => boxes.some(b => r.x < b.x + b.w + 1 && b.x < r.x + r.w + 1 && r.y < b.y + b.h + 1 && b.y < r.y + r.h + 1);
+  const onLine = (r: Rect) => [...routed.values()].some(q => q.pts.some((p, i) => { const n = q.pts[i + 1]; if (!n) return false; return Math.max(p.x, n.x) > r.x - 2 && Math.min(p.x, n.x) < r.x + r.w + 2 && Math.max(p.y, n.y) > r.y - 2 && Math.min(p.y, n.y) < r.y + r.h + 2; }));
   const clusters = (ids: string[]) => {
     const set = new Set(ids), out: Box[][] = [];
     const cols = lay.layers.length ? lay.layers : [ids];
@@ -2444,8 +2445,9 @@ function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
       world.append(h('div', { class: 'band-line band-tick', title: BOUNDARY_TIP, style: `left:${x}px;top:${top}px;height:${bottom - top}px` })); drawn = true;
     }
     if (!captioned && (drawn || sides.size === 0)) {
-      const cap = { x: x0, y: top - 18, w: 150, h: 16 };
-      if (!hit(cap)) { world.append(h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${cap.x}px;top:${cap.y}px` }, BOUNDARY_TITLE)); captioned = true; }
+      // Over the cluster, else under it: off every box and every routed line.
+      const cap = [{ x: x0, y: top - 18, w: 150, h: 16 }, { x: x0, y: bottom + 2, w: 150, h: 16 }].find(r => !hit(r) && !onLine(r));
+      if (cap) { world.append(h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${cap.x}px;top:${cap.y}px` }, BOUNDARY_TITLE)); captioned = true; }
     }
   }
   for (const c of clusters(lay.bands.outside)) {
@@ -2662,13 +2664,17 @@ function placeLineLabels() {
   const drawnNow = shownLines(), badged = [...world.querySelectorAll<SVGGElement>('.edge.badged')].filter(g => drawnNow.has(g.dataset.key!) && !g.classList.contains('hit'));
   if (!selected && !planView.isOpen()) {
     const drawn = drawnNow, seenEnd = new Set<string>();
+    // Beauty v3 (E): at the name-tag view the lens's foreground lines say their condition, else what they send or what starts them.
+    const fit = face === 'tag' ? placeFitLabels(box, clear, blocks, drawn) : new Map<string, Set<string>>();
+    const fitAny = new Set([...fit.values()].flatMap(k => [...k])), fitLenses = (key: string) => [...fit].filter(([, k]) => k.has(key)).map(([l]) => l).join(' ');
     placeBadges(box, badged, clear, blocks, drawn);
     // By zoom tier (map design v3 5.5, line-grammar restLabels): the overview keeps only counts and condition badges, the middle
     // tier short labels on the main flow and a scenario path, near every label in full. Labels only show or hide.
     const mode = restLabels(tier);
     placedTier = tier;
-    if (mode === 'counts') { placeCounts(box, clear, blocks, false, drawn, true); return; }
-    const rest = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit'))
+    // A line's count gives way, under a lens, to that lens's label of it (styles.css: data-fit).
+    if (mode === 'counts') { placeCounts(box, clear, blocks, false, drawn, true); box.querySelectorAll<HTMLElement>('.edge-count').forEach(c => { const l = fitLenses(c.dataset.key!); if (l) c.dataset.fit = l; }); return; }
+    const rest = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit') && !fitAny.has(g.dataset.key!))
       .filter(g => restLabelShown(mode, { spine: g.classList.contains('spine'), path: g.classList.contains('sc-path') })).filter(g => {
         const e = edgeOf(g.dataset.key); if (!e) return false;
         const k = `${e.to}|${e.kind}|${lineChans.get(e.key) ?? ''}|${restWord(e)}`; if (seenEnd.has(k)) return false;
@@ -2731,6 +2737,48 @@ function placeLineLabels() {
  * the port it leaves, at the first place clear of parts, heads, the title, the labels set so far and other lines; with none, at
  * its first place all the same (.forced): a line whose record says when it flows never reads as one that always flows. A
  * selected line's badge reads whole and taller (its full words, the mode as read); its line's own badges are set first. */
+/** Beauty v3 (E): the fit (name-tag) view's line labels, at rest with nothing selected: each line in a lens's foreground says its
+ * condition in the record's words (rank 1, nearest the branch), else what it sends or what starts it (rank 2; an optional line with a
+ * small ◌ first), cut to 14 characters and 「…」 (8 when no place is found), on a level run of its own line, 12px clear of bends, heads
+ * and ports, never on another line, a card, a head, the title or another label of its lens. Everything else reads on hover.
+ * The labels of every lens with a foreground at rest (데이터: data lines, 시작·반복: control lines, 시나리오: the path) are placed at
+ * once from the geometry alone, each lens's set apart from the others; the lens only shows its own (styles.css, data-lens), so switching
+ * lens re-places nothing (principle 4). The ◇ of a conditional line stays at its port (placeCue), under every lens. Returns, per lens,
+ * the lines labelled. */
+const FIT_LENSES = ['data', 'start', 'scenario'] as const;
+function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], drawn: Set<string>): Map<string, Set<string>> {
+  const world = $('world'), inv = lineInv(), said = opened ? relationLines(opened.project) : new Map<string, LineSaid>(), out = new Map<string, Set<string>>();
+  const all = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit') && !g.classList.contains('stub'));
+  const cut = (t: string, n: number) => { const s = t.replace(/\s+/g, ' ').trim(); if (s.length <= n) return s; const w = wholeWords(s, n - 1); return `${w.length >= (n - 1) / 2 ? w : s.slice(0, n - 1).trim()}…`; };
+  type FitSpot = LabelSpot & { el: HTMLElement; text: string };
+  const placed: Rect[] = [];
+  for (const lens of FIT_LENSES) {
+    const fg = (g: SVGGElement) => (lens === 'scenario' ? g.classList.contains('sc-path') : lensLineFg(lens, { key: g.dataset.key!, channel: lineChans.get(g.dataset.key!) ?? null, from: g.dataset.from!, to: g.dataset.to! }, {}));
+    const spots: FitSpot[] = [], els: HTMLElement[] = [];
+    for (const g of all.filter(fg)) {
+      const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
+      const b = lineBadges.get(e.key), cond = b?.kind === 'condition', opt = b?.kind === 'optional';
+      // A condition in the record's own words (the relation's 조건 column as read), never the bare word 「조건」.
+      const words = cond ? e.ids.map(id => conditionWords(said.get(id)?.when)).find(w => !!w && w !== '조건') ?? null : null;
+      const full = (cond ? words ?? b!.full : restWord(e)).replace(/[「」『』‘’“”"]/g, '').trim(); if (!full) continue;
+      const mark = !cond && opt ? '◌ ' : '';
+      const el = h('span', { class: `edge-label fit k-${e.kind}${cond ? ' fit-cond' : ''}`, 'data-key': e.key, 'data-lens': lens, 'data-full': full }); box.append(el); els.push(el);
+      const pts = edgePts(e.key, path), free = (r: Rect) => clear(r) && !lineUnder(r, e.key, drawn);
+      [14, 8].forEach((n, fi) => {
+        const base = full.replace(/[….]+$/, ''), c = cut(base, n), text = `${mark}${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; el.textContent = text;
+        const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
+        labelSpots(pts, w, hh, cond ? 'start' : 'long', 12 * inv).filter(free).slice(0, 8).forEach((r, i) => spots.push({ key: e.key, ...r, dist: fi * 50 + i, rank: cond ? 0 : 1, el, text }));
+      });
+    }
+    const { kept } = resolveLabels(spots, 6), keptEl = new Set<HTMLElement>(), keys = new Set<string>();
+    for (const s of kept) { s.el.textContent = s.text; s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; keptEl.add(s.el); keys.add(s.key); placed.push(s); }
+    for (const el of els) if (!keptEl.has(el)) el.remove();
+    out.set(lens, keys);
+  }
+  // What else is set later (badges, counts, the rest's labels) keeps off every lens's labels.
+  blocks.push(...placed);
+  return out;
+}
 function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) => boolean, blocks: Rect[], shown: Set<string>) {
   const parts: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
   const offParts = (r: Rect) => !parts.some(o => r.x < o.x + o.w + 2 && o.x < r.x + r.w + 2 && r.y < o.y + o.h + 2 && o.y < r.y + r.h + 2);
@@ -2819,12 +2867,12 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional', besi
   offParts: (r: Rect) => boolean, apart: (r: Rect) => boolean, offLabels: (r: Rect) => boolean, set: (el: HTMLElement, r: Rect) => void) {
   const inv = labelInv(), s = CUE_PX * inv, len = path.getTotalLength();
   const at = (p: { x: number; y: number }): Rect => ({ x: p.x - s / 2, y: p.y - s / 2, w: s, h: s });
-  // Map hygiene H5: one mark per line, at the middle of its longest run first (where it reads as the line's, not a port's or a
-  // bundle's), then the places its badge would take, then anywhere along it.
-  const pts = edgePts(e.key, path), runs = pts.slice(1).map((q, i) => ({ a: pts[i]!, b: q, n: Math.abs(q.x - pts[i]!.x) + Math.abs(q.y - pts[i]!.y) })).sort((p, q) => q.n - p.n);
-  const mids = runs.slice(0, 2).map(r => ({ x: (r.a.x + r.b.x) / 2, y: (r.a.y + r.b.y) / 2 }));
-  const spots = [...mids, ...cuePoints(pts, s + 4 * inv, 'long'), ...Array.from({ length: 13 }, (_, i) => path.getPointAtLength(len * (0.04 + i * 0.075)))].map(at);
-  const spot = spots.find(r => offParts(r) && apart(r) && offLabels(r)) ?? spots.find(r => offParts(r) && apart(r)) ?? spots.find(offParts) ?? null;
+  // Beauty v3 (E): never mid-line (a mark on every line read as a debug glyph): at the line's source port, on the line 7px out from the
+  // card's side or face, where the relation branches (the ruling Q3: 해당 관계의 접점이나 분기 위치); a little further out when that place
+  // is taken by a part.
+  void apart; void offLabels;
+  const spots = [7, 13, 19, 25].map(d => path.getPointAtLength(Math.min(len / 2, (d + CUE_PX / 2) * inv))).map(at);
+  const spot = spots.find(r => offParts(r)) ?? null;
   if (!spot) return;
   const el = h('span', { class: `edge-cue q-${cue}${beside ? ' beside' : ''}`, 'data-cue': e.key, role: 'img', 'aria-label': cue === 'condition' ? '조건 있는 관계' : '선택 관계' });
   box.append(el); set(el, spot);
@@ -3023,15 +3071,22 @@ function applyCamera(animate = false) {
 function fitView(explicit: boolean, animate = false) {
   const o = opened; if (!o) return;
   syncMapArea();
-  const vp = $('viewport').getBoundingClientRect(), left = SAFE_SIDE, right = SAFE_SIDE, top = Math.max(SAFE_TOP, topInset() + 12), bottom = mapBottomInset();
-  const w = Math.max(200, vp.width - left - right), hgt = Math.max(160, mapBottom() - top - bottom);
+  const vp = $('viewport').getBoundingClientRect(), left = SAFE_SIDE, right = SAFE_SIDE, bottom = mapBottomInset();
+  // Beauty v3 (F.1): while the map's own title reads in the frame the title chip is hidden, so its row (SAFE_TOP) is the map's: the
+  // safe top is just under the strip. Only a fit that drops the title keeps the chip's row.
+  let top = topInset() + 16;
+  const w = Math.max(200, vp.width - left - right), room = (t: number) => Math.max(160, mapBottom() - t - bottom);
   // The map's own title is part of the whole view while it can be read there; below the text floor it is hidden and the title chip
   // at the top left says the name (map hygiene H3), so the fit does not keep room for it.
-  const fitOf = (b: Rect) => Math.min(1, w / Math.max(1, b.w + 16), hgt / Math.max(1, b.h + 16));
+  const fitOf = (b: Rect, t = top) => Math.min(1, w / Math.max(1, b.w + 16), room(t) / Math.max(1, b.h + 16));
   let B = drawnBounds(), fit = fitOf(B);
-  // Without the title the whole map may fit at a scale where the title would be drawn again (at or above the floor): the fit stays
-  // just under the floor then, so the title it left out of the frame stays hidden (the chip names the map).
-  if (titleH && fit < TITLE_FLOOR_K) { const nb = drawnBounds(false); fit = Math.min(fitOf(nb), TITLE_FLOOR_K - 0.001); B = nb; }
+  if (!titleH || fit < TITLE_FLOOR_K) {
+    top = Math.max(SAFE_TOP, topInset() + 12); fit = fitOf(B);
+    // Without the title the whole map may fit at a scale where the title would be drawn again (at or above the floor): the fit stays
+    // just under the floor then, so the title it left out of the frame stays hidden (the chip names the map).
+    if (titleH && fit < TITLE_FLOOR_K) { const nb = drawnBounds(false); fit = Math.min(fitOf(nb), TITLE_FLOOR_K - 0.001); B = nb; }
+  }
+  const hgt = room(top);
   // Map hygiene H2: the first view opens on its focus (the first view's emphasis, else the main flow) at the opening scale when that
   // focus fits inside the safe area there; a focus too large for it opens the whole map at its fit instead.
   const f = explicit ? null : openFocus();
@@ -3040,7 +3095,8 @@ function fitView(explicit: boolean, animate = false) {
   // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
   const mw = B.w * k, mh = B.h * k, free = w - mw;
   const xoff = free <= 0 ? 0 : free / 2;
-  const yoff = mh <= hgt ? (hgt - mh) / 2 : 0;
+  // Beauty v3 (F.2): optical centring: of the free height 42% above, 58% below (the dock reads as weight at the bottom).
+  const yoff = mh <= hgt ? (hgt - mh) * 0.42 : 0;
   camera = { k, x: left + xoff - B.x * k, y: top + yoff - B.y * k };
   // Polish round fixes 1: a map that does not fit at the opening scale opens on what the first view points at (its emphasised parts,
   // else the main flow), centred where it can be, never past the map's own edges; not on its top-left corner and title.
@@ -4996,10 +5052,15 @@ function applyLegendMarks() {
   // faded to view-lens BG_LINE and never fainter). The selected part's lines, a selected relation and a scenario path's lines are
   // always foreground. Classes only: nothing moves.
   const selBox = selected && selected === scope ? `ghost:${selected}` : selected;
+  const fgEnds = new Set<string>(), drawnNow = shownLines();
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const fg = g.classList.contains('on') || g.classList.contains('sc-path') || g.classList.contains('lit') || lensLineFg(viewLens, { key: g.dataset.key!, channel: lineChans.get(g.dataset.key!) ?? null, from: g.dataset.from!, to: g.dataset.to! }, { selected: selBox });
     g.classList.toggle('lf-fg', fg); g.classList.toggle('lf-bg', !fg);
+    if (fg && drawnNow.has(g.dataset.key!)) { fgEnds.add(g.dataset.from!); fgEnds.add(g.dataset.to!); }
   });
+  // Beauty v3 (G): hierarchy from the record only: a card with an inside (.has-inside) and the ends of the lens's foreground lines
+  // (.lens-fg) are drawn a little firmer; no card is sized by importance. Classes only: a lens switch toggles them, nothing moves.
+  world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => { const b = lay.boxes.get(el.dataset.box!); el.classList.toggle('has-inside', !!b && b.kind === 'node' && b.kids > 0); el.classList.toggle('lens-fg', fgEnds.has(el.dataset.box!)); });
   // A 「+N」 marker of gathered badges steps back or hides with the lines it gathers only when all of them do.
   world.querySelectorAll<HTMLElement>('.edge-badge.b-more').forEach(el => { const from = el.dataset.badgeMore ?? '';
     if (m.hide.has(from)) el.classList.add('lg-hide'); else if (m.fade.has(from) || m.dim.has(from)) el.classList.add('lg-fade'); });

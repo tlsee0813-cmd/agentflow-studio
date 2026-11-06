@@ -64,11 +64,16 @@ test('BV2B-4 ports: the ends on one side are spread PORT_MIN or more apart in th
 // Beauty v2 review (H2): no port is shared any more (two lines out of one point ran together and forked: a bus the ruling forbids).
 // A side with more ends than fit PORT_MIN apart spreads them PORT_FLOOR apart, inside the card's corners where it can.
 test('BV2B-5 a side with more ends than room gives each end its own port, PORT_FLOOR apart, in order; never two ends on one point', () => {
-  for (const n of [7, 8, 9]) {
+  for (let n of [7, 8, 9]) {
     const sources = Array.from({ length: n }, (_, i) => box(`s${i}`, 0, i * 100));
     const b = boxes([box('m', 400, 400), ...sources]);
     const es = sources.map((s, i) => edge(s.id, 'm', i, { head: i < 5 ? 'filled' : 'open', start: 'none' }));
-    const r = routeEdges(b, es), ys = es.map(e => r.get(e.key).pts.at(-1).y);
+    // Beauty v3 (D.3): ends past the side's budget whose partner lies wholly above (below) take the card's top (bottom) face; the rest stay on the side.
+    const r = routeEdges(b, es), onSide = es.filter(e => Math.abs(r.get(e.key).pts.at(-1).x - 400) < 0.5), ys = onSide.map(e => r.get(e.key).pts.at(-1).y);
+    const top = es.filter(e => !onSide.includes(e)).map(e => r.get(e.key).pts.at(-1));
+    assert.ok(top.every(q => Math.abs(q.y - 400) < 0.5 || Math.abs(q.y - 480) < 0.5), `${n}: the others meet the top or bottom face`);
+    assert.equal(new Set(top.map(q => `${q.x.toFixed(2)},${q.y}`)).size, top.length, `${n}: each its own place on the face`);
+    n = onSide.length;
     assert.equal(new Set(ys.map(y => y.toFixed(2))).size, n, `${n}: every end its own port`);
     const sorted = [...ys].sort((p, q) => p - q);
     for (let i = 1; i < n; i++) assert.ok(sorted[i] - sorted[i - 1] >= PORT_FLOOR - 1e-6, `${n}: ${sorted[i] - sorted[i - 1]}`);

@@ -3524,3 +3524,15 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    surfaces). */
 :root[data-theme="dark"] .space .node.card :is(.c-tag-icon, .c-loop-tab) { color: var(--text-3); }
 @media (prefers-color-scheme: dark) { :root[data-theme="auto"] .space .node.card :is(.c-tag-icon, .c-loop-tab) { color: var(--text-3); } }
+/* Beauty v3 (G): hierarchy from the record only (no size by importance). A card with an inside: a firmer edge (its second sheet kept)
+ * and a heavier name; the ends of the lens's foreground lines: a darker edge. Colours only: the box and its lines never move. */
+.node.card.has-inside { border-color: #a3abb6; }
+.node.card.has-inside :is(.c-name, .c-tag-line:first-child) { font-weight: 680; }
+.node.card.lens-fg { border-color: var(--text-3); }
+.node.card.lens-fg :is(.c-name, .c-tag-line) { color: var(--text); }
+.node.card.selected, .node.card.selected:hover { border-color: var(--accent); }
+/* Beauty v3 (E): the fit view's labels of every lens are placed at once; each lens shows its own (and its lines' counts give way). */
+.edge-labels > .edge-label.fit { display: none; font-weight: 500; color: var(--text-2); background: var(--bg); box-shadow: 0 0 0 2px var(--bg); }
+.space.lens-data .edge-labels > .edge-label.fit[data-lens="data"], .space.lens-start .edge-labels > .edge-label.fit[data-lens="start"],
+.space.lens-scenario .edge-labels > .edge-label.fit[data-lens="scenario"] { display: block; }
+.space.lens-data .edge-count[data-fit~="data"], .space.lens-start .edge-count[data-fit~="start"], .space.lens-scenario .edge-count[data-fit~="scenario"] { display: none; }

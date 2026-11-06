@@ -25,21 +25,26 @@ export const earY = (b: Box): number => (b.kind === 'node' ? b.y + (b.ear ?? Mat
 /** The x where a control line meets a card's top or bottom: the head's left third (the wedge's place, 3.6), lines of one face
  * spread PORT_GAP apart round it in the order of their other ends, kept 8 inside the card's corners. */
 function facePorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: number; b?: number }> {
-  const at = new Map<string, { key: string; end: 'a' | 'b'; far: number }[]>(), out = new Map<string, { a?: number; b?: number }>();
+  const at = new Map<string, { key: string; end: 'a' | 'b'; far: number; fy: number }[]>(), out = new Map<string, { a?: number; b?: number }>();
   for (const e of edges) {
     const f = e.faces; if (!f) continue;
     for (const end of ['a', 'b'] as const) {
       const face = f[end]; if (face !== 'top' && face !== 'bottom') continue;
       const me = boxes.get(end === 'a' ? e.from : e.to), far = boxes.get(end === 'a' ? e.to : e.from); if (!me || !far || me.kind !== 'node') continue;
-      const k = `${me.id}|${face}`; (at.get(k) ?? at.set(k, []).get(k)!).push({ key: e.key, end, far: far.x + far.w / 2 });
+      const k = `${me.id}|${face}`; (at.get(k) ?? at.set(k, []).get(k)!).push({ key: e.key, end, far: far.x + far.w / 2, fy: far.kind === 'frame' ? far.y + far.head / 2 : far.y + (far.contact ?? far.h / 2) });
     }
   }
   for (const [k, list] of at) {
-    const box = boxes.get(k.split('|')[0]!)!, x0 = box.x + box.w / 3, n = list.length;
-    list.sort((p, q) => p.far - q.far);
+    const box = boxes.get(k.split('|')[0]!)!, x0 = box.x + box.w / 3, n = list.length, top = k.endsWith('|top'), cx = box.x + box.w / 2;
+    // Beauty v3 (D.3): the ends whose partners lie to the left first, then those to the right; within each, the order in which their
+    // one-bend lines (out of the face, up or down, one turn into the partner's side) nest without crossing: going right, the farther
+    // partner takes the x farther from the partner's side.
+    const dirOf = (p: { far: number }) => (p.far < cx ? 0 : 1), yKey = (p: { far: number; fy: number }) => ((top ? 1 : -1) * (dirOf(p) ? 1 : -1)) * p.fy;
+    list.sort((p, q) => dirOf(p) - dirOf(q) || yKey(p) - yKey(q) || p.far - q.far);
     // Beauty v2 B2: the run of ports is moved whole to stay inside the corners (clamping each port alone stacked them on one point).
     const span = (n - 1) * PORT_GAP, start = Math.max(box.x + 8, Math.min(box.x + box.w - 8 - span, x0 - span / 2));
-    list.forEach((p, i) => { const x = start + i * PORT_GAP; const port = out.get(p.key) ?? {}; port[p.end] = x; out.set(p.key, port); });
+    // On the half-pixel grid the route search keeps its lanes on (a port off it would leave its first run slanted).
+    list.forEach((p, i) => { const x = Math.round((start + i * PORT_GAP) * 2) / 2; const port = out.get(p.key) ?? {}; port[p.end] = x; out.set(p.key, port); });
   }
   return out;
 }
@@ -307,8 +312,37 @@ function order(c: Seg[], vertical: boolean) {
   for (let pass = 0; pass < c.length; pass++) { let swapped = false; for (let i = 0; i + 1 < c.length; i++) if (prefer(c[i]!, c[i + 1]!) > 0) { [c[i], c[i + 1]] = [c[i + 1]!, c[i]!]; swapped = true; } if (!swapped) break; }
 }
 
+/** Beauty v3 (D.2): the most line ends one side of a card takes: 5 on an 80-high card, 6 on a 104-high one (PORT_GAP apart inside its
+ * PORT_INSET corners). */
+export const sideBudget = (b: Box): number => (b.h >= 100 ? 6 : 5);
+/** Beauty v3 (D.3): a card side over its budget sends its ends whose partner lies wholly above it (or below it, 24 clear) to its top (or
+ * bottom) face, the steepest first, until the side is within budget. Only where the geometry is real; the line keeps its stroke and
+ * head (the face carries no meaning), its end never shares a port, and no trunk joins it to another line. Returns the faces to take. */
+export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[]): Map<string, { a?: PortFace; b?: PortFace }> {
+  type End = { key: string; end: 'a' | 'b'; me: Box; other: Box };
+  const by = new Map<string, End[]>(), out = new Map<string, { a?: PortFace; b?: PortFace }>();
+  for (const e of edges) {
+    const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
+    const side = sideOf(a, b, boxes); if (side !== 'l' && side !== 'r') continue;
+    const other = side === 'r' ? 'l' : 'r', fa = e.faces?.a, fb = e.faces?.b;
+    if (fa !== 'top' && fa !== 'bottom' && !pinOf(a, e, 'a')) (by.get(`${a.id}|${side}`) ?? by.set(`${a.id}|${side}`, []).get(`${a.id}|${side}`)!).push({ key: e.key, end: 'a', me: a, other: b });
+    if (fb !== 'top' && fb !== 'bottom' && !pinOf(b, e, 'b')) (by.get(`${b.id}|${other}`) ?? by.set(`${b.id}|${other}`, []).get(`${b.id}|${other}`)!).push({ key: e.key, end: 'b', me: b, other: a });
+  }
+  for (const list of by.values()) {
+    const me = list[0]!.me; if (me.kind !== 'node' || list.length <= sideBudget(me)) continue;
+    const face = (x: End): PortFace | null => (x.other.y + x.other.h < me.y - 24 ? 'top' : x.other.y > me.y + me.h + 24 ? 'bottom' : null);
+    const steep = (x: End) => Math.abs((x.other.y + x.other.h / 2) - (me.y + me.h / 2)) / Math.max(1, Math.abs((x.other.x + x.other.w / 2) - (me.x + me.w / 2)));
+    const cands = list.filter(x => face(x)).sort((p, q) => steep(q) - steep(p) || (p.key < q.key ? -1 : 1));
+    for (const x of cands.slice(0, list.length - sideBudget(me))) out.set(x.key, { ...out.get(x.key), [x.end]: face(x)! });
+  }
+  return out;
+}
+
 /** Every line of one drawn set (the map's lines, or its summary lines), routed together. */
-export function routeEdges(boxes: Map<string, Box>, edges: Edge[], opts: { quick?: boolean } = {}): Map<string, Routed> {
+export function routeEdges(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: boolean } = {}): Map<string, Routed> {
+  // Beauty v3 (D): ends over a side's budget take the top or bottom face toward a partner that really lies above or below.
+  const over = opts.quick ? new Map<string, { a?: PortFace; b?: PortFace }>() : faceOverflow(boxes, edgesIn);
+  const edges = over.size ? edgesIn.map(e => { const o = over.get(e.key); return o ? { ...e, faces: { a: o.a ?? e.faces?.a ?? 'side', b: o.b ?? e.faces?.b ?? 'side' } } : e; }) : edgesIn;
   // A control line read as such leaves its card's bottom and comes in at the top (map design v3 3.6): routed first, kept only
   // when its route turns at most FACE_TURNS times (else it meets the sides, told by its dash and open head alone). Only cards
   // have those faces; a group, an outside partner or an end that holds the other keeps its side.
