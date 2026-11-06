@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,RULE_SCOPES,ANCHOR_KINDS,ENFORCER_KINDS,WITHDRAWAL_KINDS,GATE_KINDS,PART_STATES,PART_TYPES,PART_TYPES_17,PART_IMPLEMENTATIONS,STATUS_DIMENSION_KINDS,STATUS_VALUE_KINDS,GROUP_AXES,VARIANT_CHOICES,VARIANT_TOGETHER,ENTRY_KINDS,CADENCE_KINDS,CROSS_KINDS,ACTOR_ROLES,ACTOR_KINDS,CONTRACT_CHANGE_KINDS,SHIPPED_KINDS,WITHDRAWAL_METHODS,CONDITION_PHASES,COVERAGE_STATES,ARTIFACT_KINDS,WRITE_MODES,RECORD_DIAGNOSTIC_CATEGORIES,RECORD_FAMILIES,FAMILY_REASONS,CITE_GRADES,CLAIM_NATURES,STATUS_SCOPE_KINDS,FOUND_BY,OBLIGATION_KINDS,type StatusDimension,CHANNELS,RELATION_MODES,SCENARIO_KINDS,SCENARIO_LINK_KINDS,SCENARIO_PATH_STATUSES,SCENARIO_GAP_REASONS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {ROW_STATES,ROW_REASONS,IDENTITY_ANSWERS,IDENTITY_OPS,type RowState,V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,RULE_SCOPES,ANCHOR_KINDS,ENFORCER_KINDS,WITHDRAWAL_KINDS,GATE_KINDS,PART_STATES,PART_TYPES,PART_TYPES_17,PART_IMPLEMENTATIONS,STATUS_DIMENSION_KINDS,STATUS_VALUE_KINDS,GROUP_AXES,VARIANT_CHOICES,VARIANT_TOGETHER,ENTRY_KINDS,CADENCE_KINDS,CROSS_KINDS,ACTOR_ROLES,ACTOR_KINDS,CONTRACT_CHANGE_KINDS,SHIPPED_KINDS,WITHDRAWAL_METHODS,CONDITION_PHASES,COVERAGE_STATES,ARTIFACT_KINDS,WRITE_MODES,RECORD_DIAGNOSTIC_CATEGORIES,RECORD_FAMILIES,FAMILY_REASONS,CITE_GRADES,CLAIM_NATURES,STATUS_SCOPE_KINDS,FOUND_BY,OBLIGATION_KINDS,type StatusDimension,CHANNELS,RELATION_MODES,SCENARIO_KINDS,SCENARIO_LINK_KINDS,SCENARIO_PATH_STATUSES,SCENARIO_GAP_REASONS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 import { validEvidence, recordIdentity } from './record-source.js';
@@ -417,6 +417,34 @@ const RELATION18_KEYS=['when','optional','variantRef','crosses','cadenceKind','p
 const said18=(v:unknown,max:number)=>{if(v!==null)text(v,max);};
 const ref18=(v:unknown,re:RegExp)=>{ensure(typeof v==='string'&&re.test(v));};
 const LOOP_REF=/^B\d{1,3}:L\d{1,3}$/,STEP_REF18=/^B\d{1,3}:S\d{1,3}[a-z]?$/;
+/** map-reading.20 (recipe .50, row-ledger.ts): a reading's row entries: each (record, table, id) once, a known state with a reason it allows,
+ * a send count, its targets (reflected only, up to eight) and the parts it conflicts with (held only, up to four). */
+function readingRows(v:unknown,areaIds:Set<string>){
+  list(v,2048);const seen=new Set<string>();
+  for(const x of v as unknown[]){obj(x,['record','table','id','state','reason','detail','sent','to','with']);text(x.record,200);text(x.table,40);text(x.id,40);
+    const key=JSON.stringify([x.record,x.table,x.id]);ensure(!seen.has(key));seen.add(key);ensure(ROW_STATES.includes(x.state as never));
+    const reasons=ROW_REASONS[x.state as RowState];ensure(x.state==='reflected'?x.reason===null:reasons.includes(x.reason as string));
+    ensure(x.detail===null||typeof x.detail==='string'&&/^[a-z][a-z-]{0,39}$/.test(x.detail));integer(x.sent);
+    list(x.to,8);for(const g of x.to as unknown[]){obj(g,['kind','id','index']);ensure(['part','claim','relation','reading'].includes(g.kind as string));text(g.id,80);ensure(g.index===null||integer(g.index)===undefined);ensure((g.kind==='claim')===(g.index!==null));if(g.kind==='part'||g.kind==='claim')ensure(areaIds.has(g.id as string));}
+    ensure(x.state==='reflected'?(x.to as unknown[]).length>0:(x.to as unknown[]).length===0);
+    list(x.with,4);for(const a of x.with as unknown[])ensure(areaIds.has(a as string));ensure(x.state==='held'||(x.with as unknown[]).length===0);}
+}
+/** Recipe .50 step 5 (map-identity.ts): a reading's C-IDENT row decisions: each (record, id) once, a known state with a reason it allows, the part
+ * it names (a known area or null), an operation of a known kind on known areas (rename: from and to, 60; retire: a successor or null; fold:
+ * the canonical part), 바뀐 때 (60), up to eight F/E IDs, and where the row stands in its pasted text. */
+function readingIdentity(v:unknown,areaIds:Set<string>,records:Map<string,string>){
+  list(v,256);const seen=new Set<string>(),area=(x:unknown)=>{ensure(typeof x==='string'&&areaIds.has(x));};
+  for(const x of v as unknown[]){obj(x,['record','id','map','answer','part','state','reason','areaId','op','when','evidence','at']);text(x.record,200);text(x.id,40);
+    const key=JSON.stringify([x.record,x.id]);ensure(!seen.has(key));seen.add(key);
+    ensure(x.map===null||typeof x.map==='string'&&/^P\d{2,3}$/.test(x.map));ensure(x.answer===null||IDENTITY_ANSWERS.includes(x.answer as never));ensure(x.part===null||typeof x.part==='string'&&/^B\d{1,3}$/.test(x.part));
+    ensure(ROW_STATES.includes(x.state as never));ensure(x.state==='reflected'?x.reason===null:ROW_REASONS[x.state as RowState].includes(x.reason as string));
+    if(x.areaId!==null)area(x.areaId);ensure(x.state!=='reflected'||x.areaId!==null);
+    if(x.op!==null){const o=x.op as Record<string,unknown>;obj(o,['kind','areaId','successor','into','from','to','renamed']);ensure(x.state==='reflected');ensure(IDENTITY_OPS.includes(o.kind as never));area(o.areaId);ensure(typeof o.renamed==='boolean');
+      ensure(o.kind==='retire'?o.successor===null||(area(o.successor),o.successor!==o.areaId):o.successor===null);ensure(o.kind==='fold'?(area(o.into),o.into!==o.areaId):o.into===null);
+      if(o.kind==='rename'){text(o.from,120);text(o.to,60);}else ensure(o.from===null&&o.to===null&&o.renamed===false);}
+    if(x.when!==null)text(x.when,60);list(x.evidence,8);for(const e of x.evidence as unknown[])ensure(typeof e==='string'&&/^[FE]\d{1,3}$/.test(e));
+    obj(x.at,['record','from','to']);const at=x.at as Record<string,unknown>;ensure(records.has(at.record as string));integer(at.from);integer(at.to);ensure((at.from as number)<(at.to as number)&&(at.to as number)<=records.get(at.record as string)!.length);}
+}
 function status18(s:Record<string,unknown>,quote:(q:unknown)=>void,keys:string[],nineteen=false){
   obj(s,[...keys,...(nineteen?['scopeKind']:[])]);ensure(STATUS_DIMENSION_KINDS.includes(s.dimension as never));ensure(STATUS_VALUE_KINDS[s.dimension as StatusDimension].includes(s.value as string));
   said18(s.scope,120);said18(s.basis,60);said18(s.successor,60);quote(s.quote);
@@ -535,8 +563,12 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;
-    const nineteen=version==='map-reading.19',eighteen=nineteen||version==='map-reading.18',seventeen=eighteen||version==='map-reading.17',sixteen=seventeen||version==='map-reading.16',fifteen=sixteen||version==='map-reading.15',fourteen=fifteen||version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
-    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[]),...(eighteen?READING18_KEYS:[]),...(nineteen?READING19_KEYS:[])]);ensure(r.version==='map-reading.1'||two);
+    const twenty=version==='map-reading.20',nineteen=twenty||version==='map-reading.19',eighteen=nineteen||version==='map-reading.18',seventeen=eighteen||version==='map-reading.17',sixteen=seventeen||version==='map-reading.16',fifteen=sixteen||version==='map-reading.15',fourteen=fifteen||version==='map-reading.14',thirteen=fourteen||version==='map-reading.13',twelve=thirteen||version==='map-reading.12',eleven=twelve||version==='map-reading.11',ten=eleven||version==='map-reading.10',nine=ten||version==='map-reading.9',eight=nine||version==='map-reading.8',seven=eight||version==='map-reading.7',six=seven||version==='map-reading.6',five=six||version==='map-reading.5';four=five||version==='map-reading.4';const three=four||version==='map-reading.3',two=three||version==='map-reading.2';records=four?asRead:raw;
+    obj(r,['version','id','at','model','prompt','hash','records','summary','parts','relations','candidates','gaps','skipped',...(two?['requests','matches']:[]),...(four?['material']:[]),...(six?['exclusions']:[]),...(eight?['basisAt','basisVersion']:[]),...(nine?['portMap']:[]),...(eighteen?READING18_KEYS:[]),...(nineteen?READING19_KEYS:[]),...(twenty?['rows',...(Object.hasOwn(r as object,'identity')?['identity']:[])]:[])]);ensure(r.version==='map-reading.1'||two);
+    // map-reading.20 (recipe .50): the rows of a v5 record this reading sent or left out for room, each once, with its state.
+    if(twenty)readingRows(r.rows,areaIds);
+    // Recipe .50 step 5: the C-IDENT rows this reading weighed (only on a .20 reading that had such rows).
+    if(twenty&&Object.hasOwn(r as object,'identity'))readingIdentity(r.identity,areaIds,raw);
     // map-reading.8: the records' own basis time and target version, as written, or null.
     if(eight){if(r.basisAt!==null)text(r.basisAt,60);if(r.basisVersion!==null)text(r.basisVersion,60);}
     id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);text(r.model,80);text(r.prompt,40);ensure(typeof r.hash==='string'&&/^[0-9a-f]{64}$/.test(r.hash)&&!hashes.has(r.hash));hashes.add(r.hash as string);
@@ -619,7 +651,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
     }
     // map-reading.9: a first map holds 48 relations (earlier readings 32).
     // map-reading.13: every relation holds the fields of the format artifact it carries (up to 24 of 60, each once; [] when not said).
-    list(r.relations,nine?48:32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[]),...(thirteen?['payloadFields']:[]),...(eighteen?RELATION18_KEYS:[]),...(nineteen?['claimNature','cites']:[])]);if(eighteen)relation18(x);if(nineteen){ensure(x.claimNature===null||CLAIM_NATURES.includes(x.claimNature as never));cites19(x.cites);}if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,seventeen?80:40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));
+    list(r.relations,nine?48:32);for(const x of r.relations){obj(x,['relationId','from','to','kind','quote',...(seven?['payload','cadence','mode']:[]),...(eight?['channel']:[]),...(thirteen?['payloadFields']:[]),...(eighteen?RELATION18_KEYS:[]),...(nineteen?['claimNature','cites']:[]),...(nineteen&&!!x&&typeof x==='object'&&Object.hasOwn(x,'also')?['also']:[])]);if(Object.hasOwn(x,'also'))ensure(x.also===true);if(eighteen)relation18(x);if(nineteen){ensure(x.claimNature===null||CLAIM_NATURES.includes(x.claimNature as never));cites19(x.cites);}if(seven){if(x.payload!==null)text(x.payload,80);if(x.cadence!==null)text(x.cadence,seventeen?80:40);ensure(x.mode===null||RELATION_MODES.includes(x.mode as never));}if(eight)ensure(x.channel===null||CHANNELS.includes(x.channel as never));
       if(thirteen){list(x.payloadFields,24);for(const f of x.payloadFields as unknown[])text(f,60);ensure(new Set(x.payloadFields as unknown[]).size===(x.payloadFields as unknown[]).length);}id(x.relationId);ensure(areaIds.has(x.from as string)&&areaIds.has(x.to as string)&&x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));quote(x.quote);}
     // map-reading.9: each port-map row names a relation of this reading, the part at its end by direction (in: the receiver, out: the
     // sender) as this reading kept it, an input or output name and a step of that part, once each, on its own passage.
@@ -632,14 +664,15 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(!!part&&part!.steps.some(s=>s.name===m.step)&&(m.direction==='in'?part!.inputs:part!.outputs).includes(m.port));
       const key=JSON.stringify([m.relationId,m.port,m.step,m.direction]);ensure(!rows.has(key));rows.add(key);}}
     // map-reading.5: each candidate says what it leaves undecided; an undecided statement is kept in it, exact where it stands.
-    if(five){list(r.candidates,16);}if(five)for(const c of r.candidates as unknown[]){obj(c,['text','areaIds','quote','target','statement']);ensure(['attribution','identity','parent','holds'].includes(c.target as string));
+    if(five){list(r.candidates,twenty?64:16);}if(five)for(const c of r.candidates as unknown[]){obj(c,['text','areaIds','quote','target','statement']);ensure(['attribution','identity','parent','holds'].includes(c.target as string));
       const held=c.target==='attribution'||c.target==='holds';ensure(held?c.statement!==null:c.statement===null);list(c.areaIds,c.target==='holds'?1:2);
       if(c.statement!==null){obj(c.statement,['kind','text','about','quote']);ensure(CLAIM_KINDS.includes(c.statement.kind as never));text(c.statement.text,240);if(c.statement.about!==null)text(c.statement.about,80);quote(c.statement.quote);}}
-    list(r.candidates,16);for(const c of r.candidates){obj(c,['text','areaIds','quote',...(five?['target','statement']:[])]);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
+    // map-reading.20 (recipe .50 step 4): 32 candidates (a held part's relations among them); earlier entries 16.
+    list(r.candidates,twenty?64:16);for(const c of r.candidates){obj(c,['text','areaIds','quote',...(five?['target','statement']:[])]);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
     // map-reading.18 (pipeline .43): the reading's own fields from v4 records (record-reading.ts).
     if(eighteen)reading18(r,quote,records,read,nineteen);if(nineteen)reading19(r,quote);
     list(r.gaps,2);for(const g of r.gaps)text(g,160);
-    list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped',...(four?['material']:[])].includes(x.reason as string));}
+    list(r.skipped,64);for(const x of r.skipped){obj(x,['what','name','reason']);ensure(['part','relation'].includes(x.what as string));text(x.name,200);ensure(['same-name','archived','removed','exists','parent-skipped','empty-group','same-files',...(four?['material']:[])].includes(x.reason as string));}
     if(four){list(r.material,8);for(const x of r.material){obj(x,['record','from','to','what']);ensure(records.has(x.record as string));text(x.what,120);integer(x.from);integer(x.to);ensure((x.from as number)<(x.to as number)&&read.some(y=>y.id===x.record&&y.from<=(x.from as number)&&(x.to as number)<=y.to));}}
     if(six){list(r.exclusions,512);for(const x of r.exclusions){
       // pipeline .38 (map-reading.13): an io item's exclusion may carry the value it set aside (≤60, never secret-like), as stored.

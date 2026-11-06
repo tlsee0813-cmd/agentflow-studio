@@ -9,7 +9,7 @@ import { validateProject } from '../dist/public/shared/validation.js';
 import { ApiError } from '../../server/errors.mjs';
 import { validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, fragmentSetAside, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues,
   isMapRevision, validateMapRevision, revisionGroups,
-  missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT,
+  missingMapCorrections, mapCorrectionRevision, MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT, LATER_BLUEPRINT_BASE, LATER_IDENTITY_SWAP,
   BLUEPRINT_PARTS_MAX, BLUEPRINT_NEW_PARTS_MAX, BLUEPRINT_LATER_NEW_PARTS_MAX, BLUEPRINT_GLOBAL_MAX, BLUEPRINT_FIRST_GLOBAL_MAX, BLUEPRINT_RELATION_ITEMS_MAX,
   BLUEPRINT_LATER_RELATION_ITEMS_MAX, BLUEPRINT_ANCHORS_MAX, blueprintCoverage, readingDiagnostics, sectionRows,
   BLUEPRINT_LATER_PARTS_MAX, blueprintPartsMax, unknownRows, missingLines, fragmentKeys, factRows, uncitedFacts, planClaims, planShort, loopRows, payloadParts, finalDiagnostics, FINAL_DIAGNOSTICS, FRAGMENT_KEYS, planStoreFolds, storeDupParts, droppedItems, summarySentences, connectionPayloadRows, REFUSAL_OUTCOME, versionFacts } from '../server/map-blueprint.mjs';
@@ -350,7 +350,8 @@ test('later blueprints require corrections while first-map shape/prompt remain u
   const first = fixture(), firstPlan = planned(first);
   assert.deepEqual(Object.keys(firstPlan), ['parts', 'global']); validateMapBlueprint(firstPlan, first.ask);
   refused(() => validateMapBlueprint({ ...firstPlan, corrections: [] }, first.ask));
-  assert.ok(LATER_BLUEPRINT_PROMPT.startsWith(MAP_BLUEPRINT_PROMPT)); assert.ok(!MAP_BLUEPRINT_PROMPT.includes('corrections'));
+  // Recipe .50 step 3: the later plan starts with the first-map text with its one 판본-beside-identity line said without 판본.
+  assert.equal(LATER_BLUEPRINT_BASE, MAP_BLUEPRINT_PROMPT.replace(...LATER_IDENTITY_SWAP)); assert.ok(LATER_BLUEPRINT_PROMPT.startsWith(LATER_BLUEPRINT_BASE)); assert.ok(!MAP_BLUEPRINT_PROMPT.includes('corrections'));
   assert.ok(LATER_BLUEPRINT_PROMPT.includes('같은 대상·범위'));
   assert.ok(LATER_BLUEPRINT_PROMPT.includes('다른 판본·브랜치') && LATER_BLUEPRINT_PROMPT.includes('roleBy=person'));
   const later = fixture(1), part = later.ask.parts[0], plan = { parts: [{ ref: part.id, name: part.name, parent: part.parentId,
@@ -447,8 +448,8 @@ test('the combined first-map wire only omits set-aside items: no quote clipped, 
   expected.relations.splice(0, 1); expected.candidates.splice(0, 1); expected.gaps = expected.gaps.slice(0, 2); expected.material.splice(0, 1);
   assert.deepEqual(wire, expected);
   assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [
-    ['parts[0].claims[0].at', 'reference', null], ['parts[3].basis', 'contract', 'count'], ['relations[0]', 'contract', 'ends'],
-    ['candidates[0].target', 'reference', null], ['gaps', 'contract', 'count'], ['material[0]', 'material-evidence', null]]);
+    ['parts[0].claims[0].at', 'reference', null], ['parts[3].basis[4]', 'contract', 'count'], ['parts[3].basis[5]', 'contract', 'count'], ['relations[0]', 'contract', 'ends'],
+    ['candidates[0].target', 'reference', null], ['gaps[2]', 'contract', 'count'], ['material[0]', 'material-evidence', null]]);
   const plain = M.validateMapReply(wire, f.ask);
   assert.equal(M.setAside(plain).length, 0);
   assert.deepEqual(plain.parts[0].claims.map(c => c.key), ['s1', 's41']);
@@ -664,7 +665,8 @@ test('.29: a first map plans (.31) 36 new parts (a later map 12) in twelve fragm
   assert.equal(M.validateMapReply(read.wire, f.ask).relations.length, 48);
   const over = combineRenderedReading(fragments, wide, f.ask, koruPlan(f));
   assert.equal(over.wire.relations.length, 48);
-  assert.deepEqual(over.exclusions.filter(x => x.path === 'relations').map(x => [x.rule, x.category]), [['contract', 'count']]);
+  // .50: the item past the bound is named by its own index.
+  assert.deepEqual(over.exclusions.filter(x => x.path.startsWith('relations')).map(x => [x.path, x.rule, x.category]), [['relations[48]', 'contract', 'count']]);
   assert.throws(() => M.validateMapReply({ ...structuredClone(read.wire), relations: wide.relations }, f.ask));
   assert.deepEqual(mapStageIssues(wide).filter(x => x.path === 'relations'), [{ path: 'relations', rule: 'count', expected: 48, actual: 49 }]);
   const laterAsk = fixture(1).ask;

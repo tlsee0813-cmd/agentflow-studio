@@ -267,7 +267,7 @@ test('R48 contract: every reading .48 makes is stored as map-reading.19 exactly 
     const wire0 = wr ?? wire([part(g, 'new:p02', '공방 부분 02', '|B02|', { steps: [1, 2, 3, 28, 29, 30].map(k => ({ name: k === 1 ? '받기' : `단계 ${pad(k)}`, does: null, uses: [], at: g.at(`|${b(2)}:S${pad(k)}|`) })) })]);
     const read = M.validateMapReply(structuredClone(wire0), g.ask, { setAside: true });
     const applied = M.applyReading(g.project, g.input, read, meta(`R_record48_${name === '공방' ? 'b' : 'a'}`, name === '공방' ? '8' : '4'));
-    assert.equal(applied.reading.version, 'map-reading.19', name);
+    assert.equal(applied.reading.version, 'map-reading.20', name);
     assert.deepEqual(validateProject(applied.project), applied.project, name);
   }
 });

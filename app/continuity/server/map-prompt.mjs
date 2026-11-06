@@ -305,6 +305,49 @@ export const MAP7_VOCABULARY = `
 - 새 부분의 ref는 "new:" 뒤에 ASCII 소문자 a–z, 숫자 0–9, 밑줄(_), 하이픈(-)만으로 1~24자인 키를 붙인다. 전체 형식은 ^new:[a-z0-9_-]{1,24}$이다. 예: "new:label_guide", "new:label-lookup", "new:a0". 대문자("new:labelGuide"), 공백, 한글 등 그 밖의 문자, 빈 키, 25자 이상의 키는 응답 전체가 거절된다.
 - 사용자에게 보이는 이름은 name에 쓴다. name은 사용자의 언어로 써도 되며 ID와 같을 필요가 없다.
 - 같은 응답에서 새 부분을 parent, relations의 from·to, candidates의 parts로 가리킬 때는 그 부분의 parts[].ref에 쓴 ID를 철자 그대로 쓴다. 기존 부분은 P01 같은 id 그대로 쓴다. parts에 같은 ref를 두 번 쓰지 않는다.`;
-/** The one renderer of the map.7 instructions, for the standard provider and the CLI executor alike. */
-export const map7Prompt = ask => MAP7_PROMPT + MAP7_VOCABULARY + map7Guidance(ask);
-export const MAP7_RECIPE = 'map7-recipe.3: later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null; instructions = MAP7_PROMPT + condition-length-guidance.1 (rows [start, last end <= 80 | null, last end <= 200 | null] per sent piece in sent order, ends contiguous from the start, trimmed UTF-16 of whole pieces of one record, no record text, <= 1600 rows, block <= 65536 UTF-8 bytes, else INPUT_TOO_LARGE before sending); part-id-vocabulary.1 between them (new part ids exactly ^new:[a-z0-9_-]{1,24}$, references spelled as parts[].ref; validator unchanged)';
+// Recipe .49 (brief-parts.1): a map over its byte budget sends the parts its records do not name in short form, marked brief: true
+// (map-reading.ts fitMap). Said only to an ask that has such a part, after the vocabulary; every other ask renders byte for byte as before.
+export const MAP7_BRIEF = `
+
+간추린 기존 부분(brief-parts.1):
+- parts에서 "brief":true인 부분은 지금 지도에 있고 현재 유효한 기존 부분이다. 보낼 분량 때문에 note와 current를 비우고 role은 앞 60자까지만 보냈을 뿐이다. 비어 있는 note·current는 알려진 것이 없다는 뜻이 아니다.
+- brief 부분이 같은 대상인지는 name·readAs·부모(parentId)·relations와 남은 role로 맞춘다. 기록이 그 부분을 말하면 그 id(P01 등)로 쓰고, 같은 대상을 새 부분으로 만들지 않는다. 가를 수 없으면 candidates에 쓴다.
+- 세부가 빠졌다는 이유로 brief 부분을 새로 생긴 것·없는 것·폐기되거나 멈춘 것·미구현으로 읽거나 쓰지 않는다. 그런 내용은 원문이 직접 말할 때만 쓴다.
+- brief 부분의 보내지 않은 current에는 키가 없으므로 replaces나 corrections로 가리키지 않는다. 원문이 그 부분의 앞선 내용을 철회·정정하면 그 철회·정정을 새 주장으로 쓴다. 보내지 않은 설명을 짐작해 role을 다시 쓰지 않는다.`;
+// Recipe .50 (map7-recipe.5, map-reading.20): the later contract takes six claims per part and sixteen relations, as the divided later
+// pipeline's render and global rules already told its models; an item past a bound is set aside on its own (never the whole reply). Said
+// to every map.7 ask right after MAP7_PROMPT (unchanged byte for byte), whose count line it supersedes.
+export const MAP7_COUNTS = `
+
+후속 지도 개수(later-counts.1, 위 개수 상한 문장보다 우선한다):
+- 부분마다 claims는 최대 6개, relations는 최대 16개다. 그 밖의 상한(parts 24개·새 부분 12개·basis 4개·candidates 6개·gaps 2개·material 6개·matches 24개)은 위와 같다.
+- 상한을 넘은 항목은 응답 전체를 거절하지 않고 그 항목만 이번 정리에서 제외되며, 그 원문 행은 다음 정리에서 다시 보낸다. 중요한 철회·정정·조건·사람에게 가는 관계를 상한 뒤쪽에 두지 않는다.`;
+// Recipe .50 step 3 (map7-recipe.6, later-identity.1, ruling F5 Q1/Q7(3)): the parts of a later ask are this project's earlier
+// understanding; a commit or 판본 difference scopes claims, never a part's identity. MAP7_PROMPT stays byte for byte (its sha is pinned),
+// so this block, right after MAP7_COUNTS, supersedes its 「같은 대상인지는 이름만으로 …」 line and reads its 판본 lines as claim rules. It
+// also says what the ask's new part fields are (part-facts.1: state, lastBasis, files; buildMapAsk) and that a role carries no basis stamp.
+export const MAP7_IDENTITY = `
+
+기존 부분의 정체(later-identity.2, 위 「같은 대상인지는 이름만으로 정하지 않는다 …」 문장보다 우선한다):
+- parts는 같은 프로젝트를 앞 기록들로 읽은 지금 지도다. 이번 기록은 나중 기준 커밋에서 쓰였을 수 있으며, 기준 커밋·판본·작성 세션이 다르다는 것만으로 다른 대상이 아니다. 위의 「판본이 다르거나 나중에 도착했다는 것은 대체의 근거가 아니다」와 「다른 브랜치·판본 자료는 앞의 주장을 바꾸지 않고」는 role·current 주장의 대체에 관한 것이며 부분의 정체에는 쓰지 않는다.
+- 같은 대상인지는 이름만으로 정하지 않고, 기록이 말하는 책임·부모·연결·파일을 그 부분의 role·parentId·relations·files·readAs와 원문 근거로 대조한다. role의 판본·세부가 다르다는 것은 어긋남이 아니다. 파일·부모·구현·이름이 바뀌어도 같은 책임을 이어 맡으면 같은 부분이며 그 id(P01 등)로 쓴다. 다만 기록이 그 책임을 다른 것이 이미 전부 대신했다고 하면(옛 구현을 걷어 내고 새 구현으로 바꿈) 대신한 것은 새 부분이고, 앞 부분은 id를 그대로 둔 채 대신했다는 원문을 그 부분의 주장으로 남긴다(지우거나 새 부분에 합치지 않는다). 책임·파일·연결은 근거일 뿐 자동으로 같다는 뜻이 아니다: 같은 코드로 도는 별개의 실행 단위(다른 프로세스·인스턴스·사람)는 같은 부분이 아니다. 가를 수 없으면 새 부분으로 비켜 가지 않고 candidates(identity 또는 attribution)에 쓴다.
+- parts의 state(앞 읽기가 적은 상태 단어이며 구현·가동·검증을 합친 판정이 아니다), lastBasis(그 부분을 마지막으로 읽은 기록의 기준 커밋·시점), files(앞 읽기가 그 부분의 것으로 읽은 파일, 최대3개)는 지난 읽기의 요약이다. 원문 근거나 조건 구간이 아니며 at·basis·aboutAt으로 쓰지 않는다. lastBasis가 이번 기록의 기준과 다르다는 것은 시간이 흘렀다는 뜻일 뿐이다.
+- 명시적 제거·대체는 그 대상·범위(전부·일부)·효력 시점(이미·계획)을 원문으로 확인하고 그 기존 부분에 쓴다. 일부만 바뀐 것은 부분 전체의 폐기가 아니고, 계획된 대체는 아무것도 없애지 않는다. 기록의 오류·미해결(C-ISSUE) 결함 행은 replaces의 근거가 아니다. 「구현됨」은 같은 기능·범위의 미구현 주장만 끝내며 돌고 있다·검사됐다는 뜻이 아니다.
+- role은 그 부분이 맡은 일을 쓰고 「기준 8f5809d에서」 같은 기준 머리말로 시작하지 않는다. 판본이 중요한 사실은 claims와 aboutAt으로 남긴다.`;
+// Recipe .50 step 4 (map7-recipe.7, row-binding.1, ruling F5 Q1/Q7(4)): a later ask's v5 records say, in partRows, what the B IDs their
+// text cites are on the map (buildMapAsk; the part the app bound that C-PART row to, by record and row ID). Said to every map.7 ask right
+// after MAP7_IDENTITY; MAP7_PROMPT stays byte for byte.
+export const MAP7_ROWS = `
+
+기록 행의 지도 대응(row-binding.1):
+- records[].partRows는 그 기록이 보낸 원문이 인용하는 B ID마다 그 기록의 C-PART 이름(name)과, 앞선 읽기가 그 C-PART 행을 반영한 지금 지도의 부분(part: parts의 P01 같은 id, 아직 없으면 null)이다. 그 기록의 C-PART 행이 이번에 함께 오지 않아도 B ID가 무엇을 가리키는지 알 수 있게 한 것이다.
+- B ID는 기록마다 따로다. 한 기록의 B03과 다른 기록의 B03은 다른 행이며, 같은 B ID라는 이유로 섞지 않는다.
+- part가 있는 B는 그 부분이다: 그 B를 말하는 행(C-LINK·C-STATE·C-WITHDRAW 등)의 내용은 그 id로 쓰고(relations의 from·to, parts의 기존 부분), 그 B로 새 부분을 만들지 않는다. 그 C-PART 행으로 새 부분을 써도 앱은 그 부분으로 읽는다.
+- part가 null인 B는 아직 지도에 반영되지 않은 기록 행이다. 이름이 같거나 괄호 설명만 다르다는 것만으로 기존 부분과 같다고 정하지 않는다(위 기존 부분의 정체). 이름이 거의 같은 새 부분은 앱이 만들지 않고 같은 대상 후보로 남기므로, 같은지 다른지 원문으로 가를 수 있으면 그 판단을 쓴다.
+- partRows는 지난 읽기의 대응 요약이며 원문 근거가 아니다. at·basis·aboutAt으로 쓰지 않는다.`;
+/** The brief-parts rule for an ask that has a part in short form, else nothing. */
+export const mapBriefRule = ask => Array.isArray(ask?.parts) && ask.parts.some(p => p?.brief === true) ? MAP7_BRIEF : '';
+/** The one renderer of the map.7 instructions, for the standard provider and the CLI executor alike. Recipe .49: the brief-parts rule
+ * after the vocabulary when the ask has a brief part. */
+export const map7Prompt = ask => MAP7_PROMPT + MAP7_COUNTS + MAP7_IDENTITY + MAP7_ROWS + MAP7_VOCABULARY + mapBriefRule(ask) + map7Guidance(ask);
+export const MAP7_RECIPE = 'map7-recipe.9: later-identity.2 (a full replacement in effect is a new successor part, the predecessor kept under its id with the replacement as its claim; never merged into the successor); map-roster.2 (the line a partial roster asks to copy says 목록 P01–Pnn; retirement needs a time in effect and a built successor; a roster or request source is no evidence; a hash differing with no reading since holds every row; two C-PART rows of one record never fold; a new part on a row whose correspondence is held is held); map-roster.1 (the C-IDENT table of a v5.2 record is read by the app alone and never sent; a B row it binds to a part (같음, 이름 바뀜 with an F/E cite, the roster still standing for that part) goes as records[].partRows like a ledger binding; a part a record retired (대신함, 없어짐) or a duplicate folded onto its canonical part is not a part of the ask); later-counts.1 right after MAP7_PROMPT (claims per part <= 6 and relations <= 16, map-reading.20; each item past a bound set aside on its own); later-identity.1 right after it (a commit or 판본 difference scopes claims, never the identity of a part; responsibility, files and links are evidence, not equality; no basis stamp in a role); row-binding.1 right after that (records[].partRows of a later map.7 ask: the B IDs a v5 record\'s sent text cites, each once, <= 48, {id ^B\\d{1,3}$, name <= 60, part: an ask part id | null}, the part the app bound that record\'s C-PART row to, by record and row ID; a B with a part is that part, a new part on its C-PART row is read as it; B IDs are per record; never evidence); apply: a new part whose name is alike an earlier live part (qualifiers in brackets left out, case and spacing folded) is held as an identity candidate with its relations, never merged; ask parts of a later map.7 ask carry part-facts.1 (state PartState|null, lastBasis <sha7>[ · YYYY-MM-DD]|null <= 40, files <= 3 of <= 60; all three or none), a role without a leading 「기준 <sha>에서/의」 and a roleAbout that is a record table row as null (stored data unchanged); later only = parts.length > 0 || requests.length > 0 || priors.length > 0 (a first map is map.6); map.6 contract; roleAboutAt/claim.aboutAt/statement.aboutAt/match.aboutAt = sent anchor of the owning record (role: a basis record) | null; resolved exact passage, outer white space trimmed, 80/200 UTF-16, never clipped or nulled; material overlap refused; stored as about string|null; instructions = MAP7_PROMPT + condition-length-guidance.1 (rows [start, last end <= 80 | null, last end <= 200 | null] per sent piece in sent order, ends contiguous from the start, trimmed UTF-16 of whole pieces of one record, no record text, <= 1600 rows, block <= 65536 UTF-8 bytes, else INPUT_TOO_LARGE before sending); part-id-vocabulary.1 between them (new part ids exactly ^new:[a-z0-9_-]{1,24}$, references spelled as parts[].ref; validator unchanged); brief-parts.1 after the vocabulary only when a part is brief: true (note empty, current empty, role <= 60: a known current part sent short for size, matched by name, readAs, parent and relations, never new, absent or retired for missing details)';

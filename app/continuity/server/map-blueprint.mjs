@@ -123,11 +123,38 @@ global은64개 이하(그중 relation 항목 48개까지), text240자 이하. �
 부분 표의 한 행(목록 한 줄, 기여자 목록 한 줄)은 부분 하나다. 그 행이 적은 항목·사람을 각각 부분으로 세우지 않고 그 부분의 focus에 항목으로 적는다. C-GROUP 묶음 뜻이 「목록」인 행의 자식들도 부분이 아니라 부모 부분의 항목이다(자기 C-PART 행이 있는 항목만 부분이다).`;
 export const BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT;
 // Keep the first-map prompt and its cache identity unchanged. Only later map.7 planning registers current-claim obligations.
-export const LATER_BLUEPRINT_PROMPT = MAP_BLUEPRINT_PROMPT + `
+// Recipe .50 step 3 (later-identity.1, ruling F5 Q1/Q7(3)): a later plan reads the map as this project's earlier understanding. The one
+// first-map line that put 판본 beside identity is said without it here (a checked swap: the first-map text itself stays byte for byte),
+// the corrections line is said of claims, and a positive identity paragraph follows the obligations.
+// Review of .50 (later-identity.2): a full replacement in effect is a successor, not the same part (ruling F5 Q3).
+export const IDENTITY_VERSION = 'later-identity.2';
+const swapOnce = (text, from, to) => { if (text.split(from).length !== 2) throw new Error(`later plan: '${from.slice(0, 40)}' not found once`); return text.replace(from, () => to); };
+export const LATER_IDENTITY_RULES = `
+기존 부분의 정체(later-identity.2):
+- INPUT.parts는 같은 프로젝트를 앞 기록들로 읽은 지금까지의 이해다. 이번 기록은 같은 프로젝트의 나중 기준 커밋에서 쓰였을 수 있다. 기준 커밋·판본·작성 세션이 다르다는 것만으로 다른 대상이 되지 않는다. 판본 주의는 current 주장의 대체(corrections·replaces)에만 쓰고 부분의 정체에는 쓰지 않는다.
+- 기록의 부분 행이 기존 부분과 같은 책임(하는 일), 같은 자리(부모·연결 상대), 같은 파일(files)을 말하는지 원문 근거로 대조해, 같은 대상이면 그 Pxx로 계획한다. 파일·부모·구현 방식·이름이 바뀌어도 같은 책임을 이어 맡으면 같은 부분이다. 다만 기록이 그 책임을 다른 것이 이미 전부 대신했다고 하면(옛 구현을 걷어 내고 새 구현으로 바꿈) 대신한 것은 새 부분으로 세우고, 앞 Pxx는 그대로 두어 대신했다는 원문을 그 부분에 맡긴다(새 부분에 합치지 않는다). 반대로 책임·파일·연결은 같은 대상의 근거일 뿐 자동으로 같다는 뜻이 아니다: 같은 코드로 도는 별개의 실행 단위(다른 프로세스·인스턴스·사람)는 따로 둔다. 이름이 같거나 괄호 설명만 다른 것은 후보일 뿐이며 이름이 비슷하다는 것만으로 합치지 않는다.
+- 기존 Pxx로 계획하면 name과 parent는 기존 값 그대로 쓰고(위 규칙), 기록이 부르는 다른 이름은 focus에 「기록 이름: …」으로 적는다. 이름이 다르다는 이유로 같은 대상을 새 부분으로 세우지 않는다.
+- 같은 대상인지 가를 수 없으면 새 부분을 만들어 비켜 가지 않는다: 그 Pxx를 parts에 두고 kind=uncertain 항목 「<기록 이름> ↔ Pxx 같은 대상인지 미정: 이유 → Pxx」를 남기며, 그 행은 이번에 부분으로 세우지 않는다. 기준이 다르다는 것은 미정의 이유가 아니다. 분명히 새로운 대상만 새 부분으로 세운다. 새 부분은 지도에 처음 오른다는 뜻이며 소프트웨어에 새로 생겼다는 뜻이 아니다.
+- 명시적 제거·대체(C-PART 상태 「제거됨」, C-WITHDRAW의 제거·폐기·대체, C-CHANGE의 실제 변화)는 그 대상(어느 기존 부분인지), 범위(전부인지 일부인지), 효력 시점(이미 일어났는지 계획인지)을 원문으로 확인한 뒤 그 기존 부분에 맡긴다. 기준이 다르다는 이유로 material로 미루지 않는다. 일부만 바뀐 것은 부분 전체의 제거가 아니고, 계획된 대체는 아무것도 없애지 않는다.
+- C-ISSUE(오류·미해결)의 결함·문제 행은 철회가 아니다: corrections로 등록하지 않는다. 「구현됨」은 같은 기능·범위의 미구현 주장만 끝내며 돌고 있다·검사됐다는 뜻이 아니다.
+- INPUT.parts의 state(앞 읽기가 그 부분에 적은 상태 단어), lastBasis(그 부분을 마지막으로 읽은 기록의 기준 커밋·시점), files(앞 읽기가 그 부분의 것으로 읽은 파일, 최대3개)는 지난 읽기의 요약이며 원문 근거가 아니고 at가 될 수 없다. lastBasis가 이번 기록의 기준과 다르다는 것은 시간이 흘렀다는 뜻이지 다른 대상이라는 뜻이 아니다.`;
+// Recipe .50 step 4 (row-binding.1, ruling F5 Q1/Q7(4)): what a later ask's records[].partRows say, for the plan (the stage that picks Pxx
+// or new:); appended after the identity paragraph.
+export const ROW_BINDING_VERSION = 'row-binding.1';
+export const LATER_ROW_RULES = `
+기록 행의 지도 대응(row-binding.1):
+- INPUT.records[].partRows는 그 기록 조각이 인용하는 B ID마다 그 기록의 C-PART 이름(name)과, 앞선 읽기가 그 C-PART 행을 반영한 지도 부분(part: INPUT.parts의 Pxx, 아직 없으면 null)이다. C-PART 행이 이번에 다시 오지 않아도 B ID를 이름과 부분으로 풀 수 있다. B ID는 기록마다 따로이므로 다른 기록의 같은 B ID와 섞지 않는다.
+- part가 있는 B는 그 Pxx다: 그 B를 말하는 행(C-LINK·C-STATE·C-WITHDRAW 등)은 그 Pxx로 계획하고, 그 B로 new: 부분을 세우지 않는다. 그 C-PART 행으로 new: 부분을 세워도 앱은 그 Pxx로 읽는다.
+- part가 null인 B는 아직 지도에 반영되지 않은 행이다. 이름이 같거나 괄호 설명만 다르다는 것만으로 기존 부분과 같다고 정하지 않는다(위 기존 부분의 정체). 이름이 거의 같은 새 부분은 앱이 만들지 않고 같은 대상 후보로 남기므로, 원문으로 가를 수 있으면 Pxx로 쓰거나 다른 대상임이 드러나게 다른 이름을 쓴다.
+- partRows는 지난 읽기의 대응 요약이며 원문 근거가 아니고 at가 될 수 없다.`;
+export const LATER_IDENTITY_SWAP = Object.freeze(['같은 이름만으로 다른 대상·판본을 합치지 않는다.', '같은 이름만으로 다른 대상을 합치지 않는다(기준 커밋·판본의 차이는 대상의 차이가 아니다: 아래 「기존 부분의 정체」).']);
+/** The first-map plan text with that one line said without 판본 (the later plan's base). */
+export const LATER_BLUEPRINT_BASE = swapOnce(MAP_BLUEPRINT_PROMPT, ...LATER_IDENTITY_SWAP);
+export const LATER_BLUEPRINT_PROMPT = LATER_BLUEPRINT_BASE + `
 이번 INPUT.schemaVersion은 studio.map.7이며 parts는 총24개 이하(위의 36개가 아니다), 새 부분은 12개 이하, global은 32개 이하, 그중 relation 항목은 16개까지다. 출력 키는 정확히 parts, global, corrections 세 개다. 앞의 두 키 규칙을 유지하고 corrections 배열을 반드시 추가한다(없으면 []).
 corrections는 이번 원문이 같은 대상·범위의 기존 current 주장을 명시적으로 철회·정정·대체한다고 밝힌 경우만 등록하는 후속 작성 의무다. 각 항목은 정확히 {"part":"기존 Pxx","claim":"그 부분 current의 실제 C키","at":["이번 원문에 실제 있는 구간 별칭"]}다. part는 이번 parts 계획에도 포함하고, 최대24항목·부분마다4항목·동일(part,claim)은 한 번만 쓴다. at는 원래 기록의 실제 개별 별칭1~8개이며 사용자 기재 metadata나 이전 current/요청/보조해석은 근거가 아니다.
-다른 판본·브랜치의 사실이 함께 성립하거나 원문이 현재 주장을 명시적으로 철회하지 않은 경우는 corrections에 넣지 않는다. 뒤에 도착했다는 이유로 대체하지 않는다. 같은 범위인지 미정이면 대체를 강요하지 않는다. 사용자 직접 역할(roleBy=person)은 이 목록으로 바꾸지 않는다. current가 비어 있으면 그 부분에는 corrections를 등록할 수 없다.
-등록한 의무는 이후 해당 부분의 유효한 claim.replaces가 그 current 키를 지목해야 충족된다. 요약·미정 후보·역할 설명·요청 대응만으로 기존 현재 주장을 철회했다고 처리하지 않는다. 모든 의미를 기계적으로 감지한다는 보증이 아니라 원문에서 명시적으로 확인한 정정을 잃지 않기 위한 목록이다.`;
+다른 판본·브랜치의 주장이 함께 성립하거나 원문이 현재 주장을 명시적으로 철회하지 않은 경우는 corrections에 넣지 않는다(이 판본 문장은 current 주장의 대체에 관한 것이며 부분의 정체와 무관하다). 뒤에 도착했다는 이유로 대체하지 않는다. 같은 범위인지 미정이면 대체를 강요하지 않는다. 사용자 직접 역할(roleBy=person)은 이 목록으로 바꾸지 않는다. current가 비어 있으면 그 부분에는 corrections를 등록할 수 없다.
+등록한 의무는 이후 해당 부분의 유효한 claim.replaces가 그 current 키를 지목해야 충족된다. 요약·미정 후보·역할 설명·요청 대응만으로 기존 현재 주장을 철회했다고 처리하지 않는다. 모든 의미를 기계적으로 감지한다는 보증이 아니라 원문에서 명시적으로 확인한 정정을 잃지 않기 위한 목록이다.` + LATER_IDENTITY_RULES + LATER_ROW_RULES;
 
 /** Exact bounded blueprint, with every pointer resolved against original span.2 records. No text is repaired or clipped. */
 export function validateMapBlueprint(value, ask) {
@@ -535,10 +562,12 @@ const cellItems = text => listItems(text);
  * 120 characters); an item pointing at no row stays one unit named by its own text (up to 120).
  * .35: and the part's own rows by name (OWN_ROWS, CONDITION_ROWS, [모름] steps, design-cell items; see above), each once per part (a
  * row the plan also assigned to that part is one unit). A unit lands too when one of the given exclusions ({ record, from, to }: a
- * claim, step or anchor set aside on the way) stands on its row. missingUnits says, per missing unit, its ref and whether it may
+ * claim, step or anchor set aside on the way) stands on its row. missingUnits says, per missing unit, its ref, its rows (a plan item on no table row: the places it cites) and whether it may
  * refuse a render's first pass (trigger): a plan item or focus row whose own part cell names another part of the plan only costs a
  * wrong-part exclusion when written there, so it stays the diagnostic's alone. */
-export function planClaims(ask, blueprint, parts, exclusions = []) {
+/* Recipe .51 (M3, the cascade): with { survived: true } a unit whose row an item set aside in this very reading stands on is not expected at
+ * all (it neither lands nor goes missing): what the reading set aside on the way was never going to arrive, so a final review cannot ask for it. */
+export function planClaims(ask, blueprint, parts, exclusions = [], { survived = false } = {}) {
   const texts = askRecords(ask), list = (Array.isArray(parts) ? parts : []).filter(part => part && typeof part === 'object');
   const where = alias => {
     if (typeof alias !== 'string' || !alias.includes('.')) return null;
@@ -591,7 +620,7 @@ export function planClaims(ask, blueprint, parts, exclusions = []) {
     const ref = [...g.text.matchAll(ASSIGNED)].at(-1)?.[1];
     if (!ref || !refs.has(ref)) continue;
     const spans = g.at.map(where).filter(Boolean), rows = itemRows.filter(row => spans.some(r => meets(r, row)));
-    if (!rows.length) { items.push({ ref, rows, name: `${ref}: ${opening(g.text)}`, landed: spans.some(r => quoted.some(q => meets(q, r)) || placed.some(q => meets(q, r))), trigger: true }); continue; }
+    if (!rows.length) { items.push({ ref, rows, spans, name: `${ref}: ${opening(g.text)}`, landed: spans.some(r => quoted.some(q => meets(q, r)) || placed.some(q => meets(q, r))), trigger: true }); continue; }
     for (const row of rows) if (!has(ref, row) && !elsewhereWhole(ref, row))
       items.push({ ref, rows: [row], name: `${ref}: ${opening(row.cells.join(' | '))}`, landed: said(row), trigger: !elsewhere(ref, row) && !whole(row) });
   }
@@ -643,8 +672,9 @@ export function planClaims(ask, blueprint, parts, exclusions = []) {
     if (!ref || has(ref, row)) continue;
     items.push({ ref, rows: [row], name: `${ref}: ${opening(s.text)}`, landed: said(row), trigger: false });
   }
-  const missing = items.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref));
-  return { items: items.length, missing: missing.map(item => item.name), missingUnits: missing.map(item => ({ ref: item.ref, name: item.name, trigger: item.trigger })) };
+  const expected = survived ? items.filter(item => !item.rows.some(row => aside.some(r => meets(r, row)))) : items;
+  const missing = expected.filter(item => !item.landed).sort((a, b) => order.get(a.ref) - order.get(b.ref));
+  return { items: expected.length, missing: missing.map(item => item.name), missingUnits: missing.map(item => ({ ref: item.ref, name: item.name, trigger: item.trigger, rows: (item.rows.length ? item.rows : item.spans ?? []).map(r => ({ record: r.record, from: r.from, to: r.to })) })) };
 }
 /** .34: the plan items (planClaims, named the same way) no claim of the given parts quotes whose part holds fewer claims than a
  * first map's cap (MAP6_CLAIMS) once read (read: the fragment's checked reply; a part it does not hold counts none). A render's
@@ -798,7 +828,9 @@ export function readingDiagnostics({ ask, summary, parts, relations, blueprint =
     // tags) is no part's row: the summary receives it, sharing an 8-character run with it (its tags left out); one it does not is named.
     const flat = typeof summary === 'string' ? summary.replace(/\s+/g, ' ') : '';
     const partNames = (Array.isArray(parts) ? parts : []).flatMap(part => typeof part?.name === 'string' ? [part.name] : []);
-    const unreflected = summarySentences(ask, partNames).filter(s => s.project).filter(s => {
+    // Recipe .51 (M3): a reply with no summary at all (a revision verdict, which writes none) leaves no project sentence unbacked: there is
+    // no summary to judge, and its sentences are the next wire's to say (never an issue against the verdict).
+    const unreflected = typeof summary !== 'string' ? [] : summarySentences(ask, partNames).filter(s => s.project).filter(s => {
       const t = s.text.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
       return !Array.from({ length: Math.max(0, t.length - 7) }, (_, i) => t.slice(i, i + 8)).some(run => flat.includes(run));
     });
@@ -1029,6 +1061,202 @@ export function missingMapCorrections(wire, ask, blueprint) {
   if (!(planned.corrections ?? []).length) return [];
   try { return structuredClone(absentCorrections(validateMapReply(wire, ask), planned)); }
   catch (error) { invalid(error); }
+}
+
+/* ---------- Recipe .50 step 2 (Astra F5 Q1, Q7(2)): the later plan's correction obligations, contained. ----------
+ * A. An obligation must be justified by its evidence (correctionJustified): an alias in a table row is judged by that row's content,
+ *    its effect (a before/after or change column filled, or change words) and its target (a content word of the withdrawn claim or the
+ *    part's name); an alias in prose cannot be judged by the program and keeps the planner's reading. No table is allowed or barred by
+ *    its ID: a defect row (C-ISSUE) that states no change never makes one, one that says what was removed can. An unjustified one is
+ *    left out of the effective plan (justifiedBlueprint) with a set-aside entry and a reading exclusion (correction-unjustified).
+ * B. An obligation still unmet after the one semantic re-render is held with its dependents as one unit (correctionUnits): the target
+ *    claim stays current and the part's claims on the obligation's lines, the part's relations inside them and their port-map rows are
+ *    left out (holdCorrectionUnits) with their reasons (correction-unmet, correction-held); everything independent applies. */
+// Review of .50 (later-containment.2): a change word said in the negative states no change; a held unit's reasons come first, one per line.
+// Recipe .51 (later-containment.3): a final review's second revision verdict is held with what stands on its parts, never a refusal of the
+// reading. Review of .51 (later-containment.4): what is held is what is missing (revisionHolds: the missing units' rows and the verdict's
+// unquoted lines; the parts' items apply), its reasons after the reasons of what left the wire; a failed semantic render or final review on
+// the revision path is that revision's verdict.
+export const CONTAINMENT_VERSION = 'later-containment.4';
+const CHANGE_COLUMN = /옛|이전|지금|이후|바뀐|변경|철회|대체|방식/;
+const CHANGE_WORDS = /철회|정정|대체|대신|바뀌|바뀐|바뀜|바꾸|바꿨|바꿈|변경|제거|폐기|되돌|옮겼|옮김|교체|삭제|없앴|없애|채택\s*안|다시\s*도입|revert|remov|deprecat|replac|rollback|instead|renam/gi;
+/* Review of .50 (K10): a change word said in the negative (「삭제되지 않고」, 「제거하지 못했다」, 「교체 안 됨」, 「not removed」) states no change, and
+ * 「더는·더 이상·no longer」 is a change only with a verb of use (「더 이상 쓰지 않는다」), never with a quality (「더는 빠르지 않다」: a defect). */
+const NEG_AFTER = /^[가-힣]{0,3}\s*(?:지\s*(?:않|못|말)|(?:안|못)\s*(?:됨|되|돼|함|했|한|해|하)|불가|실패)/;
+const NEG_BEFORE = /(?:\bnot|\bnever|n't|\bcannot|\bfailed to)\s+(?:been\s+|be\s+|yet\s+)?$/i;
+const NO_LONGER_USE = /(?:더\s*이상|더는)\s*(?:[^\s|]+\s+){0,2}?(?:쓰|사용|두|지원|유지|제공|실행|돌리|돌아가|부르|호출|만들|읽|보내|받|켜|포함|남기)[가-힣]{0,3}\s*(?:지\s*)?않|no longer\s+(?:be\s+)?(?:used|in use|supported|maintained|called|shipped|needed|run|runs|exists?|provided)/i;
+export function changeStated(text) {
+  if (NO_LONGER_USE.test(text)) return true;
+  for (const m of text.matchAll(CHANGE_WORDS)) {
+    const end = m.index + m[0].length;
+    if (NEG_AFTER.test(text.slice(end, end + 12)) || NEG_BEFORE.test(text.slice(Math.max(0, m.index - 20), m.index))) continue;
+    return true;
+  }
+  return false;
+}
+const EMPTY_CELL = /^(?:—|–|-|모름|없음)?$/;
+const OWN_COLUMNS = new Set(['행 ID', '근거']);
+/** Where an alias (N02.63, N02.63-65) stands in its record of the ask, or null. */
+function aliasPlace(alias, texts) {
+  const record = typeof alias === 'string' && alias.includes('.') ? alias.slice(0, alias.indexOf('.')) : null, source = record ? texts.get(record) : null;
+  const range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
+  return range ? { record, from: range.from, to: range.to, text: source.text } : null;
+}
+/** The table rows a place overlaps, each with its cells by column (the definition's name, else the header as written). */
+function rowsAtPlace(place) {
+  const out = [];
+  for (const table of readRecordTables(place.text).tables) for (const row of table.rows) {
+    if (!(row.from < place.to && place.from < row.to)) continue;
+    out.push(row.cells.map((cell, k) => ({ column: (table.columns?.[k] ?? table.header?.[k] ?? '').trim(), text: (cell.text ?? '').trim() })).filter(c => !OWN_COLUMNS.has(c.column)));
+  }
+  return out;
+}
+/** Whether one obligation's evidence supports a withdrawal or replacement of its claim (see A above). */
+export function correctionJustified(obligation, ask) {
+  const texts = askRecords(ask), part = ask.parts.find(p => p.id === obligation.part), claim = part?.current.find(c => c.key === obligation.claim);
+  if (!part || !claim) return false;
+  const target = new Set([...contentWords(claim.text), ...contentWords(part.name)]);
+  return obligation.at.some(alias => {
+    const place = aliasPlace(alias, texts);
+    if (!place) return false;
+    const rows = rowsAtPlace(place);
+    if (!rows.length) return true;
+    return rows.some(cells => {
+      const effect = cells.some(c => CHANGE_COLUMN.test(c.column) && !EMPTY_CELL.test(c.text)) || cells.some(c => changeStated(c.text));
+      const words = contentWords(cells.map(c => c.text).join(' '));
+      return effect && [...words].some(w => target.has(w));
+    });
+  });
+}
+/** The indices of the plan's obligations its evidence does not justify (a first map has none). */
+export function unjustifiedCorrections(blueprint, ask) {
+  const planned = validateMapBlueprint(blueprint, ask);
+  return (planned.corrections ?? []).flatMap((obligation, k) => correctionJustified(obligation, ask) ? [] : [k]);
+}
+/** The plan every later stage works on: the model's plan without its unjustified obligations (a copy; the cached plan stays as written). */
+export function justifiedBlueprint(blueprint, ask) {
+  const planned = validateMapBlueprint(blueprint, ask);
+  if (!planned.corrections) return planned;
+  const away = new Set(unjustifiedCorrections(planned, ask));
+  return away.size ? { ...planned, corrections: planned.corrections.filter((_, k) => !away.has(k)) } : planned;
+}
+/** The plan stage's set-aside entries for its unjustified obligations (fixed path, rule and category). */
+export const correctionSetAside = (blueprint, ask) => unjustifiedCorrections(blueprint, ask).map(k => ({ path: `corrections[${k}]`, rule: 'contract', category: 'correction-unjustified' }));
+const overlapsPlace = (a, b) => !!a && !!b && a.record === b.record && a.from < b.to && b.from < a.to;
+const insidePlace = (a, b) => !!a && !!b && a.record === b.record && b.from <= a.from && a.to <= b.to;
+/** Each unmet obligation's unit in a combined later wire: its part's wire index, the part's claims whose line overlaps the obligation's
+ * lines, the relations from or to the part standing inside them and the port-map rows of those relations. */
+export function correctionUnits(wire, ask, held, kept = []) {
+  const texts = askRecords(ask), lines = Array.isArray(wire?.relations) ? wire.relations : [], rows = Array.isArray(wire?.portMap) ? wire.portMap : [];
+  // A claim that meets a kept obligation of its part is that obligation's, never a dependent of a held one.
+  const sanctioned = new Set(kept.map(o => `${o.part}:${o.claim}`));
+  return (held ?? []).map(obligation => {
+    const part = Array.isArray(wire?.parts) ? wire.parts.findIndex(p => p?.ref === obligation.part) : -1, places = obligation.at.map(a => aliasPlace(a, texts)).filter(Boolean);
+    const claimsOf = part >= 0 && Array.isArray(wire.parts[part].claims) ? wire.parts[part].claims : [];
+    const claims = claimsOf.flatMap((c, j) => { if (typeof c?.replaces === 'string' && sanctioned.has(`${obligation.part}:${c.replaces}`)) return [];
+      const at = aliasPlace(c?.at, texts); return places.some(p => overlapsPlace(at, p)) ? [j] : []; });
+    const relations = lines.flatMap((r, k) => { if (!r || (r.from !== obligation.part && r.to !== obligation.part)) return [];
+      const at = aliasPlace(r.at, texts); return places.some(p => insidePlace(at, p)) ? [k] : []; });
+    const portMap = rows.flatMap((m, k) => m && relations.includes(m.relation) ? [k] : []);
+    return { obligation, part, claims, relations, portMap };
+  });
+}
+/** The later wire with every held unit's dependents left out and their reasons, and the reasons of the unjustified obligations. Parts
+ * are never left out (part indices stay); a reason names the wire the model wrote (claim, relation and port-map indices before). */
+export function holdCorrectionUnits(wire, ask, blueprint, held = []) {
+  const planned = validateMapBlueprint(blueprint, ask), unmet = new Set(held.map(o => `${o.part}:${o.claim}`));
+  const kept = (justifiedBlueprint(planned, ask).corrections ?? []).filter(o => !unmet.has(`${o.part}:${o.claim}`));
+  // Review of .50 (silent cuts): the unit's own reasons, one per line of the obligation, go before any per-item reason, so past the set-aside
+  // bound an item still left out stands inside a reason that holds its row (correction), never as a row waiting with no reason.
+  const units = correctionUnits(wire, ask, held, kept), exclusions = [], heads = [];
+  for (const k of unjustifiedCorrections(planned, ask)) {
+    const obligation = planned.corrections[k], i = wire.parts.findIndex(p => p?.ref === obligation.part);
+    if (i >= 0) exclusions.push(aliasExclusion(`parts[${i}].claims`, 'correction-unjustified', obligation.at[0], ask));
+  }
+  const claimAway = new Map(), relationAway = new Set(), rowAway = new Set();
+  for (const unit of units) {
+    if (unit.part < 0) continue;
+    for (const at of new Set(unit.obligation.at)) heads.push(aliasExclusion(`parts[${unit.part}].claims`, 'correction-unmet', at, ask));
+    for (const j of unit.claims) if (!(claimAway.get(unit.part)?.has(j))) { claimAway.set(unit.part, new Set([...claimAway.get(unit.part) ?? [], j]));
+      exclusions.push(aliasExclusion(`parts[${unit.part}].claims[${j}]`, 'correction-held', wire.parts[unit.part].claims[j].at, ask)); }
+    for (const k of unit.relations) if (!relationAway.has(k)) { relationAway.add(k); exclusions.push(aliasExclusion(`relations[${k}]`, 'correction-held', wire.relations[k].at, ask)); }
+    for (const k of unit.portMap) if (!rowAway.has(k)) { rowAway.add(k); exclusions.push(aliasExclusion(`portMap[${k}]`, 'correction-held', wire.portMap[k].at, ask)); }
+  }
+  exclusions.splice(exclusions.filter(x => x.category === 'correction-unjustified').length, 0, ...heads);
+  if (!claimAway.size && !relationAway.size && !rowAway.size) return { wire, exclusions: exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX) };
+  const removed = [...relationAway].sort((a, b) => a - b);
+  const out = { ...wire, parts: wire.parts.map((p, i) => claimAway.has(i) ? { ...p, claims: p.claims.filter((_, j) => !claimAway.get(i).has(j)) } : p),
+    relations: wire.relations.filter((_, k) => !relationAway.has(k)),
+    ...(Array.isArray(wire.portMap) ? { portMap: wire.portMap.flatMap((m, k) => rowAway.has(k) ? [] : [m && Number.isSafeInteger(m.relation) ? { ...m, relation: m.relation - removed.filter(r => r < m.relation).length } : m]) } : {}) };
+  return { wire: out, exclusions: exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX) };
+}
+
+/* ---------- Recipe .51 (Astra F5: no deadlock): a revision verdict that cannot be honoured is held, never a refusal of the reading. ----------
+ * The one semantic re-render is spent when global-final asks for another (a second revision): before .51 that refused the whole reading, nothing
+ * applied and nothing was recorded, so the next ask was byte-identical and the same refusal replayed for ever. Now the verdict is read as a
+ * judgement on the parts it names. A named part the program's own check also finds short (revisionBacking: a plan item of that part no claim,
+ * condition, step or place of it quotes, counted over the rows that survived this reading's set-asides) is backed; a verdict the program backs
+ * on no part (the model's opinion alone) is only a diagnostic: nothing is held.
+ * Review of .51: what a backed verdict holds is what is missing, never the part. The part's items as rendered apply (the check found something
+ * missing, not something wrong); the rows of its missing plan units and the lines the verdict cites that no item of the wire quotes are named
+ * (revisionHolds: revision-held, adjacent places of one part as one), so their rows are held once and go with the next ask. Nothing leaves
+ * the wire: no part, relation or candidate is removed, so the wire validates exactly as the combined fragments do. */
+export const REVISION_DIAGNOSTIC = 'revision';
+/** Which of a verdict's parts the program's own check backs: { backed, unbacked, names, units } (names: the plan units missing on a backed
+ * part; units: those units, each { ref, name, rows }, rows the table rows it stands for, in the ask's coordinates). */
+export function revisionBacking(revision, parts, ask, blueprint, exclusions = []) {
+  const refs = Array.isArray(revision?.reviseParts) ? [...new Set(revision.reviseParts.filter(ref => typeof ref === 'string'))] : [];
+  let missing = [];
+  try { missing = planClaims(ask, blueprint, parts, exclusions, { survived: true }).missingUnits; } catch { missing = []; }
+  const units = missing.filter(unit => refs.includes(unit.ref)), on = new Set(units.map(unit => unit.ref));
+  return { backed: refs.filter(ref => on.has(ref)), unbacked: refs.filter(ref => !on.has(ref)), names: units.map(unit => unit.name), units };
+}
+/** Two verdicts as one (the parts of both, the first's reason, the lines of both, eight at most); either may be null. */
+export function joinVerdicts(a, b) {
+  if (!a || !b) return a ?? b ?? null;
+  return { reviseParts: [...new Set([...a.reviseParts ?? [], ...b.reviseParts ?? []])], reason: a.reason ?? b.reason ?? '', at: [...new Set([...a.at ?? [], ...b.at ?? []])].slice(0, 8) };
+}
+/** The stage diagnostic a revision verdict leaves on global-final (fixed shape; the reason is the model's text, untrusted, kept as data):
+ * expected the parts it names, actual the parts backed, names 「확인|판정만 ref: reason」 (확인: the program's check also finds a unit of that
+ * part missing; what of it no item quotes is held, revisionHolds) then the program's missing units. */
+export function revisionDiagnostic(revision, backing) {
+  const clip = s => String(s ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  const refs = [...backing.backed, ...backing.unbacked], reason = clip(revision?.reason).slice(0, 120);
+  const names = [...refs.map(ref => `${backing.backed.includes(ref) ? '확인' : '판정만'} ${ref}: ${reason}`.slice(0, 160)),
+    ...(Array.isArray(revision?.at) ? [`근거 ${revision.at.filter(a => typeof a === 'string').slice(0, 8).join(' ')}`.slice(0, 160)] : []),
+    ...backing.names.map(n => clip(n).slice(0, 160))].filter(n => n.length >= 1).slice(0, PLAN_CLAIMS_NAMES);
+  return { path: 'parts', rule: REVISION_DIAGNOSTIC, expected: Math.min(refs.length, 9999), actual: Math.min(backing.backed.length, 9999), names };
+}
+/** Every place a value quotes (any string that is an alias of the ask), deep, in order, once each. */
+function quotedPlaces(value, texts, out = new Map()) {
+  if (typeof value === 'string') { const p = value.includes('.') ? aliasPlace(value, texts) : null; if (p) out.set(`${p.record}:${p.from}:${p.to}`, { alias: value, ...p }); return out; }
+  if (Array.isArray(value)) { for (const x of value) quotedPlaces(x, texts, out); return out; }
+  if (value && typeof value === 'object') for (const x of Object.values(value)) quotedPlaces(x, texts, out);
+  return out;
+}
+/** The reasons (revision-held) a backed verdict leaves beside the wire, which it never changes: per backed part (path parts[i], its index
+ * in this wire; 'parts' when the wire has no entry of it), the rows of its missing plan units, then the lines the verdict cites, each only
+ * where no item of the wire quotes it (a row an item stands on is that item's), overlapping or adjacent places of one part and record (only
+ * white space between) as one. At most `room` reasons: the reasons of what the server left out of the wire come first, so the bound never
+ * hides a removed item's reason; a row past it is not held and goes again as any unplaced row does. */
+export function revisionHolds(wire, ask, backing, revision = null, room = DIVIDED_EXCLUSIONS_MAX) {
+  if (!backing?.backed?.length || !(room > 0)) return [];
+  const texts = askRecords(ask), parts = Array.isArray(wire?.parts) ? wire.parts : [], quoted = [...quotedPlaces(wire, texts).values()];
+  const free = place => !quoted.some(q => overlapsPlace(q, place));
+  const pathOf = ref => { const i = parts.findIndex(p => p?.ref === ref); return i >= 0 ? `parts[${i}]` : 'parts'; };
+  const places = [];
+  for (const ref of backing.backed) for (const unit of backing.units.filter(u => u.ref === ref)) for (const row of unit.rows ?? []) if (free(row)) places.push({ path: pathOf(ref), record: row.record, from: row.from, to: row.to });
+  const cited = pathOf(backing.backed[0]);
+  for (const alias of Array.isArray(revision?.at) ? revision.at : []) { const p = aliasPlace(alias, texts); if (p && free(p)) places.push({ path: cited, record: p.record, from: p.from, to: p.to }); }
+  const order = [...new Set(places.map(p => p.path))];
+  places.sort((a, b) => order.indexOf(a.path) - order.indexOf(b.path) || (a.record < b.record ? -1 : a.record > b.record ? 1 : 0) || a.from - b.from);
+  const merged = [];
+  for (const p of places) {
+    const last = merged.at(-1), between = last && last.record === p.record ? (texts.get(p.record)?.text ?? '').slice(last.to, Math.max(last.to, p.from)) : null;
+    if (last && last.path === p.path && between !== null && !between.trim()) { last.to = Math.max(last.to, p.to); continue; }
+    merged.push({ ...p });
+  }
+  return merged.slice(0, room).map(p => ({ path: p.path, rule: 'contract', category: 'revision-held', explanation: explainExclusion(p.path, 'contract', 'revision-held'), record: p.record, from: p.from, to: p.to }));
 }
 
 /** Machine review data for the existing one-pass revision path. The complete blueprint keeps every obligation anchor;

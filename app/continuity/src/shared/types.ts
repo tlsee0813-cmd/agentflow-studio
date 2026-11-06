@@ -178,7 +178,8 @@ export interface Project {
   pasted: PastedRecord[];
   /** Map readings (project.9): what was read from records into the map, oldest first. Derived understanding with its quotes,
    * kept apart from Area.note (the person's words) and from space.understanding (return.2 and its anchors). A reading only
-   * ever added parts and relations; it never renamed, moved, archived or re-described an existing part. */
+   * ever added parts and relations; it never renamed, moved, archived or re-described an existing part (recipe .50 step 5: but for the rename a
+   * record's own C-IDENT row asks, map-identity.ts, which leaves a name the person gave as it is). */
   readings: ReadingEntry[];
 }
 /** One pasted record: the text exactly as pasted, a stable id, when it was added here (not when it was written or which
@@ -541,7 +542,10 @@ export interface ReadingRelation { relationId: string; from: string; to: string;
    * its 경계, its 박자 word, the C-DATA row its 넘기는 것 names first (D03), the 통로 it goes by and the list item (「목록: 항목」) it stands for. */
   when?: string | null; optional?: boolean; variantRef?: string | null; crosses?: CrossKind | null; cadenceKind?: CadenceKind | null; payloadRef?: string | null; via?: string | null; member?: string | null;
   /** map-reading.19, a line on a v5 C-LINK row: its 주장 성격 (12.2; mode observed only for 실행 관측 with a run-grade cite) and the row's cites. */
-  claimNature?: ClaimNature | null; cites?: ReadingCite[] }
+  claimNature?: ClaimNature | null; cites?: ReadingCite[];
+  /** Review of .51 (6b): another relation between the same two parts and kind, on a C-LINK row of its own, kept under that line (the map
+   * draws one line per pair and kind): the views list it beside the line's own facts, never over them. Only ever true. */
+  also?: true }
 /** What a candidate leaves undecided (map-reading.5): whose statement this is (attribution), whether two parts are one
  * (identity), whether a part is inside a parent (parent), or whether a statement holds (holds). An attribution or holds candidate
  * keeps the undecided statement itself (content, kind, version, exact quote): it is in no part's claims. areaIds name the
@@ -552,7 +556,11 @@ export interface ReadingCandidate { text: string; areaIds: string[]; quote: Read
   /** map-reading.5 only. */
   target?: CandidateTarget; statement?: CandidateStatement | null }
 /** Something the reply proposed that was not applied, and why (kept so the next reading of the same input does not repeat it). */
-export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' | 'material' }
+export interface ReadingSkip { what: 'part' | 'relation'; name: string; reason: 'same-name' | 'archived' | 'removed' | 'exists' | 'parent-skipped' | 'material'
+  // Recipe .51 (M4, 6d): a group card with no member is never made.
+  | 'empty-group'
+  // Review of .51 (M5): a new part held as an identity candidate because its files are the very files of a live part.
+  | 'same-files' }
 /** map-reading.4: a passage the reading took as material inside the record (an example, a sample under test, another program's
  * words), not as this project's own: [from, to) of the record, with what it is. Nothing of the map rests on it alone. */
 export interface ReadingMaterial { record: string; from: number; to: number; what: string }
@@ -563,7 +571,7 @@ export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION
    * record/from/to; only on parts[i].inputs[j] and parts[i].outputs[j]. Exclusions without it keep their exact shape. */
   value?: string }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14' | 'map-reading.15' | 'map-reading.16' | 'map-reading.17' | 'map-reading.18' | 'map-reading.19'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14' | 'map-reading.15' | 'map-reading.16' | 'map-reading.17' | 'map-reading.18' | 'map-reading.19' | 'map-reading.20'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -600,7 +608,68 @@ export interface MapReading {
   /** map-reading.19 (recipe .45, a 기록 v5 record): the level the app computed (0 · 1 첫 구조 · 2 상세; null with no v5 record), the folded pages,
    * the remaining obligations, the C-END rows, the C-CHECK rows, the C-HEAD defaults and its 첫 구조 줄 (neither a claim of the project). */
   level?: 0 | 1 | 2 | null; pages?: ReadingPage[]; obligations?: ReadingObligation[]; pageEnds?: ReadingPageEnd[]; checks?: ReadingCheck[]; defaults?: ReadingDefault[]; firstLines?: string[];
+  /** map-reading.20 (recipe .50, row-ledger.ts): what this reading did with each row of a 기록 v5 record it sent or left out for room. Only a
+   * reading that sent a v5 fold is .20; every earlier entry keeps its exact shape and is read by the same rule on the fly. */
+  rows?: ReadingRow[];
+  /** Recipe .50 step 5 (map-identity.ts, 기록 요청 v5.2): what this reading decided for each row of the C-IDENT tables of the v5 records it
+   * sent (the record's own correspondence of the map's parts to its B rows, read by the program alone), with the operation a row applied:
+   * rename, retire (with its successor) or fold (a map-made duplicate onto one canonical part). Only on a .20 reading that had such rows. */
+  identity?: ReadingIdentityRow[];
 }
+/* ---------- Recipe .50 step 5 (Astra F5 Q2/Q3/Q6/Q7(5)): the C-IDENT table of a 기록 v5.2 record, as the program decided it. ---------- */
+/** 대응: 같음 / 이름 바뀜 / 대신함 / 없어짐 / 모름; 나뉨 and 합침 are kept as written and are unsupported in .50. */
+export const IDENTITY_ANSWERS = ['same', 'renamed', 'replaced', 'gone', 'unknown', 'split', 'merged'] as const;
+export type IdentityAnswer = typeof IDENTITY_ANSWERS[number];
+export const IDENTITY_OPS = ['bind', 'rename', 'retire', 'fold'] as const;
+/** What a reflected row did: bind (the record's B row is that part), rename (the part's official name became `to`; `from` stays its old
+ * name; renamed: the shown name changed too, false when the person's own name stays), retire (the part is no longer current, with its
+ * successor part or null) or fold (areaId, a duplicate the map made, is the canonical part `into`; its references resolve there). */
+export interface ReadingIdentityOp { kind: typeof IDENTITY_OPS[number]; areaId: string; successor: string | null; into: string | null; from: string | null; to: string | null; renamed: boolean }
+export interface ReadingIdentityRow {
+  /** The record (its fold key) and the row's own ID (ID01). */
+  record: string; id: string;
+  /** The map part as the row names it (P23; null when it names none), its 대응 (null when no fixed word) and its B ID (null for none). */
+  map: string | null; answer: IdentityAnswer | null; part: string | null;
+  state: RowState; reason: string | null;
+  /** The part the row names as it resolves now (a folded duplicate resolves to its canonical part), null when none does. */
+  areaId: string | null;
+  /** The operation this reading applied on the row (null: none, or one an earlier reading applied already). */
+  op: ReadingIdentityOp | null;
+  /** 바뀐 때 as written (60), and the F and E IDs the row cites (up to eight). */
+  when: string | null; evidence: string[];
+  /** Where the row stands: the pasted text and its [from, to). */
+  at: { record: string; from: number; to: number } }
+/* ---------- map-reading.20 (recipe .50, Astra F5 Q5): the row-processing ledger. Every current row of a 기록 v5 record's tables (the ledgers
+ * and the page frame aside) has a state per (record, table, row ID): reflected (the map items it became), waiting (why not yet), held (what
+ * it conflicts with) or rejected (a concrete reason). Parsed is never reflected: a row inside a read interval with nothing on it waits. ---------- */
+export const ROW_STATES = ['reflected', 'waiting', 'held', 'rejected'] as const;
+export type RowState = typeof ROW_STATES[number];
+/** Why a row is in its state (reflected has none). waiting: limit (an item on it past a bound, or the reading used its whole allowance),
+ * budget (left out of the ask for room), unresolved-endpoint (a part it names has no reflected C-PART row yet), transient (sent and not
+ * placed for no other reason, or an item on it set aside for its form), not-yet-sent; held: the candidate's target (identity, parent,
+ * attribution, holds), depends (a row it names is held) or correction (recipe .50 step 2: an unmet correction obligation's unit stands on
+ * it, map-blueprint.mjs holdCorrectionUnits); rejected: material (the reading kept it as material), depends (a row it names
+ * was rejected) or unplaced (sent again as often as the ledger allows, never placed). */
+export const ROW_REASONS: Readonly<Record<RowState, readonly string[]>> = Object.freeze({ reflected: [],
+  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends', 'correction', 'roster', 'revision'],
+  // Recipe .50 step 5 (C-IDENT rows only): held roster (the map changed under the part since the record's roster, or the reply's roster line is
+  // missing); rejected form, unknown-part, other-project, unsupported (나뉨·합침), undecided (모름), planned and partial (nothing is retired).
+  // Review of .50: rejected unconfirmed (a C-IDENT retirement with no time it took effect, or a successor not said to be built) and, for any
+  // row, unsupported (it stands only on a reading field the app never shows: kept in the reading, not reflected, not sent again).
+  // Recipe .51: held revision (a final review's second revision verdict held the part the row stands on; the row goes once more), then
+  // rejected revision (held so again: never sent a third time).
+  // Review of .51: rejected empty-group (the only part the row stood on was a group card with no member, no claim and no line: not made).
+  rejected: ['material', 'depends', 'unplaced', 'form', 'unknown-part', 'other-project', 'unsupported', 'undecided', 'planned', 'partial', 'unconfirmed', 'revision', 'empty-group'] });
+/** What a reflected row became: a part (its basis or a field of it), one of its claims (index in this reading's part entry), a relation, or a
+ * field of the reading itself (checks, projectStatus, …: id is the field's name). */
+export interface ReadingRowTarget { kind: 'part' | 'claim' | 'relation' | 'reading'; id: string; index: number | null }
+export interface ReadingRow { record: string; table: string; id: string; state: RowState; reason: string | null;
+  /** The last exclusion category seen on the row (transient, unplaced), else null. */
+  detail: string | null;
+  /** How many readings have sent the row so far, this one included (a row left out for room is not sent). */
+  sent: number;
+  /** reflected: up to eight targets; held: the parts it conflicts with (up to four). Empty otherwise. */
+  to: ReadingRowTarget[]; with: string[] }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
@@ -659,7 +728,13 @@ export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at
   /** The pasted record read, and the ledger version (the map reading id) the record was read against (null: no map reading). */
   record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15' || e.version === 'map-reading.16' || e.version === 'map-reading.17' || e.version === 'map-reading.18' || e.version === 'map-reading.19';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15' || e.version === 'map-reading.16' || e.version === 'map-reading.17' || e.version === 'map-reading.18' || e.version === 'map-reading.19' || e.version === 'map-reading.20';
+/** Review of .51: what the readings last said of the whole project: the newest map reading's summary that is not empty (a reading may write
+ * none: a final review's verdict leaves the fragments combined without a global rewrite), or null. Never made up. */
+export const latestMapSummary = (readings: readonly ReadingEntry[]): string | null => {
+  for (let k = readings.length - 1; k >= 0; k--) { const r = readings[k]!; if (isMapReading(r) && r.summary.trim()) return r.summary; }
+  return null;
+};
 export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;
