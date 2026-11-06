@@ -347,6 +347,7 @@ export function routeEdges(boxes: Map<string, Box>, edgesIn: Edge[], opts: { qui
   // when its route turns at most FACE_TURNS times (else it meets the sides, told by its dash and open head alone). Only cards
   // have those faces; a group, an outside partner or an end that holds the other keeps its side.
   const fx = facePorts(boxes, edges), faceKept = new Map<string, { a: PortFace; b: PortFace }>(), faceRoutes = new Map<string, Route>();
+  const cands: { e: Edge; a: Box; b: Box; fa: PortFace; fb: PortFace }[] = [], candFaces = new Map<string, { a: PortFace; b: PortFace }>();
   for (const e of edges) {
     const f = e.faces, a = boxes.get(e.from), b = boxes.get(e.to); if (!f || !a || !b) continue;
     // A face is taken only toward where the other end lies: a bottom when the other end's middle is below this card, a top when
@@ -356,11 +357,24 @@ export function routeEdges(boxes: Map<string, Box>, edgesIn: Edge[], opts: { qui
     const fa: PortFace = (f.a === 'top' || f.a === 'bottom') && a.kind === 'node' && toward(a, b, f.a) ? f.a : f.a === 'ear' ? 'ear' : 'side';
     const fb: PortFace = (f.b === 'top' || f.b === 'bottom') && b.kind === 'node' && toward(b, a, f.b) ? f.b : f.b === 'ear' ? 'ear' : 'side';
     if ((fa !== 'top' && fa !== 'bottom' && fb !== 'top' && fb !== 'bottom') || sideOf(a, b, boxes) === 'in') { if (fa === 'ear' || fb === 'ear') faceKept.set(e.key, { a: fa, b: fb }); continue; }
-    const px = fx.get(e.key) ?? {}, at = (box: Box, face: PortFace, x?: number) => ({ face, at: face === 'top' || face === 'bottom' ? x ?? box.x + box.w / 3 : mid(box) });
-    const r = opts.quick ? quickFace(a, b, at(a, fa, px.a), at(b, fb, px.b)) : faceRoute(a, b, boxes.values(), at(a, fa, px.a), at(b, fb, px.b));
-    if (r && turnsOf(r.pts) <= FACE_TURNS) { faceKept.set(e.key, { a: fa, b: fb }); faceRoutes.set(e.key, r); }
+    cands.push({ e, a, b, fa, fb }); candFaces.set(e.key, { a: fa, b: fb });
   }
+  // Beauty v3: a face line's side end takes its own port on that side (spread with the side's other ends), never the side's middle
+  // where another line already meets it. Ports are spread with every face line first; when some fall back to their sides, again.
+  const faceRun = (pp: Map<string, { a?: number; b?: number }>, c: (typeof cands)[number]) => {
+    const px = fx.get(c.e.key) ?? {}, pt = pp.get(c.e.key) ?? {}, at = (box: Box, face: PortFace, x: number | undefined, side: number | undefined) => ({ face, at: face === 'top' || face === 'bottom' ? x ?? box.x + box.w / 3 : side ?? mid(box) });
+    const r = opts.quick ? quickFace(c.a, c.b, at(c.a, c.fa, px.a, pt.a), at(c.b, c.fb, px.b, pt.b)) : faceRoute(c.a, c.b, boxes.values(), at(c.a, c.fa, px.a, pt.a), at(c.b, c.fb, px.b, pt.b));
+    return r && turnsOf(r.pts) <= FACE_TURNS ? r : null;
+  };
+  const ports0 = cands.length ? assignPorts(boxes, edges, new Map([...faceKept, ...candFaces])) : new Map<string, { a?: number; b?: number }>();
+  for (const c of cands) { const r = faceRun(ports0, c); if (r) { faceKept.set(c.e.key, { a: c.fa, b: c.fb }); faceRoutes.set(c.e.key, r); } }
   const ports = assignPorts(boxes, edges, faceKept), out = new Map<string, Routed>();
+  if (cands.some(c => !faceRoutes.has(c.e.key))) for (const c of cands) {
+    if (!faceRoutes.has(c.e.key)) continue;
+    const was = ports0.get(c.e.key) ?? {}, now = ports.get(c.e.key) ?? {};
+    if (was.a === now.a && was.b === now.b) continue;
+    const r = faceRun(ports, c); if (r) faceRoutes.set(c.e.key, r);
+  }
   for (const e of edges) {
     const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
     // Beauty v3 (C.4): a line with a reserved route (its hint from the layered layout) takes it when every run of it is free; else the
