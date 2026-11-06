@@ -2754,24 +2754,34 @@ function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, blocks: R
   const placed: Rect[] = [];
   for (const lens of FIT_LENSES) {
     const fg = (g: SVGGElement) => (lens === 'scenario' ? g.classList.contains('sc-path') : lensLineFg(lens, { key: g.dataset.key!, channel: lineChans.get(g.dataset.key!) ?? null, from: g.dataset.from!, to: g.dataset.to! }, {}));
-    const spots: FitSpot[] = [], els: HTMLElement[] = [];
+    // Lines of one channel meeting the same part that would read the same (five people starting one screen) share one label, set on
+    // whichever of their lines has room; the label names each of them (data-also), so the hover of any reads it.
+    const spots: FitSpot[] = [], els: HTMLElement[] = [], groups = new Map<string, { el: HTMLElement; keys: string[] }>();
     for (const g of all.filter(fg)) {
       const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
       const b = lineBadges.get(e.key), cond = b?.kind === 'condition', opt = b?.kind === 'optional';
       // A condition in the record's own words (the relation's 조건 column as read), never the bare word 「조건」.
       const words = cond ? e.ids.map(id => conditionWords(said.get(id)?.when)).find(w => !!w && w !== '조건') ?? null : null;
       const full = (cond ? words ?? b!.full : restWord(e)).replace(/[「」『』‘’“”"]/g, '').trim(); if (!full) continue;
-      const mark = !cond && opt ? '◌ ' : '';
-      const el = h('span', { class: `edge-label fit k-${e.kind}${cond ? ' fit-cond' : ''}`, 'data-key': e.key, 'data-lens': lens, 'data-full': full }); box.append(el); els.push(el);
+      const mark = !cond && opt ? '◌ ' : '', gk = `${e.to}|${lineChans.get(e.key) ?? e.kind}|${mark}${full}`, same = groups.get(gk);
+      const el = same?.el ?? h('span', { class: `edge-label fit k-${e.kind}${cond ? ' fit-cond' : ''}`, 'data-key': e.key, 'data-lens': lens, 'data-full': full });
+      if (same) same.keys.push(e.key); else { groups.set(gk, { el, keys: [e.key] }); box.append(el); els.push(el); }
       const pts = edgePts(e.key, path), free = (r: Rect) => clear(r) && !lineUnder(r, e.key, drawn);
       [14, 8].forEach((n, fi) => {
         const base = full.replace(/[….]+$/, ''), c = cut(base, n), text = `${mark}${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; el.textContent = text;
         const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
-        labelSpots(pts, w, hh, cond ? 'start' : 'long', 12 * inv).filter(free).slice(0, 8).forEach((r, i) => spots.push({ key: e.key, ...r, dist: fi * 50 + i, rank: cond ? 0 : 1, el, text }));
+        // The short form may sit closer to a bend (6px), then beside the end it points to (portSpots), before the line goes unlabelled.
+        const along = labelSpots(pts, w, hh, cond ? 'start' : 'long', (fi ? 6 : 12) * inv).filter(free).slice(0, 8);
+        const beside = fi ? portSpots(pts, w, hh).filter(r => free(r) && !polylineHitsRect(pts, r, 1)) : [];
+        [...along, ...beside].forEach((r, i) => spots.push({ key: gk, ...r, dist: fi * 50 + i, rank: cond ? 0 : 1, el, text }));
       });
     }
     const { kept } = resolveLabels(spots, 6), keptEl = new Set<HTMLElement>(), keys = new Set<string>();
-    for (const s of kept) { s.el.textContent = s.text; s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; keptEl.add(s.el); keys.add(s.key); placed.push(s); }
+    for (const s of kept) {
+      const grp = groups.get(s.key)!; s.el.textContent = s.text; s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; keptEl.add(s.el); placed.push(s);
+      for (const k of grp.keys) keys.add(k);
+      if (grp.keys.length > 1) s.el.dataset.also = grp.keys.join(' ');
+    }
     for (const el of els) if (!keptEl.has(el)) el.remove();
     out.set(lens, keys);
   }

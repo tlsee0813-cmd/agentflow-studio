@@ -576,7 +576,7 @@ function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, 
   for (const s of segs) { const w = s.spine ? 4 * s.w : s.w; (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w }); }
   void spine;
   for (let pass = 0; pass < 8; pass++) for (const l of (pass % 2 ? [...layers].reverse() : layers)) l.forEach((k, i) => {
-    if (isDummy[k]) return;
+    void isDummy;
     const list = nb.get(k); if (!list?.length) return;
     const v = list.map(x => ({ y: ys[x.k]!, w: x.w })).sort((a, b) => a.y - b.y), tot = v.reduce((a, x) => a + x.w, 0);
     let acc = 0, m = v[0]!.y; for (let j = 0; j < v.length; j++) { acc += v[j]!.w; if (Math.abs(acc - tot / 2) < 1e-9 && j + 1 < v.length) { m = (v[j]!.y + v[j + 1]!.y) / 2; break; } if (acc > tot / 2) { m = v[j]!.y; break; } }
