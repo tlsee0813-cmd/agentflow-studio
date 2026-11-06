@@ -2944,8 +2944,16 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional', besi
   const out = (ds: number[]) => ds.filter(d => (d + CUE_PX / 2) * inv <= len / 2).map(d => at(path.getPointAtLength((d + CUE_PX / 2) * inv)));
   const near = out([6, 11, 16]), far = out([22, 28, 34, 40, 46]);
   const pick = (ss: Rect[]) => ss.find(r => offParts(r) && apart(r) && offLabels(r) && offLines(r)) ?? ss.find(r => offParts(r) && apart(r) && offLabels(r)) ?? ss.find(r => offParts(r) && apart(r));
-  // A conditional line never reads unconditional: with no place apart, the nearest place off the parts.
-  const spot = pick(near) ?? pick(far) ?? [...near, ...far].find(offParts) ?? null;
+  let spot = pick(near) ?? pick(far) ?? null;
+  // With no place apart (ports closer than a mark at a far zoom): a mark of the same kind on a line leaving the same part at its first
+  // place stands for this line too (data-also; never two marks stacked); else the nearest place off the parts (a conditional line
+  // never reads unconditional).
+  if (!spot && near[0]) {
+    const r0 = near[0], same = [...box.querySelectorAll<HTMLElement>(`.edge-cue.q-${cue}`)].find(c => { const x = parseFloat(c.style.left), y = parseFloat(c.style.top);
+      return edgeOf(c.dataset.cue)?.from === e.from && r0.x < x + s + 2 && x < r0.x + s + 2 && r0.y < y + s + 2 && y < r0.y + s + 2; });
+    if (same) { same.dataset.also = [...(same.dataset.also ?? '').split(' ').filter(Boolean), e.key].join(' '); return; }
+  }
+  spot ??= [...near, ...far].find(offParts) ?? null;
   if (!spot) return;
   const el = h('span', { class: `edge-cue q-${cue}${beside ? ' beside' : ''}`, 'data-cue': e.key, role: 'img', 'aria-label': cue === 'condition' ? '조건 있는 관계' : '선택 관계' });
   box.append(el); set(el, spot);
