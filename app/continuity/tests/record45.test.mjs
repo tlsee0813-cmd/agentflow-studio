@@ -107,14 +107,15 @@ test('.45 the reading\'s own fields: level, pages, obligations, page ends, C-CHE
   assert.equal(read.basisScope.text, 'server/ app/ README.md · 못 읽음: server/push/fcm.ts · 실행 안 함');
   assert.ok(read.pageEnds.some(e => e.page === 1 && e.table === 'C-LINK' && e.reserved.join() === 'D01,D02'));
   const applied = M.applyReading(f.project, f.input, read, meta('R_record45', '5'));
-  assert.equal(applied.reading.version, 'map-reading.19');
+  assert.equal(applied.reading.version, 'map-reading.20'); assert.ok(applied.reading.rows.length > 0, '.50: a reading that sent a v5 fold keeps its rows');
   assert.deepEqual(validateProject(applied.project), applied.project);
   const raw = S.serializeProject(applied.project), bad = mutate => { const p = JSON.parse(raw); mutate(p.readings.at(-1)); return () => validateProject(p); };
   assert.throws(bad(r => { delete r.level; }));
   assert.throws(bad(r => { r.parts[0].family = 'engine'; }));
   assert.throws(bad(r => { r.relations[0].cites.push({ ref: 'E99', grade: 'measured', source: null, place: null, quote: null }); }));
   assert.throws(bad(r => { r.version = 'map-reading.18'; }), 'a .18 entry holds none of the .19 keys');
-  const older = JSON.parse(raw), r18 = stripNineteen(older.readings.at(-1)); r18.version = 'map-reading.18';
+  assert.throws(bad(r => { r.version = 'map-reading.19'; }), '.50: a .19 entry holds no rows');
+  const older = JSON.parse(raw), r18 = stripNineteen(older.readings.at(-1)); r18.version = 'map-reading.18'; delete r18.rows;
   for (const p of r18.parts) { for (const v of p.variants ?? []) if (v.together === 'per-data') v.together = 'unknown'; for (const c of p.claims) if (c.withdrawalMethod === 'doc-only') c.withdrawalMethod = null; }
   assert.deepEqual(validateProject(older), older, 'a map-reading.18 entry keeps its shape');
 });
@@ -208,7 +209,7 @@ test('.45 cards: the record family first (a gate in the trigger tint with its ow
 });
 
 test('.45 recipe: first-map-divided.45 and later-map-divided.45; the prompts read v5 records with their key sets', () => {
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.49', 'later-map-divided.49']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.50', 'later-map-divided.50']);
   assert.ok(P.RENDER_RULES.includes('기록 v5(첫 줄이 「〔기록 … · 쪽 n · 기준 … · 앞 쪽 …〕」인 기록)') && B.MAP_BLUEPRINT_PROMPT.includes('INPUT 옆의 keys'));
   assert.ok(P.EXTRACTION_PROMPT.includes('input.keys'));
   assert.equal(T.recordVersion(page(1)), 'v5');

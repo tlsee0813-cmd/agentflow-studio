@@ -563,7 +563,7 @@ export interface ReadingExclusion { path: string; rule: typeof READING_EXCLUSION
    * record/from/to; only on parts[i].inputs[j] and parts[i].outputs[j]. Exclusions without it keep their exact shape. */
   value?: string }
 export interface MapReading {
-  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14' | 'map-reading.15' | 'map-reading.16' | 'map-reading.17' | 'map-reading.18' | 'map-reading.19'; id: string; at: string; model: string; prompt: string;
+  version: 'map-reading.1' | 'map-reading.2' | 'map-reading.3' | 'map-reading.4' | 'map-reading.5' | 'map-reading.6' | 'map-reading.7' | 'map-reading.8' | 'map-reading.9' | 'map-reading.10' | 'map-reading.11' | 'map-reading.12' | 'map-reading.13' | 'map-reading.14' | 'map-reading.15' | 'map-reading.16' | 'map-reading.17' | 'map-reading.18' | 'map-reading.19' | 'map-reading.20'; id: string; at: string; model: string; prompt: string;
   /** SHA-256 of the request: the very same request is never sent or applied again. */
   hash: string;
   /** Records read, and which part of each went: characters [from, to) of total. A record's unsent tail is read by a later reading. */
@@ -600,7 +600,32 @@ export interface MapReading {
   /** map-reading.19 (recipe .45, a 기록 v5 record): the level the app computed (0 · 1 첫 구조 · 2 상세; null with no v5 record), the folded pages,
    * the remaining obligations, the C-END rows, the C-CHECK rows, the C-HEAD defaults and its 첫 구조 줄 (neither a claim of the project). */
   level?: 0 | 1 | 2 | null; pages?: ReadingPage[]; obligations?: ReadingObligation[]; pageEnds?: ReadingPageEnd[]; checks?: ReadingCheck[]; defaults?: ReadingDefault[]; firstLines?: string[];
+  /** map-reading.20 (recipe .50, row-ledger.ts): what this reading did with each row of a 기록 v5 record it sent or left out for room. Only a
+   * reading that sent a v5 fold is .20; every earlier entry keeps its exact shape and is read by the same rule on the fly. */
+  rows?: ReadingRow[];
 }
+/* ---------- map-reading.20 (recipe .50, Astra F5 Q5): the row-processing ledger. Every current row of a 기록 v5 record's tables (the ledgers
+ * and the page frame aside) has a state per (record, table, row ID): reflected (the map items it became), waiting (why not yet), held (what
+ * it conflicts with) or rejected (a concrete reason). Parsed is never reflected: a row inside a read interval with nothing on it waits. ---------- */
+export const ROW_STATES = ['reflected', 'waiting', 'held', 'rejected'] as const;
+export type RowState = typeof ROW_STATES[number];
+/** Why a row is in its state (reflected has none). waiting: limit (an item on it past a bound, or the reading used its whole allowance),
+ * budget (left out of the ask for room), unresolved-endpoint (a part it names has no reflected C-PART row yet), transient (sent and not
+ * placed for no other reason, or an item on it set aside for its form), not-yet-sent; held: the candidate's target (identity, parent,
+ * attribution, holds) or depends (a row it names is held); rejected: material (the reading kept it as material), depends (a row it names
+ * was rejected) or unplaced (sent again as often as the ledger allows, never placed). */
+export const ROW_REASONS: Readonly<Record<RowState, readonly string[]>> = Object.freeze({ reflected: [],
+  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends'], rejected: ['material', 'depends', 'unplaced'] });
+/** What a reflected row became: a part (its basis or a field of it), one of its claims (index in this reading's part entry), a relation, or a
+ * field of the reading itself (checks, projectStatus, …: id is the field's name). */
+export interface ReadingRowTarget { kind: 'part' | 'claim' | 'relation' | 'reading'; id: string; index: number | null }
+export interface ReadingRow { record: string; table: string; id: string; state: RowState; reason: string | null;
+  /** The last exclusion category seen on the row (transient, unplaced), else null. */
+  detail: string | null;
+  /** How many readings have sent the row so far, this one included (a row left out for room is not sent). */
+  sent: number;
+  /** reflected: up to eight targets; held: the parts it conflicts with (up to four). Empty otherwise. */
+  to: ReadingRowTarget[]; with: string[] }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
 export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
@@ -659,7 +684,7 @@ export interface ScenarioReading { version: 'scenario-reading.1'; id: string; at
   /** The pasted record read, and the ledger version (the map reading id) the record was read against (null: no map reading). */
   record: string; ledgerVersion: string | null; pathStatus: ScenarioPathStatus; scenario: ScenarioRecord; diagnostics: ScenarioDiagnostic[] }
 export type ReadingEntry = MapReading | ReadingCorrection | RequestCorrection | ReplaceCorrection | ScenarioReading;
-export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15' || e.version === 'map-reading.16' || e.version === 'map-reading.17' || e.version === 'map-reading.18' || e.version === 'map-reading.19';
+export const isMapReading = (e: ReadingEntry): e is MapReading => e.version === 'map-reading.1' || e.version === 'map-reading.2' || e.version === 'map-reading.3' || e.version === 'map-reading.4' || e.version === 'map-reading.5' || e.version === 'map-reading.6' || e.version === 'map-reading.7' || e.version === 'map-reading.8' || e.version === 'map-reading.9' || e.version === 'map-reading.10' || e.version === 'map-reading.11' || e.version === 'map-reading.12' || e.version === 'map-reading.13' || e.version === 'map-reading.14' || e.version === 'map-reading.15' || e.version === 'map-reading.16' || e.version === 'map-reading.17' || e.version === 'map-reading.18' || e.version === 'map-reading.19' || e.version === 'map-reading.20';
 export const isScenarioReading = (e: ReadingEntry): e is ScenarioReading => e.version === 'scenario-reading.1';
 export const READINGS_LIMIT = 500;
 export const PASTED_LIMIT = 500;

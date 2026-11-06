@@ -302,7 +302,11 @@ test('attachExclusions takes only checked fixed reasons for a first map.6 and ke
   ]) assert.throws(() => M.attachExclusions(M.validateMapReply(clean, f.ask), bad, f.ask));
   M.attachExclusions(M.validateMapReply(clean, f.ask), [located], f.ask);
   const later = fixture();
-  assert.throws(() => M.attachExclusions(M.validateMapReply(structuredClone(later.reply), later.inp.ask), reasons, later.inp.ask), 'never for map.7');
+  // Recipe .50: a later map (map.7) carries the server's checked reasons too (before .50 refused, and the paid result discarded).
+  const laterReply = M.validateMapReply(structuredClone(later.reply), later.inp.ask), own = M.readingExclusions(laterReply).length, laterReason = { ...located, record: later.inp.ask.records[0].id, from: 0, to: 3 };
+  M.attachExclusions(laterReply, [laterReason], later.inp.ask);
+  assert.deepEqual(M.readingExclusions(laterReply).slice(0, 1), [laterReason]); assert.equal(M.readingExclusions(laterReply).length, own + 1);
+  assert.throws(() => M.attachExclusions(M.validateMapReply(structuredClone(later.reply), later.inp.ask), [{ ...laterReason, explanation: '다른 설명' }], later.inp.ask), 'map.7 under the same checks');
 });
 
 // ---- map-reading.7 (first-map-divided.25): a claim's topic, tag, time, place and the decision before; a part's own state word

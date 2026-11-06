@@ -447,8 +447,8 @@ test('the combined first-map wire only omits set-aside items: no quote clipped, 
   expected.relations.splice(0, 1); expected.candidates.splice(0, 1); expected.gaps = expected.gaps.slice(0, 2); expected.material.splice(0, 1);
   assert.deepEqual(wire, expected);
   assert.deepEqual(exclusions.map(x => [x.path, x.rule, x.category]), [
-    ['parts[0].claims[0].at', 'reference', null], ['parts[3].basis', 'contract', 'count'], ['relations[0]', 'contract', 'ends'],
-    ['candidates[0].target', 'reference', null], ['gaps', 'contract', 'count'], ['material[0]', 'material-evidence', null]]);
+    ['parts[0].claims[0].at', 'reference', null], ['parts[3].basis[4]', 'contract', 'count'], ['parts[3].basis[5]', 'contract', 'count'], ['relations[0]', 'contract', 'ends'],
+    ['candidates[0].target', 'reference', null], ['gaps[2]', 'contract', 'count'], ['material[0]', 'material-evidence', null]]);
   const plain = M.validateMapReply(wire, f.ask);
   assert.equal(M.setAside(plain).length, 0);
   assert.deepEqual(plain.parts[0].claims.map(c => c.key), ['s1', 's41']);
@@ -664,7 +664,8 @@ test('.29: a first map plans (.31) 36 new parts (a later map 12) in twelve fragm
   assert.equal(M.validateMapReply(read.wire, f.ask).relations.length, 48);
   const over = combineRenderedReading(fragments, wide, f.ask, koruPlan(f));
   assert.equal(over.wire.relations.length, 48);
-  assert.deepEqual(over.exclusions.filter(x => x.path === 'relations').map(x => [x.rule, x.category]), [['contract', 'count']]);
+  // .50: the item past the bound is named by its own index.
+  assert.deepEqual(over.exclusions.filter(x => x.path.startsWith('relations')).map(x => [x.path, x.rule, x.category]), [['relations[48]', 'contract', 'count']]);
   assert.throws(() => M.validateMapReply({ ...structuredClone(read.wire), relations: wide.relations }, f.ask));
   assert.deepEqual(mapStageIssues(wide).filter(x => x.path === 'relations'), [{ path: 'relations', rule: 'count', expected: 48, actual: 49 }]);
   const laterAsk = fixture(1).ask;

@@ -11,6 +11,7 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as T from '../dist/public/shared/record-table.js';
 import * as X from '../dist/public/shared/record-excerpt.js';
+import * as L from '../dist/public/shared/row-ledger.js';
 import * as J from '../dist/public/shared/map-job.js';
 import * as Route from '../dist/public/shared/map-route.js';
 import * as St from '../dist/public/shared/studio.js';
@@ -141,7 +142,7 @@ test('R47-1 the divided first map sends the whole fold: Q1 first, page by page, 
 test('R47-2 quotes stay anchored: a reading on the fold stores each quote where it stands in its pasted text, map-reading.19, and the record is read', () => {
   const p = project(), { inp } = divided(p);
   const reply = M.validateMapReply(wireOf(inp), inp.ask), applied = M.applyReading(p, inp, reply, meta('R_record47', '7'));
-  assert.equal(applied.reading.version, 'map-reading.19');
+  assert.equal(applied.reading.version, 'map-reading.20'); assert.ok(applied.reading.rows.length > 0, '.50: with its rows');
   assert.deepEqual(validateProject(applied.project), applied.project);
   // Every C-PART row is a part (the program's), each standing on its own row of the pasted text.
   const parts = applied.reading.parts;
@@ -149,8 +150,11 @@ test('R47-2 quotes stay anchored: a reading on the fold stores each quote where 
   for (const x of parts) for (const q of x.basis) assert.equal(p.pasted.find(r => r.id === q.record).text.slice(q.from, q.to), q.quote);
   // One read interval per record of the ask (two for the 4th paste), the text's last run to its end.
   assert.deepEqual(applied.reading.records.map(r => [p.pasted.findIndex(x => x.id === r.id), r.to === r.total]), [[1, true], [3, false], [2, true], [3, true]]);
-  // Nothing is fresh any more: the draft no current page holds is no record to read.
-  assert.equal(M.buildMapAsk(applied.project, St.studioView(applied.project), [], undefined, M.MAP6_SCHEMA).problem, 'NOTHING_NEW');
+  // Nothing new is left: the draft no current page holds is no record to read. Recipe .50: what may go again is only a row this reading
+  // read and placed nothing of, named as such (row-ledger.ts).
+  const next = M.buildMapAsk(applied.project, St.studioView(applied.project), [], undefined, M.MAP6_SCHEMA), draft = p.pasted.findIndex(x => !applied.reading.records.some(r => r.id === x.id));
+  assert.ok(next.problem === 'NOTHING_NEW' || next.ask.records.every(r => /앞선 정리에서 반영되지 않아 다시 보낸 행/.test(r.note)), next.problem ?? next.ask.records.map(r => r.note).join(' | '));
+  if (draft >= 0 && !next.problem) assert.ok(![...next.records.values()].some(r => r.id === p.pasted[draft].id));
 });
 
 test('R47-3 no anchored range of a v5 record crosses a gap line: the empty row where the replaced step stood, or a blank line', () => {
@@ -202,19 +206,24 @@ test('R47-5 within the shared bounds the fold goes in page order, the last recor
   for (const gone of GONE) assert.ok(!texts(inp).join('\n').includes(gone), gone);
   const applied = M.applyReading(p, inp, M.validateMapReply(wireOf(inp), inp.ask), meta('R_record47c', '9'));
   const next = M.buildMapAsk(applied.project, St.studioView(applied.project), [], undefined, M.MAP6_SCHEMA);
-  // From the cut on: pages 3–4's rows past it, then page 5; none of the rows read before goes again.
+  // Recipe .50 (row-ledger.ts): the next reading first sends again the rows this one read and placed nothing of (named in the note), in
+  // page order, never a row it placed; the rows past the cut follow as room allows and wait, never sent, until they go.
   assert.equal(next.problem, null);
-  const first = [...next.records.values()][0], nextText = texts(next).join('\n'), cutRow = p.pasted.find(r => r.id === last.id).text.slice(last.to).match(/\|B\d\d:S\d\d\|/)[0];
+  const first = [...next.records.values()][0], nextText = texts(next).join('\n'), pasted = p.pasted.find(r => r.id === last.id).text, cutRow = pasted.slice(last.to).match(/\|B\d\d:S\d\d\|/)[0];
   assert.equal(first.id, last.id);
-  assert.ok(nextText.includes(cutRow) && !nextText.includes('|B01:S01|'), cutRow);
-  assert.ok(next.ask.records.some(r => /쪽 5/.test(r.note)));
+  assert.ok(nextText.includes('|B01:S01|') && /앞선 정리에서 반영되지 않아 다시 보낸 행 \d+개: C-STEP B01:S01/.test(next.ask.records[0].note), next.ask.records[0].note);
+  const ledger = L.rowLedger(applied.project, X.v5Folds(applied.project.pasted)), placed = [...ledger.values()].filter(x => x.state === 'reflected'), textOf = id => p.pasted.find(r => r.id === id).text;
+  assert.ok(placed.length > 0);
+  for (const x of placed) assert.ok(!nextText.includes(textOf(x.paste).slice(x.start, x.end)), `${x.table} ${x.id} was placed: never sent again`);
+  const cut = [...ledger.values()].find(x => x.paste === last.id && pasted.slice(x.start, x.end).includes(cutRow));
+  assert.ok(nextText.includes(cutRow) || cut.reason === 'not-yet-sent', cutRow);
 });
 
 test('R47-6 v4 and v3 asks are byte for byte what .46 built (golden), whatever bounds are given; the recipe is .47 and the contract map-reading.19', () => {
   const golden = JSON.parse(readFileSync(new URL('./fixtures/record47/v4-golden.json', import.meta.url), 'utf8')), mods = { D, M, S: St, J };
   assert.deepEqual(goldenDigests(mods), golden);
   assert.deepEqual(goldenDigests(mods, Route.mapRoute({ schemaVersion: M.MAP6_SCHEMA, parts: [], requests: [], priors: [] }, OFFER).limits), golden);
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.49', 'later-map-divided.49']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.50', 'later-map-divided.50']);
 });
 
 test('R47-7 the bounds: a first map.6 ask may be a whole fold, every other ask keeps 64 KiB, four records and 12,000 characters each', () => {

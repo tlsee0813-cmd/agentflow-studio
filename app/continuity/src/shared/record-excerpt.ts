@@ -113,20 +113,25 @@ export function v5Folds(pasted: readonly { id: string; text: string }[]): V5Fold
 }
 
 export interface PasteExcerpt { id: string; text: string; pieces: ExcerptPiece[]; rows: number; left: Droppable[];
+  /** Recipe .50: the rows of `again` this excerpt sends (rows an earlier reading read without placing them: row-ledger.ts), by key. */
+  again: string[];
   /** Cut at `cap`: where the pasted text's lines not sent this time begin (the rest is read next time), and the rows among them. */
   cut: number | null; cutRows: number }
 /** What one pasted text of a fold sends: its rows from `sent.get(id)` on (rows an earlier reading read are not sent again; page head,
  * table and closing lines go wherever they stand), the rows in `leave` left out, and the ledger rows the rows sent from every text in
- * `sent` cite; with `cap`, only its lines up to the last whole line within cap characters (cut). null when nothing of it would go. */
-export function pasteExcerpt(v: V5Fold, paste: FoldPaste, leave: ReadonlySet<string> = new Set(), sent: ReadonlyMap<string, number> = new Map(v.pastes.map(p => [p.id, 0])), cap = Infinity, pages: readonly number[] | null = null): PasteExcerpt | null {
+ * `sent` cite; with `cap`, only its lines up to the last whole line within cap characters (cut). null when nothing of it would go.
+ * Recipe .50: the rows of `again` (by line key, `paste@offset`) go too wherever they stand (an earlier reading read them and placed
+ * nothing of them), and so do the ledger rows they cite. */
+export function pasteExcerpt(v: V5Fold, paste: FoldPaste, leave: ReadonlySet<string> = new Set(), sent: ReadonlyMap<string, number> = new Map(v.pastes.map(p => [p.id, 0])), cap = Infinity, pages: readonly number[] | null = null, again: ReadonlySet<string> = new Set()): PasteExcerpt | null {
   const from = sent.get(paste.id) ?? 0;
-  const goes = (p: FoldPaste, l: Line) => sent.has(p.id) && (l.kind === 'always' || (l.kind === 'row' && !leave.has(l.key!) && l.from >= sent.get(p.id)!));
+  const goes = (p: FoldPaste, l: Line) => sent.has(p.id) && (l.kind === 'always' || (l.kind === 'row' && !leave.has(l.key!) && (l.from >= sent.get(p.id)! || again.has(l.key!))));
+  const resent = paste.lines.some(l => l.kind === 'row' && again.has(l.key!) && (!pages || pages.includes(l.page)));
   // The ledger rows any sent row cites (a row of one text may cite a ledger row of another), and the F rows a cited E row's 출처 names.
   const cited = new Set<string>();
   for (const p of v.pastes) for (const l of p.lines) if (goes(p, l)) for (const c of l.cites) cited.add(c);
   for (const p of v.pastes) for (const l of p.lines) if (l.kind === 'ledger' && l.rowId!.startsWith('E') && cited.has(l.rowId!)) for (const c of l.cites) cited.add(c);
   // Recipe .47: with `pages`, only the lines of those pages (one run of the record's pages).
-  const lines = pages ? paste.lines.filter(l => pages.includes(l.page)) : paste.lines, keep = lines.map(l => goes(paste, l) || (l.kind === 'ledger' && cited.has(l.rowId!) && l.from >= from));
+  const lines = pages ? paste.lines.filter(l => pages.includes(l.page)) : paste.lines, keep = lines.map(l => goes(paste, l) || (l.kind === 'ledger' && cited.has(l.rowId!) && (l.from >= from || resent)));
   // A table's title and header lines go when the table sends a line.
   const used = new Set<number>(); lines.forEach((l, i) => { if (keep[i] && l.table !== null) used.add(l.table); });
   lines.forEach((l, i) => { if (l.kind === 'table' && used.has(l.table!)) keep[i] = true; });
@@ -145,7 +150,7 @@ export function pasteExcerpt(v: V5Fold, paste: FoldPaste, leave: ReadonlySet<str
     pieces.push({ at: text.length, from: l.from, to: l.to }); text += paste.text.slice(l.from, l.to); previous = l;
   };
   // A blank line goes with the line after it (what is sent never ends on one); a line past the cap starts the part read next time.
-  let pending: Line[] = [];
+  let pending: Line[] = []; const sentAgain: string[] = [];
   for (const [i, l] of lines.entries()) {
     if (!keep[i]) continue;
     if (cut !== null) { if (l.kind === 'row') cutRows++; continue; }
@@ -154,10 +159,10 @@ export function pasteExcerpt(v: V5Fold, paste: FoldPaste, leave: ReadonlySet<str
     if (size > cap) { cut = add[0]!.from; if (l.kind === 'row') cutRows++; continue; }
     for (const x of add) append(x);
     pending = [];
-    if (l.kind === 'row') rows++;
+    if (l.kind === 'row') { rows++; if (l.from < from && again.has(l.key!)) sentAgain.push(l.key!); }
   }
   if (!pieces.length || !text.trim()) return null;
-  return { id: paste.id, text, pieces, rows, left: v.droppable.filter(x => x.paste === paste.id && (!pages || pages.includes(x.page)) && leave.has(x.key)), cut, cutRows };
+  return { id: paste.id, text, pieces, rows, left: v.droppable.filter(x => x.paste === paste.id && (!pages || pages.includes(x.page)) && leave.has(x.key)), again: sentAgain, cut, cutRows };
 }
 
 /** The pasted text's [from, to) an excerpt range stands on when it lies within one piece, else null (it would cross a gap). */

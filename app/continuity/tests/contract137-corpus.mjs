@@ -26,13 +26,13 @@ export function corpus(mods) {
   add7('summary over 360', w => { w.summary = `SECRET_MARKER_137 ${'x'.repeat(360)}`; }, ['summary', 'contract', 'text']);
   add7('summary secret-like', w => { w.summary = `키 ${SECRETISH}`; }, ['summary', 'contract', 'secret-like']);
   add7('parts object', w => { w.parts = { SECRET_MARKER_137: 1 }; }, ['parts', 'contract', 'shape']);
-  add7('parts 25', w => { w.parts = Array.from({ length: 25 }, () => w.parts[1]); }, ['parts', 'contract', 'count']);
+  add7('parts 25', w => { w.parts = Array.from({ length: 25 }, () => w.parts[1]); }, ['parts[24]', 'contract', 'count']);
   add7('part missing key', w => { delete w.parts[1].claims; w.parts[1].EXTRA_KEY_137 = 'SECRET_MARKER_137'; }, ['parts[1]', 'contract', 'keys']);
   add7('new part parent unknown', w => { w.parts[0].parent = 'P99'; }, ['parts[0].parent', 'contract', 'parent']);
   add7('existing part named', w => { w.parts[1].name = 'SECRET_MARKER_137'; }, ['parts[1]', 'contract', 'existing-name-parent']);
   add7('new part name blank', w => { w.parts[0].name = '   '; }, ['parts[0].name', 'contract', 'text']);
   add7('new part no basis', w => { w.parts[0].basis = []; }, ['parts[0].basis', 'contract', 'basis-required']);
-  add7('claims 5', w => { w.parts[1].claims.push(w.parts[1].claims[0]); }, ['parts[1].claims', 'contract', 'count']);
+  add7('claims 7', w => { w.parts[1].claims.push(...[0, 1, 2].map(k => ({ ...w.parts[1].claims[k], key: `s7${k}` }))); }, ['parts[1].claims[6]', 'contract', 'count']);
   add7('claim kind', w => { w.parts[1].claims[2].kind = 'SECRET_MARKER_137'; }, ['parts[1].claims[2].kind', 'contract', 'kind']);
   add7('claim text control', w => { w.parts[1].claims[1].text = 'SECRET_MARKER_137\u0007'; }, ['parts[1].claims[1].text', 'contract', 'text']);
   add7('claim replaces unknown', w => { w.parts[1].claims[0].replaces = 'SECRET_MARKER_137'; }, ['parts[1].claims[0].replaces', 'contract', 'replaces']);
@@ -44,7 +44,7 @@ export function corpus(mods) {
   add7('candidate text over 240', w => { w.candidates[0].text = 'y'.repeat(241); }, ['candidates[0].text', 'contract', 'text']);
   add7('candidate statement kind', w => { w.candidates[0].statement.kind = 'SECRET_MARKER_137'; }, ['candidates[0].statement.kind', 'contract', 'kind']);
   add7('candidate statement missing key', w => { delete w.candidates[0].statement.kind; w.candidates[0].statement.EXTRA_KEY_137 = null; }, ['candidates[0].statement', 'contract', 'keys']);
-  add7('gaps 3', w => { w.gaps = ['a', 'b', 'c']; }, ['gaps', 'contract', 'count']);
+  add7('gaps 3', w => { w.gaps = ['a', 'b', 'c']; }, ['gaps[2]', 'contract', 'count']);
   add7('gap over 160', w => { w.gaps = [`SECRET_MARKER_137${'g'.repeat(160)}`]; }, ['gaps[0]', 'contract', 'text']);
   add7('material what blank', w => { w.material[0].what = ''; }, ['material[0].what', 'contract', 'text']);
   add7('material at number', w => { w.material[0].at = 137; }, ['material[0].at', 'contract', 'shape']);
@@ -54,7 +54,7 @@ export function corpus(mods) {
   add7('match extra key', w => { w.matches[3].EXTRA_KEY_137 = 'SECRET_MARKER_137'; }, ['matches[3]', 'contract', 'match-contract']);
   add7('match text secret-like', w => { w.matches[3].text = `값 ${SECRETISH}`; }, ['matches[3]', 'contract', 'secret-like']);
   add7('match replaces unknown prior', w => { w.matches[3].replaces = 'M09'; }, ['matches[3].replaces', 'contract', 'prior']);
-  add7('matches 25', w => { w.matches = Array.from({ length: 25 }, () => w.matches[3]); }, ['matches', 'contract', 'count']);
+  add7('matches 25', w => { w.matches = Array.from({ length: 25 }, () => w.matches[3]); }, ['matches[24]', 'contract', 'count']);
   // Structured refusals that existed before 137 (they must stay exactly as they were).
   add7('kept: condition not-anchor', w => { w.matches[1].aboutAt = K.CODE_META.version; });
   add7('kept: invalid new key', w => { w.parts[0].ref = 'new:SecretMarker'; });

@@ -146,13 +146,13 @@ test('49-6 validation: brief is map.7 only, exactly true, with no note or curren
 test('49-7 instructions: the brief-parts rule goes only with a brief part; the later recipes and m7 recipe are bumped', () => {
   const brief = build(grown()).ask, plain = structuredClone(brief);
   for (const x of plain.parts) delete x.brief;
-  assert.equal(P.map7Prompt(brief), P.MAP7_PROMPT + P.MAP7_VOCABULARY + P.MAP7_BRIEF + P.map7Guidance(brief));
-  assert.equal(P.map7Prompt(plain), P.MAP7_PROMPT + P.MAP7_VOCABULARY + P.map7Guidance(plain), 'an ask without a brief part renders as before');
+  assert.equal(P.map7Prompt(brief), P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_VOCABULARY + P.MAP7_BRIEF + P.map7Guidance(brief));
+  assert.equal(P.map7Prompt(plain), P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_VOCABULARY + P.map7Guidance(plain), 'an ask without a brief part renders as before');
   assert.equal(P.mapBriefRule(plain), ''); assert.equal(P.mapBriefRule(brief), P.MAP7_BRIEF);
   for (const said of ['"brief":true', '현재 유효한 기존 부분', 'name·readAs·부모(parentId)·relations', '새 부분으로 만들지 않는다', '없는 것', 'replaces나 corrections로 가리키지 않는다'])
     assert.ok(P.MAP7_BRIEF.includes(said), said);
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.4:') && P.MAP7_RECIPE.includes('brief-parts.1'));
-  assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.49', 'later-map-divided.49']);
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.5:') && P.MAP7_RECIPE.includes('brief-parts.1'));
+  assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.50', 'later-map-divided.50']);
 });
 
 /* ---------- review of .49: what names a part ---------- */
@@ -184,7 +184,9 @@ test('49-8 a later v5 page that names parts only by their B IDs (the C-PART rows
   for (let i = 0; i < ids.length - 1; i++) p = D.addRelation(p, ids[i], ids[i + 1], 'flow', '관계 설명 '.padEnd(200, '긴 설명. '));
   p = parseProject(JSON.stringify(D.pasteRecord(p, page2, null).project));
   const inp = build(p), ask = inp.ask, sent = M.askRecords(ask);
-  assert.equal(inp.problem, null); assert.equal(ask.records.length, 1);
+  assert.equal(inp.problem, null); assert.equal(ask.records.length, 2);
+  // Recipe .50 (row-ledger.ts): page 1's C-PART rows the first map left unplaced (past its 36 new parts) go again, named, before page 2.
+  assert.ok(/앞선 정리에서 반영되지 않아 다시 보낸 행 4개: C-PART B37·B38·B39·B40/.test(ask.records[0].note), ask.records[0].note);
   const cited = [7, 21, 33].map(i => ask.parts.find(x => x.name === libName(i)));
   assert.ok(cited.every(Boolean) && cited.every(x => ![...sent.values()].some(r => r.text.includes(x.name))), 'the page says them by B ID only');
   assert.ok(ask.parts.some(x => x.brief), 'the map is over its budget: some parts go brief');
