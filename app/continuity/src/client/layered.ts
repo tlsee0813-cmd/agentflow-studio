@@ -22,7 +22,8 @@ export interface LNode { id: string; w: number; h: number;
   order: number;
   /** Pins by relation end ('<relId>|in' / '|out'), from the top. */
   pins?: Record<string, number>;
-  /** A participant or an external system (a hint only: a line back to a participant is the cheaper one to turn). */
+  /** A hint only: a line back to a participant (outside) or from a store read back by its writer is the one turned; an external
+   * system is laid as any part (its kind mark says what it is). */
   role?: 'outside' | 'external' | 'store' | null;
   /** Least room above and below it from another part (an open group keeps a lane for lines beside it). */
   gutter?: number }
@@ -331,11 +332,11 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
 
   // Coordinates under one spacing; the slack spending tries wider spacings (F.3).
   const place = (rowGap: number, laneMargin: number, layerGap: number) => {
-    const out: { ys: number[]; xs: number[]; colX: number[]; colW: number[]; gaps: number[]; tracks: Map<string, number>[]; w: number; h: number; y0: number }[] = [];
+    const out: { ys: number[]; xs: number[]; colX: number[]; colW: number[]; gaps: number[]; tracks: Map<string, number>[]; w: number; h: number; y0: number; fold: number; dx: number; dy: number }[] = [];
     for (const b of laid) {
       const sep = (u: number, v: number) => { const du = b.isDummy[u]!, dv = b.isDummy[v]!; const g = du && dv ? opt.laneTrack : du || dv ? laneMargin : Math.max(rowGap, b.gut[u]!, b.gut[v]!); return (b.h[u]! - b.anc[u]!) + g + b.anc[v]!; };
       const ys = brandesKoepf(b.layers, b.segs, b.isDummy, sep, b.spineSet);
-      polish(b.layers, b.segs, ys, sep, b.isDummy, b.spineSet);
+      polish(b.layers, b.segs, ys, sep, b.isDummy);
       for (let k = 0; k < ys.length; k++) ys[k] = half(ys[k]!);
       // Columns: as wide as their widest member, left-aligned; each gap as wide as the tracks its height-changing runs need.
       const colW = b.layers.map(l => Math.max(0, ...l.map(k => b.wd[k]!)));
@@ -360,8 +361,28 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       }
       const colX: number[] = []; let x = 0; for (let L = 0; L < b.layers.length; L++) { colX.push(x); x += colW[L]! + (gaps[L] ?? 0); }
       const real = b.layers.flat().filter(k => !b.isDummy[k]);
+      const extent = (ls: number[][]) => { const ks = ls.flat(); return { top: Math.min(...ks.map(k => ys[k]! - (b.isDummy[k] ? 0 : b.anc[k]!))), bot: Math.max(...ks.map(k => ys[k]! + (b.isDummy[k] ? 0 : b.h[k]! - b.anc[k]!))) }; };
       const top = Math.min(...real.map(k => ys[k]! - b.anc[k]!)), bot = Math.max(...real.map(k => ys[k]! - b.anc[k]! + b.h[k]!));
-      out.push({ ys, xs: [], colX, colW, gaps, tracks, w: colX.at(-1)! + colW.at(-1)!, h: bot - top, y0: top });
+      const o = { ys, xs: [] as number[], colX, colW, gaps, tracks, w: colX.at(-1)! + colW.at(-1)!, h: bot - top, y0: top, fold: -1, dx: 0, dy: 0 };
+      // Fold (F.3, for one long chain): the main block, far wider than the window's shape, continues on a second row under its first
+      // half, as text wraps, cut after the column whose gap one line alone crosses (nearest the middle, within its middle 40%); that line
+      // finds its own route. Both rows read left to right; a fold that would not bring the drawing nearer the window's shape is not made.
+      if (opt.spend && out.length === 0 && b.layers.length >= 6 && o.w / Math.max(1, o.h) > 1.6 * Math.max(0.5, opt.aspect)) {
+        const layerOf = new Map<number, number>(); b.layers.forEach((l, li) => l.forEach(k => layerOf.set(k, li)));
+        let best = -1, bestD = Infinity;
+        for (let L = 1; L + 2 < b.layers.length; L++) {
+          const cut = colX[L + 1]!, share = cut / o.w; if (share < 0.3 || share > 0.7) continue;
+          const across = [...b.chains.values()].filter(ch => { const ls = ch.path.map(k => layerOf.get(k)!); return Math.min(...ls) <= L && Math.max(...ls) > L; }).length;
+          if (across !== 1) continue;
+          const d = Math.abs(share - 0.5); if (d < bestD) { bestD = d; best = L; }
+        }
+        if (best >= 0) {
+          const A = extent(b.layers.slice(0, best + 1)), B = extent(b.layers.slice(best + 1)), dx = -colX[best + 1]!, dy = A.bot - B.top + 2 * Math.max(rowGap, opt.laneMargin * 2 + opt.laneTrack);
+          const w2 = Math.max(colX[best]! + colW[best]!, o.w + dx), t2 = Math.min(A.top, B.top + dy), b2 = Math.max(A.bot, B.bot + dy), asp = Math.max(0.5, opt.aspect);
+          if (Math.abs(Math.log(w2 / Math.max(1, b2 - t2) / asp)) < Math.abs(Math.log(o.w / Math.max(1, o.h) / asp))) Object.assign(o, { fold: best, dx, dy, w: w2, h: b2 - t2, y0: t2 });
+        }
+      }
+      out.push(o);
     }
     // Shelf packing (A.8): the main block, then the others in rows under it no wider than it (or the widest block).
     const bg = opt.blockGap ?? rowGap * 2, rowW = Math.max(0, ...out.map(o => o.w));
@@ -397,7 +418,8 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     const o = P.out[bi]!, d = P.off[bi]!, nodeOf = b.nodeOf;
     b.layers.forEach((l, L) => {
       const col: string[] = [];
-      for (const k of l) { if (b.isDummy[k]) continue; const nd = nodes[nodeOf[k]!]!; pos.set(nd.id, { x: half(d.x + o.colX[L]!), y: half(d.y + o.ys[k]! - b.anc[k]! - o.y0) }); layer.set(nd.id, colBase + L); col.push(nd.id); }
+      const fx = o.fold >= 0 && L > o.fold ? o.dx : 0, fy = o.fold >= 0 && L > o.fold ? o.dy : 0;
+      for (const k of l) { if (b.isDummy[k]) continue; const nd = nodes[nodeOf[k]!]!; pos.set(nd.id, { x: half(d.x + o.colX[L]! + fx), y: half(d.y + o.ys[k]! - b.anc[k]! - o.y0 + fy) }); layer.set(nd.id, colBase + L); col.push(nd.id); }
       order.push(col);
     });
     colBase += b.layers.length;
@@ -405,12 +427,15 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     const L = new Map<number, number>(); b.layers.forEach((l, li) => l.forEach(k => L.set(k, li)));
     for (const [i, ch] of b.chains) {
       const p = ch.path; length += L.get(p.at(-1)!)! - L.get(p[0]!)!;
+      // The line across a fold has no reserved route (the router finds its own); the second row's routes move with it.
+      const after = (li: number) => o.fold >= 0 && li > o.fold, lo = Math.min(...p.map(k => L.get(k)!)), hi = Math.max(...p.map(k => L.get(k)!));
+      if (o.fold >= 0 && lo <= o.fold && hi > o.fold) continue;
       const xs: number[] = [], ys: number[] = [];
       for (let j = 0; j + 1 < p.length; j++) {
         const Lj = L.get(p[j]!)!, gl = o.colX[Lj]! + o.colW[Lj]!, gw = o.gaps[Lj]!, t = o.tracks[Lj]!.get(edges[i]!.key);
         const n = o.tracks[Lj]!.get('#') ?? 0, mid = gl + gw / 2;
-        xs.push(half(d.x + (t === undefined ? mid : mid - ((n - 1) * opt.laneTrack) / 2 + t * opt.laneTrack)));
-        if (j + 2 < p.length) ys.push(half(d.y + o.ys[p[j + 1]!]! - o.y0));
+        xs.push(half(d.x + (after(Lj) ? o.dx : 0) + (t === undefined ? mid : mid - ((n - 1) * opt.laneTrack) / 2 + t * opt.laneTrack)));
+        if (j + 2 < p.length) ys.push(half(d.y + o.ys[p[j + 1]!]! - o.y0 + (after(L.get(p[j + 1]!)!) ? o.dy : 0)));
       }
       channels.set(edges[i]!.key, ch.rev ? { xs: xs.reverse(), ys: ys.reverse() } : { xs, ys });
     }
@@ -579,11 +604,10 @@ function brandesKoepf(layers: number[][], segs: Seg[], isDummy: boolean[], sep: 
 /** Priority polish (A.7-5): each real node (the spine's too: B–K already set it straight, and a hub on it pulled to its partners' middle
  * reads better than one held at the top) moves toward the weighted median of its neighbours' anchors, inside the room
  * its layer's order leaves. */
-function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, v: number) => number, isDummy: boolean[], spine: Set<number>) {
+function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, v: number) => number, isDummy: boolean[]) {
   const nb = new Map<number, { k: number; w: number }[]>();
   // The spine's own steps weigh four times: the main flow stays one straight line unless most of a part's lines pull it away.
   for (const s of segs) { const w = s.spine ? 4 * s.w : s.w; (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w }); }
-  void spine;
   // A long line's dummy rows move as one row (a stair of rows would add turns): to the height of its source, else of its target, where
   // every row it passes leaves room; else it stays.
   const chains = new Map<string, { ds: number[]; a: number; b: number }>();

@@ -144,10 +144,15 @@ test('S8-7 beside a folded group with six partners both ways, the paired strokes
   assert.equal(paired.length, 6);
   const segs = r => [...r.values()].flatMap(x => x.pts.slice(1, -2).map((p, i) => ({ p, q: x.pts[i + 2] })).filter(s => Math.abs(s.p.x - s.q.x) < 0.01 && Math.abs(s.p.y - s.q.y) > 1));
   const runs = r => segs(r).map(s => s.p.x);
-  const xsBefore = runs(routeEdges(boxes, both)), after = segs(routeEdges(boxes, paired)), xsAfter = after.map(s => s.p.x);
-  // Beauty v3 (D.3): ends past a side's budget take a face (both sets alike), so the six paired strokes are compared with their own count:
-  // at most one gap run each.
-  void xsBefore; assert.ok(xsAfter.length <= paired.length, `${xsAfter.length} runs for ${paired.length} strokes`);
+  const rb = routeEdges(boxes, both), ra = routeEdges(boxes, paired), xsBefore = runs(rb), after = segs(ra), xsAfter = after.map(s => s.p.x);
+  // Beauty v3 (D.3): ends past a side's budget take a face (both sets alike), so the gap runs no longer count the pairing's saving: the
+  // paired strokes take half the group's ends and at most half the ink of the twelve, and never more gap runs than before (at most one
+  // each).
+  const endsOn = r => new Set([...r.values()].flatMap(x => [x.pts[0], x.pts.at(-1)]).filter(p => p.x >= g.x - 0.5 && p.x <= g.x + g.w + 0.5 && p.y >= g.y - 0.5 && p.y <= g.y + g.h + 0.5).map(p => `${Math.round(p.x)},${Math.round(p.y)}`)).size;
+  const ink = r => [...r.values()].reduce((a, x) => a + x.pts.reduce((s, q, i) => (i ? s + Math.abs(q.x - x.pts[i - 1].x) + Math.abs(q.y - x.pts[i - 1].y) : 0), 0), 0);
+  assert.ok(endsOn(ra) <= endsOn(rb) / 2, `ends on the group ${endsOn(rb)} → ${endsOn(ra)}`);
+  assert.ok(ink(ra) <= ink(rb) / 2, `ink ${Math.round(ink(rb))} → ${Math.round(ink(ra))}`);
+  assert.ok(xsAfter.length <= Math.min(xsBefore.length, paired.length), `${xsBefore.length} → ${xsAfter.length} runs for ${paired.length} strokes`);
   // Beauty v3 (D.3): with the side over its budget one end takes the top face, and runs that never meet may share an x band; runs that
   // overlap along their length keep TRACK_GAP apart.
   for (let i = 0; i < after.length; i++) for (let j = i + 1; j < after.length; j++) {

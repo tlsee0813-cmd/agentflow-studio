@@ -28,7 +28,7 @@ import { correctRequestMatch, unlinkReplacement, requestComparison } from '../sh
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type RelationView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { groupAxis, groupWordOf, recordedAxis, filedUnder, SHELF_TITLE, SHELF_TIP, OUTSIDE_TITLE, OUTSIDE_TIP, BOUNDARY_TITLE, BOUNDARY_TIP } from './map-regions.js';
-import { layoutScope, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, unionRect, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
+import { layoutScope, stickyAspect, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, unionRect, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
@@ -39,12 +39,12 @@ import { glyphSvg } from './card-glyphs.js';
 import { cardFace, cutsWord, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
-import { labelSpots, polylineHitsRect, portSpots, cuePoints } from './map-labels.js';
+import { labelSpots, polylineHitsRect, portSpots } from './map-labels.js';
 import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep, formLoop, chooseForm, formUsable, nextForm, readForm, writeForm, formKeyOf, shortRef,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
@@ -829,7 +829,9 @@ function withTitle() {
 let planRows: Map<string, string[]> | null = null, planRowsKey = '';
 /** The shape of the room a first view has for its parts (the window's map without the header, the title above the parts and
  * the margins; never the reading pane): what an unlinked block of parts is balanced against. */
-const mapAspect = () => Math.max(1, Math.min(3, (window.innerWidth - 48) / Math.max(240, window.innerHeight - 252)));
+/** The window's aspect as the layout takes it: a step of ASPECTS, kept across small resizes (map-layout stickyAspect). */
+let aspectStep: number | null = null;
+const mapAspect = () => (aspectStep = stickyAspect(Math.max(1, Math.min(3, (window.innerWidth - 48) / Math.max(240, window.innerHeight - 252))), aspectStep));
 /** Places held for the view at hand (holdPlaces): the automatically placed boxes keep where they are while a part is dragged
  * and until the next redraw, over the stored places but never written to them. */
 let held: Positions | null = null;
@@ -2397,20 +2399,31 @@ function placeLoneHead(crossing?: Map<string, { all: number }>) {
 }
 /** Beauty v3 (B.2): the system boundary and the participants' caption, beside the parts they name, never a zone or a column.
  * - External systems that sit together in one column (consecutive in its order, nothing of the system between them) are one cluster.
- *   Each cluster has a quiet 1px rule 14px off it on each side its lines really arrive from (read from the routed ends), spanning the
- *   cluster; a rule that would touch any box is not drawn (the cards keep their external marks). The caption 「시스템 경계 · 기록 기준」
- *   reads once, over the first cluster in reading order. It claims what the old long rule claimed: lines crossing here leave the
+ *   A cluster at the system's edge in its rows (its lines arrive from one side only, and nothing of the system lies on its other side
+ *   across those rows) has a quiet 1px rule 14px off it on the side its lines arrive from, spanning the cluster; a rule that would touch
+ *   any box, or that a line of other parts would cross, is not drawn. An external system in the middle of a chain reads by its own
+ *   external mark alone. The caption 「시스템 경계 · 기록 기준」 reads once, beside the first rule in reading order, off every box and
+ *   every routed line, measured at the size it is drawn. It claims what the old long rule claimed: lines crossing here leave the
  *   system, as recorded.
  * - Participants: two or more together in one column carry the small caption 「참여자」 over them (a caption of recorded kinds, not a
  *   group); a single one reads by its glyph and kind word.
- * Placed from the boxes and the routes (a drag moves them with their parts); nothing is drawn for an empty band. */
+ * Placed from the boxes and the routes (a drag moves them with their parts); nothing is drawn for an empty band. The captions' places
+ * are kept (bandRects) so no line label is set over them. */
+let bandRects: Rect[] = [];
 function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
-  const world = $('world'); world.querySelectorAll('.band-head, .band-line, .band-zone').forEach(x => x.remove());
+  const world = $('world'); world.querySelectorAll('.band-head, .band-line').forEach(x => x.remove());
+  bandRects = [];
   const boxes = [...lay.boxes.values()], hit = (r: Rect) => boxes.some(b => r.x < b.x + b.w + 1 && b.x < r.x + r.w + 1 && r.y < b.y + b.h + 1 && b.y < r.y + r.h + 1);
-  const onLine = (r: Rect) => [...routed.values()].some(q => q.pts.some((p, i) => { const n = q.pts[i + 1]; if (!n) return false; return Math.max(p.x, n.x) > r.x - 2 && Math.min(p.x, n.x) < r.x + r.w + 2 && Math.max(p.y, n.y) > r.y - 2 && Math.min(p.y, n.y) < r.y + r.h + 2; }));
+  const crosses = (q: Routed, r: Rect) => q.pts.some((p, i) => { const n = q.pts[i + 1]; if (!n) return false; return Math.max(p.x, n.x) > r.x - 2 && Math.min(p.x, n.x) < r.x + r.w + 2 && Math.max(p.y, n.y) > r.y - 2 && Math.min(p.y, n.y) < r.y + r.h + 2; });
+  const onLine = (r: Rect) => [...routed.values()].some(q => crosses(q, r));
+  // A caption is drawn scaled up at low zoom (styles.css .band-head): its place is checked at that size (at least the fit view's).
+  const u = parseFloat($('space').style.getPropertyValue('--u')) || 1, capScale = Math.max(1.3, Math.min(u, Math.max(u * 0.7692, 1.5385)));
+  const capSize = (cls: string, text: string) => { const el = h('div', { class: `band-head ${cls}`, style: 'left:0;top:0;visibility:hidden' }, text); world.append(el); const w = el.offsetWidth * capScale, hh = el.offsetHeight * capScale; el.remove(); return { w, h: hh }; };
+  const inLayers = new Set(lay.layers.flat());
   const clusters = (ids: string[]) => {
     const set = new Set(ids), out: Box[][] = [];
-    const cols = lay.layers.length ? lay.layers : [ids];
+    // The layers' columns, and the parts no line places (each its own column).
+    const cols = [...(lay.layers.length ? lay.layers : [ids.filter(i => inLayers.has(i))]), ...ids.filter(i => !inLayers.has(i)).map(i => [i])];
     for (const col of cols) {
       const list = col.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b && b.kind !== 'ghost').sort((p, q) => p.y - q.y);
       let run: Box[] = [];
@@ -2425,9 +2438,10 @@ function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
     }
     return out.sort((p, q) => p[0]!.x - q[0]!.x || p[0]!.y - q[0]!.y);
   };
-  const ext = clusters(lay.bands.boundary);
+  const external = new Set(lay.bands.boundary), outside = new Set(lay.bands.outside);
+  const system = boxes.filter(b => b.kind !== 'ghost' && !external.has(b.id) && !outside.has(b.id) && !external.has(b.container) && !outside.has(b.container));
   let captioned = false;
-  for (const c of ext) {
+  for (const c of clusters(lay.bands.boundary)) {
     const x0 = Math.min(...c.map(b => b.x)), x1 = Math.max(...c.map(b => b.x + b.w)), top = Math.min(...c.map(b => b.y)) - 10, bottom = Math.max(...c.map(b => b.y + b.h)) + 10;
     const ids = new Set(c.map(b => b.id)), sides = new Set<'l' | 'r'>();
     for (const r of routed.values()) {
@@ -2437,23 +2451,33 @@ function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
         if (Math.abs(q.x - b.x) < 1.5) sides.add('l'); else if (Math.abs(q.x - b.x - b.w) < 1.5) sides.add('r');
       }
     }
-    let drawn = false;
-    for (const s of ['l', 'r'] as const) {
-      if (!sides.has(s)) continue;
-      const x = s === 'l' ? x0 - 14 : x1 + 14;
-      if (hit({ x: x - 1, y: top, w: 2, h: bottom - top })) continue;
-      world.append(h('div', { class: 'band-line band-tick', title: BOUNDARY_TIP, style: `left:${x}px;top:${top}px;height:${bottom - top}px` })); drawn = true;
+    let tick: { x: number; s: 'l' | 'r' } | null = null;
+    const rows = (b: Box) => b.y < bottom + 40 && b.y + b.h > top - 40;
+    if (sides.size === 1) {
+      const s = [...sides][0]!, x = s === 'l' ? x0 - 14 : x1 + 14;
+      const beyond = system.some(b => rows(b) && (s === 'l' ? b.x >= x1 : b.x + b.w <= x0));
+      const rect = { x: x - 1, y: top, w: 2, h: bottom - top };
+      const foreign = [...routed.values()].some(q => { const e = edgeOf(q.key); return !!e && !ids.has(e.from) && !ids.has(e.to) && crosses(q, rect); });
+      if (!beyond && !foreign && !hit(rect)) {
+        world.append(h('div', { class: 'band-line band-tick', title: BOUNDARY_TIP, style: `left:${x}px;top:${top}px;height:${bottom - top}px` }));
+        tick = { x, s };
+      }
     }
-    if (!captioned && (drawn || sides.size === 0)) {
-      // Over the cluster, else under it: off every box and every routed line.
-      const cap = [{ x: x0, y: top - 18, w: 150, h: 16 }, { x: x0, y: bottom + 2, w: 150, h: 16 }].find(r => !hit(r) && !onLine(r));
-      if (cap) { world.append(h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${cap.x}px;top:${cap.y}px` }, BOUNDARY_TITLE)); captioned = true; }
+    if (!captioned && tick) {
+      // Over the cluster, else under it, else over or under the rule on its outer side: off every box and every routed line.
+      const { w, h: hh } = capSize('band-boundary', BOUNDARY_TITLE), gap = 4;
+      const cap = [{ x: x0, y: top - hh - gap }, { x: x0, y: bottom + gap }, { x: x1 - w, y: top - hh - gap }, { x: x1 - w, y: bottom + gap },
+        { x: tick.s === 'l' ? tick.x - w : tick.x, y: top - hh - gap }, { x: tick.s === 'l' ? tick.x - w : tick.x, y: bottom + gap }]
+        .map(p => ({ ...p, w, h: hh })).find(r => !hit(r) && !onLine(r));
+      // Drawn from its top left: its box grows down and right from there (transform-origin 0 100% is its bottom left).
+      if (cap) { world.append(h('div', { class: 'band-head band-boundary', title: BOUNDARY_TIP, style: `left:${cap.x}px;top:${cap.y + cap.h - cap.h / capScale}px` }, BOUNDARY_TITLE)); bandRects.push(cap); captioned = true; }
     }
   }
   for (const c of clusters(lay.bands.outside)) {
     if (c.length < 2) continue;
-    const x0 = Math.min(...c.map(b => b.x)), cap = { x: x0, y: Math.min(...c.map(b => b.y)) - 20, w: 50, h: 16 };
-    if (!hit(cap)) world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${cap.x}px;top:${cap.y}px` }, OUTSIDE_TITLE));
+    const { w, h: hh } = capSize('band-outside', OUTSIDE_TITLE);
+    const x0 = Math.min(...c.map(b => b.x)), cap = { x: x0, y: Math.min(...c.map(b => b.y)) - hh - 4, w, h: hh };
+    if (!hit(cap) && !onLine(cap)) { world.append(h('div', { class: 'band-head band-outside', title: OUTSIDE_TIP, style: `left:${cap.x}px;top:${cap.y + cap.h - cap.h / capScale}px` }, OUTSIDE_TITLE)); bandRects.push(cap); }
   }
 }
 function moveLoneHead() {
@@ -2656,6 +2680,7 @@ function placeLineLabels() {
   const blocks: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b)).concat(lay.heads);
   if (titleH) blocks.push(titleRect());
   if (shortRect) blocks.push(shortRect); // an open short expansion reads where it is: no verb or count is set under it
+  blocks.push(...bandRects); // nor over the boundary's or the participants' caption
   const clear = (r: Rect) => !blocks.some(b => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3);
   // At rest: every line drawn now (on a busy map its summary lines, each with its count) carries its label. Lines of one kind
   // meeting the same part share one label only when theirs would read the same (the first of them carries it).
@@ -2664,23 +2689,33 @@ function placeLineLabels() {
   const drawnNow = shownLines(), badged = [...world.querySelectorAll<SVGGElement>('.edge.badged')].filter(g => drawnNow.has(g.dataset.key!) && !g.classList.contains('hit'));
   if (!selected && !planView.isOpen()) {
     const drawn = drawnNow, seenEnd = new Set<string>();
-    // Beauty v3 (E): at the name-tag view the lens's foreground lines say their condition, else what they send or what starts them.
-    const fit = face === 'tag' ? placeFitLabels(box, clear, blocks, drawn) : new Map<string, Set<string>>();
-    const fitAny = new Set([...fit.values()].flatMap(k => [...k])), fitLenses = (key: string) => [...fit].filter(([, k]) => k.has(key)).map(([l]) => l).join(' ');
+    // The badges (at the name-tag view: the port marks) first, so the fit labels keep off them.
     placeBadges(box, badged, clear, blocks, drawn);
+    // Beauty v3 (E): at the name-tag view the lens's foreground lines say their condition, else what they send or what starts them.
+    // Every lens's set is placed now (a lens switch re-places nothing); the labels, counts and marks set for every lens read under a
+    // lens only where they keep off that lens's fit labels (giveWay): 구성, with no fit labels, keeps all of them.
+    const fit = face === 'tag' ? placeFitLabels(box, clear, drawn, restLabels(tier) === 'counts') : new Map<string, FitSet>();
+    const giveWay = (sel: string) => box.querySelectorAll<HTMLElement>(sel).forEach(c => {
+      const k = c.dataset.key ?? c.dataset.cue ?? '', inv = labelInv(), r = { x: parseFloat(c.style.left), y: parseFloat(c.style.top), w: c.offsetWidth * inv, h: c.offsetHeight * inv };
+      const ls = [...fit].filter(([, f]) => (c.classList.contains('edge-cue') ? f.conds.has(k) : f.keys.has(k)) || (Number.isFinite(r.x) && f.rects.some(o => r.x < o.x + o.w + 2 && o.x < r.x + r.w + 2 && r.y < o.y + o.h + 2 && o.y < r.y + r.h + 2))).map(([l]) => l);
+      if (ls.length) c.dataset.fit = ls.join(' '); else delete c.dataset.fit;
+    });
+    // A conditional line whose fit label says its condition (with its ◇) carries no second ◇ at its port under that lens.
+    giveWay('.edge-cue');
     // By zoom tier (map design v3 5.5, line-grammar restLabels): the overview keeps only counts and condition badges, the middle
     // tier short labels on the main flow and a scenario path, near every label in full. Labels only show or hide.
     const mode = restLabels(tier);
     placedTier = tier;
     // A line's count gives way, under a lens, to that lens's label of it (styles.css: data-fit).
-    if (mode === 'counts') { placeCounts(box, clear, blocks, false, drawn, true); box.querySelectorAll<HTMLElement>('.edge-count').forEach(c => { const l = fitLenses(c.dataset.key!); if (l) c.dataset.fit = l; }); return; }
-    const rest = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit') && !fitAny.has(g.dataset.key!))
+    if (mode === 'counts') { placeCounts(box, clear, blocks, false, drawn, true); giveWay('.edge-count'); return; }
+    const rest = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit'))
       .filter(g => restLabelShown(mode, { spine: g.classList.contains('spine'), path: g.classList.contains('sc-path') })).filter(g => {
         const e = edgeOf(g.dataset.key); if (!e) return false;
         const k = `${e.to}|${e.kind}|${lineChans.get(e.key) ?? ''}|${restWord(e)}`; if (seenEnd.has(k)) return false;
         seenEnd.add(k); return true;
       });
     if (rest.length) placeRestLabels(box, rest, clear, mode === 'short');
+    if (fit.size) giveWay('.edge-label:not(.fit)');
     return;
   }
   placedTier = tier;
@@ -2738,55 +2773,80 @@ function placeLineLabels() {
  * its first place all the same (.forced): a line whose record says when it flows never reads as one that always flows. A
  * selected line's badge reads whole and taller (its full words, the mode as read); its line's own badges are set first. */
 /** Beauty v3 (E): the fit (name-tag) view's line labels, at rest with nothing selected: each line in a lens's foreground says its
- * condition in the record's words (rank 1, nearest the branch), else what it sends or what starts it (rank 2; an optional line with a
- * small ◌ first), cut to 14 characters and 「…」 (8 when no place is found), on a level run of its own line, 12px clear of bends, heads
- * and ports, never on another line, a card, a head, the title or another label of its lens. Everything else reads on hover.
+ * condition in the record's words (rank 1, nearest the branch; a small ◇ in front, which then stands for its port mark), else what it
+ * sends or what starts it (rank 2), cut to 14 characters and 「…」 (8 when no place is found; a single code word is cut only past its
+ * end), on a level run of its own line, 12px clear of bends, heads and ports, never on another line, a card, a head, the title, a
+ * port mark or another label of its lens. A condition the record did not put in words says what the line sends instead (its ◇ stays
+ * at the port). Everything else reads on hover.
  * The labels of every lens with a foreground at rest (데이터: data lines, 시작·반복: control lines, 시나리오: the path) are placed at
- * once from the geometry alone, each lens's set apart from the others; the lens only shows its own (styles.css, data-lens), so switching
- * lens re-places nothing (principle 4). The ◇ of a conditional line stays at its port (placeCue), under every lens. Returns, per lens,
- * the lines labelled. */
+ * once from the geometry alone, each measured as drawn and each lens's set apart from the others; the lens only shows its own
+ * (styles.css, data-lens), so switching lens re-places nothing (principle 4). Returns, per lens, the lines labelled, the lines whose
+ * label says their condition and the labels' places. */
+type FitSet = { keys: Set<string>; conds: Set<string>; rects: Rect[] };
 const FIT_LENSES = ['data', 'start', 'scenario'] as const;
-function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, blocks: Rect[], drawn: Set<string>): Map<string, Set<string>> {
-  const world = $('world'), inv = lineInv(), said = opened ? relationLines(opened.project) : new Map<string, LineSaid>(), out = new Map<string, Set<string>>();
+/** A fit label's words cut to n characters: its whole words and 「…」, at least 4 characters of them; else a single code word
+ * (`G_IS_STANDALONE`) whole up to n + 6; else null (no such form: a fragment like 「원시…」 or 「not…」 says nothing; the hover does). */
+function fitCut(t: string, n: number): string | null {
+  const s = t.replace(/\s+/g, ' ').trim(); if (s.length <= n) return s;
+  const w = wholeWords(s, n - 1); if (w.length >= Math.max(4, (n - 1) / 2)) return `${w}…`;
+  const tok = /^\S+/.exec(s)?.[0] ?? s; if (tok.length >= 4 && tok.length <= n + 6) return tok === s ? s : `${tok}…`;
+  return null;
+}
+function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Set<string>, far = false): Map<string, FitSet> {
+  const world = $('world'), inv = lineInv(), said = opened ? relationLines(opened.project) : new Map<string, LineSaid>(), out = new Map<string, FitSet>();
   const all = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit') && !g.classList.contains('stub'));
-  const cut = (t: string, n: number) => { const s = t.replace(/\s+/g, ' ').trim(); if (s.length <= n) return s; const w = wholeWords(s, n - 1); return `${w.length >= (n - 1) / 2 ? w : s.slice(0, n - 1).trim()}…`; };
   type FitSpot = LabelSpot & { el: HTMLElement; text: string };
-  const placed: Rect[] = [];
-  for (const lens of FIT_LENSES) {
-    const fg = (g: SVGGElement) => (lens === 'scenario' ? g.classList.contains('sc-path') : lensLineFg(lens, { key: g.dataset.key!, channel: lineChans.get(g.dataset.key!) ?? null, from: g.dataset.from!, to: g.dataset.to! }, {}));
+  // At the overview (where the other lines carry only their counts) 구성 has its own set too: the conditions said in words and what
+  // starts each control line (the judges' at-least: condition and trigger).
+  for (const lens of far ? [...FIT_LENSES, 'compose' as const] : FIT_LENSES) {
+    const fg = (g: SVGGElement) => (lens === 'compose' ? lineBadges.get(g.dataset.key!)?.kind === 'condition' || lineChans.get(g.dataset.key!) === 'control' : lens === 'scenario' ? g.classList.contains('sc-path') : lensLineFg(lens, { key: g.dataset.key!, channel: lineChans.get(g.dataset.key!) ?? null, from: g.dataset.from!, to: g.dataset.to! }, {}));
     // Lines of one channel meeting the same part that would read the same (five people starting one screen) share one label, set on
     // whichever of their lines has room; the label names each of them (data-also), so the hover of any reads it.
-    const spots: FitSpot[] = [], els: HTMLElement[] = [], groups = new Map<string, { el: HTMLElement; keys: string[] }>();
+    const spots: FitSpot[] = [], els: HTMLElement[] = [], groups = new Map<string, { el: HTMLElement; keys: string[]; cond: boolean; full: string }>();
     for (const g of all.filter(fg)) {
       const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
-      const b = lineBadges.get(e.key), cond = b?.kind === 'condition', opt = b?.kind === 'optional';
-      // A condition in the record's own words (the relation's 조건 column as read), never the bare word 「조건」.
-      const words = cond ? e.ids.map(id => conditionWords(said.get(id)?.when)).find(w => !!w && w !== '조건') ?? null : null;
-      const full = (cond ? words ?? b!.full : restWord(e)).replace(/[「」『』‘’“”"]/g, '').trim(); if (!full) continue;
-      const mark = !cond && opt ? '◌ ' : '', gk = `${e.to}|${lineChans.get(e.key) ?? e.kind}|${mark}${full}`, same = groups.get(gk);
-      const el = same?.el ?? h('span', { class: `edge-label fit k-${e.kind}${cond ? ' fit-cond' : ''}`, 'data-key': e.key, 'data-lens': lens, 'data-full': full });
-      if (same) same.keys.push(e.key); else { groups.set(gk, { el, keys: [e.key] }); box.append(el); els.push(el); }
+      const b = lineBadges.get(e.key);
+      // A condition in the record's own words (the relation's 조건 column as read), never the bare word 「조건」 nor the note that the
+      // record holds none (COND_UNSAID: a fact for the hover, not for the map).
+      const words = b?.kind === 'condition' ? e.ids.map(id => conditionWords(said.get(id)?.when)).find(w => !!w && w !== '조건' && w !== COND_UNSAID) ?? null : null;
+      // Else what it sends or what starts it; the lens already says a line is a start, so 「기동 · 」 is left off, and a bare channel
+      // or kind word (기동, 제어, 넘겨줌) says nothing the lens does not: that line is left to its hover.
+      const cond = !!words, said0 = (words ?? restWord(e)).replace(/[「」『』‘’“”"]/g, '').trim(), full = cond ? said0 : said0.replace(/^기동\s*·\s*/, '').trim();
+      if (lens === 'compose' && !cond && lineChans.get(e.key) !== 'control') continue;
+      if (!full || (!cond && (full === '기동' || full === '제어' || full === (REL_LABEL[e.kind] ?? e.kind)))) continue;
+      const gk = `${e.to}|${lineChans.get(e.key) ?? e.kind}|${cond ? '◇' : ''}${full}`, same = groups.get(gk);
+      const el = same?.el ?? h('span', { class: `edge-label fit k-${e.kind}${cond ? ' fit-cond' : ''}`, 'data-key': e.key, 'data-lens': lens });
+      if (same) same.keys.push(e.key); else { groups.set(gk, { el, keys: [e.key], cond, full }); box.append(el); els.push(el); }
       const pts = edgePts(e.key, path), free = (r: Rect) => clear(r) && !lineUnder(r, e.key, drawn);
+      // Measured as drawn: a fit label of a lens not on now is display:none (styles.css), and a hidden label measures 0 × 0.
+      el.style.display = 'block';
       [14, 8].forEach((n, fi) => {
-        const base = full.replace(/[….]+$/, ''), c = cut(base, n), text = `${mark}${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; el.textContent = text;
+        const base = full.replace(/[….]+$/, ''), c = fitCut(base, n); if (c === null) return;
+        const text = `${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; el.textContent = text;
         const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
-        // The short form may sit closer to a bend (6px), then beside the end it points to (portSpots), before the line goes unlabelled.
-        const along = labelSpots(pts, w, hh, cond ? 'start' : 'long', (fi ? 6 : 12) * inv).filter(free).slice(0, 8);
-        const beside = fi ? portSpots(pts, w, hh).filter(r => free(r) && !polylineHitsRect(pts, r, 1)) : [];
-        [...along, ...beside].forEach((r, i) => spots.push({ key: gk, ...r, dist: fi * 50 + i, rank: cond ? 0 : 1, el, text }));
+        // Along a level or upright run (the short form may sit closer to a bend, 6px), then beside an end of its line: a condition
+        // beside the end it branches from first, any other beside the end it points to first (portSpots), before the line goes
+        // unlabelled.
+        const along = labelSpots(pts, w, hh, cond ? 'start' : 'long', (fi ? 6 : 12) * inv).filter(free).slice(0, 12);
+        const ends = cond ? [[...pts].reverse(), pts] : [pts, [...pts].reverse()];
+        const beside = ends.flatMap(p => portSpots(p, w, hh)).filter(r => free(r) && !polylineHitsRect(pts, r, 1));
+        along.forEach((r, i) => spots.push({ key: gk, ...r, dist: fi * 50 + i, rank: cond ? 0 : 1, el, text }));
+        beside.forEach((r, i) => spots.push({ key: gk, ...r, dist: fi * 50 + 20 + i, rank: cond ? 0 : 1, el, text }));
       });
+      el.style.removeProperty('display');
     }
-    const { kept } = resolveLabels(spots, 6), keptEl = new Set<HTMLElement>(), keys = new Set<string>();
+    const { kept } = resolveLabels(spots, 6), keptEl = new Set<HTMLElement>(), set: FitSet = { keys: new Set(), conds: new Set(), rects: [] };
     for (const s of kept) {
-      const grp = groups.get(s.key)!; s.el.textContent = s.text; s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; keptEl.add(s.el); placed.push(s);
-      for (const k of grp.keys) keys.add(k);
+      const grp = groups.get(s.key)!; s.el.textContent = s.text; s.el.style.left = `${s.x}px`; s.el.style.top = `${s.y}px`; keptEl.add(s.el);
+      set.rects.push({ x: s.x, y: s.y, w: s.w, h: s.h });
+      for (const k of grp.keys) { set.keys.add(k); if (grp.cond) set.conds.add(k); }
+      // The whole words read in the tip when the label is cut (its own 「…」 says so; no second one from styles.css).
+      if (s.text !== grp.full) s.el.dataset.full = grp.full;
       if (grp.keys.length > 1) s.el.dataset.also = grp.keys.join(' ');
     }
     for (const el of els) if (!keptEl.has(el)) el.remove();
-    out.set(lens, keys);
+    out.set(lens, set);
   }
-  // What else is set later (badges, counts, the rest's labels) keeps off every lens's labels.
-  blocks.push(...placed);
   return out;
 }
 function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) => boolean, blocks: Rect[], shown: Set<string>) {
@@ -2806,7 +2866,7 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     // 선택, 박자, ◷, the 「한 번」 tick): its words read in the line's tip on hover, and on the lines of a picked card.
     // Restore (spec §7 'Conditional relations'): a conditional or optional line still never reads unconditional: a tiny text-free
     // mark sits on the line itself at its badge's place (restCue), part of the line's hover, under every lens (시작·반복 too).
-    if (!on && tier !== 'near') { const cue = restCue(b, on, tier); if (cue) placeCue(box, e, cue, beside, path, offParts, apart, offLabels, set); continue; }
+    if (!on && tier !== 'near') { const cue = restCue(b, on, tier); if (cue) placeCue(box, e, cue, beside, path, offParts, apart, offLabels, r => !lineUnder(r, e.key, shown), set); continue; }
     const el = h('span', { class: `edge-badge b-${b.kind}${on ? ' on' : ''}${beside ? ' beside' : ''}${b.unresolved ? ' unres' : ''}`, 'data-badge': e.key });
     box.append(el);
     const pts = edgePts(e.key, path), len = path.getTotalLength();
@@ -2870,19 +2930,22 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     set(el, spot);
   }
 }
-/** Restore (spec-cards-v2 §7): the rest cue of a conditional (◇) or optional (dashed ring) line below 가까이, CUE_PX on screen, its
- * centre on the line at the places its badge would take (cuePoints), then anywhere along it: off every part, the badges and marks
- * set so far and the labels when it can; off the parts always (a mark under a card's name says nothing). Its words: the line's tip. */
+/** Restore (spec-cards-v2 §7): the rest cue of a conditional (◇) or optional (dashed ring) line below 가까이, CUE_PX on screen. Beauty
+ * v3 (E): never mid-line (a mark on every line read as a debug glyph): at the line's source port, on the line 7px out from the card's
+ * side or face, where the relation branches (the ruling Q3: 해당 관계의 접점이나 분기 위치); further out along its own line, in 6px
+ * steps, until it is off every part, apart from the marks and badges set so far and off the labels and other lines (several marks
+ * leaving one side step out one after the other, never stacked); off the parts and the other marks always. Its words: the line's tip. */
 function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional', beside: boolean, path: SVGPathElement,
-  offParts: (r: Rect) => boolean, apart: (r: Rect) => boolean, offLabels: (r: Rect) => boolean, set: (el: HTMLElement, r: Rect) => void) {
+  offParts: (r: Rect) => boolean, apart: (r: Rect) => boolean, offLabels: (r: Rect) => boolean, offLines: (r: Rect) => boolean, set: (el: HTMLElement, r: Rect) => void) {
   const inv = labelInv(), s = CUE_PX * inv, len = path.getTotalLength();
   const at = (p: { x: number; y: number }): Rect => ({ x: p.x - s / 2, y: p.y - s / 2, w: s, h: s });
-  // Beauty v3 (E): never mid-line (a mark on every line read as a debug glyph): at the line's source port, on the line 7px out from the
-  // card's side or face, where the relation branches (the ruling Q3: 해당 관계의 접점이나 분기 위치); a little further out when that place
-  // is taken by a part.
-  void apart; void offLabels;
-  const spots = [7, 13, 19, 25].map(d => path.getPointAtLength(Math.min(len / 2, (d + CUE_PX / 2) * inv))).map(at);
-  const spot = spots.find(r => offParts(r)) ?? null;
+  // Near the port first (its centre within 20px on screen: marks on neighbouring lines stagger there), the cleanest place among them; only
+  // then further out along its own line.
+  const out = (ds: number[]) => ds.filter(d => (d + CUE_PX / 2) * inv <= len / 2).map(d => at(path.getPointAtLength((d + CUE_PX / 2) * inv)));
+  const near = out([6, 11, 16]), far = out([22, 28, 34, 40, 46]);
+  const pick = (ss: Rect[]) => ss.find(r => offParts(r) && apart(r) && offLabels(r) && offLines(r)) ?? ss.find(r => offParts(r) && apart(r) && offLabels(r)) ?? ss.find(r => offParts(r) && apart(r));
+  // A conditional line never reads unconditional: with no place apart, the nearest place off the parts.
+  const spot = pick(near) ?? pick(far) ?? [...near, ...far].find(offParts) ?? null;
   if (!spot) return;
   const el = h('span', { class: `edge-cue q-${cue}${beside ? ' beside' : ''}`, 'data-cue': e.key, role: 'img', 'aria-label': cue === 'condition' ? '조건 있는 관계' : '선택 관계' });
   box.append(el); set(el, spot);
@@ -2975,10 +3038,13 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     if (tp) { const chip = typeChipEl(e, tp); box.append(chip);
       for (const form of typeChipForms(tp.name, tp.fields)) { fillTypeChip(chip, form); mine = spotsFor(chip); if (mine.length) break; }
       if (mine.length) label = chip; else chip.remove(); }
-    if (!label) { const word = restWord(e), cutWord = short ? wholeWords(word) : word;
+    // Beauty v3 review: a short label that keeps only the channel's word (「기동…」) says nothing: what starts the line is said without
+    // 「기동 · 」 then (a control line reads as one by its head), and a label of fewer than 4 characters is left to the tip.
+    const shortWord = (w: string) => { const c = wholeWords(w); if (c.length >= 4 || c === w) return c; const rest = w.replace(/^기동\s*·\s*/, ''); const r = rest !== w ? wholeWords(rest) : ''; return r.length >= 4 || (r && r === rest) ? r : ''; };
+    if (!label) { const word = restWord(e), cutWord = short ? shortWord(word) : word;
       // Polish round fixes 2: a label that does not fit in whole words is left to the line's tip (no 「기동 · 명령 torch…」).
       if (!cutWord) { hidden.push(g); continue; }
-      label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}${short ? ' brief' : ''}`, 'data-key': e.key, ...(cutWord !== word ? { 'data-full': word } : {}) }, cutWord); box.append(label); mine = spotsFor(label); }
+      label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}${short ? ' brief' : ''}${cutWord !== word && cutWord === word.replace(/^기동\s*·\s*/, '') ? ' whole' : ''}`, 'data-key': e.key, ...(cutWord !== word ? { 'data-full': word } : {}) }, cutWord); box.append(label); mine = spotsFor(label); }
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
     // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
     // then better places across all labels: every label's first place before any label's second.
@@ -5068,6 +5134,9 @@ function applyLegendMarks() {
     g.classList.toggle('lf-fg', fg); g.classList.toggle('lf-bg', !fg);
     if (fg && drawnNow.has(g.dataset.key!)) { fgEnds.add(g.dataset.from!); fgEnds.add(g.dataset.to!); }
   });
+  // A port mark steps back with its line when the lens has a foreground (구성 has none: every mark reads as it is).
+  const bgLines = fgEnds.size ? new Set([...world.querySelectorAll<SVGGElement>('.edge.lf-bg')].map(g => g.dataset.key!)) : new Set<string>();
+  world.querySelectorAll<HTMLElement>('.edge-cue').forEach(c => c.classList.toggle('cue-bg', bgLines.has(c.dataset.cue ?? '')));
   // Beauty v3 (G): hierarchy from the record only: a card with an inside (.has-inside) and the ends of the lens's foreground lines
   // (.lens-fg) are drawn a little firmer; no card is sized by importance. Classes only: a lens switch toggles them, nothing moves.
   world.querySelectorAll<HTMLElement>('.node[data-box]').forEach(el => { const b = lay.boxes.get(el.dataset.box!); el.classList.toggle('has-inside', !!b && b.kind === 'node' && b.kids > 0); el.classList.toggle('lens-fg', fgEnds.has(el.dataset.box!)); });

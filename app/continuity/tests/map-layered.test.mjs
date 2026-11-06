@@ -91,8 +91,12 @@ test('the same input gives the same layout, on repeat and on shuffled input (eig
   for (const m of FIX) {
     const opt = { ...OPT, spend: true }, a = layered(lnodes(m), ledges(m), opt), b = layered(lnodes(m), ledges(m), opt);
     assert.deepEqual(plainOf(a), plainOf(b), `${m.map}: repeat`);
+    // Shuffled arrays of the same parts (each keeps its record order, which the layout reads) and lines: the array order is not read.
     const c = layered(shuffle(lnodes(m), rnd), shuffle(ledges(m), rnd), opt);
     assert.deepEqual(plainOf(a), plainOf(c), `${m.map}: shuffled`);
+    // A different record order is a different input: the layout still holds together (no overlap is checked below for every map).
+    const d = layered(lnodes(m).map((n, i, all) => ({ ...n, order: all.length - i })), ledges(m), opt);
+    assert.equal(d.pos.size, a.pos.size, `${m.map}: reordered`);
     // Nothing overlaps.
     const bs = m.boxes.map(x => ({ ...a.pos.get(x.id), w: x.w, h: x.h }));
     for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) { const p = bs[i], q = bs[j]; assert.ok(!(p.x < q.x + q.w && q.x < p.x + p.w && p.y < q.y + q.h && q.y < p.y + p.h), `${m.map}: boxes ${i} and ${j} overlap`); }
@@ -113,7 +117,7 @@ test('routed crossings and length are not worse than the old placement on the ce
     const L = layered(lnodes(m), ledges(m), { ...OPT, spend: true });
     const hinted = edges.map(e => { const ch = L.channels.get(e.key); return ch ? { ...e, hint: ch } : e; });
     const o = measure(new Map(m.boxes.map(b => [b.id, box(b, b)])), edges), n = measure(new Map(m.boxes.map(b => [b.id, box(b, L.pos.get(b.id))])), hinted);
-    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len * 1.2, `${m.map}: length ${Math.round(n.len)} ≤ 1.2 × ${Math.round(o.len)} (a hub's lines may run longer for fewer crossings)`);
+    assert.ok(n.c <= o.c, `${m.map}: crossings ${n.c} ≤ ${o.c}`); assert.ok(n.len <= o.len * 1.15, `${m.map}: length ${Math.round(n.len)} ≤ 1.15 × ${Math.round(o.len)} (a hub's lines may run longer for fewer crossings; the eight together stay at 0.8)`);
     oldC += o.c; newC += n.c; oldL += o.len; newL += n.len;
   }
   assert.ok(newC <= oldC * 0.5, `all maps: crossings ${newC} ≤ 0.5 × ${oldC}`); assert.ok(newL <= oldL * 0.8, `all maps: length ${Math.round(newL)} ≤ 0.8 × ${Math.round(oldL)}`);
@@ -125,5 +129,5 @@ test('speed: 60 parts and 120 lines lay out well under the budget (median of 5)'
   const times = [];
   for (let i = 0; i < 5; i++) { const t = performance.now(); layered(ns, es, { ...OPT, spend: true }); times.push(performance.now() - t); }
   times.sort((a, b) => a - b);
-  assert.ok(times[2] < 150, `median ${times[2].toFixed(1)} ms (budget 50, test bar 150 under load)`);
+  assert.ok(times[2] < 100, `median ${times[2].toFixed(1)} ms (budget 50, test bar 100 under load)`);
 });

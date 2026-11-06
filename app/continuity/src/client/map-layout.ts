@@ -34,6 +34,16 @@ export const SHELF_GAP = 64;
 /** Beauty v3 (F.3): the layout's target aspect is the window's, quantised so a small resize never lays the map out again. */
 export const ASPECTS = [1.4, 1.6, 1.8, 2.0, 2.4] as const;
 export const quantAspect = (a: number): number => ASPECTS.reduce((b, x) => (Math.abs(x - a) < Math.abs(b - a) - 1e-9 ? x : b), ASPECTS[0]);
+/** The margin past the midpoint between two steps that a window must cross before the layout takes the next step. */
+export const ASPECT_HYST = 0.06;
+/** The step for a window aspect a, with hysteresis: the step in use (prev) is kept until a is ASPECT_HYST past the midpoint to a
+ * neighbouring step, so a one-pixel resize across a midpoint never lays the map out again. */
+export function stickyAspect(a: number, prev: number | null | undefined): number {
+  const q = quantAspect(a), i = prev == null ? -1 : ASPECTS.indexOf(prev as (typeof ASPECTS)[number]);
+  if (i < 0 || q === prev) return q;
+  const lo = i > 0 ? (ASPECTS[i - 1]! + ASPECTS[i]!) / 2 - ASPECT_HYST : -Infinity, hi = i < ASPECTS.length - 1 ? (ASPECTS[i]! + ASPECTS[i + 1]!) / 2 + ASPECT_HYST : Infinity;
+  return a >= lo && a <= hi ? ASPECTS[i]! : q;
+}
 /** Beauty v2 B3 (corridor room): a gap that n lines must pass is at least laneRoom(n) wide: LANE_MARGIN clear of the cards on each
  * side and LANE_TRACK between neighbouring lines (map units: at the least card-face zoom, 0.9, about 12.6 and 9 screen pixels; the
  * ruling's six strands need about 64px + stroke on screen). map-route's TRACK_GAP is LANE_TRACK. */
@@ -75,6 +85,9 @@ export interface Edge { key: string; from: string; to: string; kind: RelationVie
   spine?: boolean;
   /** The faces its two ends take (absent: both sides). The router keeps a top or a bottom only for a route of few turns. */
   faces?: { a: PortFace; b: PortFace };
+  /** Beauty v3 review: the ends that took a face only because their side was over its budget (map-route faceOverflow): they meet the
+   * face's right two-thirds, so the head's left third stays the control lines' (3.6). */
+  overflow?: { a?: boolean; b?: boolean };
   /** A summary stroke that holds both directions between its two ends (line-grammar pairWays, S8): a head at each end; back: the
    * relations that run from its 'to' to its 'from'. */
   both?: boolean; back?: string[];
@@ -314,8 +327,12 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     let flowW = 0, flowH = 0, lastFrame = false;
     if (lnodes.length) {
       const L = layered(lnodes, lines, { layerGap: colGap, rowGap: gapY, laneMargin: LANE_MARGIN, laneTrack: LANE_TRACK, aspect: quantAspect(aspect), wrapGap: inFrame ? WRAP_LANE : WRAP_GAP, blockGap: inFrame ? GAP * 2 : ROW_GAP * 2, spend: !inFrame });
-      // Inside a group a plain chain (one part per layer) runs top to bottom, as a list of steps.
-      if (inFrame && L.order.every(c => c.length === 1)) {
+      // Inside a group a plain chain (one part per layer, all of them linked into one) runs top to bottom, as a list of steps; separate
+      // chains keep their own blocks (never read as one list).
+      const root = new Map(lnodes.map(n => [n.id, n.id])), find = (i: string): string => { let r = i; while (root.get(r) !== r) r = root.get(r)!; return r; };
+      for (const e of lines) if (root.has(e.from) && root.has(e.to)) root.set(find(e.from), find(e.to));
+      const oneChain = new Set(lnodes.map(n => find(n.id))).size === 1;
+      if (inFrame && oneChain && L.order.every(c => c.length === 1)) {
         let x = 0;
         for (const c of wrap(L.order.map(c => c[0]!))) { let y = 0; c.forEach((i, k) => { if (k) y += pairGap(c[k - 1]!, i); put(i, x, y); y += sizes.get(i)!.h; }); x += colW(c) + GAP; flowW = Math.max(flowW, x - GAP); flowH = Math.max(flowH, y); }
       } else {
@@ -548,7 +565,12 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   if (!boxes.size) { bx = by = bx2 = by2 = 0; }
   const bands: Record<Band, string[]> = { outside: [], boundary: [], shelf: [] };
   for (const id of kidsOf(scope)) { const b = bandOf.get(id); if (b && boxes.has(id)) bands[b].push(id); }
-  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands, channels: (scopeLaid as LResult | null)?.channels ?? new Map(), layers: (scopeLaid as LResult | null)?.order ?? [] };
+  // A reserved route belongs to the automatic arrangement: a line with an end the person has placed (stored or held away from where
+  // the arrangement put it) searches its own route.
+  const own = scope ?? ROOT, autoAt = autoMemo.get(own), placed = pos[own] ?? {};
+  const moved = (id: string | undefined) => { const s = id ? placed[id] : undefined, a = id ? autoAt?.get(id) : undefined; return !!s && (!a || Math.abs(s.x - a.x) > 0.5 || Math.abs(s.y - a.y) > 0.5); };
+  const channels = new Map([...((scopeLaid as LResult | null)?.channels ?? new Map<string, Channel>())].filter(([k]) => { const [a, b] = k.split('|'); return !moved(a) && !moved(b); }));
+  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands, channels, layers: (scopeLaid as LResult | null)?.order ?? [] };
 }
 
 /** Where a column of outside partners goes (the parts it meets: near): beside them on the free side nearest to them (outgoing to
@@ -722,7 +744,9 @@ export function hintPath(a: Box, b: Box, others: Iterable<Box>, ports: Ports, hi
     if (own.some(o => hitBox(o, p.x, p.y, q.x, q.y, -1))) return null;
   }
   const m = Math.floor((pts.length - 1) / 2), mid = { x: (pts[m]!.x + pts[m + 1]!.x) / 2, y: (pts[m]!.y + pts[m + 1]!.y) / 2 };
-  return { d: rounded(pts), pts, mx: mid.x, my: mid.y, ...(pts.length > 4 ? { detour: true } : {}), clear: true };
+  // A reserved route with several bends is no detour; one far longer than the way between its ports is (styles: .edge.detour).
+  const len = pts.reduce((s, q, i) => (i ? s + Math.abs(q.x - pts[i - 1]!.x) + Math.abs(q.y - pts[i - 1]!.y) : 0), 0), way = Math.abs(pts[0]!.x - pts.at(-1)!.x) + Math.abs(pts[0]!.y - pts.at(-1)!.y);
+  return { d: rounded(pts), pts, mx: mid.x, my: mid.y, ...(len > 1.5 * way + 40 ? { detour: true } : {}), clear: true };
 }
 
 /** A route through a card's top or bottom (map design v3 3.6, S4b): a control line leaves its card's bottom and comes in at the

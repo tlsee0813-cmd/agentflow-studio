@@ -6,6 +6,8 @@
 :root {
   --bg: #f4f5f7; --canvas-dot: rgba(17,24,39,.06); --surface: #ffffff; --surface-2: #f9fafb;
   --line: #e3e5e9; --line-strong: #cdd1d7; --hair: #eef0f2;
+  /* Beauty v3 (G): the edge of a card with an inside (the cards keep their light form under a dark setting, so one value serves both). */
+  --card-edge-firm: #a3abb6;
   /* Greys keep their order of emphasis; every one of them reads at 4.5:1 or more on white (text-4 ≈ 5:1, on the canvas 4.57:1;
      #6b717c would sit at 4.50 exactly on the canvas, so text-4 is one step darker). */
   /* map design v3 9.1: ink 17.74:1 on white, text-2 10.37, text-3 6.90, text-4 5.34 (4.90 on the canvas). */
@@ -3526,7 +3528,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 @media (prefers-color-scheme: dark) { :root[data-theme="auto"] .space .node.card :is(.c-tag-icon, .c-loop-tab) { color: var(--text-3); } }
 /* Beauty v3 (G): hierarchy from the record only (no size by importance). A card with an inside: a firmer edge (its second sheet kept)
  * and a heavier name; the ends of the lens's foreground lines: a darker edge. Colours only: the box and its lines never move. */
-.node.card.has-inside { border-color: #a3abb6; }
+.node.card.has-inside { border-color: var(--card-edge-firm); }
 .node.card.has-inside :is(.c-name, .c-tag-line:first-child) { font-weight: 680; }
 .node.card.lens-fg { border-color: var(--text-3); }
 .node.card.lens-fg :is(.c-name, .c-tag-line) { color: var(--text); }
@@ -3536,3 +3538,17 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space.lens-data .edge-labels > .edge-label.fit[data-lens="data"], .space.lens-start .edge-labels > .edge-label.fit[data-lens="start"],
 .space.lens-scenario .edge-labels > .edge-label.fit[data-lens="scenario"] { display: block; }
 .space.lens-data .edge-count[data-fit~="data"], .space.lens-start .edge-count[data-fit~="start"], .space.lens-scenario .edge-count[data-fit~="scenario"] { display: none; }
+/* Beauty v3 review: a fit label carries its own 「…」 when cut (never a second from the rest labels' rule); a condition in words
+   carries the line's ◇ in front, which stands for its port mark under that lens (data-fit on the mark). Under a lens, a rest label,
+   a count or a mark that would sit under that lens's fit labels, or whose line that lens labels, gives way (data-fit); 구성 keeps all. */
+.edge-labels > .edge-label.fit[data-full]::after { content: none; }
+/* Its words are cut by characters already (never by the plain label's 120px: a code word read 「G_IS_STANDAL…」). */
+.edge-labels > .edge-label.fit { max-width: none; }
+.edge-labels > .edge-label.fit.fit-cond::before { content: ""; display: inline-block; box-sizing: border-box; width: 6px; height: 6px; margin: 0 5px 1px 1px; vertical-align: middle; border: 1.25px solid var(--text-3); background: var(--surface); transform: rotate(45deg); }
+.space.lens-data .edge-labels > :is(.edge-label:not(.fit), .edge-cue)[data-fit~="data"], .space.lens-start .edge-labels > :is(.edge-label:not(.fit), .edge-cue)[data-fit~="start"],
+.space.lens-scenario .edge-labels > :is(.edge-label:not(.fit), .edge-cue)[data-fit~="scenario"] { display: none; }
+/* The marks of the lens's background lines step back with their lines. */
+.edge-labels > .edge-cue.cue-bg:not(.near):not(:hover) { opacity: .45; }
+.space.lens-compose .edge-labels > .edge-label.fit[data-lens="compose"] { display: block; }
+.space.lens-compose .edge-labels > :is(.edge-label:not(.fit), .edge-cue, .edge-count)[data-fit~="compose"] { display: none; }
+.edge-labels > .edge-label.whole[data-full]::after { content: none; }

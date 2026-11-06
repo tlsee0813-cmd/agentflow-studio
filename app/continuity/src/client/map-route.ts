@@ -31,11 +31,15 @@ function facePorts(boxes: Map<string, Box>, edges: Edge[]): Map<string, { a?: nu
     for (const end of ['a', 'b'] as const) {
       const face = f[end]; if (face !== 'top' && face !== 'bottom') continue;
       const me = boxes.get(end === 'a' ? e.from : e.to), far = boxes.get(end === 'a' ? e.to : e.from); if (!me || !far || me.kind !== 'node') continue;
-      const k = `${me.id}|${face}`; (at.get(k) ?? at.set(k, []).get(k)!).push({ key: e.key, end, far: far.x + far.w / 2, fy: far.kind === 'frame' ? far.y + far.head / 2 : far.y + (far.contact ?? far.h / 2) });
+      // An end over its side's budget gathers apart from the control lines' (at the face's right two-thirds, not the head's left third).
+      const k = `${me.id}|${face}${e.overflow?.[end] ? '|over' : ''}`; (at.get(k) ?? at.set(k, []).get(k)!).push({ key: e.key, end, far: far.x + far.w / 2, fy: far.kind === 'frame' ? far.y + far.head / 2 : far.y + (far.contact ?? far.h / 2) });
     }
   }
   for (const [k, list] of at) {
-    const box = boxes.get(k.split('|')[0]!)!, x0 = box.x + box.w / 3, n = list.length, top = k.endsWith('|top'), cx = box.x + box.w / 2;
+    // Overflow ends sit beside the control lines' run on the side their partners mostly lie (left of it toward the left, right of it
+    // toward the right), so their bends never cross the control lines'.
+    const over = k.endsWith('|over'), box = boxes.get(k.split('|')[0]!)!, cx = box.x + box.w / 2, leftward = list.filter(p => p.far < cx).length * 2 > list.length;
+    const x0 = box.x + (over ? (leftward ? box.w / 6 : (2 * box.w) / 3) : box.w / 3), n = list.length, top = k.includes('|top');
     // Beauty v3 (D.3): the ends whose partners lie to the left first, then those to the right; within each, the order in which their
     // one-bend lines (out of the face, up or down, one turn into the partner's side) nest without crossing: going right, the farther
     // partner takes the x farther from the partner's side.
@@ -342,7 +346,7 @@ export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[]): M
 export function routeEdges(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: boolean } = {}): Map<string, Routed> {
   // Beauty v3 (D): ends over a side's budget take the top or bottom face toward a partner that really lies above or below.
   const over = opts.quick ? new Map<string, { a?: PortFace; b?: PortFace }>() : faceOverflow(boxes, edgesIn);
-  const edges = over.size ? edgesIn.map(e => { const o = over.get(e.key); return o ? { ...e, faces: { a: o.a ?? e.faces?.a ?? 'side', b: o.b ?? e.faces?.b ?? 'side' } } : e; }) : edgesIn;
+  const edges = over.size ? edgesIn.map(e => { const o = over.get(e.key); return o ? { ...e, faces: { a: o.a ?? e.faces?.a ?? 'side', b: o.b ?? e.faces?.b ?? 'side' }, overflow: { a: !!o.a, b: !!o.b } } : e; }) : edgesIn;
   // A control line read as such leaves its card's bottom and comes in at the top (map design v3 3.6): routed first, kept only
   // when its route turns at most FACE_TURNS times (else it meets the sides, told by its dash and open head alone). Only cards
   // have those faces; a group, an outside partner or an end that holds the other keeps its side.
