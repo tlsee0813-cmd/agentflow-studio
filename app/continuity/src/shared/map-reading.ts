@@ -290,6 +290,9 @@ export type ContractGuard = 'shape' | 'keys' | 'text' | 'count' | 'new-count' | 
   // Recipe .48: a model line on no record row left out so the record's undrawn C-LINK rows fit the first map's lines (line-cap, set aside by
   // the server); a condition's 거짓이면 or a step's 하는 일 past its bound written null alone (the condition or step stays).
   | 'line-cap' | 'condition-else' | 'step-does'
+  // Recipe .50 step 2 (set aside by the server): a later plan's correction obligation its evidence does not justify; one still unmet after
+  // the semantic re-render (held with its dependents); a claim, relation or port-map row standing on such an obligation's lines.
+  | 'correction-unjustified' | 'correction-unmet' | 'correction-held'
   // Recipe .48 fix (A7): a step whose overlong 하는 일 says what it does not do, and a rule whose scope breaks the contract, held whole.
   | 'step-held' | 'scope-held';
 /** map-reading.7–8: the categories that leave out a part's own optional fields only (the part stays). */
@@ -1653,6 +1656,10 @@ const exclusionExplanation = (e: MapReplyError): string => {
   };
   // Recipe .50: one item past a bound, named by its own index (its row is sent again with the next reading).
   return e.rule === 'contract' && e.target === 'count' && /\]$/.test(e.path) ? '허용 개수를 넘어 이 항목을 이번 정리에서 제외했어요.'
+    // Recipe .50 step 2: the later plan's correction obligations, contained (map-blueprint.mjs holdCorrectionUnits).
+    : e.rule === 'contract' && e.target === 'correction-unjustified' ? '정리 계획은 이 원문 줄이 이 부분의 기존 주장을 철회·대체한다고 보았지만, 그 줄은 철회·대체·제거 같은 바뀐 결과를 적지 않아 대체 의무로 두지 않았어요. 기존 주장과 이 줄의 주장을 함께 두었어요.'
+    : e.rule === 'contract' && e.target === 'correction-unmet' ? '원문이 이 부분의 기존 주장을 철회·대체한다고 정리 계획이 보았지만, 부분 정리는 대체로 쓰지 않았어요. 기존 주장은 그대로 두고, 이 줄에서 나온 주장과 연결은 대체 여부가 정해질 때까지 보류했어요. 원문에서 확인해 주세요.'
+    : e.rule === 'contract' && e.target === 'correction-held' ? '기존 주장을 대체하는지 정해지지 않은 원문 줄에서 나온 항목이어서, 대체 여부가 정해질 때까지 이번 정리에서 보류했어요.'
     : e.rule === 'contract' && e.target === 'count' ? '허용 개수를 넘는 뒤쪽 항목들을 제외했어요.'
     : e.rule === 'contract' && e.target === 'parent-skipped' ? '참조한 새 부분이 제외되어 이 항목도 제외했어요.'
     // pipeline .29: a relation or a claim set aside by the program's own reading of the line it quotes.
@@ -1718,6 +1725,8 @@ const exclusionExplanation = (e: MapReplyError): string => {
 export interface MapReplyOptions { setAside?: boolean; owners?: readonly string[] }
 /** At most this many set-aside reasons travel with a divided first map (a reply with more is refused whole on the server). */
 export const DIVIDED_EXCLUSIONS_MAX = 64;
+/** The newest map reading contract (recipe .50): what a reading that sent a 기록 v5 fold is stored as; the divided pipeline's key names it. */
+export const READING_CONTRACT = 'map-reading.20';
 export function validateMapReply(value: unknown, ask: MapAsk, options: MapReplyOptions = {}): MapReply {
   const code = 'INVALID_RESPONSE', aside: MapReplyError[] = [];
   // divided (map.6 + setAside): an item of its own (a basis quote, a claim, a relation, a candidate, a gap, a material range, and
@@ -4097,7 +4106,12 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // nothing to change and no such reason (the records add nothing to the map as it is) is a reading, kept as before.
   if (four && !parts.length && !relations.length && !candidates.length && !matches.length && reply.gaps.length) throw new Error('NOTHING_READ');
   // map-reading.20 (recipe .50): a reading that sent a v5 fold keeps what it did with each row it sent or left out for room (row-ledger.ts).
-  if (six && sentFolds.length) { reading.version = 'map-reading.20'; reading.rows = decideRows(tracked, reading, sentOf, prior, done.length === 0); }
+  // Recipe .50 step 2: a row held for a correction names the part it stands with: the server reason's part index in the wire it was written
+  // in, less the parts this browser set aside whole before it (the server never sets a later part aside whole).
+  const wholeParts = (EXCLUSIONS.get(reply) ?? []).flatMap(x => { const m = /^parts\[(\d+)\]$/.exec(x.path); return m ? [Number(m[1])] : []; });
+  const heldWith = (x: ReadingExclusion): string[] => { const m = /^parts\[(\d+)\]/.exec(x.path); if (!m) return [];
+    const i = Number(m[1]), ref = reply.parts[i - wholeParts.filter(k => k < i).length]?.ref, id = ref ? ids.get(ref) : undefined; return id ? [id] : []; };
+  if (six && sentFolds.length) { reading.version = READING_CONTRACT; reading.rows = decideRows(tracked, reading, sentOf, prior, done.length === 0, heldWith); }
   p = addReading(p, reading);
   const next = parseProject(JSON.stringify(p));
   const corresponding = matches.filter(m => m.targets.length === 1).flatMap(m => {

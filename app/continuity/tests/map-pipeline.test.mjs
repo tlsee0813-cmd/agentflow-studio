@@ -832,19 +832,26 @@ function conditionalLater() {
   return { ask, wire, obligation };
 }
 
-test('a replacement of a different conditional current key cannot satisfy a declared obligation or reach global-final', async t => {
+// Recipe .50 step 2: the unmet obligation no longer refuses the reading (that refusal replayed forever); it is held as a unit, named, and
+// the rest applies. The still-current claim stays: nothing replaces it.
+test('a replacement of a different conditional current key cannot satisfy a declared obligation: the obligation is held, the rest applies', async t => {
   const { make } = await setup(t), { ask, wire, obligation } = conditionalLater(), before = structuredClone(ask), calls = [];
   const pipeline = make({ callProvider: fakeProvider(ask, calls, call => call.stage === 'plan'
     ? { ...blueprintFor(wire, ask), corrections: [obligation] } : undefined, wire) });
-  await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
+  const out = await pipeline.read(ask);
   assert.equal(calls.filter(call => call.stage === 'render').length, 2, 'the declared missing key gets exactly one semantic pass');
-  assert.equal(calls.filter(call => call.stage === 'global').length, 0, 'a summary cannot remove the still-current claim');
+  const reviews = calls.filter(call => call.stage === 'global');
+  assert.equal(reviews.length, 1); assert.ok(reviews[0].input.semanticReview, 'the one paid review is global-final, checking the kept obligations');
+  assert.deepEqual(reviews[0].input.blueprint.corrections, []);
   const semantic = calls.find(call => call.stage === 'render' && call.input.semanticReview);
   assert.deepEqual(semantic.input.blueprint.corrections, [obligation]);
+  assert.deepEqual(out.exclusions.map(x => [x.path, x.category]), [['parts[0].claims', 'correction-unmet']]);
+  const checked = validateMapReply(structuredClone(out.wire), ask);
+  assert.ok(!checked.parts[0].claims.some(claim => claim.replaces === 'C01')); assert.ok(checked.parts[0].claims.some(claim => claim.replaces === 'C02'), 'the independent claim applies');
   assert.deepEqual(ask, before);
   const count = calls.length;
-  await assert.rejects(pipeline.call(ask), matchesCode('INVALID_RESPONSE'));
-  assert.equal(calls.length, count, 'the cached unsuccessful semantic pass cannot silently start another round');
+  assert.deepEqual(await pipeline.read(ask), out);
+  assert.equal(calls.length, count, 'the cached semantic pass cannot silently start another round; the same reading comes back');
 });
 
 test('raw replaces on a map7 soft-excluded claim does not satisfy the ledger and triggers original-key repair', async t => {

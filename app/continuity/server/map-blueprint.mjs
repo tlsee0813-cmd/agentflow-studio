@@ -1031,6 +1031,112 @@ export function missingMapCorrections(wire, ask, blueprint) {
   catch (error) { invalid(error); }
 }
 
+/* ---------- Recipe .50 step 2 (Astra F5 Q1, Q7(2)): the later plan's correction obligations, contained. ----------
+ * A. An obligation must be justified by its evidence (correctionJustified): an alias in a table row is judged by that row's content,
+ *    its effect (a before/after or change column filled, or change words) and its target (a content word of the withdrawn claim or the
+ *    part's name); an alias in prose cannot be judged by the program and keeps the planner's reading. No table is allowed or barred by
+ *    its ID: a defect row (C-ISSUE) that states no change never makes one, one that says what was removed can. An unjustified one is
+ *    left out of the effective plan (justifiedBlueprint) with a set-aside entry and a reading exclusion (correction-unjustified).
+ * B. An obligation still unmet after the one semantic re-render is held with its dependents as one unit (correctionUnits): the target
+ *    claim stays current and the part's claims on the obligation's lines, the part's relations inside them and their port-map rows are
+ *    left out (holdCorrectionUnits) with their reasons (correction-unmet, correction-held); everything independent applies. */
+export const CONTAINMENT_VERSION = 'later-containment.1';
+const CHANGE_COLUMN = /옛|이전|지금|이후|바뀐|변경|철회|대체|방식/;
+const CHANGE_WORDS = /철회|정정|대체|대신|바뀌|바뀐|바뀜|바꾸|바꿨|바꿈|변경|제거|폐기|되돌|옮겼|옮김|교체|삭제|없앴|없애|더\s*이상|더는|채택\s*안|다시\s*도입|revert|remov|deprecat|replac|rollback|instead|no longer|renam/i;
+const EMPTY_CELL = /^(?:—|–|-|모름|없음)?$/;
+const OWN_COLUMNS = new Set(['행 ID', '근거']);
+/** Where an alias (N02.63, N02.63-65) stands in its record of the ask, or null. */
+function aliasPlace(alias, texts) {
+  const record = typeof alias === 'string' && alias.includes('.') ? alias.slice(0, alias.indexOf('.')) : null, source = record ? texts.get(record) : null;
+  const range = source?.spans ? resolveRange(alias, record, source.text, source.spans) : null;
+  return range ? { record, from: range.from, to: range.to, text: source.text } : null;
+}
+/** The table rows a place overlaps, each with its cells by column (the definition's name, else the header as written). */
+function rowsAtPlace(place) {
+  const out = [];
+  for (const table of readRecordTables(place.text).tables) for (const row of table.rows) {
+    if (!(row.from < place.to && place.from < row.to)) continue;
+    out.push(row.cells.map((cell, k) => ({ column: (table.columns?.[k] ?? table.header?.[k] ?? '').trim(), text: (cell.text ?? '').trim() })).filter(c => !OWN_COLUMNS.has(c.column)));
+  }
+  return out;
+}
+/** Whether one obligation's evidence supports a withdrawal or replacement of its claim (see A above). */
+export function correctionJustified(obligation, ask) {
+  const texts = askRecords(ask), part = ask.parts.find(p => p.id === obligation.part), claim = part?.current.find(c => c.key === obligation.claim);
+  if (!part || !claim) return false;
+  const target = new Set([...contentWords(claim.text), ...contentWords(part.name)]);
+  return obligation.at.some(alias => {
+    const place = aliasPlace(alias, texts);
+    if (!place) return false;
+    const rows = rowsAtPlace(place);
+    if (!rows.length) return true;
+    return rows.some(cells => {
+      const effect = cells.some(c => CHANGE_COLUMN.test(c.column) && !EMPTY_CELL.test(c.text)) || cells.some(c => CHANGE_WORDS.test(c.text));
+      const words = contentWords(cells.map(c => c.text).join(' '));
+      return effect && [...words].some(w => target.has(w));
+    });
+  });
+}
+/** The indices of the plan's obligations its evidence does not justify (a first map has none). */
+export function unjustifiedCorrections(blueprint, ask) {
+  const planned = validateMapBlueprint(blueprint, ask);
+  return (planned.corrections ?? []).flatMap((obligation, k) => correctionJustified(obligation, ask) ? [] : [k]);
+}
+/** The plan every later stage works on: the model's plan without its unjustified obligations (a copy; the cached plan stays as written). */
+export function justifiedBlueprint(blueprint, ask) {
+  const planned = validateMapBlueprint(blueprint, ask);
+  if (!planned.corrections) return planned;
+  const away = new Set(unjustifiedCorrections(planned, ask));
+  return away.size ? { ...planned, corrections: planned.corrections.filter((_, k) => !away.has(k)) } : planned;
+}
+/** The plan stage's set-aside entries for its unjustified obligations (fixed path, rule and category). */
+export const correctionSetAside = (blueprint, ask) => unjustifiedCorrections(blueprint, ask).map(k => ({ path: `corrections[${k}]`, rule: 'contract', category: 'correction-unjustified' }));
+const overlapsPlace = (a, b) => !!a && !!b && a.record === b.record && a.from < b.to && b.from < a.to;
+const insidePlace = (a, b) => !!a && !!b && a.record === b.record && b.from <= a.from && a.to <= b.to;
+/** Each unmet obligation's unit in a combined later wire: its part's wire index, the part's claims whose line overlaps the obligation's
+ * lines, the relations from or to the part standing inside them and the port-map rows of those relations. */
+export function correctionUnits(wire, ask, held, kept = []) {
+  const texts = askRecords(ask), lines = Array.isArray(wire?.relations) ? wire.relations : [], rows = Array.isArray(wire?.portMap) ? wire.portMap : [];
+  // A claim that meets a kept obligation of its part is that obligation's, never a dependent of a held one.
+  const sanctioned = new Set(kept.map(o => `${o.part}:${o.claim}`));
+  return (held ?? []).map(obligation => {
+    const part = Array.isArray(wire?.parts) ? wire.parts.findIndex(p => p?.ref === obligation.part) : -1, places = obligation.at.map(a => aliasPlace(a, texts)).filter(Boolean);
+    const claimsOf = part >= 0 && Array.isArray(wire.parts[part].claims) ? wire.parts[part].claims : [];
+    const claims = claimsOf.flatMap((c, j) => { if (typeof c?.replaces === 'string' && sanctioned.has(`${obligation.part}:${c.replaces}`)) return [];
+      const at = aliasPlace(c?.at, texts); return places.some(p => overlapsPlace(at, p)) ? [j] : []; });
+    const relations = lines.flatMap((r, k) => { if (!r || (r.from !== obligation.part && r.to !== obligation.part)) return [];
+      const at = aliasPlace(r.at, texts); return places.some(p => insidePlace(at, p)) ? [k] : []; });
+    const portMap = rows.flatMap((m, k) => m && relations.includes(m.relation) ? [k] : []);
+    return { obligation, part, claims, relations, portMap };
+  });
+}
+/** The later wire with every held unit's dependents left out and their reasons, and the reasons of the unjustified obligations. Parts
+ * are never left out (part indices stay); a reason names the wire the model wrote (claim, relation and port-map indices before). */
+export function holdCorrectionUnits(wire, ask, blueprint, held = []) {
+  const planned = validateMapBlueprint(blueprint, ask), unmet = new Set(held.map(o => `${o.part}:${o.claim}`));
+  const kept = (justifiedBlueprint(planned, ask).corrections ?? []).filter(o => !unmet.has(`${o.part}:${o.claim}`));
+  const units = correctionUnits(wire, ask, held, kept), exclusions = [];
+  for (const k of unjustifiedCorrections(planned, ask)) {
+    const obligation = planned.corrections[k], i = wire.parts.findIndex(p => p?.ref === obligation.part);
+    if (i >= 0) exclusions.push(aliasExclusion(`parts[${i}].claims`, 'correction-unjustified', obligation.at[0], ask));
+  }
+  const claimAway = new Map(), relationAway = new Set(), rowAway = new Set();
+  for (const unit of units) {
+    if (unit.part < 0) continue;
+    exclusions.push(aliasExclusion(`parts[${unit.part}].claims`, 'correction-unmet', unit.obligation.at[0], ask));
+    for (const j of unit.claims) if (!(claimAway.get(unit.part)?.has(j))) { claimAway.set(unit.part, new Set([...claimAway.get(unit.part) ?? [], j]));
+      exclusions.push(aliasExclusion(`parts[${unit.part}].claims[${j}]`, 'correction-held', wire.parts[unit.part].claims[j].at, ask)); }
+    for (const k of unit.relations) if (!relationAway.has(k)) { relationAway.add(k); exclusions.push(aliasExclusion(`relations[${k}]`, 'correction-held', wire.relations[k].at, ask)); }
+    for (const k of unit.portMap) if (!rowAway.has(k)) { rowAway.add(k); exclusions.push(aliasExclusion(`portMap[${k}]`, 'correction-held', wire.portMap[k].at, ask)); }
+  }
+  if (!claimAway.size && !relationAway.size && !rowAway.size) return { wire, exclusions: exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX) };
+  const removed = [...relationAway].sort((a, b) => a - b);
+  const out = { ...wire, parts: wire.parts.map((p, i) => claimAway.has(i) ? { ...p, claims: p.claims.filter((_, j) => !claimAway.get(i).has(j)) } : p),
+    relations: wire.relations.filter((_, k) => !relationAway.has(k)),
+    ...(Array.isArray(wire.portMap) ? { portMap: wire.portMap.flatMap((m, k) => rowAway.has(k) ? [] : [m && Number.isSafeInteger(m.relation) ? { ...m, relation: m.relation - removed.filter(r => r < m.relation).length } : m]) } : {}) };
+  return { wire: out, exclusions: exclusions.slice(0, DIVIDED_EXCLUSIONS_MAX) };
+}
+
 /** Machine review data for the existing one-pass revision path. The complete blueprint keeps every obligation anchor;
  * this compact sentinel carries the first eight distinct original locations, never synthetic evidence or wire edits. */
 export function mapCorrectionRevision(wire, ask, blueprint) {

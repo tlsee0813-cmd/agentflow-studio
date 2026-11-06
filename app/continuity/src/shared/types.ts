@@ -612,10 +612,11 @@ export type RowState = typeof ROW_STATES[number];
 /** Why a row is in its state (reflected has none). waiting: limit (an item on it past a bound, or the reading used its whole allowance),
  * budget (left out of the ask for room), unresolved-endpoint (a part it names has no reflected C-PART row yet), transient (sent and not
  * placed for no other reason, or an item on it set aside for its form), not-yet-sent; held: the candidate's target (identity, parent,
- * attribution, holds) or depends (a row it names is held); rejected: material (the reading kept it as material), depends (a row it names
+ * attribution, holds), depends (a row it names is held) or correction (recipe .50 step 2: an unmet correction obligation's unit stands on
+ * it, map-blueprint.mjs holdCorrectionUnits); rejected: material (the reading kept it as material), depends (a row it names
  * was rejected) or unplaced (sent again as often as the ledger allows, never placed). */
 export const ROW_REASONS: Readonly<Record<RowState, readonly string[]>> = Object.freeze({ reflected: [],
-  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends'], rejected: ['material', 'depends', 'unplaced'] });
+  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends', 'correction'], rejected: ['material', 'depends', 'unplaced'] });
 /** What a reflected row became: a part (its basis or a field of it), one of its claims (index in this reading's part entry), a relation, or a
  * field of the reading itself (checks, projectStatus, …: id is the field's name). */
 export interface ReadingRowTarget { kind: 'part' | 'claim' | 'relation' | 'reading'; id: string; index: number | null }

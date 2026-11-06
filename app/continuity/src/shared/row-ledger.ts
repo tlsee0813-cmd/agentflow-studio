@@ -9,7 +9,7 @@
  * Parsed is never reflected: a row inside a read interval with nothing standing on it waits, and buildMapAsk sends it again (resendRows).
  * A reading of map-reading.20 stores what it decided (MapReading.rows); an earlier reading is read by the same rule here, its rows being
  * those past what was read before it and inside its read interval. Nothing here calls a model or changes a project. */
-import { isMapReading, type MapReading, type Project, type ReadingRow, type ReadingRowTarget, type RowState } from './types.js';
+import { isMapReading, type MapReading, type Project, type ReadingExclusion, type ReadingRow, type ReadingRowTarget, type RowState } from './types.js';
 import type { FoldRow } from './record-table.js';
 import type { V5Fold, ExcerptPiece } from './record-excerpt.js';
 
@@ -52,7 +52,9 @@ export function trackedRows(f: V5Fold): Tracked[] {
 interface Place { record: string; from: number; to: number }
 interface Stand extends Place { target: ReadingRowTarget }
 interface Hold extends Place { reason: string; with: string[] }
-interface Aside extends Place { category: string | null }
+interface Aside extends Place { category: string | null; with: string[] }
+/** Recipe .50 step 2: the server's reasons that hold a row for a correction (the obligation and the items on its lines; map-blueprint.mjs). */
+export const CORRECTION_HOLDS: ReadonlySet<string> = new Set(['correction-unmet', 'correction-held']);
 const isPlace = (v: unknown): v is Place => !!v && typeof v === 'object' && typeof (v as Place).record === 'string' && Number.isSafeInteger((v as Place).from) && Number.isSafeInteger((v as Place).to);
 /** Every place a value quotes, however deep. */
 function places(v: unknown, out: Place[] = []): Place[] {
@@ -64,7 +66,7 @@ function places(v: unknown, out: Place[] = []): Place[] {
 }
 /** The reading's own fields that are not map items, candidates, material or diagnostics. */
 const OWN_FIELDS = new Set(['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', 'material', 'exclusions', 'portMap', 'rows', 'requests', 'recordDiagnostics', 'obligations', 'pages', 'level', 'firstLines', 'basisAt', 'basisVersion']);
-function standing(r: MapReading): { stands: Stand[]; holds: Hold[]; material: Place[]; asides: Aside[] } {
+function standing(r: MapReading, heldWith: (x: ReadingExclusion) => string[]): { stands: Stand[]; holds: Hold[]; material: Place[]; asides: Aside[] } {
   const stands: Stand[] = [];
   for (const p of r.parts) {
     for (const [k, v] of Object.entries(p)) {
@@ -77,7 +79,7 @@ function standing(r: MapReading): { stands: Stand[]; holds: Hold[]; material: Pl
   for (const [k, v] of Object.entries(r)) if (!OWN_FIELDS.has(k)) for (const q of places(v)) stands.push({ ...q, target: { kind: 'reading', id: k, index: null } });
   const holds: Hold[] = r.candidates.flatMap(c => ([c.quote, c.statement?.quote ?? null] as unknown[]).filter(isPlace).map(q => ({ record: q.record, from: q.from, to: q.to, reason: c.target ?? 'identity', with: [...c.areaIds] })));
   const material = (r.material ?? []).map(m => ({ record: m.record, from: m.from, to: m.to }));
-  const asides = (r.exclusions ?? []).filter(x => x.record !== null && x.from !== null && x.to !== null).map(x => ({ record: x.record!, from: x.from!, to: x.to!, category: x.category }));
+  const asides = (r.exclusions ?? []).filter(x => x.record !== null && x.from !== null && x.to !== null).map(x => ({ record: x.record!, from: x.from!, to: x.to!, category: x.category, with: x.category && CORRECTION_HOLDS.has(x.category) ? heldWith(x).slice(0, 4) : [] }));
   return { stands, holds, material, asides };
 }
 const on = (q: Place, t: Tracked) => q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to;
@@ -85,9 +87,10 @@ const on = (q: Place, t: Tracked) => q.record === t.row.record && q.from < t.row
 /** How a reading took the rows: sent (in a piece the ask carried), left (inside its read interval, not sent: left out for room). */
 export type Sent = (t: Tracked) => 'sent' | 'left' | null;
 
-/** What reading r decided for the rows it sent or left, given the ledger before it (prior) and whether it was the first map. */
-export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent, prior: ReadonlyMap<string, LedgerRow>, first: boolean): ReadingRow[] {
-  const { stands, holds, material, asides } = standing(r), allow = first ? ALLOWANCE.first : ALLOWANCE.later;
+/** What reading r decided for the rows it sent or left, given the ledger before it (prior) and whether it was the first map. heldWith (recipe
+ * .50 step 2): the part areas a server reason holding a correction stands with (applyReading resolves its part index). */
+export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent, prior: ReadonlyMap<string, LedgerRow>, first: boolean, heldWith: (x: ReadingExclusion) => string[] = () => []): ReadingRow[] {
+  const { stands, holds, material, asides } = standing(r, heldWith), allow = first ? ALLOWANCE.first : ALLOWANCE.later;
   const made = r.parts.filter(p => p.created).length, out: ReadingRow[] = [];
   const decided = new Map<string, ReadingRow>(), lazy: { t: Tracked; e: ReadingRow }[] = [];
   for (const t of rows) {
@@ -102,6 +105,9 @@ export function decideRows(rows: readonly Tracked[], r: MapReading, sentOf: Sent
       const aside = asides.filter(q => on(q, t)), limit = aside.some(q => q.category === 'count' || q.category === 'new-count');
       if (uniq.length) e = { ...base, state: 'reflected', reason: null, to: uniq };
       else if (hold) e = { ...base, state: 'held', reason: ['identity', 'parent', 'attribution', 'holds'].includes(hold.reason) ? hold.reason : 'identity', with: hold.with.slice(0, 4) };
+      // Recipe .50 step 2: a row an unmet correction obligation (or an item on its lines) stands on is held with that unit, not sent again.
+      else if (aside.some(q => q.category && CORRECTION_HOLDS.has(q.category))) { const q = aside.find(y => y.category && CORRECTION_HOLDS.has(y.category))!;
+        e = { ...base, state: 'held', reason: 'correction', detail: q.category, with: [...new Set(aside.flatMap(y => y.with))].slice(0, 4) }; }
       else if (material.some(q => on(q, t))) e = { ...base, state: 'rejected', reason: 'material' };
       else if (limit) e = { ...base, state: 'waiting', reason: 'limit', detail: 'count' };
       else { e = { ...base, state: 'waiting', reason: 'transient', detail: aside.find(q => q.category)?.category ?? before?.detail ?? null }; if (!aside.length) lazy.push({ t, e }); }
@@ -141,6 +147,10 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
       return x && t.row.row.from >= (readTo.get(x.id) ?? 0) && t.row.row.from >= x.from && t.row.row.to <= x.to ? 'sent' : null;
     }, out, i === 0) : []);
     for (const e of entries) { const x = out.get(ledgerKey(e.record, e.table, e.id)); if (x) Object.assign(x, { state: e.state, reason: e.reason, detail: e.detail, sent: e.sent, to: structuredClone(e.to), with: [...e.with], reading: r.id }); }
+    // Recipe .50 step 2: a row held for a correction is weighed again only when its target changes: a later reading that writes claims on the
+    // part it stands with lets it wait (transient) and go again within the send bounds. A re-pasted row is new text and goes anyway.
+    for (const x of out.values()) if (x.state === 'held' && x.reason === 'correction' && x.reading !== r.id && r.parts.some(q => x.with.includes(q.areaId) && q.claims.length))
+      Object.assign(x, { state: 'waiting', reason: 'transient', detail: 'correction-unmet', with: [] });
     for (const x of r.records) readTo.set(x.id, Math.max(readTo.get(x.id) ?? 0, x.to));
   });
   for (const x of out.values()) {
