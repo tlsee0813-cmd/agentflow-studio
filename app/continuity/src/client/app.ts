@@ -2413,7 +2413,13 @@ let bandRects: Rect[] = [];
 function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   const world = $('world'); world.querySelectorAll('.band-head, .band-line').forEach(x => x.remove());
   bandRects = [];
-  const boxes = [...lay.boxes.values()], hit = (r: Rect) => boxes.some(b => r.x < b.x + b.w + 1 && b.x < r.x + r.w + 1 && r.y < b.y + b.h + 1 && b.y < r.y + r.h + 1);
+  // Off every box, the heads over outside partners and the 「이은 선 없음」 head over the unlinked parts (moveLoneHead: 20 above them).
+  const lone = loneIds.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b);
+  const lu = Math.max(1, (parseFloat($('space').style.getPropertyValue('--u')) || 1) * 0.8696), ly = lone.length ? Math.min(...lone.map(b => b.y)) - 20 : 0;
+  // Drawn scaled from its bottom left (styles: .lone-head), about 100 × 16 at its own size.
+  const loneHead: Rect[] = lone.length ? [{ x: Math.min(...lone.map(b => b.x)), y: ly + 16 - 16 * lu - 2, w: 100 * lu, h: 16 * lu + 4 }] : [];
+  const boxes = [...lay.boxes.values()], heads: Rect[] = [...lay.heads, ...loneHead];
+  const hit = (r: Rect) => [...boxes, ...heads].some(b => r.x < b.x + b.w + 1 && b.x < r.x + r.w + 1 && r.y < b.y + b.h + 1 && b.y < r.y + r.h + 1);
   const crosses = (q: Routed, r: Rect) => q.pts.some((p, i) => { const n = q.pts[i + 1]; if (!n) return false; return Math.max(p.x, n.x) > r.x - 2 && Math.min(p.x, n.x) < r.x + r.w + 2 && Math.max(p.y, n.y) > r.y - 2 && Math.min(p.y, n.y) < r.y + r.h + 2; });
   const onLine = (r: Rect) => [...routed.values()].some(q => crosses(q, r));
   // A caption is drawn scaled up at low zoom (styles.css .band-head): its place is checked at that size (at least the fit view's).
