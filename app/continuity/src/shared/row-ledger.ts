@@ -149,8 +149,11 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
     for (const e of entries) { const x = out.get(ledgerKey(e.record, e.table, e.id)); if (x) Object.assign(x, { state: e.state, reason: e.reason, detail: e.detail, sent: e.sent, to: structuredClone(e.to), with: [...e.with], reading: r.id }); }
     // Recipe .50 step 2: a row held for a correction is weighed again only when its target changes: a later reading that writes claims on the
     // part it stands with lets it wait (transient) and go again within the send bounds. A re-pasted row is new text and goes anyway.
-    for (const x of out.values()) if (x.state === 'held' && x.reason === 'correction' && x.reading !== r.id && r.parts.some(q => x.with.includes(q.areaId) && q.claims.length))
-      Object.assign(x, { state: 'waiting', reason: 'transient', detail: 'correction-unmet', with: [] });
+    // Recipe .50 step 4: a row held on an identity question likewise, when a later reading writes basis or claims on a part it names (the
+    // same conflict is not sent again until its target changes).
+    for (const x of out.values()) if (x.state === 'held' && x.reading !== r.id && (x.reason === 'correction' && r.parts.some(q => x.with.includes(q.areaId) && q.claims.length)
+      || x.reason === 'identity' && r.parts.some(q => x.with.includes(q.areaId) && (q.claims.length || q.basis.length))))
+      Object.assign(x, { state: 'waiting', reason: 'transient', detail: x.reason === 'correction' ? 'correction-unmet' : 'identity', with: [] });
     for (const x of r.records) readTo.set(x.id, Math.max(readTo.get(x.id) ?? 0, x.to));
   });
   for (const x of out.values()) {
@@ -163,6 +166,19 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
   return out;
 }
 
+/** Recipe .50 step 4 (row-binding.1, ruling F5 Q7(4)): the row → part mapping, from the ledger (so every reading, old or new, gives it): a
+ * C-PART row reflected into exactly one part that is live (live(id)) by a part target (its basis, or a part field standing on the row: type,
+ * family, implementation) is bound to that part, by (record, row ID). A row reflected into two parts binds nothing; a claim quoting the row
+ * never binds; a name never binds. Keyed as the ledger is (ledgerKey(record, 'C-PART', B…)). */
+export function rowBindings(ledger: ReadonlyMap<string, LedgerRow>, live: (id: string) => boolean): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const [k, x] of ledger) {
+    if (x.table !== 'C-PART' || x.state !== 'reflected') continue;
+    const ids = [...new Set(x.to.filter(t => t.kind === 'part').map(t => t.id))];
+    if (ids.length === 1 && live(ids[0]!)) out.set(k, ids[0]!);
+  }
+  return out;
+}
 /** The waiting rows an ask sends again: every waiting row that lies before what was read of its pasted text (a row past it goes anyway),
  * the record standing now first (records in `order`, newest first), then oldest first within a record (paste order, then text order), at
  * most RESEND_ROWS_MAX. */

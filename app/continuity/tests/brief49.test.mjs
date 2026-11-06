@@ -146,12 +146,12 @@ test('49-6 validation: brief is map.7 only, exactly true, with no note or curren
 test('49-7 instructions: the brief-parts rule goes only with a brief part; the later recipes and m7 recipe are bumped', () => {
   const brief = build(grown()).ask, plain = structuredClone(brief);
   for (const x of plain.parts) delete x.brief;
-  assert.equal(P.map7Prompt(brief), P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_IDENTITY + P.MAP7_VOCABULARY + P.MAP7_BRIEF + P.map7Guidance(brief));
-  assert.equal(P.map7Prompt(plain), P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_IDENTITY + P.MAP7_VOCABULARY + P.map7Guidance(plain), 'an ask without a brief part renders as before');
+  assert.equal(P.map7Prompt(brief), P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_IDENTITY + P.MAP7_ROWS + P.MAP7_VOCABULARY + P.MAP7_BRIEF + P.map7Guidance(brief));
+  assert.equal(P.map7Prompt(plain), P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_IDENTITY + P.MAP7_ROWS + P.MAP7_VOCABULARY + P.map7Guidance(plain), 'an ask without a brief part renders as before');
   assert.equal(P.mapBriefRule(plain), ''); assert.equal(P.mapBriefRule(brief), P.MAP7_BRIEF);
   for (const said of ['"brief":true', '현재 유효한 기존 부분', 'name·readAs·부모(parentId)·relations', '새 부분으로 만들지 않는다', '없는 것', 'replaces나 corrections로 가리키지 않는다'])
     assert.ok(P.MAP7_BRIEF.includes(said), said);
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.6:') && P.MAP7_RECIPE.includes('brief-parts.1'));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.7:') && P.MAP7_RECIPE.includes('brief-parts.1'));
   assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.50', 'later-map-divided.50']);
 });
 

@@ -63,7 +63,7 @@ test('L50-1 the later contract takes sixteen relations and six claims; each item
   assert.deepEqual(ex.map(x => text.slice(x.from, x.to).match(/^\|(LN\d\d)\|/)?.[1]), ['LN07', 'LN17', 'LN18']);
   // The prompt says so (right after the base text, which stays as it was), and the recipe is bumped.
   assert.ok(P.map7Prompt(ask).startsWith(P.MAP7_PROMPT + P.MAP7_COUNTS) && P.MAP7_COUNTS.includes('claims는 최대 6개, relations는 최대 16개'));
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.6:'), 'step 3 bumped it again (later-identity.1)');
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.7:'), 'steps 3 and 4 bumped it again (later-identity.1, row-binding.1)');
   // A first map (map.6) keeps its own bounds.
   assert.deepEqual([M.MAP6_RELATIONS, M.MAP6_CLAIMS], [48, 20]);
 });

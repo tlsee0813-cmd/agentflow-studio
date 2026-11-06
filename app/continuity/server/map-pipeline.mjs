@@ -2,11 +2,11 @@ import { ApiError } from '../../server/errors.mjs';
 import { validateMapAsk, validateMapReply, conditionRows, ruleConditionRows, askRecords, MAP_RECORD_CHARS, MAP_BYTES, READING_CONTRACT } from '../dist/public/shared/map-reading.js';
 import { segmentKeys } from '../dist/public/shared/record-table.js';
 import { isFirstMap, dividedKind } from '../dist/public/shared/map-route.js';
-import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_COUNTS, MAP7_IDENTITY, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, MAP7_BRIEF, map7Prompt, mapBriefRule } from './map-prompt.mjs';
+import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_COUNTS, MAP7_IDENTITY, MAP7_ROWS, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, MAP7_BRIEF, map7Prompt, mapBriefRule } from './map-prompt.mjs';
 import { planMapPartitions, validateExtraction, extractionStageIssues, EXTRACTION_CANDIDATES_MAX } from './map-partition.mjs';
 import { callMapProvider, readResponseUsage } from './map-provider.mjs';
 import { mapPipelineKey } from './map-pipeline-store.mjs';
-import { MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT, IDENTITY_VERSION, validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues, fragmentSetAside, stageSetAside,
+import { MAP_BLUEPRINT_PROMPT, LATER_BLUEPRINT_PROMPT, IDENTITY_VERSION, ROW_BINDING_VERSION, validateMapBlueprint, splitBlueprintParts, validateRenderedFragment, combineRenderedMaps, combineRenderedReading, mapStageIssues, blueprintStageIssues, fragmentSetAside, stageSetAside,
   isMapRevision, validateMapRevision, revisionGroups, mapCorrectionRevision, missingMapCorrections, justifiedBlueprint, correctionSetAside, holdCorrectionUnits, CONTAINMENT_VERSION, safeValidation, fragmentKeys, finalDiagnostics, missingLines, planStoreFolds, droppedItems, BLUEPRINT_PARTS_MAX, BLUEPRINT_PARTS_PER_FRAGMENT } from './map-blueprint.mjs';
 import { stageDiagnostic, stagePhase, blueprintReason, fragmentReason, globalReason, maskForKeeping } from './map-stage-diagnostic.mjs';
 
@@ -452,6 +452,10 @@ export const LINES_CORRECTION_USD = 0.07;
 // a bound is its own exclusion; every row of a v5 record the map sees has a state per (record, row) in the reading that decided it
 // (reflected, waiting, held, rejected: row-ledger.ts), and a waiting row an earlier reading read without placing it is sent again
 // (bounded) instead of hidden by its read interval; a later map carries the server's set-aside reasons to the browser.
+// .50 step 4 (row-binding.1, Q7(4)): a v5 row ID is its record's own; a C-PART row reflected into one part binds that part (by record and
+// row ID, never by name), a later ask's records say what their cited B IDs are on the map (partRows), the app reads a new part on a bound
+// row as that part, and a later map's new part named like an earlier one (bracketed qualifiers left out) is held as an identity candidate
+// with its relations, never merged.
 export const PIPELINE_RECIPE = 'first-map-divided.50';
 export const LATER_PIPELINE_RECIPE = 'later-map-divided.50';
 /** .45 (RECORD_ASKS_V5_KO.md 12.4 (d)): the key sets beside a stage's INPUT: for each v5 record, the B, F and E IDs its own text cites
@@ -512,13 +516,15 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
     semanticRender: SEMANTIC_RENDER_RULES, finalGlobal: FINAL_GLOBAL_RULES, firstGlobal: FIRST_GLOBAL_RULES, firstFinalGlobal: FIRST_FINAL_GLOBAL_RULES, semanticRevisionLimit: SEMANTIC_REVISION_LIMIT,
     deepseekModel, mergeModel, renderModel, renderProvider, globalModel, globalProvider, targetChars, maxPartitions, firstMaxPartitions, extractionTokens, mergeTokens, renderTokens, globalTokens, reasoning: 'high', planReasoning };
   const identity = mapPipelineKey(recipe);
-  const laterRecipe = { ...recipe, version: LATER_PIPELINE_RECIPE, blueprint: LATER_BLUEPRINT_PROMPT, merge: MAP7_PROMPT + MAP7_COUNTS + MAP7_IDENTITY + MAP7_VOCABULARY + LATER_MERGE_RULES, firstGlobal: null, firstFinalGlobal: null,
+  const laterRecipe = { ...recipe, version: LATER_PIPELINE_RECIPE, blueprint: LATER_BLUEPRINT_PROMPT, merge: MAP7_PROMPT + MAP7_COUNTS + MAP7_IDENTITY + MAP7_ROWS + MAP7_VOCABULARY + LATER_MERGE_RULES, firstGlobal: null, firstFinalGlobal: null,
     schemaRecipe: MAP7_RECIPE, guidance: MAP7_GUIDANCE_FRAME, brief: MAP7_BRIEF,
     // Recipe .50 step 2: the key (and the m7 id) also names the containment rules and the reading contract the result is checked by, so a
     // result of other rules (a cached refusal of .49 among them) is never replayed; the ask itself carries the map state an obligation targets.
     containment: CONTAINMENT_VERSION, contract: READING_CONTRACT,
     // Recipe .50 step 3: the identity rules by name (the prompts above carry them too).
-    identity: IDENTITY_VERSION };
+    identity: IDENTITY_VERSION,
+    // Recipe .50 step 4: the row-binding rules by name (the ask's partRows and the apply rules; the prompts carry them too).
+    rows: ROW_BINDING_VERSION };
   const laterIdentity = mapPipelineKey(laterRecipe);
   // The batch's name: each distinct model once, in stage order (unchanged when the global model is the render model).
   const model = [...new Set([deepseekModel, mergeModel, renderModel, globalModel])].join('_');

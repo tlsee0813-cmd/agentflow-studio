@@ -61,6 +61,12 @@ const cut = (s: string, n: number): string => { const t = s.replace(/\s+/g, ' ')
 const citesCut = (c: readonly Cite[]): Cite[] => c.filter(x => ![x.source, x.place, x.quote].some(w => w && secretLike(w))).slice(0, RECORD43_MAX.cites).map(x => ({ ...x, ref: cut(x.ref, 12), source: x.source ? cut(x.source, 120) : null, place: x.place ? cut(x.place, 80) : null, quote: x.quote ? cut(x.quote, 200) : null }));
 const bare = (s: string): string => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
 const overlaps = (q: { record: string; from?: number; to?: number }, r: { record: string; from: number; to: number }): boolean => q.record === r.record && q.from !== undefined && q.to !== undefined && q.from < r.to && r.from < q.to;
+/** Recipe .50 step 4 (row-binding.1, ruling F5 Q7(4)): a v5 row ID is its record's own (two records' B03 are different rows). A part's
+ * recordRef stays a bare B ID (its record is its basis); the fold it was joined in is kept beside it here, so a joined part matches that ID
+ * only in its own record. A part joined with no fold (a v4 row, a recordRef the reply wrote) matches by the ID alone, as before. */
+const REF_FOLD = new WeakMap<object, string>();
+export function joinRef(b: Part43, id: string | null, fold: string | null | undefined): void { b.recordRef = id; if (id && fold) REF_FOLD.set(b, fold); else REF_FOLD.delete(b); }
+export const refIs = (b: Part43, id: string, fold: string | null | undefined): boolean => b.recordRef === id && (!fold || !REF_FOLD.has(b) || REF_FOLD.get(b) === fold);
 
 /** The program's .43 pass over a checked reply (parts, lines and the reply's own fields), given the ask's record texts. Returns the
  * reading's own fields; mutates the reply's items. nameOf names a part of the map the reply refers to by ref. maxLines bounds the lines
@@ -79,11 +85,13 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   const nameOfPart = (b: Part43): string => b.name ?? ctx.nameOf(b.ref);
   // Recipe .45: a v5 row's part name (its B ID's C-PART 이름) also names the part joined to that ID by its row (record45Parts), whatever the
   // model called it.
-  let aliases: Map<string, string> | undefined;
-  const aliasOf = (n: string) => (aliases ??= new Map(rowsOf(texts, ['C-PART']).filter(r => r.dialect === 'v5').map(r => [plain(bare(r.byColumn['이름'] ?? '')), (r.byColumn['행 ID'] ?? '').trim()] as [string, string]))).get(n);
+  // Recipe .50 step 4: the (ID, record) a name stands for, the last row of that name winning as before, so a part joined in one record is
+  // never found through another record's ID.
+  let aliases: Map<string, [string, string | undefined]> | undefined;
+  const aliasOf = (n: string) => (aliases ??= new Map(rowsOf(texts, ['C-PART']).filter(r => r.dialect === 'v5').map(r => [plain(bare(r.byColumn['이름'] ?? '')), [(r.byColumn['행 ID'] ?? '').trim(), r.folded?.key]] as [string, [string, string | undefined]]))).get(n);
   const byName = (name: string): Part43 | undefined => { const n = plain(bare(name)); if (!n) return undefined; const id = aliasOf(n);
     // Review N4 (8.3): a v5 row's part by its ID first (the part record45Parts joined to the row), its name only as a fallback.
-    return (id ? parts.find(b => b.recordRef === id) : undefined) ?? parts.find(b => plain(nameOfPart(b)) === n); };
+    return (id ? parts.find(b => refIs(b, id[0], id[1])) : undefined) ?? parts.find(b => plain(nameOfPart(b)) === n); };
   const diag = (category: ReadingRecordDiagnostic['category'], table: string | null, record: string, from: number, to: number, column: string | null = null) => {
     if (out.recordDiagnostics.length < RECORD43_MAX.recordDiagnostics && from < to) out.recordDiagnostics.push({ category, table, column, record, from, to });
   };
@@ -128,8 +136,8 @@ export function record43(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   /* Parts: C-PART (type, 구현 상태, row ID, list items), C-GROUP, C-STATUS, then the state (4.6). */
   const groups = v4(['C-GROUP']);
   for (const r of v4(['C-PART'])) {
-    const b = byName(r.byColumn['이름'] ?? ''), q = rowQuote(r); if (!b || !q || (b.recordRef && !(r.dialect === 'v5' && b.recordRef === (r.byColumn['행 ID'] ?? '').trim()))) continue;
-    const id = (r.byColumn['행 ID'] ?? '').trim(); b.recordRef = /^B\d{1,3}$/.test(id) ? id : null;
+    const b = byName(r.byColumn['이름'] ?? ''), q = rowQuote(r); if (!b || !q || (b.recordRef && !(r.dialect === 'v5' && refIs(b, (r.byColumn['행 ID'] ?? '').trim(), r.folded?.key)))) continue;
+    const id = (r.byColumn['행 ID'] ?? '').trim(); joinRef(b, /^B\d{1,3}$/.test(id) ? id : null, r.dialect === 'v5' ? r.folded?.key : null);
     // .44: the row's 유형 decides a v4 part's type, on that row: a fixed word gives its value; 모름, a word outside the list or no word
     // gives none (the model's word for a part the record types otherwise, or not at all, is not kept).
     const word = fixedWord(r.byColumn['유형'] ?? '', TYPE_WORDS), typed = word?.value ?? null;
@@ -389,19 +397,19 @@ export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: 
   const stood = (r: FoldRow) => f.history.get(rowKey(r.table, r.id)) ?? [r];
   const within = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => x.from !== undefined && x.to !== undefined && stood(r).some(h => x.record === h.record && h.row.from <= x.from! && x.to! <= h.row.to + 1);
   const onRow = (r: FoldRow) => (x: { record: string; from?: number; to?: number }) => stood(r).some(h => overlaps(x, { record: h.record, from: h.row.from, to: h.row.to }));
-  const taken = (id: string) => ctx.parts.some(b => b.recordRef === id);
+  const taken = (id: string) => ctx.parts.some(b => refIs(b, id, f.key));
   const open = (b: Part43) => b.name !== null && !b.recordRef;
   // 8.3 (review N4): a v5 part is joined to its C-PART row by ID first: the model's part whose basis stands within the row (the one of the
   // row's name first); then by name; then a part whose basis meets the row. A row no part takes becomes the program's part.
   for (const { r, name } of rows) {
     if (taken(r.id)) continue;
     const on = ctx.parts.filter(b => open(b) && (b.basis ?? []).some(within(r))), b = on.find(x => plainOf(x) === plain(name)) ?? on[0];
-    if (b) b.recordRef = r.id;
+    if (b) joinRef(b, r.id, f.key);
   }
   for (const { r, name, q } of rows) {
     if (taken(r.id)) continue;
     const b = ctx.parts.find(x => open(x) && plainOf(x) === plain(name)) ?? ctx.parts.find(x => open(x) && (x.basis ?? []).some(onRow(r)));
-    if (b) { b.recordRef = r.id; continue; }
+    if (b) { joinRef(b, r.id, f.key); continue; }
     // A part of the row's name the ID join gave another row stays unjoined (record45 says it); the row is not added again under its name.
     if (ctx.parts.some(x => x.name !== null && plainOf(x) === plain(name))) continue;
     if (fresh >= ctx.maxNew) continue;
@@ -409,7 +417,7 @@ export function record45Parts(ctx: { texts: Texts; parts: Part43[]; onMaterial: 
     const ref = `new:rec-${r.id.toLowerCase()}`; if (ctx.parts.some(x => x.ref === ref)) continue;
     const p = { ref, name, parent: null, role: role && !secretLike(role) ? role : null, roleAbout: null, roleReplaces: null, basis: [q], claims: [], state: null, stateQuote: null, stateWhen: null,
       files: [], type: null, typeQuote: null, inputs: [], outputs: [], fields: [], config: [], steps: [], loop: null, stateVars: [], conditions: [], fileRoles: [], recordRef: r.id } as Part43;
-    ctx.parts.push(p); added.push(p); fresh++;
+    joinRef(p, r.id, f.key); ctx.parts.push(p); added.push(p); fresh++;
   }
   return added;
 }
@@ -456,14 +464,14 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
   const cites6 = citesCut;
   for (const f of folds) {
     const nameOf = (id: string) => (f.byId.get(id)?.row.byColumn['이름'] ?? '').trim() || id;
-    const byRef = (id: string) => parts.find(b => b.recordRef === id && f.byId.get(id)?.table === 'C-PART');
+    const byRef = (id: string) => f.byId.get(id)?.table === 'C-PART' ? parts.find(b => refIs(b, id, f.key)) : undefined;
     // Parts: a row record43 did not join by name joins the model's part whose basis stands on it.
     for (const r of f.rows.get('C-PART') ?? []) {
       let b = byRef(r.id); const q = rowQ(r); if (!q) continue;
       if (!b) {
         b = parts.find(x => !x.recordRef && x.name !== null && (x.basis ?? []).some(y => (f.history.get(rowKey(r.table, r.id)) ?? [r]).some(h => overlaps(y, { record: h.record, from: h.row.from, to: h.row.to }))));
         if (!b) continue;
-        b.recordRef = r.id; const t = roleType(r.row.byColumn['표현군·역할'] ?? '', partStructure(f, r.id)); b.type = t as PartType | null; b.typeQuote = t ? q : null;
+        joinRef(b, r.id, f.key); const t = roleType(r.row.byColumn['표현군·역할'] ?? '', partStructure(f, r.id)); b.type = t as PartType | null; b.typeQuote = t ? q : null;
         const impl = fixedWord(r.row.byColumn['구현 상태'] ?? '', IMPLEMENTATION_WORDS); b.implementation = impl?.value ?? null; b.implementationQuote = impl?.value ? q : null;
       }
       familyOn(b, r.row.byColumn['표현군·역할'] ?? '', q, r.mark === 'add'); b.cites = cites6(r.cites);
@@ -488,7 +496,8 @@ export function record45(ctx: { texts: Texts; parts: Part43[]; relations: Line43
       return hits.find(r => q.from !== undefined && r.row.from <= q.from && q.from < r.row.to) ?? hits.sort((a, b) => a.row.from - b.row.from)[0];
     };
     for (const b of parts) {
-      for (const s of b.steps ?? []) { const r = s.recordRef ? f.byId.get(s.recordRef) : undefined; if (r) s.cites = cites6(r.cites); }
+      // Recipe .50 step 4: a step's cites come from the row of that ID in its own record only.
+      for (const s of b.steps ?? []) { const r = s.recordRef ? f.byId.get(s.recordRef) : undefined; if (r && f.pages.some(p => p.record === s.quote.record)) s.cites = cites6(r.cites); }
       for (const c of b.claims) { const r = rowAt(c); if (r) { c.cites = cites6(r.cites); ledgerOn(c, r); ruleStance(c, r); } }
     }
     // The v5 record's own artifacts (C-DATA, 13.3 shared data), gates checked as none, supplementary tables and unknown tables.
@@ -615,7 +624,7 @@ const REPLACED_PARENT = new WeakMap<object, string>();
 /** Recipe .48: the parent each v5 C-GROUP row gives its children: a 구성 or 목록 row (PARENT_AXES) whose 부모 cell is one B ID of a C-PART row,
  * each child B ID of its 자식들 cell (the parent itself left out), as the parts that stand on those rows ({ row, parent, child }). */
 export function groupParents(f: FoldedRecord, parts: readonly Part43[]): { row: string; parent: Part43; child: Part43 }[] {
-  const byRef = (id: string) => f.byId.get(id)?.table === 'C-PART' ? parts.find(b => b.recordRef === id) : undefined, out: { row: string; parent: Part43; child: Part43 }[] = [];
+  const byRef = (id: string) => f.byId.get(id)?.table === 'C-PART' ? parts.find(b => refIs(b, id, f.key)) : undefined, out: { row: string; parent: Part43; child: Part43 }[] = [];
   for (const r of f.rows.get('C-GROUP') ?? []) {
     const axis = fixedWord(r.row.byColumn['묶음 뜻'] ?? '', GROUP_WORDS)?.value; if (!axis || !PARENT_AXES.has(axis)) continue;
     const cell = (r.row.byColumn['부모'] ?? '').replace(/\s*:\s*.+$/, '').trim();

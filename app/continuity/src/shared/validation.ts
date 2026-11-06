@@ -646,10 +646,11 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       ensure(!!part&&part!.steps.some(s=>s.name===m.step)&&(m.direction==='in'?part!.inputs:part!.outputs).includes(m.port));
       const key=JSON.stringify([m.relationId,m.port,m.step,m.direction]);ensure(!rows.has(key));rows.add(key);}}
     // map-reading.5: each candidate says what it leaves undecided; an undecided statement is kept in it, exact where it stands.
-    if(five){list(r.candidates,16);}if(five)for(const c of r.candidates as unknown[]){obj(c,['text','areaIds','quote','target','statement']);ensure(['attribution','identity','parent','holds'].includes(c.target as string));
+    if(five){list(r.candidates,twenty?32:16);}if(five)for(const c of r.candidates as unknown[]){obj(c,['text','areaIds','quote','target','statement']);ensure(['attribution','identity','parent','holds'].includes(c.target as string));
       const held=c.target==='attribution'||c.target==='holds';ensure(held?c.statement!==null:c.statement===null);list(c.areaIds,c.target==='holds'?1:2);
       if(c.statement!==null){obj(c.statement,['kind','text','about','quote']);ensure(CLAIM_KINDS.includes(c.statement.kind as never));text(c.statement.text,240);if(c.statement.about!==null)text(c.statement.about,80);quote(c.statement.quote);}}
-    list(r.candidates,16);for(const c of r.candidates){obj(c,['text','areaIds','quote',...(five?['target','statement']:[])]);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
+    // map-reading.20 (recipe .50 step 4): 32 candidates (a held part's relations among them); earlier entries 16.
+    list(r.candidates,twenty?32:16);for(const c of r.candidates){obj(c,['text','areaIds','quote',...(five?['target','statement']:[])]);text(c.text,240);list(c.areaIds,2);for(const a of c.areaIds)ensure(areaIds.has(a as string));if(c.quote!==null)quote(c.quote);}
     // map-reading.18 (pipeline .43): the reading's own fields from v4 records (record-reading.ts).
     if(eighteen)reading18(r,quote,records,read,nineteen);if(nineteen)reading19(r,quote);
     list(r.gaps,2);for(const g of r.gaps)text(g,160);

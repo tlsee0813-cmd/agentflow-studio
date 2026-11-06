@@ -137,6 +137,15 @@ export const LATER_IDENTITY_RULES = `
 - 명시적 제거·대체(C-PART 상태 「제거됨」, C-WITHDRAW의 제거·폐기·대체, C-CHANGE의 실제 변화)는 그 대상(어느 기존 부분인지), 범위(전부인지 일부인지), 효력 시점(이미 일어났는지 계획인지)을 원문으로 확인한 뒤 그 기존 부분에 맡긴다. 기준이 다르다는 이유로 material로 미루지 않는다. 일부만 바뀐 것은 부분 전체의 제거가 아니고, 계획된 대체는 아무것도 없애지 않는다.
 - C-ISSUE(오류·미해결)의 결함·문제 행은 철회가 아니다: corrections로 등록하지 않는다. 「구현됨」은 같은 기능·범위의 미구현 주장만 끝내며 돌고 있다·검사됐다는 뜻이 아니다.
 - INPUT.parts의 state(앞 읽기가 그 부분에 적은 상태 단어), lastBasis(그 부분을 마지막으로 읽은 기록의 기준 커밋·시점), files(앞 읽기가 그 부분의 것으로 읽은 파일, 최대3개)는 지난 읽기의 요약이며 원문 근거가 아니고 at가 될 수 없다. lastBasis가 이번 기록의 기준과 다르다는 것은 시간이 흘렀다는 뜻이지 다른 대상이라는 뜻이 아니다.`;
+// Recipe .50 step 4 (row-binding.1, ruling F5 Q1/Q7(4)): what a later ask's records[].partRows say, for the plan (the stage that picks Pxx
+// or new:); appended after the identity paragraph.
+export const ROW_BINDING_VERSION = 'row-binding.1';
+export const LATER_ROW_RULES = `
+기록 행의 지도 대응(row-binding.1):
+- INPUT.records[].partRows는 그 기록 조각이 인용하는 B ID마다 그 기록의 C-PART 이름(name)과, 앞선 읽기가 그 C-PART 행을 반영한 지도 부분(part: INPUT.parts의 Pxx, 아직 없으면 null)이다. C-PART 행이 이번에 다시 오지 않아도 B ID를 이름과 부분으로 풀 수 있다. B ID는 기록마다 따로이므로 다른 기록의 같은 B ID와 섞지 않는다.
+- part가 있는 B는 그 Pxx다: 그 B를 말하는 행(C-LINK·C-STATE·C-WITHDRAW 등)은 그 Pxx로 계획하고, 그 B로 new: 부분을 세우지 않는다. 그 C-PART 행으로 new: 부분을 세워도 앱은 그 Pxx로 읽는다.
+- part가 null인 B는 아직 지도에 반영되지 않은 행이다. 이름이 같거나 괄호 설명만 다르다는 것만으로 기존 부분과 같다고 정하지 않는다(위 기존 부분의 정체). 이름이 거의 같은 새 부분은 앱이 만들지 않고 같은 대상 후보로 남기므로, 원문으로 가를 수 있으면 Pxx로 쓰거나 다른 대상임이 드러나게 다른 이름을 쓴다.
+- partRows는 지난 읽기의 대응 요약이며 원문 근거가 아니고 at가 될 수 없다.`;
 export const LATER_IDENTITY_SWAP = Object.freeze(['같은 이름만으로 다른 대상·판본을 합치지 않는다.', '같은 이름만으로 다른 대상을 합치지 않는다(기준 커밋·판본의 차이는 대상의 차이가 아니다: 아래 「기존 부분의 정체」).']);
 /** The first-map plan text with that one line said without 판본 (the later plan's base). */
 export const LATER_BLUEPRINT_BASE = swapOnce(MAP_BLUEPRINT_PROMPT, ...LATER_IDENTITY_SWAP);
@@ -144,7 +153,7 @@ export const LATER_BLUEPRINT_PROMPT = LATER_BLUEPRINT_BASE + `
 이번 INPUT.schemaVersion은 studio.map.7이며 parts는 총24개 이하(위의 36개가 아니다), 새 부분은 12개 이하, global은 32개 이하, 그중 relation 항목은 16개까지다. 출력 키는 정확히 parts, global, corrections 세 개다. 앞의 두 키 규칙을 유지하고 corrections 배열을 반드시 추가한다(없으면 []).
 corrections는 이번 원문이 같은 대상·범위의 기존 current 주장을 명시적으로 철회·정정·대체한다고 밝힌 경우만 등록하는 후속 작성 의무다. 각 항목은 정확히 {"part":"기존 Pxx","claim":"그 부분 current의 실제 C키","at":["이번 원문에 실제 있는 구간 별칭"]}다. part는 이번 parts 계획에도 포함하고, 최대24항목·부분마다4항목·동일(part,claim)은 한 번만 쓴다. at는 원래 기록의 실제 개별 별칭1~8개이며 사용자 기재 metadata나 이전 current/요청/보조해석은 근거가 아니다.
 다른 판본·브랜치의 주장이 함께 성립하거나 원문이 현재 주장을 명시적으로 철회하지 않은 경우는 corrections에 넣지 않는다(이 판본 문장은 current 주장의 대체에 관한 것이며 부분의 정체와 무관하다). 뒤에 도착했다는 이유로 대체하지 않는다. 같은 범위인지 미정이면 대체를 강요하지 않는다. 사용자 직접 역할(roleBy=person)은 이 목록으로 바꾸지 않는다. current가 비어 있으면 그 부분에는 corrections를 등록할 수 없다.
-등록한 의무는 이후 해당 부분의 유효한 claim.replaces가 그 current 키를 지목해야 충족된다. 요약·미정 후보·역할 설명·요청 대응만으로 기존 현재 주장을 철회했다고 처리하지 않는다. 모든 의미를 기계적으로 감지한다는 보증이 아니라 원문에서 명시적으로 확인한 정정을 잃지 않기 위한 목록이다.` + LATER_IDENTITY_RULES;
+등록한 의무는 이후 해당 부분의 유효한 claim.replaces가 그 current 키를 지목해야 충족된다. 요약·미정 후보·역할 설명·요청 대응만으로 기존 현재 주장을 철회했다고 처리하지 않는다. 모든 의미를 기계적으로 감지한다는 보증이 아니라 원문에서 명시적으로 확인한 정정을 잃지 않기 위한 목록이다.` + LATER_IDENTITY_RULES + LATER_ROW_RULES;
 
 /** Exact bounded blueprint, with every pointer resolved against original span.2 records. No text is repaired or clipped. */
 export function validateMapBlueprint(value, ask) {

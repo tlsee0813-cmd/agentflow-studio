@@ -100,17 +100,17 @@ test('I50-4 the later prompts: a positive identity rule, version caution said of
     '「기록 이름: …」', '새 부분을 만들어 비켜 가지 않는다', '효력 시점', '계획된 대체는 아무것도 없애지 않는다', 'C-ISSUE(오류·미해결)의 결함·문제 행은 철회가 아니다',
     '「구현됨」은 같은 기능·범위의 미구현 주장만 끝내며', 'lastBasis가 이번 기록의 기준과 다르다는 것은 시간이 흘렀다는 뜻'])
     assert.ok(B.LATER_BLUEPRINT_PROMPT.includes(said), said);
-  assert.ok(B.LATER_BLUEPRINT_PROMPT.endsWith(B.LATER_IDENTITY_RULES)); assert.equal(B.IDENTITY_VERSION, 'later-identity.1');
+  assert.ok(B.LATER_BLUEPRINT_PROMPT.endsWith(B.LATER_IDENTITY_RULES + B.LATER_ROW_RULES), "step 4: the row-binding paragraph follows"); assert.equal(B.IDENTITY_VERSION, 'later-identity.1');
   // Render and global (the later merge rules) and the map.7 instructions.
   assert.ok(!LATER_MERGE_RULES.includes('구간·판본·프로젝트') && LATER_MERGE_RULES.includes('기준 커밋·판본의 차이는 부분의 정체가 아니라 주장의 범위(aboutAt)에 관한 것이다'));
   assert.ok(MERGE_RULES.includes('다른 구간의 같은 이름을 이름만으로 합치지 않는다') && !RENDER_RULES.includes('later-identity'), 'first-map rules untouched');
   const ask = ask7(grown()).ask, prompt = P.map7Prompt(ask);
-  assert.ok(prompt.startsWith(P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_IDENTITY + P.MAP7_VOCABULARY));
+  assert.ok(prompt.startsWith(P.MAP7_PROMPT + P.MAP7_COUNTS + P.MAP7_IDENTITY + P.MAP7_ROWS + P.MAP7_VOCABULARY));
   for (const said of ['위 「같은 대상인지는 이름만으로 정하지 않는다 …」 문장보다 우선한다', 'role·current 주장의 대체에 관한 것이며 부분의 정체에는 쓰지 않는다',
     'role·parentId·relations·files·readAs', '새 부분으로 비켜 가지 않고 candidates', '구현·가동·검증을 합친 판정이 아니다', 'at·basis·aboutAt으로 쓰지 않는다',
     'replaces의 근거가 아니다', '기준 머리말로 시작하지 않는다'])
     assert.ok(P.MAP7_IDENTITY.includes(said), said);
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.6:') && P.MAP7_RECIPE.includes('later-identity.1') && P.MAP7_RECIPE.includes('part-facts.1'));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.7:') && P.MAP7_RECIPE.includes('later-identity.1') && P.MAP7_RECIPE.includes('part-facts.1'));
   assert.equal(M.PART_FACTS, 'part-facts.1');
 });
 

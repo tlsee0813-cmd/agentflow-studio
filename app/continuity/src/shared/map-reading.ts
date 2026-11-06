@@ -13,10 +13,10 @@ import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
 import { recordKind, recordLabel, mapBasis, mapNoteHead } from './record-source.js';
 import { validateFrozenRequest, validateRequestContext, requestContext, validateRequestMatch, requestMatches, hasTarget, sameTarget, canReplace, MATCH_STANCES, recordTexts, readInterval, type RequestContext, type FrozenRequest, type RequestMatch, type RequestMatch3, type StoredRequestMatch, type MatchKind, type MatchStance, type RequestTarget } from './request-return.js';
-import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PAGE_HEAD, CHUNK_HEAD, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow } from './record-table.js';
+import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PAGE_HEAD, CHUNK_HEAD, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow, type FoldRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun, type V5Fold } from './record-excerpt.js';
-import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, type LedgerRow } from './row-ledger.js';
+import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, rowBindings, ledgerKey, type LedgerRow } from './row-ledger.js';
 export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -1348,7 +1348,13 @@ export function recordBasis(text: string): string | null {
   return date ? `${word} · ${date}` : word;
 }
 /** text: studio.map.1–3. lead + spans: studio.map.4 (the same excerpt as span.2 pieces; never both). */
-export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text?: string; lead?: string; spans?: SpanWire[]; note: string; basis: string; addedAt?: string }
+export interface MapAskRecord { id: string; kind: 'pasted' | RecordView['kind']; text?: string; lead?: string; spans?: SpanWire[]; note: string; basis: string; addedAt?: string; partRows?: MapAskPartRow[] }
+/** Recipe .50 step 4 (row-binding.1, map.7 only): a B ID a v5 record's sent text cites, with its record's C-PART 이름 and the part of the
+ * ask an earlier reading reflected that C-PART row into (row-ledger.ts rowBindings), or null when none has. B IDs are the record's own. A
+ * summary of earlier readings, never evidence. */
+export interface MapAskPartRow { id: string; name: string; part: string | null }
+export const ROW_BINDING = 'row-binding.1';
+export const PART_ROWS_MAX = 48, PART_ROW_NAME_CHARS = 60;
 /** studio.map.3: an earlier current match the records may explicitly take back, by alias (M01…), with what it said and the one
  * frozen item it answers. Material, never a new record. */
 export interface MapAskPrior { key: string; quote: string; text: string; kind: MatchKind; stance: MatchStance | null; about: string | null; target: RequestTarget }
@@ -1629,7 +1635,14 @@ export function validateMapAsk(value: unknown, at: MapAskRoute = {}): MapAsk {
   const records = new Set<string>();
   for (const r of value.records) {
     const hasTime = !!r && typeof r === 'object' && Object.hasOwn(r, 'addedAt');
-    obj(r, ['id', 'kind', ...(four ? ['lead', 'spans'] : ['text']), 'note', 'basis', ...(hasTime ? ['addedAt'] : [])]); check(typeof r.id === 'string' && RECORD.test(r.id) && !records.has(r.id)); records.add(r.id);
+    // Recipe .50 step 4 (row-binding.1): a later map.7 record may say what its cited B IDs are on the map.
+    const hasRows = !!r && typeof r === 'object' && Object.hasOwn(r, 'partRows');
+    obj(r, ['id', 'kind', ...(four ? ['lead', 'spans'] : ['text']), 'note', 'basis', ...(hasTime ? ['addedAt'] : []), ...(hasRows ? ['partRows'] : [])]);
+    if (hasRows) {
+      check(version === MAP7_SCHEMA); arr(r.partRows, PART_ROWS_MAX); const seen = new Set<string>();
+      for (const x of r.partRows) { obj(x, ['id', 'name', 'part']); check(typeof x.id === 'string' && /^B\d{1,3}$/.test(x.id) && !seen.has(x.id)); seen.add(x.id as string);
+        str(x.name, PART_ROW_NAME_CHARS); check(x.part === null || typeof x.part === 'string' && parts.has(x.part)); }
+    } check(typeof r.id === 'string' && RECORD.test(r.id) && !records.has(r.id)); records.add(r.id);
     check(['pasted', 'request', 'report', 'evidence', 'answer', 'decision'].includes(r.kind as string)); str(r.note, 600, true); str(r.basis, 300);
     if (!four) str(r.text, MAP_RECORD_CHARS);
     else {
@@ -3379,6 +3392,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   const steps: PartUnderstanding['steps'] = [], stateVars: ReadingStateVar[] = [], portMap: PartUnderstanding['portMap'] = []; let loop: PartUnderstanding['loop'] = null;
   const conditions: PartUnderstanding['conditions'] = [], fileRoles: ReadingFileRole[] = [];
   let recordLoops: ReadingRecordLoop[] = [], variants: ReadingVariant[] = [], statusClaims: ReadingStatusClaim[] = [];
+  const unbuiltRows: ReadingQuote[] = [];
   const gather = (list: string[], own: readonly string[] | undefined) => { if (own?.length) list.splice(0, list.length, ...own, ...list.filter(f => !own.includes(f))); };
   for (const r of p.readings) {
     if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
@@ -3386,6 +3400,14 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     if (part.created) createdName = part.created.name;
     // The newest reading that gives a state (or a type) wins (readings are oldest first); the lists gather, newest first, each once.
     if (part.state) stateRead = { state: part.state, when: part.stateWhen ?? null, quote: part.stateQuote ?? null, at: r.at };
+    // Recipe .50 step 4 (ruling F5: 「구현됨」 ends only the unbuilt claim of the same function and scope): a newer reading that read the
+    // part's own row as built or partial, and gave no state, ends an older unbuilt state (no state now: built is not running or checked),
+    // and the earlier claims standing on the part's own row that said unbuilt end with it. A claim on any other row stays.
+    else if (stateRead?.state === 'unbuilt' && (part.implementation === 'built' || part.implementation === 'partial') && part.implementationQuote) {
+      for (const c of all) if (unbuiltRows.some(q => q.record === c.record && q.from !== undefined && c.from !== undefined && q.from < c.to! && c.from < q.to!)) replaced.add(`${c.reading}:${c.index}`);
+      stateRead = null;
+    }
+    if (part.implementation === 'unbuilt' && part.implementationQuote) unbuiltRows.push(part.implementationQuote);
     if (part.type) typeRead = { type: part.type, quote: part.typeQuote ?? null, at: r.at };
     if (part.familyQuote) familyRead = { family: part.family ?? null, role: part.familyRole ?? null, reason: part.familyReason ?? null, unclear: part.familyUnclear === true, quote: part.familyQuote, at: r.at };
     gather(files, part.files); gather(inputs, part.inputs); gather(outputs, part.outputs); gather(fields, part.fields); gather(config, part.config);
@@ -3678,6 +3700,21 @@ export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, b
   for (const x of ask.parts) if (x.files) x.files = [];
   return fits();
 }
+/** Recipe .50 step 4 (row-binding.1): the B IDs an excerpt of a v5 fold's pasted text cites, first appearance order, each once, at most
+ * PART_ROWS_MAX: those bound to a part of the ask (part: its alias), and those whose C-PART row neither the excerpt carries nor goes(r)
+ * says this ask sends otherwise (name only, part null): an unbound B whose C-PART row goes is named there already. Only IDs of a C-PART row
+ * of that fold. */
+export function partRowsOf(f: Pick<V5Fold, 'key' | 'fold'>, paste: string, ex: Pick<PasteExcerpt, 'text' | 'pieces'>, bound: ReadonlyMap<string, string>, alias: ReadonlyMap<string, string>, goes: (r: FoldRow) => boolean = () => false): MapAskPartRow[] {
+  const out: MapAskPartRow[] = [];
+  for (const id of new Set(ex.text.match(PART_CITE) ?? [])) {
+    if (out.length >= PART_ROWS_MAX) break;
+    const r = f.fold.byId.get(id), name = r?.table === 'C-PART' ? (r.row.byColumn['이름'] ?? '').trim() : ''; if (!r || !name || secretLike(name)) continue;
+    const area = bound.get(ledgerKey(f.key, 'C-PART', id)), part = area ? alias.get(area) ?? null : null;
+    const carried = r.record === paste && ex.pieces.some(x => x.from <= r.row.from && r.row.to <= x.to) || goes(r);
+    if (part || !carried) out.push({ id, name: cut(name, PART_ROW_NAME_CHARS), part });
+  }
+  return out;
+}
 /** anchored: true for m4, MAP5_SCHEMA for m5 (only after the server advertises that capability); records go as span.2 pieces, ending
  * where a piece ends (a cut excerpt never leaves its last sentence half sent), with requests and priors always present.
  * MAP7_SCHEMA (a server that also advertises the later m7 recipe): the ask is built as map.6 and, once complete, goes as map.7 when it
@@ -3727,6 +3764,9 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   const readEnd = readEnds(p), ledger = folds.length ? rowLedger(p, folds) : new Map<string, LedgerRow>();
   const pasteAt = new Map(p.pasted.map((r, i) => [r.id, i])), newest = [...folds].sort((a, b) => Math.max(...b.pastes.map(x => pasteAt.get(x.id) ?? -1)) - Math.max(...a.pastes.map(x => pasteAt.get(x.id) ?? -1))).map(f => f.key);
   const again = resendRows(ledger, readEnd, pasteAt, newest), againKeys = new Set(again.map(x => `${x.paste}@${x.start}`));
+  // Recipe .50 step 4 (row-binding.1): a later map.7 ask says, for each record, what the B IDs its sent text cites are on the map (the part
+  // its C-PART row was reflected into, by (record, row ID)), so a page that names its parts by ID only is read against the map.
+  const bindings = facts && askParts.length ? rowBindings(ledger, id => alias.has(id) && p.space.areas.some(a => a.id === id && !a.archived)) : null, rowsFold = new Map<MapAskRecord, V5Fold>();
   const againOf = new Map(again.map(x => [`${x.paste}@${x.start}`, x])), againIn = (x: PageRun) => again.some(y => y.paste === x.paste.id && x.from <= y.start && y.end <= x.to);
   for (const y of again) if (!unreadFrom.has(y.paste)) unreadFrom.set(y.paste, readEnd.get(y.paste) ?? 0);
   // A text is fresh while one of its runs of current pages runs past what was read of it (a page waiting after a gap is not yet), or holds a
@@ -3805,9 +3845,14 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     const runs = f.runs.filter(x => v5Sendable.has(x.paste.id) && pending(x)), sent = new Map(runs.map(x => [x.paste.id, unreadFrom.get(x.paste.id) ?? 0]));
     const base = ask.records.length, startN = n.N, room = Math.max(0, bound.records - base);
     const leaveOf = (k: number) => new Set(f.droppable.slice(0, k).map(d => d.key));
-    const record = (run: PageRun, ex: PasteExcerpt, at: number, last: boolean): Placed => {
+    const record = (run: PageRun, ex: PasteExcerpt, at: number, last: boolean, prior: readonly Placed[] = []): Placed => {
       const px = run.paste, r = sources.get(px.id)!, id = `N${String(startN + at + 1).padStart(2, '0')}`, i = runs.indexOf(run);
       const rec: MapAskRecord = { id, kind: r.kind, note: '', basis: basisOf(r), ...(ask.requests ? { addedAt: r.at } : {}) }; put(rec, ex.text);
+      // A C-PART row a record placed before this one carries (an earlier run of this fold, or a record already in the ask) names its B there;
+      // one only a later record carries is left out after placing (below), so the bytes counted here are never exceeded.
+      const carries = (pieces: readonly ExcerptPiece[] | undefined, r: FoldRow) => !!pieces?.some(q => q.from <= r.row.from && r.row.to <= q.to);
+      if (bindings) { const rows = partRowsOf(f, px.id, ex, bindings, alias, r => prior.some(x => x.run.paste.id === r.record && carries(x.ex.pieces, r)) || [...records.values()].some(ref => ref.id === r.record && carries(ref.pieces, r)));
+        if (rows.length) { rec.partRows = rows; rowsFold.set(rec, f); } }
       const left = ex.left.length ? ` · 분량상 빼고 보낸 행 ${ex.left.length}개: ${leftText(ex.left)}` : '';
       const cutNote = ex.cut !== null ? ` · 분량상 이 원문 ${ex.cut + 1}자부터(행 ${ex.cutRows}개)는 다음 정리에서 읽음` : '';
       const later = last && i < runs.length - 1 ? ` · 이번에 보내지 못한 쪽: ${runs.slice(i + 1).flatMap(x => x.pages).join('·')}` : '';
@@ -3832,7 +3877,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     const whole = (k: number): Placed[] | null => {
       if (runs.length > room) return null;
       const leave = leaveOf(k), out: Placed[] = [];
-      for (const run of runs) { const ex = pasteExcerpt(f, run.paste, leave, sent, Infinity, run.pages, againKeys); if (ex) out.push(record(run, ex, out.length, run === runs.at(-1))); }
+      for (const run of runs) { const ex = pasteExcerpt(f, run.paste, leave, sent, Infinity, run.pages, againKeys); if (ex) out.push(record(run, ex, out.length, run === runs.at(-1), out)); }
       return out;
     };
     // The runs in page order as far as they fit, the last one cut at a line (cap shrinking by a tenth down to a readable excerpt).
@@ -3843,7 +3888,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
         let cap = Infinity, got: Placed | null = null;
         for (let g = 0; g < 40; g++) {
           const ex = pasteExcerpt(f, run.paste, leave, sent, cap, run.pages, againKeys); if (!ex) break;
-          const one = record(run, ex, out.length, true);
+          const one = record(run, ex, out.length, true, out);
           if (within([...out, one])) { got = one; break; }
           const next = Math.floor(Math.min(cap, ex.text.length, bound.recordChars) * (cap === Infinity && ex.text.length > bound.recordChars ? 1 : 0.9));
           if (next < MIN_RECORD_CHARS) break; cap = next;
@@ -3853,7 +3898,7 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
         if (got.ex.cut !== null) break;
       }
       // Only the last record's note says what goes next time (the pages after it).
-      const final = out.map((x, i) => record(x.run, x.ex, i, i === out.length - 1));
+      const final = out.map((x, i) => record(x.run, x.ex, i, i === out.length - 1, out.slice(0, i)));
       while (final.length && !within(final)) final.pop();
       return final;
     };
@@ -3899,6 +3944,13 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
     if (bytes(ask) > room - 256) { ask.records.pop(); n[letter]--; break; }
     records.set(id, { id: r.id, from: r.from, to: r.from + text.length, total: r.text.length, text });
   }
+  // Recipe .50 step 4: an unbound B whose C-PART row another record of this ask carries (page 1 beside page 2) is named there already.
+  for (const rec of ask.records) {
+    const f = rowsFold.get(rec); if (!f || !rec.partRows) continue;
+    rec.partRows = rec.partRows.filter(x => { if (x.part) return true; const r = f.fold.byId.get(x.id)!;
+      return ![...records.values()].some(ref => ref.id === r.record && ref.pieces?.some(q => q.from <= r.row.from && r.row.to <= q.to)); });
+    if (!rec.partRows.length) delete rec.partRows;
+  }
   input.coverage = { fresh, sent: ask.records.length, partial: [...records.values()].filter(recordPartial).length };
   if (!ask.records.length) return { ...input, problem: 'TOO_LARGE' };
   const leak = ask.records.find(x => secretLike(records.get(x.id)!.text));
@@ -3906,6 +3958,22 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   if (anchored === MAP7_SCHEMA && !firstAsk(ask)) ask.schemaVersion = MAP7_SCHEMA;
   return input;
 }
+
+/* ---------- recipe .50 step 4: names alike, for candidates only ---------- */
+const QUALIFIER = /[(（[［][^()（）[\]［］]*[)）\]］]/g;
+/** A name's core (normName, parenthetical qualifiers left out, no spacing) and its qualifiers (folded the same way, in order). */
+export function nameCore(n: string): { core: string; qualifier: string } {
+  const k = normName(n), qualifier = (k.match(QUALIFIER) ?? []).map(q => q.slice(1, -1).replace(/\s+/g, '')).filter(Boolean).join('|');
+  return { core: k.replace(QUALIFIER, ' ').replace(/\s+/g, ''), qualifier };
+}
+/** Two names alike (recipe .50 step 4): the same core of at least two characters, and the same qualifiers or one of them none (「주기 일정」 and
+ * 「주기 일정(작업 예약)」, 「Cache」 and 「cache」; never 「설정 (서버)」 and 「설정 (클라이언트)」). A candidate, never a merge. */
+export function likeNames(a: string, b: string): boolean {
+  const x = nameCore(a), y = nameCore(b);
+  return x.core.length >= 2 && x.core === y.core && (x.qualifier === y.qualifier || !x.qualifier || !y.qualifier);
+}
+/** A map-reading.20 reading keeps up to 32 candidates (the model's and the same-name ones first, then a held part's relations). */
+export const READING_CANDIDATES_20 = 32;
 
 /* ---------- the one write ---------- */
 export interface Applied { project: Project; reading: MapReading; created: string[]; touched: string[] }
@@ -4076,6 +4144,21 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const ids = new Map(input.parts), skipped: ReadingSkip[] = [...asMaterial], candidates: ReadingCandidate[] = [], parts: ReadingPart[] = [], created: string[] = [];
   const parentOf = (id: string) => p.space.containment.parents[id] ?? null;
   const madeBefore = done.flatMap(r => r.parts.filter(x => x.created).map(x => ({ areaId: x.areaId, ...x.created! })));
+  // Recipe .50 step 4 (row-binding.1, ruling F5 Q1/Q7(4)): the app keeps the row → part mapping. A new part whose basis stands on a C-PART
+  // row an earlier reading reflected into one live part (by record and row ID, never by name) is that part: it is not created, its ref
+  // resolves to the part, and its basis, claims and fields join that part's entry (its role does not write over the part's).
+  const bound = sentFolds.length ? rowBindings(prior, active) : new Map<string, string>(), partRowsSent = tracked.filter(t => t.row.table === 'C-PART');
+  const boundOf = (x: MapReplyPart): string | null => {
+    const quotes = x.basis.map(real), hit = new Set(partRowsSent.filter(t => quotes.some(q => q.from !== undefined && q.to !== undefined && q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to))
+      .flatMap(t => { const a = bound.get(t.key); return a ? [a] : []; }));
+    return hit.size === 1 ? [...hit][0]! : null;
+  };
+  const rebound: { x: MapReplyPart; areaId: string }[] = [];
+  // Recipe .50 step 4: the same-name net of a later map also compares names with their parenthetical qualifiers left out and case and
+  // spacing folded (likeNames), against the parts live before this reading under any parent but the new part's own ancestors: a match is
+  // an identity candidate and the part is held (not created), never merged. held: the new part's ref → the part it may be.
+  const later = input.ask.schemaVersion === MAP7_SCHEMA, before = project.space.areas.filter(a => !a.archived), held = new Map<string, string>();
+  const ancestors = (id: string | null) => { const out = new Set<string>(); for (let k = id, g = 0; k && g < 64; k = parentOf(k), g++) out.add(k); return out; };
   // New parts, parents first (the reply's own order otherwise).
   const queue = mapParts.filter(x => x.name !== null), dropped = new Set(reply.parts.filter(x => x.name !== null && !mapParts.some(p => p.ref === x.ref)).map(x => x.ref));
   for (let guard = 0; queue.length && guard < 64; guard++) {
@@ -4083,13 +4166,21 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
       const x = queue[i]!; if (x.parent && !ids.has(x.parent) && !dropped.has(x.parent)) continue;
       queue.splice(i--, 1);
       if (x.parent && dropped.has(x.parent)) { dropped.add(x.ref); skipped.push({ what: 'part', name: x.name!, reason: 'parent-skipped' }); continue; }
+      const to = boundOf(x);
+      if (to) { ids.set(x.ref, to); rebound.push({ x, areaId: to }); continue; }
       const parentId = x.parent ? ids.get(x.parent)! : null, key = normName(x.name!);
       const same = p.space.areas.find(a => !a.archived && parentOf(a.id) === parentId && normName(a.name) === key)
         ?? madeBefore.map(m => p.space.areas.find(a => a.id === m.areaId && !a.archived && m.parentId === parentId && normName(m.name) === key)).find(Boolean);
       if (same) {
         // Not the same thing by its name alone: the new one is not added, and nothing is attached to the existing one.
-        dropped.add(x.ref); skipped.push({ what: 'part', name: x.name!, reason: 'same-name' });
+        dropped.add(x.ref); held.set(x.ref, same.id); skipped.push({ what: 'part', name: x.name!, reason: 'same-name' });
         candidates.push({ text: `‘${x.name}’: 같은 이름의 부분이 이미 있어 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, areaIds: [same.id], quote: real(x.basis[0]!), ...(six ? { target: 'identity' as const, statement: null } : {}) });
+        continue;
+      }
+      const up = ancestors(parentId), like = later ? before.find(a => !up.has(a.id) && likeNames(a.name, x.name!)) : undefined;
+      if (like) {
+        dropped.add(x.ref); held.set(x.ref, like.id); skipped.push({ what: 'part', name: x.name!, reason: 'same-name' });
+        candidates.push({ text: cut(`‘${x.name}’: 이름이 거의 같은 부분 ‘${like.name}’이(가) 이미 있어 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, 240), areaIds: [like.id], quote: real(x.basis[0]!), target: 'identity', statement: null });
         continue;
       }
       if (madeBefore.some(m => m.parentId === parentId && normName(m.name) === key && p.space.areas.some(a => a.id === m.areaId && a.archived))) {
@@ -4108,13 +4199,34 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const overlaps = (a: ReadingQuote, b: ReadingQuote) => a.from !== undefined && b.from !== undefined ? a.from < b.to! && b.from < a.to! : a.quote.includes(b.quote) || b.quote.includes(a.quote);
   const settled = (areaId: string, c: ReadingClaim) => !unsure.some(u => u.parts.has(areaId) && u.record === c.record && overlaps(u, c));
   for (const x of mapParts) if (x.name === null) parts.push({ areaId: ids.get(x.ref)!, created: null, role: x.role, roleAbout: x.roleAbout, roleReplaces: x.roleReplaces ? real(x.roleReplaces) : null, basis: x.basis.map(real), claims: x.claims.map(claimOf), ...stateOf(x) });
+  // Recipe .50 step 4: a new part read as the part its C-PART row is bound to joins that part's entry (basis up to four, each once; claims
+  // up to the stored bound), or stands as its entry with no role of its own. It is kept with its basis alone: the row stays that part's.
+  const keep = new Set<string>();
+  for (const { x, areaId } of rebound) {
+    const basis = x.basis.map(real), claims = x.claims.map(claimOf), entry = parts.find(e => e.areaId === areaId); keep.add(areaId);
+    if (!entry) { parts.push({ areaId, created: null, role: null, roleAbout: null, roleReplaces: null, basis: basis.slice(0, 4), claims: claims.slice(0, 20), ...stateOf(x) }); continue; }
+    for (const q of basis) if (entry.basis.length < 4 && !entry.basis.some(b => b.record === q.record && b.from === q.from && b.to === q.to)) entry.basis.push(q);
+    entry.claims.push(...claims.slice(0, Math.max(0, 20 - entry.claims.length)));
+  }
   if (!six) for (const part of parts) part.claims = part.claims.filter(c => settled(part.areaId, c));
-  for (let i = parts.length - 1; i >= 0; i--) if (!parts[i]!.created && !parts[i]!.role && !parts[i]!.claims.length) parts.splice(i, 1);
+  for (let i = parts.length - 1; i >= 0; i--) if (!parts[i]!.created && !parts[i]!.role && !parts[i]!.claims.length && !keep.has(parts[i]!.areaId)) parts.splice(i, 1);
   const relations: ReadingRelation[] = [], storedAs = new Map<MapReply['relations'][number], string>();
   const madeRelations = done.flatMap(r => r.relations);
+  // Recipe .50 step 4: a relation of a part held on its name (same-name) is not dropped silently: it is an identity candidate naming the part
+  // it may be and its other end, on its own passage (its row is held with them in the ledger, and goes again when that part changes).
+  const lineCandidates: ReadingCandidate[] = [], refName = (ref: string) => reply.parts.find(y => y.ref === ref)?.name ?? (ids.get(ref) ? p.space.areas.find(a => a.id === ids.get(ref))?.name : undefined) ?? ref;
   for (const r of mapRelations) {
     const from = ids.get(r.from), to = ids.get(r.to), name = `${r.from}→${r.to}`;
-    if (!from || !to) { skipped.push({ what: 'relation', name, reason: 'parent-skipped' }); continue; }
+    if (!from || !to) {
+      skipped.push({ what: 'relation', name, reason: 'parent-skipped' });
+      const end = [r.from, r.to].find(ref => held.has(ref));
+      if (six && end) {
+        const may = held.get(end)!, other = end === r.from ? to : from, mayName = p.space.areas.find(a => a.id === may)?.name ?? '';
+        lineCandidates.push({ text: cut(`‘${refName(r.from)} → ${refName(r.to)}’ 관계: 끝 부분 ‘${refName(end)}’이(가) 기존 부분 ‘${mayName}’과(와) 같은 대상인지 정해지지 않아 그리지 않았어요.`, 240),
+          areaIds: [...new Set([may, ...(other ? [other] : [])])].slice(0, 2), quote: real(lineQuote(r)), target: 'identity', statement: null });
+      }
+      continue;
+    }
     // map-reading.7: a line this very reading drew as designed and also read as observed (or the other way) is one line on the
     // map read twice: the second reading of it is kept beside the first, under the same relation, with its own passage.
     const twin = six && r.mode ? relations.find(x => x.from === from && x.to === to && x.kind === r.kind && x.mode && x.mode !== r.mode && !relations.some(y => y.relationId === x.relationId && y.mode === r.mode)) : undefined;
@@ -4162,7 +4274,7 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
     ...(six ? { exclusions: (EXCLUSIONS.get(reply) ?? []).map(x => { const source = x.record ? input.records.get(x.record) : null;
       const at = source && x.from !== null && x.to !== null ? (source.pieces ? { from: placeOf(source.pieces, x.from), to: placeOf(source.pieces, x.to) } : { from: source.from + x.from, to: source.from + x.to }) : null;
       return { ...x, record: source?.id ?? null, from: at ? at.from : null, to: at ? at.to : null }; }) } : {}),
-    summary: comparisonOnly ? '이미 지도에 읽은 원문을 고른 요청과 다시 대조했어요.' : reply.summary, parts, relations, candidates: candidates.slice(0, 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
+    summary: comparisonOnly ? '이미 지도에 읽은 원문을 고른 요청과 다시 대조했어요.' : reply.summary, parts, relations, candidates: [...candidates, ...lineCandidates].slice(0, six && sentFolds.length ? READING_CANDIDATES_20 : 16), gaps: reply.gaps, skipped: skipped.slice(0, 64),
     ...(withRequests ? { requests: structuredClone(frozen), matches } : {}),
     ...(four ? { material: material.map(m => { const source = input.records.get(m.record)!, place = recordAt(source, m.from, m.to); if (!place) throw new Error('INVALID_RESPONSE'); return { record: source.id, from: place.from, to: place.to, what: m.what }; }) } : {}) };
   // Anchored: a reply that gets nothing out of the records (no part, claim, line, candidate or match) and says why with gaps
