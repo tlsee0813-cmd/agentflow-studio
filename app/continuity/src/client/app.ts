@@ -55,6 +55,7 @@ import { hoverMachine, placeTip, DIM_AFTER_MS, type TipSide, type HoverMachine }
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
+import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks } from '../shared/record-table.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -4500,7 +4501,8 @@ function idGloss(project: Project, v?: StudioView): IdGloss {
   let view = v; return projectIdGloss(project, id => (view ??= studioView(project)).parts.find(p => p.id === id)?.name ?? null, projectVariantGloss(project));
 }
 /** The map's view with its ports said without the record's row IDs (an ID the record names said by that name). */
-function plainMapView(project: Project): StudioView { const v = studioView(project); return plainView(v, idGloss(project, v)); }
+// Recipe .50 step 5: the current map leaves out a part a record retired and a duplicate folded onto its canonical part (map-identity.ts).
+function plainMapView(project: Project): StudioView { const v = currentView(project, studioView(project)); return plainView(v, idGloss(project, v)); }
 /** What readings said each relation hands over (map-reading.7): per relation, the newest reading's line that names a payload. */
 function relationPayloads(project: Project): Map<string, ReadingRelation> {
   const out = new Map<string, ReadingRelation>();
@@ -5838,7 +5840,7 @@ function renderMapEntry() {
     // Three records the spec names (§8.1): the status report, the design record, and the scenario record with the map's ledger
     // (only once a map exists; the app reads it as a path against that ledger when it is pasted back).
     // .43: one record request (기록 요청 v4.1), the v3 status and v1 design requests behind 「이전 요청문」 (record-asks.ts).
-    fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title)),
+    fresh ? null : h('p', { class: 'fine se-ask' }, '진행 중인 AI 대화가 있다면 ', ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title), o.project),
       ...(o.view.parts.length ? [' · ', askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario)] : []),
       ' 문구를 복사해 그 대화에 붙여 넣으세요(파일을 못 보는 대화면 ', askCopy('대화용 현황 요청', CHAT_REPORT_ASK, 'link-button', RECORD_ASK_EXPLAIN.status),
       '). 나온 답을 통째로 ‘기록 붙여넣기’에 넣으면 앱이 덩이를 나눠 읽고 부분·연결·상태·안의 단계·모르는 것이 지도가 돼요.'),
@@ -5873,7 +5875,7 @@ function mapBlock(): HTMLElement | null {
     // record is read as a path by the app alone (scenario-record.ts) when it is pasted.
     // .43: a pasted 기록 v4 whose completion table leaves tables offers its continuation (record-asks.ts).
     ...[pageNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title)), continuationNode(o.project.pasted.map(r => r.text), (label, text, title) => askCopy(label, text, 'link-button', title))].filter((x): x is HTMLElement => !!x),
-    h('p', { class: 'fine rm-ask rm-records' }, ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title)), ' · ',
+    h('p', { class: 'fine rm-ask rm-records' }, ...recordAskNodes((label, text, title) => askCopy(label, text, 'link-button', title), o.project), ' · ',
       askCopy('시나리오 기록 요청(대장 포함)', scenarioAskWithLedger(o.view, o.project.readings), 'link-button', RECORD_ASK_EXPLAIN.scenario),
       ' — 기록 요청은 지금 상태와 카드의 안쪽(산출물·단계·조건)을, 시나리오 기록은 동작 경로 하나를 써 받아요. 둘 다 다른 기록처럼 붙여 넣어요. 시나리오 기록은 붙이면 앱이 AI 없이 지금 지도의 ID 대장과 맞춰 길로 읽어, 제목 아래 ‘시나리오’ 줄에서 지도 위에 보여요.'));
   const limited = status.release === 'existing-map';

@@ -14,7 +14,10 @@ import type { FoldRow } from './record-table.js';
 import type { V5Fold, ExcerptPiece } from './record-excerpt.js';
 
 /** The tables whose rows are tracked: every table with row IDs but the ledgers and the page frame. */
-export const LEDGER_SKIP_TABLES: ReadonlySet<string> = new Set(['C-HEAD', 'C-SUMMARY', 'C-SRC', 'C-EVID', 'C-DROP', 'C-END']);
+export const LEDGER_SKIP_TABLES: ReadonlySet<string> = new Set(['C-HEAD', 'C-SUMMARY', 'C-SRC', 'C-EVID', 'C-DROP', 'C-END', 'C-IDENT']);
+/** Recipe .50 step 5: the C-IDENT rows are tracked apart: never sent, their state is what the newest reading that weighed them decided
+ * (MapReading.identity, map-identity.ts), and they are never sent again. */
+export const IDENT_TABLE_ID = 'C-IDENT';
 /** A row whose only reason is transient is sent at most three times; any waiting row at most six (limit included); then it is rejected
  * (unplaced). At most 80 earlier rows are sent again by one ask, oldest first; a reading stores at most 2048 row entries. */
 export const RESEND_TRANSIENT_MAX = 3, RESEND_ALL_MAX = 6, RESEND_ROWS_MAX = 80, READING_ROWS_MAX = 2048;
@@ -65,7 +68,7 @@ function places(v: unknown, out: Place[] = []): Place[] {
   return out;
 }
 /** The reading's own fields that are not map items, candidates, material or diagnostics. */
-const OWN_FIELDS = new Set(['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', 'material', 'exclusions', 'portMap', 'rows', 'requests', 'recordDiagnostics', 'obligations', 'pages', 'level', 'firstLines', 'basisAt', 'basisVersion']);
+const OWN_FIELDS = new Set(['version', 'id', 'at', 'model', 'prompt', 'hash', 'records', 'summary', 'parts', 'relations', 'candidates', 'gaps', 'skipped', 'material', 'exclusions', 'portMap', 'rows', 'identity', 'requests', 'recordDiagnostics', 'obligations', 'pages', 'level', 'firstLines', 'basisAt', 'basisVersion']);
 function standing(r: MapReading, heldWith: (x: ReadingExclusion) => string[]): { stands: Stand[]; holds: Hold[]; material: Place[]; asides: Aside[] } {
   const stands: Stand[] = [];
   for (const p of r.parts) {
@@ -139,6 +142,9 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
       paste: t.row.record, start: t.row.row.from, end: t.row.row.to, ends: t.ends, name: t.name, reading: null });
     byPaste.set(t.row.record, [...byPaste.get(t.row.record) ?? [], t]);
   }
+  // Recipe .50 step 5: each C-IDENT row waits until a reading weighs it (it is the program's, so it is never sent).
+  for (const f of folds) for (const r of f.fold.rows.get(IDENT_TABLE_ID) ?? []) out.set(ledgerKey(f.key, IDENT_TABLE_ID, r.id), { record: f.key, table: IDENT_TABLE_ID, id: r.id,
+    state: 'waiting', reason: 'not-yet-sent', detail: null, sent: 0, to: [], with: [], paste: r.record, start: r.row.from, end: r.row.to, ends: [], name: null, reading: null });
   const all = [...byPaste.values()].flat(), readTo = new Map<string, number>();
   const maps = p.readings.filter(isMapReading);
   maps.forEach((r, i) => {
@@ -147,6 +153,9 @@ export function rowLedger(p: Pick<Project, 'readings'>, folds: readonly V5Fold[]
       return x && t.row.row.from >= (readTo.get(x.id) ?? 0) && t.row.row.from >= x.from && t.row.row.to <= x.to ? 'sent' : null;
     }, out, i === 0) : []);
     for (const e of entries) { const x = out.get(ledgerKey(e.record, e.table, e.id)); if (x) Object.assign(x, { state: e.state, reason: e.reason, detail: e.detail, sent: e.sent, to: structuredClone(e.to), with: [...e.with], reading: r.id }); }
+    for (const e of r.identity ?? []) { const x = out.get(ledgerKey(e.record, IDENT_TABLE_ID, e.id)); if (x) Object.assign(x, { state: e.state, reason: e.reason, detail: e.op?.kind ?? null,
+      to: e.state === 'reflected' && e.areaId ? [{ kind: 'part' as const, id: e.areaId, index: null }, ...(e.op?.successor ? [{ kind: 'part' as const, id: e.op.successor, index: null }] : [])] : [],
+      with: e.state === 'held' && e.areaId ? [e.areaId] : [], reading: r.id }); }
     // Recipe .50 step 2: a row held for a correction is weighed again only when its target changes: a later reading that writes claims on the
     // part it stands with lets it wait (transient) and go again within the send bounds. A re-pasted row is new text and goes anyway.
     // Recipe .50 step 4: a row held on an identity question likewise, when a later reading writes basis or claims on a part it names (the
@@ -184,7 +193,7 @@ export function rowBindings(ledger: ReadonlyMap<string, LedgerRow>, live: (id: s
  * most RESEND_ROWS_MAX. */
 export function resendRows(ledger: ReadonlyMap<string, LedgerRow>, readTo: ReadonlyMap<string, number>, pasteOrder: ReadonlyMap<string, number>, order: readonly string[] = []): LedgerRow[] {
   const rank = (x: LedgerRow) => { const i = order.indexOf(x.record); return i < 0 ? order.length : i; };
-  return [...ledger.values()].filter(x => x.state === 'waiting' && x.end <= (readTo.get(x.paste) ?? 0))
+  return [...ledger.values()].filter(x => x.state === 'waiting' && x.table !== IDENT_TABLE_ID && x.end <= (readTo.get(x.paste) ?? 0))
     .sort((a, b) => rank(a) - rank(b) || (pasteOrder.get(a.paste) ?? 0) - (pasteOrder.get(b.paste) ?? 0) || a.start - b.start).slice(0, RESEND_ROWS_MAX);
 }
 /** How a new reading took each tracked row, from the pieces its ask sent: inside a piece, sent; inside its read interval and waiting before

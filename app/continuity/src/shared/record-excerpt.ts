@@ -75,6 +75,9 @@ function pasteLines(id: string, text: string, f: FoldedRecord, rt: RecordTables)
     if (!place || !table || !def) { out.push(line('always')); continue; }
     // C-DROP's work is done in the fold: what it took away is not sent, so neither is the table.
     if (table.id === 'C-DROP') continue;
+    // Recipe .50 step 5: the C-IDENT table (the record's correspondence to the map's roster) is the program's to read (map-identity.ts); its
+    // P IDs are the roster's, not an ask's aliases, so none of its lines goes. What it settles reaches the model as partRows.
+    if (table.id === 'C-IDENT') continue;
     if (place.role === 'title' || place.role === 'struct') { out.push(line('table')); continue; }
     if (place.role === 'body' || place.role === 'none' || table.id === 'C-END') { out.push(line('always')); continue; }
     // A row the fold does not hold now (a later 교체 replaced it, C-DROP took it away, an extra) is not sent.

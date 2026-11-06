@@ -138,8 +138,12 @@ export const COMMON_TABLES: readonly TableDef[] = Object.freeze([
   v5('C-EVID', '근거 장부', 0, 'E', ['E ID', '등급', '출처', '자리', '짧은 인용']),
   v5('C-DROP', '삭제', 0, null, ['행 ID', '이유', '근거']),
   v5('C-END', '쪽 끝', 0, null, ['표 ID', '상태', '쓴 행', '예약', '남은 것'])]);
+/** Recipe .50 step 5 (기록 요청 v5.2, map-identity.ts): the record's correspondence of the map's roster parts (P IDs) to its own B rows. Asked
+ * only when the project has a map; outside the queues (no obligation, no order), never sent to a model (record-excerpt.ts): the program
+ * reads it. A v5 or v5.1 record has none. */
+export const IDENT_TABLE: TableDef = v5('C-IDENT', '지도 대응', 0, 'ID', ['행 ID', '지도 부분(Pxx)', '대응', '이 기록 부분(Bxx)', '바뀐 때', '근거']);
 /** The v5 tables by ID (the supplementary tables queue 3, their v4 definitions). */
-export const V5_TABLE_DEFS: ReadonlyMap<string, TableDef> = new Map([...COMMON_TABLES, ...PROFILE_TABLES.map(t => ({ ...t, queue: 3 as const, rowId: 'P', dialect: 'v5' as const }))].map(t => [t.id, t]));
+export const V5_TABLE_DEFS: ReadonlyMap<string, TableDef> = new Map([...COMMON_TABLES, IDENT_TABLE, ...PROFILE_TABLES.map(t => ({ ...t, queue: 3 as const, rowId: 'P', dialect: 'v5' as const }))].map(t => [t.id, t]));
 /** The v5 queues in order (1.1): Q1 then Q2 (recommended order, 12.1), the page-end tables apart. */
 export const Q1_TABLES = COMMON_TABLES.filter(t => t.queue === 1).map(t => t.id), Q2_TABLES = COMMON_TABLES.filter(t => t.queue === 2).map(t => t.id);
 export const PAGE_END_TABLES = COMMON_TABLES.filter(t => t.queue === 0).map(t => t.id);

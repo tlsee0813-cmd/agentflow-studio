@@ -124,7 +124,7 @@ test('118-3 nothing of the ask changes; the rendering is deterministic, carries 
   assert.deepEqual([P.MAP4_RECIPE, P.MAP5_RECIPE, P.MAP6_RECIPE].map(h), ['0340413adccd30ac', 'b432f60e7d61d502', '8071e83eafdae2cd']);
   assert.equal(sha(P.MAP7_PROMPT), '73286f8b79e80c132aaa5e891d7955748e30fd21bf9e3e7f641ec37b6e480f4b', 'the base map.7 text of pre118 (117 systemSha)');
   assert.equal(await mapPromptId(), 'm6-6859b864664f');
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.7:') && P.MAP7_RECIPE.includes(G.CONDITION_GUIDANCE), 'AF120: recipe.3 keeps the guidance');
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.8:') && P.MAP7_RECIPE.includes(G.CONDITION_GUIDANCE), 'AF120: recipe.3 keeps the guidance');
   const m7 = await map7PromptId(); assert.match(m7, /^m7-[0-9a-f]{12}$/); assert.notEqual(m7, 'm7-1a2625a62324', 'a new recipe id (pre118 named m7-1a2625a62324)');
   assert.throws(() => G.conditionGuidance({ ...inp.ask, schemaVersion: 'studio.map.6' }), /INVALID_INPUT/, 'map.7 only');
 });

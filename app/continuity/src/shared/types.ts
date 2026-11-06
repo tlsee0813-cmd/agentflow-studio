@@ -178,7 +178,8 @@ export interface Project {
   pasted: PastedRecord[];
   /** Map readings (project.9): what was read from records into the map, oldest first. Derived understanding with its quotes,
    * kept apart from Area.note (the person's words) and from space.understanding (return.2 and its anchors). A reading only
-   * ever added parts and relations; it never renamed, moved, archived or re-described an existing part. */
+   * ever added parts and relations; it never renamed, moved, archived or re-described an existing part (recipe .50 step 5: but for the rename a
+   * record's own C-IDENT row asks, map-identity.ts, which leaves a name the person gave as it is). */
   readings: ReadingEntry[];
 }
 /** One pasted record: the text exactly as pasted, a stable id, when it was added here (not when it was written or which
@@ -603,7 +604,34 @@ export interface MapReading {
   /** map-reading.20 (recipe .50, row-ledger.ts): what this reading did with each row of a 기록 v5 record it sent or left out for room. Only a
    * reading that sent a v5 fold is .20; every earlier entry keeps its exact shape and is read by the same rule on the fly. */
   rows?: ReadingRow[];
+  /** Recipe .50 step 5 (map-identity.ts, 기록 요청 v5.2): what this reading decided for each row of the C-IDENT tables of the v5 records it
+   * sent (the record's own correspondence of the map's parts to its B rows, read by the program alone), with the operation a row applied:
+   * rename, retire (with its successor) or fold (a map-made duplicate onto one canonical part). Only on a .20 reading that had such rows. */
+  identity?: ReadingIdentityRow[];
 }
+/* ---------- Recipe .50 step 5 (Astra F5 Q2/Q3/Q6/Q7(5)): the C-IDENT table of a 기록 v5.2 record, as the program decided it. ---------- */
+/** 대응: 같음 / 이름 바뀜 / 대신함 / 없어짐 / 모름; 나뉨 and 합침 are kept as written and are unsupported in .50. */
+export const IDENTITY_ANSWERS = ['same', 'renamed', 'replaced', 'gone', 'unknown', 'split', 'merged'] as const;
+export type IdentityAnswer = typeof IDENTITY_ANSWERS[number];
+export const IDENTITY_OPS = ['bind', 'rename', 'retire', 'fold'] as const;
+/** What a reflected row did: bind (the record's B row is that part), rename (the part's official name became `to`; `from` stays its old
+ * name; renamed: the shown name changed too, false when the person's own name stays), retire (the part is no longer current, with its
+ * successor part or null) or fold (areaId, a duplicate the map made, is the canonical part `into`; its references resolve there). */
+export interface ReadingIdentityOp { kind: typeof IDENTITY_OPS[number]; areaId: string; successor: string | null; into: string | null; from: string | null; to: string | null; renamed: boolean }
+export interface ReadingIdentityRow {
+  /** The record (its fold key) and the row's own ID (ID01). */
+  record: string; id: string;
+  /** The map part as the row names it (P23; null when it names none), its 대응 (null when no fixed word) and its B ID (null for none). */
+  map: string | null; answer: IdentityAnswer | null; part: string | null;
+  state: RowState; reason: string | null;
+  /** The part the row names as it resolves now (a folded duplicate resolves to its canonical part), null when none does. */
+  areaId: string | null;
+  /** The operation this reading applied on the row (null: none, or one an earlier reading applied already). */
+  op: ReadingIdentityOp | null;
+  /** 바뀐 때 as written (60), and the F and E IDs the row cites (up to eight). */
+  when: string | null; evidence: string[];
+  /** Where the row stands: the pasted text and its [from, to). */
+  at: { record: string; from: number; to: number } }
 /* ---------- map-reading.20 (recipe .50, Astra F5 Q5): the row-processing ledger. Every current row of a 기록 v5 record's tables (the ledgers
  * and the page frame aside) has a state per (record, table, row ID): reflected (the map items it became), waiting (why not yet), held (what
  * it conflicts with) or rejected (a concrete reason). Parsed is never reflected: a row inside a read interval with nothing on it waits. ---------- */
@@ -616,7 +644,10 @@ export type RowState = typeof ROW_STATES[number];
  * it, map-blueprint.mjs holdCorrectionUnits); rejected: material (the reading kept it as material), depends (a row it names
  * was rejected) or unplaced (sent again as often as the ledger allows, never placed). */
 export const ROW_REASONS: Readonly<Record<RowState, readonly string[]>> = Object.freeze({ reflected: [],
-  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends', 'correction'], rejected: ['material', 'depends', 'unplaced'] });
+  waiting: ['limit', 'budget', 'unresolved-endpoint', 'transient', 'not-yet-sent'], held: ['identity', 'parent', 'attribution', 'holds', 'depends', 'correction', 'roster'],
+  // Recipe .50 step 5 (C-IDENT rows only): held roster (the map changed under the part since the record's roster, or the reply's roster line is
+  // missing); rejected form, unknown-part, other-project, unsupported (나뉨·합침), undecided (모름), planned and partial (nothing is retired).
+  rejected: ['material', 'depends', 'unplaced', 'form', 'unknown-part', 'other-project', 'unsupported', 'undecided', 'planned', 'partial'] });
 /** What a reflected row became: a part (its basis or a field of it), one of its claims (index in this reading's part entry), a relation, or a
  * field of the reading itself (checks, projectStatus, …: id is the field's name). */
 export interface ReadingRowTarget { kind: 'part' | 'claim' | 'relation' | 'reading'; id: string; index: number | null }

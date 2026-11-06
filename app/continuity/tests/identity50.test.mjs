@@ -110,7 +110,7 @@ test('I50-4 the later prompts: a positive identity rule, version caution said of
     'role·parentId·relations·files·readAs', '새 부분으로 비켜 가지 않고 candidates', '구현·가동·검증을 합친 판정이 아니다', 'at·basis·aboutAt으로 쓰지 않는다',
     'replaces의 근거가 아니다', '기준 머리말로 시작하지 않는다'])
     assert.ok(P.MAP7_IDENTITY.includes(said), said);
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.7:') && P.MAP7_RECIPE.includes('later-identity.1') && P.MAP7_RECIPE.includes('part-facts.1'));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.8:') && P.MAP7_RECIPE.includes('later-identity.1') && P.MAP7_RECIPE.includes('part-facts.1'));
   assert.equal(M.PART_FACTS, 'part-facts.1');
 });
 

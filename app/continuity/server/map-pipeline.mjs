@@ -1,5 +1,6 @@
 import { ApiError } from '../../server/errors.mjs';
 import { validateMapAsk, validateMapReply, conditionRows, ruleConditionRows, askRecords, MAP_RECORD_CHARS, MAP_BYTES, READING_CONTRACT } from '../dist/public/shared/map-reading.js';
+import { ROSTER_VERSION } from '../dist/public/shared/map-identity.js';
 import { segmentKeys } from '../dist/public/shared/record-table.js';
 import { isFirstMap, dividedKind } from '../dist/public/shared/map-route.js';
 import { MAP6_FIRST_PROMPT, MAP7_PROMPT, MAP7_COUNTS, MAP7_IDENTITY, MAP7_ROWS, MAP7_RECIPE, MAP7_GUIDANCE_FRAME, MAP7_VOCABULARY, MAP7_BRIEF, map7Prompt, mapBriefRule } from './map-prompt.mjs';
@@ -524,7 +525,10 @@ export function createFirstMapPipeline({ store, deepseekKey, openaiKey, deepseek
     // Recipe .50 step 3: the identity rules by name (the prompts above carry them too).
     identity: IDENTITY_VERSION,
     // Recipe .50 step 4: the row-binding rules by name (the ask's partRows and the apply rules; the prompts carry them too).
-    rows: ROW_BINDING_VERSION };
+    rows: ROW_BINDING_VERSION,
+    // Recipe .50 step 5: the roster and C-IDENT rules by name (the app reads C-IDENT, never sent; what it binds goes as partRows; retired and
+    // folded parts are left out of the current map the ask is made of).
+    roster: ROSTER_VERSION };
   const laterIdentity = mapPipelineKey(laterRecipe);
   // The batch's name: each distinct model once, in stage order (unchanged when the global model is the render model).
   const model = [...new Set([deepseekModel, mergeModel, renderModel, globalModel])].join('_');

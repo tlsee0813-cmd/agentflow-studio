@@ -8,14 +8,18 @@ import { h } from './plan-dom.js';
 import { recordAskV4, newRecordId, continuationAsk, RECORD_V4_EXPLAIN, CONTINUATION_EXPLAIN, PROJECT_REPORT_ASK, DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN,
   recordAskV5, newRecordIdV5, pageAsk, pageCapReached, supplementaryAsk, obligationCount, RECORD_V5_EXPLAIN, PAGE_ASK_EXPLAIN, SUPPLEMENT_ASK_EXPLAIN } from '../shared/report-ask.js';
 import { latestFold, Q2_TABLES } from '../shared/record-table.js';
+import { mapRoster } from '../shared/map-identity.js';
+import type { Project } from '../shared/types.js';
 
 export type AskCopy = (label: string, text: string, title: string) => HTMLElement;
-/** The v5 request (a fresh record ID in each rendering) and the earlier requests folded under 「이전 요청문」 (v4.1, v3 status, v1 design). */
-export function recordAskNodes(copy: AskCopy): (HTMLElement | string)[] {
+/** The v5 request (a fresh record ID in each rendering) and the earlier requests folded under 「이전 요청문」 (v4.1, v3 status, v1 design).
+ * Recipe .50 step 5: a project with a map gets v5.2, the map's roster in it (map-identity.ts); detail: the parts the session is about, if known. */
+export function recordAskNodes(copy: AskCopy, project: Project | null = null, detail: readonly string[] = []): (HTMLElement | string)[] {
   const older = h('details', { class: 'ask-older' }, h('summary', { class: 'link-button quiet' }, '이전 요청문'),
     h('span', { class: 'fine' }, copy('기록 요청 v4.1', recordAskV4(newRecordId()), RECORD_V4_EXPLAIN), ' · ', copy('현황 보고 요청 v3', PROJECT_REPORT_ASK, RECORD_ASK_EXPLAIN.status), ' · ',
       copy('설계 기록 요청 v1', DESIGN_RECORD_ASK, RECORD_ASK_EXPLAIN.design), ' — 이미 v4·v3·v1 기록을 쓰는 프로젝트용이에요.'));
-  return [copy('기록 요청', recordAskV5(newRecordIdV5()), RECORD_V5_EXPLAIN), ' ', older];
+  const roster = project ? mapRoster(project, { detail }) : null;
+  return [copy('기록 요청', recordAskV5(newRecordIdV5(), roster), RECORD_V5_EXPLAIN), ' ', older];
 }
 /** The status line of the latest pasted v5 record (「첫 구조 · 상세 남음 N」: the detail tables the app counts as not settled), or null. */
 export function recordStatusLine(texts: readonly string[]): string | null {

@@ -199,7 +199,7 @@ test('B50-7 the later prompts say what partRows are; first-map texts unchanged; 
   assert.ok(B.LATER_BLUEPRINT_PROMPT.endsWith(B.LATER_ROW_RULES) && B.LATER_ROW_RULES.includes('INPUT.records[].partRows') && B.LATER_ROW_RULES.includes('그 B로 new: 부분을 세우지 않는다'));
   assert.ok(!B.MAP_BLUEPRINT_PROMPT.includes('row-binding') && !P.MAP6_FIRST_PROMPT.includes('row-binding') && !P.MAP7_PROMPT.includes('partRows'));
   assert.equal(B.ROW_BINDING_VERSION, 'row-binding.1');
-  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.7:') && P.MAP7_RECIPE.includes('row-binding.1'));
+  assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.8:') && P.MAP7_RECIPE.includes('row-binding.1'));
 });
 
 test('B50-R replay: R11\'s ask names R10\'s B IDs on the map, and R11\'s stored reply holds 주기 일정 and keeps 분류 모델 파일\'s relations', { skip: !haveGrowth() || !existsSync(join(GROWTH, 'runs/stage4-r3/job.json')) }, () => {

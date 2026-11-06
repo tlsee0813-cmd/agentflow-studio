@@ -1,13 +1,15 @@
 /* studio.map.1: reading records into the map. The browser sends the map as it is (parts by alias, the person's own words, what
  * earlier readings understood) and the records not yet read; the model answers with parts, claims and relations, each resting on
  * an exact quote of what was sent. applyReading is the only write: it adds parts and relations and keeps one MapReading with the
- * derived understanding. It never renames, moves, archives or re-describes an existing part, never writes Area.note and never
- * touches space.understanding (return.2 and its anchors). What is unclear stays a candidate; nothing asks for approval per part. */
+ * derived understanding. It never moves, archives or re-describes an existing part, never writes Area.note and never touches
+ * space.understanding (return.2 and its anchors); it renames one only on a record's own C-IDENT row (recipe .50 step 5, map-identity.ts),
+ * and then only where the shown name is still the official one (a name the person gave stays). What is unclear stays a candidate; nothing asks for approval per part. */
 import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap, type ReadingCondition, type ReadingFileRole, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS, type RuleScope, type AnchorKind, type EnforcerKind, type WithdrawalKind, type GateKind,
   type ReadingRecordLoop, type ReadingVariant, type ReadingStatusClaim, type ReadingDecider, type ReadingActor, type ReadingContractChange, type ReadingShippedIn, type WithdrawalMethod, type ConditionPhase, type ReadingStepBranch, type CrossKind, type CadenceKind, type ReadingCite, type FoundBy, type ClaimNature } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
-import { addArea, addChildArea, addRelation, addReading } from './domain.js';
+import { addArea, addChildArea, addRelation, addReading, editArea } from './domain.js';
+import { decideIdentity, identityBindings, identityState, canonicalPart, mapRoster } from './map-identity.js';
 import { parseProject, sourceText } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
@@ -3394,10 +3396,16 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   let recordLoops: ReadingRecordLoop[] = [], variants: ReadingVariant[] = [], statusClaims: ReadingStatusClaim[] = [];
   const unbuiltRows: ReadingQuote[] = [];
   const gather = (list: string[], own: readonly string[] | undefined) => { if (own?.length) list.splice(0, list.length, ...own, ...list.filter(f => !own.includes(f))); };
+  // Recipe .50 step 5 (map-identity.ts): a duplicate the map made and a record folded onto this part reads as this part (its entries after
+  // the part's own, in a reading with no entry of the part's own, so a claim's (reading, index) stays one claim); a record's C-IDENT row that
+  // retired the part gives it the state retired from that reading on.
+  const ident = identityState(p), dups = new Set([...ident.folded.keys()].filter(id => id !== areaId && canonicalPart(ident, id) === areaId));
   for (const r of p.readings) {
     if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
-    const part = r.parts.find(x => x.areaId === areaId); if (!part) continue;
-    if (part.created) createdName = part.created.name;
+    for (const x of r.identity ?? []) if (x.op?.kind === 'retire' && x.op.areaId === areaId) stateRead = { state: 'retired', when: x.when, quote: null, at: r.at };
+    const mine = r.parts.filter(x => x.areaId === areaId);
+    for (const part of mine.length || !dups.size ? mine : r.parts.filter(x => dups.has(x.areaId)).slice(0, 1)) {
+    if (part.created && part.areaId === areaId) createdName = part.created.name;
     // The newest reading that gives a state (or a type) wins (readings are oldest first); the lists gather, newest first, each once.
     if (part.state) stateRead = { state: part.state, when: part.stateWhen ?? null, quote: part.stateQuote ?? null, at: r.at };
     // Recipe .50 step 4 (ruling F5: 「구현됨」 ends only the unbuilt claim of the same function and scope): a newer reading that read the
@@ -3437,6 +3445,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     }
     history.push({ reading: r.id, at: r.at, role: part.role, claims: part.claims, basis: part.basis });
     part.claims.forEach((c, index) => { all.push({ ...c, reading: r.id, index, at: r.at }); if (c.replaces) replaced.add(`${c.replaces.reading}:${c.replaces.index}`); });
+    }
   }
   if (!history.length) return null;
   const seen = new Set<string>(), claims: CurrentClaim[] = [];
@@ -3766,7 +3775,13 @@ export function buildMapAsk(p: Project, view: StudioView, requests: FrozenReques
   const again = resendRows(ledger, readEnd, pasteAt, newest), againKeys = new Set(again.map(x => `${x.paste}@${x.start}`));
   // Recipe .50 step 4 (row-binding.1): a later map.7 ask says, for each record, what the B IDs its sent text cites are on the map (the part
   // its C-PART row was reflected into, by (record, row ID)), so a page that names its parts by ID only is read against the map.
-  const bindings = facts && askParts.length ? rowBindings(ledger, id => alias.has(id) && p.space.areas.some(a => a.id === id && !a.archived)) : null, rowsFold = new Map<MapAskRecord, V5Fold>();
+  // Recipe .50 step 5 (map-identity.ts): a binding to a folded duplicate is one to its canonical part, and the records' own C-IDENT rows bind
+  // their B rows too (같음, 이름 바뀜), where the ledger has none.
+  const askLive = (id: string) => alias.has(id) && p.space.areas.some(a => a.id === id && !a.archived);
+  const bindings = facts && askParts.length ? (() => { const s = identityState(p), led = new Map([...rowBindings(ledger, () => true)].map(([k, v]) => [k, canonicalPart(s, v)] as const));
+    const out = new Map([...led].filter(([, v]) => askLive(v)));
+    for (const [k, v] of identityBindings(p, folds, led, askLive)) if (!out.has(k)) out.set(k, v);
+    return out; })() : null, rowsFold = new Map<MapAskRecord, V5Fold>();
   const againOf = new Map(again.map(x => [`${x.paste}@${x.start}`, x])), againIn = (x: PageRun) => again.some(y => y.paste === x.paste.id && x.from <= y.start && y.end <= x.to);
   for (const y of again) if (!unreadFrom.has(y.paste)) unreadFrom.set(y.paste, readEnd.get(y.paste) ?? 0);
   // A text is fresh while one of its runs of current pages runs past what was read of it (a page waiting after a gap is not yet), or holds a
@@ -4147,7 +4162,12 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   // Recipe .50 step 4 (row-binding.1, ruling F5 Q1/Q7(4)): the app keeps the row → part mapping. A new part whose basis stands on a C-PART
   // row an earlier reading reflected into one live part (by record and row ID, never by name) is that part: it is not created, its ref
   // resolves to the part, and its basis, claims and fields join that part's entry (its role does not write over the part's).
-  const bound = sentFolds.length ? rowBindings(prior, active) : new Map<string, string>(), partRowsSent = tracked.filter(t => t.row.table === 'C-PART');
+  // Recipe .50 step 5: a binding to a folded duplicate is one to its canonical part; the C-IDENT rows of this ask's records bind their B rows
+  // too (같음 and 이름 바뀜 with an F or E cite, the roster still standing for that part), where the ledger has none.
+  const idState = identityState(project), askFolds = sentFolds.filter(f => f.pastes.some(x => [...input.records.values()].some(r => r.id === x.id)));
+  const ledgerBound = new Map([...(sentFolds.length ? rowBindings(prior, active) : new Map<string, string>())].map(([k, v]) => [k, canonicalPart(idState, v)] as const).filter(([, v]) => active(v)));
+  const bound = new Map(ledgerBound), partRowsSent = tracked.filter(t => t.row.table === 'C-PART');
+  if (askFolds.length) for (const [k, v] of identityBindings(project, askFolds, ledgerBound, active)) if (!bound.has(k)) bound.set(k, v);
   const boundOf = (x: MapReplyPart): string | null => {
     const quotes = x.basis.map(real), hit = new Set(partRowsSent.filter(t => quotes.some(q => q.from !== undefined && q.to !== undefined && q.record === t.row.record && q.from < t.row.row.to && t.row.row.from < q.to))
       .flatMap(t => { const a = bound.get(t.key); return a ? [a] : []; }));
@@ -4177,7 +4197,8 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
         candidates.push({ text: `‘${x.name}’: 같은 이름의 부분이 이미 있어 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, areaIds: [same.id], quote: real(x.basis[0]!), ...(six ? { target: 'identity' as const, statement: null } : {}) });
         continue;
       }
-      const up = ancestors(parentId), like = later ? before.find(a => !up.has(a.id) && likeNames(a.name, x.name!)) : undefined;
+      // Recipe .50 step 5: a duplicate folded onto its canonical part is no part of its own to be alike.
+      const up = ancestors(parentId), like = later ? before.find(a => !up.has(a.id) && !idState.folded.has(a.id) && likeNames(a.name, x.name!)) : undefined;
       if (like) {
         dropped.add(x.ref); held.set(x.ref, like.id); skipped.push({ what: 'part', name: x.name!, reason: 'same-name' });
         candidates.push({ text: cut(`‘${x.name}’: 이름이 거의 같은 부분 ‘${like.name}’이(가) 이미 있어 새로 만들지 않았어요. 같은 대상인지는 원문으로 확인해 주세요.`, 240), areaIds: [like.id], quote: real(x.basis[0]!), target: 'identity', statement: null });
@@ -4288,6 +4309,20 @@ export function applyReading(project: Project, input: MapInput, reply: MapReply,
   const heldWith = (x: ReadingExclusion): string[] => { const m = /^parts\[(\d+)\]/.exec(x.path); if (!m) return [];
     const i = Number(m[1]), ref = reply.parts[i - wholeParts.filter(k => k < i).length]?.ref, id = ref ? ids.get(ref) : undefined; return id ? [id] : []; };
   if (six && sentFolds.length) { reading.version = READING_CONTRACT; reading.rows = decideRows(tracked, reading, sentOf, prior, done.length === 0, heldWith); }
+  // Recipe .50 step 5 (map-identity.ts): the C-IDENT rows of this ask's records, weighed on the map as this reading leaves it (a successor this
+  // reading made from its B row resolves), and their operations applied: a rename changes the shown name only where it is still the official
+  // one (a name the person gave stays); a retirement and a fold change no area (the current map leaves them out: currentView).
+  if (six && reading.rows && askFolds.some(f => f.fold.rows.get('C-IDENT')?.length)) {
+    const after = rowLedger({ readings: [...p.readings, reading] }, sentFolds), live = (id: string) => p.space.areas.some(a => a.id === id && !a.archived);
+    const postBound = new Map([...rowBindings(after, live)].map(([k, v]) => [k, canonicalPart(idState, v)] as const));
+    const roster = mapRoster(p), rows = askFolds.flatMap(f => decideIdentity(p, f, postBound, roster));
+    for (const e of rows) {
+      if (e.op?.kind !== 'rename') continue;
+      const a = p.space.areas.find(x => x.id === e.op!.areaId);
+      if (a && idState.created.has(a.id) && normName(a.name) === normName(e.op.from ?? '')) { p = editArea(p, a.id, e.op.to!, a.note); e.op.renamed = true; }
+    }
+    if (rows.length) reading.identity = rows;
+  }
   p = addReading(p, reading);
   const next = parseProject(JSON.stringify(p));
   const corresponding = matches.filter(m => m.targets.length === 1).flatMap(m => {
