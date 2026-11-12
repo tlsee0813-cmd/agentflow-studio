@@ -179,7 +179,8 @@ test('G53-5 a cut description keeps its trailing plan word (계획 · 예정): t
   const p = empty(recordB(base, [['P03', '같음', 'B02', '—', 'F01']], { lines: { 1: `${'원문을 규칙대로 정리하고 '.repeat(30)}저장소에 넘기도록 계획됨` } })).project;
   const u = M.partUnderstanding(p, areaOf(base, '정리기'));
   assert.ok(u.role.length <= 300 && u.role.endsWith('계획됨') && u.role.includes('…'), u.role);
-  assert.ok(/\nP03 정리기 · — · [^\n]*… 계획됨/.test(I.mapRoster(p).text), I.mapRoster(p).text);
+  // Review of .54 (finding 3): the clause holding the plan word, from its last boundary (「…하고」).
+  assert.ok(/\nP03 정리기 · — · [^\n]*… 저장소에 넘기도록 계획됨/.test(I.mapRoster(p).text), I.mapRoster(p).text);
 });
 
 /* ---------- Q3 (1): 구현 바뀜 ---------- */

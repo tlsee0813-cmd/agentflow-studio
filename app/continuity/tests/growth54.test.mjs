@@ -151,17 +151,22 @@ test('G54-2 the card line never joins a later sentence\'s plan word onto the fir
     ['주문을 받아 검증하고 저장소에 오래 남긴다. 알림은 아직 예정.', '주문을 받아 검증하고 저장소에 오래 남긴다.'],
     ['매일 밤 예정 작업 목록을 읽어 보낸다.', '매일 밤 예정 작업 목록을 읽어 보낸다.'],
     ['사용자에게 메일을 보낸다.', '사용자에게 메일을 보낸다.'],
-    // No clause boundary before the plan word: the first sentence whole, as before .53.
-    ['소비 폴더의 문서를 읽어 색인하도록 계획되어 있는 처리 단계다.', '소비 폴더의 문서를 읽어 색인하도록 계획되어 있는 처리 단계다.'],
+    // A plan word a plain cut keeps whole: the first sentence whole (the card draws it as before).
+    ['검색 화면은 계획이며 이후 사용자 요청과 운영 상황에 따라 범위를 조정한다.', '검색 화면은 계획이며 이후 사용자 요청과 운영 상황에 따라 범위를 조정한다.'],
   ]) assert.equal(roleLine(text), want, text);
+  // Review of .54 (finding 3): no clause boundary before the plan word: the word kept with the word before it, never the plain cut.
+  const noBoundary = '소비 폴더의 문서를 읽어 색인하도록 계획되어 있는 처리 단계다.';
+  assert.equal(roleLine(noBoundary), '소비… 색인하도록 계획되어…');
   // A plan clause after a comma: 「head… clause」, every piece the sentence's own words.
   const first = '문서를 받아 색인하고 태그를 붙이며, 메일 알림은 예정이다.', line = roleLine(`${first} 그 밖은 그대로다.`);
   assert.ok(line.endsWith('… 메일 알림은 예정이다.') && pieces(line, first), line);
   assert.equal(S.planClause(first), '메일 알림은 예정이다.');
   assert.equal(S.planClause('원문을 정리하도록 계획된 처리다.'), null);
-  // A clause too wide for the line: the sentence whole.
+  // A clause too wide for the line: the words from the one holding the plan word (review of .54, finding 3: never the sentence whole,
+  // which the card would cut plainly).
   const wide = '문서를 받아, 메일 알림과 화면 알림을 함께 보내도록 계획되어 있는 단계다.';
-  assert.equal(roleLine(wide), wide);
+  assert.equal(roleLine(wide), '문서를… 계획되어 있는 단계다.');
+  assert.ok(S.textWidth(roleLine(wide)) <= 15 && pieces(roleLine(wide), wide));
 });
 
 /* ---------- 3. a cut never drops the plan word ---------- */
@@ -175,8 +180,10 @@ test('G54-3 a plan ending wider than the room keeps at least its plan word, meas
   assert.equal(S.planTail('aaaaaaaaaaaaaaa예정', S.textWidth), 'aaaaaaaaaaaaaaa예정');
   assert.equal(S.planTail('가나다라마바사아자차카타파하예정', S.textWidth), null);
   assert.equal(S.planTail('aaaaaaaaaaaaaaaaaaaa 예정이다', S.textWidth), '예정이다');
-  // Too narrow for even the plan word: uncut, never a plain cut that drops it.
-  assert.equal(S.clipKeepPlan('가나다라마바 예정', 4, S.textWidth), '가나다라마바 예정');
+  // Review of .54 (finding 3): too narrow for any head: the word holding the plan word alone; too narrow for even that: uncut, never a
+  // plain cut that drops it.
+  assert.equal(S.clipKeepPlan('가나다라마바 예정', 4, S.textWidth), '… 예정');
+  assert.equal(S.clipKeepPlan('가나다라마바 예정되어있는일', 4, S.textWidth), '가나다라마바 예정되어있는일');
   // Wide enough: as .53.
   assert.ok(S.clipKeepPlan('a'.repeat(80) + ' 예정', 20).endsWith('… 예정'));
 });
@@ -243,4 +250,81 @@ test('G54-7 a 대신함 whose successor B row the same table gives a part that g
   const done = empty(p), web = areaOf(done.project, '웹 화면');
   assert.ok(web);
   assert.equal(I.identityState(done.project).retired.get(areaOf(base, '알림기'))?.successor, web);
+});
+
+/* ---------- 8. review of .54, finding 3: a plan word anywhere in the text survives every cut ---------- */
+const PLAN = /계획|예정|하기로|할\s*것|나중에|아직/;
+/** Every piece of a cut (between its 「…」) is the text's own words, and one of them holds a plan word. */
+const keepsPlan = (out, text) => {
+  const t = text.replace(/\s+/g, ' ').trim(), parts = out.split('…').map(x => x.trim()).filter(Boolean);
+  return parts.every(x => t.includes(x)) && parts.some(x => PLAN.test(x));
+};
+const FAR = `${'수집 서비스가 받은 원문을 규칙대로 정리한 뒤 중복을 걸러 저장소의 작업 대기열로 넘긴다. '.repeat(6)}이 단계는 정리된 문서를 매일 밤 읽어 로컬 데이터베이스에 색인하도록 계획되어 있는 처리 단계다.`;
+const SEARCH = '검색 화면은 계획이며 이후 사용자 요청과 운영 상황에 따라 범위를 조정한다.';
+const SEARCH_LATER = `들어온 문서를 OCR로 읽어 색인하고 태그를 붙인다. ${SEARCH}`;
+
+test('G54-8 a plan word far from the end survives the cut: the plan sentence or clause after the head, else the word with the word next to it', () => {
+  assert.ok(FAR.length > 300 && S.planTail(FAR) === null);
+  for (const [n, widthOf] of [[300], [140], [120], [60], [60, t => t.length], [40], [30], [15, S.textWidth]]) {
+    const out = S.clipKeepPlan(FAR, n, widthOf);
+    assert.ok((widthOf ?? (t => [...t].length))(out) <= n && keepsPlan(out, FAR) && out.includes('…'), `${n}: ${out}`);
+  }
+  assert.ok(S.clipKeepPlan(FAR, 120).endsWith('… 이 단계는 정리된 문서를 매일 밤 읽어 로컬 데이터베이스에 색인하도록 계획되어 있는 처리 단계다.'));
+  assert.equal(S.clipKeepPlan(FAR, 30), '수집 서비스가 받은 원문… 계획되어 있는 처리 단계다.');
+  assert.equal(S.clipKeepPlan(FAR, 15, S.textWidth), '수집… 색인하도록 계획되어…');
+  // 「검색 화면은 계획이며 …」: alone (the plain cut holds 계획) and after another sentence (cut to 30 or 40, 계획 kept).
+  for (const n of [30, 40]) {
+    for (const text of [SEARCH, SEARCH_LATER]) { const out = S.clipKeepPlan(text, n); assert.ok([...out].length <= n && keepsPlan(out, text), `${n}: ${out}`); }
+  }
+  assert.equal(S.clipKeepPlan(SEARCH_LATER, 30), '들어온 문서를 OCR로 읽어… 검색 화면은 계획이며…');
+  assert.equal(roleLine(SEARCH), SEARCH);
+  // The plan words beyond 계획 · 예정 count too.
+  for (const word of ['하기로 했다', '나중에 붙인다', '아직 없다', '처리할 것이다']) {
+    const text = `${'원문을 규칙대로 정리한 뒤 저장소로 넘긴다 '.repeat(5)}알림 기능은 ${word}.`;
+    assert.ok(keepsPlan(S.clipKeepPlan(text, 40), text), S.clipKeepPlan(text, 40));
+  }
+});
+
+test('G54-9 every call site keeps a far plan word: the bound line, the roster note and detail, the over-budget ask role, the short role, the handover', () => {
+  const base = firstRead(project(page1())), tidy = areaOf(base, '정리기');
+  const p = empty(recordB(base, [['P03', '같음', 'B02', '—', 'F01']], { lines: { 1: FAR } })).project;
+  const role = M.partUnderstanding(p, tidy).role;
+  assert.ok(role.length <= 300 && keepsPlan(role, FAR) && role.endsWith('계획되어 있는 처리 단계다.'), role);
+  const entry = I.mapRoster(p, { detail: [tidy] }).entries.find(e => e.areaId === tidy);
+  assert.ok(entry.note.length <= I.ROSTER_NOTE_CHARS && keepsPlan(entry.note, FAR), entry.note);
+  assert.ok(/^역할: /.test(entry.detail) && entry.detail.length <= 144 && keepsPlan(entry.detail.slice(4), FAR), entry.detail);
+  const ask = { parts: [{ id: 'P1', current: [], role: FAR, note: '' }], relations: [] };
+  assert.equal(M.fitMap(ask, '', false, () => ask.parts[0].role.length <= 120), true);
+  assert.ok(ask.parts[0].role.length <= 120 && keepsPlan(ask.parts[0].role, FAR), ask.parts[0].role);
+  // The short form (BRIEF_ROLE) a brief map ask gives a part.
+  const short = { parts: [{ id: 'P1', name: '정리 단계', current: [], role: FAR, note: 'x'.repeat(400) }, { id: 'P2', name: '저장 단계', current: [], role: '다른 부분', note: '' }], relations: [] };
+  M.fitMap(short, '', true, () => short.parts[0].brief === true);
+  assert.ok(short.parts[0].brief && short.parts[0].role.length <= M.BRIEF_ROLE && keepsPlan(short.parts[0].role, FAR), short.parts[0].role);
+  // The handover's 역할 line.
+  const doc = handoverText(p, { scope: null, code: 'ABC234', at: '2026-11-13T05:00:00.000Z' }), line = doc.split('\n').find(l => l.startsWith('- 역할: ') && l.includes('수집 서비스가'));
+  assert.ok(line && keepsPlan(line.slice(6).replace(/ \(사용자가 고친 설명\)$/, ''), FAR), line);
+  // The card line: the first sentence's own plan word only.
+  assert.equal(roleLine(FAR), '수집 서비스가 받은 원문을 규칙대로 정리한 뒤 중복을 걸러 저장소의 작업 대기열로 넘긴다.');
+  assert.ok(keepsPlan(roleLine(`${'원문을 규칙대로 정리한 뒤 중복을 걸러 저장소의 작업 대기열로 넘기도록 '}계획된 단계다.`), '원문을 규칙대로 정리한 뒤 중복을 걸러 저장소의 작업 대기열로 넘기도록 계획된 단계다.'));
+});
+
+test('G54-10 fuzz: at any cut width, a text holding a plan word keeps one, in its own words, within the width when a word fits', () => {
+  let seed = 54; const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+  const pick = xs => xs[Math.floor(rnd() * xs.length)];
+  const WORDS = ['문서를', '받아', '정리하고', '저장소에', '넘긴다', '색인하며', '태그를', '붙이고,', '사용자', '요청을', 'OCR로', 'PDF', '작업', '대기열로', '매일', '밤', '읽어', '검사한다', 'cronjob이', '데이터베이스에'];
+  const PLANS = ['계획되어', '예정이다', '하기로', '처리할 것', '나중에', '아직', '계획', '(예정)', '예정된'];
+  const units = [t => [...t].length, S.textWidth, t => t.length];
+  for (let i = 0; i < 4000; i++) {
+    const sentences = Array.from({ length: 1 + Math.floor(rnd() * 4) }, () => Array.from({ length: 2 + Math.floor(rnd() * 12) }, () => pick(WORDS)));
+    const planned = rnd() < 0.8;
+    if (planned) { const s = pick(sentences); s.splice(Math.floor(rnd() * (s.length + 1)), 0, pick(PLANS)); }
+    const text = sentences.map(s => `${s.join(' ')}.`).join(rnd() < 0.5 ? ' ' : '  ');
+    const widthOf = pick(units), n = 1 + Math.floor(rnd() * (widthOf(text) + 4)), out = S.clipKeepPlan(text, n, widthOf);
+    const folded = text.replace(/\s+/g, ' ').trim();
+    if (planned) assert.ok(keepsPlan(out, text), `${n}: ${text} → ${out}`);
+    else assert.ok(out.split('…').map(x => x.trim()).filter(Boolean).every(x => folded.includes(x)), out);
+    // Within the width whenever 「… word」 fits (every word here is at most 9 wide); a text it never fits stays whole.
+    if (n >= 12 || !planned) assert.ok(widthOf(out) <= n || (n < 2 && out === '…'), `${n}: ${text} → ${out}`);
+    else assert.ok(widthOf(out) <= n || out === folded, `${n}: ${text} → ${out}`);
+  }
 });

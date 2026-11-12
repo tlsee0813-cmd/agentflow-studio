@@ -6,7 +6,7 @@
  * - The display settings: a global default and an explicit per-project override, read and written with fallback; lenses are
  *   temporary and never write them. */
 import type { StorageLike } from '../shared/storage.js';
-import { clipKeepPlanClause, textWidth } from '../shared/studio.js';
+import { clipKeepPlan, planCutNeeded, textWidth } from '../shared/studio.js';
 
 /* ---------- the status dot ---------- */
 export type DotKind = 'running' | 'stopped' | 'waiting' | 'conflict';
@@ -71,12 +71,14 @@ export function opsSaid(word: string | null, when: string | null, grade: Grade |
 /** The first sentence of a description (the card's 「하는 일」 line), or null for none. Recipe .53 (ruling F6 Q1): a description that ends on a
  * plan word never goes missing from the line by a cut. Recipe .54 (review of .53): only the first sentence's own plan word counts (a later
  * sentence's never comes onto the line: no sentence the record did not write); a first sentence wider than ROLE_LINE_WIDTH whose plan word
- * sits after a clause boundary is cut at that boundary, 「head… clause」 (studio clipKeepPlanClause), else it is shown whole, as before .53. */
+ * sits after a clause boundary is cut at that boundary, 「head… clause」. Review of .54 (finding 3): any plan word (studio
+ * PLAN_WORD), wherever it sits in the first sentence: a sentence whose plan word a plain cut to ROLE_LINE_WIDTH would leave out is cut by
+ * studio clipKeepPlan (its clause, else the word with the word next to it); one whose plan word fits in that head is shown whole. */
 export const ROLE_LINE_WIDTH = 15;
 export function roleLine(text: string | null | undefined): string | null {
   const t = (text ?? '').replace(/\s+/g, ' ').trim(); if (!t) return null;
   const m = /^(.+?[.!?。])(?=\s|$)/.exec(t), first = m ? m[1]! : t;
-  return /계획|예정/.test(first) ? clipKeepPlanClause(first, ROLE_LINE_WIDTH, textWidth) : first;
+  return planCutNeeded(first, ROLE_LINE_WIDTH, textWidth) ? clipKeepPlan(first, ROLE_LINE_WIDTH, textWidth) : first;
 }
 
 /* ---------- counted 「외 N」 ---------- */

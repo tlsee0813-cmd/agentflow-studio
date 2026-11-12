@@ -7,7 +7,7 @@
 import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap, type ReadingCondition, type ReadingFileRole, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS, type RuleScope, type AnchorKind, type EnforcerKind, type WithdrawalKind, type GateKind,
   type ReadingRecordLoop, type ReadingVariant, type ReadingStatusClaim, type ReadingDecider, type ReadingActor, type ReadingContractChange, type ReadingShippedIn, type WithdrawalMethod, type ConditionPhase, type ReadingStepBranch, type CrossKind, type CadenceKind, type ReadingCite, type FoundBy, type ClaimNature } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
-import { clipKeepPlan, type StudioView, type RecordView } from './studio.js';
+import { clipKeepPlan, planCutNeeded, type StudioView, type RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading, editArea } from './domain.js';
 import { decideIdentity, identityBindings, identityHolds, identityState, canonicalPart, mapRoster, areaOfNumber, rosterEcho, implementationChanges, nameCandidates } from './map-identity.js';
 import { parseProject, sourceText } from './validation.js';
@@ -3859,7 +3859,10 @@ export function partRelevance(ask: Pick<MapAsk, 'parts' | 'relations'>, text: st
 export const BRIEF_FILES = 1;
 function briefPart(x: MapAskPart): void {
   if (!x.note && !x.current.length && x.role.length <= BRIEF_ROLE && (x.files?.length ?? 0) <= BRIEF_FILES) return;
-  x.note = ''; x.current = []; x.role = cut(x.role, BRIEF_ROLE); x.brief = true;
+  // Review of .54 (finding 3): a short role whose plan word the plain cut would leave out keeps it (studio clipKeepPlan, in the UTF-16
+  // units the validation counts); any other role, or one no keeping cut fits, takes the plain cut as before.
+  const units = (t: string) => t.length, kept = planCutNeeded(x.role, BRIEF_ROLE, units) ? clipKeepPlan(x.role, BRIEF_ROLE, units) : null;
+  x.note = ''; x.current = []; x.role = kept !== null && kept.length <= BRIEF_ROLE ? kept : cut(x.role, BRIEF_ROLE); x.brief = true;
   if (x.files) x.files = x.files.slice(0, BRIEF_FILES);
 }
 /** Shrinks the map of an ask until fits() holds, in fixed steps, stopping as soon as it fits; true when it fits. Every part keeps its
@@ -3877,7 +3880,7 @@ export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, b
   if (fits()) return true;
   // Review of .49: judged before step 1, so a code word of a claim that step leaves out still names its part.
   const rel = brief ? partRelevance(ask, text) : null;
-  // Recipe .54 (review of .53): the role's cut keeps a plan ending (studio clipKeepPlan).
+  // Recipe .54 (review of .53): the role's cut keeps a plan ending; review of .54 (finding 3): its plan word wherever it sits (studio clipKeepPlan).
   for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = clipKeepPlan(x.role, 120); if (fits()) return true; }
   for (const x of ask.parts) x.note = cut(x.note, BRIEF_NOTE);
   if (fits()) return true;

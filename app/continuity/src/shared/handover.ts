@@ -167,7 +167,7 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   const u = part.reading;
   const role = u?.role ?? part.summary ?? null;
   // Every line a list item: in a Markdown viewer a plain line after a list runs into its last item.
-  // Recipe .54 (review of .53): the role's cut keeps a plan ending (studio clipKeepPlan).
+  // Recipe .54 (review of .53): the role's cut keeps a plan ending; review of .54 (finding 3): its plan word wherever it sits (studio clipKeepPlan).
   if (role) lines.push(`- 역할: ${clipKeepPlan(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
   if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
   // Chosen by KEEP_FIRST in either mode (the newest of a kind first, as the map lists them), then written in the mode's order.
