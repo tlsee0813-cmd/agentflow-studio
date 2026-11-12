@@ -892,21 +892,23 @@ function grammarEdges(o: Opened, edges: Edge[]): Edge[] {
 }
 /** Beauty v3 (A, C): the grain the layout lays a relation's line at, as the map strokes it: its channel (the newest reading's, else by
  * kind) and its signature of condition, timing and status (mergeByChannel splits a stroke by both). Beauty v4 review: relations whose
- * condition, optional mark, timing or status differ never share a stroke (the ruling: one representative never covers them). */
+ * condition, optional mark, timing or status differ never share a stroke (the ruling: one representative never covers them). Beauty v5
+ * (hub lanes): and its drawn head (mergeByChannel splits a stroke by it too), '<channel>^<head>[~<signature>]', so every stroke has a
+ * layout line, and a lane, of its own. */
 function lineGrain(o: Opened): (id: string, kind: RelationView['kind']) => string {
   const said = relationLines(o.project), notes = new Map(o.view.relations.map(r => [r.id, r.note])), sig = sigFor(said, notes);
-  return (id, kind) => { const ch = said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), s = sig(id); return s ? `${ch}~${sigKey(s)}` : ch; };
+  return (id, kind) => { const ch = said.get(id)?.channel ?? (kind === 'flow' ? 'data' : 'uses'), s = sig(id), g = `${ch}^${lineStyle(kind, ch).head}`; return s ? `${g}~${sigKey(s)}` : g; };
 }
 /** Beauty v3 (C.3): each stroke between two of the scope's own parts takes the route its layout line reserved (Edge.hint), keyed by its
- * ends and the grain of its first relation that runs its way; a second stroke of the same line searches its own. */
+ * ends and the grain of its first relation that runs its way. Beauty v5 (hub lanes): every stroke, not only the first of a key (the
+ * grain holds the head, so two strokes meet one key only when the drawn set joins them: a summary stroke holding both ways). */
 function withHints(o: Opened, list: Edge[]): Edge[] {
   if (!lay.channels.size) return list;
-  const grain = lineGrain(o), used = new Set<string>(), kinds = new Map(o.view.relations.map(r => [r.id, r.kind]));
+  const grain = lineGrain(o), kinds = new Map(o.view.relations.map(r => [r.id, r.kind]));
   return list.map(e => {
     const id = e.ids.find(x => !(e.back ?? []).includes(x)) ?? e.ids[0]; if (!id) return e;
-    const k = `${e.from}|${e.to}|${grain(id, kinds.get(id) ?? e.kind)}`, ch = lay.channels.get(k);
-    if (!ch || used.has(k)) return e;
-    used.add(k); return { ...e, hint: ch };
+    const ch = lay.channels.get(`${e.from}|${e.to}|${grain(id, kinds.get(id) ?? e.kind)}`);
+    return ch ? { ...e, hint: ch } : e;
   });
 }
 
