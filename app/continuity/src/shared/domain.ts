@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile, type PastedRecord, type RecordEvidence, PASTED_TEXT_LIMIT, READINGS_LIMIT, isMapReading, type ReadingEntry } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile, type PastedRecord, type RecordEvidence, PASTED_TEXT_LIMIT, READINGS_LIMIT, isMapReading, type ReadingEntry, type HumanEdit, HUMAN_EDITS_LIMIT } from './types.js';
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
@@ -737,6 +737,31 @@ export function addRelation(p: Project, from: string, to: string, kind: Relation
 }
 export function removeRelation(p: Project, id: string): Project {
   ensure(p.space.relations.some(r=>r.id===id));const n=change(p);n.space.relations=n.space.relations.filter(r=>r.id!==id);return n;
+}
+/* ---------- Growth view (ruling F6 Q4): the person's own structure edits, logged with a time from now on ----------
+ * A reading adds parts and relations through addArea/addRelation (unlogged: the reading itself is dated). These are the person's: each
+ * makes the edit as the plain function does, then appends one entry (next sequence number, the time, before and after) to Project.edits.
+ * A call that changes nothing logs nothing. The log keeps its newest HUMAN_EDITS_LIMIT entries; nothing older is ever dated. */
+type EditBody=HumanEdit extends infer E?E extends HumanEdit?Omit<E,'seq'|'at'>:never:never;
+function logged(n:Project,e:EditBody):Project {
+  const at=now(),log=n.edits??{version:'human-edits.1' as const,since:at,entries:[]},seq=(log.entries.at(-1)?.seq??0)+1;
+  n.edits={version:'human-edits.1',since:log.since,entries:[...log.entries,{...e,seq,at} as HumanEdit].slice(-HUMAN_EDITS_LIMIT)};return n;
+}
+export function archiveAreaByPerson(p:Project,id:string,archived:boolean):Project {
+  const was=p.space.areas.find(a=>a.id===id)?.archived;const n=setAreaArchived(p,id,archived);
+  return was===archived?n:logged(n,{kind:'archive',target:id,before:!archived,after:archived});
+}
+export function setAreaParentByPerson(p:Project,id:string,parentId:string|null):Project {
+  const was=p.space.containment.parents[id]??null,n=setAreaParent(p,id,parentId);
+  return n===p?p:logged(n,{kind:'parent',target:id,before:was,after:parentId});
+}
+export function addRelationByPerson(p:Project,from:string,to:string,kind:RelationKind,note=''):Project {
+  const n=addRelation(p,from,to,kind,note),r=n.space.relations.at(-1)!;
+  return logged(n,{kind:'relation-add',target:r.id,before:null,after:{id:r.id,from:r.from,to:r.to,kind:r.kind,note:r.note}});
+}
+export function removeRelationByPerson(p:Project,id:string):Project {
+  const r=p.space.relations.find(x=>x.id===id);const n=removeRelation(p,id);
+  return logged(n,{kind:'relation-remove',target:id,before:{id,from:r!.from,to:r!.to,kind:r!.kind,note:r!.note},after:null});
 }
 /** The area the unsent request is written for (undefined = follow the current work). Changed only by the user. */
 export function setDraftTarget(p: Project, area: string|null|undefined): Project {

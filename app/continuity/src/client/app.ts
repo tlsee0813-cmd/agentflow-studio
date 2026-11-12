@@ -17,7 +17,9 @@ import { recordRails, historyEntries, foldHistory, sourceRows, shortReading, rea
 import { recordTexts } from '../shared/request-return.js';
 import type { MapReading, ReadingExclusion } from '../shared/types.js';
 import { recordLabel } from '../shared/record-source.js';
-import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, SavedCamera } from '../shared/types.js';
+import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, SavedCamera, ViewState, GrowthMemo, RelationKind } from '../shared/types.js';
+import { mapVersions, pastVersion, changeSet, directLines, unreflectedAt, citeLines, changeReason, visitBaseline, growthMemo, compareBase, versionLabel, CHANGE_WORD, TAB_ORDER, type ChangeSet, type LineKey, type IdentityCite, type Unreflected } from '../shared/map-growth.js';
+import { cardTabs, placeTabs, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, unreflectedRow, tabWord, type SummaryKey } from './growth-view.js';
 import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
@@ -77,7 +79,9 @@ const recentAt = (at: string | null) => !!at && Date.now() - Date.parse(at) < 24
 
 /* ---------- state ---------- */
 /** alias: stable address keys of an example's parts (spec key → id) and back; null for saved projects, whose ids are stable. */
-interface Opened { key: string; kind: 'example' | 'saved' | 'legacy'; project: Project; ref: EntryRef | null; view: StudioView; alias: { toId: Map<string, string>; toKey: Map<string, string> } | null }
+interface Opened { key: string; kind: 'example' | 'saved' | 'legacy'; project: Project; ref: EntryRef | null; view: StudioView; alias: { toId: Map<string, string>; toKey: Map<string, string> } | null;
+  /** The growth view: this is map version N as the records made it (read-only; growthPast holds the current map behind it). */
+  past?: number }
 interface Answer { at: string; intent: AskIntent; question: string | null; model: string; reply: StudioReply; refs: Record<string, string>; coverage?: AskCoverage }
 interface Ask { partId: string; intent: AskIntent; question: string | null; controller: AbortController | null; error: string | null; coverage?: AskCoverage }
 
@@ -196,6 +200,7 @@ const stableId = (o: Opened, id: string) => o.alias?.toKey.get(id) ?? id;
 const liveId = (o: Opened, key: string) => o.alias?.toId.get(key) ?? key;
 function loadView(o: Opened) {
   const v = o.kind === 'example' ? readViewState(kv, viewKeyOf(o)) : readEntryView(kv, viewKeyOf(o), o.project.id);
+  growthLoad(o, v);
   for (const [k, open] of Object.entries(v.folds)) { const id = liveId(o, k); if (partOf(o, id)) expandState.set(`${o.key}|${id}`, open); }
   for (const [k, c] of Object.entries(v.cameras)) {
     const id = k ? liveId(o, k) : null; if (id && !partOf(o, id)?.childIds.length) continue;
@@ -210,7 +215,8 @@ function flushView() {
   const prefix = `${o.key}|`, folds: Record<string, boolean> = {}, cams: Record<string, SavedCamera> = {};
   for (const [k, v] of expandState) if (k.startsWith(prefix)) folds[stableId(o, k.slice(prefix.length))] = v;
   for (const [k, c] of cameras) if (k.startsWith(prefix)) { const sc = k.slice(prefix.length); cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k, ...(c.win ? { win: c.win } : {}) }; }
-  writeViewState(kv, viewKeyOf(o), { folds, cameras: cams });
+  const gm = growthMemoOf(o);
+  writeViewState(kv, viewKeyOf(o), { folds, cameras: cams, ...(gm ? { growth: gm } : {}) });
 }
 /** Direct children of the scope open as frames; deeper parts stay folded until opened. */
 /** Unfolded only for the part being looked at (not the person's own fold choice). */
@@ -354,7 +360,7 @@ async function render() {
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
-  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; openState = null; backStack = []; hideDetail(); renderHome(); autoSync.render(); return; }
+  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); growthCmp = null; growthPast = null; growthMenuOpen = false; planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; openState = null; backStack = []; hideDetail(); renderHome(); autoSync.render(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -375,7 +381,7 @@ async function render() {
   const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
   if (fresh || nextScope !== scope) {
     if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() });
-    if (fresh) { flushView(); scenes = []; }
+    if (fresh) { flushView(); scenes = []; growthCmp = null; growthPast = null; growthMenuOpen = false; }
     else if (backing || (back && scenes.at(-1)?.scope === back.from.scope)) scenes.pop();
     else scenes.push({ scope, selected });
     backing = false;
@@ -839,14 +845,23 @@ const mapAspect = () => (aspectStep = stickyAspect(Math.max(1, Math.min(3, (wind
  * and until the next redraw, over the stored places but never written to them. */
 let held: Positions | null = null;
 const heldPositions = (o: Opened): Positions => {
-  const pos = positionsOf(o), ov = wellOverlays(o); if (!held && !ov) return pos;
+  const pos = positionsOf(o), ov = wellOverlays(o), gp = growthPast && o.past ? growthPast : null; if (!held && !ov && !gp) return pos;
   // An open well's held places stand under everything; the moves made for it over the stored places (map design v3 4.5).
   const out: Positions = {};
-  for (const c of new Set([...Object.keys(held ?? {}), ...Object.keys(pos), ...Object.keys(ov?.hold ?? {}), ...Object.keys(ov?.push ?? {})]))
-    out[c] = { ...(ov?.hold[c] ?? {}), ...(held?.[c] ?? {}), ...(pos[c] ?? {}), ...(ov?.push[c] ?? {}) };
+  // The growth view's past version: the current map's places pinned (common parts at 0px), then the places found for parts only it has.
+  for (const c of new Set([...Object.keys(held ?? {}), ...Object.keys(pos), ...Object.keys(ov?.hold ?? {}), ...Object.keys(ov?.push ?? {}), ...Object.keys(gp?.pins ?? {}), ...Object.keys(gp?.extra ?? {})]))
+    out[c] = { ...(ov?.hold[c] ?? {}), ...(held?.[c] ?? {}), ...(pos[c] ?? {}), ...(ov?.push[c] ?? {}), ...(gp?.pins[c] ?? {}), ...(gp?.extra[c] ?? {}) };
   return out;
 };
-const relayout = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
+/** In the growth view's past version, a part only it has that the automatic arrangement put over a pinned part moves clear of it (below its
+ * container's boxes), and the layout runs once more with that place. */
+const relayout = (o: Opened) => {
+  relayoutOnce(o); const gp = growthPast; if (!gp || !o.past) return;
+  const pinned = new Set([...Object.values(gp.pins), ...Object.values(gp.extra)].flatMap(m => Object.keys(m)));
+  const fix = clearPastOnly([...lay.boxes.values()], pinned);
+  if (Object.keys(fix).length) { for (const [c, m] of Object.entries(fix)) gp.extra[c] = { ...gp.extra[c], ...m }; relayoutOnce(o); }
+};
+const relayoutOnce = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
 /** Beauty v2 B3: where the routed lines still crowd, strips open across the map (map-route openCorridors), for the lines drawn at rest
  * (a busy map's summary lines, else each line). Positions only.
  * Beauty v2 review (H1, H4): the strips belong to the automatic arrangement, never to the person's places. They are found on the
@@ -2375,7 +2390,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   syncLineMode();
   // Beauty v5: the first screen's focus (its top line's height counts in the fit below).
   drawFocus();
-  $('add-part').hidden = o.kind !== 'saved';
+  $('add-part').hidden = o.kind !== 'saved' || !!o.past;
   $('arrange').hidden = !view.parts.length;
   renderPartForm();
   renderMapEntry();
@@ -2391,6 +2406,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   if (planOverlay) planView.overlay();
   applyReadMarks();
   applyLens();
+  drawGrowth();
   if (openState) syncOpenSoon();
 }
 
@@ -2615,11 +2631,13 @@ const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : la
 /** A summary line that, beside the selection, holds fewer relations than at rest. */
 const restOf = (e: Edge) => e.key.startsWith('sum:') && sums !== restSums && (restSums.find(x => x.key === e.key)?.ids.length ?? 0) > e.ids.length;
 function syncLineMode() {
-  const sp = $('space'), ff = ffActive(), rest = !selected && !scView && !ff && !planView.isOpen() && restSums.length > 0;
+  // The growth view's lit lines read one by one, as a selection's do.
+  const gl = !!document.querySelector('#world .edge.growth-lit, #world .edge.growth-gone-line');
+  const sp = $('space'), ff = ffActive(), rest = !selected && !scView && !ff && !gl && !planView.isOpen() && restSums.length > 0;
   sp.classList.toggle('rest-sum', rest);
   // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum). Beauty v5: the first screen's
   // flow is drawn the same way at rest.
-  sp.classList.toggle('sel-sum', (!!selected || !!scView || ff) && !planView.isOpen() && restSums.length > 0);
+  sp.classList.toggle('sel-sum', (!!selected || !!scView || ff || gl) && !planView.isOpen() && restSums.length > 0);
   sp.classList.toggle('ff-rest', ff && !selected && !planView.isOpen());
   // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
   sp.classList.toggle('dense-lines', lay.edges.length >= 12);
@@ -3212,6 +3230,7 @@ function applyCamera(animate = false) {
   sp.style.setProperty('--linv', (Math.max(12, labelPx(camera.k)) / (12 * camera.k)).toFixed(3));
   if ((Math.abs(inv - placedInv) / placedInv > 0.08 || tier !== placedTier) && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
   updateSticky();
+  if (growthCmp && growthTabK && Math.abs(camera.k - growthTabK) / growthTabK > 0.04) requestAnimationFrame(placeGrowthTabs);
   saveViewSoon();
 }
 /** Whole view in the free area. Opening shrinks to 60% at most, so a large map opens whole (names stay readable on one line
@@ -3480,6 +3499,7 @@ function select(partId: string | null) {
   if (changed) { editing = false; composerOpen = false; if (ask && !ask.controller) ask = null; sheetOpen = !!pendingRecord; pickedStep = null; if (pickedLine && pickedLine.part !== partId) pickedLine = null; if (signOpen && signOpen.part !== partId) { signOpen = null; signFocus = false; markSignTabs(); } }
   if (!!selected !== !!partId) recentPeek = false;
   if (partId) scopeReading = false;
+  if (partId && $('lens').classList.contains('growth-read')) hideLens();
   selected = partId;
   if (opened) renderRecent();
   markSelection(partId);
@@ -3496,6 +3516,7 @@ function select(partId: string | null) {
       if (readingCamera && !mapMoved) { camera = readingCamera; applyCamera(true); }
       readingCamera = null; returnView.render(); return;
     }
+    if (growthCmp?.pane) { renderGrowthPane(); return; }
     if (scopeReading) renderScopeLens(); else hideLens(); return;
   }
   if (returnView.isOpen()) { if (changed && !readingCamera) { readingCamera = { ...camera }; mapMoved = false; } readMarks = []; applyReadMarks(); }
@@ -3540,8 +3561,8 @@ const union = <T extends Rect>(rs: T[]): Rect => { const x = Math.min(...rs.map(
 const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
 const topInset = () => stripInset() + ftH() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
 function mapArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
-function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed', 'scenario-read'); readingFor = []; syncMapArea(); }
-const mapBottomInset = () => BOTTOM + legendInset();
+function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed', 'scenario-read', 'growth-read'); readingFor = []; syncMapArea(); }
+const mapBottomInset = () => BOTTOM + legendInset() + ($('space').classList.contains('growth-cmp') || $('space').classList.contains('growth-in-past') ? 40 : 0);
 const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
 /** The map's viewport: below the plan's strip when it is open, left of the pane when it is open. Camera coordinates stay
  * relative to the space, so neither moves anything already drawn. */
@@ -6001,6 +6022,7 @@ const ownSaves = new Set<string>();
 let saveFailure: string | null = null;
 /** The one write path for structure edits: saved projects through the workspace store, examples in memory only. */
 async function commit(o: Opened, next: Project): Promise<string | null> {
+  if (o.past) return '지난 지도 버전을 보는 중에는 바꿀 수 없어요. 현재로 돌아와 주세요.';
   if (o.kind === 'saved' && o.ref) {
     try { o.ref = await store.save(o.ref, next); ownSaves.add(`${o.ref.entryId}:${o.ref.seq}`); }
     catch (err) { saveFailure = storageErrorCode(err); return saveFailure === 'STORAGE_CONFLICT' ? '다른 탭에서 이 프로젝트가 바뀌어 저장하지 않았어요. 새로고침한 뒤 다시 해 주세요.' : '저장하지 못했어요. 바뀐 내용은 적용하지 않았어요.'; }
@@ -6014,7 +6036,7 @@ async function commit(o: Opened, next: Project): Promise<string | null> {
 
 /* Adding a part: the first part of a new project, another top part, or a part inside the selected one. */
 let partForm: { parentId: string | null } | null = null;
-function openPartForm(parentId: string | null) { partForm = { parentId }; renderPartForm(); }
+function openPartForm(parentId: string | null) { if (opened?.past) return; partForm = { parentId }; renderPartForm(); }
 function renderPartForm() {
   const box = $('part-form'), o = opened;
   if (!o || !partForm) { box.hidden = true; box.replaceChildren(); return; }
@@ -6190,6 +6212,269 @@ const planView = createPlanView({
     syncMapArea(); placeEdgeLabels(); // the change plan draws each line: the rest summary and its counts give way
   }
 });
+/* ---------- the growing map (ruling F6 Q4, Q5; map-growth.ts, growth-view.ts) ----------
+ * Time is something the person chooses to look at, never always-on chrome. The visit's baseline is read when the map opens (loadView) and
+ * stays fixed for the visit; the version shown is written back (flushView) as the next visit's baseline. A quiet chip by the lens bar opens
+ * the comparison when the two differ, and 「지도 이력」 lists every version. Comparing draws one 32px line under the lens bar and a text tab
+ * over each changed card; a picked change opens its scene in the pane while its card stays where it is. A past version is drawn read-only,
+ * rebuilt from the records, its common parts at their current places and the camera where it was. */
+let growthVisit: { key: string; base: number | null; pick: number | null } | null = null;
+let growthMenuOpen = false;
+interface GrowthCmp { key: string; from: number; to: number; cs: ChangeSet; picked: SummaryKey | null; scene: string | null; pane: 'list' | 'unreflected' | 'scene' | null;
+  un: Unreflected[] | null; unState: 'all' | Unreflected['state']; unShown: number;
+  saved: { lens: LensId; selected: string | null; camera: { x: number; y: number; k: number }; scope: string | null } }
+let growthCmp: GrowthCmp | null = null;
+let growthPast: { n: number; live: Opened; pins: Positions; extra: Positions; applied: number; undated: number } | null = null;
+let growthTabK = 0;
+/** The map as it is now (while a past version is looked at, the current one behind it): what saves, runs and the memo go by. */
+const liveOpened = (): Opened | null => growthPast?.live ?? opened;
+const growthCount = () => { const o = liveOpened(); return o ? mapVersions(o.project).length : 0; };
+const growthUnreflected = (): Unreflected[] | null => { const c = growthCmp, o = liveOpened(); if (!c || !o) return null; return c.un ??= unreflectedAt(o.project, c.to); };
+/** A part's name now, else at the comparison's earlier version (a retired part). */
+function growthName(id: string): string | null {
+  const o = liveOpened(); if (!o) return null;
+  const now = o.view.parts.find(x => x.id === id)?.name; if (now) return now;
+  return growthCmp ? pastVersion(o.project, growthCmp.from).view.parts.find(x => x.id === id)?.name ?? null : null;
+}
+function growthLoad(o: Opened, v: ViewState) { const b = visitBaseline(v.growth, Date.now()); growthVisit = { key: o.key, base: b.base, pick: v.growth?.pick ?? null }; }
+function growthMemoOf(o: Opened): GrowthMemo | null {
+  if (growthVisit?.key !== o.key) return null;
+  const live = growthPast && growthPast.live.key === o.key ? growthPast.live : o, n = mapVersions(live.project).length;
+  return n ? growthMemo(growthVisit.base, n, growthVisit.pick, Date.now()) : null;
+}
+function renderGrowthEntry() {
+  const wrap = $('growth-history').parentElement as HTMLElement, live = liveOpened(), n = growthCount(), usable = !!live && live.kind !== 'legacy' && n >= 2;
+  wrap.hidden = !usable;
+  const base = usable && growthVisit?.key === live!.key ? compareBase(growthVisit.base, n) : null, chip = $('growth-chip');
+  chip.hidden = base === null || !!growthCmp || !!growthPast;
+  if (base !== null) { chip.textContent = growthChipText(base, n); chip.title = `지난번에 본 ${versionLabel(base)}과 지금의 ${versionLabel(n)} 비교하기`; }
+  const menu = $('growth-menu'); $('growth-history').setAttribute('aria-expanded', String(growthMenuOpen && usable));
+  if (!growthMenuOpen || !usable) { menu.hidden = true; menu.replaceChildren(); return; }
+  menu.replaceChildren(historyMenu(mapVersions(live!.project), { current: n, visit: growthVisit?.key === live!.key ? compareBase(growthVisit.base, n) : null, pick: growthVisit?.key === live!.key ? growthVisit.pick : null, viewing: growthPast?.n ?? null },
+    { compare: k => { if (growthVisit && growthVisit.key === live!.key) growthVisit.pick = k; saveViewSoon(); growthCompare(k); }, view: k => growthView(k), close: () => { growthMenuOpen = false; renderGrowthEntry(); } }));
+  menu.hidden = false;
+}
+/** Opens the comparison from version `from` to the current one (the lens, selection, scope and camera are kept to come back to). */
+function growthCompare(from: number) {
+  const o = liveOpened(), to = growthCount(); if (!o || from < 1 || from >= to) return;
+  if (growthPast) growthLeavePast(false);
+  const saved = growthCmp?.saved ?? { lens: viewLens, selected, camera: { ...camera }, scope };
+  growthCmp = { key: o.key, from, to, cs: changeSet(o.project, from, to), picked: null, scene: null, pane: null, un: null, unState: 'all', unShown: 80, saved };
+  growthMenuOpen = false;
+  if ($('lens').classList.contains('growth-read')) hideLens();
+  readMarks = []; applyReadMarks();
+  renderSpace('keep');
+}
+/** Ends the comparison: the lens, the selection and the camera come back as they were. */
+function growthExit() {
+  const c = growthCmp, o = liveOpened(); if (!c) return;
+  if (growthPast) growthLeavePast(false);
+  growthCmp = null; readMarks = []; if ($('lens').classList.contains('growth-read')) hideLens();
+  renderSpace('keep');
+  if (!o || c.key !== o.key) return;
+  if (viewLens !== c.saved.lens) setLens(c.saved.lens);
+  const back = () => { camera = { ...c.saved.camera }; applyCamera(true); };
+  if (selected !== c.saved.selected || scope !== c.saved.scope) { go(o.key, c.saved.selected, c.saved.scope); window.setTimeout(back, 80); } else back();
+}
+/** The parts and lines a summary item lights in place (the read-marks highlight; added lines in the accent). */
+function growthPick(k: SummaryKey) {
+  const c = growthCmp; if (!c) return;
+  c.picked = c.picked === k ? null : k; c.scene = null;
+  const list = c.cs.changes.filter(x => x.kind === k), lines = k === 'lines' ? [...c.cs.added, ...c.cs.removed] : [];
+  readMarks = c.picked ? [...new Set([...list.map(x => x.kind === 'retire' ? x.successor ?? '' : x.part), ...lines.flatMap(l => [l.from, l.to])].filter(Boolean))] : [];
+  // One change of its kind opens its scene; several open their list (and the 설명 item tabs their cards).
+  if (!c.picked) { c.pane = null; if ($('lens').classList.contains('growth-read')) hideLens(); drawGrowth(); applyReadMarks(); return; }
+  const scenes = list.filter(x => x.kind !== 'retire');
+  if (k !== 'lines' && k !== 'retire' && k !== 'desc' && scenes.length === 1) { growthScene(scenes[0]!.part); return; }
+  growthOpenPane('list');
+}
+function growthScene(part: string) {
+  const c = growthCmp, o = opened; if (!c || !o) return;
+  c.scene = part; c.pane = 'scene';
+  const ch = c.cs.changes.filter(x => x.part === part);
+  readMarks = [...new Set([part, ...ch.flatMap(x => (x.predecessor ? [] : x.others ?? []))])];
+  growthOpenPane('scene');
+  // The card stays where it is: the camera moves only when the pane would cover it.
+  const b = lay.boxes.get(part); if (b) { const r = toScreen(b), a = mapArea(); if (r.x < a.x || r.y < a.y || r.x + Math.min(r.w, 200) > a.x + a.w || r.y + Math.min(r.h, 60) > a.y + a.h) revealParts([part]); }
+}
+function growthOpenPane(pane: GrowthCmp['pane']) {
+  const c = growthCmp, o = opened; if (!c || !o) return;
+  c.pane = pane;
+  if (selected) { go(o.key); return; } // select(null) draws the pane (renderGrowthPane)
+  renderGrowthPane(); drawGrowth(); applyReadMarks();
+}
+function closeGrowthPane() { const c = growthCmp; if (c) { c.pane = null; c.scene = null; c.picked = null; } readMarks = []; hideLens(); drawGrowth(); applyReadMarks(); }
+const KIND_REL: Record<RelationKind, string> = { flow: '흐름', needs: '필요로 함', shares: '함께 씀', related: '관련' };
+const lineText = (l: LineKey) => `${growthName(l.from) ?? '부품'} → ${growthName(l.to) ?? '부품'} · ${KIND_REL[l.kind]}`;
+/** The record's identity row as the scene shows it: 바뀐 때, its cites as written, the row and the way to its line. */
+function citeBlock(c: IdentityCite | null | undefined): HTMLElement[] {
+  const o = liveOpened(); if (!c || !o) return [h('p', { class: 'gs-fine' }, '이 변화를 적은 기록 행을 찾지 못함')];
+  const cites = citeLines(o.project, c.record, c.evidence), paste = c.place ? o.project.pasted.find(x => x.id === c.place!.record) : null;
+  const reason = changeReason(o.project, c.record, c.part, c.when);
+  return [h('dl', { class: 'gs-dl' },
+    h('dt', {}, '바뀐 때'), h('dd', {}, c.when && !/^[—–-]+$/.test(c.when) ? c.when : '기록 없음'),
+    h('dt', {}, '근거'), h('dd', {}, ...(cites.length ? cites.map(x => h('span', { class: 'gs-cite' }, h('b', {}, x.id), ` ${x.text}`)) : [c.evidence.length ? `${c.evidence.join(' · ')} (원문에서 찾지 못함)` : '근거 표시 없음'])),
+    h('dt', {}, '이유'), h('dd', {}, reason ? h('span', {}, reason.text, h('small', { class: 'gs-src' }, ` · 기록의 변화 이력${reason.date ? ` ${reason.date}` : ''}`)) : h('span', { class: 'gs-none' }, '이유 기록 없음')),
+    h('dt', {}, '기록 행'), h('dd', {}, `${c.record.split('@')[0]} · ${c.row} · ${fullTime(c.at)} 읽음`,
+      paste && c.place ? h('button', { type: 'button', class: 'link-button gs-quote', onclick: () => showQuote(paste.id, paste.text.slice(c.place!.from, c.place!.to), c.place!.from) }, '원문 보기') : null))];
+}
+function growthSceneEl(c: GrowthCmp, part: string): HTMLElement[] {
+  const o = liveOpened()!, cur = o.view.parts.find(x => x.id === part), A = pastVersion(o.project, c.from).view, was = A.parts.find(x => x.id === part);
+  const changes = c.cs.changes.filter(x => x.part === part && x.kind !== 'retire').sort((a, b) => TAB_ORDER.indexOf(a.kind) - TAB_ORDER.indexOf(b.kind));
+  const lines = changes.reduce((acc, x) => { const d = directLines(c.cs, x); return { added: [...acc.added, ...d.added.filter(l => !acc.added.some(y => y.id === l.id))], removed: [...acc.removed, ...d.removed.filter(l => !acc.removed.some(y => y.id === l.id))] }; }, { added: [] as LineKey[], removed: [] as LineKey[] });
+  const blocks = changes.map(x => {
+    const title = x.kind === 'succeed' ? `${growthName(x.predecessor!) ?? '부품'} → ${x.name}` : x.kind === 'rename' || x.kind === 'reimpl' ? `${x.before ?? ''} → ${x.after ?? ''}` : x.kind === 'dedupe' ? `${(x.others ?? []).map(id => growthName(id) ?? '부품').join(' · ')} → ${x.name}` : x.kind === 'new' ? (x.since ? `${versionLabel(x.since)}에서 처음 읽힘` : `${versionLabel(c.from)} 뒤에 처음 읽힘`) : x.kind === 'correct' ? '사람이 고친 설명' : '같은 부품에 대한 새 설명';
+    const lead = x.kind === 'succeed' ? `기록이 ${growthName(x.predecessor!) ?? '이전 부품'}의 자리를 ${x.name}이(가) 대신한다고 적음 (기록의 대응 행에서만 읽음)` : x.kind === 'dedupe' ? '지도가 같은 부품을 두 번 만든 것을 하나로 정리함' : null;
+    return h('section', { class: `gs-change k-${x.kind}` }, h('h3', {}, h('span', { class: 'gs-word' }, tabWord(x)), h('span', { class: 'gs-title' }, title)), lead ? h('p', { class: 'gs-lead' }, lead) : null,
+      ...(x.kind === 'succeed' || x.kind === 'rename' || x.kind === 'reimpl' ? citeBlock(x.cite) : []));
+  });
+  const nowRole = cur?.reading?.role ?? null, wasRole = was?.reading?.role ?? null, desc = changes.find(x => x.kind === 'desc'), succ = changes.find(x => x.kind === 'succeed');
+  const prev = succ ? A.parts.find(x => x.id === succ.predecessor) : null;
+  const steps = (cur?.reading?.steps ?? []).slice(0, 6).map(s => s.name);
+  return [
+    h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.from)} → ${versionLabel(c.to)} · 바뀐 것`)), h('h2', { id: 'lens-title' }, cur?.name ?? growthName(part) ?? '부품'),
+      h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '변화 설명 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
+    h('div', { class: 'lens-body gs-body' }, ...blocks,
+      h('section', { class: 'gs-lines' }, h('h3', {}, '바뀐 직접 연결', lines.added.length ? h('small', {}, '＋는 지도에 밝힘') : null),
+        lines.added.length || lines.removed.length ? h('ul', {}, ...lines.added.map(l => h('li', { class: 'gs-add' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '＋'), lineText(l))),
+          ...lines.removed.map(l => h('li', { class: 'gs-rem' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '−'), lineText(l)))) : h('p', { class: 'gs-none' }, '이 부품에 닿은 연결은 그대로임'),
+        lines.removed.length ? h('p', { class: 'gs-fine' }, '빠진 연결은 지금 지도에 그리지 않음 · 남은 부품끼리 잇지 않음 ', h('button', { type: 'button', class: 'link-button', onclick: () => growthView(c.from) }, `${versionLabel(c.from)}에서 보기`)) : null),
+      h('section', { class: 'gs-desc' }, h('h3', {}, '설명'),
+        h('p', { class: 'gs-now' }, nowRole ?? '기록된 설명 없음'),
+        wasRole && nowRole && wasRole.replace(/\s+/g, ' ').trim() !== nowRole.replace(/\s+/g, ' ').trim()
+          ? h('div', { class: 'gs-was' }, h('span', { class: 'gs-was-k' }, desc?.target ? `이전 설명 · 대상 ${desc.target} 기록의 설명으로 갱신됨` : '이전 설명 · 같은 부품에 대한 새 설명이 채택됨'), h('p', {}, wasRole)) : null,
+        prev?.reading?.role ? h('div', { class: 'gs-was' }, h('span', { class: 'gs-was-k' }, `대신한 부품의 설명 · ${prev.name}`), h('p', {}, prev.reading.role)) : null,
+        steps.length ? h('div', { class: 'gs-steps' }, h('span', { class: 'gs-was-k' }, '기록된 내부 동작'), h('ol', {}, ...steps.map(s => h('li', {}, s)))) : null))];
+}
+function growthListEl(c: GrowthCmp, k: SummaryKey): HTMLElement[] {
+  const body: (HTMLElement | null)[] = [];
+  if (k === 'lines') {
+    body.push(h('section', { class: 'gs-lines' }, h('h3', {}, `더해진 연결 ${c.cs.added.length}`, h('small', {}, ' · 지도에 밝힘')), h('ul', {}, ...c.cs.added.map(l => h('li', { class: 'gs-add' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '＋'), lineText(l))))));
+    if (c.cs.removed.length) body.push(h('section', { class: 'gs-lines' }, h('h3', {}, `빠진 연결 ${c.cs.removed.length}`), h('ul', {}, ...c.cs.removed.map(l => h('li', { class: 'gs-rem' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '−'), lineText(l)))),
+      h('p', { class: 'gs-fine' }, '빠진 연결은 지금 지도에 그리지 않음 ', h('button', { type: 'button', class: 'link-button', onclick: () => growthView(c.from) }, `${versionLabel(c.from)}에서 보기`))));
+  } else {
+    const list = c.cs.changes.filter(x => x.kind === k);
+    body.push(h('ul', { class: 'gs-list' }, ...list.map(x => h('li', {}, k === 'retire'
+      ? h('div', { class: 'gs-item' }, h('strong', {}, x.name), h('span', { class: 'gs-item-sub' }, x.successor ? `대신하는 부품 · ${growthName(x.successor) ?? '부품'}` : '대신하는 부품 없음', x.cite?.when ? ` · 바뀐 때 ${x.cite.when}` : ''),
+        h('span', { class: 'gs-item-acts' }, x.successor ? h('button', { type: 'button', class: 'link-button', onclick: () => growthScene(x.successor!) }, '승계 보기') : null, h('button', { type: 'button', class: 'link-button', onclick: () => growthView(c.from) }, `${versionLabel(c.from)}에서 보기`)))
+      : h('button', { type: 'button', class: 'gs-item', onclick: () => growthScene(x.part) }, h('strong', {}, x.name),
+        h('span', { class: 'gs-item-sub' }, x.kind === 'desc' ? x.after ?? '' : x.before || x.after ? `${x.before ?? ''} → ${x.after ?? ''}` : x.kind === 'succeed' ? `${growthName(x.predecessor!) ?? '부품'} 대신` : x.kind === 'dedupe' ? `${(x.others?.length ?? 0) + 1}→1` : ''))))));
+    if (k === 'retire') body.push(h('p', { class: 'gs-fine' }, '은퇴한 부품은 지금 지도에 없음 · 지난 버전 보기나 이 목록에서만 보임'));
+    if (k === 'desc') body.push(h('p', { class: 'gs-fine' }, '설명 갱신은 정정이 아님 · 카드 위 「설명」 표시는 이 항목을 고른 동안만'));
+  }
+  const word = k === 'lines' ? '연결' : CHANGE_WORD[k], n = k === 'lines' ? c.cs.added.length + c.cs.removed.length : c.cs.counts[k];
+  return [h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.from)} → ${versionLabel(c.to)}`)), h('h2', { id: 'lens-title' }, `${word} ${n}`),
+    h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '목록 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
+  h('div', { class: 'lens-body gs-body' }, ...body)];
+}
+function growthUnEl(c: GrowthCmp): HTMLElement[] {
+  const all = growthUnreflected() ?? [], o = liveOpened()!;
+  const count = (s: Unreflected['state']) => all.filter(x => x.state === s).length, shown = c.unState === 'all' ? all : all.filter(x => x.state === c.unState);
+  const filt = (s: GrowthCmp['unState'], word: string, n: number) => h('button', { type: 'button', class: `gu-filter${c.unState === s ? ' on' : ''}`, 'aria-pressed': String(c.unState === s), onclick: () => { c.unState = s; c.unShown = 80; renderGrowthPane(); } }, `${word} ${n}`);
+  const rows = shown.slice(0, c.unShown).map(x => unreflectedRow(x, growthName, { part: id => { readMarks = [id]; applyReadMarks(); revealParts([drawnRep(o, id) ?? id].filter(id => lay.boxes.has(id))); },
+    source: x => { const t = o.project.pasted.find(p => p.id === x.paste); if (t) showQuote(t.id, t.text.slice(x.start, x.end), x.start); } }));
+  return [h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.to)}까지 읽은 기록`)), h('h2', { id: 'lens-title' }, `미반영 ${all.length}`),
+    h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '미반영 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
+  h('div', { class: 'lens-body gs-body gu-body' },
+    h('p', { class: 'gs-fine' }, '읽은 기록의 행 가운데 지도에 들어가지 않은 것 · 대기는 다음 읽기에서 다시 보냄, 보류는 정해지지 않은 것, 거절은 할 일이 아님'),
+    h('div', { class: 'gu-filters', role: 'group', 'aria-label': '미반영 나누어 보기' }, filt('all', '전체', all.length), filt('waiting', '대기', count('waiting')), filt('held', '보류', count('held')), filt('rejected', '거절', count('rejected'))),
+    shown.length ? h('ol', { class: 'gu-list' }, ...rows) : h('p', { class: 'gs-none' }, '없음'),
+    shown.length > c.unShown ? h('button', { type: 'button', class: 'link-button gu-more', onclick: () => { c.unShown += 120; renderGrowthPane(); } }, `${shown.length - c.unShown}개 더 보기`) : null)];
+}
+function renderGrowthPane() {
+  const c = growthCmp, l = $('lens'); if (!c || !c.pane || !opened) return;
+  const body = l.classList.contains('growth-read') ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0, same = l.classList.contains('growth-read') && l.dataset.growth === `${c.pane}|${c.scene ?? ''}|${c.picked ?? ''}`;
+  const content = c.pane === 'scene' && c.scene ? growthSceneEl(c, c.scene) : c.pane === 'unreflected' ? growthUnEl(c) : c.picked ? growthListEl(c, c.picked) : null;
+  if (!content) { closeGrowthPane(); return; }
+  l.replaceChildren(...content); l.classList.remove('compare', 'scope-read', 'railed', 'return-read', 'scenario-read'); l.classList.add('growth-read'); l.dataset.growth = `${c.pane}|${c.scene ?? ''}|${c.picked ?? ''}`; l.hidden = false; readingFor = [];
+  if (same) { const b = l.querySelector('.lens-body'); if (b) b.scrollTop = body; }
+  syncMapArea();
+}
+/* The past view. */
+function pinsOfLayout(): Positions {
+  const out: Positions = {};
+  for (const b of lay.boxes.values()) if (b.kind !== 'ghost') (out[b.container] ??= {})[b.id] = { x: b.rel.x, y: b.rel.y };
+  return out;
+}
+/** Shows version n, read-only: the current map's places pinned for the parts both have, the camera where it is. */
+function growthView(n: number) {
+  const live = liveOpened(); if (!live || n < 1 || n >= growthCount()) return;
+  const pins = growthPast?.pins ?? pinsOfLayout(), pv = pastVersion(live.project, n);
+  const past: Opened = { ...live, project: pv.project, view: plainMapView(pv.project), past: n };
+  growthPast = { n, live, pins, extra: {}, applied: pv.applied, undated: pv.undated };
+  growthMenuOpen = false;
+  if (selected && !past.view.parts.some(x => x.id === selected)) select(null);
+  if (scope && !past.view.parts.some(x => x.id === scope)) scope = null;
+  if ($('lens').classList.contains('growth-read') && growthCmp) { growthCmp.pane = null; hideLens(); }
+  opened = past;
+  renderSpace('keep');
+}
+function growthLeavePast(redraw = true) {
+  const g = growthPast; if (!g) return;
+  growthPast = null; opened = g.live;
+  if (selected && !g.live.view.parts.some(x => x.id === selected)) select(null);
+  if (redraw) renderSpace('keep');
+}
+/** The line, the banner, the tabs and the lit lines, after every redraw. */
+function drawGrowth() {
+  const live = liveOpened(), sp = $('space');
+  if (growthCmp && (!live || growthCmp.key !== live.key)) growthCmp = null;
+  if (growthCmp && live) { const n = growthCount(); if (growthCmp.to !== n && n > growthCmp.from) Object.assign(growthCmp, { to: n, cs: changeSet(live.project, growthCmp.from, n), un: null }); }
+  renderGrowthEntry();
+  const c = growthCmp, line = $('growth-line'), on = !!c && !growthPast;
+  sp.classList.toggle('growth-cmp', on);
+  if (on) line.replaceChildren(compareLine(c!.cs, c!.picked, growthUnreflected()?.length ?? null, { pick: growthPick, unreflected: () => growthOpenPane('unreflected'), history: () => { growthMenuOpen = true; renderGrowthEntry(); }, exit: growthExit }));
+  else line.replaceChildren();
+  line.hidden = !on;
+  const banner = $('growth-past'); sp.classList.toggle('growth-in-past', !!growthPast);
+  if (growthPast) banner.replaceChildren(pastBanner(growthPast.n, growthPast.applied, growthPast.undated, () => growthLeavePast()));
+  else banner.replaceChildren();
+  banner.hidden = !growthPast;
+  drawGrowthMarks(); syncLineMode(); placeDock();
+}
+/** The relation ids lit now: the added lines (the 연결 item, or the picked scene's) on the current map; the removed ones on the earlier
+ * version's own drawing only. */
+function growthLit(): { ids: Set<string>; cls: 'growth-lit' | 'growth-gone-line' } | null {
+  const c = growthCmp; if (!c) return null;
+  const sceneLines = (part: string) => c.cs.changes.filter(x => x.part === part).map(x => directLines(c.cs, x));
+  if (!growthPast) { const ids = c.picked === 'lines' ? c.cs.added.map(l => l.id) : c.scene ? sceneLines(c.scene).flatMap(d => d.added.map(l => l.id)) : []; return ids.length ? { ids: new Set(ids), cls: 'growth-lit' } : null; }
+  if (growthPast.n !== c.from) return null;
+  const ids = c.scene ? sceneLines(c.scene).flatMap(d => d.removed.map(l => l.id)) : c.cs.removed.map(l => l.id);
+  return ids.length ? { ids: new Set(ids), cls: 'growth-gone-line' } : null;
+}
+function drawGrowthMarks() {
+  const world = $('world'), c = growthCmp, o = opened;
+  world.querySelectorAll('.growth-tab').forEach(e => e.remove());
+  world.querySelectorAll('.edge.growth-lit, .edge.growth-gone-line').forEach(e => e.classList.remove('growth-lit', 'growth-gone-line'));
+  world.querySelectorAll('.growth-gone').forEach(e => e.classList.remove('growth-gone'));
+  if (!c || !o) return;
+  const lit = growthLit();
+  if (lit) world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => { if ((g.dataset.ids ?? '').split(',').some(id => lit.ids.has(id))) { g.classList.add(lit.cls); layerEdge(g); } });
+  const tab = (part: string, word: string, more: number, kind: string, on: boolean, tip: string, click: (() => void) | null) => {
+    const b = lay.boxes.get(part); if (!b || b.kind === 'ghost') return;
+    world.append(h('button', { type: 'button', class: `growth-tab k-${kind}${on ? ' on' : ''}`, 'data-part': part, title: tip, ...(click ? { onclick: click } : { tabindex: '-1' }) }, word, more ? h('span', { class: 'gt-more' }, ` +${more}`) : null));
+  };
+  if (!growthPast) for (const t of cardTabs(c.cs, c.picked === 'desc')) tab(t.part, t.word, t.more, t.main.kind, c.scene === t.part, `${t.changes.map(x => tabWord(x)).join(' · ')} · 눌러서 무엇이 바뀌었는지 보기`, () => growthScene(t.part));
+  else if (growthPast.n === c.from) for (const x of c.cs.changes) if (x.kind === 'retire') {
+    world.querySelector(`[data-part="${CSS.escape(x.part)}"]`)?.classList.add('growth-gone');
+    tab(x.part, `이후 은퇴`, 0, 'retire', false, `${versionLabel(c.to)}에는 없음${x.successor ? ` · ${growthName(x.successor) ?? '다른 부품'}이(가) 대신함` : ''}`, null);
+  }
+  placeGrowthTabs();
+}
+/** Tabs above their cards in map units sized for the zoom (20px on screen), never over each other, another card or a group's head. */
+function placeGrowthTabs() {
+  const world = $('world'), els = [...world.querySelectorAll<HTMLElement>('.growth-tab')]; growthTabK = camera.k; if (!els.length) return;
+  const boxes = new Map([...lay.boxes.values()].filter(b => b.kind !== 'ghost').map(b => [b.id, { x: b.x, y: b.y, w: b.w, h: b.h }]));
+  const obstacles = [...lay.boxes.values()].map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.kind === 'frame' ? b.head : b.h }));
+  const t = titleH ? titleRect() : null; if (t) obstacles.push({ id: '', ...t });
+  // The captions on the map (the system boundary, the participants, 「이은 선 없음」) are never covered either.
+  for (const r of bandRects) obstacles.push({ id: '', ...r });
+  for (const el of world.querySelectorAll<HTMLElement>('.lone-head, .band-head')) obstacles.push({ id: '', x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+  for (const e of els) e.hidden = false;
+  const places = placeTabs(els.map(e => ({ part: e.dataset.part!, w: e.offsetWidth, h: e.offsetHeight })), boxes, obstacles, 3 / camera.k);
+  for (const e of els) { const r = places.get(e.dataset.part!); e.hidden = !r; if (r) { e.style.left = `${r.x}px`; e.style.top = `${r.y}px`; } }
+}
+
 /* ---------- coming back: the return reading in the pane ---------- */
 /** Parts the return reading is about now: marked on the map (drawn representatives), never selected or restyled by status. */
 let readMarks: string[] = [];
@@ -6250,7 +6535,8 @@ const returnView = createReturnView({
     if (!content) { if (l.classList.contains('return-read')) hideLens(); return; }
     if (selected || planView.isOpen()) return;
     const same = l.classList.contains('return-read') && !l.hidden, keep = same ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0;
-    l.replaceChildren(...content); l.classList.remove('compare', 'scope-read', 'railed'); l.classList.add('return-read'); l.hidden = false; readingFor = [];
+    if (growthCmp) growthCmp.pane = null;
+    l.replaceChildren(...content); l.classList.remove('compare', 'scope-read', 'railed', 'growth-read'); l.classList.add('return-read'); l.hidden = false; readingFor = [];
     syncMapArea();
     const body = l.querySelector('.lens-body'); if (body && same) body.scrollTop = keep;
   },
@@ -6326,15 +6612,15 @@ const returnView = createReturnView({
 /** The parts the last map reading of this visit added or said something about (marked while the pane reads it). */
 let justRead: { key: string; parts: string[] } | null = null;
 const mapRun = createMapRun({
-  current: () => opened,
+  current: () => liveOpened(),
   // Each opening of a project is its own visit (projectFor keeps the object while the same project stays open).
-  visit: () => opened,
+  visit: () => liveOpened(),
   status: () => status,
   accessCode: () => sessionCode(),
-  requests: () => opened ? frozenRequests(opened.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : [],
+  requests: () => { const o = liveOpened(); return o ? frozenRequests(o.project, (planView.bundleOf()?.snapshots ?? []).flatMap(s => s.scope ? [s.scope] : [])) : []; },
   commit: async next => {
-    const o = opened; if (!o) return '프로젝트가 열려 있지 않아요.';
-    const base = o.ref ? { ...o.ref } : null, failed = await commit(o, next), now = opened;
+    const o = liveOpened(); if (!o) return '프로젝트가 열려 있지 않아요.';
+    const base = o.ref ? { ...o.ref } : null, failed = await commit(o, next), now = liveOpened();
     // Left and came back while it was saved: this visit may have read the entry just before the save landed. It takes the saved
     // project only when it read the very state this save replaced (same lifecycle and save number), so it is not left stale.
     if (!failed && now && now !== o && now.key === o.key && base && now.ref && now.ref.lifecycle === base.lifecycle && now.ref.seq === base.seq) {
@@ -6410,11 +6696,11 @@ const connectorHost = {
   }
 };
 const autoSync = createAutoSync({
-  current: () => opened,
+  current: () => liveOpened(),
   sources: sessionSources,
   kv,
   save: saveRecords,
-  full: () => { const o = opened; return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
+  full: () => { const o = liveOpened(); return o && o.kind === 'saved' ? recordRoom(o.project, []) : null; },
   canRead: () => { const inp = mapRun.input(), st = mapRun.state(); return !!inp && !inp.problem && mapRun.can() && !st.pending && !st.ready && !st.committing; },
   read: () => void mapRun.run(),
   bound: () => renderMapEntry(),
@@ -6469,6 +6755,8 @@ function runReady(st: MapRunState, primary: string, link: string): HTMLElement[]
 }
 /** Applied and saved: the map shows what came in where it is (a first map fits the view), and the pane says what was understood. */
 function mapApplied(a: Applied) {
+  // A reading landed: the map comes back to now (a past version is never the one a reading changes).
+  if (growthPast) growthLeavePast(false);
   const o = opened; if (!o) return;
   const first = a.created.length > 0 && o.view.parts.length === a.created.length;
   justRead = { key: o.key, parts: [...new Set([...a.created, ...a.touched])] };
@@ -7252,7 +7540,7 @@ function toast(text: string, action?: { label: string; run: () => void }) {
 function dropToast() { clearTimeout(toastTimer); $('toast').hidden = true; toastKey = null; }
 /** Explicit only: resets the places in this view (the scope and its open frames); one undo. */
 function arrange() {
-  const o = opened; if (!o) return;
+  const o = opened; if (!o || o.past) return;
   const pos = positionsOf(o), containers = [scope ?? ROOT, ...[...lay.boxes.values()].filter(b => b.kind === 'frame').map(b => b.id)];
   const before = structuredClone(pos), had = containers.some(c => pos[c] && Object.keys(pos[c]!).length);
   if (!had) { toast('이미 자동 배치 상태예요.'); return; }
@@ -7356,7 +7644,7 @@ function bindCanvas() {
     if (recentOpen || recentPeek) { recentOpen = recentPeek = false; if (opened) renderRecent(); }
     if (target.closest('button,a,input,textarea')) return;
     const handle = target.closest<HTMLElement>('[data-drag]'), o = opened;
-    if (handle && o) {
+    if (handle && o && !o.past) {
       const id = handle.dataset.drag!, b = lay.boxes.get(id); if (!b) return;
       drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'part', id, container: b.container, start: { ...b.rel } };
     } else drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'pan', cx: camera.x, cy: camera.y, ...(lineHit(target) ? { edge: lineHit(target)! } : {}) };
@@ -7758,6 +8046,9 @@ async function main() {
   try { await store.init(); } catch { store.read(); }
   bindCanvas(); bindFind(); bindImport(); bindNewProject();
   $('add-part').addEventListener('click', () => openPartForm(scope));
+  $('growth-history').addEventListener('click', () => { growthMenuOpen = !growthMenuOpen; renderGrowthEntry(); });
+  $('growth-chip').addEventListener('click', () => { const live = liveOpened(), base = live && growthVisit?.key === live.key ? compareBase(growthVisit.base, growthCount()) : null; if (base !== null) growthCompare(base); });
+  document.addEventListener('pointerdown', e => { if (growthMenuOpen && !(e.target as HTMLElement).closest?.('.growth-wrap, #growth-line')) { growthMenuOpen = false; renderGrowthEntry(); } }, true);
   $('plan-entry').addEventListener('click', () => planView.toggle());
   $('handover-open').addEventListener('click', e => handover.open(scope, e.currentTarget as HTMLElement));
   $('return-entry').addEventListener('click', () => { if (returnView.isOpen() && !planView.isOpen()) returnView.close(); else openReturn(); });

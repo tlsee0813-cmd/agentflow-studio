@@ -1,5 +1,5 @@
 import { API_SCHEMA, SCHEMA, V5_SCHEMA, V4_SCHEMA, V3_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, RESULT_BYTES, RESULT_TEXT_LIMIT, TEXT_LIMIT, FILE_LIMIT, ITEM_LIMIT, REQUEST_BYTES, type Intent, type Background, type ResultFile, type ExportRecord, type Task, type Advice, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Ticket, type Question, GUIDE_SCHEMA, type GuideRequest, type GuideReply, type GuideEnvelope, type GuideTicket, type UnderstandingInput } from './types.js';
-import {ROW_STATES,ROW_REASONS,IDENTITY_ANSWERS,IDENTITY_OPS,type RowState,V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,RULE_SCOPES,ANCHOR_KINDS,ENFORCER_KINDS,WITHDRAWAL_KINDS,GATE_KINDS,PART_STATES,PART_TYPES,PART_TYPES_17,PART_IMPLEMENTATIONS,STATUS_DIMENSION_KINDS,STATUS_VALUE_KINDS,GROUP_AXES,VARIANT_CHOICES,VARIANT_TOGETHER,ENTRY_KINDS,CADENCE_KINDS,CROSS_KINDS,ACTOR_ROLES,ACTOR_KINDS,CONTRACT_CHANGE_KINDS,SHIPPED_KINDS,WITHDRAWAL_METHODS,CONDITION_PHASES,COVERAGE_STATES,ARTIFACT_KINDS,WRITE_MODES,RECORD_DIAGNOSTIC_CATEGORIES,RECORD_FAMILIES,FAMILY_REASONS,CITE_GRADES,CLAIM_NATURES,STATUS_SCOPE_KINDS,FOUND_BY,OBLIGATION_KINDS,type StatusDimension,CHANNELS,RELATION_MODES,SCENARIO_KINDS,SCENARIO_LINK_KINDS,SCENARIO_PATH_STATUSES,SCENARIO_GAP_REASONS,READINGS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
+import {ROW_STATES,ROW_REASONS,IDENTITY_ANSWERS,IDENTITY_OPS,type RowState,V6_SCHEMA,V7_SCHEMA,V8_SCHEMA,V9_SCHEMA,V10_SCHEMA,V11_SCHEMA,V12_SCHEMA,V13_SCHEMA,type ReadingEntry,type PastedRecord,READING_EXCLUSION_RULES,CLAIM_KINDS,CLAIM_TOPICS,EVIDENCE_GRADES,RULE_SCOPES,ANCHOR_KINDS,ENFORCER_KINDS,WITHDRAWAL_KINDS,GATE_KINDS,PART_STATES,PART_TYPES,PART_TYPES_17,PART_IMPLEMENTATIONS,STATUS_DIMENSION_KINDS,STATUS_VALUE_KINDS,GROUP_AXES,VARIANT_CHOICES,VARIANT_TOGETHER,ENTRY_KINDS,CADENCE_KINDS,CROSS_KINDS,ACTOR_ROLES,ACTOR_KINDS,CONTRACT_CHANGE_KINDS,SHIPPED_KINDS,WITHDRAWAL_METHODS,CONDITION_PHASES,COVERAGE_STATES,ARTIFACT_KINDS,WRITE_MODES,RECORD_DIAGNOSTIC_CATEGORIES,RECORD_FAMILIES,FAMILY_REASONS,CITE_GRADES,CLAIM_NATURES,STATUS_SCOPE_KINDS,FOUND_BY,OBLIGATION_KINDS,type StatusDimension,CHANNELS,RELATION_MODES,SCENARIO_KINDS,SCENARIO_LINK_KINDS,SCENARIO_PATH_STATUSES,SCENARIO_GAP_REASONS,READINGS_LIMIT,HUMAN_EDITS_LIMIT,PASTED_TEXT_LIMIT,PASTED_LIMIT,type Area,type PlanStamp,type Point,type ManualPositions,type Backup} from './types.js';
 import { validateFrozenRequest, validateStoredMatch, hasTarget, matchLedger, recordTextMap, type FrozenRequest, type StoredRequestMatch, type RecordText } from './request-return.js';
 import { ANCHOR_QUOTE_MAX, textDigest } from './evidence-span.js';
 import { validEvidence, recordIdentity } from './record-source.js';
@@ -226,7 +226,8 @@ export function validateRequest(v: unknown): ContextRequest {
 }
 /** Same checks as validateProject without the defensive copy; used on freshly parsed JSON. */
 function assertProject(v: unknown): asserts v is Project {
-  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice','space','pasted','readings']);
+  // Growth view: the person's edit log is optional (absent until the first logged edit), so older projects read exactly as before.
+  obj(v,['schemaVersion','id','revision','name','sources','bases','tasks','currentTaskId','draft','answerDraft','basisDraft','basisEdits','draftKind','pending','notice','space','pasted','readings',...(v&&typeof v==='object'&&Object.hasOwn(v,'edits')?['edits']:[])]);
   ensure(v.schemaVersion === SCHEMA, 'UNSUPPORTED_SCHEMA'); id(v.id); integer(v.revision); text(v.name,120); text(v.draft,TEXT_LIMIT,true); text(v.answerDraft,TEXT_LIMIT,true); text(v.basisDraft,TEXT_LIMIT,true);
   ensure(['request','report','evidence','test_answer'].includes(v.draftKind as string)); if (v.notice !== null) text(v.notice,2000);
   list(v.sources); list(v.bases); list(v.tasks); for (const s of v.sources) source(s); for (const b of v.bases) basis(b);
@@ -239,6 +240,7 @@ function assertProject(v: unknown): asserts v is Project {
   const tasks=new Set<string>(),returns=new Map<string,{taskId:string;record:ExportRecord}>();
   const areaIds=space(v.space);
   pasted(v.pasted,areaIds);
+  if(v.edits!==undefined)humanEdits(v.edits,areaIds);
   for (const t of v.tasks) {
     const optional=['intentEdit','areaId'].filter(k=>t&&typeof t==='object'&&Object.hasOwn(t,k));
     obj(t,['id','sourceIds','parentTaskId','advice','adviceRevision','mode','manual','suggestions','handoffs','resultFile','background',...optional]); id(t.id);
@@ -713,6 +715,24 @@ function containment(v:unknown,areas:Area[]) {
   for(const a of areas){ensure(Object.hasOwn(revisions,a.id));integer(revisions[a.id]);}
   for(const [child,parent] of Object.entries(parents)){ensure(byId.has(child)&&typeof parent==='string'&&byId.has(parent)&&child!==parent);if(!byId.get(child)!.archived)ensure(!byId.get(parent as string)!.archived);}
   for(const a of areas){const seen=new Set<string>();let id:string|undefined=a.id;while(id){ensure(!seen.has(id));seen.add(id);id=parents[id] as string|undefined;}}
+}
+/** Growth view (ruling F6 Q4): the person's edit log. Each entry has the next sequence number, a time no earlier than the one before it
+ * (and the log's start), one of the four kinds, an existing part (archive, parent) or a relation snapshot between existing parts, and a value
+ * that changed (before ≠ after). Areas are archived, never deleted, so every id it names stays readable. */
+export function humanEdits(v:unknown,areaIds:ReadonlySet<string>) {
+  obj(v,['version','since','entries']);ensure(v.version==='human-edits.1');date(v.since);list(v.entries,HUMAN_EDITS_LIMIT);
+  const area=(x:unknown)=>{ensure(typeof x==='string'&&areaIds.has(x));};
+  const rel=(x:unknown,target:string)=>{obj(x,['id','from','to','kind','note']);id(x.id);ensure(x.id===target);area(x.from);area(x.to);ensure(x.from!==x.to);ensure(['flow','needs','shares','related'].includes(x.kind as string));text(x.note,200,true);};
+  let seq=-1,at=v.since as string;
+  for(const e of v.entries){
+    obj(e,['seq','at','kind','target','before','after']);integer(e.seq);ensure((e.seq as number)>=1&&(seq<0||e.seq===seq+1));seq=e.seq as number;
+    date(e.at);ensure((e.at as string)>=at);at=e.at as string;id(e.target);
+    if(e.kind==='archive'){area(e.target);ensure(typeof e.before==='boolean'&&typeof e.after==='boolean'&&e.before!==e.after);}
+    else if(e.kind==='parent'){area(e.target);for(const x of [e.before,e.after])if(x!==null){area(x);ensure(x!==e.target);}ensure(e.before!==e.after);}
+    else if(e.kind==='relation-add'){ensure(e.before===null);rel(e.after,e.target as string);}
+    else if(e.kind==='relation-remove'){ensure(e.after===null);rel(e.before,e.target as string);}
+    else ensure(false);
+  }
 }
 const HELD=['no-anchor','area-moved','area-mismatch','area-archived','file-basis','superseded','plan-changed'];
 /** AREA17 shape: per area, a revision counter and its entries in arrival order. Exactly one entry holds each applied revision

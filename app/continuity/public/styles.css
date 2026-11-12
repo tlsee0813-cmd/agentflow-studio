@@ -1771,7 +1771,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.rest-sum .edge:not(.sum), .space:not(.rest-sum) .edge.sum { display: none; }
 /* With a selection on a busy map: its own lines are drawn one by one; everything else stays the dimmed summary, each line
    holding only the relations not drawn on their own (a summary left with none gives way, .hit). */
-.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx):not(.sc-path):not(.ff-flow):not(.ff-ctx) { display: none; }
+.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx):not(.sc-path):not(.ff-flow):not(.ff-ctx):not(.growth-lit):not(.growth-gone-line) { display: none; }
 .space.sel-sum .edge.sum:not(.hit) { display: block; }
 .edge-count { position: absolute; min-width: 24px; height: 16px; padding: 0 5px; white-space: nowrap; border: 0; border-radius: 4px; background: var(--bg); box-shadow: none; color: var(--text-3); font-size: 11px; line-height: 16px; font-weight: var(--fw-name); text-align: center; font-variant-numeric: tabular-nums; }
 .edge-count.beside { color: var(--text-4); }
@@ -3639,3 +3639,119 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
   -webkit-text-stroke: 6px var(--halo, var(--bg)); paint-order: stroke fill; stroke-linejoin: round; }
 /* A condition's label: a small rounded rectangle (radius 5, 22 high, 6 a side), never a pill; its words in the label colour. */
 .space .edge-labels > .edge-badge.b-condition:not(.on) { height: 22px; padding: 0 6px; border-radius: 5px; font-size: 12px; line-height: 20px; color: #526176; }
+
+/* ---------- The growing map (ruling F6 Q4, Q5): time is chosen, never always-on chrome. One change colour (the accent), the kind in short
+   words; only 미반영 is a quiet amber. ---------- */
+.controls .growth-wrap { position: relative; display: inline-flex; align-items: center; gap: 4px; }
+.controls .growth-wrap[hidden] { display: none; }
+.controls .growth-history { height: 28px; padding: 0 8px; font-size: 12px; font-weight: 500; color: var(--text-3); }
+.controls .growth-chip { height: 26px; padding: 0 10px; border: 1px solid var(--accent-line); border-radius: 6px; background: var(--surface); color: var(--accent); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.controls .growth-chip:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.controls .growth-chip[hidden], .growth-menu[hidden] { display: none; }
+.gh-pop { position: absolute; left: 0; bottom: calc(100% + 12px); z-index: 5; width: 400px; max-height: min(62vh, 540px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-lg); white-space: normal; }
+.gh-head { display: flex; align-items: baseline; gap: 8px; padding: 10px 8px 8px 14px; border-bottom: 1px solid var(--line); }
+.gh-head strong { font-size: 13px; font-weight: 600; color: var(--text); }
+.gh-sub { flex: 1; font-size: 11.5px; color: var(--text-3); }
+.controls .gh-x { min-width: 24px; height: 24px; font-size: 15px; color: var(--text-3); }
+.gh-list { list-style: none; margin: 0; padding: 4px 0; overflow: auto; }
+.gh-row { display: grid; grid-template-columns: 66px 1fr; gap: 4px 10px; padding: 7px 14px; }
+.gh-row + .gh-row { border-top: 1px solid var(--hair-2, #eef0f3); }
+.gh-row.viewing { background: var(--accent-soft); }
+.gh-n { font-size: 12.5px; font-weight: 600; line-height: 20px; color: var(--text); font-variant-numeric: tabular-nums; }
+.gh-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: 11.5px; line-height: 20px; color: var(--text-3); }
+.gh-target { color: var(--text-2); }
+.gh-tag { padding: 0 6px; border-radius: 4px; background: var(--chip); color: var(--text-2); font-size: 11px; line-height: 18px; }
+.gh-acts { grid-column: 2; display: flex; gap: 6px; }
+.gh-acts:empty { display: none; }
+.controls .gh-act { min-width: 0; height: 24px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; font-size: 11.5px; font-weight: 500; color: var(--text-2); }
+.controls .gh-act:hover { border-color: var(--accent-line); color: var(--accent); background: var(--surface); }
+/* The compare line: 32px under the lens bar (the tools step up for it). */
+.growth-line { position: absolute; left: var(--s-4); bottom: var(--s-4); z-index: 2; box-sizing: border-box; height: 32px; max-width: calc(100% - var(--plan-w, 0px) - 2 * var(--s-4)); display: flex; align-items: center; padding: 0 3px 0 4px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow-float); }
+.growth-line[hidden] { display: none; }
+.space.growth-cmp > .controls { bottom: calc(var(--s-4) + 40px); }
+.gl-row { display: flex; align-items: center; gap: 1px; min-width: 0; overflow: hidden; white-space: nowrap; font-size: 12.5px; }
+.gl-row button { flex: none; height: 24px; padding: 0 6px; border: 0; background: none; border-radius: 5px; font-size: 12.5px; font-weight: 500; color: var(--text-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.gl-row button:hover { background: var(--chip); color: var(--text); }
+.gl-row .gl-pair { font-weight: 600; color: var(--text); }
+.gl-row .gl-item.on { background: var(--accent-soft); color: var(--accent-strong); }
+.gl-row .gl-item.k-desc:not(.on) { color: var(--text-3); }
+.gl-dot { flex: none; color: var(--text-4); padding: 0 1px; }
+.gl-none { color: var(--text-3); padding: 0 6px; }
+.gl-gap { flex: 1 1 12px; min-width: 12px; }
+.gl-row .gl-un { color: #8a641d; }
+.gl-row .gl-un.zero { color: var(--text-3); }
+.gl-row .gl-exit { min-width: 24px; padding: 0; font-size: 15px; color: var(--text-3); }
+/* Tabs over the changed cards: outside the card's box, 20px and 12px on screen at any zoom. */
+.world .growth-tab { position: absolute; z-index: 6; box-sizing: border-box; height: calc(20px * var(--u, 1)); padding: 0 calc(6px * var(--u, 1)); border: calc(1px * var(--u, 1)) solid var(--accent); border-radius: calc(4px * var(--u, 1)); background: var(--surface); color: var(--accent-strong); font-size: calc(12px * var(--u, 1)); line-height: calc(18px * var(--u, 1)); font-weight: 500; white-space: nowrap; cursor: pointer; font-variant-numeric: tabular-nums; }
+.world .growth-tab[hidden] { display: none; }
+.world .growth-tab:hover { background: var(--accent-soft); }
+.world .growth-tab.on { background: var(--accent); color: #fff; }
+.world .growth-tab.on .gt-more { color: #dfe6ff; }
+.world .growth-tab .gt-more { color: var(--text-3); font-weight: 400; }
+.world .growth-tab.k-retire { border-style: dashed; border-color: var(--text-3); color: var(--text-2); cursor: default; }
+#space.growth-cmp .world .node.read-mark, #space.growth-cmp .world .frame.read-mark { border-color: var(--accent); box-shadow: inset calc(3px * var(--u, 1)) 0 0 var(--accent); }
+#space .world .edge.growth-lit { --bw: 2.25 !important; }
+#space .world .edge.growth-lit .edge-line { stroke: var(--accent) !important; stroke-opacity: 1 !important; opacity: 1 !important; }
+#space .world .edge.growth-gone-line { --bw: 2.25 !important; }
+#space .world .edge.growth-gone-line .edge-line { stroke: var(--accent); stroke-opacity: 1; opacity: 1; stroke-dasharray: calc(6px * var(--u, 1)) calc(4px * var(--u, 1)); }
+#space .world .node.growth-gone { border-style: dashed; border-color: var(--text-3); }
+/* The past view's banner: what is drawn, read-only, and the way back. */
+.growth-past { position: absolute; left: var(--s-4); bottom: var(--s-4); z-index: 2; max-width: calc(100% - var(--plan-w, 0px) - 2 * var(--s-4)); }
+.space.growth-in-past > .controls { bottom: calc(var(--s-4) + 40px); }
+.growth-past[hidden] { display: none; }
+.gp-row { box-sizing: border-box; height: 32px; display: flex; align-items: center; gap: 10px; padding: 0 3px 0 12px; white-space: nowrap; overflow: hidden; background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: var(--r-md); box-shadow: var(--shadow-float); font-size: 12.5px; line-height: 18px; color: var(--text); }
+.gp-text { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.gp-row > :not(.gp-text) { flex: none; }
+.gp-fine { font-size: 11.5px; color: var(--text-3); }
+.gp-now { height: 24px; padding: 0 12px; border: 1px solid var(--accent); border-radius: 6px; background: var(--surface); color: var(--accent-strong); font-size: 12.5px; font-weight: 600; }
+.gp-now:hover { background: var(--accent); color: #fff; }
+/* The pane: a change's scene, a kind's list, 미반영. */
+.lens.growth-read .gs-body { display: flex; flex-direction: column; gap: 14px; }
+.gs-body h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px; font-size: 12.5px; font-weight: 600; color: var(--text-2); }
+.gs-body h3 small { font-weight: 400; color: var(--text-3); }
+.gs-word { flex: none; padding: 0 6px; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent-strong); font-size: 11.5px; line-height: 18px; font-weight: 500; }
+.gs-title { font-size: 13.5px; color: var(--text); }
+.gs-lead { margin: 0 0 8px; font-size: 12.5px; line-height: 19px; color: var(--text-2); }
+.gs-dl { display: grid; grid-template-columns: 56px 1fr; gap: 6px 10px; margin: 0; font-size: 12.5px; line-height: 19px; }
+.gs-dl dt { color: var(--text-3); }
+.gs-dl dd { margin: 0; color: var(--text); min-width: 0; overflow-wrap: anywhere; }
+.gs-cite { display: block; } .gs-cite b { font-weight: 600; color: var(--text-2); margin-right: 2px; }
+.gs-src, .gs-fine { color: var(--text-3); font-size: 11.5px; line-height: 17px; }
+.gs-fine { margin: 6px 0 0; }
+.gs-none { color: var(--text-3); }
+.gs-quote { margin-left: 6px; }
+.gs-lines ul, .gs-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.gs-lines li { display: flex; gap: 6px; font-size: 12.5px; line-height: 19px; color: var(--text); }
+.gs-lines li small { color: var(--text-3); }
+.gs-sign { flex: none; width: 14px; text-align: center; font-weight: 600; }
+.gs-add .gs-sign { color: var(--accent); }
+.gs-rem { color: var(--text-2); } .gs-rem .gs-sign { color: var(--text-3); }
+.gs-now { margin: 0; font-size: 13px; line-height: 20px; color: var(--text); }
+.gs-was { margin-top: 10px; padding-left: 10px; border-left: 2px solid var(--line); }
+.gs-was p { margin: 2px 0 0; font-size: 12.5px; line-height: 19px; color: var(--text-2); }
+.gs-was-k { display: block; font-size: 11.5px; color: var(--text-3); }
+.gs-steps { margin-top: 10px; } .gs-steps ol { margin: 4px 0 0; padding-left: 18px; font-size: 12.5px; line-height: 19px; color: var(--text-2); }
+.gs-item { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); text-align: left; font-size: 12.5px; line-height: 18px; color: var(--text); }
+button.gs-item:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+.gs-item strong { font-weight: 600; }
+.gs-item-sub { color: var(--text-3); font-size: 12px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gs-item-acts { display: flex; gap: 10px; margin-top: 2px; }
+.gu-filters { display: flex; flex-wrap: wrap; gap: 4px; }
+.gu-filter { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); font-size: 12px; color: var(--text-2); }
+.gu-filter.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong); }
+.gu-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.gu-row { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--hair-2, #eef0f3); }
+.gu-state { flex: none; width: 30px; font-size: 11.5px; line-height: 19px; font-weight: 600; color: #8a641d; }
+.gu-row.s-held .gu-state { color: var(--text-2); }
+.gu-row.s-rejected .gu-state { color: var(--text-3); }
+.gu-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gu-tried { font-size: 12.5px; line-height: 19px; color: var(--text); overflow-wrap: anywhere; }
+.gu-why { font-size: 12px; line-height: 18px; color: var(--text-2); }
+.gu-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 2px; }
+.gu-part { height: 22px; padding: 0 8px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); font-size: 11.5px; color: var(--text-2); }
+.gu-part:hover { border-color: var(--accent-line); color: var(--accent); }
+.gu-src { font-size: 11.5px; }
+.gu-more { align-self: flex-start; }
+/* While comparing or looking at a past version, the change owns the accent: the first screen's flow steps back to its quiet form (its top line stays). */
+#space.growth-cmp.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.growth-lit) .edge-line, #space.growth-in-past.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.growth-gone-line) .edge-line { stroke: var(--edge-spine) !important; }
+#space.growth-cmp.ff-on.ff-rest .world .node.ff-card:not(.selected):not(.read-mark), #space.growth-cmp.ff-on.ff-rest .world .node.ff-start:not(.selected):not(.read-mark), #space.growth-in-past.ff-on.ff-rest .world .node.ff-card:not(.selected), #space.growth-in-past.ff-on.ff-rest .world .node.ff-start:not(.selected) { border-color: var(--line-strong, #7e8a9d); outline: none; background: var(--surface); }
