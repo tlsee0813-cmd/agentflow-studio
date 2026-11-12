@@ -115,7 +115,7 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
   const put = (key: string, end: 'a' | 'b', y: number) => { const port = out.get(key) ?? {}; port[end] = y; out.set(key, port); };
   // An end tied to a pin stands at the pin and never moves; so does a reference's ear (the head band, 3.6: no port, no spread).
   // The side's other lines spread round its contact point.
-  const pinned = new Set<string>(), pinnedAt = new Map<string, number[]>(), plannedAt = new Map<string, { key: string; y: number; far: number }[]>(), pinnedFar = new Map<string, number[]>();
+  const pinned = new Set<string>(), pinnedAt = new Map<string, number[]>(), plannedAt = new Map<string, { key: string; y: number; far: number; p: End }[]>(), pinnedFar = new Map<string, number[]>();
   for (const [k, list] of [...at]) {
     const box = boxes.get(k.split('|')[0]!)!, free: End[] = [], tied = new Map<number, End[]>();
     for (const p of list) {
@@ -132,16 +132,20 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
     if (ys.length) { pinnedAt.set(k, ys); pinnedFar.set(k, fars); }
     // Beauty v5 (hub lanes): an end whose port the layout planned (Channel.ports, the shared port model) stands at it, so its tracks meet
     // the ports they were planned from even where this drawn set has fewer ends on the side (a summary stroke holding both ways); the
-    // side's other ends spread round them as round pins.
-    const len = box.kind === 'frame' ? box.head : box.h, mine: { key: string; y: number; far: number }[] = [];
-    for (const p of [...free]) {
-      const y = sides.get(p.key)!.e.hint?.ports?.[p.end];
-      if (y === undefined || y < box.y + 4 || y > box.y + len - 4 || [...ys, ...mine.map(m => m.y)].some(o => Math.abs(o - y) < 4 - 0.01)) continue;
-      put(p.key, p.end, y); mine.push({ key: p.key, y, far: p.far }); free.splice(free.indexOf(p), 1);
+    // side's other ends spread round them as round pins. Beauty v5 lanes review: a planned port stands only PORT_MIN clear of the side's
+    // pins and of the planned ports kept before it (by planned height); one crowding them spreads with the side's free ends (a selection
+    // draws other strokes than the plan's, and a kept plan put ends 6 apart: nanogpt, shapez).
+    const len = box.kind === 'frame' ? box.head : box.h, mine: { key: string; y: number; far: number; p: End }[] = [];
+    const plan = (p: End) => sides.get(p.key)!.e.hint?.ports?.[p.end];
+    for (const p of free.filter(q => plan(q) !== undefined).sort((q, r) => plan(q)! - plan(r)! || (q.key < r.key ? -1 : q.key > r.key ? 1 : 0))) {
+      const y = plan(p)!;
+      if (y < box.y + 4 || y > box.y + len - 4 || [...ys, ...mine.map(m => m.y)].some(o => Math.abs(o - y) < PORT_MIN - 0.01)) continue;
+      mine.push({ key: p.key, y, far: p.far, p }); free.splice(free.indexOf(p), 1);
     }
     if (mine.length) plannedAt.set(k, mine);
     if (free.length) at.set(k, free); else at.delete(k);
   }
+  for (const [k, ms] of plannedAt) if (!at.has(k)) for (const m of ms) put(m.key, m.p.end, m.y);
   for (const [k, list] of at) {
     const box = boxes.get(k.split('|')[0]!)!, side = box.kind === 'frame' ? box.head : box.h;
     const fixedFar = [...pinnedFar.get(k) ?? [], ...(plannedAt.get(k) ?? []).map(m => m.far)];
@@ -153,8 +157,20 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
     // Beauty v5 (hub lanes): the shared port model (port-slots.ts, as the layout planned them): PORT_GAP apart round the contact point
     // inside the corners while the side holds them, closer only past its capacity (PORT_FLOOR at the least), never two on one point; a
     // side with ends tied to pins spreads its free ends round them (beauty v2 review H2/H3).
-    const inset = box.kind === 'frame' ? FRAME_INSET : PORT_INSET;
-    sideSlots(list.length, box.y, side, mid(box), [...pinnedAt.get(k) ?? [], ...(plannedAt.get(k) ?? []).map(m => m.y)], inset, list.map(p => p.far), fixedFar).forEach((y, i) => put(list[i]!.key, list[i]!.end, y));
+    const inset = box.kind === 'frame' ? FRAME_INSET : PORT_INSET, pins = pinnedAt.get(k) ?? [], planned = plannedAt.get(k) ?? [];
+    let slots = sideSlots(list.length, box.y, side, mid(box), [...pins, ...planned.map(m => m.y)], inset, list.map(p => p.far), fixedFar);
+    // Beauty v5 lanes review: a side whose planned ports leave its ends less than PORT_FLOOR apart, or push a free end past a planned one
+    // against the order of where their lines go (its line would cross the planned one's at the side), drops the plan: every end of it
+    // spreads by the port model (its planned height only orders it: far), round the pins alone.
+    const all = [...pins, ...planned.map(m => m.y), ...slots].sort((p, q) => p - q);
+    const byY = [...planned.map(m => ({ y: m.y, far: m.far })), ...slots.map((y, i) => ({ y, far: list[i]!.far }))].sort((p, q) => p.y - q.y);
+    if (planned.length && (all.some((y, i) => i > 0 && y - all[i - 1]! < PORT_FLOOR - 0.01) || byY.some((p, i) => i > 0 && p.far < byY[i - 1]!.far - 0.5))) {
+      for (const m of planned) list.push(m.p);
+      plannedAt.delete(k);
+      list.sort((p, q) => p.far - q.far || (p.end !== q.end && Math.abs(p.far - mid(box)) <= 1 ? 0 : p.far > mid(box) ? q.d - p.d : p.d - q.d) || (p.key < q.key ? -1 : p.key > q.key ? 1 : 0));
+      slots = sideSlots(list.length, box.y, side, mid(box), pins, inset, list.map(p => p.far), pinnedFar.get(k) ?? []);
+    } else for (const m of planned) put(m.key, m.p.end, m.y);
+    slots.forEach((y, i) => put(list[i]!.key, list[i]!.end, y));
   }
   const within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = boxes.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
   // The boxes a straight run between a and b must not cross (as edgePath reckons them): every box but the two ends, the groups
@@ -362,13 +378,18 @@ export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[]): M
     if (fb !== 'top' && fb !== 'bottom' && !pinOf(b, e, 'b')) (by.get(`${b.id}|${other}`) ?? by.set(`${b.id}|${other}`, []).get(`${b.id}|${other}`)!).push({ key: e.key, end: 'b', me: b, other: a, laid: !!e.hint?.ports && e.hint.ports.b === undefined });
   }
   for (const list of by.values()) {
-    const me = list[0]!.me; if (me.kind !== 'node' || list.length <= sideBudget(me)) continue;
-    const face = (x: End): PortFace | null => (x.other.y + x.other.h < me.y - 24 ? 'top' : x.other.y > me.y + me.h + 24 ? 'bottom' : null);
+    const me = list[0]!.me; if (me.kind !== 'node') continue;
+    // Beauty v5 lanes review: an end the layout sent to a face takes it toward a partner whose middle lies past that face (the face route's
+    // own test; the layout's 24 clear may differ by the drawing's rounding), so the side holds the ends its tracks were planned from;
+    // another end only toward a partner wholly past it by 24.
+    const face = (x: End): PortFace | null => (x.laid ? (x.other.y + x.other.h / 2 < me.y ? 'top' : x.other.y + x.other.h / 2 > me.y + me.h ? 'bottom' : null) : x.other.y + x.other.h < me.y - 24 ? 'top' : x.other.y > me.y + me.h + 24 ? 'bottom' : null);
     const steep = (x: End) => Math.abs((x.other.y + x.other.h / 2) - (me.y + me.h / 2)) / Math.max(1, Math.abs((x.other.x + x.other.w / 2) - (me.x + me.w / 2)));
     // Beauty v5 (hub lanes): the ends the layout sent to a face (its planned ports leave them out) go first, so the side holds the ends its
     // tracks were planned from.
+    // Beauty v5 lanes review: and every end the layout sent to a face goes there, so the router keeps the side the layout planned.
     const cands = list.filter(x => face(x)).sort((p, q) => Number(q.laid) - Number(p.laid) || steep(q) - steep(p) || (p.key < q.key ? -1 : 1));
-    for (const x of cands.slice(0, list.length - sideBudget(me))) out.set(x.key, { ...out.get(x.key), [x.end]: face(x)! });
+    const n = Math.max(list.length - sideBudget(me), cands.filter(x => x.laid).length); if (n <= 0) continue;
+    for (const x of cands.slice(0, n)) out.set(x.key, { ...out.get(x.key), [x.end]: face(x)! });
   }
   return out;
 }

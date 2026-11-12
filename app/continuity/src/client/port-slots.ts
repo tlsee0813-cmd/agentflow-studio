@@ -42,6 +42,14 @@ export function sideSlots(n: number, top: number, len: number, at: number, fixed
       if (end >= 0 && ev + cost < bd - 1e-9) { bd = ev + cost; const out: number[] = []; for (let r = n - 1, j = end; r >= 0; j = W[r]![j]!, r--) out.unshift(sl[j]!); pick = out; }
     }
     if (pick) return pick;
+    // Beauty v5 lanes review: no room even 6 apart round the pins: the free ends and the pinned ones spread together over the side (the
+    // run below for all of them), the pinned ones taking the slots nearest their own heights in order, the free ends the rest in order.
+    const F = [...fixed].sort((p, q) => p - q), m = n + F.length, U = sideSlots(m, top, len, at, [], inset);
+    // E[j][i]: the least distance of the first j pins over the first i slots, the j-th at slot i - 1.
+    const E: number[][] = Array.from({ length: F.length + 1 }, () => new Array<number>(m + 1).fill(Infinity)); E[0]!.fill(0);
+    for (let j = 1; j <= F.length; j++) for (let i = j; i <= m; i++) E[j]![i] = Math.min(E[j]![i - 1]!, E[j - 1]![i - 1]! + Math.abs(U[i - 1]! - F[j - 1]!));
+    const taken = new Set<number>(); for (let j = F.length, i = m; j > 0; i--) { if (E[j]![i]! === E[j]![i - 1]!) continue; taken.add(i - 1); j--; }
+    return U.filter((_, i) => !taken.has(i));
   }
   if (n < 2) return [at];
   const room = len - 2 * inset;
