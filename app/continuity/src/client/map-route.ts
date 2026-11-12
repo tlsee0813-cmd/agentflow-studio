@@ -425,28 +425,44 @@ const allCrossings = (out: ReadonlyMap<string, Routed>): number => { const rs = 
 /** Every line of one drawn set (the map's lines, or its summary lines), routed together. Beauty v5 lanes review 2: two face lines between
  * one pair of cards side by side on one face are ordered by their other ends' ports, which assumes each turns at its port; where the
  * drawn pair crosses itself (the search or the nudging turned one short of it), the set is routed again with the two the other way
- * round, kept when the pair crosses less and the set no more. Ties are tried in the order of their keys (never the input's). */
+ * round, kept when the pair crosses less and the set no more. Ties are tried in the order of their keys (never the input's).
+ * Beauty v5 lanes review 3: the searches are kept through one call (the boxes stay put), so a set routed again searches only the lines
+ * whose ends moved (the swapped pair, and any line whose side port moved with it); the rest of a try is the port spread and the nudging.
+ * At most FACE_TIE_TRIES ties are tried (a face-heavy map tried every crossing pair, each a whole routing: up to 3 times the time). */
 export function routeEdges(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: boolean } = {}): Map<string, Routed> {
-  const ties: FaceTie[] = [];
-  let out = routeSet(boxes, edgesIn, opts, [], ties);
+  const ties: FaceTie[] = [], memo: Searched = { face: new Map(), line: new Map(), ports: new Map() };
+  let out = routeSet(boxes, edgesIn, opts, [], memo, ties);
   if (opts.quick || !ties.length) return out;
   const flips: FaceTie[] = [];
-  let total = -1;
+  let total = -1, tried = 0;
   for (const t of ties) {
     const ri = out.get(t[0]), rj = out.get(t[2]); if (!ri || !rj) continue;
     const was = crossCount(ri.pts, rj.pts); if (!was) continue;
+    if (++tried > FACE_TIE_TRIES) break;
     if (total < 0) total = allCrossings(out);
-    const next = routeSet(boxes, edgesIn, opts, [...flips, t]), si = next.get(t[0]), sj = next.get(t[2]);
+    const next = routeSet(boxes, edgesIn, opts, [...flips, t], memo), si = next.get(t[0]), sj = next.get(t[2]);
     if (!si || !sj || crossCount(si.pts, sj.pts) >= was) continue;
     const nt = allCrossings(next); if (nt > total) continue;
     flips.push(t); out = next; total = nt;
   }
   return out;
 }
-function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: boolean }, flips: readonly FaceTie[], ties?: FaceTie[]): Map<string, Routed> {
+/** The most face pairs one routing tries the other way round (400 generated face-heavy maps and the eight sample maps try two at most). */
+export const FACE_TIE_TRIES = 4;
+/** The set routed once, no face pair tried the other way round (the routing's cost before lanes review 2): the time guard's measure. */
+export const routeOnce = (boxes: Map<string, Box>, edges: Edge[]): Map<string, Routed> => routeSet(boxes, edges, {}, [], { face: new Map(), line: new Map(), ports: new Map() });
+/** The searches made in one routeEdges call: a face line's route by the two cards and the ends searched between (two lines of one pair
+ * swapping their ends search the same ways), null when it turned too often; another line's reserved route (lane) or searched one, by
+ * the line and its ports. What no swap changes is kept too: the lines with their faces over a side's budget (edges), the side ports with
+ * every face line on its face (ports0) and the face ports from them (fx, copied before a swap), and the side ports by the face lines kept. */
+type SidePorts = Map<string, { a?: number; b?: number }>;
+interface Searched { face: Map<string, Route | null>; line: Map<string, { r: Route; lane: boolean }>; ports: Map<string, SidePorts>; edges?: Edge[]; ports0?: SidePorts; fx?: SidePorts }
+function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: boolean }, flips: readonly FaceTie[], memo: Searched, ties?: FaceTie[]): Map<string, Routed> {
   // Beauty v3 (D): ends over a side's budget take the top or bottom face toward a partner that really lies above or below.
-  const over = opts.quick ? new Map<string, { a?: PortFace; b?: PortFace }>() : faceOverflow(boxes, edgesIn);
-  const edges = over.size ? edgesIn.map(e => { const o = over.get(e.key); return o ? { ...e, faces: { a: o.a ?? e.faces?.a ?? 'side', b: o.b ?? e.faces?.b ?? 'side' }, overflow: { a: !!o.a, b: !!o.b } } : e; }) : edgesIn;
+  const edges = memo.edges ??= (() => {
+    const over = opts.quick ? new Map<string, { a?: PortFace; b?: PortFace }>() : faceOverflow(boxes, edgesIn);
+    return over.size ? edgesIn.map(e => { const o = over.get(e.key); return o ? { ...e, faces: { a: o.a ?? e.faces?.a ?? 'side', b: o.b ?? e.faces?.b ?? 'side' }, overflow: { a: !!o.a, b: !!o.b } } : e; }) : edgesIn;
+  })();
   // A control line read as such leaves its card's bottom and comes in at the top (map design v3 3.6): routed first, kept only
   // when its route turns at most FACE_TURNS times (else it meets the sides, told by its dash and open head alone). Only cards
   // have those faces; a group, an outside partner or an end that holds the other keeps its side.
@@ -467,12 +483,15 @@ function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: bool
   // where another line already meets it. Ports are spread with every face line first; when some fall back to their sides, again.
   const faceRun = (pp: Map<string, { a?: number; b?: number }>, c: (typeof cands)[number]) => {
     const px = fx.get(c.e.key) ?? {}, pt = pp.get(c.e.key) ?? {}, at = (box: Box, face: PortFace, x: number | undefined, side: number | undefined) => ({ face, at: face === 'top' || face === 'bottom' ? x ?? box.x + box.w / 3 : side ?? mid(box) });
-    const r = opts.quick ? quickFace(c.a, c.b, at(c.a, c.fa, px.a, pt.a), at(c.b, c.fb, px.b, pt.b)) : faceRoute(c.a, c.b, boxes.values(), at(c.a, c.fa, px.a, pt.a), at(c.b, c.fb, px.b, pt.b));
-    return r && turnsOf(r.pts) <= FACE_TURNS ? r : null;
+    const fa = at(c.a, c.fa, px.a, pt.a), fb = at(c.b, c.fb, px.b, pt.b), k = `${c.a.id}\u0000${c.b.id}\u0000${fa.face}:${fa.at}\u0000${fb.face}:${fb.at}`;
+    if (!opts.quick && memo.face.has(k)) return memo.face.get(k)!;
+    const r = opts.quick ? quickFace(c.a, c.b, fa, fb) : faceRoute(c.a, c.b, boxes.values(), fa, fb), kept = r && turnsOf(r.pts) <= FACE_TURNS ? r : null;
+    if (!opts.quick) memo.face.set(k, kept);
+    return kept;
   };
-  const ports0 = cands.length ? assignPorts(boxes, edges, new Map([...faceKept, ...candFaces])) : new Map<string, { a?: number; b?: number }>();
+  const ports0 = memo.ports0 ??= cands.length ? assignPorts(boxes, edges, new Map([...faceKept, ...candFaces])) : new Map();
   // The face ports, ordered by where the lines' other ends stand (ports0: their side ports with every face line on its face).
-  const fx = cands.length ? facePorts(boxes, edges, ports0) : new Map<string, { a?: number; b?: number }>();
+  const fx0 = memo.fx ??= cands.length ? facePorts(boxes, edges, ports0) : new Map(), fx = flips.length ? new Map([...fx0].map(([k, v]) => [k, { ...v }])) : fx0;
   for (const [ki, ei, kj, ej] of flips) { const pi = fx.get(ki), pj = fx.get(kj), xi = pi?.[ei], xj = pj?.[ej]; if (pi && pj && xi !== undefined && xj !== undefined) { pi[ei] = xj; pj[ej] = xi; } }
   for (const c of cands) { const r = faceRun(ports0, c); if (r) { faceKept.set(c.e.key, { a: c.fa, b: c.fb }); faceRoutes.set(c.e.key, r); } }
   // Beauty v5 lanes review 2: the ends of two face lines between one pair of cards meeting one face (tied in facePorts' order: one
@@ -487,7 +506,8 @@ function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: bool
       if (bi === bj && (ei === 'a' ? ci.fa : ci.fb) === (ej === 'a' ? cj.fa : cj.fb)) ties?.push([ci.e.key, ei, cj.e.key, ej]);
     }
   }
-  const ports = assignPorts(boxes, edges, faceKept), out = new Map<string, Routed>(), lanes = new Set<string>();
+  const kept = [...faceKept.keys()].join('\u0000'), ports = memo.ports.get(kept) ?? memo.ports.set(kept, assignPorts(boxes, edges, faceKept)).get(kept)!;
+  const out = new Map<string, Routed>(), lanes = new Set<string>();
   if (cands.some(c => !faceRoutes.has(c.e.key))) for (const c of cands) {
     if (!faceRoutes.has(c.e.key)) continue;
     const was = ports0.get(c.e.key) ?? {}, now = ports.get(c.e.key) ?? {};
@@ -498,8 +518,11 @@ function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: bool
     const a = boxes.get(e.from), b = boxes.get(e.to); if (!a || !b) continue;
     // Beauty v3 (C.4): a line with a reserved route (its hint from the layered layout) takes it when every run of it is free; else the
     // search as before.
-    const p = ports.get(e.key) ?? {}, fr = faceRoutes.get(e.key), hp = !fr && !opts.quick && e.hint ? hintPath(a, b, boxes.values(), p, e.hint) : null;
-    const r = fr ?? (opts.quick ? quickRoute(a, b, p.a, p.b, boxes) : hp ?? edgePath(a, b, boxes.values(), p));
+    const p = ports.get(e.key) ?? {}, fr = faceRoutes.get(e.key), lk = `${e.key}\u0000${p.a ?? ''}\u0000${p.b ?? ''}`;
+    let got = fr || opts.quick ? undefined : memo.line.get(lk);
+    if (!fr && !opts.quick && !got) { const h = e.hint ? hintPath(a, b, boxes.values(), p, e.hint) : null; got = { r: h ?? edgePath(a, b, boxes.values(), p), lane: !!h }; memo.line.set(lk, got); }
+    const hp = got?.lane ? got.r : null;
+    const r = fr ?? (opts.quick ? quickRoute(a, b, p.a, p.b, boxes) : got!.r);
     // Beauty v5 (hub lanes): a line on its reserved route keeps it: the nudging moves the others round it, never it.
     if (hp) lanes.add(e.key);
     // The faces the line really takes: its kept top or bottom, else its sides (an ear stays an ear).

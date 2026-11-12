@@ -4,11 +4,13 @@
 // LR-2 a recorded selection (a hub picked on a busy map; geometry only, names left out): its ends were 6 apart where a kept plan met
 //      the selection's other strokes; now every side keeps PORT_FLOOR, with no more crossings.
 // LR-3 sideSlots with no room even 6 apart round its pins spreads the free and the pinned ends together, never a free end on a pin.
+// LR-7 a face-heavy map (generated, geometry only): the pairs tried the other way round search again only their own lines; the whole
+//      routing stays within 1.3 times one routing measured in the same run, with fewer crossings and the same routes either input order.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { sideSlots, PORT_PITCH, PORT_FLOOR } from '../dist/public/client/port-slots.js';
-import { routeEdges, PORT_MIN } from '../dist/public/client/map-route.js';
+import { routeEdges, routeOnce, PORT_MIN } from '../dist/public/client/map-route.js';
 
 const box = (id, x, y, w = 224, h = 80) => ({ id, x, y, w, h, kind: 'node', depth: 0, container: 'root', kids: 0, rel: { x, y }, head: 0, face: 'unit', contact: h / 2, pins: {} });
 const edge = (from, to, b, a) => ({ key: `${from}|${to}|data`, from, to, kind: 'flow', notes: [], ids: [`${from}${to}`], agg: false, hint: { xs: [400], ys: [], ports: { ...(a !== undefined ? { a } : {}), b } } });
@@ -155,4 +157,24 @@ test('LR-6 a recorded pair on one face whose search turns one short of its port:
   assert.ok(crossings(new Map(pair.map(k => [k, one.get(k)]))) <= 1, 'the pair crosses at most once');
   // No more crossings in the whole set than the order with the pair apart (18).
   assert.ok(crossings(one) <= 18, `crossings ${crossings(one)}`);
+});
+
+test('LR-7 a face-heavy map: a pair tried the other way round searches again only its own lines, within 1.3 times one routing', async () => {
+  // Geometry only (a generated map: control lines through tops and bottoms, pairs both ways and side by side). Each crossing pair tried
+  // the other way round was a whole routing again (2 to 3 times the time on such maps); now the searches are kept through the call.
+  const cap = JSON.parse(await readFile(new URL('./fixtures/face-heavy.json', import.meta.url), 'utf8'));
+  const boxes = new Map(cap.boxes.map(b => [b.id, b]));
+  const once = routeOnce(boxes, cap.edges), out = routeEdges(boxes, cap.edges, cap.opts);
+  // The pair the other way round is kept: fewer crossings than one routing (34, now 33), and the same routes in either input order.
+  assert.ok(crossings(out) < crossings(once), `crossings ${crossings(out)}, routed once ${crossings(once)}`);
+  const two = routeEdges(new Map([...boxes].reverse()), [...cap.edges].reverse(), cap.opts);
+  for (const [k, r] of out) assert.deepEqual(two.get(k).pts, r.pts, k);
+  // The time against one routing (the cost before pairs were tried), measured together: medians of interleaved runs after a warm-up.
+  for (let i = 0; i < 3; i++) { routeOnce(boxes, cap.edges); routeEdges(boxes, cap.edges, cap.opts); }
+  const one = [], all = [], med = l => [...l].sort((p, q) => p - q)[l.length >> 1];
+  for (let i = 0; i < 9; i++) {
+    let t = performance.now(); routeOnce(boxes, cap.edges); one.push(performance.now() - t);
+    t = performance.now(); routeEdges(boxes, cap.edges, cap.opts); all.push(performance.now() - t);
+  }
+  assert.ok(med(all) <= 1.3 * med(one), `${med(all).toFixed(1)} ms, routed once ${med(one).toFixed(1)} ms`);
 });
