@@ -1773,7 +1773,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.rest-sum .edge:not(.sum), .space:not(.rest-sum) .edge.sum { display: none; }
 /* With a selection on a busy map: its own lines are drawn one by one; everything else stays the dimmed summary, each line
    holding only the relations not drawn on their own (a summary left with none gives way, .hit). */
-.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx):not(.sc-path) { display: none; }
+.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx):not(.sc-path):not(.ff-flow):not(.ff-ctx) { display: none; }
 .space.sel-sum .edge.sum:not(.hit) { display: block; }
 .edge-count { position: absolute; min-width: 24px; height: 16px; padding: 0 5px; white-space: nowrap; border: 0; border-radius: 4px; background: var(--bg); box-shadow: none; color: var(--text-3); font-size: 11px; line-height: 16px; font-weight: var(--fw-name); text-align: center; font-variant-numeric: tabular-nums; }
 .edge-count.beside { color: var(--text-4); }
@@ -3570,3 +3570,41 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .node.card.k-external { background: var(--ext-bg); border-color: var(--ext-edge); }
 .node.card.k-external :is(.c-kind, .c-tag-line:not(:first-child)) { color: var(--ext-ink); }
 .edge-labels > .edge-cue.cue-bg:not(.near):not(:hover):not(.lg-pick) { opacity: .5; }
+
+/* ---------- beauty v5 · the first screen's focus (first-flow.ts) ----------
+   The record's own first sentence fixed at the canvas's top left (18–20px, two lines at most), with the 「먼저 보는 흐름」 switcher under
+   it. In focus mode (.ff-on) three weights by the reading focus, never by importance: the flow 3px in the accent, its context 2.25px,
+   every other line 1.15px with no label at rest. Card text never fades here: a card off the lens keeps its words and lowers only its
+   border and extras. Arrowhead grammar unchanged (the flow's heads are the accent's own, as a path's). */
+.focus-top { position: absolute; left: 16px; top: 16px; z-index: 3; max-width: min(860px, calc(100% - var(--plan-w, 0px) - 32px)); display: flex; flex-direction: column; gap: 4px; padding: 8px 14px 7px; background: rgba(245,246,248,.94); border: 1px solid var(--line); border-radius: var(--r-pop); box-shadow: var(--shadow-sm); pointer-events: none; }
+.focus-top > * { pointer-events: auto; }
+.focus-top .ft-sentence { margin: 0; padding: 0; border: 0; background: none; text-align: left; font: inherit; font-size: 19px; line-height: 26px; font-weight: var(--fw-name); letter-spacing: -.01em; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
+.focus-top button.ft-sentence { cursor: pointer; }
+.focus-top button.ft-sentence:hover { color: var(--accent-strong); }
+.focus-top button.ft-sentence:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.focus-top.ft-under .ft-sentence { visibility: hidden; height: 0; }
+.focus-top .ft-switch { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font-size: 13px; line-height: 20px; color: var(--text-2); }
+.focus-top .ft-name { font-weight: var(--fw-name); color: var(--accent-strong); }
+.focus-top .ft-name::before { content: ''; display: inline-block; width: 16px; height: 3px; margin: 0 6px 3px 0; border-radius: 2px; background: var(--accent); vertical-align: middle; }
+.focus-top .ft-dot { color: var(--text-4); }
+.focus-top .ft-b { height: 22px; min-width: 22px; padding: 0 6px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font: inherit; font-size: 12.5px; line-height: 20px; cursor: pointer; }
+.focus-top .ft-b:hover { border-color: var(--line-hover); color: var(--text); }
+.focus-top .ft-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#space.ff-on .world .edge:not(.ff-flow):not(.ff-ctx):not(.s-sparse):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked) { --bw: 1.15; }
+#space.ff-on .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) { --bw: 2.25; }
+#space.ff-on .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) .edge-line { stroke: var(--edge-spine); stroke-opacity: 1; opacity: 1; }
+#space.ff-on .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 3; }
+#space.ff-on .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--accent); stroke-opacity: 1; opacity: 1; }
+#space.ff-on .world .edge.ff-fold:not(.on):not(.near):not(.lg-pick) { display: none; }
+#space.ff-on.ff-rest .edge-labels > :not(.ff-keep):not(.edge-cue) { visibility: hidden; }
+#space.ff-on .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible),
+#space.ff-on .node.lg-fade, #space.ff-on .ghost.lg-fade { opacity: 1; filter: none; border-color: var(--hair-2); box-shadow: none; }
+#space.ff-on .node:is(.lens-off, .lg-fade) :is(.dot, .ladder, .c-tag-icon, .node-signs, .c-loop-tab) { opacity: .55; }
+.ff-note { position: absolute; z-index: 4; width: max-content; display: flex; gap: 6px; align-items: baseline; max-width: 260px; padding: 3px 8px; border: 1px solid var(--accent-line); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow-sm); font-size: 12px; line-height: 17px; color: var(--text-2); pointer-events: auto; }
+.ff-note-label { flex: none; font-weight: var(--fw-name); color: var(--accent-strong); }
+.ff-note-text { min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: keep-all; overflow-wrap: anywhere; }
+.ff-note-label { white-space: nowrap; }
+.ff-fold-chip { position: absolute; z-index: 4; height: 20px; padding: 0 7px; border: 1px dashed var(--line-hover); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font: inherit; font-size: 11.5px; line-height: 18px; font-weight: var(--fw-name); white-space: nowrap; cursor: pointer; }
+.ff-fold-chip.open { border-style: solid; }
+.ff-fold-chip:hover { color: var(--text); border-color: var(--text-3); }
+.ff-fold-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

@@ -57,7 +57,8 @@ import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns,
 import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
-import { splitRecordChunks } from '../shared/record-table.js';
+import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
+import { firstFlow, hubFolds, foldWord, switcherText, summarySource, headLines, FLOW_RULE_WORD, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -2368,6 +2369,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
   // unchanged).
   syncLineMode();
+  // Beauty v5: the first screen's focus (its top line's height counts in the fit below).
+  drawFocus();
   $('add-part').hidden = o.kind !== 'saved';
   $('arrange').hidden = !view.parts.length;
   renderPartForm();
@@ -2560,7 +2563,7 @@ let restRouted = new Map<string, Routed>(), shownKey = '';
 function routeShown() {
   if (dragQuick) return;
   const world = $('world'), sel = $('space').classList.contains('sel-sum');
-  const gs = sel ? [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => (g.classList.contains('sum') ? !g.classList.contains('hit') : ['on', 'path', 'ctx', 'sc-path'].some(c => g.classList.contains(c)))) : [];
+  const gs = sel ? [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => (g.classList.contains('sum') ? !g.classList.contains('hit') : ['on', 'path', 'ctx', 'sc-path', 'ff-flow', 'ff-ctx'].some(c => g.classList.contains(c)))) : [];
   const set = gs.map(g => edgeOf(g.dataset.key)).filter((e): e is Edge => !!e);
   const key = set.map(e => `${e.key}:${e.ids.length}`).join('|');
   if (key === shownKey) return;
@@ -2608,17 +2611,19 @@ const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : la
 /** A summary line that, beside the selection, holds fewer relations than at rest. */
 const restOf = (e: Edge) => e.key.startsWith('sum:') && sums !== restSums && (restSums.find(x => x.key === e.key)?.ids.length ?? 0) > e.ids.length;
 function syncLineMode() {
-  const sp = $('space'), rest = !selected && !scView && !planView.isOpen() && restSums.length > 0;
+  const sp = $('space'), ff = ffActive(), rest = !selected && !scView && !ff && !planView.isOpen() && restSums.length > 0;
   sp.classList.toggle('rest-sum', rest);
-  // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum).
-  sp.classList.toggle('sel-sum', (!!selected || !!scView) && !planView.isOpen() && restSums.length > 0);
+  // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum). Beauty v5: the first screen's
+  // flow is drawn the same way at rest.
+  sp.classList.toggle('sel-sum', (!!selected || !!scView || ff) && !planView.isOpen() && restSums.length > 0);
+  sp.classList.toggle('ff-rest', ff && !selected && !planView.isOpen());
   // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
   sp.classList.toggle('dense-lines', lay.edges.length >= 12);
 }
 /** Selected lines, a change's context lines, lines inside one group and lines that cross nothing else read above the groups. */
 function layerEdge(el: Element) {
   const top = document.querySelector('#world .edges-top'), base = document.querySelector('#world .edges:not(.edges-top)');
-  const layer = ['on', 'ctx', 'inner', 'clear', 'sc-path'].some(c => el.classList.contains(c)) ? top : base;
+  const layer = ['on', 'ctx', 'inner', 'clear', 'sc-path', 'ff-flow'].some(c => el.classList.contains(c)) ? top : base;
   if (layer && el.parentNode !== layer) layer.append(el);
 }
 /** The routes drawn last (positionWorld): the polylines the verbs and counts are placed on. */
@@ -2648,7 +2653,7 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); dropRowIds(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); }
+function placeEdgeLabels() { placeLineLabels(); dropRowIds(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); markFocusLabels(); placeFocusMarks(); }
 /** Beauty v4 (P3): the last guard that no line label, badge or chip on the map shows a record row ID (CD01, B12, N02.63, LN13): each
  * reads the record's own words for that row where the map has them, else without the ID; a label with nothing of its own left goes
  * (its words read on hover, as written). A condition's or 선택 badge keeps its kind word then (a conditional line never reads as one
@@ -3095,7 +3100,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
     // then better places across all labels: every label's first place before any label's second.
     const word = wordOf(e), said = word !== (REL_LABEL[e.kind] ?? e.kind) && word !== '제어' && word !== '참조';
-    const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path'), spine: g.classList.contains('spine') || g.classList.contains('fv-emph'), said });
+    const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path') || g.classList.contains('ff-flow'), spine: g.classList.contains('spine') || g.classList.contains('fv-emph'), said });
     mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i + ('beside' in r && r.beside ? 100 : 0), rank, el: label }));
   }
   const { kept, dropped } = resolveLabels(spots, 6);
@@ -3239,7 +3244,7 @@ function clearChrome(f: Rect & { ids: string[] }, B: Rect, a: { left: number; to
   const k = camera.k, space = $('space'), vpw = $('viewport').clientWidth, vph = mapBottom();
   const chrome: Rect[] = [], sr = space.getBoundingClientRect();
   const own = (el: HTMLElement | null, pad: number) => { if (el && !el.hidden && el.offsetWidth) { const r = el.getBoundingClientRect(); chrome.push({ x: r.left - sr.left - pad, y: r.top - sr.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad }); } };
-  own(space.querySelector<HTMLElement>(':scope > .controls'), 8); own(document.getElementById('first-view'), 6); own(document.getElementById('line-key'), 6);
+  own(space.querySelector<HTMLElement>(':scope > .controls'), 8); own(document.getElementById('first-view'), 6); own(document.getElementById('line-key'), 6); own(document.getElementById('focus-top'), 6);
   // The title chip takes the top left while the map's own title is out of view.
   const chip: Rect = { x: 0, y: 0, w: Math.min(vpw, 420), h: Math.max(0, a.top - 12) };
   const cards = [...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost');
@@ -3285,7 +3290,7 @@ function clearChrome(f: Rect & { ids: string[] }, B: Rect, a: { left: number; to
 /** The parts the opening view centres on when the whole map does not fit (the first view's emphasis, else the main flow): their
  * boxes' bounds and their ids (the pan search weighs them most, clearChrome), or null. */
 function openFocus(): (Rect & { ids: string[] }) | null {
-  const ids = fvOn() && fvRec!.parts.length ? fvRec!.parts : lay.spine;
+  const fl = ffShown(), ids = fl && ffActive() ? fl.parts.map(p => opened ? drawnRep(opened, p) : p).filter((x): x is string => !!x) : fvOn() && fvRec!.parts.length ? fvRec!.parts : lay.spine;
   const bs = ids.map(id => lay.boxes.get(id)).filter((b): b is NonNullable<typeof b> => !!b); if (!bs.length) return null;
   const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y)), r = Math.max(...bs.map(b => b.x + b.w)), btm = Math.max(...bs.map(b => b.y + b.h));
   return { x, y, w: r - x, h: btm - y, ids };
@@ -3408,7 +3413,7 @@ const toScreen = (b: { x: number; y: number; w: number; h: number }): Rect => ({
 const union = <T extends Rect>(rs: T[]): Rect => { const x = Math.min(...rs.map(r => r.x)), y = Math.min(...rs.map(r => r.y)); return { x, y, w: Math.max(...rs.map(r => r.x + r.w)) - x, h: Math.max(...rs.map(r => r.y + r.h)) - y }; };
 /** The change plan's strip takes the top of the map while it is open. */
 const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
-const topInset = () => stripInset() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
+const topInset = () => stripInset() + ftH() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
 function mapArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
 function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed', 'scenario-read'); readingFor = []; syncMapArea(); }
 const mapBottomInset = () => BOTTOM + legendInset();
@@ -3450,7 +3455,8 @@ function revealParts(ids: string[]) {
 function updateSticky() {
   const st = $('scope-sticky'), o = opened;
   if (!o || !titleH) { st.hidden = true; return; }
-  const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset();
+  syncFocusTop();
+  const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset() + ftH();
   st.style.top = `${top - 6}px`;
   st.hidden = camera.k >= TITLE_FLOOR_K && t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
   // Map hygiene H2: the chip never covers a card (the header's path names the map all the same); it waits for room.
@@ -3518,6 +3524,189 @@ function renderScopeLens() {
   l.hidden = false; syncMapArea();
 }
 function closeScopeReading() { scopeReading = false; if ($('lens').classList.contains('scope-read')) hideLens(); }
+
+/* ---------- the first screen's focus (beauty v5, first-flow.ts) ----------
+ * The record's own first sentence fixed at the canvas's top left (its C-SUMMARY, never the model's summary or the person's brief),
+ * 「먼저 보는 흐름」 chosen by fixed rules (the person's kept choice, a scenario, the summary's core-flow sentence, a first-structure
+ * line, a recorded start, or none) drawn on the lines the map already has: the flow 3px in the accent, its context 2.25px, every other
+ * line 1.15px without its label at rest. Card text is never faded here; only borders, lines and extras step back. A card on the flow
+ * with six or more other lines folds them behind one chip (「다른 연결 N개」), opened in place. Nothing new is drawn on the map. */
+let ffNow: FirstFlow | null = null, ffSrc: (SummarySource & { label: string }) | null = null, ffOpen = new Set<string>(), ffFolds = new Map<string, string[]>(), ffFor = '';
+/** The flow drawn now (null: none, 전체 관계, inside a part, or a scenario lens shown). */
+const ffShown = (): FlowCandidate | null => (ffNow?.flow && !scope && !scView ? ffNow.flow : null);
+const ffActive = () => $('space').classList.contains('ff-on');
+/** The newest map record's C-SUMMARY (its own first sentence and core-flow sentence) and where it stands. */
+function summaryOf(o: Opened): (SummarySource & { label: string }) | null {
+  const ids = new Set(o.project.readings.filter(isMapReading).flatMap(r => r.records.map(x => x.id)));
+  const recs = o.project.pasted.filter(p => ids.has(p.id)).map(p => {
+    const t = readRecordTables(p.text), table = (t.byId.get('C-SUMMARY') ?? []).filter(x => x.body.length).at(-1), page = table ? t.pages[table.page] ?? t.page : null;
+    return { id: p.id, body: table?.body ?? [], label: page ? `기록 ${page.recordId} · 쪽 ${page.n}` : '기록' };
+  });
+  const s = summarySource(recs); if (!s) return null;
+  // Its record and line: the page head it stands under and the line of the pasted text the sentence starts on.
+  const text = o.project.pasted.find(p => p.id === s.record)?.text ?? '', line = text.slice(0, s.from).split('\n').length;
+  return { ...s, label: `${recs.find(r => r.id === s.record)?.label ?? '기록'} · ${line}번째 줄` };
+}
+/** What the rules read of the opened map: the first view's parts (with their C-ENTRY rows), each relation with its condition, the
+ * loops, the scenarios in paste order, the summary's core-flow sentence, the C-HEAD 「첫 구조 줄」 row's lines, the person's choice. */
+function focusInput(o: Opened): FlowInput {
+  const base = firstViewInput(o), maps = o.project.readings.filter(isMapReading), latest = new Map<string, MapReading['parts'][number]>();
+  for (const r of maps) for (const p of r.parts) latest.set(p.areaId, p);
+  const said = relationLines(o.project);
+  const parts = base.parts.map(p => ({ ...p, entryRows: (latest.get(p.id)?.entries ?? []).map(e => ({ kind: e.kind, name: e.name, order: e.order, ref: e.recordRef })) }));
+  const lines = base.lines.map(l => ({ ...l, when: said.get(l.id)?.when ?? null }));
+  const scenarios = scenarioReadings(o).flatMap(e => {
+    const u = scenarioUnderstanding(o.project, e.id); if (!u || u.pathStatus === 'rejected') return [];
+    const area = new Map(u.visits.map(v => [v.id, v.partOnMap ? v.areaId : null])), heads = headTexts(u), c = e.scenario.scenario;
+    return [{ id: e.id, name: scenarioLabel(c?.name, c?.kind, e.pathStatus), parts: u.visits.filter(v => v.partOnMap).map(v => v.areaId),
+      links: u.links.map(l => ({ from: area.get(l.from) ?? null, to: area.get(l.to) ?? null, relation: l.relation && l.relationOnMap ? l.relation.relationId : null, kind: l.kind,
+        condition: (t => (t && t !== '모름' && t !== '없음' ? t : null))(saidText(l.condition)) })),
+      start: heads.start[0]?.text ?? null, end: heads.end[0]?.text ?? null }];
+  });
+  const withRows = [...maps].reverse().find(r => r.records.length);
+  const hq = headQuote((withRows ? maps.flatMap(r => r.records) : []).map(x => ({ id: x.id, text: o.project.pasted.find(r => r.id === x.id)?.text ?? '' })));
+  const cells = hq ? cellTexts(hq.quote) : [], at = cells.findIndex(c => /첫 구조 줄/.test(c)), value = at >= 0 ? cells[at + 1] ?? '' : '';
+  // A flow needs a line drawn in this view (a relation inside a folded group is drawn on its group's line, which holds it).
+  const drawn = new Set(lay.edges.flatMap(e => e.ids));
+  return { parts, lines, loops: base.loops ?? [], scenarios, summaryFlow: ffSrc?.flow ?? null, headLines: headLines(value), kept: fvRec?.flow ?? null, drawn };
+}
+/** The flow's marks on the lines drawn now, the summary of the rest without them, the folds, the notes, the labels and the top line. */
+function drawFocus() {
+  const o = opened, world = $('world'), sp = $('space');
+  world.querySelectorAll('.edge.ff-flow, .edge.ff-ctx, .edge.ff-fold').forEach(g => g.classList.remove('ff-flow', 'ff-ctx', 'ff-fold'));
+  if (o && ffFor !== o.key) { ffFor = o.key; ffOpen = new Set(); }
+  ffSrc = o ? summaryOf(o) : null;
+  ffNow = o && o.view.parts.length ? firstFlow(focusInput(o)) : null;
+  const f = ffShown(); let any = false;
+  if (f) {
+    const fl = new Set(f.lines), cx = new Set(f.context);
+    world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => {
+      const e = edgeOf(g.dataset.key); if (!e) return;
+      if (e.ids.some(id => fl.has(id))) { g.classList.add('ff-flow'); any = true; } else if (e.ids.some(id => cx.has(id))) g.classList.add('ff-ctx'); else return;
+      layerEdge(g);
+    });
+  }
+  sp.classList.toggle('ff-on', any);
+  // At rest on a busy map the flow's lines are drawn one by one and the rest stays its summary, each summary line holding only the
+  // relations not drawn on their own (as beside a selection or a scenario's path).
+  if (o && !selected) {
+    const keep = new Set([...world.querySelectorAll<SVGGElement>('.edge.sc-path, .edge.ff-flow, .edge.ff-ctx')].map(g => g.dataset.key!));
+    sums = keep.size ? sumLines(o, restSummary(lay.boxes, lay.edges, e => keep.has(e.key)), new Set(restSums.filter(x => x.both).map(x => x.key))) : restSums;
+    world.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
+  }
+  syncLineMode(); markLines(); foldHubs(); routeShown(); placeEdgeLabels(); renderFocusTop();
+}
+/** A flow card whose drawn lines off the flow are six or more folds them (hub fold): only its flow lines stay, with 「다른 연결 N개」;
+ * opened, they come back in place. A line touching two such cards stays folded only while both are folded. */
+function foldHubs() {
+  const o = opened, world = $('world'), f = ffShown(); ffFolds = new Map();
+  world.querySelectorAll('.edge.ff-fold').forEach(g => g.classList.remove('ff-fold'));
+  if (!o || !f || !ffActive()) return;
+  // A card on the flow: an end of one of the flow's drawn lines (a named part past a gap is on no drawn flow).
+  const drawn = shownLines(), cards = [...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].filter(g => drawn.has(g.dataset.key!)).flatMap(g => [g.dataset.from!, g.dataset.to!]);
+  const ls = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('stub') && !g.classList.contains('hit'))
+    .map(g => ({ key: g.dataset.key!, from: g.dataset.from!, to: g.dataset.to!, flow: g.classList.contains('ff-flow') || g.classList.contains('ff-ctx') }));
+  ffFolds = hubFolds(cards, ls);
+  const open = new Set([...ffFolds].filter(([c]) => ffOpen.has(c)).flatMap(([, ks]) => ks));
+  const hide = new Set([...ffFolds].filter(([c]) => !ffOpen.has(c)).flatMap(([, ks]) => ks).filter(k => !open.has(k)));
+  world.querySelectorAll<SVGGElement>('.edge').forEach(g => g.classList.toggle('ff-fold', hide.has(g.dataset.key!)));
+}
+/** A hub's chip pressed: its other lines in place, or folded again (nothing else moves). */
+function toggleHub(id: string) {
+  if (ffOpen.has(id)) ffOpen.delete(id); else ffOpen.add(id);
+  foldHubs(); routeShown(); placeEdgeLabels();
+  document.querySelector<HTMLElement>(`#world .ff-fold-chip[data-hub="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
+}
+/** The labels of the lines the flow does not hold step back at rest (the flow's own and its one branch keep theirs). */
+function markFocusLabels() {
+  const world = $('world'), f = ffShown();
+  const keep = new Set([...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].map(g => g.dataset.key!));
+  if (f?.branch) for (const g of world.querySelectorAll<SVGGElement>('.edge.ff-ctx, .edge.ff-flow')) if ((g.dataset.ids ?? '').split(',').includes(f.branch.line)) keep.add(g.dataset.key!);
+  world.querySelectorAll<HTMLElement>('.edge-labels > *').forEach(el => {
+    const ks = [el.dataset.key, el.dataset.badge, el.dataset.once, el.dataset.cue, ...(el.dataset.also ?? '').split(' ')].filter((x): x is string => !!x);
+    el.classList.toggle('ff-keep', ks.some(k => keep.has(k)));
+  });
+}
+/** The notes at the flow's start, its one branch and its end, and the hubs' chips, in map coordinates (they follow a drag, positionWorld),
+ * screen-sized like the line chips; a note that would cover a card or another note takes its next place or is left off (its words read
+ * in the switcher's tip). */
+function placeFocusMarks() {
+  const o = opened, world = $('world'), f = ffShown();
+  world.querySelectorAll('.ff-note, .ff-fold-chip').forEach(el => el.remove());
+  if (!o || !f || !ffActive()) return;
+  const inv = labelInv(), boxOf = (id: string) => { const r = drawnRep(o, id); return r ? lay.boxes.get(r) ?? null : null; };
+  const taken: Rect[] = [...lay.boxes.values()].filter(b => b.kind !== 'frame').map(b => ({ x: b.x, y: b.y, w: b.w, h: b.h }));
+  for (const b of lay.boxes.values()) if (b.kind === 'frame') taken.push({ x: b.x, y: b.y, w: b.w, h: b.head });
+  if (titleH) taken.push(titleRect());
+  const free = (r: Rect) => !taken.some(b => r.x < b.x + b.w + 2 && b.x < r.x + r.w + 2 && r.y < b.y + b.h + 2 && b.y < r.y + r.h + 2);
+  // A note is no wider than the card it stands at (its words wrap to two lines), so it fits the room between the rows.
+  const put = (el: HTMLElement, spots: (w: number, hh: number) => { x: number; y: number }[], maxW = 260 * inv) => {
+    el.style.transform = `scale(${inv})`; el.style.transformOrigin = '0 0'; el.style.maxWidth = `${Math.max(120, maxW / inv)}px`; world.append(el);
+    const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, at = spots(w, hh).map(p => ({ ...p, w, h: hh })).find(free);
+    if (!at) { el.remove(); return; }
+    el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at);
+  };
+  const note = (cls: string, label: string, text: string | null, tip: string) => h('div', { class: `ff-note ${cls}`, role: 'note', title: tip }, h('span', { class: 'ff-note-label' }, label), text ? h('span', { class: 'ff-note-text' }, text.length > 48 ? `${text.slice(0, 47)}…` : text) : null);
+  const a = f.start ? boxOf(f.start.part) : null, z = f.end ? boxOf(f.end.part) : null;
+  if (a) put(note('ff-start', f.rule === 'entry' ? '기록된 시작' : '시작', f.start!.text, `먼저 보는 흐름의 시작${f.start!.text ? ` · ${f.start!.text}` : ''}`),
+    (w, hh) => [{ x: a.x, y: a.y - hh - 6 }, { x: a.x + a.w - w, y: a.y - hh - 6 }, { x: a.x - w - 8, y: a.y }, { x: a.x, y: a.y + a.h + 6 }], a.w);
+  if (z && z !== a) put(note('ff-end', '끝', f.end!.text, `먼저 보는 흐름의 끝${f.end!.text ? ` · 넘겨받는 것: ${f.end!.text}` : ''}`),
+    (w, hh) => [{ x: z.x, y: z.y + z.h + 6 }, { x: z.x + z.w - w, y: z.y + z.h + 6 }, { x: z.x + z.w + 8, y: z.y }, { x: z.x, y: z.y - hh - 6 }], z.w);
+  // The one branch: beside where its line leaves its card (the record's condition words, never a meaning made up).
+  const br = f.branch, bg = br ? [...world.querySelectorAll<SVGGElement>('.edge.ff-flow, .edge.ff-ctx')].find(g => (g.dataset.ids ?? '').split(',').includes(br.line) && !g.classList.contains('ff-fold')) : null;
+  const pts = bg ? lastRouted.get(bg.dataset.key!)?.pts : null;
+  if (br && pts && pts.length > 1) { const p = pts[0]!; put(note('ff-branch', '갈림', br.text, `갈림 · 조건: ${br.text}`), (w, hh) => [{ x: p.x + 10, y: p.y + 8 }, { x: p.x + 10, y: p.y - hh - 8 }, { x: p.x - w - 10, y: p.y + 8 }, { x: p.x - w - 10, y: p.y - hh - 8 }]); }
+  // The hubs' chips, under each card's lower right corner (inside the card's own corner when there is no room under it).
+  for (const [id, keys] of ffFolds) {
+    const b = lay.boxes.get(id); if (!b) continue;
+    const open = ffOpen.has(id), chip = h('button', { type: 'button', class: `ff-fold-chip${open ? ' open' : ''}`, 'data-hub': id, 'aria-expanded': String(open),
+      title: open ? '경로 밖 연결을 다시 접어요' : `이 카드의 먼저 보는 흐름 밖 연결 ${keys.length}개를 접어 두었어요 · 눌러서 제자리에 펼치기`,
+      onclick: (e: Event) => { e.stopPropagation(); toggleHub(id); } }, foldWord(keys.length, open));
+    put(chip, (w, hh) => [{ x: b.x + b.w - w, y: b.y + b.h + 4 }, { x: b.x + b.w + 6, y: b.y + b.h - hh }, { x: b.x - w - 6, y: b.y + b.h - hh }]);
+  }
+}
+/** The top line: the record's first sentence (hover: whole, with its record and row) and under it the switcher. */
+function renderFocusTop() {
+  const el = $('focus-top'), o = opened, s = ffSrc, f = ffNow;
+  if (!o || scope || !o.view.parts.length || (!s && !f?.candidates.length)) { el.hidden = true; el.replaceChildren(); syncFocusTop(); return; }
+  const sentence = s ? h(o.kind === 'saved' ? 'button' : 'p', { class: 'ft-sentence', ...(o.kind === 'saved' ? { type: 'button', onclick: () => showQuote(s.record, s.quote, s.from) } : {}),
+    title: `${s.first}\n출처: ${s.label} · 요약(C-SUMMARY) 첫 문장${o.kind === 'saved' ? ' · 눌러서 원문 보기' : ''}` }, s.shown) : null;
+  const name = (id: string) => partOf(o, id)?.name ?? id;
+  const choose = (c: FlowChoice) => {
+    // The choice is the person's, kept with the map's first view (a map with none yet keeps only this).
+    fvRec = { ...(fvRec ?? { lens: viewLens === 'data' || viewLens === 'start' ? viewLens : 'compose', parts: [], lines: [], previews: [], reason: null, line: null, off: true, by: 'person' as const }), flow: c };
+    saveFirstView(); drawFocus();
+  };
+  const btn = (cls: string, text: string, title: string, on: () => void, extra: Record<string, string> = {}) => h('button', { type: 'button', class: `ft-b ${cls}`, title, onclick: on, ...extra }, text);
+  let row: HTMLElement | null = null;
+  if (f?.flow && !scView) {
+    const c = f.flow, n = f.candidates.length, step = (d: number) => { const x = f.candidates[(f.index + d + n) % n]!; choose({ rule: x.rule, key: x.key }); };
+    const tip = [`${FLOW_RULE_WORD[c.rule]}${f.kept ? ' · 내가 고른 흐름' : ''}`, c.text ? `“${c.text}”` : null, `부분: ${c.parts.map(name).join(' → ')}`,
+      `그린 선 ${c.lines.length}개 (지도에 이미 있는 관계만)${c.gaps.length ? ` · 끊긴 곳 ${c.gaps.length}: ${c.gaps.map(([a, b]) => `${name(a)} → ${name(b)}`).join(', ')} (직접 이은 관계가 없어 잇지 않았어요)` : ''}`,
+      '굵은 파란 선은 지금 설명하는 흐름이에요 · 중요도나 실행 빈도가 아니에요'].filter(Boolean).join('\n');
+    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': '먼저 보는 흐름' }, h('span', { class: 'ft-name', title: tip }, switcherText(f, name)),
+      n > 1 ? btn('ft-prev', '‹', '이전 흐름', () => step(-1), { 'aria-label': '이전 흐름' }) : null, n > 1 ? btn('ft-next', '›', '다음 흐름', () => step(1), { 'aria-label': '다음 흐름' }) : null,
+      h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'), btn('ft-all', '전체 관계', '모든 선을 같은 무게로 · 먼저 보는 흐름 끄기', () => choose({ rule: 'all', key: '' })));
+  } else if (f?.rule === 'all' && f.candidates.length && !scView) {
+    const c = f.candidates[0]!;
+    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': '먼저 보는 흐름' }, h('span', { class: 'ft-name' }, '전체 관계'), h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'),
+      btn('ft-back', '먼저 보는 흐름 보기', `${FLOW_RULE_WORD[c.rule]}${c.text ? ` · “${c.text}”` : ''}`, () => choose({ rule: c.rule, key: c.key })));
+  }
+  el.replaceChildren(...[sentence, row].filter((x): x is HTMLElement => !!x));
+  el.hidden = !el.childElementCount; syncFocusTop();
+}
+/** The top line's height (the camera's fit keeps the map under it). */
+const ftH = () => { const el = document.getElementById('focus-top'); return el && !el.hidden ? el.offsetHeight + 8 : 0; };
+/** The top line under the change plan's strip; its sentence steps back while a card is under it (the switcher stays). */
+function syncFocusTop() {
+  const el = document.getElementById('focus-top'); if (!el) return;
+  el.style.top = `${stripInset()}px`;
+  const s = el.querySelector<HTMLElement>('.ft-sentence'); if (!s || el.hidden) return;
+  el.classList.remove('ft-under');
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
+  const r = { x: el.offsetLeft + s.offsetLeft - 4, y: el.offsetTop + s.offsetTop - 4, w: s.offsetWidth + 8, h: s.offsetHeight + 8 };
+  el.classList.toggle('ft-under', [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k));
+}
 
 /* ---------- the scenario on the map (spec §3, cycle 3): one foreground scenario at a time ----------
  * Entering it changes no selection and no camera: each visit's badge sits at its part's card (top-left, never moving a card),
@@ -3789,7 +3978,7 @@ function markLines() {
   // A picked line among the selection's (markPicked) is the one that keeps the accent's ends.
   const picking = $('space').classList.contains('line-picked');
   document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
-    const lit = (el.classList.contains('on') && (!picking || el.classList.contains('picked'))) || el.classList.contains('sc-path'), line = el.querySelector('.edge-line'); if (!line) return;
+    const lit = (el.classList.contains('on') && (!picking || el.classList.contains('picked'))) || el.classList.contains('sc-path') || el.classList.contains('ff-flow'), line = el.querySelector('.edge-line'); if (!line) return;
     // A wait on the path reads as a control line: its open head (placeScenarioMarks dashes its end).
     const head = (el.classList.contains('sc-wait') && el.dataset.head === 'filled' ? 'open' : el.dataset.head ?? 'filled') as Head, start = (el.dataset.start ?? 'none') as Head;
     const mark = (h: Head) => (h === 'none' ? 'none' : `url(#m-${h}${lit ? '-on' : ''})`);
@@ -5002,7 +5191,7 @@ function syncFirstView(o: Opened) {
 /** The person picks the recommendation again (「추천 첫 보기로」) or an offered focus (「바꾸기」): its lens, emphasis and previews. */
 function applyFirstView(focus: FvFocus | null) {
   const o = opened; if (!o || !fvNow) return;
-  fvRec = recordOf(fvNow, 'person', focus); fvMenu = null; saveFirstView();
+  fvRec = { ...recordOf(fvNow, 'person', focus), flow: fvRec?.flow ?? null }; fvMenu = null; saveFirstView();
   if (fvRec.lens !== viewLens) setLens(fvRec.lens); else applyLens();
 }
 function clearEmphasis() { if (!fvRec) return; fvRec = { ...fvRec, off: true }; fvMenu = null; saveFirstView(); applyLens(); }
@@ -5016,8 +5205,10 @@ function markFirstView() {
   const was = cardMarks();
   world.querySelectorAll('.fv-emph, .fv-preview').forEach(el => el.classList.remove('fv-emph', 'fv-preview'));
   // Polish round fixes 1: while the first view emphasises lines, the other control lines step back at rest (styles.css fv-lines).
-  $('space').classList.toggle('fv-lines', fvOn() && fvRec!.lines.length > 0);
-  if (fvOn()) {
+  // Beauty v5: while the first screen draws its flow, the flow is the emphasis (the first view's marks wait).
+  const emphOn = fvOn() && !ffActive();
+  $('space').classList.toggle('fv-lines', emphOn && fvRec!.lines.length > 0);
+  if (emphOn) {
     const r = fvRec!, rels = new Set(r.lines);
     for (const id of r.parts) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('fv-emph');
     for (const id of r.previews) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('fv-preview');
@@ -5457,7 +5648,7 @@ function markSelection(partId: string | null) {
   for (const end of path.ends) related.add(end);
   // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
   // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
-  const scLines = new Set([...document.querySelectorAll<SVGGElement>('#world .edge.sc-path')].map(g => g.dataset.key!));
+  const scLines = new Set([...document.querySelectorAll<SVGGElement>('#world .edge.sc-path, #world .edge.ff-flow, #world .edge.ff-ctx')].map(g => g.dataset.key!));
   sums = me || scLines.size ? (opened ? sumLines(opened, restSummary(lay.boxes, lay.edges, e => (!!me && (e.from === me || e.to === me)) || path.lines.has(e.key) || scLines.has(e.key)), new Set(restSums.filter(x => x.both).map(x => x.key))) : []) : restSums;
   markLines();
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
