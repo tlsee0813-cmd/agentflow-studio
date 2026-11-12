@@ -22,11 +22,13 @@ test('HEADS-2 a marker never sized is sized whatever zoom another marker was siz
   assert.equal(markResize(0.640, 0.640 + MARK_STEP), true);
 });
 
-test('HEADS-3 the client sizes each marker when it makes it and keeps no zoom cache shared across redraws', async () => {
+test('HEADS-3 the client sizes each marker by its own zoom, a new one at the first call after the redraw; no zoom cache across redraws', async () => {
   const app = await readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
   const defs = app.slice(app.indexOf('function endMarkDefs('), app.indexOf('function syncMarks('));
-  assert.match(defs, /markerWidth: px, markerHeight: px/, 'a marker carries its box from the start');
-  assert.match(defs, /'data-k': String\(camera\.k\)/, 'and the zoom it was sized at');
+  // A marker is made with no zoom (data-k), so markResize(null, k) sizes it at the first syncMarks after the redraw, whatever zoom the
+  // markers of the map before were sized at.
+  assert.doesNotMatch(defs, /'data-k'/, 'a new marker carries no zoom');
+  assert.match(defs, /'data-head': k/, 'it says which head it is, for its size');
   const sync = app.slice(app.indexOf('function syncMarks('), app.indexOf('function syncMarks(') + 700);
   assert.match(sync, /markResize\(at, k\)/, 'each marker by its own zoom');
   assert.doesNotMatch(app, /\bmarksAt\b/, 'no module-wide zoom cache');

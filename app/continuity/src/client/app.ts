@@ -3843,16 +3843,17 @@ function endMarkDefs(): SVGElement {
     ear: { ref: '5', el: () => svg('circle', { class: 'mk-ring', cx: '5', cy: '5', r: '3.4' }) },
     dot: { ref: '5', el: () => svg('circle', { class: 'mk-fill', cx: '5', cy: '5', r: '4' }) } };
   for (const [k, s] of Object.entries(shapes)) for (const suf of ['', '-on', '-near']) {
-    // Sized at the zoom it is made at (markPx) and marked with that zoom (data-k), so syncMarks resizes it only when the zoom moves.
-    const px = markPx(k as Exclude<Head, 'none'>, camera.k);
-    const m = svg('marker', { id: `m-${k}${suf}`, class: `mk mk-${k}${suf ? ` mk${suf}` : ''}`, viewBox: '0 0 10 10', refX: s.ref, refY: '5', markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse', 'data-head': k, 'data-k': String(camera.k), markerWidth: px, markerHeight: px });
+    // Made without a size or a zoom (data-k): the first syncMarks after the redraw sizes it in the document (see syncMarks).
+    const m = svg('marker', { id: `m-${k}${suf}`, class: `mk mk-${k}${suf ? ` mk${suf}` : ''}`, viewBox: '0 0 10 10', refX: s.ref, refY: '5', markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse', 'data-head': k });
     m.append(s.el()); defs.append(m);
   }
   return defs;
 }
 /** Heads and ears keep their screen size whatever the zoom (6.1): each marker is HEAD_PX screen pixels, so 1/k of the map. Each
- * marker carries the zoom it was sized at (data-k); a marker made by a redraw is sized when made (endMarkDefs), never left to a cache
- * an earlier map's markers set (beauty v5 lanes review: every head of a map opened at its predecessor's zoom was lost so). */
+ * marker carries the zoom it was sized at (data-k); a marker made by a redraw carries none, so the first call after it sizes it, never
+ * skipped by a cache an earlier map's markers set (beauty v5 lanes review: every head of a map opened within 0.005 of its predecessor's
+ * zoom was lost so). Sized here, once the lines that point at it are in the document, not when made: the browser draws a head from a
+ * marker changed after its lines took it (a marker sized only before the lines were drawn drew no head at 1x, as the bug did). */
 function syncMarks(k: number) {
   document.querySelectorAll<SVGMarkerElement>('#world marker.mk').forEach(m => {
     const at = m.dataset.k === undefined ? null : Number(m.dataset.k); if (!markResize(at, k)) return;
