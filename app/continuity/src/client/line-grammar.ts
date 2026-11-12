@@ -22,6 +22,15 @@ export const DASH = { data: [], control: [], uses: [8, 5], shares: [8, 5], relat
 /** End marks' boxes in screen pixels at every zoom (beauty v2 B1: about 7–9 long and 5–7 wide): the filled triangle 9 (9 × 6.3), the
  * open V 10 (8.2 × 7), a reference's V 9.5 (7.1 × 6.7), the ear's ring 6, a dot 4. */
 export const HEAD_PX = { filled: 9, open: 10, ref: 9.5, ear: 6, dot: 4 } as const;
+/** An end mark's box in map units at zoom k (HEAD_PX screen pixels, so 1/k of the map), as the marker's markerWidth/Height carry it.
+ * Beauty v5 (lanes review): a marker is sized when it is made and again whenever the zoom it was sized at moved by MARK_STEP or more,
+ * each marker by the zoom it carries (markResize), never by one cache shared with markers since replaced: a redraw makes new
+ * markers, and a map opened at nearly the zoom of the one before (0.643 against 0.640) drew every head at the SVG default box, too
+ * small to see. */
+export const MARK_STEP = 0.005;
+export function markPx(head: Exclude<Head, 'none'>, k: number): string { return (HEAD_PX[head] / Math.max(k, 1e-6)).toFixed(2); }
+/** Whether a marker sized at zoom 'at' (null: never sized) needs sizing at zoom k. */
+export function markResize(at: number | null, k: number): boolean { return at === null || !Number.isFinite(at) || Math.abs(k - at) >= MARK_STEP; }
 /** The style of a line from its kind and its channel (a line with no channel read keeps its kind's default: a flow hands data
  * over, a need or a shared use refers). */
 export function lineStyle(kind: RelKind, channel: Channel | null): LineStyle {

@@ -14,8 +14,13 @@
  *   separations that make every corridor laneRoom of its lines wide (the room is the layout's own spacing).
  * - Blocks (A.8): each connected block on its own, the largest first, the others shelf-packed under it.
  * - Channels (C): each line's reserved route (its tracks in the gaps and its rows through the columns) for the router to try first.
+ * - Hub lanes (beauty v5): the ports planned by the router's own model (port-slots.ts: capacity, slots round the contact point, face
+ *   overflow), each side's ends in gate order, a gap's tracks by precedence (laneTracks), a hub set by its ports in the polish, and a
+ *   rail laid in the nearest gap between parts before round the block; the planned ports go to the router with the channel.
  * Placement only: no relation's id, end, kind, direction or condition is read for anything but where the parts go, and nothing is
  * drawn as a region, a hull or a membership. */
+
+import { sideSlots, sideCapacity, laneTracks, PORT_INSET, FRAME_INSET } from './port-slots.js';
 
 export interface LNode { id: string; w: number; h: number;
   /** From the top: where side lines meet it (typed card: its contact point; frame: head / 2; else h / 2). */
@@ -28,7 +33,10 @@ export interface LNode { id: string; w: number; h: number;
    * system is laid as any part (its kind mark says what it is). */
   role?: 'outside' | 'external' | 'store' | null;
   /** Least room above and below it from another part (an open group keeps a lane for lines beside it). */
-  gutter?: number }
+  gutter?: number;
+  /** Beauty v5: a group's side where its lines meet (its head row, from the top); absent: a card (its whole height, top and bottom
+   * faces for its control lines and its overflow). */
+  side?: number }
 /** drive: a data or control line; ref: a reference (uses, a need with no channel); plain: shares or related. */
 export type LKind = 'drive' | 'ref' | 'plain';
 /** control: a control line (it starts or steers its target), read only to tell which side of the system an external one sits on. */
@@ -46,7 +54,10 @@ export interface LOptions { layerGap: number; rowGap: number; laneMargin: number
   /** Caps of the slack spending. */
   maxRowGap?: number; maxLaneMargin?: number; maxLayerGap?: number }
 /** A line's reserved route: port a → (xs[0], ya) → (xs[0], ys[0]) → (xs[1], ys[0]) → … → (xs[k], yb) → port b. */
-export interface Channel { xs: number[]; ys: number[] }
+export interface Channel { xs: number[]; ys: number[];
+  /** Beauty v5 (hub lanes): the heights the shared port model gave its two ends (a: where it leaves, b: where it arrives; absent: an end
+   * sent to a top or bottom face), so the router orders each side's ends as the tracks were planned. */
+  ports?: { a?: number; b?: number } }
 export interface LResult {
   /** Top-left of each node, relative to the drawing's top-left (0, 0), on the 0.5 grid. */
   pos: Map<string, { x: number; y: number }>;
@@ -67,8 +78,11 @@ export interface LResult {
 const cmpId = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const half = (v: number) => Math.round(v * 2) / 2;
 export const laneRoomOf = (n: number, margin: number, track: number) => (n <= 0 ? 0 : 2 * margin + (n - 1) * track + 2);
-/** map-route's PORT_GAP: the ends on one side of a card are spread this far apart. */
-const PORT_STEP = 12;
+/** Beauty v5 (hub lanes): runs whose extents come this near each other in one gap take tracks apart (two runs on one x with a gap
+ * shorter than this between them read as one line). */
+const LANE_NEAR = 16;
+/** A card with this many line ends is a hub: polish sets it by its ports (each line's port against its partner's), not its middle. */
+const HUB_ENDS = 8;
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
 
 /* ---------- network simplex (Gansner et al.) on one connected acyclic graph, minlen 1 ---------- */
@@ -128,7 +142,7 @@ export function networkSimplex(n: number, E: readonly SEdge[], cap = 4 * E.lengt
 }
 
 /* ---------- the layout ---------- */
-type Seg = { u: number; v: number; w: number; pu: number; pv: number; key: string; spine: boolean };
+type Seg = { u: number; v: number; w: number; pu: number; pv: number; key: string; spine: boolean; ei: number };
 interface Block { nodes: number[]; edges: number[] }
 
 export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], opt: LOptions): LResult {
@@ -338,7 +352,7 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
         path.push(lid.get(t)!);
         chains.set(i, { path, rev: back });
         const w = ordW(i), ps = frac(s, i, back ? 'in' : 'out'), pt = frac(t, i, back ? 'out' : 'in');
-        for (let j = 0; j + 1 < path.length; j++) segs.push({ u: path[j]!, v: path[j + 1]!, w, pu: j === 0 ? ps : 0.5, pv: j + 2 === path.length ? pt : 0.5, key: edges[i]!.key, spine: false });
+        for (let j = 0; j + 1 < path.length; j++) segs.push({ u: path[j]!, v: path[j + 1]!, w, pu: j === 0 ? ps : 0.5, pv: j + 2 === path.length ? pt : 0.5, key: edges[i]!.key, spine: false, ei: i });
       }
       // The spine (the heaviest chain of driving lines, flows before needs): one straight line through the block.
       const spine: number[] = (() => {
@@ -392,16 +406,28 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
             const ds = ch.path.slice(1, -1).filter(k => ys0[k]! < top - 0.5 || ys0[k]! > bot + 0.5); if (!ds.length || tried.has(i)) continue;
             tried.add(i);
             const keep = layers.map(l => [...l]), lis = new Set(ds.map(k => layerOf0.get(k)!)), c0 = near(lis);
-            layers.forEach((l, li) => {
+            // Beauty v5 (hub lanes): the nearest legal row first: in each column it passes, the gap between two of its parts nearest the
+            // heights of the line's two ends; then, as before, in under the column's first part (or over its last). The one crossing least
+            // is kept when it adds at most INSIDE_COST; else the rail stays outside.
+            const ya = ys0[ch.path[0]!]!, yb = ys0[ch.path.at(-1)!]!;
+            const tryInside = (nearest: boolean) => layers.forEach((l, li) => {
               if (!lis.has(li)) return;
               const reals = l.filter(k => !isDummy[k]); if (reals.length < 2) return;
               const above = l.filter(k => ds.includes(k) && ys0[k]! < top && l.indexOf(k) < l.indexOf(reals[0]!)), below = l.filter(k => ds.includes(k) && ys0[k]! > bot && l.indexOf(k) > l.indexOf(reals.at(-1)!));
               if (!above.length && !below.length) return;
               const rest = l.filter(k => !above.includes(k) && !below.includes(k));
-              rest.splice(rest.indexOf(reals[0]!) + 1, 0, ...above); rest.splice(rest.indexOf(reals.at(-1)!), 0, ...below);
+              if (nearest) {
+                let g = 1, gd = Infinity;
+                for (let q = 1; q < reals.length; q++) { const m = (ys0[reals[q - 1]!]! - anc[reals[q - 1]!]! + h[reals[q - 1]!]! + ys0[reals[q]!]! - anc[reals[q]!]!) / 2, d = Math.abs(m - ya) + Math.abs(m - yb); if (d < gd - 1e-9) { gd = d; g = q; } }
+                rest.splice(rest.indexOf(reals[g - 1]!) + 1, 0, ...above, ...below);
+              } else { rest.splice(rest.indexOf(reals[0]!) + 1, 0, ...above); rest.splice(rest.indexOf(reals.at(-1)!), 0, ...below); }
               layers[li] = rest;
             });
-            const c1 = near(lis);
+            tryInside(true);
+            const near1 = layers.map(l => [...l]), c1n = near(lis);
+            keep.forEach((l, li) => { layers[li] = [...l]; }); tryInside(false);
+            let c1 = near(lis);
+            if (c1n <= c1 + 1e-9) { near1.forEach((l, li) => { layers[li] = l; }); c1 = c1n; }
             if (c1 - c0 <= INSIDE_COST + 1e-9 && layers.some((l, li) => l.some((k, j) => keep[li]![j] !== k))) moved = true; else keep.forEach((l, li) => { layers[li] = l; });
           }
           if (!moved) break;
@@ -445,32 +471,82 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     laid.push(best.laid);
   }
 
+  /** Beauty v5 (hub lanes): the shared port model (port-slots.ts, as map-route assignPorts sets the ports) on one block at heights ys.
+   * Per segment, the height of each real end's port (a dummy end: its row); undefined for an end that takes its card's top or bottom
+   * (a control line toward a partner below or above, or an end past its side's capacity whose partner lies wholly above or below by 24,
+   * the steepest first: map-route faceOverflow). A side's free ends are ordered by their gate: where the line leaves the card's
+   * neighbourhood (the row of its first dummy, else its partner's port, found in a second round), then by key. */
+  const portsOf = (b: (typeof laid)[number], ys: readonly number[]): Map<Seg, { u?: number; v?: number }> => {
+    type End = { s: Seg; end: 'u' | 'v'; k: number; far: number; from: boolean };
+    const layerOf = new Map<number, number>(); b.layers.forEach((l, li) => l.forEach(k => layerOf.set(k, li)));
+    const sides = new Map<string, End[]>();
+    for (const s of b.segs) {
+      const ch = b.chains.get(s.ei); if (!ch) continue;
+      for (const end of ['u', 'v'] as const) {
+        const k = s[end]; if (b.isDummy[k]) continue;
+        const far = end === 'u' ? ch.path.at(-1)! : ch.path[0]!, key = `${k}|${end === 'u' ? 'r' : 'l'}`;
+        (sides.get(key) ?? sides.set(key, []).get(key)!).push({ s, end, k, far, from: b.nodeOf[k] === from[s.ei] });
+      }
+    }
+    const top = (k: number) => ys[k]! - b.anc[k]!, mid = (k: number) => top(k) + b.h[k]! / 2;
+    // The faces first; then the order by the partners' anchors, and again by their ports (the newest known) until nothing moves (at most
+    // four rounds: two sides that face each other settle their orders together).
+    const faced = new Set<string>(), res = new Map<Seg, { u?: number; v?: number }>();
+    const tag = (x: End) => `${x.s.ei}|${x.end}|${x.s.u}`;
+    for (const list of sides.values()) {
+      const k = list[0]!.k, nd = nodes[b.nodeOf[k]!]!; if (nd.side !== undefined) continue;
+      const t = top(k), bot = t + b.h[k]!;
+      // Past the side's capacity, the steepest of those whose partner lies wholly above or below. The ports are planned for the summary
+      // strokes a busy map draws at rest, which meet sides only and take no pin (map-route pinOf): a control line is planned on its side,
+      // and no end on a pin. A line drawn one by one that takes its card's bottom or top, or its pin, leaves its planned slot empty (the
+      // router keeps the side's other ends at their planned ports and spreads the rest round them).
+      const count = list, cap = sideCapacity(b.h[k]!, PORT_INSET);
+      if (count.length > cap) {
+        const wholly = (x: End) => top(x.far) + b.h[x.far]! < t - 24 || top(x.far) > bot + 24;
+        const steep = (x: End) => Math.abs(mid(x.far) - mid(k)) / Math.max(1, Math.abs(layerOf.get(x.far)! - layerOf.get(k)!) * 300);
+        const cands = count.filter(wholly).sort((p, q) => steep(q) - steep(p) || cmpId(p.s.key, q.s.key));
+        for (const x of cands.slice(0, count.length - cap)) faced.add(tag(x));
+      }
+    }
+    for (let round = 0; round < 4; round++) {
+      const prev = new Map(res); res.clear();
+      for (const list of sides.values()) {
+        const k = list[0]!.k, nd = nodes[b.nodeOf[k]!]!, frame = nd.side !== undefined, t = top(k), len = nd.side ?? b.h[k]!;
+        const gate = (x: End) => { const o = x.end === 'u' ? x.s.v : x.s.u; if (b.isDummy[o]) return ys[o]!; const w = x.end === 'u' ? 'v' : 'u', p = res.get(x.s)?.[w] ?? prev.get(x.s)?.[w]; return p ?? ys[o]!; };
+        const set = (x: End, y: number) => { const r = res.get(x.s) ?? res.set(x.s, {}).get(x.s)!; r[x.end] = y; };
+        const on = list.filter(x => !faced.has(tag(x))).sort((p, q) => gate(p) - gate(q) || cmpId(p.s.key, q.s.key));
+        sideSlots(on.length, t, len, ys[k]!, [], frame ? FRAME_INSET : PORT_INSET).forEach((py, i) => set(on[i]!, py));
+      }
+      if (round && [...res].every(([sg, r]) => prev.get(sg)?.u === r.u && prev.get(sg)?.v === r.v)) break;
+    }
+    return res;
+  };
   // Coordinates under one spacing; the slack spending tries wider spacings (F.3).
   const place = (rowGap: number, laneMargin: number, layerGap: number) => {
-    const out: { ys: number[]; xs: number[]; colX: number[]; colW: number[]; gaps: number[]; tracks: Map<string, number>[]; w: number; h: number; y0: number; fold: number; dx: number; dy: number; gapY: number; indent: number }[] = [];
+    const out: { ys: number[]; xs: number[]; colX: number[]; colW: number[]; gaps: number[]; tracks: Map<string, number>[]; w: number; h: number; y0: number; fold: number; dx: number; dy: number; gapY: number; indent: number; ports: Map<Seg, { u?: number; v?: number }> }[] = [];
     for (const b of laid) {
       const sep = (u: number, v: number) => { const du = b.isDummy[u]!, dv = b.isDummy[v]!; const g = du && dv ? opt.laneTrack : du || dv ? laneMargin : Math.max(rowGap, b.gut[u]!, b.gut[v]!); return (b.h[u]! - b.anc[u]!) + g + b.anc[v]!; };
       const ys = brandesKoepf(b.layers, b.segs, b.isDummy, sep, b.spineSet);
-      polish(b.layers, b.segs, ys, sep, b.isDummy, opt.laneTrack);
+      // Beauty v5 (hub lanes): a hub is set by its ports (each line's port against its partner's), from the ports at B–K's heights.
+      const P0 = portsOf(b, ys);
+      polish(b.layers, b.segs, ys, sep, b.isDummy, opt.laneTrack, (s, end) => { const y = P0.get(s)?.[end]; return y === undefined ? 0 : y - ys[s[end]]!; });
       for (let k = 0; k < ys.length; k++) ys[k] = half(ys[k]!);
+      const PY = portsOf(b, ys);
       // Columns: as wide as their widest member, left-aligned; each gap as wide as the tracks its height-changing runs need.
       const colW = b.layers.map(l => Math.max(0, ...l.map(k => b.wd[k]!)));
       const tracks: Map<string, number>[] = [], gaps: number[] = [];
+      const layerOfK = new Map<number, number>(); b.layers.forEach((l, li) => l.forEach(k => layerOfK.set(k, li)));
+      const byGap = new Map<number, Seg[]>(); for (const s of b.segs) { const g = layerOfK.get(s.u)!; (byGap.get(g) ?? byGap.set(g, []).get(g)!).push(s); }
       for (let L = 0; L + 1 < b.layers.length; L++) {
-        // Each run from its port as the router will set it: the ends on one side of a card spread PORT_GAP apart round its contact
-        // point, in the order of where their lines go next (map-route assignPorts orders them so too, by the hint's first row).
-        const inGap = b.segs.filter(s => b.layers[L]!.includes(s.u));
-        const portY = new Map<Seg, { a: number; b: number }>(inGap.map(s => [s, { a: ys[s.u]!, b: ys[s.v]! }]));
-        for (const end of ['u', 'v'] as const) {
-          const by = new Map<number, Seg[]>(); for (const s of inGap) if (!b.isDummy[s[end]]) (by.get(s[end]) ?? by.set(s[end], []).get(s[end])!).push(s);
-          for (const [k, list] of by) {
-            if (list.length < 2) continue;
-            list.sort((p, q) => ys[end === 'u' ? p.v : p.u]! - ys[end === 'u' ? q.v : q.u]! || cmpId(p.key, q.key));
-            list.forEach((s, i) => { const y = ys[k]! + (i - (list.length - 1) / 2) * PORT_STEP; portY.get(s)![end === 'u' ? 'a' : 'b'] = y; });
-          }
+        // Beauty v5 (hub lanes): each run from its ports as the router sets them (the shared port model, portsOf), a run whose end takes
+        // a top or bottom face left out (it turns in its card's column, not in the gap); the tracks by precedence (laneTracks).
+        const inGap = byGap.get(L) ?? [];
+        const runs: { key: string; a: number; b: number }[] = [];
+        for (const s of inGap) {
+          const p = PY.get(s), a = b.isDummy[s.u] ? ys[s.u]! : p?.u, c = b.isDummy[s.v] ? ys[s.v]! : p?.v;
+          if (a !== undefined && c !== undefined && Math.abs(a - c) >= 1) runs.push({ key: s.key, a, b: c });
         }
-        const runs = inGap.map(s => ({ key: s.key, ...portY.get(s)! })).filter(r => Math.abs(r.a - r.b) >= 1);
-        const t = trackOf(runs); tracks.push(t.at);
+        const t = laneTracks(runs, opt.laneTrack, LANE_NEAR); tracks.push(t.at);
         const base = b.wrapAfter.has(L) ? (opt.wrapGap ?? layerGap / 2) : layerGap;
         gaps.push(Math.max(base, laneRoomOf(t.n, laneMargin, opt.laneTrack)));
       }
@@ -478,7 +554,7 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
       const real = b.layers.flat().filter(k => !b.isDummy[k]);
       const extent = (ls: number[][]) => { const ks = ls.flat(); return { top: Math.min(...ks.map(k => ys[k]! - (b.isDummy[k] ? 0 : b.anc[k]!))), bot: Math.max(...ks.map(k => ys[k]! + (b.isDummy[k] ? 0 : b.h[k]! - b.anc[k]!))) }; };
       const top = Math.min(...real.map(k => ys[k]! - b.anc[k]!)), bot = Math.max(...real.map(k => ys[k]! - b.anc[k]! + b.h[k]!));
-      const o = { ys, xs: [] as number[], colX, colW, gaps, tracks, w: colX.at(-1)! + colW.at(-1)!, h: bot - top, y0: top, fold: -1, dx: 0, dy: 0, gapY: 0, indent: 0 };
+      const o = { ys, xs: [] as number[], colX, colW, gaps, tracks, w: colX.at(-1)! + colW.at(-1)!, h: bot - top, y0: top, fold: -1, dx: 0, dy: 0, gapY: 0, indent: 0, ports: PY };
       // Fold (F.3, for one long chain): the main block, far wider than the window's shape, continues on a second row under its first
       // half, as text wraps, cut after the column whose gap one line alone crosses (nearest the middle, within its middle 40%); that line
       // takes the reserved route round the cut (below). Both rows read left to right; a fold that would not bring the drawing nearer the window's shape is not made.
@@ -557,8 +633,14 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     colBase += b.layers.length;
     crossings += totalCrossings(b.layers, b.segs, true);
     const L = new Map<number, number>(); b.layers.forEach((l, li) => l.forEach(k => L.set(k, li)));
+    const firstSeg = new Map<number, Seg>(), lastSeg = new Map<number, Seg>();
+    for (const s of b.segs) { const ch = b.chains.get(s.ei); if (!ch) continue; if (s.u === ch.path[0]) firstSeg.set(s.ei, s); if (s.v === ch.path.at(-1)) lastSeg.set(s.ei, s); }
     for (const [i, ch] of b.chains) {
       const p = ch.path; length += L.get(p.at(-1)!)! - L.get(p[0]!)!;
+      // Beauty v5 (hub lanes): the ports its tracks were planned from, at the drawn ends (a: where it leaves).
+      const at = (y: number | undefined, k: number) => (y === undefined ? undefined : half(d.y + y - o.y0 + (o.fold >= 0 && L.get(k)! > o.fold ? o.dy : 0)));
+      const ps = at(o.ports.get(firstSeg.get(i)!)?.u, p[0]!), pt = at(o.ports.get(lastSeg.get(i)!)?.v, p.at(-1)!);
+      const ports = ch.rev ? { ...(pt !== undefined ? { a: pt } : {}), ...(ps !== undefined ? { b: ps } : {}) } : { ...(ps !== undefined ? { a: ps } : {}), ...(pt !== undefined ? { b: pt } : {}) };
       // The second row's routes move with it. The line across the fold (P4) leaves its first-row end into the gap beside it, runs down to
       // the space between the rows, along it to the gap before its second-row end and in: inside the drawing, never round it.
       const after = (li: number) => o.fold >= 0 && li > o.fold;
@@ -569,7 +651,7 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
         const own = (g: number) => { const t = o.tracks[g]?.get(edges[i]!.key), n = o.tracks[g]?.get('#') ?? 0; return g === o.fold || t === undefined || n < 2 ? null : o.colX[g]! + o.colW[g]! + o.gaps[g]! / 2 - ((n - 1) * opt.laneTrack) / 2 + t * opt.laneTrack; };
         const ga = own(l0), gb = own(l1 - 1);
         const xa = half(d.x + (ga ?? o.colX[l0]! + o.colW[l0]! + opt.laneMargin)), xb = half(d.x + o.dx + (gb ?? o.colX[l1]! - opt.laneMargin)), yg = half(d.y + o.gapY - o.y0);
-        channels.set(edges[i]!.key, ch.rev ? { xs: [xb, xa], ys: [yg] } : { xs: [xa, xb], ys: [yg] });
+        channels.set(edges[i]!.key, ch.rev ? { xs: [xb, xa], ys: [yg], ports } : { xs: [xa, xb], ys: [yg], ports });
         continue;
       }
       for (let j = 0; j + 1 < p.length; j++) {
@@ -578,7 +660,7 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
         xs.push(half(d.x + (after(Lj) ? o.dx : 0) + (t === undefined ? mid : mid - ((n - 1) * opt.laneTrack) / 2 + t * opt.laneTrack)));
         if (j + 2 < p.length) ys.push(half(d.y + o.ys[p[j + 1]!]! - o.y0 + (after(L.get(p[j + 1]!)!) ? o.dy : 0)));
       }
-      channels.set(edges[i]!.key, ch.rev ? { xs: xs.reverse(), ys: ys.reverse() } : { xs, ys });
+      channels.set(edges[i]!.key, ch.rev ? { xs: xs.reverse(), ys: ys.reverse(), ports } : { xs, ys, ports });
     }
   });
   const main = laid[0], spine = main ? main.spine.map(v => nodes[v]!.id) : [];
@@ -586,24 +668,6 @@ export function layered(nodesIn: readonly LNode[], edgesIn: readonly LEdge[], op
     metrics: { crossings, length, dummies, ms: now() - t0, pivots, rowGap, layerGap } };
 }
 
-/** Tracks for the runs that change height in one gap (C.2): fewest tracks (left-edge interval colouring, runs on one track at least a
- * track apart), then ordered so they cross least (of two runs going down, the one starting higher further right; going up, the one
- * starting lower). at: '<key>|<hop>' → track index; '#' → the number of tracks. Keys of runs are their segment's key and hop. */
-function trackOf(runs: { key: string; a: number; b: number }[]): { n: number; at: Map<string, number> } {
-  const at = new Map<string, number>(); if (!runs.length) { at.set('#', 0); return { n: 0, at }; }
-  // Of two runs, which goes left: the order whose turns cross the other run less (run i left of j: j's first run, coming from the
-  // left at its start height, crosses i's vertical when that height is inside i's extent; i's last run, going right at its end
-  // height, crosses j's vertical likewise). Pairwise, settled by passes; ties by start height, then key.
-  const inside = (y: number, p: number, q: number) => y > Math.min(p, q) + 0.5 && y < Math.max(p, q) - 0.5;
-  const cost = (i: { a: number; b: number }, j: { a: number; b: number }) => Number(inside(j.a, i.a, i.b)) + Number(inside(i.b, j.a, j.b));
-  const ord = [...runs].sort((p, q) => p.a - q.a || p.b - q.b || cmpId(p.key, q.key));
-  for (let pass = 0; pass < ord.length; pass++) { let sw = false; for (let i = 0; i + 1 < ord.length; i++) { const p = ord[i]!, q = ord[i + 1]!; if (cost(p, q) > cost(q, p)) { ord[i] = q; ord[i + 1] = p; sw = true; } } if (!sw) break; }
-  // Tracks in that order: a run takes the track right of every earlier run whose extent it meets (fewest tracks the order allows).
-  const tr: number[] = [];
-  ord.forEach((r, i) => { let t = 0; for (let j = 0; j < i; j++) { const o = ord[j]!; if (Math.max(o.a, o.b) >= Math.min(r.a, r.b) - 6 && Math.min(o.a, o.b) <= Math.max(r.a, r.b) + 6) t = Math.max(t, tr[j]! + 1); } tr.push(t); at.set(r.key, t); });
-  const n = Math.max(...tr) + 1; at.set('#', n);
-  return { n, at };
-}
 /* ---------- ordering ---------- */
 function orderLayers(layers: number[][], segs: Seg[], sweeps: number, nodeOf: number[], flat: { a: number; b: number; w: number }[], bundle: ReadonlyMap<number, string> = new Map()) {
   const pos = new Map<number, number>(); const index = () => layers.forEach(l => l.forEach((k, i) => pos.set(k, i)));
@@ -762,10 +826,11 @@ function brandesKoepf(layers: number[][], segs: Seg[], isDummy: boolean[], sep: 
 /** Priority polish (A.7-5): each real node (the spine's too: B–K already set it straight, and a hub on it pulled to its partners' middle
  * reads better than one held at the top) moves toward the weighted median of its neighbours' anchors, inside the room
  * its layer's order leaves. */
-function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, v: number) => number, isDummy: boolean[], track = 10) {
-  const nb = new Map<number, { k: number; w: number }[]>();
+function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, v: number) => number, isDummy: boolean[], track = 10, off: (s: Seg, end: 'u' | 'v') => number = () => 0) {
+  const nb = new Map<number, { k: number; w: number; d: number }[]>();
   // The spine's own steps weigh four times: the main flow stays one straight line unless most of a part's lines pull it away.
-  for (const s of segs) { const w = s.spine ? 4 * s.w : s.w; (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w }); }
+  // Beauty v5 (hub lanes): d, what the line needs between the two anchors to run level (its far port's offset less its near one's).
+  for (const s of segs) { const w = s.spine ? 4 * s.w : s.w, d = off(s, 'v') - off(s, 'u'); (nb.get(s.u) ?? nb.set(s.u, []).get(s.u)!).push({ k: s.v, w, d }); (nb.get(s.v) ?? nb.set(s.v, []).get(s.v)!).push({ k: s.u, w, d: -d }); }
   // A long line's dummy rows move as one row (a stair of rows would add turns): to the height of its source, else of its target, where
   // every row it passes leaves room; else it stays.
   const chains = new Map<string, { ds: number[]; a: number; b: number }>();
@@ -782,7 +847,8 @@ function polish(layers: number[][], segs: Seg[], ys: number[], sep: (u: number, 
     if (isDummy[k]) return;
     if (i === 0 && l === (pass % 2 ? layers[layers.length - 1] : layers[0])) rows();
     const list = nb.get(k); if (!list?.length) return;
-    const v = list.map(x => ({ y: ys[x.k]!, w: x.w })).sort((a, b) => a.y - b.y), tot = v.reduce((a, x) => a + x.w, 0);
+    // A hub (HUB_ENDS lines or more) goes where most of its lines leave level: its partners' ports less its own ports' offsets.
+    const hub = list.length >= HUB_ENDS, v = list.map(x => ({ y: ys[x.k]! + (hub ? x.d : 0), w: x.w })).sort((a, b) => a.y - b.y), tot = v.reduce((a, x) => a + x.w, 0);
     let acc = 0, m = v[0]!.y; for (let j = 0; j < v.length; j++) { acc += v[j]!.w; if (Math.abs(acc - tot / 2) < 1e-9 && j + 1 < v.length) { m = (v[j]!.y + v[j + 1]!.y) / 2; break; } if (acc > tot / 2) { m = v[j]!.y; break; } }
     const lo = i > 0 ? ys[l[i - 1]!]! + sep(l[i - 1]!, k) : -Infinity, hi = i + 1 < l.length ? ys[l[i + 1]!]! - sep(k, l[i + 1]!) : Infinity;
     ys[k] = Math.min(hi, Math.max(lo, m));

@@ -302,7 +302,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
     const lk = new Map<string, LEdge>();
     for (const r of v.relations) {
       const a = lift(r.from), b = lift(r.to); if (!a || !b || a === b) continue;
-      const g = grain(r), key = `${a}|${b}|${g}`, ch = g.split('~')[0];
+      const g = grain(r), key = `${a}|${b}|${g}`, ch = g.split(/[~^]/)[0];
       const kind: LKind = r.kind === 'shares' || r.kind === 'related' ? 'plain' : ch === 'data' || ch === 'control' ? 'drive' : 'ref';
       (lk.get(key) ?? lk.set(key, { key, from: a, to: b, kind, weight: 1, relIds: [], ...(ch === 'control' ? { control: true } : {}) }).get(key)!).relIds.push(r.id);
     }
@@ -330,7 +330,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
       : b === 'outside' || familyOf(i) === 'participant' ? 'outside' : isStore(i) ? 'store' : null);
     const lnodes: LNode[] = ids.filter(i => linked.has(i)).map(i => {
       const s = sizes.get(i)!, b = band.get(i);
-      return { id: i, w: s.w, h: s.h, order: rank.get(i)!, anchor: s.head > 0 ? s.head / 2 : s.contact ?? s.h / 2, ...(s.pins ? { pins: s.pins } : {}), role: roleOf(i, b), ...(s.head > 0 ? { gutter: FRAME_GUTTER } : {}) };
+      return { id: i, w: s.w, h: s.h, order: rank.get(i)!, anchor: s.head > 0 ? s.head / 2 : s.contact ?? s.h / 2, ...(s.pins ? { pins: s.pins } : {}), role: roleOf(i, b), ...(s.head > 0 ? { gutter: FRAME_GUTTER, side: s.head } : {}) };
     });
     let flowW = 0, flowH = 0, lastFrame = false;
     if (lnodes.length) {
