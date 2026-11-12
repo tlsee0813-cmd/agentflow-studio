@@ -3644,6 +3644,10 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* Polish 5 (ruling: code stays code where the record has no plain words): code in a line label, a badge or a note reads as quoted code,
    one monospace chip per run at the label's own size, on its own ground (no halo inside it); the label is cut only between tokens (the
    app adds the 「…」), so the CSS never cuts inside one. */
-.edge-labels code.lb-code, .ff-note code.lb-code { font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Consolas, Menlo, monospace; font-size: 1em; font-weight: 500; letter-spacing: 0; padding: 0 3px; margin: 0 1px; border-radius: 3px; background: #e9edf3; color: #3a4659; -webkit-text-stroke: 0; }
+.edge-labels code.lb-code, .ff-note code.lb-code { font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Consolas, Menlo, monospace; font-size: 1em; font-weight: 400; letter-spacing: 0; padding: 0 3px; margin: 0 1px; border-radius: 3px; background: #e9edf3; color: #3a4659; -webkit-text-stroke: 0; }
 .edge-labels > .has-code { text-overflow: clip; }
-@media (prefers-color-scheme: dark) { .edge-labels code.lb-code, .ff-note code.lb-code { background: #26324a; color: #c9d4e6; } }
+/* Polish 6: one 「…」 only: a label whose own words end on the app's cut mark takes none from the [data-full] rule; the chip's dark
+   form only once the page opts in (data-theme="dark", or "auto" with a dark system), as every other dark rule; its weight regular. */
+.edge-labels > .edge-label.self-cut[data-full]::after { content: none; }
+:root[data-theme="dark"] :is(.edge-labels, .ff-note) code.lb-code { background: #26324a; color: #c9d4e6; }
+@media (prefers-color-scheme: dark) { :root[data-theme="auto"]:not([data-theme="light"]) :is(.edge-labels, .ff-note) code.lb-code { background: #26324a; color: #c9d4e6; } }

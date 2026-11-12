@@ -34,9 +34,9 @@ test('P5-1 the top sentence comes from the record about the latest target time; 
   assert.equal(s.record, a.id, 'the backlog record pasted later never speaks for the map');
   assert.equal(s.shown, '새 판의 성장 시험 서비스다.');
   assert.match(s.flow, /수집기 → 정리기/, 'its core-flow sentence comes from the same record');
-  // Paste order where a date is missing or the dates are equal.
+  // Paste order among the undated and where the dates are equal; an undated record never outranks a dated one (polish 6).
   const body = t => [{ text: t, from: 0 }];
-  assert.equal(summarySource([{ id: 'x', target: '2020-01-01', body: body('앞이다.') }, { id: 'y', target: null, body: body('뒤다.') }]).record, 'y');
+  assert.equal(summarySource([{ id: 'x', target: '2020-01-01', body: body('앞이다.') }, { id: 'y', target: null, body: body('뒤다.') }]).record, 'x');
   assert.equal(summarySource([{ id: 'x', target: '2020-01-01', body: body('앞이다.') }, { id: 'y', target: '2020-01-01', body: body('뒤다.') }]).record, 'y');
   assert.equal(summarySource([{ id: 'x', body: body('앞이다.') }, { id: 'y', body: body('뒤다.') }]).record, 'y', 'no dates at all: paste order, as before');
   assert.deepEqual(byTarget([{ id: 'n', target: '2024-05-01' }, { id: 'o', target: '2019-01-01' }, { id: 'm', target: '2021-03-03' }]).map(x => x.id), ['o', 'm', 'n']);
@@ -75,7 +75,7 @@ test('P5-3 a cut never loses a plan word: the notes\' 48 characters, the top sen
   assert.match(a, /t\.textContent = basis \? keepPlanFit\(basis, t\.dataset\.text \?\? '', 1, \(lead\?\.offsetWidth \?\? 0\) \+ 6\) : keepPlanFit\(t, t\.dataset\.text \?\? '', el\.classList\.contains\('ft-one'\) \? 1 : 2\);/,
     'the sentence (1 or 2 lines, as its form shows it) and the basis line, each measured to its box');
   assert.match(a, /'data-text': topWords/); assert.match(a, /class: 'ft-basis-t', 'data-text': said/);
-  assert.match(a, /fillLabel\(nt, keepPlanFit\(nt, t0, 2\)\)/, 'a note\'s two clamped lines too');
+  assert.match(a, /t1 = keepPlanFit\(nt, t0, 2\); fillLabel\(nt, t1\);/, 'a note\'s two clamped lines too');
 });
 
 test('P5-4 at rest the first screen\'s lines are routed as the summary strokes they stand for (hyperfine 19 → 5 crossings)', async () => {
@@ -113,9 +113,10 @@ test('P5-7 code in a label reads as quoted code: a monospace chip, words kept as
   assert.equal(tokenCut('len(files) == 0 이면 건너뜀', 3), 'len(files) == 0…', 'never inside a token');
   assert.equal(tokenCut('a_b c_d', 5), 'a_b c_d');
   const a = await app();
-  assert.match(a, /function fillLabel\(el: HTMLElement, text: string, full = text\): void \{/);
-  for (const site of ['box.append(label); fillLabel(label, cutWord, word);', 'box.append(label); fillLabel(label, verb);', 'fillLabel(s.el, s.text);', "fillLabel(el, text); el.classList.toggle('glyph'"]) assert.ok(a.includes(site), site);
-  assert.match(a, /for \(let n = words - 1; n >= 1 && el\.scrollWidth > el\.clientWidth \+ 1; n--\) \{ draw\(tokenCut\(text, n\)\); el\.dataset\.full = full; \}/, 'wider than its room: whole tokens off the end, the whole text in the tip');
+  // Polish 6 (P6-1 to P6-3) keeps these sites and the cut, and makes them say when no cut fits.
+  assert.match(a, /function fillLabel\(el: HTMLElement, text: string, full = text\): boolean \{/);
+  for (const site of ['box.append(label); if (!fillLabel(label, cutWord, word))', 'box.append(label); fillLabel(label, verb);', 'fillLabel(s.el, s.text);', "filled = fillLabel(el, text); if (!filled) continue; el.classList.toggle('glyph'"]) assert.ok(a.includes(site), site);
+  assert.match(a, /for \(let n = words - 1; n >= 1; n--\) \{ const c = tokenCut\(text, n\); if \(c === null\) continue; draw\(c\); el\.dataset\.full = full; if \(!over\(\)\) return done\(true\); \}/, 'wider than its room: whole tokens off the end, the whole text in the tip');
   const c = await css();
   assert.match(c, /\.edge-labels code\.lb-code, \.ff-note code\.lb-code \{ font-family: ui-monospace,[^}]*font-size: 1em;[^}]*-webkit-text-stroke: 0; \}/, 'monospace at the label\'s own size, on its own ground');
   assert.match(c, /\.edge-labels > \.has-code \{ text-overflow: clip; \}/, 'the CSS never cuts inside a token');

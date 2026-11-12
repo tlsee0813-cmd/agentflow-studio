@@ -138,14 +138,14 @@ export const shownSentence = (s: string): string => s.replace(new RegExp(CITES.s
  * model's summary, never the person's brief). */
 export interface SummarySource { record: string; first: string; shown: string; flow: string | null; quote: string; from: number }
 /** Polish 5 (ruling F6 Q1): records in paste order, the one the map describes now last: a record about a later target time (its 기준 시점,
- * map-reading pastedTargets) stands after one about an earlier time whatever order they were pasted in; paste order decides only where a
- * date is missing or the dates are equal (a backlog record pasted late never speaks for the map). */
+ * map-reading pastedTargets) stands after one about an earlier time whatever order they were pasted in (a backlog record pasted late never
+ * speaks for the map). Polish 6: a total order. A record with no date is about a time not known, so it never outranks a dated one: the
+ * undated stand first, in paste order, then the dated by their date; paste order decides only among the undated and among equal dates. */
 export function byTarget<T extends { target?: string | null }>(records: readonly T[]): T[] {
-  const left = [...records], out: T[] = [];
-  // The later of two: the later target when both name one and they differ, else the later pasted.
-  const later = (a: T, b: T) => (a.target && b.target && a.target !== b.target ? (a.target > b.target ? a : b) : b);
-  while (left.length) { const best = left.reduce(later); left.splice(left.indexOf(best), 1); out.unshift(best); }
-  return out;
+  const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  return records.map((r, i) => ({ r, i }))
+    .sort((a, b) => Number(!!a.r.target) - Number(!!b.r.target) || (a.r.target && b.r.target ? cmp(a.r.target, b.r.target) : 0) || a.i - b.i)
+    .map(x => x.r);
 }
 export function summarySource(records: readonly { id: string; target?: string | null; body: readonly { text: string; from: number }[] }[]): SummarySource | null {
   const ordered = byTarget(records);

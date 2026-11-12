@@ -375,11 +375,16 @@ export function labelParts(text: string): { t: string; code: boolean }[] {
 }
 /** Whether a label shows code (then it is drawn with its code chip). */
 export const hasCode = (text: string): boolean => labelParts(text).some(p => p.code);
-/** The label cut to its first n tokens (spaces kept inside), with 「…」 when anything is left out: a cut never falls inside a token. */
-export function tokenCut(text: string, n: number): string {
+/** The label cut to its first n tokens (spaces kept inside), with one 「…」 when anything is left out: a cut never falls inside a token
+ * nor ends on a mark that promises more (「기동 ·」, 「==」, 「→」). null when what is left says nothing: fewer than 4 characters of words
+ * (「기동 ·」 is only its lead, 「원시」 a fragment); the label is then left to its line's hover (polish 6). */
+export function tokenCut(text: string, n: number): string | null {
   const toks = text.trim().split(/(\s+)/).filter(Boolean), words = toks.filter(t => !/^\s+$/.test(t));
   if (n >= words.length) return text.trim();
   let seen = 0, out = '';
   for (const t of toks) { if (!/^\s+$/.test(t)) { if (seen === n) break; seen++; } out += t; }
-  return `${out.trimEnd().replace(/…+$/, '')}…`;
+  // Off the end: a cut mark of its own (「...」, 「…」), a comma or 「·」 on the last word, and every whole token that is only such a mark
+  // (「·」, 「→」, 「==」); a token's own characters never (「<command>」 keeps its 「>」).
+  for (let prev = ''; prev !== out;) { prev = out; out = out.trimEnd().replace(/(?:…+|\.{3})$|[·,;]+$|(?:^|\s)[·,;:/\-→←↔⇒=<>!&|+*]+$/, '').trimEnd(); }
+  return out.replace(/[\s·,;:()[\]{}…]/g, '').length < 4 ? null : `${out}…`;
 }

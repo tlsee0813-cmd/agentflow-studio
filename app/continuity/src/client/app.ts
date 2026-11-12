@@ -2717,16 +2717,26 @@ function dropRowIds() {
 }
 /** Polish 5 (ruling: code stays code where the record has no plain words; never a paraphrase): a label's words with the code in them as
  * one monospace code chip per run (line-grammar labelParts), at the label's size on its own ground; plain words stay text. A label with
- * code is cut only between tokens, with 「…」, when it is wider than its room, its whole text in its line's tip (data-full). */
-function fillLabel(el: HTMLElement, text: string, full = text): void {
-  const draw = (t: string) => { const ps = labelParts(t); el.replaceChildren(...ps.map(p => (p.code ? h('code', { class: 'lb-code' }, p.t) : document.createTextNode(p.t)))); return ps; };
-  const ps = labelParts(text), code = ps.some(p => p.code);
-  el.classList.toggle('has-code', code); el.classList.toggle('is-code', code && ps.every(p => p.code || !p.t.trim()));
-  if (!code) { el.textContent = text; return; }
-  draw(text); if (full !== text) el.dataset.full = full;
-  if (!el.isConnected) return;
-  const words = text.trim().split(/s+/).length;
-  for (let n = words - 1; n >= 1 && el.scrollWidth > el.clientWidth + 1; n--) { draw(tokenCut(text, n)); el.dataset.full = full; }
+ * code is cut only between tokens, with 「…」, when it is wider than its room, its whole text in its line's tip (data-full).
+ * Polish 6: false when no cut fits (a one-word label, one whose first word is already too wide, or one whose only cuts keep just its
+ * lead): the caller leaves it to its line's hover, never clipped inside a token. A label ending on its own 「…」 takes no second one from
+ * styles.css (self-cut). Every text a label shows goes through here, so its chip classes always match what it shows. */
+function fillLabel(el: HTMLElement, text: string, full = text): boolean {
+  // The chip classes follow what is drawn (a cut that keeps no code is a plain label again).
+  const draw = (t: string) => { const ps = labelParts(t), code = ps.some(p => p.code);
+    el.classList.toggle('has-code', code); el.classList.toggle('is-code', code && ps.every(p => p.code || !p.t.trim()));
+    el.replaceChildren(...ps.map(p => (p.code ? h('code', { class: 'lb-code' }, p.t) : document.createTextNode(p.t)))); return ps; };
+  const done = (ok: boolean) => { el.classList.toggle('self-cut', /(?:…|\.{3})$/.test(el.textContent ?? '')); return ok; };
+  const code = labelParts(text).some(p => p.code);
+  if (full !== text) el.dataset.full = full; else delete el.dataset.full;
+  if (!code) el.classList.remove('has-code', 'is-code');
+  if (!code) { el.textContent = text; return done(true); }
+  draw(text);
+  const over = () => el.isConnected && el.scrollWidth > el.clientWidth + 1;
+  if (!over()) return done(true);
+  const words = text.trim().split(/\s+/).length;
+  for (let n = words - 1; n >= 1; n--) { const c = tokenCut(text, n); if (c === null) continue; draw(c); el.dataset.full = full; if (!over()) return done(true); }
+  return done(false);
 }
 /** Polish 5: a text a box cuts by its CSS (a line clamp or an ellipsis), measured in the box's own font: unchanged where it fits or the cut
  * keeps its last plan word (계획·예정·…); else cut by clipKeepPlan to the box's room (its width times its lines), so the plan word never
@@ -2829,8 +2839,9 @@ function placeLineLabels() {
     const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}`, 'data-key': e.key });
     box.append(label); fillLabel(label, verb);
     const inv = lineInv(), pts = edgePts(e.key, path), len = path.getTotalLength(), prefer = fan ? (e.to === selected ? 'end' : 'start') : 'long';
-    let spot: Rect | null = null;
-    const tryAt = (text: string) => { label.textContent = text; const tw = label.offsetWidth * inv, th = label.offsetHeight * inv; return labelSpots(pts, tw, th, prefer).find(r => clear(r) && !lineUnder(r, e.key, shown)) ?? null; };
+    let spot: Rect | null = null, fits = true;
+    // Polish 6: each text tried goes through fillLabel (its code chip, or none, as it shows); one that fits in no cut has no place.
+    const tryAt = (text: string) => { fits = fillLabel(label, text); if (!fits) return null; const tw = label.offsetWidth * inv, th = label.offsetHeight * inv; return labelSpots(pts, tw, th, prefer).find(r => clear(r) && !lineUnder(r, e.key, shown)) ?? null; };
     if (said) { label.classList.add('said'); spot = tryAt(`${verb} · ${said}`); if (!spot) label.classList.remove('said'); }
     if (!spot) spot = tryAt(verb);
     // A payload or a beat too long for its line gives way to the channel's short word ('제어', the verb), on the same places.
@@ -2846,9 +2857,9 @@ function placeLineLabels() {
       const beside = (wd: number, ht: number) => [lay.boxes.get(selected!), lay.boxes.get(e.from === selected ? e.to : e.from)].flatMap(b => !b ? [] : [
         { x: b.x, y: b.y - ht - 6 }, { x: b.x + b.w - wd, y: b.y - ht - 6 }, { x: b.x, y: b.y + b.h + 6 }, { x: b.x + b.w - wd, y: b.y + b.h + 6 },
         { x: b.x - wd - 6, y: b.y + b.h / 2 - ht / 2 }, { x: b.x + b.w + 6, y: b.y + b.h / 2 - ht / 2 }].map(r => ({ ...r, w: wd, h: ht })));
-      spot = along(w, hh).find(clear) ?? null;
+      spot = fits ? along(w, hh).find(clear) ?? null : null;
       if (!spot) {
-        label.textContent = REVISED_SHORT; label.classList.add('short');
+        fillLabel(label, REVISED_SHORT); label.classList.add('short');
         const sw = label.offsetWidth * inv, sh = label.offsetHeight * inv;
         spot = along(sw, sh).find(clear) ?? beside(sw, sh).find(clear) ?? null;
       }
@@ -2920,7 +2931,7 @@ function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Se
       el.style.display = 'block';
       [14, 8].forEach((n, fi) => {
         const base = full.replace(/[….]+$/, ''), c = fitCut(base, n); if (c === null) return;
-        const text = `${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; fillLabel(el, text);
+        const text = `${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; if (!fillLabel(el, text)) return;
         const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
         // Along a level or upright run (the short form may sit closer to a bend, 6px), then beside an end of its line: a condition
         // beside the end it branches from first, any other beside the end it points to first (portSpots), before the line goes
@@ -2984,16 +2995,17 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
       el.style.left = `${a.x - 6}px`; el.style.top = `${a.y - 7}px`; el.style.transform = `scale(${inv}) rotate(${ang.toFixed(1)}deg)`;
       continue;
     }
-    let spot: Rect | null = null;
+    let spot: Rect | null = null, filled = false;
     for (const text of forms) {
-      fillLabel(el, text); el.classList.toggle('glyph', text === BADGE_GLYPH); el.classList.toggle('short', text !== forms[0]);
+      // Polish 6: a form that fits in no cut (code wider than its room) is skipped, never clipped inside a token.
+      filled = fillLabel(el, text); if (!filled) continue; el.classList.toggle('glyph', text === BADGE_GLYPH); el.classList.toggle('short', text !== forms[0]);
       const f = find(); spot = f.spots.find(r => clear(r) && !lineUnder(r, e.key, shown)) ?? f.spots.find(clear) ?? null;
       if (spot) break;
     }
     // Forced: its smallest form anywhere on its line off every part and every badge set so far, over other lines or labels if it
     // must (a line whose record says when it flows never reads as one that always flows). A part's name is never covered.
     // Polish round fixes 2: off the line labels as well (a forced badge sat on 「넘겨줌」); over a label only when nothing else is left.
-    if (!spot) { const f = find(); spot = [...f.spots, ...f.along].find(r => offParts(r) && apart(r) && offLabels(r)) ?? [...f.spots, ...f.along].find(r => offParts(r) && apart(r)) ?? null; if (spot) el.classList.add('forced'); }
+    if (!spot && filled) { const f = find(); spot = [...f.spots, ...f.along].find(r => offParts(r) && apart(r) && offLabels(r)) ?? [...f.spots, ...f.along].find(r => offParts(r) && apart(r)) ?? null; if (spot) el.classList.add('forced'); }
     if (!spot) { el.remove(); const k = e.from; (over.get(k) ?? over.set(k, []).get(k)!).push({ e, b, path }); continue; }
     set(el, spot);
   }
@@ -3156,7 +3168,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     if (!label) { const word = restWord(e), cutWord = short ? shortWord(word) : word;
       // Polish round fixes 2: a label that does not fit in whole words is left to the line's tip (no 「기동 · 명령 torch…」).
       if (!cutWord) { hidden.push(g); continue; }
-      label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}${short ? ' brief' : ''}${cutWord !== word && cutWord === word.replace(/^기동\s*·\s*/, '') ? ' whole' : ''}`, 'data-key': e.key, ...(cutWord !== word ? { 'data-full': word } : {}) }); box.append(label); fillLabel(label, cutWord, word); mine = spotsFor(label); }
+      label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}${short ? ' brief' : ''}${cutWord !== word && cutWord === word.replace(/^기동\s*·\s*/, '') ? ' whole' : ''}`, 'data-key': e.key, ...(cutWord !== word ? { 'data-full': word } : {}) }); box.append(label); if (!fillLabel(label, cutWord, word)) { label.remove(); hidden.push(g); continue; } mine = spotsFor(label); }
     if (!mine.length) { label.remove(); hidden.push(g); continue; }
     // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
     // then better places across all labels: every label's first place before any label's second.
@@ -3734,7 +3746,7 @@ const ffLit = () => ffActive() && !selected && !planView.isOpen() && !ffLensPick
 /** Each pasted text's target time (map-reading pastedTargets), read once per list of pasted texts (they are never edited). */
 let ffTargetsFor: object | null = null, ffTargetsNow = new Map<string, string | null>();
 const ffTargets = (o: Opened) => { if (ffTargetsFor !== o.project.pasted) { ffTargetsNow = pastedTargets(o.project.pasted); ffTargetsFor = o.project.pasted; } return ffTargetsNow; };
-/** The map record about the latest target time (its 기준 시점; paste order only where a date is missing or equal, first-flow byTarget): its
+/** The map record about the latest target time (its 기준 시점; an undated record never outranks a dated one, paste order only among the undated or equal dates, first-flow byTarget): its
  * C-SUMMARY (its own first sentence and core-flow sentence) and where it stands. */
 function summaryOf(o: Opened): (SummarySource & { label: string }) | null {
   const ids = new Set(o.project.readings.filter(isMapReading).flatMap(r => r.records.map(x => x.id))), tg = ffTargets(o);
@@ -3909,7 +3921,11 @@ function placeFocusMarks() {
   const put = (el: HTMLElement, spots: (w: number, hh: number) => { x: number; y: number }[], maxW = 260 * inv, own?: Rect) => {
     el.style.transform = `scale(${inv})`; el.style.transformOrigin = '0 0'; el.style.maxWidth = `${Math.max(120, maxW / inv)}px`; world.append(el);
     // Polish 5: its words with any code as a code chip, and its two lines never losing a plan word.
-    const nt = el.querySelector<HTMLElement>('.ff-note-text'); if (nt) { const t0 = nt.textContent ?? ''; fillLabel(nt, keepPlanFit(nt, t0, 2)); }
+    const nt = el.querySelector<HTMLElement>('.ff-note-text');
+    if (nt) { const t0 = nt.textContent ?? '', t1 = keepPlanFit(nt, t0, 2); fillLabel(nt, t1);
+      // Polish 6: words that still run past the two lines are cut between tokens with one 「…」 (never the clamp's 「…」 after the record's
+      // own 「...」: 「hyperfine <command> … …」), keeping a plan word the text holds; the whole words stay in the note's hover.
+      for (let n = t1.trim().split(/\s+/).length - 1; n >= 1 && nt.scrollHeight > nt.clientHeight + 1; n--) { const c = tokenCut(t1, n); if (c && (!PLAN_WORD.test(t1) || PLAN_WORD.test(c))) fillLabel(nt, c, t1); } }
     // A card's own chip (own given) is never left off: with no free spot it takes its first one, on its card's edge.
     const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, all = spots(w, hh).map(p => ({ ...p, w, h: hh })), at = all.find(r => free(r, own)) ?? (own ? all[0] : undefined);
     if (!at) { el.remove(); return; }
