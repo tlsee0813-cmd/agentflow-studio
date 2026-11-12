@@ -31,7 +31,8 @@ export function stepLens(cur: LensId, dir: 1 | -1, usable: (id: LensId) => boole
 /* ---------- what a lens does to the map (classes only) ---------- */
 /** How a lens draws each channel's lines and which card families it lifts. Never a position, a size or a label place.
  * Beauty v2 B5 (the binding lens contract): a lens has a foreground and a background, and the background stays visible: a
- * channel the lens is about is drawn whole (1), every other line at BG_LINE (never fainter). 구성: no channel is the subject (the
+ * channel the lens is about is drawn whole (1), every other line in the background (BG_LINE: its place, no longer an opacity — the craft spec
+ * draws the background in a solid quieter tone, styles.css, never faded). 구성: no channel is the subject (the
  * parts, their containment and the selected part's own lines are); 데이터: data lines; 시작·반복: control lines; 상태·공백: no line
  * (the recorded states are); 시나리오: no channel (the recorded path is, drawn on top). */
 export const BG_LINE = 0.55;

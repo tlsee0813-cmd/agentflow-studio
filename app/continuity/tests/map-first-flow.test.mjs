@@ -7,7 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { firstFlow, flowCandidates, namedFlow, flowParts, flowSteps, nameTokens, summarySentences, summarySource, shownSentence, headLines, hubFolds, foldedLines, foldWord,
-  switcherText, sourceText, branchWords, statesOrder, recordWords, codeLike, scenarioBasis, SCENARIO_NO_BASIS, HUB_FOLD_MIN, FLOW_RULES, FLOW_CONTROL, FLOW_SOURCE, ENTRY_SOFT_OVER } from '../dist/public/client/first-flow.js';
+  switcherText, startCard, sourceText, branchWords, statesOrder, recordWords, codeLike, scenarioBasis, SCENARIO_NO_BASIS, HUB_FOLD_MIN, FLOW_RULES, FLOW_CONTROL, FLOW_SOURCE, ENTRY_SOFT_OVER } from '../dist/public/client/first-flow.js';
 import { readFirstView, writeFirstView, recordOf, firstView } from '../dist/public/client/first-view.js';
 import { COND_UNSAID } from '../dist/public/client/line-grammar.js';
 import * as D from '../dist/public/shared/domain.js';
@@ -272,7 +272,10 @@ test('FF-16 the basis sentence shows under the switcher when it is not the top o
   for (const l of ff.filter(x => /ff-flow|ff-ctx|lf-bg/.test(x) && /--bw|stroke:/.test(x))) assert.match(l, /^#space\.ff-on\.ff-rest/, `weights at rest only: ${l.slice(0, 60)}`);
   assert.ok(ff.some(l => l.startsWith('#space.ff-on.ff-rest.ff-soft .world .edge.ff-flow') && /--bw: 2\.25;/.test(l)), 'a picked lens: the lines at the context weight');
   for (const l of ff.filter(x => /lens-off|lg-fade/.test(x))) assert.match(l, /#space\.ff-on:not\(\.lens-state\)/, '상태·공백 keeps its card fade');
-  assert.ok(ff.some(l => /edge-labels > :not\(\.ff-keep\):not\(\.edge-cue\):not\(\.near\):not\(:hover\) \{ opacity: \.6; \}/.test(l)), 'background labels read in a quieter tone at rest');
+  // Craft spec (review of v5 focus 3) changed exactly this: a label on its halo takes the quieter text tone, never an opacity (the line
+  // would show through its words); badges and counts keep theirs.
+  assert.ok(ff.some(l => /edge-labels > \.edge-label:not\(\.ff-keep\):not\(\.near\):not\(:hover\) \{ color: var\(--text-4\); \}/.test(l)), 'background labels read in a quieter tone at rest');
+  assert.ok(ff.some(l => /edge-labels > :not\(\.ff-keep\):not\(\.edge-cue\):not\(\.edge-label\):not\(\.near\):not\(:hover\) \{ opacity: \.6; \}/.test(l)));
   assert.match(css, /\.focus-top \.ft-basis \{[^}]*white-space: nowrap;[^}]*text-overflow: ellipsis;/);
 });
 
@@ -368,8 +371,9 @@ test('FF-22 the basis sentence and the top line show no evidence group, file tag
   const a = focusBlock(await app());
   assert.match(a, /const basisWords = \(t: string\): string \| null => \{ const w = labelPlain\(shownSentence\(t\)\);/, 'through the labels\' row-ID guard');
   assert.match(a, /const said = c\.text \? basisWords\(c\.text\) : null/);
-  assert.match(a, /근거 문장: “\$\{said \?\? shownSentence\(c\.text\)\}”/, 'the switcher\'s tip: plain words, never an evidence group or file tag');
-  assert.match(a, /\}, basisWords\(s\.first\) \?\? s\.shown\)/, 'the top sentence too');
+  // Review of v5 focus 3 (A5) changed exactly this: no fallback to the unguarded words; nothing plain left, nothing shown (the source only).
+  assert.match(a, /c\.text \? \(said \? `근거 문장: “\$\{said\}”` : null\)/, 'the switcher\'s tip: plain words, never an evidence group or file tag');
+  assert.match(a, /const topWords = s \? basisWords\(s\.first\) : null;/, 'the top sentence too');
   assert.doesNotMatch(a, /\$\{c\.text\}”/, 'never the raw sentence in quotes on screen');
 });
 
@@ -420,11 +424,12 @@ test('FF-26 a scenario\'s lines stand on that scenario record: its own heads, or
 
 test('FF-27 the fold never leaves a card with no line shown; the chip sits on its hub card\'s edge; N stays exact (review2 #11)', async () => {
   // Hub a: six lines off the view; x0..x2 have no other line (they would read as unconnected): theirs stay. x3..x5 keep a line to z.
-  const lines = [...Array.from({ length: 6 }, (_, i) => ({ key: `a${i}`, from: 'a', to: `x${i}`, flow: false })),
-    ...[3, 4, 5].map(i => ({ key: `k${i}`, from: `x${i}`, to: 'z', flow: false })), { key: 'f', from: 'a', to: 'b', flow: true }];
+  // Review of v5 focus 3 (A4) changed the numbers: what is left must still be HUB_FOLD_MIN or more, so the hub here has nine lines off.
+  const lines = [...Array.from({ length: 9 }, (_, i) => ({ key: `a${i}`, from: 'a', to: `x${i}`, flow: false })),
+    ...[3, 4, 5, 6, 7, 8].map(i => ({ key: `k${i}`, from: `x${i}`, to: 'z', flow: false })), { key: 'f', from: 'a', to: 'b', flow: true }];
   const folds = hubFolds(['a'], lines);
-  assert.deepEqual(folds.get('a'), ['a3', 'a4', 'a5']);
-  assert.equal(foldedLines(folds, new Set()).byHub.get('a').length, 3, 'N is exactly what it hides');
+  assert.deepEqual(folds.get('a'), ['a3', 'a4', 'a5', 'a6', 'a7', 'a8']);
+  assert.equal(foldedLines(folds, new Set()).byHub.get('a').length, 6, 'N is exactly what it hides');
   assert.equal(hubFolds(['a'], lines.filter(l => !l.key.startsWith('k'))).size, 0, 'every end alone: nothing folds');
   const a = focusBlock(await app());
   assert.match(a, /put\(chip, \(w, hh\) => \[\{ x: b\.x \+ b\.w - w - m, y: b\.y \+ b\.h - hh \/ 2 \}/, 'straddling its card\'s lower edge');
@@ -436,12 +441,116 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   const a = await app();
   assert.match(a, /const FT_GIVE = 0\.03;/);
   assert.match(a, /const base = topInset\(\) - ftH\(\), at = frameView\(explicit, base\);/, 'framed under the strip alone first');
-  assert.match(a, /for \(const r of \[box\.full, box\.one, box\.short\]\)/, 'whole, then its sentence on one line, then stepped back');
+  // Review of v5 focus 3 (A2, A3) changed exactly this: each form measured where it stands for that camera (beside the title).
+  assert.match(a, /for \(const form of \[null, 'ft-one', 'ft-under'\] as const\)/, 'whole, then its sentence on one line, then stepped back');
+  assert.match(a, /done = !ftCovers\(ftBox\(form, camera, inkAt\(k\)\), camera, scene, inkAt\(k\)\)/);
   assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects\];/, 'never over a card or a lane caption');
-  assert.match(a, /el\.classList\.add\('ft-one'\); if \(!covers\(\)\) return;/, 'the sentence on one line before it steps back');
+  assert.match(a, /el\.classList\.add\('ft-one'\); ftPlace\(el, camera, ink\); if \(!covers\(\)\) return;/, 'the sentence on one line before it steps back');
   assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop\)/, 'the map\'s own title never reads through the top line');
   const css = await cssNoComments();
   assert.match(css, /\.focus-top\.ft-one \.ft-sentence \{ -webkit-line-clamp: 1; \}/);
   assert.match(css, /\.focus-top\.ft-under \.ft-sentence \{ display: none; \}/, 'stepped back, it takes no room');
-  assert.match(a, /if \(!done\) frameView\(explicit, base \+ box\.short\.h \+ 8\);/, 'at worst the short form\'s room, never the whole sentence\'s');
+  assert.match(a, /if \(!done\) frameView\(explicit, base \+ ftBox\('ft-under', camera, null\)\.h \+ 8\);/, 'at worst the short form\'s room, never the whole sentence\'s');
+});
+
+// ---------- review of v5 focus 3 (A1–A6) and the craft spec's first priority (위계/토큰) ----------
+
+test('FF-29 a whole name one part holds wins over another part\'s stem that reads the same; a stem counts only where no whole name does (A1)', () => {
+  const S = [P('s', '스케줄러'), P('q', '스케줄러 큐'), P('w', '워커')];
+  assert.deepEqual(flowSteps('스케줄러가 워커에 보낸다', S), [['s'], ['w']], '「스케줄러」 is the scheduler\'s whole name, not the queue\'s stem');
+  assert.deepEqual(flowSteps('스케줄러 큐에서 워커가 꺼낸다', S), [['q'], ['w']], 'the longer whole name still reads');
+  const Q = [P('a', '수집기'), P('b', '수집기록'), P('c', '분석기')];
+  assert.deepEqual(flowSteps('수집기가 모은 것을 분석기가 읽는다', Q), [['a'], ['c']]);
+  assert.deepEqual(flowSteps('수집기록을 분석기가 읽는다', Q), [['b'], ['c']]);
+  assert.deepEqual(flowSteps('일정 계산이 끝나면 분석기가 읽는다', [P('x', '일정 계산기'), P('c', '분석기')]), [['x'], ['c']], 'a stem no whole name reads still counts');
+  assert.deepEqual(flowSteps('분석기가 저장소에 쓴다', [P('x1', '저장소'), P('x2', '저장소'), P('c', '분석기')]), [['c']], 'a whole name two parts hold still picks none');
+});
+
+test('FF-30 the top line\'s clear check includes the drawn lines\' routes and the labels on the map, not only cards and lane captions (A2)', async () => {
+  const a = await app();
+  assert.match(a, /routes: \[\.\.\.lastRouted\.values\(\)\]\.filter\(r => shown\.has\(r\.key\) && r\.pts\.length > 1\)/, 'every drawn line\'s route');
+  assert.match(a, /querySelectorAll<HTMLElement>\('\.edge-labels > \*, \.ff-note, \.ff-fold-chip'\)/, 'every label, badge, count, note and chip shown');
+  assert.match(a, /if \(scene\.routes\.some\(pts => polylineHitsRect\(pts, m, 0\)\)\) return true;/);
+  assert.match(a, /const covers = \(\) => ftCovers\(/, 'at rest the same check steps the sentence back');
+  assert.match(a, /function placeEdgeLabels\(\) \{[^\n]*syncFocusTop\(\); \}/, 'checked again once the labels have their places');
+});
+
+test('FF-31 the map\'s title and its 기록 정보 stay in sight at rest: the top line stands beside the title, the record\'s time beside the toggle (A3)', async () => {
+  const a = await app();
+  assert.match(a, /function ftPlace\(el: HTMLElement, cam: Cam, ink: Rect \| null\)/);
+  assert.match(a, /const left = Math\.round\(t\.x \+ t\.w \+ 24\)/, 'beside the title\'s ink, never over it');
+  assert.match(a, /if \(scene\.boxes\.some\(hit\) \|\| \(ink && hit\(ink\)\)\) return true;/, 'the title itself is never under the line');
+  assert.match(a, /const underTop = overCols && !!fr && fr\.y < ti\.y \+ ti\.h && ti\.y < fr\.y \+ fr\.h;/, 'the title steps back only where the line truly stands over its ink');
+  assert.match(a, /metaBtn, !metaOpen && basis \? h\('span', \{ class: 'map-when', title: basis\.title \}, basis\.textContent\) : null/, 'the record\'s time and version at rest');
+  const css = await cssNoComments();
+  assert.match(css, /\.map-when \{[^}]*font-size: var\(--t-kind, 12px\);[^}]*pointer-events: auto;/);
+});
+
+test('FF-32 a hub folds only while what is left after the skip rule is still HUB_FOLD_MIN or more (A4)', () => {
+  const off = (n) => Array.from({ length: n }, (_, i) => ({ key: `a${i}`, from: 'a', to: `x${i}`, flow: false }));
+  const keep = (from, to) => Array.from({ length: to - from }, (_, i) => ({ key: `k${from + i}`, from: `x${from + i}`, to: 'z', flow: false }));
+  assert.equal(hubFolds(['a'], [...off(7), ...keep(1, 7)]).get('a').length, 6, 'one end alone keeps its line: six fold');
+  assert.equal(hubFolds(['a'], [...off(7), ...keep(2, 7)]).size, 0, 'five left after the rule: no fold');
+  assert.equal(hubFolds(['a'], [...off(6), ...keep(3, 6)]).size, 0, 'three left: no fold (it once folded three)');
+});
+
+test('FF-33 every shown or hovered sentence goes through the guard; nothing plain left: nothing shown, the source only in the hover (A5)', async () => {
+  const a = focusBlock(await app()), code = a.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  assert.doesNotMatch(code, /\?\? s\.shown/, 'never the unguarded top sentence');
+  assert.doesNotMatch(code, /\$\{s\.first\}/, 'never the raw sentence in the top line\'s hover');
+  assert.doesNotMatch(code, /\$\{c\.text\}/, 'never the raw basis in a hover');
+  assert.doesNotMatch(code, /said \?\? shownSentence/, 'never the unguarded basis in the switcher\'s hover');
+  assert.match(code, /const sentence = s && topWords \?/, 'no sentence when nothing plain is left');
+  assert.match(code, /title: `\$\{FLOW_CONTROL\}의 근거 문장 · \$\{c\.source\}\\n\$\{said\}`/);
+});
+
+test('FF-34 「…에서 차례로」 and 「…하면 차례로」 state no order; 차례로 after a list, or opening a clause, does (A6)', () => {
+  for (const t of ['수집기에서 차례로 꺼내 분석기에 넘긴다', '수집기는 실패하면 차례로 재시도하고 분석기에 넘긴다', '큐에서 차례로 꺼낸다', '수집기에서 이어서 읽는다'])
+    assert.equal(statesOrder(t), false, t);
+  for (const t of ['수집기, 분석기, 보고서 생성기를 차례로 거친다', '차례로 수집기와 분석기를 돈다', '수집기가 모은다, 차례로 분석기가 읽는다', '수집기가 모은 뒤 이어서 분석기가 읽는다', '수집기가 모으고 그 다음 분석기가 읽는다'])
+    assert.equal(statesOrder(t), true, t);
+});
+
+test('FF-35 one start card, only where the record backs a start; never on the first named part of an unordered view (craft spec 위계, F6)', async () => {
+  const sum = (t, x = {}) => flowCandidates('summary', base({ summaryFlow: t, ...x }))[0] ?? null;
+  const ordered = sum('주문 창구 → 반죽 배합기 → 오븐 굽기 단계');
+  assert.equal(ordered.source, FLOW_SOURCE.ordered);
+  assert.deepEqual(startCard(ordered), { part: 'desk', why: 'ordered' }, 'the first step of a flow the record describes in order');
+  const plain = sum('주문 창구와 반죽 배합기, 오븐 굽기 단계가 함께 일한다');
+  assert.equal(plain.source, FLOW_SOURCE.summary);
+  assert.ok(plain.lines.length > 0);
+  assert.equal(startCard(plain), null, 'an unordered view: no start card, even on its first named part');
+  assert.equal(startCard(sum('주문 창구·새벽 타이머 → 반죽 배합기 → 오븐 굽기 단계')), null, 'a first step of alternatives is no one start');
+  assert.equal(startCard(sum('판매 장부 → 반죽 배합기 → 오븐 굽기 단계')), null, 'a first step past a gap is not on the view');
+  const head = flowCandidates('head', base({ headLines: ['주문 창구 → 반죽 배합기 → 오븐 굽기 단계'] }))[0];
+  assert.equal(startCard(head), null, 'a first-structure line is 기록의 첫 구조, never a recorded start');
+  assert.deepEqual(startCard(flowCandidates('entry', base())[0]), { part: 'cli', why: 'entry' }, 'a C-ENTRY start');
+  assert.deepEqual(startCard(flowCandidates('scenario', base({ scenarios: [SC] }))[0]), { part: 'desk', why: 'scenario' }, 'a scenario\'s recorded start');
+  assert.equal(startCard(flowCandidates('scenario', base({ scenarios: [{ ...SC, start: null }] }))[0]), null, 'a scenario that records no start');
+  assert.equal(startCard(null), null);
+  const a = focusBlock(await app());
+  assert.match(a, /const st = startCard\(f\); if \(st\) card\(st\.part\)\?\.classList\.add\('ff-start'\);/, 'the app marks only that card');
+  assert.doesNotMatch(a, /f\.parts\[0\]!\)\}"\]`\)\?\.classList\.add\('ff-start'\)/, 'never the first named part by itself');
+  const css = await cssNoComments();
+  assert.match(css, /#space\.ff-on\.ff-rest:not\(\.ff-soft\) \.node\.ff-start:not\(\.selected\) \{ background: #eef3ff; border-color: var\(--accent\); outline: calc\(2px \* var\(--u, 1\)\) solid var\(--accent\);/);
+  assert.match(css, /#space\.ff-on\.ff-rest:not\(\.ff-soft\) \.node\.ff-card:not\(\.selected\) \{ border-color: var\(--accent\); outline: calc\(1\.5px \* var\(--u, 1\)\) solid var\(--accent\);/);
+});
+
+test('FF-36 craft tokens: one accent #315eca, lines never faded by opacity (solid channel colours), labels 12/500 on a halo, conditions as small rects', async () => {
+  const raw = await readFile(new URL('../public/styles.css', import.meta.url), 'utf8'), css = await cssNoComments();
+  assert.match(css, /--accent: #315eca;/);
+  assert.doesNotMatch(raw, /#3358ff|rgba\(51,88,255,/i, 'the old accent is gone everywhere');
+  assert.doesNotMatch(css, /opacity: var\(--lo-/, 'no lens fades a line by opacity');
+  assert.match(css, /\.edge-line \{ --lw: 1\.25; fill: none; stroke: var\(--edge-c, var\(--edge\)\);/);
+  for (const [c, v] of [['c-data', '#5f748e'], ['c-control', '#748093'], ['c-uses', '#7a8496']]) assert.match(css, new RegExp(`\\.edge\\.${c} \\{ --edge-c: ${v}; \\}`));
+  assert.match(css, /\.space:is\(\.lens-data, \.lens-start, \.lens-scenario\) \.world \.edge\.lf-bg \{ --edge-c: #7e8a9d; \}/, 'a lens\'s background: a solid quieter tone');
+  // #7e8a9d stays at 3:1 or more on #f6f7f9 and on the canvas (#f4f5f7).
+  const lum = (h) => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(x => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const ratio = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+  for (const bg of ['#f6f7f9', '#f4f5f7']) for (const fg of ['#7e8a9d', '#5f748e', '#748093', '#7a8496']) assert.ok(ratio(fg, bg) >= 3, `${fg} on ${bg}`);
+  assert.match(css, /\.space \.edge-labels > \.edge-label:not\(\.on\):not\(\.near\):not\(\.type-chip\):not\(\.revised\) \{[^}]*font-size: 12px; line-height: 16px; font-weight: 500; color: #526176; background: transparent;[^}]*-webkit-text-stroke: 6px var\(--halo, var\(--bg\)\); paint-order: stroke fill;/);
+  assert.match(css, /\.space \.edge-labels > \.edge-badge\.b-condition:not\(\.on\) \{ height: 22px; padding: 0 6px; border-radius: 5px;/);
+  const a = await app();
+  assert.match(a, /el\.style\.setProperty\('--halo', `rgb\(/, 'the halo is the ground the label stands on');
+  assert.doesNotMatch(a, /setProperty\(`--lo-\$\{k\}`/, 'no line opacities set any more');
 });

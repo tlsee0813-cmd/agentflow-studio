@@ -153,9 +153,10 @@ export function headLines(value: string): string[] {
   const parts = /[①-⑳]/.test(v) ? v.split(/[①-⑳]/) : /(?:^|\s)\d{1,2}\)\s/.test(v) ? v.split(/(?:^|\s)\d{1,2}\)\s/) : v.split(/\s+\/\s+|\s*;\s*/);
   return parts.map(x => x.trim()).filter(Boolean);
 }
-/** An order word that opens a clause or joins two (「…, 그 다음 …」, 「…하고 이어서 …」, 「…를 차례로」 at a clause's start or after a verb's
- * joining ending), never a bare 「다음에」 (「다음에 쓸 값」) or a word's own 「…순으로」 (「날짜순으로」, 「오래된 순으로」). */
-const ORDER_WORD = /(?:(?:^|[,，;:]\s*|(?:고|며|면|서|뒤|후)\s+)(?:그\s*다음(?:에|으로)?|그\s*뒤(?:에)?|그\s*후(?:에)?|이어서|차례로|순서대로)|(?:를|을)\s+(?:차례로|순서대로))(?=[\s,，]|$)/;
+/** An order word that opens a clause or joins two (「…, 그 다음 …」, 「…하고 이어서 …」), and 차례로 · 순서대로 only at a clause's start or
+ * after a list it orders (「…를 차례로」); never a bare 「다음에」 (「다음에 쓸 값」), a word's own 「…순으로」 (「날짜순으로」, 「오래된 순으로」),
+ * 「…에서 차례로」 (one by one out of a place) or 「…하면 차례로」 (in turn, under a condition) (review of v5 focus 3, A6). */
+const ORDER_WORD = /(?:(?:^|[,，;:]\s*)(?:그\s*다음(?:에|으로)?|그\s*뒤(?:에)?|그\s*후(?:에)?|이어서|차례로|순서대로)|(?:고|며|면|(?<!에)서|뒤|후)\s+(?:그\s*다음(?:에|으로)?|그\s*뒤(?:에)?|그\s*후(?:에)?|이어서)|(?:를|을)\s+(?:차례로|순서대로))(?=[\s,，]|$)/;
 /** Whether a sentence states the order of actions itself: then its lines are 「기록이 설명한 흐름」; otherwise only 「요약에 나온 연결」. Only an
  * arrow, a clause-opening or joining 그 다음 · 그 뒤 · 이어서 · 차례로 · 순서대로, or 「…순으로」 right after a list of two or more of the
  * map's names (read with the parts given; without them no 「순으로」 counts). */
@@ -268,7 +269,11 @@ function namedSpans(text: string, parts: readonly FvPart[], loops: readonly FvLo
   };
   const hold = (k: string) => { for (const [s, e] of plain(k)) if (!taken.some(t => s < t.e && t.s < e)) taken.push({ part: '', s, e }); };
   // 2. Whole names, then a Korean name read as the work it names (its last syllable off, three or more characters left), longest first.
-  const byName = held(parts.flatMap(p => { const k = norm(p.name), st = nameStem(p.name); return [{ id: p.id, k }, ...(st ? [{ id: p.id, k: norm(st) }] : [])]; }).filter(x => x.k.length >= 2));
+  // A whole name and a stem never share one pool (review of v5 focus 3, A1): a whole name one part holds wins over another part's stem
+  // that reads the same (「스케줄러」 beside 「스케줄러 큐」, 「수집기」 beside 「수집기록」); a stem counts only where no whole name reads so.
+  const wholes = parts.map(p => ({ id: p.id, k: norm(p.name) })).filter(x => x.k.length >= 2), wholeKeys = new Set(wholes.map(x => x.k));
+  const stems = parts.flatMap(p => { const st = nameStem(p.name); return st ? [{ id: p.id, k: norm(st) }] : []; }).filter(x => x.k.length >= 2 && !wholeKeys.has(x.k));
+  const byName = held([...wholes, ...stems]);
   for (const { id, k } of byName) if (id) { for (const [s, e] of plain(k)) take(id, s, e); } else hold(k);
   // 3. Record IDs as written (B03, B03:L01); never a piece of a longer token.
   for (const m of text.matchAll(/(?<![A-Za-z0-9])(B\d{1,3})(?::(L\d{1,3}))?(?![\dA-Za-z])/g)) {
@@ -400,6 +405,23 @@ function dressed(rule: FlowRule, key: string, source: string, name: string, text
     start: rule === 'entry' ? { part: sp, text: startText } : rule === 'scenario' && startText ? { part: first, text: startText } : null,
     end: rule === 'scenario' && endText ? { part: last, text: endText } : null };
 }
+/** Why a card is the view's one start card: a recorded start's C-ENTRY part, a scenario's recorded start, or the first step of a view the
+ * record describes in order. */
+export type StartWhy = 'entry' | 'scenario' | 'ordered';
+/** The view's one start card (craft spec 위계: a light accent face and a 2px accent edge), only where the record backs a start: a recorded
+ * start's own part (기록된 시작), a scenario's recorded start, or the first step of a view whose source is 「기록이 설명한 흐름」 when that step
+ * is one part and a drawn line of the view leaves it. Never the first named part of a view that states no order (ruling F6: name order is
+ * no order), never a part promoted for its lines (no hub is a start). null: no start card. */
+export function startCard(c: FlowCandidate | null): { part: string; why: StartWhy } | null {
+  if (!c || !c.drawnLines) return null;
+  if (c.rule === 'entry') return c.start ? { part: c.start.part, why: 'entry' } : null;
+  if (c.rule === 'scenario') return c.start?.text ? { part: c.start.part, why: 'scenario' } : null;
+  if (c.rule === 'summary' && c.source === FLOW_SOURCE.ordered) {
+    const st = c.steps[0];
+    return st && st.length === 1 && c.ends[0] === st[0] ? { part: st[0]!, why: 'ordered' } : null;
+  }
+  return null;
+}
 /** Evidence first: the candidate with the most drawn lines, then the record's order. */
 const byEvidence = (cs: FlowCandidate[]): FlowCandidate[] => cs.map((c, i) => ({ c, i })).sort((a, b) => b.c.drawnLines - a.c.drawnLines || a.i - b.i).map(x => x.c);
 /** Every candidate of one rule (a scenario's in paste order; the others by evidence, then the record's order). */
@@ -456,8 +478,9 @@ export function hubFolds(cards: readonly string[], lines: readonly { key: string
   const bare = new Set([...ends].filter(([, ks]) => ks.every(k => would.has(k))).map(([x]) => x));
   const out = new Map<string, string[]>();
   for (const c of busy) {
+    // What is left after that rule folds only while it is still HUB_FOLD_MIN or more (review of v5 focus 3, A4): fewer is no hub.
     const fold = off.get(c)!.filter(l => !bare.has(l.from === c ? l.to : l.from)).map(l => l.key);
-    if (fold.length) out.set(c, fold);
+    if (fold.length >= HUB_FOLD_MIN) out.set(c, fold);
   }
   return out;
 }

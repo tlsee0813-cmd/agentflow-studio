@@ -46,7 +46,7 @@ import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirs
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
-import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
@@ -58,7 +58,7 @@ import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenar
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
-import { firstFlow, hubFolds, foldedLines, foldWord, switcherText, sourceText, summarySource, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
+import { firstFlow, startCard, hubFolds, foldedLines, foldWord, switcherText, sourceText, summarySource, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -2344,7 +2344,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     onclick: () => { metaOpen = !metaOpen; renderSpace('keep'); } }, metaOpen ? '기록 정보 접기 ▴' : '기록 정보 ▾') : null;
   const title = h('header', { class: `map-title${metaOpen ? ' meta-open' : ''}` }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
-    metaBtn, meta.length ? h('div', { class: 'map-meta' }, ...meta) : null, scenarioStrip(o),
+    // Review of v5 focus 3 (A3): the record's time and version stay in sight at rest, under 「기록 정보 ▾」 (the whole line in its tip and,
+    // opened, under it).
+    metaBtn, !metaOpen && basis ? h('span', { class: 'map-when', title: basis.title }, basis.textContent) : null, meta.length ? h('div', { class: 'map-meta' }, ...meta) : null, scenarioStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -2653,7 +2655,26 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); dropRowIds(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); markFocusLabels(); placeFocusMarks(); }
+function placeEdgeLabels() { placeLineLabels(); dropRowIds(); haloLabels(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); markFocusLabels(); placeFocusMarks(); syncFocusTop(); }
+/** Craft spec (라벨 halo 3px, 바탕색): each line label's halo is the ground it actually stands on: the face of the innermost group drawn
+ * under its middle (a region's or a tinted group's colour, over the canvas), else the canvas itself. */
+function haloLabels() {
+  const world = $('world'), root = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f4f5f7';
+  const rgb = (c: string): [number, number, number, number] | null => {
+    const m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,/\s]+([\d.]+))?\s*\)/.exec(c); if (m) return [+m[1]!, +m[2]!, +m[3]!, m[4] === undefined ? 1 : +m[4]];
+    const x = /^#([0-9a-f]{6})$/i.exec(c.trim()); return x ? [parseInt(x[1]!.slice(0, 2), 16), parseInt(x[1]!.slice(2, 4), 16), parseInt(x[1]!.slice(4), 16), 1] : null;
+  };
+  const frames = [...lay.boxes.values()].filter(b => b.kind === 'frame').sort((a, b) => a.depth - b.depth), faces = new Map<string, [number, number, number, number] | null>();
+  const faceOf = (id: string) => { if (!faces.has(id)) { const el = world.querySelector<HTMLElement>(`.frame[data-box="${CSS.escape(id)}"]`); faces.set(id, el ? rgb(getComputedStyle(el).backgroundColor) : null); } return faces.get(id)!; };
+  const k = lineInv();
+  for (const el of world.querySelectorAll<HTMLElement>('.edge-labels > .edge-label')) {
+    const x = (parseFloat(el.style.left) || 0) + el.offsetWidth * k / 2, y = (parseFloat(el.style.top) || 0) + el.offsetHeight * k / 2;
+    // The ground, outermost first: each group face over what lies under it (a 2% tint over the canvas reads as its own grey).
+    let c = rgb(root) ?? [244, 245, 247, 1];
+    for (const f of frames) if (x >= f.x && x <= f.x + f.w && y >= f.y && y <= f.y + f.h) { const g = faceOf(f.id); if (g && g[3] > 0) c = [0, 1, 2].map(i => Math.round(g[i]! * g[3] + c[i]! * (1 - g[3]))).concat(1) as typeof c; }
+    el.style.setProperty('--halo', `rgb(${c[0]}, ${c[1]}, ${c[2]})`);
+  }
+}
 /** Beauty v4 (P3): the last guard that no line label, badge or chip on the map shows a record row ID (CD01, B12, N02.63, LN13): each
  * reads the record's own words for that row where the map has them, else without the ID; a label with nothing of its own left goes
  * (its words read on hover, as written). A condition's or 선택 badge keeps its kind word then (a conditional line never reads as one
@@ -3185,8 +3206,8 @@ function applyCamera(animate = false) {
   // their places are found again when the scale changed enough to matter.
   const inv = Math.min(1 / 0.3, Math.max(0.625, 1 / camera.k));
   sp.style.setProperty('--inv', inv.toFixed(3));
-  // Line labels follow the zoom a little (11–14px on screen, line-grammar labelPx): never heavier than a card's name far out.
-  sp.style.setProperty('--linv', (labelPx(camera.k) / (13 * camera.k)).toFixed(3));
+  // Craft spec (라벨 12/500): a line label reads 12px on screen at the first screen's zooms, growing with labelPx nearer in (never under 12).
+  sp.style.setProperty('--linv', (Math.max(12, labelPx(camera.k)) / (12 * camera.k)).toFixed(3));
   if ((Math.abs(inv - placedInv) / placedInv > 0.08 || tier !== placedTier) && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
   updateSticky();
   saveViewSoon();
@@ -3199,35 +3220,95 @@ function fitView(explicit: boolean, animate = false) {
   const o = opened; if (!o) return;
   syncMapArea();
   // Review of v5 focus (judges #9): the top line is top left and narrow, so the fit keeps room only for what it covers: first the map
-  // framed under the strip alone; if a card would stand under the top line there, the same frame a little smaller (at most FT_GIVE)
-  // where none does; else where none stands under its short form (the sentence steps back, the switcher stays); else the room of that
-  // short form above the map.
-  const box = ftShown() ? ftBoxes() : null;
-  if (!box) { frameView(explicit, topInset() - ftH()); applyCamera(animate); return; }
+  // framed under the strip alone; if anything of the map would stand under the top line there, the same frame a little smaller (at most
+  // FT_GIVE) where nothing does; else where nothing stands under its short form (the sentence steps back, the switcher stays); else the
+  // room of that short form above the map. Review of v5 focus 3 (A2, A3): 「anything」 is a card, a lane caption, a drawn line's route, a
+  // label on the map or the map's own title, and the top line stands beside that title while the title is in its rows (ftPlace).
+  if (!ftShown()) { frameView(explicit, topInset() - ftH()); applyCamera(animate); return; }
   const base = topInset() - ftH(), at = frameView(explicit, base);
-  const clear = (r: Rect) => !ftObstacles().some(b => camera.x + b.x * camera.k < r.x + r.w && r.x < camera.x + (b.x + b.w) * camera.k && camera.y + b.y * camera.k < r.y + r.h && r.y < camera.y + (b.y + b.h) * camera.k);
+  const scene = ftScene(), ink = titleInk();
+  const inkAt = (k: number) => (k >= TITLE_FLOOR_K ? ink : null);
   let done = false;
-  if (at.whole) for (const r of [box.full, box.one, box.short]) {
-    for (let k = at.k; k >= at.k - FT_GIVE - 1e-9 && !done; k -= 0.002) { at.place(k); done = clear(r); }
+  if (at.whole) for (const form of [null, 'ft-one', 'ft-under'] as const) {
+    for (let k = at.k; k >= at.k - FT_GIVE - 1e-9 && !done; k -= 0.002) { at.place(k); done = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); }
     if (done) break;
   }
-  if (!done) frameView(explicit, base + box.short.h + 8);
+  // Else the least room above the map (8px at a time) where one form stands clear beside the title; at worst the short form's room.
+  const most = at.whole ? ftBox(null, camera, null).h + 8 : 0;
+  for (let d = 8; d <= most && !done; d += 8) {
+    const a2 = frameView(explicit, base + d); if (!a2.whole) break;
+    for (const form of [null, 'ft-one', 'ft-under'] as const) if (!ftCovers(ftBox(form, camera, inkAt(camera.k)), camera, scene, inkAt(camera.k))) { done = true; break; }
+  }
+  if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
   applyCamera(animate);
 }
-/** What the top line must never stand over: the cards (and ghosts) and the lanes' captions (map units). */
+/** What the top line must never stand over, besides the drawn lines and the labels (ftScene): the cards (and ghosts) and the lanes'
+ * captions (map units). */
 const ftObstacles = (): Rect[] => [...[...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost'), ...bandRects];
-/** How far the fit may shrink to keep a card from under the top line (3 points of zoom). */
+/** How far the fit may shrink to keep the map from under the top line (3 points of zoom). */
 const FT_GIVE = 0.03;
 /** Whether the top line is shown. */
 const ftShown = () => { const el = document.getElementById('focus-top'); return !!el && !el.hidden && !!el.offsetWidth; };
-/** The top line's box in the camera's frame (the viewport's), whole and in its short form (the sentence stepped back), each with a 6px
- * margin. */
-function ftBoxes(): { full: Rect; one: Rect; short: Rect } {
+type Cam = { x: number; y: number; k: number };
+/** What the top line must never stand over (review of v5 focus 3, A2), read once per check: the cards and lane captions, the drawn lines'
+ * routes, and every label, badge, count, port mark, note and fold chip shown on the map (map units at their place; their size follows the
+ * zoom, so each says how it scales). */
+type FtScene = { boxes: Rect[]; routes: Point[][]; marks: { x: number; y: number; w: number; h: number; line: boolean }[] };
+function ftScene(): FtScene {
+  const world = $('world'), shown = shownLines(), marks: FtScene['marks'] = [];
+  world.querySelectorAll<HTMLElement>('.edge-labels > *, .ff-note, .ff-fold-chip').forEach(el => {
+    if (!el.offsetWidth) return; const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden') return;
+    marks.push({ x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0, w: el.offsetWidth, h: el.offsetHeight, line: el.classList.contains('edge-label') });
+  });
+  return { boxes: ftObstacles(), routes: [...lastRouted.values()].filter(r => shown.has(r.key) && r.pts.length > 1).map(r => r.pts), marks };
+}
+/** Whether a box (in the camera's frame, as ftBox measures it) stands over anything of the map for this camera: a card, a lane caption, a
+ * drawn line, a label or chip (at the size it has at this zoom), or the map's own title as drawn. */
+function ftCovers(r: Rect, cam: Cam, scene: FtScene, ink: Rect | null): boolean {
+  const k = cam.k, m: Rect = { x: (r.x - cam.x) / k, y: (r.y - cam.y) / k, w: r.w / k, h: r.h / k };
+  const hit = (b: Rect) => b.x < m.x + m.w && m.x < b.x + b.w && b.y < m.y + m.h && m.y < b.y + b.h;
+  if (scene.boxes.some(hit) || (ink && hit(ink))) return true;
+  if (scene.routes.some(pts => polylineHitsRect(pts, m, 0))) return true;
+  const inv = Math.min(1 / 0.3, Math.max(0.625, 1 / k)), linv = Math.max(12, labelPx(k)) / (12 * k);
+  return scene.marks.some(x => { const s = x.line ? linv : inv; return hit({ x: x.x, y: x.y, w: x.w * s, h: x.h * s }); });
+}
+/** The map's own title as drawn, in map units: its name, its 「기록 정보 ▾」 and the record's time beside it, a purpose or scenario row
+ * (each child's ink, never the title's whole column); null when no title is drawn. */
+function titleInk(): Rect | null {
+  const el = document.querySelector<HTMLElement>('#world > .map-title'); if (!el || el.hidden || !titleH || !el.offsetWidth) return null;
+  const R = el.getBoundingClientRect(), s = R.width / el.offsetWidth; if (!(s > 0)) return null;
+  let right = 0, bottom = 0;
+  for (const c of el.children) {
+    if (!(c instanceof HTMLElement) || !c.getClientRects().length) continue;
+    const range = document.createRange(); range.selectNodeContents(c);
+    for (const q of [...range.getClientRects()]) if (q.width && q.height) { right = Math.max(right, (q.right - R.left) / s); bottom = Math.max(bottom, (q.bottom - R.top) / s); }
+  }
+  if (!right) return null;
+  const t = titleRect(), x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+  return { x: Number.isFinite(x) ? x : t.x, y: Number.isFinite(y) ? y : t.y, w: right, h: bottom };
+}
+/** The top line's place for a camera (review of v5 focus 3, A3): beside the map's own title while that title stands in its rows, so the
+ * title, its 「기록 정보 ▾」 and the record's time stay in sight and within reach at rest; else at the window's left. Sets its left and
+ * width (no room of 320px beside the title: it stays at the left and the fit frames the title under it instead). */
+function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
+  el.style.left = ''; el.style.maxWidth = '';
+  if (!ink) return;
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
+  const t = { x: ox + cam.x + ink.x * cam.k, y: oy + cam.y + ink.y * cam.k, w: ink.w * cam.k, h: ink.h * cam.k };
+  const r = { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight };
+  if (!(t.x < r.x + r.w + 8 && r.x - 8 < t.x + t.w && t.y < r.y + r.h + 8 && r.y - 8 < t.y + t.h)) return;
+  const left = Math.round(t.x + t.w + 24), room = $('space').clientWidth - (parseFloat(getComputedStyle($('space')).getPropertyValue('--plan-w')) || 0) - left - 16;
+  if (room < 320) return;
+  el.style.left = `${left}px`; el.style.maxWidth = `${Math.min(860, room)}px`;
+}
+/** The top line's box in the camera's frame (the viewport's) in one form (null: whole; ft-one: its sentence on one line; ft-under: its
+ * sentence stepped back), placed for that camera, with a 6px margin; the line is left as it was. */
+function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
   const el = $('focus-top'), v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
-  const was = FT_FORMS.filter(c => el.classList.contains(c));
-  const at = (c: string | null): Rect => { el.classList.remove(...FT_FORMS); if (c) el.classList.add(c); return { x: el.offsetLeft - ox - 6, y: el.offsetTop - oy - 6, w: el.offsetWidth + 12, h: el.offsetHeight + 12 }; };
-  const out = { full: at(null), one: at('ft-one'), short: at('ft-under') };
-  el.classList.remove(...FT_FORMS); el.classList.add(...was);
+  const was = FT_FORMS.filter(c => el.classList.contains(c)), left = el.style.left, maxW = el.style.maxWidth;
+  el.classList.remove(...FT_FORMS); if (form) el.classList.add(form); ftPlace(el, cam, ink);
+  const out = { x: el.offsetLeft - ox - 6, y: el.offsetTop - oy - 6, w: el.offsetWidth + 12, h: el.offsetHeight + 12 };
+  el.classList.remove(...FT_FORMS); el.classList.add(...was); el.style.left = left; el.style.maxWidth = maxW;
   return out;
 }
 /** The top line's shorter forms: its sentence on one line, or stepped back. */
@@ -3499,8 +3580,13 @@ function updateSticky() {
   if (!o || !titleH) { st.hidden = true; return; }
   syncFocusTop();
   const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset() + ftH();
+  // The title as drawn (its ink, not its column) and the top line in the camera's frame: the title reads in view under the strip, and
+  // under the top line only where that line stands over its columns (beside it, the title reads whole: review of v5 focus 3, A3).
+  const ink = titleInk(), ti = ink ? toScreen(ink) : t, ft = document.getElementById('focus-top'), v0 = $('viewport'), w0 = $('world');
+  const fr = ft && !ft.hidden ? { x: ft.offsetLeft - v0.offsetLeft - w0.offsetLeft, y: ft.offsetTop - v0.offsetTop - w0.offsetTop, w: ft.offsetWidth, h: ft.offsetHeight } : null;
+  const overCols = !!fr && fr.x < ti.x + ti.w && ti.x < fr.x + fr.w, below = overCols ? top : stripInset();
   st.style.top = `${top - 6}px`;
-  st.hidden = camera.k >= TITLE_FLOOR_K && t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
+  st.hidden = camera.k >= TITLE_FLOOR_K && t.y >= below - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
   // Map hygiene H2: the chip never covers a card (the header's path names the map all the same); it waits for room.
   if (!st.hidden) {
     const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
@@ -3509,9 +3595,7 @@ function updateSticky() {
   }
   // One title at a time: the map's own title steps back while its name is pinned, and while the top line stands over it (never read
   // through the top line's box).
-  const ft = document.getElementById('focus-top'), v0 = $('viewport'), w0 = $('world');
-  const fx = ft ? ft.offsetLeft - v0.offsetLeft - w0.offsetLeft : 0, fy = ft ? ft.offsetTop - v0.offsetTop - w0.offsetTop : 0;
-  const underTop = !!ft && !ft.hidden && t.x < fx + ft.offsetWidth && fx < t.x + t.w && t.y < fy + ft.offsetHeight && fy < t.y + t.h;
+  const underTop = overCols && !!fr && fr.y < ti.y + ti.h && ti.y < fr.y + fr.h;
   document.querySelector('.map-title')?.classList.toggle('pinned', !st.hidden || underTop);
 }
 /** The state of a part as the source of what is said about it: a received summary, a written plan, or nothing yet. */
@@ -3650,7 +3734,7 @@ function focusInput(o: Opened): FlowInput {
 function drawFocus() {
   const o = opened, world = $('world'), sp = $('space');
   world.querySelectorAll('.edge.ff-flow, .edge.ff-ctx, .edge.ff-fold').forEach(g => g.classList.remove('ff-flow', 'ff-ctx', 'ff-fold'));
-  world.querySelectorAll('.node.ff-start').forEach(el => el.classList.remove('ff-start'));
+  world.querySelectorAll('.node.ff-start, .node.ff-card').forEach(el => el.classList.remove('ff-start', 'ff-card'));
   if (o && ffFor !== o.key) { ffFor = o.key; ffOpen = new Set(); ffLensPicked = false; }
   ffSrc = o ? summaryOf(o) : null;
   ffNow = o && o.view.parts.length ? firstFlow(focusInput(o)) : null;
@@ -3663,7 +3747,14 @@ function drawFocus() {
       if (e.ids.some(id => fl.has(id))) { g.classList.add(f.soft ? 'ff-ctx' : 'ff-flow'); any = true; } else if (e.ids.some(id => cx.has(id))) g.classList.add('ff-ctx'); else return;
       layerEdge(g);
     });
-    if (any && f.soft && o) world.querySelector(`.node[data-box="${CSS.escape(drawnRep(o, f.parts[0]!) ?? f.parts[0]!)}"]`)?.classList.add('ff-start');
+    // Craft spec (위계): the cards the view's accent lines touch carry a 1.5px accent edge; the one start card (light accent face, 2px edge)
+    // only where the record backs a start (first-flow startCard: a C-ENTRY start, a scenario's recorded start, the first step of a flow the
+    // record describes in order), never the first named part of an unordered view.
+    const card = (id: string) => (o ? world.querySelector(`.node[data-box="${CSS.escape(drawnRep(o, id) ?? id)}"]`) : null);
+    if (any && o) {
+      for (const g of world.querySelectorAll<SVGGElement>('.edge.ff-flow')) for (const id of [g.dataset.from!, g.dataset.to!]) world.querySelector(`.node[data-box="${CSS.escape(id)}"]`)?.classList.add('ff-card');
+      const st = startCard(f); if (st) card(st.part)?.classList.add('ff-start');
+    }
   }
   sp.classList.toggle('ff-on', any);
   sp.classList.toggle('ff-soft', any && ffLensPicked);
@@ -3772,8 +3863,11 @@ function renderFocusTop() {
   const el = $('focus-top'), o = opened, s = ffSrc, f = ffNow;
   if (!o || scope || !o.view.parts.length || (!s && !f?.candidates.length)) { el.hidden = true; el.replaceChildren(); syncFocusTop(); return; }
   const saved = o.kind === 'saved';
-  const sentence = s ? h(saved ? 'button' : 'p', { class: 'ft-sentence', ...(saved ? { type: 'button', onclick: () => showQuote(s.record, s.quote, s.from) } : {}),
-    title: `${s.first}\n출처: 기록 요약의 첫 문장 · ${s.label}${saved ? '\n눌러서 원문 보기' : ''}` }, basisWords(s.first) ?? s.shown) : null;
+  // Review of v5 focus 3 (A5): shown and hovered only through the guard (no evidence group, file tag or row ID); nothing plain left: no
+  // sentence at all (never the unguarded words).
+  const topWords = s ? basisWords(s.first) : null;
+  const sentence = s && topWords ? h(saved ? 'button' : 'p', { class: 'ft-sentence', ...(saved ? { type: 'button', onclick: () => showQuote(s.record, s.quote, s.from) } : {}),
+    title: `${topWords}\n출처: 기록 요약의 첫 문장 · ${s.label}${saved ? '\n눌러서 원문 보기' : ''}` }, topWords) : null;
   const name = (id: string) => partOf(o, id)?.name ?? id;
   const choose = (c: FlowChoice) => {
     // The choice is the person's, kept with the map's first view (a map with none yet keeps only this).
@@ -3787,7 +3881,7 @@ function renderFocusTop() {
     const byId = new Map(o.view.relations.map(r => [r.id, r])), drawnLs = c.lines.filter(id => lay.edges.some(e => e.ids.includes(id))).map(id => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r);
     // The basis in plain words: no evidence group, no file tag, no row ID (the labels' guard); a scenario's own heads, or that it has none.
     const said = c.text ? basisWords(c.text) : null, scBasis = c.rule === 'scenario' ? scenarioBasisOf(o, c.key) : null;
-    const tip = [sourceText(f), c.text ? `근거 문장: “${said ?? shownSentence(c.text)}”` : c.rule === 'scenario' ? `근거: ${scBasis ?? SCENARIO_NO_BASIS}` : null, c.start?.text ? `${c.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작'}: ${c.start.text}` : null, c.end?.text ? `시나리오 끝: ${c.end.text}` : null,
+    const tip = [sourceText(f), c.text ? (said ? `근거 문장: “${said}”` : null) : c.rule === 'scenario' ? `근거: ${scBasis ?? SCENARIO_NO_BASIS}` : null, c.start?.text ? `${c.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작'}: ${c.start.text}` : null, c.end?.text ? `시나리오 끝: ${c.end.text}` : null,
       `이름이 나온 부분: ${c.steps.map(st => st.map(name).join(', ')).join(' / ')} (이름이 나온 순서는 방향도 실행 순서도 아니에요)`,
       `그린 선 ${drawnLs.length}개 · 지도에 이미 있는 관계를 그 방향 그대로: ${drawnLs.slice(0, 6).map(r => `${name(r.from)} → ${name(r.to)}`).join(', ')}${drawnLs.length > 6 ? ` 외 ${drawnLs.length - 6}개` : ''}`,
       c.gaps.length ? `끊긴 곳 ${c.gaps.length}개 · 이어진 관계가 없어 잇지 않았어요` : null,
@@ -3798,7 +3892,7 @@ function renderFocusTop() {
     // The sentence the lines stand on, when it is not the top one (one line in plain words, whole as written in its hover; nothing plain
     // left: in the hover only). A scenario's lines stand on that scenario record, never on the map record's sentence above.
     if (c.text && shownSentence(c.text) !== s?.shown && said) {
-      basis = h('p', { class: 'ft-basis', title: `${FLOW_CONTROL}의 근거 문장 · ${c.source}\n${c.text}` }, h('span', { class: 'ft-basis-l' }, '근거 문장'), h('span', { class: 'ft-basis-t' }, said));
+      basis = h('p', { class: 'ft-basis', title: `${FLOW_CONTROL}의 근거 문장 · ${c.source}\n${said}` }, h('span', { class: 'ft-basis-l' }, '근거 문장'), h('span', { class: 'ft-basis-t' }, said));
     } else if (c.rule === 'scenario') {
       basis = h('p', { class: `ft-basis${scBasis ? '' : ' none'}`, title: `${FLOW_CONTROL}의 근거 · ${sourceText(f)}\n${scBasis ?? SCENARIO_NO_BASIS}` }, h('span', { class: 'ft-basis-l' }, '시나리오 기록'), h('span', { class: 'ft-basis-t' }, scBasis ?? SCENARIO_NO_BASIS));
     }
@@ -3812,21 +3906,23 @@ function renderFocusTop() {
 }
 /** The top line's height, its sentence whole (the camera's fit keeps the map under it, collapsed or not). */
 const ftH = () => { const el = document.getElementById('focus-top'); return el && !el.hidden ? (ftFull || el.offsetHeight) + 8 : 0; };
-/** The top line under the change plan's strip; its sentence steps back while a card is under it (the switcher stays). */
+/** The top line under the change plan's strip, beside the map's own title while that title is in its rows (ftPlace); its sentence steps
+ * back while anything of the map is under it (the switcher stays). */
 function syncFocusTop() {
   const el = document.getElementById('focus-top'); if (!el) return;
   el.style.top = `${stripInset()}px`;
-  if (el.hidden) { ftFull = 0; return; }
-  el.classList.remove(...FT_FORMS); ftFull = el.offsetHeight;
+  if (el.hidden) { ftFull = 0; el.style.left = ''; el.style.maxWidth = ''; return; }
+  const ink = camera.k >= TITLE_FLOOR_K ? titleInk() : null;
+  el.classList.remove(...FT_FORMS); ftPlace(el, camera, ink); ftFull = el.offsetHeight;
   const s = el.querySelector<HTMLElement>('.ft-sentence'); if (!s) return;
-  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
-  // The whole box with its sentence (the rows under the sentence move down with it): any card under it and the sentence takes one line
-  // (whole in its hover); still a card under it and the sentence steps back (the switcher stays).
-  const covers = () => { const r = { x: el.offsetLeft - 4, y: el.offsetTop - 4, w: el.offsetWidth + 8, h: el.offsetHeight + 8 };
-    return ftObstacles().some(b => ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k); };
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop, scene = ftScene();
+  // The whole box with its sentence (the rows under the sentence move down with it): anything of the map under it (a card, a lane
+  // caption, a drawn line, a label, the map's own title) and the sentence takes one line (whole in its hover); still something under it
+  // and the sentence steps back (the switcher stays).
+  const covers = () => ftCovers({ x: el.offsetLeft - ox - 4, y: el.offsetTop - oy - 4, w: el.offsetWidth + 8, h: el.offsetHeight + 8 }, camera, scene, ink);
   if (!covers()) return;
-  el.classList.add('ft-one'); if (!covers()) return;
-  el.classList.remove('ft-one'); el.classList.add('ft-under');
+  el.classList.add('ft-one'); ftPlace(el, camera, ink); if (!covers()) return;
+  el.classList.remove('ft-one'); el.classList.add('ft-under'); ftPlace(el, camera, ink);
 }
 
 /* ---------- the scenario on the map (spec §3, cycle 3): one foreground scenario at a time ----------
@@ -5420,7 +5516,7 @@ function lensPartsOf(o: Opened): LensPart[] {
   });
 }
 const lensLinesOf = (): LensLine[] => [...lay.edges.map(e => ({ e, sum: false })), ...restSums.map(e => ({ e, sum: true }))].map(({ e, sum }) => ({ key: e.key, channel: lineChans.get(e.key) ?? null, badge: lineBadges.has(e.key), from: e.from, to: e.to, sum }));
-/** The lens's classes on the space and its line opacities (lensLook); the switch's state; the legend's marks. */
+/** The lens's classes on the space and its line tones (styles: solid, never an opacity); the switch's state; the legend's marks. */
 /* ---------- display settings (spec cards v2 §5) ----------
  * 「표시」 in the bottom toolbar: four toggles, a global default and an explicit per-project override (card-face readDisplay /
  * writeDisplay under DISPLAY_KEY, by the project's entry). Lenses are temporary: the 상태·공백 lens shows every card's ops word
@@ -5483,7 +5579,7 @@ function applyLens() {
   for (const c of [...sp.classList]) if (c.startsWith('lens-')) sp.classList.remove(c);
   applyDisplay();
   for (const c of lensClasses(viewLens)) sp.classList.add(c);
-  for (const [k, v] of Object.entries(lensLook(viewLens).lines)) sp.style.setProperty(`--lo-${k}`, String(v));
+  // Craft spec: a lens never fades a line by an opacity (no --lo-* any more): its background takes a solid tone in styles.css.
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { const on = b.dataset.lens === viewLens; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); (b as HTMLButtonElement).disabled = !lensUsable(b.dataset.lens as LensId); });
   applyLegendMarks(); renderFirstView();
 }
@@ -5499,7 +5595,7 @@ function applyLegendMarks() {
     else world.querySelector(`[data-box="${CSS.escape(x)}"]`)?.classList.add(cls); } };
   mark(m.fade, 'lg-fade'); mark(m.dim, 'lg-dim'); mark(m.hide, 'lg-hide'); mark(m.picked, 'lg-pick');
   // Beauty v2 B5 (the lens contract): each line in the lens's foreground (.lf-fg, 2.25px, whole) or its background (.lf-bg, 1.15px,
-  // faded to view-lens BG_LINE and never fainter). The selected part's lines, a selected relation and a scenario path's lines are
+  // in a solid quieter tone, never an opacity: craft spec). The selected part's lines, a selected relation and a scenario path's lines are
   // always foreground. Classes only: nothing moves.
   const selBox = selected && selected === scope ? `ghost:${selected}` : selected;
   const fgEnds = new Set<string>(), drawnNow = shownLines();
