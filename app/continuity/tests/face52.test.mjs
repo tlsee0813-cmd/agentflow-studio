@@ -156,10 +156,17 @@ test('F52-7 a record whose roster never showed the current description (an older
   p = paste(p, page1({ record: 'AF5-52bbbbbb', basis: 'bbbb000', names: ['옛 정리기'], pairs: [], ident: { echo, rows: [['P03', '같음', 'B01', '—', 'F01']] } }));
   const u = M.partUnderstanding(empty(p, 'R_face52x').project, areaOf(base, '정리기'));
   assert.equal(u.role, '정리 엔진의 일');
-  // A record written against the roster that showed it does replace it.
+  // A record written against the roster that showed it. Recipe .54 (ruling F6 Q1 「선후 불명확 + 충돌 → 설명 교체만 보류」): the current
+  // description came from another record that bound the part and neither record names a target date, so the order is unclear: its words are
+  // a candidate (held 'order') and the description stays. Dated records replace by a clearly later target (growth54 G54-1).
   const now = I.mapRoster(p).head;
   const q = paste(p, page1({ record: 'AF5-52cccccc', basis: 'cccc222', names: ['새 정리기'], pairs: [], ident: { echo: now, rows: [['P03', '같음', 'B01', '—', 'F01']] } }));
-  assert.equal(M.partUnderstanding(empty(q, 'R_face52z').project, areaOf(base, '정리기')).role, '새 정리기의 일');
+  const held = M.partUnderstanding(empty(q, 'R_face52z').project, areaOf(base, '정리기'));
+  assert.equal(held.role, '정리 엔진의 일');
+  assert.ok(held.others.some(x => x.text === '새 정리기의 일' && x.held === 'order'), JSON.stringify(held.others));
+  // Its own words are taken only over a description no record bound: on the first-read map, the same record replaces it.
+  const fresh = paste(base, page1({ record: 'AF5-52cccccc', basis: 'cccc222', names: ['새 정리기'], pairs: [], ident: { echo, rows: [['P03', '같음', 'B01', '—', 'F01']] } }));
+  assert.equal(M.partUnderstanding(empty(fresh, 'R_face52w').project, areaOf(base, '정리기')).role, '새 정리기의 일');
 });
 
 test('F52-8 one pasted text holding two records: a description resting on the unbound record\'s lines never takes the card', () => {

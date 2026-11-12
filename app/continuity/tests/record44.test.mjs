@@ -190,6 +190,6 @@ test('.44 display: a part\'s every C-LOOP row and its variants reach the part\'s
 });
 
 test('.44 recipe and prompt: first-map-divided.44; the global stage draws both halves of a stored file\'s C-LINK line', () => {
-  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.53', 'later-map-divided.53']);
+  assert.deepEqual([P.PIPELINE_RECIPE, P.LATER_PIPELINE_RECIPE], ['first-map-divided.54', 'later-map-divided.54']);
   assert.ok(P.GLOBAL_RULES.includes('쓰는 쪽 반만 쓰고 읽는 쪽(받는 부분)을 빼지 않으며'));
 });

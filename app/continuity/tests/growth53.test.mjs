@@ -85,13 +85,21 @@ test('G53-1 (a) a bound record about a clearly earlier target never replaces the
   u = M.partUnderstanding(empty(recordB(base, [['P03', '같음', 'B02', '—', 'F01']], { date: '2021-03-01' })).project, areaOf(base, '정리기'));
   assert.equal(u.role, '정리기의 일');
   assert.deepEqual(u.others.map(x => [x.text, x.replaced, x.target]), [['정리기의 일을 맡는다.', 'bound', '2021-03-01']]);
-  // Undated (incomparable): the .52 rule stands, no target said.
+  // Undated (incomparable) over the plain first-reading description (no record bound it): the .52 rule stands, no target said.
   u = M.partUnderstanding(empty(recordB(base, [['P03', '같음', 'B02', '—', 'F01']])).project, areaOf(base, '정리기'));
   assert.equal(u.role, '정리기의 일');
   assert.deepEqual(u.others.map(x => [x.replaced, x.target ?? null]), [['bound', null]]);
   // The same date is not clearly earlier.
-  u = M.partUnderstanding(empty(recordB(base, [['P03', '같음', 'B02', '—', 'F01']], { date: '2020-11-18' })).project, areaOf(base, '정리기'));
-  assert.equal(u.role, '정리기의 일');
+  const sameDay = empty(recordB(base, [['P03', '같음', 'B02', '—', 'F01']], { date: '2020-11-18' })).project;
+  assert.equal(M.partUnderstanding(sameDay, areaOf(base, '정리기')).role, '정리기의 일');
+  // Recipe .54 (ruling F6 Q1 「선후 불명확 + 충돌 → 설명 교체만 보류」): once a bound record gave the description, another bound record whose
+  // order against it is unclear (undated, or the same date) never replaces it: its line is a candidate (held 'order'), never 이전 설명.
+  for (const date of [null, '2020-11-18']) {
+    const later = paste(sameDay, page1({ record: 'AF5-53f5f5f5', basis: 'f5c0de5', date, names: ['정리 단계'], pairs: [], lines: { 0: '원문을 새 규칙으로 정리한다' }, ident: { echo: I.mapRoster(sameDay).head, rows: [['P03', '같음', 'B01', '—', 'F01']] } }));
+    u = M.partUnderstanding(empty(later).project, areaOf(base, '정리기'));
+    assert.equal(u.role, '정리기의 일', String(date));
+    assert.deepEqual(u.others.filter(x => x.text === '원문을 새 규칙으로 정리한다').map(x => [x.held, x.replaced ?? null]), [['order', null]], String(date));
+  }
 });
 
 test('G53-1b (a) the target is read from the C-HEAD rows when the head line names none; a commit string alone never orders', () => {
@@ -164,7 +172,8 @@ test('G53-5 a cut description keeps its trailing plan word (계획 · 예정): t
   // The card line: the plan ending stays on it.
   assert.ok(/계획된 처리다\.$/.test(roleLine(long)), roleLine(long));
   assert.equal(roleLine('주문을 받아 검증한다. 그 뒤 저장소에 쓴다.'), '주문을 받아 검증한다.');
-  assert.ok(roleLine('주문을 받아 검증하고 저장소에 오래 남긴다. 알림은 아직 예정.').endsWith('예정.'));
+  // Recipe .54 (review of .53): a later sentence's plan word never comes onto the first sentence's line.
+  assert.equal(roleLine('주문을 받아 검증하고 저장소에 오래 남긴다. 알림은 아직 예정.'), '주문을 받아 검증하고 저장소에 오래 남긴다.');
   // The roster's distinguisher and the bound line keep it too.
   const base = firstRead(project(page1()));
   const p = empty(recordB(base, [['P03', '같음', 'B02', '—', 'F01']], { lines: { 1: `${'원문을 규칙대로 정리하고 '.repeat(30)}저장소에 넘기도록 계획됨` } })).project;
@@ -192,8 +201,10 @@ test('G53-6 구현 바뀜 binds the part and notes the implementation change; th
   assert.deepEqual(cautionRows(u, 0).filter(r => r.kind === 'implementation').map(r => [r.label, r.text, r.hint]), [['구현 바뀜', '저장소 → 새 저장소', '같은 부품의 구현이 바뀜 · 바뀐 때 c0ffee2 2026-10-03']]);
   assert.ok(I.mapRoster(out.project).text.includes(`\nP04 저장소 · — · 있음 · `) && I.mapRoster(out.project).text.includes('지금 구현 새 저장소'));
   assert.equal(u.stateRead?.state ?? null, M.partUnderstanding(base, store).stateRead?.state ?? null, 'no state from the change');
-  // 대신함 on 알림기 (P06), its successor B05 (화면, by the same table's 같음 row) built, still retires it.
-  assert.equal(s.retired.get(areaOf(base, '알림기'))?.successor, areaOf(base, '화면'));
+  // Recipe .54 (ruling F6 Q3 「모호하면 생애 변경 보류」): 대신함 on 알림기 (P06) whose successor B05 the same table says is 화면 (P07, 같음),
+  // a part that goes on, is held: never a retirement (a 대신함 to a new part still retires: growth54 G54-7).
+  assert.deepEqual([d.ID03.state, d.ID03.reason], ['held', 'identity']);
+  assert.ok(!s.retired.has(areaOf(base, '알림기')));
   // Read again (the record sent again): the change is noted once.
   const again = empty(out.project);
   assert.equal(rowsById(again.reading).ID01.op?.kind, 'bind');

@@ -115,24 +115,50 @@ export function clip(text: string, n: number): string {
   return text.slice(0, code >= 0xd800 && code <= 0xdbff ? n - 1 : n);
 }
 /** Recipe .53 (ruling F6 Q1): a description that ends on a plan word (계획 · 예정: 「…색인하도록 계획된 처리다.」, 「…(예정)」) keeps that ending
- * when it is cut: the words from the one holding the plan word on (within PLAN_TAIL_CHARS of the end), else null. */
+ * when it is cut: the words from the one holding the plan word on (within PLAN_TAIL_CHARS of the end, measured by widthOf: recipe .54, the
+ * same unit the cut's room is measured in), else null. */
 export const PLAN_TAIL_CHARS = 14;
-export function planTail(text: string): string | null {
-  const t = text.replace(/\s+/g, ' ').trim(), re = /계획|예정/g; let at = -1;
-  for (let m = re.exec(t); m; m = re.exec(t)) at = m.index;
+const charCount = (t: string) => [...t].length;
+/** The place of the last plan word (계획 · 예정) in a folded text, or -1. */
+const lastPlanWord = (t: string): number => { const re = /계획|예정/g; let at = -1; for (let m = re.exec(t); m; m = re.exec(t)) at = m.index; return at; };
+export function planTail(text: string, widthOf: (t: string) => number = charCount): string | null {
+  const t = text.replace(/\s+/g, ' ').trim(), at = lastPlanWord(t);
   if (at < 0) return null;
   const start = t.lastIndexOf(' ', at) + 1, tail = t.slice(start);
-  return tail.length <= PLAN_TAIL_CHARS ? tail : null;
+  return widthOf(tail) <= PLAN_TAIL_CHARS ? tail : null;
+}
+/** Recipe .54 (review of .53): the clause of one sentence that holds its last plan word: the words after the last clause boundary (a comma or
+ * semicolon, or a joining ending 하고 · 되고 · 이고 · 하며 · 되며 · 이며 · 으며) before that word, to the sentence's end. Null when the sentence has
+ * no plan word or no boundary before it (the clause would be the whole sentence). Always words of the sentence itself, never another's. */
+export function planClause(sentence: string): string | null {
+  const t = sentence.replace(/\s+/g, ' ').trim(), at = lastPlanWord(t); if (at < 0) return null;
+  const re = /[,，;；]\s*|(?<=(?:하고|되고|이고|하며|되며|이며|으며))\s+/g; let end = -1;
+  for (let m = re.exec(t); m && m.index < at; m = re.exec(t)) end = m.index + m[0].length;
+  const clause = end > 0 ? t.slice(end).trim() : '';
+  return clause && clause !== t ? clause : null;
 }
 /** A width in Korean characters: a Hangul or other wide character is 1, anything else 0.6 (a card line holds about 15). */
 export const textWidth = (t: string): number => [...t].reduce((n, ch) => n + (/[ᄀ-ᇿ⺀-꓏가-힣豈-﫿＀-￯]/.test(ch) ? 1 : 0.6), 0);
+/** The head of a folded text that fits `room` by widthOf (trailing space dropped). */
+const headFit = (t: string, room: number, widthOf: (t: string) => number) => { let head = ''; for (const ch of t) { if (widthOf(head + ch) > room) break; head += ch; } return head.trimEnd(); };
 /** Cut to at most n characters (or, with widthOf, n by that width) with 「…」, never leaving out a plan ending (planTail): such a text keeps
- * its head and its ending, the middle cut. Whitespace is folded first. */
-export function clipKeepPlan(text: string, n: number, widthOf: (t: string) => number = t => [...t].length): string {
+ * its head and its ending, the middle cut. Whitespace is folded first. Recipe .54 (review of .53): the ending and the room are measured in the
+ * same unit (widthOf); an ending wider than the room keeps at least the word holding the plan word (「…예정되어…」), and when even that does not
+ * fit the text is returned uncut: a plan word is never dropped by a plain cut. */
+export function clipKeepPlan(text: string, n: number, widthOf: (t: string) => number = charCount): string {
   const t = text.replace(/\s+/g, ' ').trim(); if (widthOf(t) <= n) return t;
-  const headOf = (room: number) => { let head = ''; for (const ch of t) { if (widthOf(head + ch) > room) break; head += ch; } return head.trimEnd(); };
-  const tail = planTail(t), keep = tail ? ` ${tail}` : '', room = n - 1 - widthOf(keep);
-  return tail && room >= 2 ? `${headOf(room)}…${keep}` : `${headOf(n - 1)}…`;
+  const tail = planTail(t, widthOf); if (!tail) return `${headFit(t, n - 1, widthOf)}…`;
+  const word = tail.split(' ')[0]!;
+  for (const keep of [` ${tail}`, ...(word !== tail ? [` ${word}…`] : [])]) { const room = n - 1 - widthOf(keep); if (room >= 2) return `${headFit(t, room, widthOf)}…${keep}`; }
+  return t;
+}
+/** Recipe .54 (review of .53): a sentence cut to n by widthOf keeping its plan clause (planClause): 「head… clause」 when the clause and two
+ * characters of head fit, else the sentence uncut. Only the sentence's own words: a later sentence's plan word never comes onto it. */
+export function clipKeepPlanClause(sentence: string, n: number, widthOf: (t: string) => number = charCount): string {
+  const t = sentence.replace(/\s+/g, ' ').trim(); if (widthOf(t) <= n) return t;
+  const clause = planClause(t); if (!clause) return t;
+  const room = n - 1 - widthOf(` ${clause}`);
+  return room >= 2 ? `${headFit(t, room, widthOf)}… ${clause}` : t;
 }
 /** Room kept for the coverage counts, which are filled in last. */
 const COVERAGE_ROOM = 256, META_BYTES = 32768, MIN_EXCERPT_BYTES = 600;

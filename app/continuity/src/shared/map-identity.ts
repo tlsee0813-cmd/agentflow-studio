@@ -127,7 +127,7 @@ export function mapRoster(p: Project, opts: { detail?: readonly string[]; max?: 
     const role = u?.role ? unstampRole(u.role).role : '', note = role ? oneKeepPlan(role, ROSTER_NOTE_CHARS) : u?.files[0] ? one(u.files[0], ROSTER_NOTE_CHARS) : '';
     const impl = implementationChanges(p, a.id).at(-1)?.to ?? null, called = nameCandidates(p, a.id).slice(-2).map(x => one(x.name, 40)).filter(x => !secretLike(x));
     const name = officialName(p, a.id), files = (u?.files ?? []).slice(0, 3);
-    const want = opts.detail?.includes(a.id) ? [role ? `역할: ${one(role, 140)}` : '', files.length ? `파일: ${files.map(f => one(f, 60)).join(', ')}` : ''].filter(Boolean).join('; ') : '';
+    const want = opts.detail?.includes(a.id) ? [role ? `역할: ${oneKeepPlan(role, 140)}` : '', files.length ? `파일: ${files.map(f => one(f, 60)).join(', ')}` : ''].filter(Boolean).join('; ') : '';
     return { pid: pid(a.id), areaId: a.id, name: secretLike(name) ? '[가림]' : one(name, ROSTER_NAME_CHARS), parent, life, note: secretLike(note) ? '' : note,
       old: partAliases(p, a.id).slice(0, 3).map(x => one(x.name, 40)), folded: [...s.folded].filter(([, to]) => canonicalPart(s, to) === a.id).map(([from]) => pid(from)).slice(0, 4),
       detail: want && !secretLike(want) ? want : null, impl: impl && !secretLike(impl) ? one(impl, 40) : null, called };
@@ -255,11 +255,17 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
     const bind: ReadingIdentityOp = { kind: 'bind', areaId: to, successor: null, into: null, from: null, to: null, renamed: false };
     // Recipe .53 (ruling F6 Q3): 구현 바뀜 binds and notes the change once per record row (a re-decided row binds only); a change still
     // planned (바뀐 때 「계획」, or a B row not built) notes nothing. The official name stays: only 이름 바뀜 renames.
+    // Recipe .54 (review of .53): a change noted is a real one: the B row names an implementation (no name: bind only) that is neither the
+    // implementation the map knows now nor alike to it (X → X is no change), and no record noted the same change (the same new implementation
+    // with the same 바뀐 때) already: a second record saying it again binds only. A partial change (바뀐 때 「일부: …」, or a B row only partly
+    // built) is, like a planned one, a bind only: it never reads as the whole part's implementation (「지금 구현」).
     if (e.answer === 'reimplemented') {
       const impl = partRows.get(e.part!)?.row.byColumn['구현 상태'] ?? '', list = s.reimplemented.get(to) ?? [];
-      if (PLANNED.test(e.when ?? '') || UNBUILT_IMPL.test(impl) || list.some(x => x.record === e.record && x.row === e.id)) return bind;
+      if (PLANNED.test(e.when ?? '') || UNBUILT_IMPL.test(impl) || PARTIAL.test(e.when ?? '') || PARTIAL_IMPL.test(impl) || list.some(x => x.record === e.record && x.row === e.id)) return bind;
       const was = one(list.at(-1)?.to ?? officialName(p, to), 120), name = bName(e);
-      return was ? { kind: 'reimplement', areaId: to, successor: null, into: null, from: was, to: name && !secretLike(name) ? name : one(was, 60), renamed: false } : bind;
+      if (!was || !name || secretLike(name) || normName(name) === normName(was) || likeNames(name, was)) return bind;
+      if (list.some(x => normName(x.to) === normName(name) && (x.when ?? '') === (e.when ?? ''))) return bind;
+      return { kind: 'reimplement', areaId: to, successor: null, into: null, from: was, to: name, renamed: false };
     }
     if (e.answer !== 'renamed') return bind;
     const name = bName(e), was = officialName(p, to);
@@ -306,6 +312,10 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
     const was = s.retired.get(a);
     let successor: string | null = null;
     if (e.answer === 'replaced') {
+      // Recipe .54 (ruling F6 Q3 「모호하면 생애 변경 보류」): a successor B row the same table also gives a part of the map that goes on (같음,
+      // 이름 바뀜 or 구현 바뀜, decided or held, any row of the table) says that part, not something new, took the work over: one part absorbing another, or an
+      // implementation change written as 대신함 (the stage-4 OCR rows). The life change is held, never a retirement.
+      if (out.some(o => sameAnswer(o.answer) && o.part === e.part && !!o.areaId && o.areaId !== a)) { set(e, 'held', 'identity'); continue; }
       const b = bound.get(ledgerKey(f.key, 'C-PART', e.part!)), to = binds.get(e.part!) ?? (b ? canonicalPart(s, b) : null);
       if (!to) { set(e, 'waiting', 'unresolved-endpoint'); continue; }
       if (to === a) { set(e, 'rejected', 'form'); continue; }

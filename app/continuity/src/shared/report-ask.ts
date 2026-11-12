@@ -419,10 +419,15 @@ const COMMON_V5 = `공통 규칙
 - 칸 안의 |는 &#124;, 칸 안에 줄바꿈이나 긴 코드 전문은 넣지 마. 「|」 양옆 공백은 빼도 된다.
 - 키·토큰·비밀번호·접속 주소의 비밀 부분·경로 속 사용자 이름은 [가림]. .env 같은 비밀 파일은 열지 마. 이 요청문은 옮기지 말고 기록 밖의 말은 쓰지 마.`;
 /** A v5 table's section: its title line, its header row (none for C-SUMMARY) and its notes, recipe .46: led by the row-ID form its rows take. */
-const tableSection5 = (id: string): string => {
-  const t = V5_TABLE_DEFS.get(id)!, form = rowIdForm(t), note = [form ? `${t.columns[0] === 'F ID' || t.columns[0] === 'E ID' ? t.columns[0] : '행 ID'} ${form}.` : '', TABLE_NOTES_V5[id] ?? (t.profile ? `(${t.rows}행) ${t.note}` : '')].filter(Boolean).join(' ');
+const tableSection5 = (id: string, notes: Readonly<Record<string, string>> = TABLE_NOTES_V5): string => {
+  const t = V5_TABLE_DEFS.get(id)!, form = rowIdForm(t), note = [form ? `${t.columns[0] === 'F ID' || t.columns[0] === 'E ID' ? t.columns[0] : '행 ID'} ${form}.` : '', notes[id] ?? (t.profile ? `(${t.rows}행) ${t.note}` : '')].filter(Boolean).join(' ');
   return [`${t.id} ${t.title}`, ...(t.columns.length ? [headerLine(t)] : []), ...(note ? [note] : [])].join('\n');
 };
+/** Recipe .54 (ruling F6 Q1): the notes of a v5.3 request (a project with a map): its C-HEAD 기준 커밋 line also asks for the base commit's
+ * date, so a record's target time (map-reading.ts foldTarget) is known and a description is never replaced by a record whose order is unclear
+ * for want of it. A v5.1 request (no map) keeps its notes byte for byte. */
+const BASIS_COMMIT_V5 = '기준 커밋(브랜치 · sha · 매니페스트 판본)', BASIS_COMMIT_V53 = '기준 커밋(브랜치 · sha · 기준 커밋 날짜(YYYY-MM-DD) · 매니페스트 판본)';
+export const TABLE_NOTES_V53: Readonly<Record<string, string>> = Object.freeze({ ...TABLE_NOTES_V5, 'C-HEAD': TABLE_NOTES_V5['C-HEAD']!.replace(BASIS_COMMIT_V5, BASIS_COMMIT_V53) });
 /** Recipe .46: every common table's row-ID form on one line (sessions invented G01, C01, W01 when the request named only some). */
 export const ROW_ID_FORMS = `행 ID 꼴: ${[...Q1_TABLES, ...Q2_TABLES, 'C-SRC', 'C-EVID'].flatMap(id => { const f = rowIdForm(V5_TABLE_DEFS.get(id)!); return f ? [`${id} ${f}`] : []; }).join(' · ')}. C-HEAD·C-SUMMARY·C-END에는 행 ID가 없고, C-DROP의 행 ID는 지울 ID다.`;
 /** Recipe .50 step 5: the roster block of a v5.2 request (map-identity.ts mapRoster's text, its first line the roster line the reply copies). */
@@ -460,15 +465,15 @@ ${FIRST_LINES_REF}
 
 첫 구조
 
-${q1.map(tableSection5).join('\n\n')}
+${q1.map(id => tableSection5(id, roster ? TABLE_NOTES_V53 : TABLE_NOTES_V5)).join('\n\n')}
 
 상세
 
-${Q2_TABLES.map(tableSection5).join('\n\n')}
+${Q2_TABLES.map(id => tableSection5(id)).join('\n\n')}
 
 쪽마다
 
-${PAGE_END_TABLES.map(tableSection5).join('\n\n')}
+${PAGE_END_TABLES.map(id => tableSection5(id)).join('\n\n')}
 
 기록 ID: ${recordId}`;
 }
@@ -590,7 +595,7 @@ ${COMMON_V5}
 ${NO_INVENTION_V5.join('\n')}
 ${rules.length ? `\n${rules.join('\n\n')}\n` : ''}
 쓸 표 (${tables.length}개)
-${tables.map(tableSection5).join('\n\n')}
+${tables.map(id => tableSection5(id)).join('\n\n')}
 
 ${tableSection5('C-SRC')}
 

@@ -81,8 +81,10 @@ test('R50-1 the record ask: v5.1 unchanged without a map; v5.2 carries the roste
   assert.ok(ask.includes(`\n${T.headerLine(T.IDENT_TABLE)}\n행 ID ID01. C-PART 바로 다음에`), 'its header and row-ID form');
   for (const w of ['같음', '이름 바뀜', '대신함', '없어짐', '모름', '「계획」', '「일부: 무엇」', '근거 없는 대응은 후보로만', '기준 커밋이 다르다는 것만으로 다른 대상이 아니고', 'git log --follow', 'P ID는 이 표에만 쓴다'])
     assert.ok(ask.includes(w), w);
-  // Nothing else of the request changed: v5.2 is v5.1 with the roster section and the C-IDENT section added.
-  const back = ask.replace('[AgentFlow 기록 요청 v5.3]', '[AgentFlow 기록 요청 v5.1]').replace(/\n\n지도 대장\n[\s\S]*?\n\n지어내지 마/, '\n\n지어내지 마').replace(/\n\nC-IDENT 지도 대응\n[\s\S]*?(?=\n\nC-GROUP)/, '');
+  // Nothing else of the request changed: v5.2 is v5.1 with the roster section and the C-IDENT section added (recipe .54: and the C-HEAD
+  // 기준 커밋 line asking for the base commit's date, ruling F6 Q1).
+  assert.equal(ask.split('기준 커밋 날짜(YYYY-MM-DD) · ').length, 2);
+  const back = ask.replace('기준 커밋 날짜(YYYY-MM-DD) · ', '').replace('[AgentFlow 기록 요청 v5.3]', '[AgentFlow 기록 요청 v5.1]').replace(/\n\n지도 대장\n[\s\S]*?\n\n지어내지 마/, '\n\n지어내지 마').replace(/\n\nC-IDENT 지도 대응\n[\s\S]*?(?=\n\nC-GROUP)/, '');
   assert.equal(back, plain);
   assert.deepEqual(T.readRecordTables(`${headOf(B, B_BASIS, 1)}\nC-IDENT 지도 대응\n대장: ${roster.head}\n${T.headerLine(T.IDENT_TABLE)}\n|---|---|---|---|---|---|\n|ID01|P02|같음|B01|—|F01|`).diagnostics, []);
   // The roster line the reply copies is read back.

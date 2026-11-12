@@ -9,7 +9,7 @@ import * as D from '../dist/public/shared/domain.js';
 import * as M from '../dist/public/shared/map-reading.js';
 import * as J from '../dist/public/shared/map-job.js';
 import * as T from '../dist/public/shared/record-table.js';
-import { studioView } from '../dist/public/shared/studio.js';
+import { studioView, clipKeepPlan } from '../dist/public/shared/studio.js';
 import { parseProject } from '../dist/public/shared/validation.js';
 import * as P from '../server/map-prompt.mjs';
 import * as Pipe from '../server/map-pipeline.mjs';
@@ -116,8 +116,9 @@ test('49-5 fitMap: claims and roles first, unnamed parts brief before named ones
     current: Array.from({ length: 6 }, (_, j) => claim(`C${i}${j}`, `주장 ${j}: `.padEnd(240, '긴 주장 문장. '))) })), relations: [] });
   const text = '부분가 부분가 부분나 를 고쳤다.';
   // A budget that the old step alone meets: nothing goes brief.
-  let ask = mk(); const after1 = (() => { const a = mk(); for (const x of a.parts) { x.current = x.current.slice(0, 2); x.role = x.role.slice(0, 120); } return bytes(a); })();
-  assert.ok(M.fitMap(ask, text, true, () => bytes(ask) <= after1)); assert.ok(ask.parts.every(x => !x.brief && x.current.length === 2 && x.role.length === 120));
+  let ask = mk(); const after1 = (() => { const a = mk(); for (const x of a.parts) { x.current = x.current.slice(0, 2); x.role = clipKeepPlan(x.role, 120); } return bytes(a); })();
+  // Recipe .54 (review of .53): the role's cut is studio clipKeepPlan (a plan ending kept, 「…」 marks the cut).
+  assert.ok(M.fitMap(ask, text, true, () => bytes(ask) <= after1)); assert.ok(ask.parts.every(x => !x.brief && x.current.length === 2 && x.role === clipKeepPlan(mk().parts[0].role, 120) && x.role.length <= 120));
   // Tighter: the unnamed parts go brief one by one (ask order), the named keep their claims.
   ask = mk(); const budget = after1 - 2000;
   assert.ok(M.fitMap(ask, text, true, () => bytes(ask) <= budget));
@@ -152,7 +153,7 @@ test('49-7 instructions: the brief-parts rule goes only with a brief part; the l
   for (const said of ['"brief":true', '현재 유효한 기존 부분', 'name·readAs·부모(parentId)·relations', '새 부분으로 만들지 않는다', '없는 것', 'replaces나 corrections로 가리키지 않는다'])
     assert.ok(P.MAP7_BRIEF.includes(said), said);
   assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.9:') && P.MAP7_RECIPE.includes('brief-parts.1'));
-  assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.53', 'later-map-divided.53']);
+  assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.54', 'later-map-divided.54']);
 });
 
 /* ---------- review of .49: what names a part ---------- */
