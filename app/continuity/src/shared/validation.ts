@@ -717,7 +717,7 @@ function containment(v:unknown,areas:Area[]) {
   for(const a of areas){const seen=new Set<string>();let id:string|undefined=a.id;while(id){ensure(!seen.has(id));seen.add(id);id=parents[id] as string|undefined;}}
 }
 /** Growth view (ruling F6 Q4): the person's edit log. Each entry has the next sequence number, a time no earlier than the one before it
- * (and the log's start), one of the four kinds, an existing part (archive, parent) or a relation snapshot between existing parts, and a value
+ * (and the log's start), one of the six kinds, an existing part (name, note, archive, parent) or a relation snapshot between existing parts, and a value
  * that changed (before ≠ after). Areas are archived, never deleted, so every id it names stays readable. */
 export function humanEdits(v:unknown,areaIds:ReadonlySet<string>) {
   obj(v,['version','since','entries']);ensure(v.version==='human-edits.1');date(v.since);list(v.entries,HUMAN_EDITS_LIMIT);
@@ -727,7 +727,9 @@ export function humanEdits(v:unknown,areaIds:ReadonlySet<string>) {
   for(const e of v.entries){
     obj(e,['seq','at','kind','target','before','after']);integer(e.seq);ensure((e.seq as number)>=1&&(seq<0||e.seq===seq+1));seq=e.seq as number;
     date(e.at);ensure((e.at as string)>=at);at=e.at as string;id(e.target);
-    if(e.kind==='archive'){area(e.target);ensure(typeof e.before==='boolean'&&typeof e.after==='boolean'&&e.before!==e.after);}
+    if(e.kind==='name'){area(e.target);for(const x of [e.before,e.after]){ensure(typeof x==='string'&&x.trim()===x);text(x,60);}ensure(e.before!==e.after);}
+    else if(e.kind==='note'){area(e.target);for(const x of [e.before,e.after])text(x,2000,true);ensure(e.before!==e.after);}
+    else if(e.kind==='archive'){area(e.target);ensure(typeof e.before==='boolean'&&typeof e.after==='boolean'&&e.before!==e.after);}
     else if(e.kind==='parent'){area(e.target);for(const x of [e.before,e.after])if(x!==null){area(x);ensure(x!==e.target);}ensure(e.before!==e.after);}
     else if(e.kind==='relation-add'){ensure(e.before===null);rel(e.after,e.target as string);}
     else if(e.kind==='relation-remove'){ensure(e.after===null);rel(e.before,e.target as string);}

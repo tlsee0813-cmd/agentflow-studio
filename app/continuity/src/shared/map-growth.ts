@@ -1,13 +1,17 @@
 /* The growing map (ruling F6 Q4, Q5): the same map, and time as something one chooses to look at.
  * - A map version is one map reading (1-based, 「지도 v07」): the readings are append-only, so version k is rebuilt from the prefix of the
  *   readings up to and including the k-th map reading, by the very functions that draw the map now (identityState, currentView,
- *   partUnderstanding). Parts made later are left out, a past name is the official name of the prefix unless the person named the part, and no
- *   later rename, retirement or fold is applied to the past (the prefix has none of them).
+ *   partUnderstanding). Parts made later are left out, a past name is the record's official name of the prefix and a past note is empty
+ *   (the person's own name or note there is an edit with no time, unless the log dates it), and no later rename, retirement or fold is
+ *   applied to the past (the prefix has none of them).
+ * - The latest version is the live map: the project and the view as they stand (every reading, the person's corrections and every other
+ *   entry after the last map reading, the archive state now), never a rebuild (versionAt).
  * - The past is rebuilt from the records only. The person's edits made before the edit log started have no time and are never dated after
  *   the fact (left out, and counted so the view can say so); a logged edit (Project.edits) is applied when it came before the version.
  * - The change set between two versions comes from the two rebuilt versions themselves (both-ends difference: a part made and retired between
  *   them is in neither; a rename and back is no rename), each change with the reading, row and record that made it.
- * - 미반영: the rows of the records read up to a version that are not reflected (waiting, held, rejected), each with plain reason words.
+ * - 미반영: the rows of the records read up to a version that are not reflected (waiting, held, rejected), each with plain reason words;
+ *   at the latest version also the waiting rows of pasted records no reading has read yet (marked unread).
  * Nothing here calls a model or changes a project. */
 import { isMapReading, ROW_REASONS, type MapReading, type Project, type Relation, type RelationKind, type RowState, type ReadingIdentityRow, type GrowthMemo, type HumanEdit } from './types.js';
 import { identityState, officialName, currentView, canonicalPart } from './map-identity.js';
@@ -54,8 +58,19 @@ export const compareBase = (base: number | null, current: number): number | null
 export interface PastVersion { project: Project; view: StudioView;
   /** The person's edits applied (logged before the version, or a part the person made before it, which has its own time). */
   applied: number;
-  /** The person's edits left out because they have no time (made before the log started): archives, parent moves, relations. */
-  undated: number }
+  /** The person's edits left out because they have no time (made before the log started): names, notes, archives, parent moves, relations. */
+  undated: number;
+  /** The live map (the latest version as it stands), not a rebuild. */
+  live?: boolean }
+const liveCache = new WeakMap<Project, PastVersion>();
+/** Version k as a comparison or the 미반영 panel reads it: the latest version is the live map (the project and its view now, every entry
+ * after the last map reading and the archive state included), an earlier one is rebuilt (pastVersion). */
+export function versionAt(p: Project, k: number): PastVersion {
+  if (k !== mapVersions(p).length) return pastVersion(p, k);
+  const hit = liveCache.get(p); if (hit) return hit;
+  const out: PastVersion = { project: p, view: currentView(p, studioView(p)), applied: 0, undated: 0, live: true };
+  liveCache.set(p, out); return out;
+}
 const pastCache = new WeakMap<Project, Map<number, PastVersion>>();
 /** The value a logged attribute had at a time: the last change at or before it, else the value before the first change, else none. */
 function loggedAt<T>(edits: readonly HumanEdit[], at: string, pick: (e: HumanEdit) => { before: T; after: T } | null): { value: T; dated: boolean } | null {
@@ -73,15 +88,30 @@ export function pastVersion(p: Project, k: number): PastVersion {
   for (const r of readings) if (isMapReading(r)) for (const x of r.parts) if (x.created && !made.has(x.areaId)) made.set(x.areaId, x.created);
   let applied = 0, undated = 0;
   const prefixSpace = { readings, space: p.space };
+  // The record's official name at a time (the readings up to it): what a name the log found already there is measured against.
+  const officialAt = (id: string, t: string) => officialName({ readings: p.readings.filter(r => r.at <= t), space: p.space }, id);
   const areas = p.space.areas.flatMap(a => {
     const byReading = full.created.has(a.id);
     if (byReading ? !made.has(a.id) : !(a.createdAt <= at)) return [];
     if (!byReading) applied++;
-    // A past name: the official name of the prefix, unless the part's name is the person's own (it stays).
-    const name = byReading && a.name === officialName(p, a.id) ? officialName(prefixSpace, a.id) : a.name;
+    // A past name and note: a logged value at or before the version; else, for a part a reading made, the record's official name of the
+    // prefix and no note (a name or note of the person's own with no time is never dated after the fact: left out and counted). A part the
+    // person made keeps its name and note (it has its own time).
+    const lgName = loggedAt<string>(edits, at, e => (e.kind === 'name' && e.target === a.id ? e : null));
+    const lgNote = loggedAt<string>(edits, at, e => (e.kind === 'note' && e.target === a.id ? e : null));
+    let name = a.name, note = a.note;
+    if (lgName?.dated) { name = lgName.value; applied++; }
+    else if (byReading) {
+      const base = lgName ? lgName.value : a.name, first = lgName ? edits.find(e => e.kind === 'name' && e.target === a.id)!.at : null;
+      name = officialName(prefixSpace, a.id);
+      if (normName(base) !== normName(first ? officialAt(a.id, first) : officialName(p, a.id))) undated++;
+    }
+    if (lgNote?.dated) { note = lgNote.value; applied++; }
+    else if (byReading) { if ((lgNote ? lgNote.value : a.note).trim()) undated++; note = ''; }
+    // An archive: a logged one at or before the version; one with no time is left out (and counted).
     const arch = loggedAt<boolean>(edits, at, e => (e.kind === 'archive' && e.target === a.id ? e : null));
-    if (arch) { if (arch.dated) applied++; } else if (a.archived) undated++;
-    return [{ ...a, name, archived: arch?.value ?? false }];
+    if (arch?.dated) applied++; else if (arch ? arch.value : a.archived) undated++;
+    return [{ ...a, name, note, archived: arch?.dated ? arch.value : false }];
   });
   const ids = new Set(areas.map(a => a.id)), parents: Record<string, string> = {}, revisions: Record<string, number> = {};
   for (const a of areas) {
@@ -151,6 +181,8 @@ export interface PartChange {
   replaced?: 'bound' | 'stated' | null; target?: string | null;
   /** 새: the version whose reading made the part. */
   since?: number | null;
+  /** 새: who made the part (a reading, or the person by hand) and, for the person, when. */
+  by?: 'reading' | 'person'; madeAt?: string;
   /** The identity row that made the change (이름, 구현, 중복 정리, 승계, 은퇴), with 바뀐 때 and its F/E cites. */
   cite?: IdentityCite | null }
 export interface LineKey { id: string; from: string; to: string; kind: RelationKind }
@@ -162,22 +194,26 @@ export interface ChangeSet { from: number; to: number; changes: PartChange[];
   /** Lines in the later version not in the earlier (by ends and kind, a folded end read as its canonical part), and the reverse. */
   added: LineKey[]; removed: LineKey[] }
 const normText = (t: string) => t.replace(/\s+/g, ' ').trim();
-const normName = (t: string) => t.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
+function normName(t: string) { return t.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase(); }
 function citeOf(p: Project, reading: string, record: string, row: string): IdentityCite | null {
   const r = p.readings.find((x): x is MapReading => isMapReading(x) && x.id === reading); if (!r) return null;
   const x = (r.identity ?? []).find((y: ReadingIdentityRow) => y.record === record && y.id === row);
   return { reading, at: r.at, record, row, when: x?.when ?? null, part: x?.part ?? null, evidence: [...x?.evidence ?? []], place: x ? { ...x.at } : null };
 }
-/** The changes from version a to version b (a < b, both 1-based; b may be the latest), from the two versions as rebuilt. */
+/** The changes from version a to version b (a < b, both 1-based; b may be the latest), from the two versions: a rebuilt one, and the latest
+ * as the live map (versionAt). */
 export function changeSet(p: Project, a: number, b: number): ChangeSet {
-  const A = pastVersion(p, a), B = pastVersion(p, b), vs = mapVersions(p), window = new Set(vs.slice(a, b).map(v => v.id));
+  const A = versionAt(p, a), B = versionAt(p, b), vs = mapVersions(p), window = new Set(vs.slice(a, b).map(v => v.id));
   const sA = identityState(A.project), sB = identityState(B.project);
   const inA = new Map(A.view.parts.map(x => [x.id, x])), inB = new Map(B.view.parts.map(x => [x.id, x]));
   const changes: PartChange[] = [];
   const add = (c: PartChange) => changes.push(c);
   for (const [id, x] of inB) if (!inA.has(id)) {
-    // A part on the later version only: new, unless it is a duplicate that was folded (it is then on neither).
-    add({ kind: 'new', part: id, name: x.name, since: vs.find(v => v.n > a && v.n <= b && (p.readings[v.end - 1] as MapReading).parts.some(q => q.areaId === id && !!q.created))?.n ?? null });
+    // A part on the later version only: new, unless it is a duplicate that was folded (it is then on neither). A part the person made is
+    // new by the person, at its own time (no reading made it).
+    const area = B.project.space.areas.find(q => q.id === id);
+    if (!sB.created.has(id) && area) { add({ kind: 'new', part: id, name: x.name, since: null, by: 'person', madeAt: area.createdAt }); continue; }
+    add({ kind: 'new', part: id, name: x.name, since: vs.find(v => v.n > a && v.n <= b && (p.readings[v.end - 1] as MapReading).parts.some(q => q.areaId === id && !!q.created))?.n ?? null, by: 'reading' });
   }
   for (const [id, y] of inB) {
     const x = inA.get(id); if (!x) continue;
@@ -258,7 +294,11 @@ export const ROW_REASON_WORDS: Readonly<Record<string, string>> = Object.freeze(
 export const rowReasonWords = (state: RowState, reason: string | null): string => (reason ? ROW_REASON_WORDS[`${state}:${reason}`] ?? '이유가 적히지 않음' : '이유가 적히지 않음');
 /** Every reason the ledger can give (for the words' completeness). */
 export const allRowReasons = (): string[] => (Object.entries(ROW_REASONS) as [RowState, readonly string[]][]).flatMap(([s, rs]) => rs.map(r => `${s}:${r}`));
+/** The words of a waiting row whose record no reading has read yet. */
+export const UNREAD_WORDS = '아직 읽지 않음';
 export interface Unreflected { state: Exclude<RowState, 'reflected'>; reason: string | null; words: string;
+  /** A row of a pasted record no reading has read yet (waiting, at the latest version only). */
+  unread: boolean;
   /** The record (fold key), the table and the row's own ID. */
   record: string; table: string; id: string;
   /** What the row tried: its 이름 cell (a part row), else its cells as written, joined. */
@@ -276,16 +316,18 @@ export function plainCells(cells: readonly string[], partName: (id: string) => s
     .split(/\s*[·+,]\s*/).map(t => t.replace(/\s+/g, ' ').trim()).filter(Boolean).join(' · ')).filter(Boolean).join(' · ');
 }
 /** The rows not reflected among the records read up to version k (each record's rows by the ledger as it stood then), waiting first, then
- * held, then rejected, each in record order. */
+ * held, then rejected, each in record order. At the latest version (the live map) the rows of pasted records no reading has read yet are
+ * there too, as waiting rows marked unread (「대기 · 아직 읽지 않음」), after the waiting rows of read records. */
 export function unreflectedAt(p: Project, k: number): Unreflected[] {
-  const past = pastVersion(p, k).project, folds = v5Folds(past.pasted); if (!folds.length) return [];
+  const v = versionAt(p, k), past = v.project, folds = v5Folds(past.pasted); if (!folds.length) return [];
   const read = new Set(past.readings.flatMap(r => (isMapReading(r) ? r.records.map(x => x.id) : [])));
   const ledger = rowLedger(past, folds), live = new Set(past.space.areas.map(a => a.id)), bound = rowBindings(ledger, id => live.has(id));
   const foldOf = new Map<string, V5Fold>(folds.map(f => [f.key, f])), text = new Map(past.pasted.map(x => [x.id, x.text]));
   const rank: Record<string, number> = { waiting: 0, held: 1, rejected: 2 };
   const out: Unreflected[] = [];
   for (const x of ledger.values() as Iterable<LedgerRow>) {
-    if (x.state === 'reflected' || !read.has(x.paste)) continue;
+    const unread = !read.has(x.paste);
+    if (x.state === 'reflected' || (unread && !(v.live && x.state === 'waiting'))) continue;
     const row = foldOf.get(x.record)?.fold.rows.get(x.table)?.find(r => r.id === x.id);
     const cells = row ? Object.entries(row.row.byColumn).filter(([c, v]) => !REF_COLS.has(c) && v.trim() && !/^[—–-]+$/.test(v.trim())).map(([, v]) => v.trim()) : [];
     const names = new Map((foldOf.get(x.record)?.fold.rows.get('C-PART') ?? []).map(r => [r.id, (r.row.byColumn['이름'] ?? '').trim()]));
@@ -293,10 +335,10 @@ export function unreflectedAt(p: Project, k: number): Unreflected[] {
     const ends = x.ends.map(b => bound.get(`${x.record}\u0000C-PART\u0000${b}`)).filter((y): y is string => !!y);
     const parts = [...new Set([...x.with, ...(x.bound ? [x.bound] : []), ...ends])].filter(id => live.has(id));
     const t = text.get(x.paste) ?? '';
-    out.push({ state: x.state, reason: x.reason, words: rowReasonWords(x.state, x.reason), record: x.record, table: x.table, id: x.id, tried: tried.length > 160 ? `${tried.slice(0, 159)}…` : tried,
+    out.push({ state: x.state, reason: x.reason, words: unread ? UNREAD_WORDS : rowReasonWords(x.state, x.reason), unread, record: x.record, table: x.table, id: x.id, tried: tried.length > 160 ? `${tried.slice(0, 159)}…` : tried,
       parts, paste: x.paste, start: x.start, end: x.end, line: t.slice(0, x.start).split('\n').length });
   }
-  return out.sort((a, b) => rank[a.state]! - rank[b.state]! || (a.paste < b.paste ? -1 : a.paste > b.paste ? 1 : a.start - b.start));
+  return out.sort((a, b) => rank[a.state]! - rank[b.state]! || Number(a.unread) - Number(b.unread) || (a.paste < b.paste ? -1 : a.paste > b.paste ? 1 : a.start - b.start));
 }
 /** The F and E cites of an identity row in its record, as written: the file (경로 · 역할) or the evidence (출처 · 자리 · 짧은 인용). */
 export function citeLines(p: Pick<Project, 'pasted'>, record: string, ids: readonly string[]): { id: string; text: string }[] {

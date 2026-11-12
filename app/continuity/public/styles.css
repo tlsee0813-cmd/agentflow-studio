@@ -3744,6 +3744,9 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .gu-state { flex: none; width: 30px; font-size: 11.5px; line-height: 19px; font-weight: 600; color: #8a641d; }
 .gu-row.s-held .gu-state { color: var(--text-2); }
 .gu-row.s-rejected .gu-state { color: var(--text-3); }
+/* A waiting row of a record no reading has read yet: the same 대기, its words 「아직 읽지 않음」 set apart. */
+.gu-row.unread .gu-why { color: var(--text-3); }
+.gu-row.unread .gu-state { opacity: .7; }
 .gu-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .gu-tried { font-size: 12.5px; line-height: 19px; color: var(--text); overflow-wrap: anywhere; }
 .gu-why { font-size: 12px; line-height: 18px; color: var(--text-2); }

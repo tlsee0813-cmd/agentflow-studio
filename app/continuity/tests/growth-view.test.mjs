@@ -99,10 +99,12 @@ test('GROWTH-4 a past version: later parts left out, past names, no future alias
   assert.equal(identityState(v2.project).retired.size, 0, 'no later retirement applied');
   assert.equal(G.pastVersion(p, 3).view.parts.some(x => x.id === 'tim'), false);
   assert.deepEqual(G.pastVersion(p, 1).view.relations.map(r => r.id).sort(), ['L1', 'L2', 'L3']);
-  // A name the person gave stays; a part the person made is there only from its own time.
+  // A name the person gave with no time is not dated after the fact (the record's name then, counted); a part the person made is there
+  // only from its own time.
   const q = workshop(); q.space.areas.find(a => a.id === 'col').name = '우리 수집기';
   q.space.areas.push({ id: 'own', name: '손 메모', note: '', archived: false, createdAt: '2026-10-03T10:00:00.000Z' }); q.space.containment.revisions.own = 0;
-  assert.equal(G.pastVersion(q, 2).view.parts.find(x => x.id === 'col').name, '우리 수집기');
+  assert.equal(G.pastVersion(q, 2).view.parts.find(x => x.id === 'col').name, '수집기');
+  assert.equal(G.pastVersion(q, 2).undated, 1);
   assert.equal(G.pastVersion(q, 2).view.parts.some(x => x.id === 'own'), false);
   assert.equal(G.pastVersion(q, 4).view.parts.some(x => x.id === 'own'), true);
   assert.equal(G.pastVersion(q, 4).applied, 1);
@@ -242,4 +244,112 @@ test('GROWTH-11 the line and the tabs: nonzero items in order, 설명 tabs only 
   assert.ok(shown.length >= 6, 'the top row has room above'); assert.ok(shown.length < 24, 'tight rows hide some');
   // A free card gets its tab right above it, left-aligned.
   assert.deepEqual(V.placeTabs([{ part: 'x', w: 40, h: 20 }], new Map([['x', { x: 100, y: 100, w: 200, h: 80 }]]), [], 2).get('x'), { x: 100, y: 78, w: 40, h: 20 });
+});
+
+test('GROWTH-12 the later end is the live map: a correction after the last map reading is 정정, a part archived with no log entry is archived', () => {
+  const p = workshop();
+  p.readings.push({ version: 'map-correction.1', id: 'M9', at: '2026-10-06T09:00:00.000Z', areaId: 'srt', text: '모은 것을 하루에 한 번 고른다', corrects: 'R2' });
+  p.space.areas.find(a => a.id === 'wat').archived = true;
+  const v = G.versionAt(p, 5);
+  assert.equal(v.live, true); assert.equal(v.project, p, 'the project as it stands, not a rebuild');
+  assert.equal(v.view.parts.find(x => x.id === 'srt').reading.role, '모은 것을 하루에 한 번 고른다');
+  assert.equal(v.view.parts.some(x => x.id === 'wat'), false, 'archived now, with or without a log entry');
+  assert.equal(G.versionAt(p, 4), G.pastVersion(p, 4), 'an earlier version is the rebuild');
+  const late = G.changeSet(p, 4, 5);
+  assert.deepEqual(late.changes.filter(c => c.kind === 'correct').map(c => [c.part, c.after]), [['col', '자료를 모아 하루에 한 번 넘긴다'], ['srt', '모은 것을 하루에 한 번 고른다']]);
+  const wide = G.changeSet(p, 1, 5);
+  assert.equal(wide.changes.some(c => c.part === 'wat'), false, 'a part archived now is no 새 part and no 승계 of the live map');
+  assert.equal(wide.added.some(l => l.from === 'wat' || l.to === 'wat'), false);
+});
+
+test('GROWTH-13 a past version shows the record\'s name of the time and no note; the person\'s names and notes are logged from now on', () => {
+  // No log: the person's name and note are undated edits (left out and counted).
+  const q = workshop(), col = q.space.areas.find(a => a.id === 'col'); col.name = '우리 수집기'; col.note = '사람 메모';
+  let v = G.pastVersion(q, 1), x = v.view.parts.find(y => y.id === 'col');
+  assert.deepEqual([x.name, x.note, v.undated, v.applied], ['수집기', '', 2, 0]);
+  assert.equal(G.pastVersion(q, 4).view.parts.find(y => y.id === 'sto').name, '기록 저장소', 'the record\'s own rename is the name of its time');
+  // From now on the part form logs each that changed, with sequence, time, before and after.
+  let p = D.editAreaByPerson(workshop(), 'col', '우리 수집기', '사람 메모');
+  assert.deepEqual(p.edits.entries.map(e => [e.seq, e.kind, e.target, e.before, e.after]), [[1, 'name', 'col', '수집기', '우리 수집기'], [2, 'note', 'col', '', '사람 메모']]);
+  assert.equal(p.space.areas.find(a => a.id === 'col').name, '우리 수집기');
+  assert.equal(D.editAreaByPerson(p, 'col', '우리 수집기', '사람 메모').edits.entries.length, 2, 'nothing changed: nothing logged');
+  p = D.editAreaByPerson(p, 'col', '우리 수집기', '고친 메모');
+  assert.deepEqual(p.edits.entries.map(e => e.kind), ['name', 'note', 'note']);
+  // Logged after every version: no version shows them, none is undated.
+  v = G.pastVersion(p, 2); x = v.view.parts.find(y => y.id === 'col');
+  assert.deepEqual([x.name, x.note, v.undated, v.applied], ['수집기', '', 0, 0]);
+  // Dated between v1 and v2: applied from v2 on, not before.
+  const early = structuredClone(p); early.edits.since = '2026-10-01T10:00:00.000Z'; for (const e of early.edits.entries) e.at = '2026-10-01T10:00:00.000Z';
+  x = G.pastVersion(early, 2).view.parts.find(y => y.id === 'col');
+  assert.deepEqual([x.name, x.note, G.pastVersion(early, 2).applied], ['우리 수집기', '고친 메모', 2]);
+  assert.equal(G.pastVersion(early, 1).view.parts.find(y => y.id === 'col').name, '수집기');
+  assert.equal(G.pastVersion(early, 1).undated, 0);
+  // Stored and read back; a broken name or note entry is refused.
+  let r = D.createProject(); for (const n of ['수집기', '정리기']) r = D.addArea(r, n);
+  const id = r.space.areas[0].id; r = D.editAreaByPerson(r, id, '모으는 곳', '메모');
+  assert.deepEqual(parseProject(serializeProject(r)).edits, r.edits);
+  const bad = (f) => { const y = structuredClone(r); f(y); assert.throws(() => parseProject(serializeProject(y)), /INVALID_DATA/); };
+  bad(y => { y.edits.entries[0].after = y.edits.entries[0].before; });
+  bad(y => { y.edits.entries[0].after = 'ㄱ'.repeat(61); });
+  bad(y => { y.edits.entries[1].after = 7; });
+});
+
+test('GROWTH-14 미반영 at the latest version holds the waiting rows of pasted records no reading has read yet, marked unread', () => {
+  const p = fixtureProject(growthFixture('track-a')), vs = G.mapVersions(p);
+  const read = new Set(p.readings.flatMap(r => r.records?.map(x => x.id) ?? [])), unreadPastes = p.pasted.filter(x => !read.has(x.id)).map(x => x.id);
+  assert.ok(unreadPastes.length > 0);
+  const last = G.unreflectedAt(p, vs.length), un = last.filter(x => x.unread);
+  assert.ok(un.length > 0, 'the unread records\' rows are there');
+  for (const x of un) { assert.ok(unreadPastes.includes(x.paste)); assert.equal(x.state, 'waiting'); assert.equal(x.words, '아직 읽지 않음'); }
+  assert.ok(last.filter(x => !x.unread).every(x => read.has(x.paste)));
+  // After the read records' waiting rows, before the held ones.
+  const i = last.findIndex(x => x.unread), j = last.findLastIndex(x => x.unread);
+  assert.ok(last.slice(0, i).every(x => x.state === 'waiting' && !x.unread)); assert.ok(last.slice(i, j + 1).every(x => x.unread));
+  assert.equal(G.unreflectedAt(p, 4).some(x => x.unread), false, 'an earlier version reads only what was read up to it');
+});
+
+test('GROWTH-15 the scene\'s earlier description: a correction says the person changed it, a description update never does', () => {
+  assert.equal(V.wasLabel('correct', null), '이전 설명 · 사람이 고친 설명으로 바뀜');
+  assert.equal(V.wasLabel('correct', 'v2.0'), '이전 설명 · 사람이 고친 설명으로 바뀜');
+  for (const w of [V.wasLabel('desc', null), V.wasLabel('desc', 'v2.0'), V.wasLabel(null, null)]) assert.doesNotMatch(w, /사람|고친|정정/);
+  assert.doesNotMatch(V.wasLabel('correct', null), /새 설명|채택|갱신/);
+});
+
+test('GROWTH-16 a clock set back never stamps an edit before the one before it, and the project still loads', () => {
+  let p = D.createProject(); for (const n of ['수집기', '정리기', '저장소']) p = D.addArea(p, n);
+  const [a, b, c] = p.space.areas.map(x => x.id); p = D.addRelation(p, a, b, 'flow');
+  const L = p.space.relations[0].id, Real = Date; let t = Date.parse('2026-11-13T10:00:00.000Z');
+  globalThis.Date = class extends Real { constructor(...x) { super(...(x.length ? x : [t])); } static now() { return t; } };
+  try {
+    p = D.addRelationByPerson(p, a, c, 'needs'); t -= 60000; p = D.removeRelationByPerson(p, L); t -= 60000; p = D.editAreaByPerson(p, a, '모으는 곳', '');
+  } finally { globalThis.Date = Real; }
+  assert.deepEqual(p.edits.entries.map(e => e.at), ['2026-11-13T10:00:00.000Z', '2026-11-13T10:00:00.000Z', '2026-11-13T10:00:00.000Z']);
+  assert.deepEqual(parseProject(serializeProject(p)).edits, p.edits);
+});
+
+test('GROWTH-17 a part the person made reads 「사람이 추가함」 with its time, never 「처음 읽힘」', () => {
+  const p = workshop();
+  p.space.areas.push({ id: 'own', name: '손으로 만든 부품', note: '', archived: false, createdAt: '2026-10-07T09:00:00.000Z' }); p.space.containment.revisions.own = 0;
+  const cs = G.changeSet(p, 1, 5), own = cs.changes.find(c => c.part === 'own'), wat = cs.changes.find(c => c.part === 'wat' && c.kind === 'new');
+  assert.deepEqual([own.kind, own.by, own.madeAt, own.since], ['new', 'person', '2026-10-07T09:00:00.000Z', null]);
+  assert.match(V.newTitle(own, 1), /^사람이 추가함 · \d{4}/); assert.doesNotMatch(V.newTitle(own, 1), /읽힘/);
+  assert.equal(wat.by, 'reading'); assert.equal(V.newTitle(wat, 1), '지도 v02에서 처음 읽힘');
+});
+
+test('GROWTH-18 a past version opens under the camera only when it shows at least half its cards, else it is fitted', () => {
+  const area = { x: 16, y: 60, w: 1248, h: 560 }, card = (x, y) => ({ x, y, w: 134, h: 48 });
+  assert.equal(V.pastKeepsCamera([card(-900, 100), card(-700, 300), card(1500, 200)], area), false, 'an empty canvas is no view');
+  assert.equal(V.pastKeepsCamera([card(100, 100), card(-700, 300), card(1500, 200), card(1600, 200)], area), false, 'one of four');
+  assert.equal(V.pastKeepsCamera([card(100, 100), card(300, 300), card(1500, 200)], area), true);
+  assert.equal(V.pastKeepsCamera([], area), true);
+});
+
+test('GROWTH-19 a hub\'s 「다른 연결 N개」 chip never stands over a card\'s title, its own card\'s included', async () => {
+  const { chipSpots } = await import('../dist/public/client/first-flow.js');
+  // A short card whose title runs to its lower edge: the chip straddling that edge would cover the title's second line.
+  const card = { x: 0, y: 0, w: 134, h: 48 }, title = { x: 22, y: 6, w: 100, h: 38 }, w = 80, hh = 20;
+  const spots = [{ x: card.w - w - 10, y: card.h - hh / 2 }, { x: card.w - w - 10, y: -hh / 2 }, { x: 10, y: card.h - hh / 2 }, { x: card.w - w, y: card.h + 4 }];
+  assert.deepEqual(chipSpots(spots, w, hh, [title]), [{ x: card.w - w, y: card.h + 4 }]);
+  assert.deepEqual(chipSpots(spots, w, hh, [{ x: 22, y: 6, w: 100, h: 14 }]).slice(0, 1), [spots[0]], 'a one-line title leaves the card\'s lower edge free');
+  assert.deepEqual(chipSpots(spots.slice(0, 1), w, hh, [title]), spots.slice(0, 1), 'with no clear place the chip still stands at its card');
 });

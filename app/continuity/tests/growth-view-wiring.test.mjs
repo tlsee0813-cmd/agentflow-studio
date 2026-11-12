@@ -54,6 +54,7 @@ test('GROWTH-W3 a past version is read-only and drawn where the current map is: 
   const view = fn(app, 'growthView');
   assert.match(view, /const pins = growthPast\?\.pins \?\? pinsOfLayout\(\)/);
   assert.match(view, /renderSpace\('keep'\);/, 'the camera stays');
+  assert.ok(view.includes("if (!pastKeepsCamera([...lay.boxes.values()].filter(b => b.kind === 'node').map(toScreen), mapArea())) fitView(false);"), 'unless it would show too little of the version: then it is fitted');
   assert.match(fn(app, 'pinsOfLayout'), /\{ x: b\.rel\.x, y: b\.rel\.y \}/, 'pinned exactly (0px), container-relative');
   assert.match(app, /\.\.\.\(gp\?\.pins\[c\] \?\? \{\}\), \.\.\.\(gp\?\.extra\[c\] \?\? \{\}\) \};/);
   assert.match(app, /const fix = clearPastOnly\(\[\.\.\.lay\.boxes\.values\(\)\], pinned\);/);
@@ -84,8 +85,22 @@ test('GROWTH-W5 the scene says only what the record says: its row, 바뀐 때 an
   assert.match(cite, /changeReason\(o\.project, c\.record, c\.part, c\.when\)/);
   assert.match(cite, /'이유 기록 없음'/);
   assert.match(cite, /showQuote\(paste\.id, paste\.text\.slice\(c\.place!\.from, c\.place!\.to\), c\.place!\.from\)/);
-  assert.match(scene, /'이전 설명 · 같은 부품에 대한 새 설명이 채택됨'/);
+  assert.ok(scene.includes("wasLabel(corr ? 'correct' : desc ? 'desc' : null"), "the earlier description says which took it over: a correction or a description update");
+  assert.ok(scene.includes("x.kind === 'new' ? newTitle(x, c.from)"), "a part the person added never reads 처음 읽힘");
   assert.match(scene, /'빠진 연결은 지금 지도에 그리지 않음 · 남은 부품끼리 잇지 않음 '/);
   assert.match(scene, /기록의 대응 행에서만 읽음/);
   assert.doesNotMatch(app.slice(app.indexOf('/* ---------- the growing map'), app.indexOf('/* ---------- coming back')), /합침|'통합'/, 'a fold the map made is 중복 정리');
+});
+
+test('GROWTH-W6 the person\'s name and note go through the log; the comparison follows the live map; the 미반영 panel says 기록, not 읽은 기록', async () => {
+  const app = await read('src/client/app.ts');
+  assert.ok(fn(app, 'editForm').includes("editAreaByPerson(o.project, part.id, name.value, note.value)"));
+  assert.equal(/(?<![A-Za-z])editArea\(/.test(app), false, 'no unlogged name or note edit from the app');
+  assert.ok(fn(app, 'drawGrowth').includes("growthCmp.proj !== live.project"), "a correction or edit after the last reading redraws the comparison");
+  const un = fn(app, 'growthUnEl');
+  assert.doesNotMatch(un, /읽은 기록/); assert.match(un, /아직 읽지 않은 기록의 행/);
+  const view = await read('src/client/growth-view.ts');
+  assert.doesNotMatch(view, /읽은 기록의 행/);
+  assert.ok(fn(view, 'unreflectedRow').includes("x.unread ? ' unread' : ''"));
+  assert.ok(fn(app, 'placeFocusMarks').includes('put(chip, (w, hh) => chipSpots(['), 'a hub chip\'s places leave out every card title');
 });

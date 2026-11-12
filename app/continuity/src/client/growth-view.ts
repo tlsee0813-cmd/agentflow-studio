@@ -79,6 +79,14 @@ export function clearPastOnly(boxes: readonly { id: string; container: string; r
   return out;
 }
 
+/** Whether a past version opens under the camera as it is: when at least half its cards (on screen, in the map's area) are in view. Else
+ * it is fitted (an empty or near-empty canvas is no view of it). */
+export function pastKeepsCamera(cards: readonly Rect[], area: Rect): boolean {
+  if (!cards.length) return true;
+  const seen = cards.filter(c => meets(c, area)).length;
+  return seen > 0 && seen * 2 >= cards.length;
+}
+
 /* ---------- DOM pieces ---------- */
 export const chipText = (base: number, now: number): string => `이전 방문 · ${versionLabel(base)} → ${versionLabel(now)}`;
 const time = (at: string) => { const t = new Date(at); return Number.isNaN(t.getTime()) ? '' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(t); };
@@ -111,23 +119,29 @@ export function compareLine(cs: ChangeSet, picked: SummaryKey | null, unreflecte
       h('button', { type: 'button', class: `gl-item k-${i.key}${picked === i.key ? ' on' : ''}`, 'aria-pressed': String(picked === i.key), title: itemTip(i.key), onclick: () => on.pick(i.key) }, i.text)])
       : [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), h('span', { class: 'gl-none' }, NO_CHANGE)]),
     h('span', { class: 'gl-gap' }),
-    unreflected !== null ? h('button', { type: 'button', class: `gl-un${unreflected ? '' : ' zero'}`, title: '미반영 · 읽은 기록의 행 가운데 지도에 들어가지 않은 것 (대기 · 보류 · 거절)', onclick: on.unreflected }, `미반영 ${unreflected}`) : null,
+    unreflected !== null ? h('button', { type: 'button', class: `gl-un${unreflected ? '' : ' zero'}`, title: '미반영 · 기록의 행 가운데 지도에 들어가지 않은 것 (대기 · 보류 · 거절)', onclick: on.unreflected }, `미반영 ${unreflected}`) : null,
     h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 보던 렌즈와 선택, 화면으로', 'aria-label': '비교 끝내기', onclick: on.exit }, '×'));
 }
 const itemTip = (k: SummaryKey): string => ({ new: '새로 생긴 부품', rename: '이름이 바뀐 부품', reimpl: '같은 부품, 구현이 바뀜', desc: '같은 부품에 대한 새 설명이 채택됨 · 고르면 카드에 표시', correct: '사람이 고친 설명',
   dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '기록이 은퇴시킨 부품 · 지금 지도에는 없음', lines: '더해진 연결과 빠진 연결' } as Record<SummaryKey, string>)[k] + ' · 누르면 지도에서 밝힘';
+/** The scene's line over the earlier description: a person's correction is never a description update, and the other way round. */
+export const wasLabel = (kind: 'desc' | 'correct' | null, target: string | null): string => (kind === 'correct' ? '이전 설명 · 사람이 고친 설명으로 바뀜'
+  : target ? `이전 설명 · 대상 ${target} 기록의 설명으로 갱신됨` : '이전 설명 · 같은 부품에 대한 새 설명이 채택됨');
+/** A 새 change's title in its scene: the version whose reading made the part, or the person who added it and when. */
+export const newTitle = (c: PartChange, from: number): string => (c.by === 'person' ? `사람이 추가함${c.madeAt && time(c.madeAt) ? ` · ${time(c.madeAt)}` : ''}`
+  : c.since ? `${versionLabel(c.since)}에서 처음 읽힘` : `${versionLabel(from)} 뒤에 처음 읽힘`);
 /** The past view's banner: what is drawn and the way back. */
 export function pastBanner(n: number, applied: number, undated: number, onNow: () => void): HTMLElement {
   const main = applied ? `${versionLabel(n)} 보기 중 · 기록과 날짜가 남은 사람 편집 ${applied}건으로 다시 그림 (날짜 없는 사람 편집은 포함하지 않음)` : `${versionLabel(n)} 보기 중 · 기록만으로 다시 그림 (그때의 사람 편집은 포함하지 않음)`;
   return h('div', { class: 'gp-row', role: 'status' }, h('span', { class: 'gp-text' }, main),
-    undated ? h('span', { class: 'gp-fine', title: '편집 기록이 생기기 전에 사람이 한 보관·옮김·연결은 언제 했는지 몰라 넣지 않음' }, `날짜 없는 편집 ${undated}건 제외`) : null,
+    undated ? h('span', { class: 'gp-fine', title: '편집 기록이 생기기 전에 사람이 고친 이름·설명, 보관·옮김·연결은 언제 했는지 몰라 넣지 않음 · 이름은 그때 기록의 이름' }, `날짜 없는 편집 ${undated}건 제외`) : null,
     h('span', { class: 'gp-fine' }, '읽기 전용'),
     h('button', { type: 'button', class: 'gp-now', onclick: onNow }, '현재로'));
 }
 /** One row of the 미반영 panel: what it tried, why (plain words), the part it is about and the source line. */
 export function unreflectedRow(x: Unreflected, name: (id: string) => string | null, on: { part: (id: string) => void; source: (x: Unreflected) => void }): HTMLElement {
   const parts = x.parts.map(id => ({ id, name: name(id) })).filter((p): p is { id: string; name: string } => !!p.name);
-  return h('li', { class: `gu-row s-${x.state}` },
+  return h('li', { class: `gu-row s-${x.state}${x.unread ? ' unread' : ''}` },
     h('span', { class: 'gu-state' }, ROW_STATE_WORD[x.state]),
     h('span', { class: 'gu-body' },
       h('span', { class: 'gu-tried' }, x.tried || '내용 없는 행'),
