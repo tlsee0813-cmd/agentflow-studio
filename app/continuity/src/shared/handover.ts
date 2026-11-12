@@ -4,7 +4,7 @@
  * document itself is not taken back in as a new record of work (foldHandover). */
 import { isMapReading, type ClaimKind, type MapReading, type Project, type ReadingQuote } from './types.js';
 import { CLAIM_LABEL, unreadRecords, scenarioReadRecords } from './map-reading.js';
-import { studioView, type PartView, type StudioView } from './studio.js';
+import { studioView, clipKeepPlan, type PartView, type StudioView } from './studio.js';
 import { relLabel } from './relation-groups.js';
 import { stamp, RECORD_HEAD, HEAD_FIELD } from './session-import.js';
 import { TOOL_NAME, RELAYED, type SessionTool } from './session-parse.js';
@@ -167,7 +167,8 @@ function partBlock(view: StudioView, part: PartView, sessions: PartSession[], to
   const u = part.reading;
   const role = u?.role ?? part.summary ?? null;
   // Every line a list item: in a Markdown viewer a plain line after a list runs into its last item.
-  if (role) lines.push(`- 역할: ${one(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
+  // Recipe .54 (review of .53): the role's cut keeps a plan ending; review of .54 (finding 3): its plan word wherever it sits (studio clipKeepPlan).
+  if (role) lines.push(`- 역할: ${clipKeepPlan(role, k.text)}${u?.corrected ? ' (사용자가 고친 설명)' : ''}`);
   if (part.note) lines.push(`- 사용자 메모: ${one(part.note, k.text)}`);
   // Chosen by KEEP_FIRST in either mode (the newest of a kind first, as the map lists them), then written in the mode's order.
   const all = u?.claims ?? [], kept = all.slice().sort((a, b) => KEEP_FIRST.indexOf(a.kind) - KEEP_FIRST.indexOf(b.kind)).slice(0, k.claims);

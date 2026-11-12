@@ -114,6 +114,89 @@ export function clip(text: string, n: number): string {
   const code = text.charCodeAt(n - 1);
   return text.slice(0, code >= 0xd800 && code <= 0xdbff ? n - 1 : n);
 }
+/** The plan words (the same set as map-identity PLANNED, kept apart: the two modules import each other): a description holding one says
+ * something is not built yet. */
+export const PLAN_WORD = /계획|예정|하기로|할\s*것|나중에|아직/;
+/** Recipe .53 (ruling F6 Q1): a description that ends on a plan word (「…색인하도록 계획된 처리다.」, 「…(예정)」) keeps that ending
+ * when it is cut: the words from the one holding the plan word on (within PLAN_TAIL_CHARS of the end, measured by widthOf: recipe .54, the
+ * same unit the cut's room is measured in), else null. Review of .54 (finding 3): a reading aid only; clipKeepPlan no longer stops at
+ * this distance. */
+export const PLAN_TAIL_CHARS = 14;
+const charCount = (t: string) => [...t].length;
+/** The last plan word (PLAN_WORD) of a folded text: its place and length, or null. */
+function lastPlanWord(t: string): { at: number; len: number } | null {
+  const re = new RegExp(PLAN_WORD.source, 'g'); let last: { at: number; len: number } | null = null;
+  for (let m = re.exec(t); m; m = re.exec(t)) last = { at: m.index, len: m[0].length };
+  return last;
+}
+export function planTail(text: string, widthOf: (t: string) => number = charCount): string | null {
+  const t = text.replace(/\s+/g, ' ').trim(), w = lastPlanWord(t);
+  if (!w) return null;
+  const start = t.lastIndexOf(' ', w.at) + 1, tail = t.slice(start);
+  return widthOf(tail) <= PLAN_TAIL_CHARS ? tail : null;
+}
+/** A clause boundary: a comma or semicolon, or the space after a joining ending (하고 · 되고 · 이고 · 하며 · 되며 · 이며 · 으며). */
+const CLAUSE_BOUNDARY = /[,，;；]\s*|(?<=(?:하고|되고|이고|하며|되며|이며|으며))\s+/g;
+/** The end of the last clause boundary in t[from, before), or `from` for none. */
+function clauseStart(t: string, from: number, before: number): number {
+  const re = new RegExp(CLAUSE_BOUNDARY.source, 'g'); re.lastIndex = from; let end = from;
+  for (let m = re.exec(t); m && m.index < before; m = re.exec(t)) if (m.index + m[0].length <= before) end = m.index + m[0].length;
+  return end;
+}
+/** Recipe .54 (review of .53): the clause of one sentence that holds its last plan word: the words after the last clause boundary before
+ * that word, to the sentence's end. Null when the sentence has no plan word or no boundary before it (the clause would be the whole
+ * sentence). Always words of the sentence itself, never another's. */
+export function planClause(sentence: string): string | null {
+  const t = sentence.replace(/\s+/g, ' ').trim(), w = lastPlanWord(t); if (!w) return null;
+  const end = clauseStart(t, 0, w.at), clause = end > 0 ? t.slice(end).trim() : '';
+  return clause && clause !== t ? clause : null;
+}
+/** A width in Korean characters: a Hangul or other wide character is 1, anything else 0.6 (a card line holds about 15). */
+export const textWidth = (t: string): number => [...t].reduce((n, ch) => n + (/[ᄀ-ᇿ⺀-꓏가-힣豈-﫿＀-￯]/.test(ch) ? 1 : 0.6), 0);
+/** The head of a folded text that fits `room` by widthOf (trailing space dropped). */
+const headFit = (t: string, room: number, widthOf: (t: string) => number) => { let head = ''; for (const ch of t) { if (widthOf(head + ch) > room) break; head += ch; } return head.trimEnd(); };
+/** Whether a plain cut of the folded text to n would leave out its last plan word: the text is wider than n and that word is not whole in
+ * the head a plain cut keeps. */
+export function planCutNeeded(text: string, n: number, widthOf: (t: string) => number = charCount): boolean {
+  const t = text.replace(/\s+/g, ' ').trim(); if (widthOf(t) <= n) return false;
+  const w = lastPlanWord(t); return !!w && headFit(t, n - 1, widthOf).length < w.at + w.len;
+}
+/** Cut to at most n characters (or, with widthOf, n by that width) with 「…」. Whitespace is folded first. Review of .54 (finding 3): a
+ * cut never leaves out the text's last plan word (PLAN_WORD), wherever it sits. A plain cut that keeps it whole stays a plain cut;
+ * otherwise the text keeps its head and, after 「…」, the first of these spans that fits (each the text's own words, a trailing 「…」 marking
+ * what is cut after it): the clause holding the plan word (from the last clause boundary of its sentence before the word) to the
+ * sentence's end; the words from the one holding the plan word to the sentence's end; that clause up to the end of the word holding the
+ * plan word; that word with the word before it (in the same sentence); that word with the word after it; that word alone. First with a
+ * head of at least two characters, then with none (「… span」); when even 「… word」 does not fit, the text stays uncut: never a plain cut
+ * that drops the plan word, never a word the text does not have. */
+export function clipKeepPlan(text: string, n: number, widthOf: (t: string) => number = charCount): string {
+  const t = text.replace(/\s+/g, ' ').trim(); if (widthOf(t) <= n) return t;
+  const plain = headFit(t, n - 1, widthOf), w = lastPlanWord(t);
+  if (!w || plain.length >= w.at + w.len) return `${plain}…`;
+  // The sentence holding the plan word: after the last sentence end before it, to the first sentence end after it (or the text's end).
+  let s0 = 0; for (const m of t.slice(0, w.at).matchAll(/[.!?。](?= )/g)) s0 = m.index! + 2;
+  const endM = /[.!?。](?= |$)/.exec(t.slice(w.at + w.len)), s1 = endM ? w.at + w.len + endM.index + 1 : t.length;
+  const c0 = clauseStart(t, s0, w.at);
+  // The word (eojeol) holding the plan word, the one before it and the one after it.
+  const e0 = t.lastIndexOf(' ', w.at) + 1, sp = t.indexOf(' ', w.at + w.len), e1 = sp < 0 ? t.length : sp;
+  const p0 = e0 > s0 ? Math.max(s0, t.lastIndexOf(' ', e0 - 2) + 1) : e0;
+  const sp2 = e1 < t.length ? t.indexOf(' ', e1 + 1) : -1, n1 = e1 < t.length ? (sp2 < 0 ? t.length : sp2) : e1;
+  const spans: [number, number][] = [];
+  const add = (a: number, b: number) => { if (a < b && !spans.some(([x, y]) => x === a && y === b)) spans.push([a, b]); };
+  if (c0 > 0) add(c0, s1);
+  add(e0, s1); if (c0 > 0) add(c0, e1); add(p0, e1); add(e0, n1); add(e0, e1);
+  const render = (a: number, b: number, withHead: boolean): string | null => {
+    const seg = t.slice(a, b).trim(), more = t.slice(b).trim() ? (/[.!?。]$/.test(seg) ? ' …' : '…') : '', before = t.slice(0, a).trimEnd();
+    const fit = (out: string) => (widthOf(out) <= n ? out : null);
+    if (!before) return fit(`${seg}${more}`);
+    if (!withHead) return fit(`… ${seg}${more}`);
+    const head = headFit(before, n - widthOf(`… ${seg}${more}`), widthOf);
+    if ([...head].length < 2) return null;
+    return fit(head === before ? `${t.slice(0, b).trim()}${more}` : `${head}… ${seg}${more}`);
+  };
+  for (const withHead of [true, false]) for (const [a, b] of spans) { const out = render(a, b, withHead); if (out) return out; }
+  return t;
+}
 /** Room kept for the coverage counts, which are filled in last. */
 const COVERAGE_ROOM = 256, META_BYTES = 32768, MIN_EXCERPT_BYTES = 600;
 

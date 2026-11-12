@@ -468,8 +468,14 @@ export const LINES_CORRECTION_USD = 0.07;
 // those reasons take the room the reasons of what the server left out of the wire leave. A semantic re-render or a final review that fails
 // on the revision path (refused after its correction, or cut at its cap) is the revision's verdict on what it was asked to revise: its
 // group keeps its first fragment, a failed final review leaves the fragments combined without a global rewrite. Never a refusal.
-export const PIPELINE_RECIPE = 'first-map-divided.51';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.51';
+// .53 (ruling F6 Q1, Q3; the reading side, map-reading.ts and map-identity.ts): a bound record's description never replaces one about a
+// clearly later target, rests on the bound row or a row naming it, and promotes no state; 구현 바뀜 (기록 요청 v5.3) binds with the change
+// noted, never retiring; a 같음 row's other name is an alias candidate.
+// .54 (ruling F6 Q1 「선후 불명확 + 충돌 → 설명 교체만 보류」 and the .53 review): a bound record never replaces a description another bound
+// record gave when the order of their targets is unclear (a candidate instead); the v5.3 record ask asks for the base commit's date; a cut role
+// in the ask keeps its plan word; 구현 바뀜 notes only a real, whole change; a 대신함 whose successor the same table says is a part that goes on is held.
+export const PIPELINE_RECIPE = 'first-map-divided.54';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.54';
 /** .45 (RECORD_ASKS_V5_KO.md 12.4 (d)): the key sets beside a stage's INPUT: for each v5 record, the B, F and E IDs its own text cites
  * (each B with its name and one-line responsibility, F with its path, E with its grade and source), a closed set; nothing for an ask with
  * no v5 record (its stage inputs stay as .44 sent them). */

@@ -617,13 +617,17 @@ export interface MapReading {
   identity?: ReadingIdentityRow[];
 }
 /* ---------- Recipe .50 step 5 (Astra F5 Q2/Q3/Q6/Q7(5)): the C-IDENT table of a 기록 v5.2 record, as the program decided it. ---------- */
-/** 대응: 같음 / 이름 바뀜 / 대신함 / 없어짐 / 모름; 나뉨 and 합침 are kept as written and are unsupported in .50. */
-export const IDENTITY_ANSWERS = ['same', 'renamed', 'replaced', 'gone', 'unknown', 'split', 'merged'] as const;
+/** 대응: 같음 / 이름 바뀜 / 대신함 / 없어짐 / 모름; 나뉨 and 합침 are kept as written and are unsupported in .50. Recipe .53 (기록 요청 v5.3,
+ * ruling F6 Q3): 구현 바뀜 (reimplemented), the same part whose implementation changed (its responsibility goes on): a bind with the change
+ * noted on the part, never a retirement. */
+export const IDENTITY_ANSWERS = ['same', 'renamed', 'replaced', 'gone', 'unknown', 'split', 'merged', 'reimplemented'] as const;
 export type IdentityAnswer = typeof IDENTITY_ANSWERS[number];
-export const IDENTITY_OPS = ['bind', 'rename', 'retire', 'fold'] as const;
+export const IDENTITY_OPS = ['bind', 'rename', 'retire', 'fold', 'reimplement'] as const;
 /** What a reflected row did: bind (the record's B row is that part), rename (the part's official name became `to`; `from` stays its old
  * name; renamed: the shown name changed too, false when the person's own name stays), retire (the part is no longer current, with its
- * successor part or null) or fold (areaId, a duplicate the map made, is the canonical part `into`; its references resolve there). */
+ * successor part or null), fold (areaId, a duplicate the map made, is the canonical part `into`; its references resolve there) or, recipe
+ * .53, reimplement (a bind whose record says the part's implementation changed: `from` the implementation the map knew, `to` the record's B
+ * row name; the official name stays unless a record says 이름 바뀜; renamed is false). */
 export interface ReadingIdentityOp { kind: typeof IDENTITY_OPS[number]; areaId: string; successor: string | null; into: string | null; from: string | null; to: string | null; renamed: boolean }
 export interface ReadingIdentityRow {
   /** The record (its fold key) and the row's own ID (ID01). */
@@ -637,6 +641,9 @@ export interface ReadingIdentityRow {
   op: ReadingIdentityOp | null;
   /** 바뀐 때 as written (60), and the F and E IDs the row cites (up to eight). */
   when: string | null; evidence: string[];
+  /** Recipe .53 (ruling F6 Q3): a 같음 row whose B row the record names otherwise than the part's official name: that name, an alias
+   * candidate only (the part is never renamed by it). Absent when the names are alike or the row is not reflected. */
+  name?: string;
   /** Where the row stands: the pasted text and its [from, to). */
   at: { record: string; from: number; to: number } }
 /* ---------- map-reading.20 (recipe .50, Astra F5 Q5): the row-processing ledger. Every current row of a 기록 v5 record's tables (the ledgers

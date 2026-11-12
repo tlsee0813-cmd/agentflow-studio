@@ -7,9 +7,9 @@
 import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CHANNELS, RELATION_MODES, READINGS_LIMIT, READING_EXCLUSION_RULES, isMapReading, isScenarioReading, type PastedRecord, type RecordEvidence, type CandidateTarget, type ClaimKind, type ClaimTopic, type EvidenceGrade, type PartState, type PartType, type Channel, type RelationMode, type MapReading, type Project, type ReadingCandidate, type ReadingClaim, type ReadingPart, type ReadingQuote, type ReadingRelation, type ReadingSkip, type ReadingExclusion, type RelationKind, type ReadingStep, type ReadingLoop, type ReadingStateVar, type ReadingPortMap, type ReadingCondition, type ReadingFileRole, RULE_SCOPES, ANCHOR_KINDS, ENFORCER_KINDS, WITHDRAWAL_KINDS, GATE_KINDS, type RuleScope, type AnchorKind, type EnforcerKind, type WithdrawalKind, type GateKind,
   type ReadingRecordLoop, type ReadingVariant, type ReadingStatusClaim, type ReadingDecider, type ReadingActor, type ReadingContractChange, type ReadingShippedIn, type WithdrawalMethod, type ConditionPhase, type ReadingStepBranch, type CrossKind, type CadenceKind, type ReadingCite, type FoundBy, type ClaimNature } from './types.js';
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
-import type { StudioView, RecordView } from './studio.js';
+import { clipKeepPlan, planCutNeeded, type StudioView, type RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading, editArea } from './domain.js';
-import { decideIdentity, identityBindings, identityHolds, identityState, canonicalPart, mapRoster, areaOfNumber } from './map-identity.js';
+import { decideIdentity, identityBindings, identityHolds, identityState, canonicalPart, mapRoster, areaOfNumber, rosterEcho, implementationChanges, nameCandidates } from './map-identity.js';
 import { parseProject, sourceText } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
@@ -18,7 +18,7 @@ import { validateFrozenRequest, validateRequestContext, requestContext, validate
 import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PAGE_HEAD, CHUNK_HEAD, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow, type FoldRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun, type V5Fold } from './record-excerpt.js';
-import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, rowBindings, ledgerKey, ownPartRow, type LedgerRow } from './row-ledger.js';
+import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, rowBindings, ledgerKey, ownPartRow, IDENT_TABLE_ID, type LedgerRow } from './row-ledger.js';
 export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -3375,8 +3375,20 @@ export interface PartUnderstanding {
   corrected: { id: string; at: string } | null;
   /** The quotes the current description rests on (none for the person's correction). */
   roleBasis: ReadingQuote[];
-  /** Descriptions read later that did not replace the current one (another version, the same version, or none named), newest first. */
-  others: { text: string; about: string | null; at: string }[];
+  /** Recipe .52 M2: when the current description came from a record whose C-IDENT row bound the part, that reading's time; else null. */
+  roleBound?: string | null;
+  /** Descriptions read later that did not replace the current one (another version, the same version, or none named), newest first;
+   * replaced: an earlier description a later one took over from — 'stated' (the record said in its own words its description replaces
+   * it, roleReplaces) or 'bound' (a record whose C-IDENT row bound the part described it anew, .52). Recipe .53 (ruling F6 Q1): target, the
+   * 기준 시점 (YYYY-MM-DD) of the record whose description took over, when that record names one. A description update is never a 정정.
+   * Recipe .54 (ruling F6 Q1 「선후 불명확 + 충돌 → 설명 교체만 보류」): held 'order', a description of a record that bound the part, kept as a
+   * candidate beside a current description another record that bound the part gave, because which of the two is about the later target is
+   * not clear (partUnderstanding). */
+  others: { text: string; about: string | null; at: string; replaced?: 'bound' | 'stated'; target?: string | null; held?: 'order' }[];
+  /** Recipe .53 (ruling F6 Q3): what the records' C-IDENT rows say of the part besides its description: an implementation change (구현 바뀜:
+   * the implementation the map knew → the record's name for the new one, with 바뀐 때) and another name a record called it on a 같음 row (an
+   * alias candidate, never a rename), oldest first. */
+  identityNotes?: { kind: 'implementation' | 'name'; from: string | null; text: string; when: string | null; at: string }[];
   /** Current claims, newest reading first: superseded ones and repeats of the same words are left out. */
   claims: CurrentClaim[];
   /** Pipeline .44 (map-reading.18 fields, derived): the newest reading's v4 C-LOOP rows of the part (every loop, with its parent loop),
@@ -3424,10 +3436,96 @@ export interface PartUnderstanding {
   roleBasisRevised: boolean;
 }
 const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
+/** Recipe .52: the v5 records of the pasted texts, for the bound-description rule: where each record's pages stand in which pasted text
+ * (one text may hold pages of several records, so a quote's record is found by its place), the map revision each record's C-IDENT copied
+ * from its roster (what the session saw), and each C-PART row's own 「하는 일 한 줄」 quoted from its row. Kept for the last list of pasted
+ * texts (ids, times and lengths; pasted texts are never edited), so an edit that leaves them alone reads none again. */
+interface FoldIndex { regions: Map<string, { from: number; to: number; key: string }[]>; echo: Map<string, number | null>; line: Map<string, { text: string; quote: ReadingQuote }>;
+  /** Recipe .53 (ruling F6 Q1): each record's target time, its 기준 시점 (YYYY-MM-DD) as its page head or C-HEAD says it, else null. */
+  target: Map<string, string | null>;
+  /** Recipe .53: the places of the rows of each record that are about a B row: the C-PART row itself and every other row of the record
+   * (C-IDENT aside) naming that B ID (its steps, loops, changes, links), by `${record key}\u0000${B}`. */
+  about: Map<string, { record: string; from: number; to: number }[]> }
+let foldIndexCache: { sig: string; out: FoldIndex } | null = null;
+function foldIndex(p: Project): FoldIndex {
+  const sig = p.pasted.map(x => `${x.id}:${x.at}:${x.text.length}`).join('|');
+  if (foldIndexCache?.sig === sig) return foldIndexCache.out;
+  const regions = new Map<string, { from: number; to: number; key: string }[]>(), echo = new Map<string, number | null>(), line = new Map<string, { text: string; quote: ReadingQuote }>();
+  const target = new Map<string, string | null>(), about = new Map<string, { record: string; from: number; to: number }[]>();
+  const texts = new Map(p.pasted.map(x => [x.id, x.text] as [string, string]));
+  try {
+    for (const f of v5Folds(p.pasted)) {
+      for (const pg of [...f.fold.pages, ...f.fold.held, ...f.fold.replaced]) regions.set(pg.record, [...regions.get(pg.record) ?? [], { from: pg.from, to: pg.to, key: f.key }]);
+      echo.set(f.key, rosterEcho(f.fold.rows.get(IDENT_TABLE_ID) ?? [])?.revision ?? null);
+      target.set(f.key, foldTarget(f));
+      for (const list of [...f.fold.rows.values(), ...f.fold.history.values()]) for (const r of list) {
+        if (r.table === IDENT_TABLE_ID) continue;
+        const ids = r.table === 'C-PART' ? [r.id] : [...new Set(r.row.cells.map(c => c.text).join(' ').match(/(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g) ?? [])];
+        for (const b of ids) {
+          const k = `${f.key}\u0000${b}`, at = { record: r.record, from: r.row.from, to: r.row.to }, l = about.get(k) ?? [];
+          if (!l.some(x => x.record === at.record && x.from === at.from && x.to === at.to)) l.push(at);
+          about.set(k, l);
+        }
+      }
+      for (const r of f.fold.rows.get('C-PART') ?? []) {
+        const said = (r.row.byColumn['하는 일 한 줄'] ?? '').replace(/\s+/g, ' ').trim(), t = texts.get(r.record);
+        if (!said || /^[—–-]+$/.test(said) || said === '모름' || t === undefined || secretLike(said)) continue;
+        line.set(`${f.key}\u0000${r.id}`, { text: clipKeepPlan(said, 300), quote: { record: r.record, quote: t.slice(r.row.from, r.row.to), from: r.row.from, to: r.row.to } });
+      }
+    }
+  } catch { /* not v5: no record is bound */ }
+  const out = { regions, echo, line, target, about }; foldIndexCache = { sig, out }; return out;
+}
+/** Recipe .53 (ruling F6 Q1): a record's target time: the 기준 시점 date its page heads or its C-HEAD rows (기준 커밋, 작성 시각) name, else null.
+ * Only a date compares: commit strings never order. */
+function foldTarget(f: V5Fold): string | null {
+  for (const t of [f.fold.title, ...f.fold.pages.map(x => x.title)]) { const m = BASIS_DATE.exec(t); if (m) return m[1]!; }
+  for (const item of ['기준 커밋', '작성 시각']) {
+    const r = f.fold.head.get(item), v = r ? r.row.cells.slice(1).map(c => c.text).join(' ') : '';
+    const m = BASIS_DATE.exec(v) ?? (item === '기준 커밋' ? /(?<!\d)(\d{4}-\d{2}-\d{2})(?!\d)/.exec(v) : null); if (m) return m[1]!;
+  }
+  return null;
+}
+/** Recipe .53 (ruling F6 Q1 (c)): whether a quote stands on a row of record `key` about one of the B rows `bs` (FoldIndex about). A quote
+ * with no place is found by its words in its pasted text. */
+function quoteAbout(ix: FoldIndex, p: Project, key: string, bs: ReadonlySet<string>, q: ReadingQuote): boolean {
+  let from = q.from, to = q.to;
+  if (from === undefined || to === undefined) { const t = p.pasted.find(x => x.id === q.record)?.text ?? '', i = q.quote ? t.indexOf(q.quote) : -1; if (i < 0) return false; from = i; to = i + q.quote.length; }
+  for (const b of bs) for (const r of ix.about.get(`${key}\u0000${b}`) ?? []) if (r.record === q.record && from < r.to && r.from < to) return true;
+  return false;
+}
+/** The v5 record (fold key) a quote stands in: the page region holding it, else the only record of its pasted text, else none. */
+function recordOfQuote(ix: FoldIndex, q: ReadingQuote): string {
+  const rs = ix.regions.get(q.record); if (!rs?.length) return '';
+  const at = q.from !== undefined ? rs.find(r => q.from! >= r.from && q.from! < r.to) : undefined; if (at) return at.key;
+  const keys = new Set(rs.map(r => r.key)); return keys.size === 1 ? [...keys][0]! : '';
+}
 export function partUnderstanding(p: Project, areaId: string): PartUnderstanding | null {
   const history: PartUnderstanding['history'] = []; let createdName: string | null = null, role: string | null = null, roleAbout: string | null = null;
   const others: PartUnderstanding['others'] = []; let roleBasis: ReadingQuote[] = [];
-  let corrected: PartUnderstanding['corrected'] = null;
+  // Recipe .52: boundBy, the records whose C-IDENT row bound the part, each with the B rows it bound (recipe .53: by those rows the model's
+  // description of a bound record is about the part, ruling F6 Q1 (c)).
+  let corrected: PartUnderstanding['corrected'] = null, roleBound: string | null = null; const boundBy = new Map<string, Set<string>>(), applied = new Set<string>();
+  // Recipe .52: the map revision (1-based count of map readings) whose reading set the current description, and that reading. A bound
+  // record replaces it only when the roster it was written against already showed it (its copied 판 is at least that revision): a record
+  // written earlier, read later (a backlog page, an older session's record pasted late), never turns the description back.
+  // Recipe .53 (ruling F6 Q1 (a)): roleTarget, the target time (기준 시점) of the record the current description rests on, when it names one.
+  let roleRev = 0, roleReading: string | null = null, rev = 0, roleTarget: string | null = null; let ix: FoldIndex | null = null; const index = () => ix ??= foldIndex(p);
+  /** The target of the one v5 record all these quotes stand in, or null. */
+  const targetOf = (qs: readonly ReadingQuote[]): string | null => { const ks = new Set(qs.map(q => recordOfQuote(index(), q))); return ks.size === 1 && !ks.has('') ? index().target.get([...ks][0]!) ?? null : null; };
+  /** A bound record's description is clearly about an earlier target than the current one's: both name a date and its date is earlier. */
+  const earlier = (t: string | null) => !!t && !!roleTarget && t < roleTarget;
+  // Recipe .54 (ruling F6 Q1 「선후 불명확 + 충돌 → 설명 교체만 보류」): roleFrom, the record (fold key) whose C-IDENT row bound the part and whose
+  // description is the current one (its own C-PART line, or the model's words resting on its rows about the part); null for any other
+  // description: the plain first reading's (the stage-1 plan line), a stated replacement, the person's correction. The rule: a bound record
+  // replaces the current description (the .52 rule, guarded by (a)) unless the current one came from ANOTHER record that bound the part and the
+  // order of the two records' targets is not clear: either names no target date, or both name the same date. Then only the description change
+  // is held: the current description stays and the bound record's words are kept in others as a candidate (held 'order'), never as 이전 설명;
+  // its identity row, relations and claims are reflected as usual. Differing texts only (the same words change nothing). Over a description
+  // no record bound (the first reading's), a first bound description still replaces it: that description is no conflicting record's.
+  let roleFrom: string | null = null;
+  const unclear = (key: string, t: string | null) => !!roleFrom && roleFrom !== key && (!t || !roleTarget || t === roleTarget);
+  const otherOnce = (text: string, about: string | null, at: string, held?: 'order') => { if (!others.some(o => norm(o.text) === norm(text))) others.unshift({ text, about, at, ...(held ? { held } : {}) }); };
   const all: CurrentClaim[] = [], replaced = new Set<string>();
   let stateRead: PartUnderstanding['stateRead'] = null, typeRead: PartUnderstanding['typeRead'] = null, familyRead: PartUnderstanding['familyRead'] = null; const files: string[] = [], inputs: string[] = [], outputs: string[] = [], fields: string[] = [], config: string[] = [];
   // A later reading's names go first in its own order; one an earlier reading also named moves up with it.
@@ -3441,8 +3539,29 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   // retired the part gives it the state retired from that reading on.
   const ident = identityState(p), dups = new Set([...ident.folded.keys()].filter(id => id !== areaId && canonicalPart(ident, id) === areaId));
   for (const r of p.readings) {
-    if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
+    if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; roleBound = null; roleTarget = null; roleFrom = null; } continue; }
     for (const x of r.identity ?? []) if (x.op?.kind === 'retire' && x.op.areaId === areaId) stateRead = { state: 'retired', when: x.when, quote: null, at: r.at };
+    // Recipe .52 M2b: the bound record's own C-PART line (its 「하는 일 한 줄」) is the part as that record knows it now; a reply that wrote
+    // no description of the part (the usual case for a part the map has) still gives the card that line, quoted from its row.
+    rev++;
+    for (const x of r.identity ?? []) {
+      // Recipe .53: a 구현 바뀜 row's bind (reimplement) binds the same way.
+      if (!((x.op?.kind === 'bind' || x.op?.kind === 'rename' || x.op?.kind === 'reimplement') && (x.op.areaId === areaId || dups.has(x.op.areaId)) && x.part)) continue;
+      boundBy.set(x.record, new Set([...boundBy.get(x.record) ?? [], x.part]));
+      const k = `${x.record}\u0000${x.part}`, own = index().line.get(k), seen = index().echo.get(x.record) ?? null, target = index().target.get(x.record) ?? null;
+      // A record's own line goes on the card once; a later reading that sends the record again (its op re-decided) changes nothing.
+      if (!own || corrected || applied.has(k)) continue; applied.add(k);
+      if (role && (norm(role) === norm(own.text) || seen === null || seen < roleRev)) continue;
+      // Recipe .53 (ruling F6 Q1 (a)): a record about a target clearly earlier than the current description's (both name a date) never
+      // replaces it: its line reads beside it as another description. Undated or the same date: the .52 rule.
+      if (role && earlier(target)) { otherOnce(own.text, null, r.at); continue; }
+      // Recipe .54 (ruling F6 Q1): another bound record's description, the order unclear: held, a candidate.
+      if (role && unclear(x.record, target)) { otherOnce(own.text, null, r.at, 'order'); continue; }
+      if (role && !others.some(o => norm(o.text) === norm(role!))) others.unshift({ text: role, about: roleAbout, at: r.at, replaced: 'bound', target });
+      role = own.text; roleAbout = null; roleBasis = [own.quote]; roleBound = r.at; roleRev = rev; roleReading = r.id; roleTarget = target; roleFrom = x.record;
+      // The part had no entry yet (a part only the bind describes): the bind is its evidence history.
+      if (!r.parts.some(x2 => x2.areaId === areaId || dups.has(x2.areaId))) history.push({ reading: r.id, at: r.at, role: own.text, claims: [], basis: [own.quote] });
+    }
     const mine = r.parts.filter(x => x.areaId === areaId);
     for (const part of mine.length || !dups.size ? mine : r.parts.filter(x => dups.has(x.areaId)).slice(0, 1)) {
     if (part.created && part.areaId === areaId) createdName = part.created.name;
@@ -3481,8 +3600,29 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     if (rows.length) portMap.splice(0, portMap.length, ...rows, ...portMap.filter(m => !rows.some(x => same(x, m))));
     // A correction holds the description only: a later reading's description reads apart, its claims still come in.
     if (part.role) {
-      if (!role || (!corrected && part.roleReplaces)) { if (role) others.unshift({ text: role, about: roleAbout, at: r.at }); role = part.role; roleAbout = part.roleAbout; roleBasis = part.basis; }
-      else others.unshift({ text: part.role, about: part.roleAbout, at: r.at });
+      // Recipe .52 M2: a record whose own C-IDENT row says this is that map part (같음 / 이름 바뀜, with evidence, against the roster that
+      // showed it the current description) describes the part as it is now: its description, resting only on that record's lines and on
+      // none pasted before the current one's, takes the card. Never arrival order alone, never over the person's correction.
+      // Every quote in one record that bound the part, whose roster showed the current description (or the line it put on the card in
+      // this same reading, which the model's fuller words of the same record replace).
+      const recs = boundBy.size && part.basis.length ? new Set(part.basis.map(q => recordOfQuote(index(), q))) : null, rec = recs?.size === 1 ? [...recs][0]! : '';
+      const seen = rec ? index().echo.get(rec) ?? null : null, target = rec ? index().target.get(rec) ?? null : null;
+      // Recipe .53 (ruling F6 Q1 (c)): the description is about the bound part only when a quote it rests on is the bound B row itself or a
+      // row of that record naming that B ID (its steps, loops, changes); any other line of the record is not enough. (a): never a record
+      // about a clearly earlier target than the current description's.
+      const about = !!rec && boundBy.has(rec) && part.basis.some(q => quoteAbout(index(), p, rec, boundBy.get(rec)!, q));
+      // Recipe .54 (ruling F6 Q1): a description that would bind but whose record's order against the current description's record is unclear
+      // (unclear above) is held: a candidate in others, the current description kept (a record that says in its own words its description
+      // replaces the earlier one, roleReplaces, still does, as before).
+      const binds = !corrected && !!role && norm(role) !== norm(part.role) && about && !earlier(target) && ((seen !== null && seen >= roleRev) || (roleReading === r.id && roleBasis.every(q => recordOfQuote(index(), q) === rec)));
+      const held = binds && unclear(rec, target), bound = binds && !held;
+      if (!role || (!corrected && part.roleReplaces) || bound) {
+        if (role && !others.some(o => norm(o.text) === norm(role!))) others.unshift({ text: role, about: roleAbout, at: r.at, replaced: bound ? 'bound' : 'stated', target: targetOf(part.basis) });
+        role = part.role; roleAbout = part.roleAbout; roleBasis = part.basis; roleRev = rev; roleReading = r.id; roleBound = bound ? r.at : null; roleTarget = targetOf(part.basis);
+        // The record this description came from, when it bound the part and the words rest on its rows about the part.
+        roleFrom = (bound || about) && !corrected ? rec : null;
+      }
+      else others.unshift({ text: part.role, about: part.roleAbout, at: r.at, ...(held ? { held: 'order' as const } : {}) });
     }
     history.push({ reading: r.id, at: r.at, role: part.role, claims: part.claims, basis: part.basis });
     part.claims.forEach((c, index) => { all.push({ ...c, reading: r.id, index, at: r.at }); if (c.replaces) replaced.add(`${c.replaces.reading}:${c.replaces.index}`); });
@@ -3509,7 +3649,12 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
   // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
   // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, recordLoops, variants, statusClaims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, familyRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
+  if (corrected) roleBound = null;
+  // Recipe .53 (ruling F6 Q3): the implementation changes and the alias candidates the records' C-IDENT rows gave the part, oldest first.
+  const identityNotes: NonNullable<PartUnderstanding['identityNotes']> = [
+    ...[areaId, ...dups].flatMap(id => implementationChanges(p, id).map(x => ({ kind: 'implementation' as const, from: x.from, text: x.to, when: x.when, at: x.at }))),
+    ...nameCandidates(p, areaId).map(x => ({ kind: 'name' as const, from: null, text: x.name, when: null, at: x.at }))].sort((a, b) => a.at.localeCompare(b.at));
+  return { role, roleAbout, roleBasis, corrected, roleBound, identityNotes, others: others.slice(0, 6), claims, recordLoops, variants, statusClaims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, familyRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
     steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 24), conditions: conditions.slice(0, 24), fileRoles: fileRoles.slice(0, 12), rules, withdrawals, gates, revised, roleBasisRevised };
 }
 
@@ -3714,7 +3859,10 @@ export function partRelevance(ask: Pick<MapAsk, 'parts' | 'relations'>, text: st
 export const BRIEF_FILES = 1;
 function briefPart(x: MapAskPart): void {
   if (!x.note && !x.current.length && x.role.length <= BRIEF_ROLE && (x.files?.length ?? 0) <= BRIEF_FILES) return;
-  x.note = ''; x.current = []; x.role = cut(x.role, BRIEF_ROLE); x.brief = true;
+  // Review of .54 (finding 3): a short role whose plan word the plain cut would leave out keeps it (studio clipKeepPlan, in the UTF-16
+  // units the validation counts); any other role, or one no keeping cut fits, takes the plain cut as before.
+  const units = (t: string) => t.length, kept = planCutNeeded(x.role, BRIEF_ROLE, units) ? clipKeepPlan(x.role, BRIEF_ROLE, units) : null;
+  x.note = ''; x.current = []; x.role = kept !== null && kept.length <= BRIEF_ROLE ? kept : cut(x.role, BRIEF_ROLE); x.brief = true;
   if (x.files) x.files = x.files.slice(0, BRIEF_FILES);
 }
 /** Shrinks the map of an ask until fits() holds, in fixed steps, stopping as soon as it fits; true when it fits. Every part keeps its
@@ -3732,7 +3880,8 @@ export function fitMap(ask: Pick<MapAsk, 'parts' | 'relations'>, text: string, b
   if (fits()) return true;
   // Review of .49: judged before step 1, so a code word of a claim that step leaves out still names its part.
   const rel = brief ? partRelevance(ask, text) : null;
-  for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = cut(x.role, 120); if (fits()) return true; }
+  // Recipe .54 (review of .53): the role's cut keeps a plan ending; review of .54 (finding 3): its plan word wherever it sits (studio clipKeepPlan).
+  for (const x of ask.parts) { x.current = x.current.slice(0, 2); x.role = clipKeepPlan(x.role, 120); if (fits()) return true; }
   for (const x of ask.parts) x.note = cut(x.note, BRIEF_NOTE);
   if (fits()) return true;
   const rank = ask.parts.map((x, i) => ({ x, i, ...(rel?.get(x.id) ?? { tier: 0, hits: 0 }) }));
