@@ -44,7 +44,7 @@ import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, markPx, markResize, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
@@ -3843,16 +3843,21 @@ function endMarkDefs(): SVGElement {
     ear: { ref: '5', el: () => svg('circle', { class: 'mk-ring', cx: '5', cy: '5', r: '3.4' }) },
     dot: { ref: '5', el: () => svg('circle', { class: 'mk-fill', cx: '5', cy: '5', r: '4' }) } };
   for (const [k, s] of Object.entries(shapes)) for (const suf of ['', '-on', '-near']) {
-    const m = svg('marker', { id: `m-${k}${suf}`, class: `mk mk-${k}${suf ? ` mk${suf}` : ''}`, viewBox: '0 0 10 10', refX: s.ref, refY: '5', markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse', 'data-px': String(HEAD_PX[k as keyof typeof HEAD_PX]) });
+    // Sized at the zoom it is made at (markPx) and marked with that zoom (data-k), so syncMarks resizes it only when the zoom moves.
+    const px = markPx(k as Exclude<Head, 'none'>, camera.k);
+    const m = svg('marker', { id: `m-${k}${suf}`, class: `mk mk-${k}${suf ? ` mk${suf}` : ''}`, viewBox: '0 0 10 10', refX: s.ref, refY: '5', markerUnits: 'userSpaceOnUse', orient: 'auto-start-reverse', 'data-head': k, 'data-k': String(camera.k), markerWidth: px, markerHeight: px });
     m.append(s.el()); defs.append(m);
   }
   return defs;
 }
-/** Heads and ears keep their screen size whatever the zoom (6.1): each marker is HEAD_PX screen pixels, so 1/k of the map. */
-let marksAt = 0;
+/** Heads and ears keep their screen size whatever the zoom (6.1): each marker is HEAD_PX screen pixels, so 1/k of the map. Each
+ * marker carries the zoom it was sized at (data-k); a marker made by a redraw is sized when made (endMarkDefs), never left to a cache
+ * an earlier map's markers set (beauty v5 lanes review: every head of a map opened at its predecessor's zoom was lost so). */
 function syncMarks(k: number) {
-  if (Math.abs(k - marksAt) < 0.005) return; marksAt = k;
-  document.querySelectorAll<SVGMarkerElement>('#world marker.mk').forEach(m => { const px = Number(m.dataset.px) / k; m.setAttribute('markerWidth', px.toFixed(2)); m.setAttribute('markerHeight', px.toFixed(2)); });
+  document.querySelectorAll<SVGMarkerElement>('#world marker.mk').forEach(m => {
+    const at = m.dataset.k === undefined ? null : Number(m.dataset.k); if (!markResize(at, k)) return;
+    const px = markPx(m.dataset.head as Exclude<Head, 'none'>, k); m.setAttribute('markerWidth', px); m.setAttribute('markerHeight', px); m.dataset.k = String(k);
+  });
 }
 /** The summary lines of a busy map in the line grammar: one per pair of groups, direction and channel; a pair that runs both ways
  * is one stroke with a head at each end (S8, line-grammar pairWays). keep: the two-way strokes drawn at rest (a selection's summary
