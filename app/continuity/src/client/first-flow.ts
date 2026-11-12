@@ -126,8 +126,12 @@ export function summarySentences(body: string): string[] {
   }
   return out;
 }
-/** A sentence as the top line shows it: the record's words, its closing evidence group left to the hover (the words are never changed). */
-export const shownSentence = (s: string): string => s.replace(new RegExp(`${CITES.source}(?=\\s*[.。]?\\s*$)`), '').trim();
+/** A record's file tag in prose: 「[파일: src/collect.py]」. */
+const FILE_TAG = /\s*[[［]\s*파일\s*[:：][^\]］]*[\]］]/g;
+/** A sentence as the top line shows it: the record's words without its bookkeeping, every evidence group (「(F01)」 「(F02+E01)」, at the
+ * end or inside) and every file tag left to the hover (the words themselves are never changed; row IDs go through the labels' guard in
+ * the app). */
+export const shownSentence = (s: string): string => s.replace(new RegExp(CITES.source, 'g'), '').replace(FILE_TAG, '').replace(/\s{2,}/g, ' ').replace(/\s+([.。,，])/g, '$1').trim();
 /** The top sentence and the core-flow sentence of the newest record that has a C-SUMMARY body (records oldest first, each with its
  * C-SUMMARY body lines and where they stand): the first sentence, whole (cites kept, for the hover), the one shown, the second
  * sentence (the core flow), and the record and line it comes from. null when no record has one (then nothing is shown: never the
@@ -149,9 +153,19 @@ export function headLines(value: string): string[] {
   const parts = /[①-⑳]/.test(v) ? v.split(/[①-⑳]/) : /(?:^|\s)\d{1,2}\)\s/.test(v) ? v.split(/(?:^|\s)\d{1,2}\)\s/) : v.split(/\s+\/\s+|\s*;\s*/);
   return parts.map(x => x.trim()).filter(Boolean);
 }
-/** Whether a sentence states the order of actions itself (arrows, 다음 · 그 뒤 · 이어서 · 차례로 · 순으로): then its lines are 「기록이 설명한
- * 흐름」; otherwise only 「요약에 나온 연결」. */
-export const statesOrder = (t: string): boolean => /→|->|⇒|다음에|다음으로|그\s*다음|그\s*뒤|그\s*후|이어서|차례로|순서대로|순으로/.test(t);
+/** An order word that opens a clause or joins two (「…, 그 다음 …」, 「…하고 이어서 …」, 「…를 차례로」 at a clause's start or after a verb's
+ * joining ending), never a bare 「다음에」 (「다음에 쓸 값」) or a word's own 「…순으로」 (「날짜순으로」, 「오래된 순으로」). */
+const ORDER_WORD = /(?:(?:^|[,，;:]\s*|(?:고|며|면|서|뒤|후)\s+)(?:그\s*다음(?:에|으로)?|그\s*뒤(?:에)?|그\s*후(?:에)?|이어서|차례로|순서대로)|(?:를|을)\s+(?:차례로|순서대로))(?=[\s,，]|$)/;
+/** Whether a sentence states the order of actions itself: then its lines are 「기록이 설명한 흐름」; otherwise only 「요약에 나온 연결」. Only an
+ * arrow, a clause-opening or joining 그 다음 · 그 뒤 · 이어서 · 차례로 · 순서대로, or 「…순으로」 right after a list of two or more of the
+ * map's names (read with the parts given; without them no 「순으로」 counts). */
+export function statesOrder(t: string, inp?: Pick<FlowInput, 'parts' | 'loops' | 'words'>): boolean {
+  if (/→|->|⇒/.test(t) || ORDER_WORD.test(t)) return true;
+  if (!inp || !/순으로/.test(t)) return false;
+  const sp = namedSpans(t, inp.parts, inp.loops ?? [], inp.words ?? []), idx = normIndex(t); if (!idx || sp.length < 2) return false;
+  const end = (x: Span) => idx[x.e - 1]! + 1, start = (x: Span) => idx[x.s]!;
+  return sp.some((x, i) => i > 0 && /^\s*(?:의\s*)?순으로/.test(t.slice(end(x))) && end(sp[i - 1]!) <= start(x) && /^\s*(?:[,，、·/]|와|과|그리고|,\s*그리고)\s*$/.test(t.slice(end(sp[i - 1]!), start(x))));
+}
 
 /** A token of the record's code words (a path, a file, a function): ASCII, a letter, and a sign of code (/ . _ : a digit or a
  * camelCase joint), four characters or more. Plain words (fetch, POST, Kafka) are no such token: names say those. */
@@ -247,9 +261,15 @@ function namedSpans(text: string, parts: readonly FvPart[], loops: readonly FvLo
   const find = (w: string): [number, number][] => (ASCII.test(w) ? ascii(w) : plain(norm(w)));
   // 1. The record's own words, longest first.
   for (const w of [...words].filter(x => known.has(x.part)).sort((a, b) => norm(b.word).length - norm(a.word).length)) for (const [s, e] of find(w.word)) take(w.part, s, e);
+  // A key two parts hold (two parts of one name, a stem or a state name they share) picks none: it is only held, so no later tier reads it.
+  const held = (keys: { id: string; k: string }[]) => {
+    const by = new Map<string, Set<string>>(); for (const { id, k } of keys) by.set(k, (by.get(k) ?? new Set()).add(id));
+    return [...by].map(([k, ids]) => ({ k, id: ids.size === 1 ? [...ids][0]! : null })).sort((a, b) => b.k.length - a.k.length);
+  };
+  const hold = (k: string) => { for (const [s, e] of plain(k)) if (!taken.some(t => s < t.e && t.s < e)) taken.push({ part: '', s, e }); };
   // 2. Whole names, then a Korean name read as the work it names (its last syllable off, three or more characters left), longest first.
-  const byName = parts.flatMap(p => { const k = norm(p.name), st = nameStem(p.name); return [{ p, k }, ...(st ? [{ p, k: norm(st) }] : [])]; }).filter(x => x.k.length >= 2).sort((a, b) => b.k.length - a.k.length);
-  for (const { p, k } of byName) for (const [s, e] of plain(k)) take(p.id, s, e);
+  const byName = held(parts.flatMap(p => { const k = norm(p.name), st = nameStem(p.name); return [{ id: p.id, k }, ...(st ? [{ id: p.id, k: norm(st) }] : [])]; }).filter(x => x.k.length >= 2));
+  for (const { id, k } of byName) if (id) { for (const [s, e] of plain(k)) take(id, s, e); } else hold(k);
   // 3. Record IDs as written (B03, B03:L01); never a piece of a longer token.
   for (const m of text.matchAll(/(?<![A-Za-z0-9])(B\d{1,3})(?::(L\d{1,3}))?(?![\dA-Za-z])/g)) {
     const s = norm(text.slice(0, m.index)).length, e = s + norm(m[0]).length;
@@ -257,7 +277,7 @@ function namedSpans(text: string, parts: readonly FvPart[], loops: readonly FvLo
     if (owner) take(owner, s, e);
   }
   // 4. A C-STATE name the text repeats; 5. a part's own word.
-  for (const p of parts) for (const st of p.states ?? []) { const k = norm(st); if (k.length >= 2) for (const [s, e] of plain(k)) take(p.id, s, e); }
+  for (const { id, k } of held(parts.flatMap(p => [...new Set((p.states ?? []).map(norm))].filter(k => k.length >= 2).map(k => ({ id: p.id, k }))))) if (id) { for (const [s, e] of plain(k)) take(id, s, e); } else hold(k);
   for (const [id, ws] of nameTokens(parts)) for (const w of ws) for (const [s, e] of (w.ascii ? ascii(w.word) : plain(norm(w.word)))) take(id, s, e);
   return [...first.values()].sort((a, b) => a.s - b.s);
 }
@@ -290,11 +310,14 @@ export function namedFlow(text: string, inp: Pick<FlowInput, 'parts' | 'lines' |
   const steps = flowSteps(text, inp.parts, inp.loops ?? [], inp.words ?? []); if (steps.length < 2) return null;
   const lines: string[] = [], gaps: [string, string][] = [];
   for (let i = 1; i < steps.length; i++) {
-    const a = steps[i - 1]!, b = steps[i]!, here = inp.lines.filter(l => a.includes(l.from) && b.includes(l.to) && l.from !== l.to).map(l => l.id);
+    // A reference line (uses) is never a step: a pair joined only by one is a gap.
+    const a = steps[i - 1]!, b = steps[i]!, here = inp.lines.filter(l => !isRef(l) && a.includes(l.from) && b.includes(l.to) && l.from !== l.to).map(l => l.id);
     if (here.length) lines.push(...here.filter(id => !lines.includes(id))); else gaps.push([a[0]!, b[0]!]);
   }
   return lines.length && drawnSome(lines, inp) ? { parts: steps.flat(), steps, lines, gaps } : null;
 }
+/** A reference line (channel uses): what a part consults, never a step of a flow or its context. */
+const isRef = (l: Pick<FlowLine, 'channel'>): boolean => l.channel === 'uses';
 /** A part's first starting entry (by its hand-run order, then its row ID N01 < N02). */
 const entryNo = (ref: string | null | undefined): number => Number(/\d+/.exec(ref ?? '')?.[0] ?? 1e9);
 function startEntry(p: FlowPart): { kind: string | null; name: string; order: number | null; ref?: string | null } | null {
@@ -308,6 +331,14 @@ function noteWords(t: string | null | undefined, inp: Pick<FlowInput, 'plain'>):
   const w = (t ?? '').replace(/\s+/g, ' ').trim(); if (!w) return null;
   const p = inp.plain ? inp.plain(w) : hasRowId(w) ? null : w;
   const r = (p ?? '').trim(); return r && !hasRowId(r) ? r : null;
+}
+/** When a scenario gives the lines, the basis is that scenario record's own heads (its trigger, the result it wants, what the design
+ * produces), each through the row-ID guard, never the map record's sentence; null when it wrote none in plain words (then the app says
+ * there is none: SCENARIO_NO_BASIS). */
+export const SCENARIO_NO_BASIS = '이 시나리오 기록에는 요약이 없어요';
+export function scenarioBasis(heads: readonly { label: string; text: string | null | undefined }[], inp: Pick<FlowInput, 'plain'> = {}): string | null {
+  const said = heads.flatMap(x => { const t = (x.text ?? '').trim(); if (!t || t === '모름' || t === '없음') return []; const w = noteWords(t, inp); return w ? [`${x.label} ${w}`] : []; });
+  return said.length ? said.join(' · ') : null;
 }
 /** A branch's words: only a condition the record wrote in plain words (never 「조건의 글자는 기록에 없음」, never a variant's name alone, never
  * a row ID: through the guard, dropped when nothing plain is left). */
@@ -346,8 +377,14 @@ function dressed(rule: FlowRule, key: string, source: string, name: string, text
   // alternatives of one step), and at a part whose picked line is conditional, that decision's other conditional exits leaving the view
   // (a conditional line to a later step skips a gap or bridges the view: no context).
   const decides = new Set(f.lines.map(id => lineById.get(id)).filter(l => !!l?.when && order.has(l.from)).map(l => l!.from));
-  const context = rule === 'entry' ? [] : inp.lines.filter(l => !on.has(l.id) && order.has(l.from) && (
-    l.from === l.to || (order.has(l.to) && order.get(l.to)! < order.get(l.from)!) || (!!l.when && decides.has(l.from) && !order.has(l.to)))).map(l => l.id);
+  // A way back is context only inside one joined run: both its ends on picked lines, on the same side of every gap (a line back
+  // between the two sides of a gap would bridge it). A reference line is never context.
+  const run = new Map<string, number>(); let seg = 0;
+  f.steps.forEach((st, i) => { if (i && f.gaps.some(([a, b]) => f.steps[i - 1]!.includes(a) && st.includes(b))) seg++; for (const p of st) if (!run.has(p)) run.set(p, seg); });
+  const picked = new Set(f.lines.flatMap(id => { const l = lineById.get(id); return l ? [l.from, l.to] : []; }));
+  const joined = (a: string, b: string) => picked.has(a) && picked.has(b) && run.get(a) === run.get(b);
+  const context = rule === 'entry' ? [] : inp.lines.filter(l => !on.has(l.id) && !isRef(l) && order.has(l.from) && (
+    (l.from === l.to && picked.has(l.from)) || (order.has(l.to) && order.get(l.to)! < order.get(l.from)! && joined(l.from, l.to)) || (!!l.when && decides.has(l.from) && !order.has(l.to)))).map(l => l.id);
   // Where it runs: from the lines drawn now only.
   const drawnLines = f.lines.filter(id => isDrawn(id, inp)), dl = drawnLines.map(id => lineById.get(id)).filter((l): l is FlowLine => !!l);
   const touched = new Set(dl.flatMap(l => [l.from, l.to]));
@@ -378,7 +415,7 @@ export function flowCandidates(rule: FlowRule, inp: FlowInput): FlowCandidate[] 
   }
   if (rule === 'summary') {
     const t = inp.summaryFlow?.trim(), f = t ? namedFlow(t, inp) : null;
-    return f && t ? [dressed('summary', `summary:${t}`, statesOrder(t) ? FLOW_SOURCE.ordered : FLOW_SOURCE.summary, '기록 요약', t, f, inp)] : [];
+    return f && t ? [dressed('summary', `summary:${t}`, statesOrder(t, inp) ? FLOW_SOURCE.ordered : FLOW_SOURCE.summary, '기록 요약', t, f, inp)] : [];
   }
   if (rule === 'head') {
     const ls = inp.headLines ?? [];
@@ -410,10 +447,17 @@ export function firstFlow(inp: FlowInput): FirstFlow {
  * folded); cards: the view's cards that may fold (never a recorded start's own card). */
 export const HUB_FOLD_MIN = 6;
 export function hubFolds(cards: readonly string[], lines: readonly { key: string; from: string; to: string; flow: boolean }[]): Map<string, string[]> {
+  const hubs = [...new Set(cards)];
+  const off = new Map(hubs.map(c => [c, lines.filter(l => !l.flow && (l.from === c || l.to === c))] as const));
+  const busy = hubs.filter(c => off.get(c)!.length >= HUB_FOLD_MIN), would = new Set(busy.flatMap(c => off.get(c)!.map(l => l.key)));
+  // Never a line whose other end would be left with no line shown: a card whose every drawn line would fold keeps them all (it would
+  // read as unconnected otherwise).
+  const ends = new Map<string, string[]>(); for (const l of lines) for (const x of new Set([l.from, l.to])) ends.set(x, [...ends.get(x) ?? [], l.key]);
+  const bare = new Set([...ends].filter(([, ks]) => ks.every(k => would.has(k))).map(([x]) => x));
   const out = new Map<string, string[]>();
-  for (const c of new Set(cards)) {
-    const other = lines.filter(l => !l.flow && (l.from === c || l.to === c)).map(l => l.key);
-    if (other.length >= HUB_FOLD_MIN) out.set(c, other);
+  for (const c of busy) {
+    const fold = off.get(c)!.filter(l => !bare.has(l.from === c ? l.to : l.from)).map(l => l.key);
+    if (fold.length) out.set(c, fold);
   }
   return out;
 }

@@ -7,7 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { firstFlow, flowCandidates, namedFlow, flowParts, flowSteps, nameTokens, summarySentences, summarySource, shownSentence, headLines, hubFolds, foldedLines, foldWord,
-  switcherText, sourceText, branchWords, statesOrder, recordWords, codeLike, HUB_FOLD_MIN, FLOW_RULES, FLOW_CONTROL, FLOW_SOURCE, ENTRY_SOFT_OVER } from '../dist/public/client/first-flow.js';
+  switcherText, sourceText, branchWords, statesOrder, recordWords, codeLike, scenarioBasis, SCENARIO_NO_BASIS, HUB_FOLD_MIN, FLOW_RULES, FLOW_CONTROL, FLOW_SOURCE, ENTRY_SOFT_OVER } from '../dist/public/client/first-flow.js';
 import { readFirstView, writeFirstView, recordOf, firstView } from '../dist/public/client/first-view.js';
 import { COND_UNSAID } from '../dist/public/client/line-grammar.js';
 import * as D from '../dist/public/shared/domain.js';
@@ -150,7 +150,8 @@ test('FF-8 the prose names a part by a word only that part\'s name holds (never 
 
 test('FF-9 the hub fold: a view card with six or more drawn lines off the view folds them behind one chip', () => {
   const ls = (n, card) => Array.from({ length: n }, (_, i) => ({ key: `${card}${i}`, from: card, to: `x${i}`, flow: false }));
-  const lines = [...ls(6, 'a'), ...ls(5, 'b'), { key: 'f', from: 'a', to: 'b', flow: true }];
+  const keepers = Array.from({ length: 6 }, (_, i) => ({ key: `k${i}`, from: `x${i}`, to: 'z', flow: false }));
+  const lines = [...ls(6, 'a'), ...ls(5, 'b'), ...keepers, { key: 'f', from: 'a', to: 'b', flow: true }];
   const folds = hubFolds(['a', 'b'], lines);
   assert.equal(HUB_FOLD_MIN, 6);
   assert.deepEqual([...folds.keys()], ['a']);
@@ -167,7 +168,7 @@ test('FF-10 the switcher: 「먼저 볼 연결」, the drawn lines in their own 
   assert.equal(switcherText(firstFlow(base()), name), '먼저 볼 연결: bake.py 수동 실행에서 나가는 연결 1개 · 기록된 시작 · 보기 1/2');
   assert.equal(switcherText(firstFlow(base({ scenarios: [SC] })), name), '먼저 볼 연결: 주문 창구 → 반죽 배합기 → 오븐 굽기 단계 · 기록된 시나리오 · 아침 주문 · 설계 · 완결');
   assert.equal(switcherText({ rule: 'all', kept: true, candidates: [], index: -1, flow: null }), null);
-  assert.deepEqual([statesOrder('A 다음에 B'), statesOrder('A → B'), statesOrder('A와 B가 있다')], [true, true, false]);
+  assert.deepEqual([statesOrder('A 다음에 B'), statesOrder('A → B'), statesOrder('A와 B가 있다'), statesOrder('A를 받고, 그 다음 B')], [false, true, false, true]);
   assert.deepEqual(Object.values(FLOW_SOURCE).sort(), ['기록된 시나리오', '기록된 시작', '기록의 첫 구조', '기록이 설명한 흐름', '선택한 보기', '요약에 나온 연결', '전체 관계'].sort());
 });
 
@@ -186,7 +187,7 @@ test('FF-11 the app reads the sentence from the record, draws only existing line
   const css = (await readFile(new URL('../public/styles.css', import.meta.url), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
   const rule = (sel) => css.split('\n').find(l => l.startsWith(sel)) ?? '';
   assert.match(rule('#space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) {'), /--bw: 3;/);
-  assert.match(rule('#space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line'), /stroke: var\(--accent\)/);
+  assert.match(rule('#space.ff-on.ff-rest:not(.ff-soft) .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line'), /stroke: var\(--accent\)/);
   assert.match(rule('#space.ff-on.ff-rest .world .edge.ff-ctx:not(.on)'), /--bw: 2\.25;/);
   assert.match(rule('#space.ff-on.ff-rest .world .edge.lf-bg:not(.ff-flow)'), /--bw: 1\.15;/);
   const off = css.split('\n').filter(l => /#space\.ff-on.*(lens-off|lg-fade)/.test(l)).join('\n');
@@ -260,7 +261,7 @@ test('FF-15 a note passes the labels\' row-ID guard: a branch only in plain word
 test('FF-16 the basis sentence shows under the switcher when it is not the top one; rest-only weights; 상태·공백 keeps its fade', async () => {
   const app = await readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
   const whole = app.slice(app.indexOf('/* ---------- the first screen\'s focus (beauty v5'), app.indexOf('/* ---------- the scenario on the map'));
-  assert.match(whole, /if \(c\.text && shownSentence\(c\.text\) !== s\?\.shown\)/, 'the basis shows only when it differs from the top sentence');
+  assert.match(whole, /if \(c\.text && shownSentence\(c\.text\) !== s\?\.shown && said\)/, 'the basis shows only when it differs from the top sentence and has plain words');
   assert.match(whole, /class: 'ft-basis', title: `\$\{FLOW_CONTROL\}의 근거 문장/, 'whole in its hover');
   assert.match(app, /ffRest = ffLit\(\)/, 'the accent heads only at rest');
   assert.match(whole, /const ffLit = \(\) => ffActive\(\) && !selected && !planView\.isOpen\(\) && !ffLensPicked/);
@@ -271,7 +272,7 @@ test('FF-16 the basis sentence shows under the switcher when it is not the top o
   for (const l of ff.filter(x => /ff-flow|ff-ctx|lf-bg/.test(x) && /--bw|stroke:/.test(x))) assert.match(l, /^#space\.ff-on\.ff-rest/, `weights at rest only: ${l.slice(0, 60)}`);
   assert.ok(ff.some(l => l.startsWith('#space.ff-on.ff-rest.ff-soft .world .edge.ff-flow') && /--bw: 2\.25;/.test(l)), 'a picked lens: the lines at the context weight');
   for (const l of ff.filter(x => /lens-off|lg-fade/.test(x))) assert.match(l, /#space\.ff-on:not\(\.lens-state\)/, '상태·공백 keeps its card fade');
-  assert.ok(ff.some(l => /edge-labels > :not\(\.ff-keep\):not\(\.edge-cue\):not\(\.near\) \{ visibility: hidden; \}/.test(l)), 'background labels wait for a hover');
+  assert.ok(ff.some(l => /edge-labels > :not\(\.ff-keep\):not\(\.edge-cue\):not\(\.near\):not\(:hover\) \{ opacity: \.6; \}/.test(l)), 'background labels read in a quieter tone at rest');
   assert.match(css, /\.focus-top \.ft-basis \{[^}]*white-space: nowrap;[^}]*text-overflow: ellipsis;/);
 });
 
@@ -328,4 +329,119 @@ test('FF-19 the switcher names the cards drawn now: a part inside a folded group
   assert.equal(switcherText(f, nm), '먼저 볼 연결: 주문 창구 → 굽기 묶음 → 판매 장부 · 기록이 설명한 흐름');
   assert.equal(branchWords('(validateStatus(status))'), 'validateStatus(status)', 'a condition written whole in brackets reads without them');
   assert.equal(branchWords('(a) 또는 (b)'), '(a) 또는 (b)');
+});
+
+// ---------- review 2 of the focus (findings 1-11) ----------
+const app = () => readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
+const focusBlock = (a) => a.slice(a.indexOf('/* ---------- the first screen\'s focus (beauty v5'), a.indexOf('/* ---------- the scenario on the map'));
+const cssNoComments = async () => (await readFile(new URL('../public/styles.css', import.meta.url), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
+const RP = [P('a', '수집기'), P('b', '설정 저장소'), P('c', '분석기'), P('d', '보고서 생성기')];
+const rn = id => RP.find(p => p.id === id)?.name ?? id;
+
+test('FF-20 a reference line (uses) is never a step nor context: a pair joined only by one is a gap (review2 #1)', () => {
+  const inp = { parts: RP, lines: [L('u1', 'a', 'b', 'uses'), L('d1', 'b', 'c')], loops: [], scenarios: [], headLines: [], kept: null };
+  const f = namedFlow('수집기가 설정 저장소를 읽고 분석기가 처리한다', inp);
+  assert.deepEqual([f.lines, f.gaps], [['d1'], [['a', 'b']]], 'a → b only by a reference line: a gap');
+  assert.equal(namedFlow('수집기가 설정 저장소를 읽는다', inp), null, 'nothing but a reference line: no flow');
+  // A reference line back between named steps is no context either.
+  const c = flowCandidates('summary', { ...inp, lines: [L('d0', 'a', 'b'), L('d1', 'b', 'c'), L('u2', 'c', 'a', 'uses')], summaryFlow: '수집기 → 설정 저장소 → 분석기' })[0];
+  assert.deepEqual([c.lines, c.context], [['d0', 'd1'], []]);
+  assert.equal(switcherText(firstFlow({ ...inp, summaryFlow: '수집기가 설정 저장소를 읽고 분석기가 처리한다' }), rn), '먼저 볼 연결: 설정 저장소 → 분석기 · 요약에 나온 연결');
+});
+
+test('FF-21 a line back between the two sides of a gap is never context (it would bridge the gap) (review2 #2)', () => {
+  const inp = { parts: RP, lines: [L('r1', 'b', 'a'), L('f1', 'b', 'c')], loops: [], scenarios: [], headLines: [], kept: null };
+  const c = flowCandidates('summary', { ...inp, summaryFlow: '수집기 다음에 설정 저장소, 그 다음 분석기' })[0];
+  assert.deepEqual([c.lines, c.gaps, c.context], [['f1'], [['a', 'b']], []], 'b → a joins the gap pair: dropped');
+  // A way back inside one joined run stays context.
+  const d = flowCandidates('summary', { ...inp, lines: [L('ab', 'a', 'b'), L('bc', 'b', 'c'), L('ca', 'c', 'a'), L('dc', 'c', 'd'), L('xd', 'd', 'b')], summaryFlow: '수집기 → 설정 저장소 → 분석기 → 보고서 생성기' })[0];
+  assert.deepEqual([d.lines, [...d.context].sort()], [['ab', 'bc', 'dc'], ['ca', 'xd']]);
+  // Across a gap: 분석기 → 보고서 생성기 has no line; 보고서 생성기 → 설정 저장소 and → 수집기 run back over it: no context.
+  const e = flowCandidates('summary', { ...inp, lines: [L('ab', 'a', 'b'), L('bc', 'b', 'c'), L('xd', 'd', 'b'), L('de', 'd', 'a'), L('dz', 'd', 'd')], summaryFlow: '수집기 → 설정 저장소 → 분석기 → 보고서 생성기' })[0];
+  assert.deepEqual([e.lines, e.gaps, e.context], [['ab', 'bc'], [['c', 'd']], []]);
+});
+
+test('FF-22 the basis sentence and the top line show no evidence group, file tag or row ID; nothing plain: hover only (review2 #3)', async () => {
+  assert.equal(shownSentence('수집기가 모은 기사(F01)를 분석기가 읽고 보고서 생성기로 넘긴다(F02+E01).'), '수집기가 모은 기사를 분석기가 읽고 보고서 생성기로 넘긴다.');
+  assert.equal(shownSentence('B01이 모은 기사를 B02가 분석해 B03에 넘김 [파일: src/collect.py]'), 'B01이 모은 기사를 B02가 분석해 B03에 넘김');
+  assert.equal(shownSentence('괄호(설명)는 남는다 (추정).'), '괄호(설명)는 남는다.');
+  const a = focusBlock(await app());
+  assert.match(a, /const basisWords = \(t: string\): string \| null => \{ const w = labelPlain\(shownSentence\(t\)\);/, 'through the labels\' row-ID guard');
+  assert.match(a, /const said = c\.text \? basisWords\(c\.text\) : null/);
+  assert.match(a, /근거 문장: “\$\{said \?\? shownSentence\(c\.text\)\}”/, 'the switcher\'s tip: plain words, never an evidence group or file tag');
+  assert.match(a, /\}, basisWords\(s\.first\) \?\? s\.shown\)/, 'the top sentence too');
+  assert.doesNotMatch(a, /\$\{c\.text\}”/, 'never the raw sentence in quotes on screen');
+});
+
+test('FF-23 a name, stem or state name two parts hold picks none (review2 #4)', () => {
+  const DUP = [P('x1', '저장소'), P('x2', '저장소'), P('c', '분석기')];
+  assert.deepEqual(flowSteps('분석기가 저장소에 쓴다', DUP), [['c']]);
+  assert.equal(namedFlow('분석기가 저장소에 쓴다', { parts: DUP, lines: [L('q', 'c', 'x1'), L('q2', 'c', 'x2')] }), null);
+  // A shared state name picks none; a longer unique name still reads.
+  const ST = [P('p', '주문 대기열', { states: ['대기 중'] }), P('q', '결제 대기열', { states: ['대기 중'] }), P('r', '분석기')];
+  assert.deepEqual(flowSteps('대기 중인 것을 분석기가 읽는다', ST), [['r']]);
+  assert.deepEqual(flowSteps('주문 대기열에서 분석기로', ST), [['p'], ['r']]);
+});
+
+test('FF-24 a stated order: arrows, clause-opening order words, or 「…순으로」 right after a list of names (review2 #5)', () => {
+  const inp = { parts: RP, loops: [] };
+  for (const t of ['수집기가 기사를 날짜순으로 모아 분석기에 넘긴다', '분석기는 다음에 쓸 값을 보고서 생성기에 남긴다', '수집기가 오래된 순으로 지운다']) {
+    assert.equal(statesOrder(t), false, t); assert.equal(statesOrder(t, inp), false, t);
+  }
+  assert.equal(statesOrder('수집기가 모으고 그 다음 분석기가 읽는다'), true);
+  assert.equal(statesOrder('수집기가 모은다, 이어서 분석기가 읽는다'), true);
+  assert.equal(statesOrder('수집기, 분석기, 보고서 생성기 순으로 돈다', inp), true);
+  assert.equal(statesOrder('수집기, 분석기, 보고서 생성기 순으로 돈다'), false, 'without the names no 「순으로」 counts');
+  assert.equal(statesOrder('보고서 생성기는 수집기 순으로 정렬한다', inp), false, 'one name is no list');
+  const c = flowCandidates('summary', { ...inp, lines: [L('ac', 'a', 'c')], summaryFlow: '수집기가 기사를 날짜순으로 모아 분석기에 넘긴다' })[0];
+  assert.equal(c.source, '요약에 나온 연결');
+});
+
+test('FF-25 a picked lens: the lines step back whole (stroke and heads), its foreground labels stay; background labels quieter, never hidden (review2 #6 #7 #10)', async () => {
+  const css = await cssNoComments(), ff = css.split('\n').filter(l => /#space\.ff-on/.test(l));
+  assert.ok(ff.some(l => l.startsWith('#space.ff-on.ff-rest.ff-soft .world .edge.ff-flow') && /\.edge-line \{ stroke: var\(--edge-spine\);/.test(l)), 'the stroke steps back with the heads');
+  assert.ok(!ff.some(l => /^#space\.ff-on\.ff-rest \.world \.edge\.ff-flow[^{]*\.edge-line \{ stroke: var\(--accent\)/.test(l)), 'the accent stroke never under .ff-soft');
+  assert.ok(!ff.some(l => /edge-labels[^{]*\{[^}]*(visibility: hidden|display: none)/.test(l) && !/ff-folded/.test(l)), 'no label hidden at rest but a folded line\'s');
+  const a = focusBlock(await app());
+  assert.match(a, /\.edge\.ff-flow, \.edge\.ff-ctx\$\{ffLensPicked \? ', \.edge\.lf-fg' : ''\}/, 'a picked lens\'s foreground labels keep their tone');
+  assert.match(await app(), /const ffLit = \(\) => ffActive\(\) && !selected && !planView\.isOpen\(\) && !ffLensPicked/, 'the accent heads go with the stroke');
+  assert.match(await app(), /saveLens\(\); renderLegend\(\); applyLens\(\);\s*\/\/[^\n]*\n\s*if \(byPerson\) markFocusLabels\(\);/, 'the picked lens\'s labels are marked once its foreground is known');
+});
+
+test('FF-26 a scenario\'s lines stand on that scenario record: its own heads, or that it has none, never the map record\'s sentence (review2 #8)', async () => {
+  assert.equal(scenarioBasis([{ label: '촉발', text: '손님 주문' }, { label: '바라는 결과', text: '빵 한 판' }]), '촉발 손님 주문 · 바라는 결과 빵 한 판');
+  assert.equal(scenarioBasis([{ label: '촉발', text: '모름' }, { label: '바라는 결과', text: null }]), null);
+  assert.equal(scenarioBasis([{ label: '촉발', text: 'N01' }]), null, 'a row ID alone is no basis');
+  assert.equal(SCENARIO_NO_BASIS, '이 시나리오 기록에는 요약이 없어요');
+  const a = focusBlock(await app());
+  assert.match(a, /\} else if \(c\.rule === 'scenario'\) \{\s*basis = h\('p', \{ class: `ft-basis/, 'a scenario always says its own basis under the switcher');
+  assert.match(a, /scBasis \?\? SCENARIO_NO_BASIS/);
+});
+
+test('FF-27 the fold never leaves a card with no line shown; the chip sits on its hub card\'s edge; N stays exact (review2 #11)', async () => {
+  // Hub a: six lines off the view; x0..x2 have no other line (they would read as unconnected): theirs stay. x3..x5 keep a line to z.
+  const lines = [...Array.from({ length: 6 }, (_, i) => ({ key: `a${i}`, from: 'a', to: `x${i}`, flow: false })),
+    ...[3, 4, 5].map(i => ({ key: `k${i}`, from: `x${i}`, to: 'z', flow: false })), { key: 'f', from: 'a', to: 'b', flow: true }];
+  const folds = hubFolds(['a'], lines);
+  assert.deepEqual(folds.get('a'), ['a3', 'a4', 'a5']);
+  assert.equal(foldedLines(folds, new Set()).byHub.get('a').length, 3, 'N is exactly what it hides');
+  assert.equal(hubFolds(['a'], lines.filter(l => !l.key.startsWith('k'))).size, 0, 'every end alone: nothing folds');
+  const a = focusBlock(await app());
+  assert.match(a, /put\(chip, \(w, hh\) => \[\{ x: b\.x \+ b\.w - w - m, y: b\.y \+ b\.h - hh \/ 2 \}/, 'straddling its card\'s lower edge');
+  assert.match(a, /\?\? \(own \? all\[0\] : undefined\)/, 'a chip is never left off');
+  assert.match(a, /const free = \(r: Rect, own\?: Rect\) => onScreen\(r\) && /, 'a note is never placed off the window\'s sides');
+});
+
+test('FF-28 the fit keeps room only for what the top line covers, giving at most 3 points of zoom (judges #9)', async () => {
+  const a = await app();
+  assert.match(a, /const FT_GIVE = 0\.03;/);
+  assert.match(a, /const base = topInset\(\) - ftH\(\), at = frameView\(explicit, base\);/, 'framed under the strip alone first');
+  assert.match(a, /for \(const r of \[box\.full, box\.one, box\.short\]\)/, 'whole, then its sentence on one line, then stepped back');
+  assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects\];/, 'never over a card or a lane caption');
+  assert.match(a, /el\.classList\.add\('ft-one'\); if \(!covers\(\)\) return;/, 'the sentence on one line before it steps back');
+  assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop\)/, 'the map\'s own title never reads through the top line');
+  const css = await cssNoComments();
+  assert.match(css, /\.focus-top\.ft-one \.ft-sentence \{ -webkit-line-clamp: 1; \}/);
+  assert.match(css, /\.focus-top\.ft-under \.ft-sentence \{ display: none; \}/, 'stepped back, it takes no room');
+  assert.match(a, /if \(!done\) frameView\(explicit, base \+ box\.short\.h \+ 8\);/, 'at worst the short form\'s room, never the whole sentence\'s');
 });

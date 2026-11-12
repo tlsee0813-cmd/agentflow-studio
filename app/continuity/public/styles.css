@@ -3575,15 +3575,18 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    The record's own first sentence fixed at the canvas's top left (18–20px, two lines at most), 「먼저 볼 연결」 under it, and the sentence
    the lines stand on when it is not the top one (one line). At rest only (a selection owns the accent), by the reading focus, never by
    importance: the picked lines 3px in the accent (2.25 once the person picks a lens: .ff-soft), their context 2.25px, the lens's
-   background lines 1.15px with their labels waiting for a hover (a lens's foreground keeps its own weight). Card text never fades
-   here, except under 상태·공백, where the fade is the lens's information. Arrowhead grammar unchanged. */
+   background lines 1.15px with their labels at rest in a quieter tone (only a label that would collide gives way, as everywhere; a
+   lens's foreground keeps its own weight, and its labels their full tone once the person picks it). Once a lens is picked the lines
+   step back whole: their stroke to the spine colour and their heads with it (markLines). Card text never fades here, except under
+   상태·공백, where the fade is the lens's information. Arrowhead grammar unchanged. */
 .focus-top { position: absolute; left: 16px; top: 16px; z-index: 3; max-width: min(860px, calc(100% - var(--plan-w, 0px) - 32px)); display: flex; flex-direction: column; gap: 4px; padding: 8px 14px 7px; background: rgba(245,246,248,.94); border: 1px solid var(--line); border-radius: var(--r-pop); box-shadow: var(--shadow-sm); pointer-events: none; }
 .focus-top > * { pointer-events: auto; }
 .focus-top .ft-sentence { margin: 0; padding: 0; border: 0; background: none; text-align: left; font: inherit; font-size: 19px; line-height: 26px; font-weight: var(--fw-name); letter-spacing: -.01em; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
 .focus-top button.ft-sentence { cursor: pointer; }
 .focus-top button.ft-sentence:hover { color: var(--accent-strong); }
 .focus-top button.ft-sentence:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-.focus-top.ft-under .ft-sentence { visibility: hidden; height: 0; }
+.focus-top.ft-under .ft-sentence { display: none; }
+.focus-top.ft-one .ft-sentence { -webkit-line-clamp: 1; }
 .focus-top .ft-switch { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font-size: 13px; line-height: 20px; color: var(--text-2); }
 .focus-top .ft-name { font-weight: var(--fw-name); color: var(--accent-strong); }
 .focus-top .ft-name::before { content: ''; display: inline-block; width: 16px; height: 3px; margin: 0 6px 3px 0; border-radius: 2px; background: var(--accent); vertical-align: middle; }
@@ -3593,15 +3596,17 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .focus-top .ft-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .focus-top .ft-basis { margin: 0; min-width: 0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
 .focus-top .ft-basis-l { margin-right: 6px; color: var(--text-3); font-weight: var(--fw-name); }
+.focus-top .ft-basis.none .ft-basis-t { color: var(--text-3); }
 #space.ff-on.ff-rest .world .edge.lf-bg:not(.ff-flow):not(.ff-ctx):not(.s-sparse):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked) { --bw: 1.15; }
 #space.ff-on.ff-rest .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) { --bw: 2.25; }
 #space.ff-on.ff-rest .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) .edge-line { stroke: var(--edge-spine); stroke-opacity: 1; opacity: 1; }
 #space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 3; }
 #space.ff-on.ff-rest.ff-soft .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 2.25; }
-#space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--accent); stroke-opacity: 1; opacity: 1; }
+#space.ff-on.ff-rest:not(.ff-soft) .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--accent); stroke-opacity: 1; opacity: 1; }
+#space.ff-on.ff-rest.ff-soft .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--edge-spine); stroke-opacity: 1; opacity: 1; }
 #space.ff-on .world .edge.ff-fold:not(.on):not(.near):not(.lg-pick) { display: none; }
 #space.ff-on .edge-labels > .ff-folded:not(.near) { display: none; }
-#space.ff-on.ff-rest .edge-labels > :not(.ff-keep):not(.edge-cue):not(.near) { visibility: hidden; }
+#space.ff-on.ff-rest .edge-labels > :not(.ff-keep):not(.edge-cue):not(.near):not(:hover) { opacity: .6; }
 #space.ff-on.ff-rest .node.ff-start:not(.selected) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-line), var(--shadow-sm); }
 #space.ff-on:not(.lens-state) .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible),
 #space.ff-on:not(.lens-state) .node.lg-fade, #space.ff-on:not(.lens-state) .ghost.lg-fade { opacity: 1; filter: none; border-color: var(--hair-2); box-shadow: none; }
@@ -3610,7 +3615,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .ff-note-label { flex: none; font-weight: var(--fw-name); color: var(--accent-strong); }
 .ff-note-text { min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: keep-all; overflow-wrap: anywhere; }
 .ff-note-label { white-space: nowrap; }
-.ff-fold-chip { position: absolute; z-index: 4; height: 20px; padding: 0 7px; border: 1px dashed var(--line-hover); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font: inherit; font-size: 11.5px; line-height: 18px; font-weight: var(--fw-name); white-space: nowrap; cursor: pointer; }
+.ff-fold-chip { position: absolute; z-index: 4; box-shadow: var(--shadow-sm); height: 20px; padding: 0 7px; border: 1px dashed var(--line-hover); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font: inherit; font-size: 11.5px; line-height: 18px; font-weight: var(--fw-name); white-space: nowrap; cursor: pointer; }
 .ff-fold-chip.open { border-style: solid; }
 .ff-fold-chip:hover { color: var(--text); border-color: var(--text-3); }
 .ff-fold-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

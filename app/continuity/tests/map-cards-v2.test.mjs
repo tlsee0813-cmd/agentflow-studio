@@ -286,7 +286,7 @@ test('CARD-11 polish round fixes 1: the 상태·공백 lens marks recorded state
   // opening view centres the first view's parts (else the main flow) when the map does not fit.
   assert.ok(src.includes("'기록 정보 ▾'") && css.includes('.map-title:not(.meta-open) > .map-meta { display: none; }'));
   assert.ok(body(src, 'renderFirstView').includes('`첫 보기 · ${'));
-  assert.ok(body(src, 'fitView').includes('openFocus()') && body(src, 'openFocus').includes('lay.spine'));
+  assert.ok((body(src, 'fitView') + body(src, 'frameView')).includes('openFocus()') && body(src, 'openFocus').includes('lay.spine'));
   assert.ok(src.includes("'요청·보고 없음'") && !src.includes("none: ['기록 없음'"));
   // A pointed line reads apart: accent, its mates faded at once, raised in its layer.
   assert.ok(css.includes('.edge.near .edge-line { stroke: var(--accent); --lw: 2.5;') && css.includes('.space.line-near .edge:not(.near):not(.on) .edge-line { opacity: .3; }'));
