@@ -58,7 +58,7 @@ import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenar
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
-import { firstFlow, hubFolds, foldWord, switcherText, summarySource, headLines, FLOW_RULE_WORD, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type SummarySource } from './first-flow.js';
+import { firstFlow, hubFolds, foldedLines, foldWord, switcherText, sourceText, summarySource, shownSentence, headLines, recordWords, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -3525,16 +3525,26 @@ function renderScopeLens() {
 }
 function closeScopeReading() { scopeReading = false; if ($('lens').classList.contains('scope-read')) hideLens(); }
 
-/* ---------- the first screen's focus (beauty v5, first-flow.ts) ----------
- * The record's own first sentence fixed at the canvas's top left (its C-SUMMARY, never the model's summary or the person's brief),
- * 「먼저 보는 흐름」 chosen by fixed rules (the person's kept choice, a scenario, the summary's core-flow sentence, a first-structure
- * line, a recorded start, or none) drawn on the lines the map already has: the flow 3px in the accent, its context 2.25px, every other
- * line 1.15px without its label at rest. Card text is never faded here; only borders, lines and extras step back. A card on the flow
- * with six or more other lines folds them behind one chip (「다른 연결 N개」), opened in place. Nothing new is drawn on the map. */
+/* ---------- the first screen's focus (beauty v5, ruling F6 Q2, first-flow.ts) ----------
+ * The record's own first sentence fixed at the canvas's top left (its C-SUMMARY, never the model's summary or the person's brief; its
+ * hover says it is the record's summary and where, and a press opens the source), and under it 「먼저 볼 연결」 chosen by fixed rules (the
+ * person's kept choice, a scenario, the summary's core-flow sentence, a first-structure line, a recorded start, or none), drawn on the
+ * lines the map already has in their own direction. When those lines stand on another sentence than the top one, that sentence shows
+ * under the switcher (one line, whole in its hover), so the top sentence never reads as their basis. At rest only (a selection owns the
+ * accent): the lines 3px in the accent (2.25 once the person picks a lens, and a recorded start's fan of more than three always), their
+ * context 2.25px, the lens's background lines 1.15px with their labels left to the hover. Card text never fades here, except under
+ * 상태·공백 (that lens's fade is its information). A card of the view with six or more other lines folds them behind one chip (「다른 연결
+ * N개」, N the lines it hides), never a recorded start's own card, never a line of the view. Nothing new is drawn on the map. */
 let ffNow: FirstFlow | null = null, ffSrc: (SummarySource & { label: string }) | null = null, ffOpen = new Set<string>(), ffFolds = new Map<string, string[]>(), ffFor = '';
-/** The flow drawn now (null: none, 전체 관계, inside a part, or a scenario lens shown). */
+/** The person picked a lens on this map since it opened: the picked lines step back to the context weight (the lens keeps its own). */
+let ffLensPicked = false;
+/** The top line's height with its sentence whole (measured each sync): the fit keeps the map under it even while the sentence steps back. */
+let ftFull = 0;
+/** The lines drawn now (null: none, 전체 관계, inside a part, or a scenario lens shown). */
 const ffShown = (): FlowCandidate | null => (ffNow?.flow && !scope && !scView ? ffNow.flow : null);
 const ffActive = () => $('space').classList.contains('ff-on');
+/** The picked lines carry the accent only at rest, before the person picks a lens. */
+const ffLit = () => ffActive() && !selected && !planView.isOpen() && !ffLensPicked && !!ffShown() && !ffShown()!.soft;
 /** The newest map record's C-SUMMARY (its own first sentence and core-flow sentence) and where it stands. */
 function summaryOf(o: Opened): (SummarySource & { label: string }) | null {
   const ids = new Set(o.project.readings.filter(isMapReading).flatMap(r => r.records.map(x => x.id)));
@@ -3547,8 +3557,18 @@ function summaryOf(o: Opened): (SummarySource & { label: string }) | null {
   const text = o.project.pasted.find(p => p.id === s.record)?.text ?? '', line = text.slice(0, s.from).split('\n').length;
   return { ...s, label: `${recs.find(r => r.id === s.record)?.label ?? '기록'} · ${line}번째 줄` };
 }
+/** The record's own words for the parts (first-flow recordWords), read once per state of the project. */
+let ffWordsKey = '', ffWordsFor: object | null = null, ffWordsNow: RecordWord[] = [];
+function ffWords(o: Opened, paste: string | null): RecordWord[] {
+  if (!paste) return [];
+  const key = `${paste}|${o.project.pasted.length}|${o.project.space.areas.length}`;
+  if (ffWordsFor === o.project.readings && ffWordsKey === key) return ffWordsNow;
+  try { ffWordsNow = recordWords(o.project, paste); } catch { ffWordsNow = []; }
+  ffWordsFor = o.project.readings; ffWordsKey = key; return ffWordsNow;
+}
 /** What the rules read of the opened map: the first view's parts (with their C-ENTRY rows), each relation with its condition, the
- * loops, the scenarios in paste order, the summary's core-flow sentence, the C-HEAD 「첫 구조 줄」 row's lines, the person's choice. */
+ * loops, the scenarios in paste order, the summary's core-flow sentence, the C-HEAD 「첫 구조 줄」 row's lines, the record's own words for
+ * the parts, the labels' row-ID guard and the person's choice. */
 function focusInput(o: Opened): FlowInput {
   const base = firstViewInput(o), maps = o.project.readings.filter(isMapReading), latest = new Map<string, MapReading['parts'][number]>();
   for (const r of maps) for (const p of r.parts) latest.set(p.areaId, p);
@@ -3566,15 +3586,17 @@ function focusInput(o: Opened): FlowInput {
   const withRows = [...maps].reverse().find(r => r.records.length);
   const hq = headQuote((withRows ? maps.flatMap(r => r.records) : []).map(x => ({ id: x.id, text: o.project.pasted.find(r => r.id === x.id)?.text ?? '' })));
   const cells = hq ? cellTexts(hq.quote) : [], at = cells.findIndex(c => /첫 구조 줄/.test(c)), value = at >= 0 ? cells[at + 1] ?? '' : '';
-  // A flow needs a line drawn in this view (a relation inside a folded group is drawn on its group's line, which holds it).
+  // A candidate needs a line drawn in this view (a relation inside a folded group is drawn on its group's line, which holds it).
   const drawn = new Set(lay.edges.flatMap(e => e.ids));
-  return { parts, lines, loops: base.loops ?? [], scenarios, summaryFlow: ffSrc?.flow ?? null, headLines: headLines(value), kept: fvRec?.flow ?? null, drawn };
+  return { parts, lines, loops: base.loops ?? [], scenarios, summaryFlow: ffSrc?.flow ?? null, headLines: headLines(value), kept: fvRec?.flow ?? null, drawn,
+    words: ffWords(o, ffSrc?.record ?? hq?.record ?? null), plain: labelPlain, rep: id => drawnRep(o, id) };
 }
-/** The flow's marks on the lines drawn now, the summary of the rest without them, the folds, the notes, the labels and the top line. */
+/** The picked lines' marks on the lines drawn now, the summary of the rest without them, the folds, the notes, the labels and the top line. */
 function drawFocus() {
   const o = opened, world = $('world'), sp = $('space');
   world.querySelectorAll('.edge.ff-flow, .edge.ff-ctx, .edge.ff-fold').forEach(g => g.classList.remove('ff-flow', 'ff-ctx', 'ff-fold'));
-  if (o && ffFor !== o.key) { ffFor = o.key; ffOpen = new Set(); }
+  world.querySelectorAll('.node.ff-start').forEach(el => el.classList.remove('ff-start'));
+  if (o && ffFor !== o.key) { ffFor = o.key; ffOpen = new Set(); ffLensPicked = false; }
   ffSrc = o ? summaryOf(o) : null;
   ffNow = o && o.view.parts.length ? firstFlow(focusInput(o)) : null;
   const f = ffShown(); let any = false;
@@ -3582,12 +3604,15 @@ function drawFocus() {
     const fl = new Set(f.lines), cx = new Set(f.context);
     world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => {
       const e = edgeOf(g.dataset.key); if (!e) return;
-      if (e.ids.some(id => fl.has(id))) { g.classList.add('ff-flow'); any = true; } else if (e.ids.some(id => cx.has(id))) g.classList.add('ff-ctx'); else return;
+      // A recorded start's fan of more than three lines reads at the context weight (its card is marked instead).
+      if (e.ids.some(id => fl.has(id))) { g.classList.add(f.soft ? 'ff-ctx' : 'ff-flow'); any = true; } else if (e.ids.some(id => cx.has(id))) g.classList.add('ff-ctx'); else return;
       layerEdge(g);
     });
+    if (any && f.soft && o) world.querySelector(`.node[data-box="${CSS.escape(drawnRep(o, f.parts[0]!) ?? f.parts[0]!)}"]`)?.classList.add('ff-start');
   }
   sp.classList.toggle('ff-on', any);
-  // At rest on a busy map the flow's lines are drawn one by one and the rest stays its summary, each summary line holding only the
+  sp.classList.toggle('ff-soft', any && ffLensPicked);
+  // At rest on a busy map the view's lines are drawn one by one and the rest stays its summary, each summary line holding only the
   // relations not drawn on their own (as beside a selection or a scenario's path).
   if (o && !selected) {
     const keep = new Set([...world.querySelectorAll<SVGGElement>('.edge.sc-path, .edge.ff-flow, .edge.ff-ctx')].map(g => g.dataset.key!));
@@ -3596,19 +3621,29 @@ function drawFocus() {
   }
   syncLineMode(); markLines(); foldHubs(); routeShown(); placeEdgeLabels(); renderFocusTop();
 }
-/** A flow card whose drawn lines off the flow are six or more folds them (hub fold): only its flow lines stay, with 「다른 연결 N개」;
- * opened, they come back in place. A line touching two such cards stays folded only while both are folded. */
+/** A lens the person picks keeps its foreground: the picked lines step back to the context weight (their accent heads too). */
+function focusLensPicked() {
+  if (!ffShown()) return;
+  ffLensPicked = true; $('space').classList.toggle('ff-soft', ffActive()); markLines();
+}
+/** A card of the view whose drawn lines off the view are six or more folds them (hub fold): only the view's lines stay, with 「다른 연결
+ * N개」; opened, they come back in place. A line touching two such cards stays folded only while both are folded. A recorded start's own
+ * card never folds, and no line of the view ever does (its picked lines, its context, a line between two of its parts). */
 function foldHubs() {
   const o = opened, world = $('world'), f = ffShown(); ffFolds = new Map();
   world.querySelectorAll('.edge.ff-fold').forEach(g => g.classList.remove('ff-fold'));
   if (!o || !f || !ffActive()) return;
-  // A card on the flow: an end of one of the flow's drawn lines (a named part past a gap is on no drawn flow).
-  const drawn = shownLines(), cards = [...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].filter(g => drawn.has(g.dataset.key!)).flatMap(g => [g.dataset.from!, g.dataset.to!]);
+  const rep = (id: string) => drawnRep(o, id) ?? id, view = new Set(f.parts.map(rep)), drawn = shownLines();
+  // The cards a picked line in the accent touches (a named part past a gap is on none; a recorded start's fan, drawn at the context weight,
+  // folds nothing around it). Never a recorded start's own card, and never a folded group standing for parts of the view (its lines are
+  // those parts' lines).
+  const touched = new Set([...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].filter(g => drawn.has(g.dataset.key!)).flatMap(g => [g.dataset.from!, g.dataset.to!]));
+  const holds = new Set(f.parts.filter(p => rep(p) !== p).map(rep));
+  const cards = [...view].filter(c => touched.has(c) && !holds.has(c) && !(f.rule === 'entry' && c === rep(f.parts[0]!)));
   const ls = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('stub') && !g.classList.contains('hit'))
-    .map(g => ({ key: g.dataset.key!, from: g.dataset.from!, to: g.dataset.to!, flow: g.classList.contains('ff-flow') || g.classList.contains('ff-ctx') }));
+    .map(g => ({ key: g.dataset.key!, from: g.dataset.from!, to: g.dataset.to!, flow: g.classList.contains('ff-flow') || g.classList.contains('ff-ctx') || (view.has(g.dataset.from!) && view.has(g.dataset.to!)) }));
   ffFolds = hubFolds(cards, ls);
-  const open = new Set([...ffFolds].filter(([c]) => ffOpen.has(c)).flatMap(([, ks]) => ks));
-  const hide = new Set([...ffFolds].filter(([c]) => !ffOpen.has(c)).flatMap(([, ks]) => ks).filter(k => !open.has(k)));
+  const { hide } = foldedLines(ffFolds, ffOpen);
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => g.classList.toggle('ff-fold', hide.has(g.dataset.key!)));
 }
 /** A hub's chip pressed: its other lines in place, or folded again (nothing else moves). */
@@ -3617,19 +3652,20 @@ function toggleHub(id: string) {
   foldHubs(); routeShown(); placeEdgeLabels();
   document.querySelector<HTMLElement>(`#world .ff-fold-chip[data-hub="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
 }
-/** The labels of the lines the flow does not hold step back at rest (the flow's own and its one branch keep theirs). */
+/** The labels of the view's lines (its picked lines and its context) stay at rest; the others wait for a hover; a folded line's go with it. */
 function markFocusLabels() {
   const world = $('world'), f = ffShown();
-  const keep = new Set([...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].map(g => g.dataset.key!));
-  if (f?.branch) for (const g of world.querySelectorAll<SVGGElement>('.edge.ff-ctx, .edge.ff-flow')) if ((g.dataset.ids ?? '').split(',').includes(f.branch.line)) keep.add(g.dataset.key!);
+  const keep = new Set(f ? [...world.querySelectorAll<SVGGElement>('.edge.ff-flow, .edge.ff-ctx')].map(g => g.dataset.key!) : []);
+  const folded = new Set([...world.querySelectorAll<SVGGElement>('.edge.ff-fold')].map(g => g.dataset.key!));
   world.querySelectorAll<HTMLElement>('.edge-labels > *').forEach(el => {
     const ks = [el.dataset.key, el.dataset.badge, el.dataset.once, el.dataset.cue, ...(el.dataset.also ?? '').split(' ')].filter((x): x is string => !!x);
     el.classList.toggle('ff-keep', ks.some(k => keep.has(k)));
+    el.classList.toggle('ff-folded', ks.length > 0 && ks.every(k => folded.has(k)));
   });
 }
-/** The notes at the flow's start, its one branch and its end, and the hubs' chips, in map coordinates (they follow a drag, positionWorld),
- * screen-sized like the line chips; a note that would cover a card or another note takes its next place or is left off (its words read
- * in the switcher's tip). */
+/** The notes (a recorded start, a scenario's recorded start and end, one branch in the record's plain words) and the hubs' chips, in map
+ * coordinates (they follow a drag, positionWorld), screen-sized like the line chips; a note that would cover a card or another note takes
+ * its next place or is left off (its words read in the switcher's tip). */
 function placeFocusMarks() {
   const o = opened, world = $('world'), f = ffShown();
   world.querySelectorAll('.ff-note, .ff-fold-chip').forEach(el => el.remove());
@@ -3648,29 +3684,34 @@ function placeFocusMarks() {
   };
   const note = (cls: string, label: string, text: string | null, tip: string) => h('div', { class: `ff-note ${cls}`, role: 'note', title: tip }, h('span', { class: 'ff-note-label' }, label), text ? h('span', { class: 'ff-note-text' }, text.length > 48 ? `${text.slice(0, 47)}…` : text) : null);
   const a = f.start ? boxOf(f.start.part) : null, z = f.end ? boxOf(f.end.part) : null;
-  if (a) put(note('ff-start', f.rule === 'entry' ? '기록된 시작' : '시작', f.start!.text, `먼저 보는 흐름의 시작${f.start!.text ? ` · ${f.start!.text}` : ''}`),
-    (w, hh) => [{ x: a.x, y: a.y - hh - 6 }, { x: a.x + a.w - w, y: a.y - hh - 6 }, { x: a.x - w - 8, y: a.y }, { x: a.x, y: a.y + a.h + 6 }], a.w);
-  if (z && z !== a) put(note('ff-end', '끝', f.end!.text, `먼저 보는 흐름의 끝${f.end!.text ? ` · 넘겨받는 것: ${f.end!.text}` : ''}`),
+  // Only what the record says: a C-ENTRY row's start, a scenario's recorded start and end (never a first or last named part's).
+  const startWord = f.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작';
+  if (a) put(note('ff-start', startWord, f.start!.text, `${startWord}${f.start!.text ? ` · ${f.start!.text}` : ''}`),
+    (w, hh) => [{ x: a.x, y: a.y - hh - 6 }, { x: a.x + a.w - w, y: a.y - hh - 6 }, { x: a.x - w - 8, y: a.y }, { x: a.x, y: a.y + a.h + 6 }], Math.max(a.w, 220 * inv));
+  if (z && z !== a) put(note('ff-end', '시나리오 끝', f.end!.text, `시나리오 끝${f.end!.text ? ` · ${f.end!.text}` : ''}`),
     (w, hh) => [{ x: z.x, y: z.y + z.h + 6 }, { x: z.x + z.w - w, y: z.y + z.h + 6 }, { x: z.x + z.w + 8, y: z.y }, { x: z.x, y: z.y - hh - 6 }], z.w);
-  // The one branch: beside where its line leaves its card (the record's condition words, never a meaning made up).
+  // The one branch: beside where its line leaves its card (the record's plain condition words, never a row ID or a meaning made up).
   const br = f.branch, bg = br ? [...world.querySelectorAll<SVGGElement>('.edge.ff-flow, .edge.ff-ctx')].find(g => (g.dataset.ids ?? '').split(',').includes(br.line) && !g.classList.contains('ff-fold')) : null;
   const pts = bg ? lastRouted.get(bg.dataset.key!)?.pts : null;
   if (br && pts && pts.length > 1) { const p = pts[0]!; put(note('ff-branch', '갈림', br.text, `갈림 · 조건: ${br.text}`), (w, hh) => [{ x: p.x + 10, y: p.y + 8 }, { x: p.x + 10, y: p.y - hh - 8 }, { x: p.x - w - 10, y: p.y + 8 }, { x: p.x - w - 10, y: p.y - hh - 8 }]); }
-  // The hubs' chips, under each card's lower right corner (inside the card's own corner when there is no room under it).
-  for (const [id, keys] of ffFolds) {
-    const b = lay.boxes.get(id); if (!b) continue;
-    const open = ffOpen.has(id), chip = h('button', { type: 'button', class: `ff-fold-chip${open ? ' open' : ''}`, 'data-hub': id, 'aria-expanded': String(open),
-      title: open ? '경로 밖 연결을 다시 접어요' : `이 카드의 먼저 보는 흐름 밖 연결 ${keys.length}개를 접어 두었어요 · 눌러서 제자리에 펼치기`,
-      onclick: (e: Event) => { e.stopPropagation(); toggleHub(id); } }, foldWord(keys.length, open));
+  // The hubs' chips, under each card's lower right corner (beside it when there is no room under it): N is exactly the lines it hides.
+  const { byHub } = foldedLines(ffFolds, ffOpen);
+  for (const [id] of ffFolds) {
+    const b = lay.boxes.get(id), open = ffOpen.has(id), n = byHub.get(id)?.length ?? 0; if (!b || (!open && !n)) continue;
+    const chip = h('button', { type: 'button', class: `ff-fold-chip${open ? ' open' : ''}`, 'data-hub': id, 'aria-expanded': String(open),
+      title: open ? '먼저 볼 연결 밖의 연결을 다시 접어요' : `이 카드의 먼저 볼 연결 밖 연결 ${n}개를 접어 두었어요 · 눌러서 제자리에 펼치기`,
+      onclick: (e: Event) => { e.stopPropagation(); toggleHub(id); } }, foldWord(n, open));
     put(chip, (w, hh) => [{ x: b.x + b.w - w, y: b.y + b.h + 4 }, { x: b.x + b.w + 6, y: b.y + b.h - hh }, { x: b.x - w - 6, y: b.y + b.h - hh }]);
   }
 }
-/** The top line: the record's first sentence (hover: whole, with its record and row) and under it the switcher. */
+/** The top line: the record's first sentence (hover: whole, said to be the record's summary, with its record and line; pressed: the
+ * source), the switcher, and the sentence the picked lines stand on when it is not the top one. */
 function renderFocusTop() {
   const el = $('focus-top'), o = opened, s = ffSrc, f = ffNow;
   if (!o || scope || !o.view.parts.length || (!s && !f?.candidates.length)) { el.hidden = true; el.replaceChildren(); syncFocusTop(); return; }
-  const sentence = s ? h(o.kind === 'saved' ? 'button' : 'p', { class: 'ft-sentence', ...(o.kind === 'saved' ? { type: 'button', onclick: () => showQuote(s.record, s.quote, s.from) } : {}),
-    title: `${s.first}\n출처: ${s.label} · 요약(C-SUMMARY) 첫 문장${o.kind === 'saved' ? ' · 눌러서 원문 보기' : ''}` }, s.shown) : null;
+  const saved = o.kind === 'saved';
+  const sentence = s ? h(saved ? 'button' : 'p', { class: 'ft-sentence', ...(saved ? { type: 'button', onclick: () => showQuote(s.record, s.quote, s.from) } : {}),
+    title: `${s.first}\n출처: 기록 요약의 첫 문장 · ${s.label}${saved ? '\n눌러서 원문 보기' : ''}` }, s.shown) : null;
   const name = (id: string) => partOf(o, id)?.name ?? id;
   const choose = (c: FlowChoice) => {
     // The choice is the person's, kept with the map's first view (a map with none yet keeps only this).
@@ -3678,31 +3719,40 @@ function renderFocusTop() {
     saveFirstView(); drawFocus();
   };
   const btn = (cls: string, text: string, title: string, on: () => void, extra: Record<string, string> = {}) => h('button', { type: 'button', class: `ft-b ${cls}`, title, onclick: on, ...extra }, text);
-  let row: HTMLElement | null = null;
+  let row: HTMLElement | null = null, basis: HTMLElement | null = null;
   if (f?.flow && !scView) {
     const c = f.flow, n = f.candidates.length, step = (d: number) => { const x = f.candidates[(f.index + d + n) % n]!; choose({ rule: x.rule, key: x.key }); };
-    const tip = [`${FLOW_RULE_WORD[c.rule]}${f.kept ? ' · 내가 고른 흐름' : ''}`, c.text ? `“${c.text}”` : null, `부분: ${c.parts.map(name).join(' → ')}`,
-      `그린 선 ${c.lines.length}개 (지도에 이미 있는 관계만)${c.gaps.length ? ` · 끊긴 곳 ${c.gaps.length}: ${c.gaps.map(([a, b]) => `${name(a)} → ${name(b)}`).join(', ')} (직접 이은 관계가 없어 잇지 않았어요)` : ''}`,
-      '굵은 파란 선은 지금 설명하는 흐름이에요 · 중요도나 실행 빈도가 아니에요'].filter(Boolean).join('\n');
-    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': '먼저 보는 흐름' }, h('span', { class: 'ft-name', title: tip }, switcherText(f, name)),
-      n > 1 ? btn('ft-prev', '‹', '이전 흐름', () => step(-1), { 'aria-label': '이전 흐름' }) : null, n > 1 ? btn('ft-next', '›', '다음 흐름', () => step(1), { 'aria-label': '다음 흐름' }) : null,
-      h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'), btn('ft-all', '전체 관계', '모든 선을 같은 무게로 · 먼저 보는 흐름 끄기', () => choose({ rule: 'all', key: '' })));
+    const byId = new Map(o.view.relations.map(r => [r.id, r])), drawnLs = c.lines.filter(id => lay.edges.some(e => e.ids.includes(id))).map(id => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r);
+    const tip = [sourceText(f), c.text ? `근거 문장: “${c.text}”` : null, c.start?.text ? `${c.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작'}: ${c.start.text}` : null, c.end?.text ? `시나리오 끝: ${c.end.text}` : null,
+      `이름이 나온 부분: ${c.steps.map(st => st.map(name).join(', ')).join(' / ')} (이름이 나온 순서는 방향도 실행 순서도 아니에요)`,
+      `그린 선 ${drawnLs.length}개 · 지도에 이미 있는 관계를 그 방향 그대로: ${drawnLs.slice(0, 6).map(r => `${name(r.from)} → ${name(r.to)}`).join(', ')}${drawnLs.length > 6 ? ` 외 ${drawnLs.length - 6}개` : ''}`,
+      c.gaps.length ? `끊긴 곳 ${c.gaps.length}개 · 이어진 관계가 없어 잇지 않았어요` : null,
+      c.soft ? '나가는 선이 많아 보통 굵기로 보여요' : '파란 선은 먼저 볼 연결이에요 · 중요도나 실행 빈도가 아니에요'].filter(Boolean).join('\n');
+    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': FLOW_CONTROL }, h('span', { class: 'ft-name', title: tip }, switcherText(f, name)),
+      n > 1 ? btn('ft-prev', '‹', '이전 보기', () => step(-1), { 'aria-label': '이전 보기' }) : null, n > 1 ? btn('ft-next', '›', '다음 보기', () => step(1), { 'aria-label': '다음 보기' }) : null,
+      h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'), btn('ft-all', FLOW_SOURCE.all, `모든 선을 같은 무게로 · ${FLOW_CONTROL} 끄기`, () => choose({ rule: 'all', key: '' })));
+    // The sentence the lines stand on, when it is not the top one (one line, whole in its hover).
+    if (c.text && shownSentence(c.text) !== s?.shown) {
+      const said = shownSentence(c.text);
+      basis = h('p', { class: 'ft-basis', title: `${FLOW_CONTROL}의 근거 문장 · ${c.source}\n${c.text}` }, h('span', { class: 'ft-basis-l' }, '근거 문장'), h('span', { class: 'ft-basis-t' }, said));
+    }
   } else if (f?.rule === 'all' && f.candidates.length && !scView) {
     const c = f.candidates[0]!;
-    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': '먼저 보는 흐름' }, h('span', { class: 'ft-name' }, '전체 관계'), h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'),
-      btn('ft-back', '먼저 보는 흐름 보기', `${FLOW_RULE_WORD[c.rule]}${c.text ? ` · “${c.text}”` : ''}`, () => choose({ rule: c.rule, key: c.key })));
+    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': FLOW_CONTROL }, h('span', { class: 'ft-name' }, `${FLOW_CONTROL}: ${FLOW_SOURCE.all}`), h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'),
+      btn('ft-back', `${FLOW_CONTROL} 보기`, `${c.source}${c.text ? ` · “${c.text}”` : ''}`, () => choose({ rule: c.rule, key: c.key })));
   }
-  el.replaceChildren(...[sentence, row].filter((x): x is HTMLElement => !!x));
+  el.replaceChildren(...[sentence, row, basis].filter((x): x is HTMLElement => !!x));
   el.hidden = !el.childElementCount; syncFocusTop();
 }
-/** The top line's height (the camera's fit keeps the map under it). */
-const ftH = () => { const el = document.getElementById('focus-top'); return el && !el.hidden ? el.offsetHeight + 8 : 0; };
+/** The top line's height, its sentence whole (the camera's fit keeps the map under it, collapsed or not). */
+const ftH = () => { const el = document.getElementById('focus-top'); return el && !el.hidden ? (ftFull || el.offsetHeight) + 8 : 0; };
 /** The top line under the change plan's strip; its sentence steps back while a card is under it (the switcher stays). */
 function syncFocusTop() {
   const el = document.getElementById('focus-top'); if (!el) return;
   el.style.top = `${stripInset()}px`;
-  const s = el.querySelector<HTMLElement>('.ft-sentence'); if (!s || el.hidden) return;
-  el.classList.remove('ft-under');
+  if (el.hidden) { ftFull = 0; return; }
+  el.classList.remove('ft-under'); ftFull = el.offsetHeight;
+  const s = el.querySelector<HTMLElement>('.ft-sentence'); if (!s) return;
   const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
   const r = { x: el.offsetLeft + s.offsetLeft - 4, y: el.offsetTop + s.offsetTop - 4, w: s.offsetWidth + 8, h: s.offsetHeight + 8 };
   el.classList.toggle('ft-under', [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k));
@@ -3976,9 +4026,9 @@ function badgeHolds(b: HTMLElement, id: string): boolean { return (b.getAttribut
 /** Each line's ends as it reads now: a selected line or a line of the scenario's path carries the accent's head and start dot. */
 function markLines() {
   // A picked line among the selection's (markPicked) is the one that keeps the accent's ends.
-  const picking = $('space').classList.contains('line-picked');
+  const picking = $('space').classList.contains('line-picked'), ffRest = ffLit();
   document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
-    const lit = (el.classList.contains('on') && (!picking || el.classList.contains('picked'))) || el.classList.contains('sc-path') || el.classList.contains('ff-flow'), line = el.querySelector('.edge-line'); if (!line) return;
+    const lit = (el.classList.contains('on') && (!picking || el.classList.contains('picked'))) || el.classList.contains('sc-path') || (ffRest && el.classList.contains('ff-flow')), line = el.querySelector('.edge-line'); if (!line) return;
     // A wait on the path reads as a control line: its open head (placeScenarioMarks dashes its end).
     const head = (el.classList.contains('sc-wait') && el.dataset.head === 'filled' ? 'open' : el.dataset.head ?? 'filled') as Head, start = (el.dataset.start ?? 'none') as Head;
     const mark = (h: Head) => (h === 'none' ? 'none' : `url(#m-${h}${lit ? '-on' : ''})`);
@@ -5273,8 +5323,10 @@ function fvPop(o: Opened, v: FirstView, r: FirstViewRecord | null): HTMLElement 
     // 「추천 첫 보기로」 and 「강조 해제」 stay two actions, apart.
     h('div', { class: 'fv-acts' }, (v.reason || v.emphasis.parts.length) && differs(r, viewLens, v) ? fvRecButton(v) : null, fvOn() && (r!.parts.length || r!.lines.length) ? fvOffButton() : null));
 }
-function setLens(id: LensId) {
+function setLens(id: LensId, byPerson = false) {
   const o = opened; if (!o || !lensUsable(id) || id === viewLens) return;
+  // Beauty v5 (F6 review 5): a lens the person picks keeps its foreground; the first screen's lines step back to the context weight.
+  if (byPerson) focusLensPicked();
   const was = viewLens; viewLens = id; legend = NO_FILTER; legendMenu = null; // each lens reads its own legend
   if (id === 'scenario' && !scOn) { const first = scenarioReadings(o)[0]; if (first) enterScenario(first.id); }
   if (was === 'scenario' && scOn) leaveScenario();
@@ -7186,7 +7238,7 @@ function bindCanvas() {
   $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k / 1.2, x, y, true); });
   $('zoom-level').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(1, x, y, true); });
   $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); if (syncLegendFold()) fitView(true, true); });
-  document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId)));
+  document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId, true)));
   bindLegendKeys();
   // S10: the first view's popovers close with Esc or a press outside the guide line.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && fvMenu) { e.preventDefault(); e.stopImmediatePropagation(); fvMenu = null; renderFirstView(); document.querySelector<HTMLElement>('#first-view .fv-b')?.focus(); } }, true);
@@ -7219,7 +7271,7 @@ function bindCanvas() {
     // Lenses (map design v3 7.3): Alt+1 … Alt+5 and [ ] pick one; L goes to the legend. On the map only, never inside a field.
     if (opened && !$('space').hidden && !$('space').classList.contains('sheet-read') && !openState) {
       const next = lensKey(e, viewLens, lensUsable);
-      if (next) { e.preventDefault(); setLens(next); return; }
+      if (next) { e.preventDefault(); setLens(next, true); return; }
       if ((e.key === 'l' || e.key === 'L') && !e.altKey && !e.ctrlKey && !e.metaKey && !(e.target as HTMLElement).closest('#lens, #panel, [contenteditable]')) {
         const first = document.querySelector<HTMLElement>(`#line-key .lg-item${legend.picked ? `[data-item="${CSS.escape(legend.picked)}"]` : ''}`) ?? document.querySelector<HTMLElement>('#line-key .lg-item');
         if (first) { e.preventDefault(); first.focus(); return; }
@@ -7292,6 +7344,8 @@ function bindEdgeHints() {
       if (near && getComputedStyle(x).display !== 'none') ends.add(x.dataset.from === id || boxInside(id, x.dataset.from!) ? x.dataset.to! : x.dataset.from!);
     });
     world.querySelectorAll('.near-end, .near-self, .edge-labels > .near').forEach(el => el.classList.remove('near-end', 'near-self', 'near'));
+    // Beauty v5 (F6 review G): at rest under 먼저 볼 연결 the other lines' labels wait for a hover; pointing at a part shows its lines'.
+    if (space.classList.contains('ff-rest')) { const ks = new Set([...world.querySelectorAll<SVGGElement>('.edge.near')].map(x => x.dataset.key!)); world.querySelectorAll<HTMLElement>('.edge-labels > *').forEach(el => { if ([el.dataset.key, el.dataset.badge, el.dataset.once, el.dataset.cue].some(k => !!k && ks.has(k))) el.classList.add('near'); }); }
     for (const far of ends) world.querySelector(`[data-box="${CSS.escape(far)}"]`)?.classList.add('near-end');
     world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('near-self');
     clearTimeout(linePeek); space.classList.remove('peek');

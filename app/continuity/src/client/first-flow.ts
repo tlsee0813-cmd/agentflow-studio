@@ -1,22 +1,39 @@
-/* The first screen's focus (beauty v5): the record's own sentence at the top of the canvas, and 「먼저 보는 흐름」, one flow to follow
- * first, chosen by fixed rules in a fixed order (the first that applies):
- * 0. the person's earlier choice for this map (kept in the first view's record; 「전체 관계」 is a choice too);
- * 1. a scenario reading, in paste order (its path's relations still on the map);
- * 2. the record's C-SUMMARY core-flow sentence (its second sentence): the parts it names, in its own order (namedParts), drawn only along
- *    relations that exist on the map directly between two consecutive named parts; a gap stays a gap, never bridged by another line or a
- *    new one; it needs two named parts and one such relation;
- * 3. the same with each C-HEAD 「첫 구조 줄」 line (the row as written, split at its own numbering);
- * 4. a recorded entry point (C-ENTRY of a starting kind): its part and the lines the record draws out of it, nothing further;
- * 5. none: no flow, the first screen as it was.
- * Never by degree, centrality, path length, the computed spine or anyone's idea of the core: only what the record wrote and the map holds.
+/* The first screen's focus (beauty v5, ruling F6 Q2): the record's own sentence at the top of the canvas, and 「먼저 볼 연결」, the lines to
+ * read first, chosen by fixed rules in a fixed order (the first that applies):
+ * 0. the person's earlier choice for this map (kept in the first view's record; 「전체 관계」 is a choice too): 「선택한 보기 · …」;
+ * 1. a scenario reading, in paste order (its path's relations still on the map): 「기록된 시나리오 · 이름」;
+ * 2. the record's C-SUMMARY core-flow sentence (its second sentence): 「요약에 나온 연결」, or 「기록이 설명한 흐름」 only when the sentence
+ *    itself states the order of actions (arrows, 다음 · 그 뒤 wording);
+ * 3. the same with each C-HEAD 「첫 구조 줄」 line: 「기록의 첫 구조」;
+ * 4. a recorded entry point (C-ENTRY of a starting kind): its part and the lines the record draws out of it: 「기록된 시작」;
+ * 5. none: no lines picked, the first screen as it was.
+ * Name order is only the order the sentence is read in, never a direction or an order of execution: a sentence's parts are read into
+ * steps (parts listed as alternatives in one step, joined by · 、 / 또는 or 「… 중 하나」, are never paired with each other), and a line is
+ * picked only where the map already has one running from a step to the next, in its own direction; a gap stays a gap (never bridged, never
+ * a shortest path, never a reference line read as a step), and a sentence whose only lines run against it gives nothing. A word is read as
+ * a part first by the record's own words for its B rows (C-PART names, C-ENTRY entry points, C-STEP functions and names, C-SRC files) bound
+ * to the map's parts by the row ledger and the C-IDENT rows, and the parts' earlier official names; then by the map's names. A word two
+ * parts hold picks none. Among several candidates of one rule, the one with the most drawn lines goes first (evidence, not centrality),
+ * then the record's order. No 「시작」 or 「결과」 is ever put on the first or last named part: only a C-ENTRY row (기록된 시작) and a scenario's
+ * recorded start and end are said, and a branch only in the record's plain words (never a row ID).
  * Pure: no DOM, no storage. */
-import { namedPartsAt, norm, STARTING_ENTRIES, type FvLoop, type FvPart } from './first-view.js';
-import type { Channel } from '../shared/types.js';
+import { norm, nameStem, STARTING_ENTRIES, type FvLoop, type FvPart } from './first-view.js';
+import { hasRowId } from './plain-ids.js';
+import { COND_UNSAID } from './line-grammar.js';
+import { isMapReading, type Channel, type Project } from '../shared/types.js';
+import { v5Folds } from '../shared/record-excerpt.js';
+import { rowLedger, rowBindings } from '../shared/row-ledger.js';
+import { identityState, canonicalPart, partAliases } from '../shared/map-identity.js';
+import type { FoldRow } from '../shared/record-table.js';
 
 export type FlowRule = 'scenario' | 'summary' | 'head' | 'entry';
 export const FLOW_RULES: readonly FlowRule[] = ['scenario', 'summary', 'head', 'entry'];
-/** How each rule is named where the switcher says what it shows. */
-export const FLOW_RULE_WORD: Readonly<Record<FlowRule, string>> = Object.freeze({ scenario: '기록된 시나리오', summary: '기록 요약의 핵심 흐름', head: '기록의 첫 구조 줄', entry: '기록된 시작' });
+/** The control's one name, and what each source is called under it (ruling F6 Q2). */
+export const FLOW_CONTROL = '먼저 볼 연결';
+export const FLOW_SOURCE: Readonly<Record<FlowRule | 'all' | 'kept' | 'ordered', string>> = Object.freeze({ scenario: '기록된 시나리오', summary: '요약에 나온 연결',
+  ordered: '기록이 설명한 흐름', head: '기록의 첫 구조', entry: '기록된 시작', all: '전체 관계', kept: '선택한 보기' });
+/** A recorded start with more lines out than this is drawn at the context weight (a fan is no flow). */
+export const ENTRY_SOFT_OVER = 3;
 
 /** A part as the flow reads it: the first view's part with its C-ENTRY rows (name and hand-run order) for the start's note. */
 export interface FlowPart extends FvPart { entryRows?: readonly { kind: string | null; name: string; order: number | null; ref?: string | null }[] }
@@ -29,7 +46,9 @@ export interface FlowScenario {
   links: readonly { from: string | null; to: string | null; relation: string | null; kind: string; condition?: string | null }[];
   start?: string | null; end?: string | null;
 }
-/** The person's choice kept for the map: a rule's candidate by its key, or 「전체 관계」 (all: no flow drawn). */
+/** A word of the record's own for a map part (recordWords). */
+export interface RecordWord { word: string; part: string }
+/** The person's choice kept for the map: a rule's candidate by its key, or 「전체 관계」 (all: no lines picked). */
 export interface FlowChoice { rule: FlowRule | 'all'; key: string }
 export interface FlowInput {
   parts: readonly FlowPart[]; lines: readonly FlowLine[]; loops?: readonly FvLoop[];
@@ -39,31 +58,49 @@ export interface FlowInput {
   /** The newest C-HEAD 「첫 구조 줄」 row's lines, as written (headLines). */
   headLines?: readonly string[];
   kept?: FlowChoice | null;
-  /** The relations the view draws now (a line of the flow must be among them: a flow needs one drawn line); every one when absent. */
+  /** The relations the view draws now (a candidate needs one drawn line); every one when absent. */
   drawn?: ReadonlySet<string> | null;
+  /** The record's own words for the parts (recordWords), read before the map's names. */
+  words?: readonly RecordWord[];
+  /** A note's words as the map may show them (the labels' row-ID guard); null: nothing plain is left. Without it, a text with a row ID
+   * is dropped whole. */
+  plain?: ((t: string) => string | null) | null;
+  /** The card a part is drawn on now (a part inside a folded group is drawn on its group; null: not drawn): the switcher names the drawn
+   * cards and never a line drawn inside one card. Each part is its own card when absent. */
+  rep?: ((id: string) => string | null) | null;
 }
 export interface FlowNote { part: string; text: string | null }
 export interface FlowCandidate {
   rule: FlowRule; key: string;
-  /** Its short name in the switcher, and the record's words it stands on (the sentence or line; null for an entry). */
-  name: string; text: string | null;
-  /** The parts in the record's order, the relations drawn (each directly between two consecutive parts), and the consecutive pairs no
-   * relation joins (drawn as nothing: a gap). */
-  parts: string[]; lines: string[]; gaps: [string, string][];
-  /** The flow's own context: a line going back between its parts (a loop or a return) and a conditional line leaving one of its parts. */
+  /** Its source as the switcher says it (FLOW_SOURCE), its own name (a scenario's), and the record's words it stands on (the sentence
+   * or line; null for a scenario or an entry). */
+  source: string; name: string; text: string | null;
+  /** The named parts in the record's order, read into steps (alternatives share a step), the lines picked (each from a step to the next,
+   * in its own direction), and the consecutive steps no line joins (a gap: drawn as nothing). */
+  parts: string[]; steps: string[][]; lines: string[]; gaps: [string, string][];
+  /** The context: a line going back between its parts (a loop or a return) and a conditional line leaving the view from one of its parts
+   * whose picked line is conditional (the other exits of that decision). */
   context: string[];
+  /** Drawn at the context weight (a recorded start with more than ENTRY_SOFT_OVER lines out). */
+  soft: boolean;
+  /** Notes said only from the record: a C-ENTRY start or a scenario's recorded start and end; never a first or last named part's. */
   start: FlowNote | null; end: FlowNote | null;
-  /** The first and the last named part a drawn line of the flow touches (where the switcher says it runs). */
+  /** The first and the last named part a drawn line of it touches. */
   ends: [string, string];
-  /** At most one branch said: the first conditional line among the flow and its context, from a flow part, with its condition. */
+  /** The drawn lines' largest connected run as layers in their own direction (the switcher's words), and how many drawn lines lie outside
+   * it. */
+  chain: string[][]; more: number;
+  /** How many of its lines are drawn now (the order among candidates of one rule). */
+  drawnLines: number;
+  /** At most one branch said: the first conditional line among its drawn lines and context whose condition reads plain. */
   branch: { line: string; part: string; text: string } | null;
 }
 export interface FirstFlow {
-  /** The rule that gave the flow; 'all' when the person chose 「전체 관계」; null when no rule applies (rule 5). */
+  /** The rule that gave the lines; 'all' when the person chose 「전체 관계」; null when no rule applies (rule 5). */
   rule: FlowRule | 'all' | null;
   /** Whether it is the person's kept choice (rule 0). */
   kept: boolean;
-  /** The candidates of the rule that applies (the switcher's 1/N), the shown one's index, and the shown one (null: none or 전체 관계). */
+  /** The candidates of the rule that applies (the switcher's 보기 1/N), the shown one's index, and the shown one (null: none or 전체 관계). */
   candidates: FlowCandidate[]; index: number; flow: FlowCandidate | null;
 }
 
@@ -72,17 +109,21 @@ const cut = (t: string, n: number): string => (t.length > n ? `${t.slice(0, n - 
 /* ---------- the record's words ---------- */
 /** A record's evidence group closing a sentence: 「(F01+E03)」. */
 const CITES = /\s*[(（]\s*(?:[FE]\d{1,3}|추정|모름)(?:\s*\+\s*(?:[FE]\d{1,3}|추정|모름))*\s*[)）]/;
-/** The sentences of a C-SUMMARY body as written (its lines joined): a sentence ends at a full stop after 다 · 요 · 함 · 됨 · 음 or after a
- * closing bracket (the evidence group), followed by a space or the end; a dot inside a file name (train.py) ends nothing. */
+/** The sentences of a C-SUMMARY body as written: a sentence ends at a full stop after 다 · 요 · 함 · 됨 · 음 or after a closing bracket (the
+ * evidence group), followed by a space or the end, and at a line break right after an evidence group (review: 「…(F01)⏎다음 문장」); a dot
+ * inside a file name (train.py) ends nothing. */
 export function summarySentences(body: string): string[] {
-  const t = body.replace(/\s*\n\s*/g, ' ').trim(), out: string[] = [];
-  let start = 0;
-  for (const m of t.matchAll(/[.。](?=\s|$)/g)) {
-    const before = t.slice(start, m.index);
-    if (!/(?:다|요|함|됨|음|[)）])\s*$/.test(before)) continue;
-    const s = t.slice(start, m.index + 1).trim(); if (s) out.push(s); start = m.index + 1;
+  const out: string[] = [];
+  for (const chunk of body.split(new RegExp(`(?<=${CITES.source})[ \\t]*\\r?\\n`))) {
+    const t = chunk.replace(/\s*\n\s*/g, ' ').trim();
+    let start = 0;
+    for (const m of t.matchAll(/[.。](?=\s|$)/g)) {
+      const before = t.slice(start, m.index);
+      if (!/(?:다|요|함|됨|음|[)）])\s*$/.test(before)) continue;
+      const s = t.slice(start, m.index + 1).trim(); if (s) out.push(s); start = m.index + 1;
+    }
+    const rest = t.slice(start).trim(); if (rest) out.push(rest);
   }
-  const rest = t.slice(start).trim(); if (rest) out.push(rest);
   return out;
 }
 /** A sentence as the top line shows it: the record's words, its closing evidence group left to the hover (the words are never changed). */
@@ -108,6 +149,58 @@ export function headLines(value: string): string[] {
   const parts = /[①-⑳]/.test(v) ? v.split(/[①-⑳]/) : /(?:^|\s)\d{1,2}\)\s/.test(v) ? v.split(/(?:^|\s)\d{1,2}\)\s/) : v.split(/\s+\/\s+|\s*;\s*/);
   return parts.map(x => x.trim()).filter(Boolean);
 }
+/** Whether a sentence states the order of actions itself (arrows, 다음 · 그 뒤 · 이어서 · 차례로 · 순으로): then its lines are 「기록이 설명한
+ * 흐름」; otherwise only 「요약에 나온 연결」. */
+export const statesOrder = (t: string): boolean => /→|->|⇒|다음에|다음으로|그\s*다음|그\s*뒤|그\s*후|이어서|차례로|순서대로|순으로/.test(t);
+
+/** A token of the record's code words (a path, a file, a function): ASCII, a letter, and a sign of code (/ . _ : a digit or a
+ * camelCase joint), four characters or more. Plain words (fetch, POST, Kafka) are no such token: names say those. */
+export const codeLike = (t: string): boolean => t.length >= 4 && /^[\x21-\x7e]+$/.test(t) && /[A-Za-z]/.test(t) && (/[/._:\d]/.test(t) || /[a-z][A-Z]/.test(t));
+const codeTokens = (cell: string): string[] => cell.split(/[\s,，、·;]+/).map(t => t.replace(/^[`'"「(]+|[`'"」),.]+$/g, '').replace(/\(\)$/, '')).filter(codeLike);
+const ONE_B = /(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g;
+const oneB = (t: string): string | null => { const m = [...new Set(t.match(ONE_B) ?? [])]; return m.length === 1 ? m[0]! : null; };
+/** The record's own words for the map's parts (ruling F6 Q2, review of v5 D): of the record a pasted text belongs to, each B row's words
+ * for the part that row is bound to (the row ledger's binding, else a reflected C-IDENT row, else the reading of that record that placed
+ * the row), and each part's earlier official names. Two tiers: what a row owns (its C-PART 이름, its C-ENTRY entry points' code words, its
+ * C-SRC files' names and their stems of five or more letters) before what a step only uses (its C-STEP functions and names of four or more
+ * characters: a step may call another part's function); a word of the second tier the first holds is left to the first. A word two parts
+ * hold in its tier is left out (it picks none). */
+export function recordWords(p: Pick<Project, 'readings' | 'pasted' | 'space'>, paste: string): RecordWord[] {
+  const folds = v5Folds(p.pasted), f = folds.find(x => x.pastes.some(y => y.id === paste));
+  const live = (id: string) => p.space.areas.some(a => a.id === id && !a.archived), s = identityState(p);
+  type Held = Map<string, { word: string; parts: Set<string> }>;
+  const owns: Held = new Map(), uses: Held = new Map();
+  const into = (out: Held) => (word: string, part: string | null | undefined) => {
+    const w = word.trim(), k = norm(w); if (!part || k.length < 2 || /^\d+$/.test(k)) return;
+    const x = out.get(k) ?? { word: w, parts: new Set<string>() }; x.parts.add(part); out.set(k, x);
+  };
+  const put = into(owns), use = into(uses);
+  if (f) {
+    const bound = new Map<string, string>(), maps = p.readings.filter(isMapReading);
+    for (const [k, v] of rowBindings(rowLedger(p, folds), live)) { const [rec, , b] = k.split('\u0000'); if (rec === f.key && b) bound.set(b, canonicalPart(s, v)); }
+    for (const r of maps) for (const e of r.identity ?? []) if (e.record === f.key && e.state === 'reflected' && e.part && e.areaId && live(e.areaId) && !bound.has(e.part)) bound.set(e.part, canonicalPart(s, e.areaId));
+    const own = new Set(f.pastes.map(x => x.id));
+    for (const r of maps) if (r.records.length && r.records.every(x => own.has(x.id))) for (const x of r.parts) if (x.recordRef && live(x.areaId) && !bound.has(x.recordRef)) bound.set(x.recordRef, canonicalPart(s, x.areaId));
+    const rows = (t: string): FoldRow[] => f.fold.rows.get(t) ?? [], cell = (r: FoldRow, c: string) => (r.row.byColumn[c] ?? '').trim();
+    for (const r of rows('C-PART')) put(cell(r, '이름'), bound.get(r.id));
+    for (const r of rows('C-ENTRY')) { const b = oneB(cell(r, '소유 부분')); for (const t of codeTokens(cell(r, '진입점'))) put(t, b ? bound.get(b) : null); }
+    for (const r of rows('C-STEP')) {
+      const b = /^(B\d{1,3}):/.exec(r.id)?.[1], part = b ? bound.get(b) : null;
+      for (const t of codeTokens(cell(r, '쓰는 함수'))) use(t, part);
+      const nm = cell(r, '단계 이름'); if (norm(nm).length >= 4) use(nm, part);
+    }
+    for (const x of f.fold.ledger.files.values()) {
+      const b = oneB(x.part ?? ''), part = b ? bound.get(b) : null, base = x.path.split(/[\\/]/).filter(Boolean).at(-1) ?? '', stem = base.replace(/\.[A-Za-z0-9]+$/, '');
+      if (!codeLike(base) || !base.includes('.')) continue;
+      put(base, part); if (stem !== base && (codeLike(stem) || /^[A-Za-z]{5,}$/.test(stem))) put(stem, part);
+    }
+  }
+  for (const a of p.space.areas) if (!a.archived) for (const x of partAliases(p, a.id)) put(x.name, canonicalPart(s, a.id));
+  // A record word never takes another part's own name (「Kafka」 from a file kafka.ts names the part 「Kafka 브로커」, not the file's owner).
+  const names = p.space.areas.filter(a => !a.archived).map(a => ({ id: canonicalPart(s, a.id), n: norm(a.name) }));
+  const one = (m: Held) => [...m].filter(([k, x]) => x.parts.size === 1 && !names.some(o => o.id !== [...x.parts][0] && o.n.includes(k))).map(([, x]) => ({ word: x.word, part: [...x.parts][0]! }));
+  return [...one(owns), ...one(new Map([...uses].filter(([k]) => !owns.has(k))))];
+}
 
 /* ---------- one flow from the record's words ---------- */
 /** The words by which the record's prose names a part besides its whole name (each normalized, as norm reads them): an ASCII piece of its
@@ -132,35 +225,75 @@ export function nameTokens(parts: readonly FvPart[]): Map<string, { word: string
 }
 const ASCII = /^[\x21-\x7e]+$/;
 const escRe = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-/** The parts a sentence or line names, in its order: namedParts (whole names, row IDs, loops, states), then a part it names only by one of
- * its own words (nameTokens: an ASCII word as a whole word, a leading phrase as namedParts reads a name). */
-export function flowParts(text: string, parts: readonly FvPart[], loops: readonly FvLoop[] = []): string[] {
-  const at = new Map(namedPartsAt(text, parts, loops).at), n = norm(text);
-  for (const [id, ws] of nameTokens(parts)) {
-    if (at.has(id)) continue;
-    let best: number | null = null;
-    for (const w of ws) {
-      let pos = -1;
-      if (w.ascii) { const m = new RegExp(`(?<![A-Za-z0-9])${escRe(w.word)}(?![A-Za-z0-9])`, 'i').exec(text); if (m) pos = norm(text.slice(0, m.index)).length; }
-      else pos = n.indexOf(norm(w.word));
-      if (pos >= 0 && (best === null || pos < best)) best = pos;
-    }
-    if (best !== null) at.set(id, best);
-  }
-  return [...at.entries()].sort((a, b) => a[1] - b[1]).map(([id]) => id);
+/** What norm drops (kept in step with first-view.ts norm). */
+const NORM_DROP = /[\s·_\-.,:;'"`()[\]{}「」『』<>‘’“”]/;
+/** Each normalized character's place in the text (null when the two readings disagree: then no step is read as alternatives). */
+function normIndex(text: string): number[] | null {
+  const idx: number[] = []; let out = '';
+  for (let i = 0; i < text.length; i++) { const c = text[i]!; if (NORM_DROP.test(c)) continue; const l = c.toLowerCase(); out += l; for (let k = 0; k < l.length; k++) idx.push(i); }
+  return out === norm(text) ? idx : null;
 }
-/** The flow a sentence or line names: its parts in its order and the relations directly between consecutive ones (forward first; the
- * other way only when none runs forward), the gaps where none does. null when it names under two parts or no relation joins any pair. */
-export function namedFlow(text: string, inp: Pick<FlowInput, 'parts' | 'lines' | 'loops' | 'drawn'>): { parts: string[]; lines: string[]; gaps: [string, string][] } | null {
-  const parts = flowParts(text, inp.parts, inp.loops ?? []); if (parts.length < 2) return null;
-  const lines: string[] = [], gaps: [string, string][] = [];
-  for (let i = 1; i < parts.length; i++) {
-    const a = parts[i - 1]!, b = parts[i]!;
-    const fwd = inp.lines.filter(l => l.from === a && l.to === b), back = fwd.length ? [] : inp.lines.filter(l => l.from === b && l.to === a);
-    const here = [...fwd, ...back].map(l => l.id);
-    if (here.length) lines.push(...here.filter(id => !lines.includes(id))); else gaps.push([a, b]);
+interface Span { part: string; s: number; e: number }
+/** Where the text names each part (normalized places, the first naming of each part), in tiers: the record's own words, whole names and
+ * stems, row IDs, state names, then the parts' own words (nameTokens); a later tier never takes a place an earlier one holds. */
+function namedSpans(text: string, parts: readonly FvPart[], loops: readonly FvLoop[], words: readonly RecordWord[]): Span[] {
+  const n = norm(text), taken: Span[] = [], first = new Map<string, Span>(), known = new Set(parts.map(p => p.id));
+  const take = (part: string, s: number, e: number) => {
+    if (taken.some(t => s < t.e && t.s < e)) return;
+    const x = { part, s, e }; taken.push(x); if (!first.has(part) || first.get(part)!.s > s) first.set(part, x);
+  };
+  const ascii = (w: string): [number, number][] => [...text.matchAll(new RegExp(`(?<![A-Za-z0-9_./-])${escRe(w)}(?![A-Za-z0-9_/-])`, 'gi'))].map(m => { const s = norm(text.slice(0, m.index)).length; return [s, s + norm(w).length]; });
+  const plain = (k: string): [number, number][] => { const r: [number, number][] = []; for (let i = n.indexOf(k); i >= 0 && k; i = n.indexOf(k, i + 1)) r.push([i, i + k.length]); return r; };
+  const find = (w: string): [number, number][] => (ASCII.test(w) ? ascii(w) : plain(norm(w)));
+  // 1. The record's own words, longest first.
+  for (const w of [...words].filter(x => known.has(x.part)).sort((a, b) => norm(b.word).length - norm(a.word).length)) for (const [s, e] of find(w.word)) take(w.part, s, e);
+  // 2. Whole names, then a Korean name read as the work it names (its last syllable off, three or more characters left), longest first.
+  const byName = parts.flatMap(p => { const k = norm(p.name), st = nameStem(p.name); return [{ p, k }, ...(st ? [{ p, k: norm(st) }] : [])]; }).filter(x => x.k.length >= 2).sort((a, b) => b.k.length - a.k.length);
+  for (const { p, k } of byName) for (const [s, e] of plain(k)) take(p.id, s, e);
+  // 3. Record IDs as written (B03, B03:L01); never a piece of a longer token.
+  for (const m of text.matchAll(/(?<![A-Za-z0-9])(B\d{1,3})(?::(L\d{1,3}))?(?![\dA-Za-z])/g)) {
+    const s = norm(text.slice(0, m.index)).length, e = s + norm(m[0]).length;
+    const owner = m[2] ? loops.find(x => x.ref === `${m[1]}:${m[2]}`)?.owner : parts.find(x => x.ref === m[1])?.id;
+    if (owner) take(owner, s, e);
   }
-  return lines.length && drawnSome(lines, inp) ? { parts, lines, gaps } : null;
+  // 4. A C-STATE name the text repeats; 5. a part's own word.
+  for (const p of parts) for (const st of p.states ?? []) { const k = norm(st); if (k.length >= 2) for (const [s, e] of plain(k)) take(p.id, s, e); }
+  for (const [id, ws] of nameTokens(parts)) for (const w of ws) for (const [s, e] of (w.ascii ? ascii(w.word) : plain(norm(w.word)))) take(id, s, e);
+  return [...first.values()].sort((a, b) => a.s - b.s);
+}
+/** Two names joined as alternatives in one step: 「A·B」, 「A、B」, 「A/B」, 「A 또는 B」, 「A나 B」 (and 「A, B 중 하나」, below). */
+const ALT_JOIN = /^\s*(?:[·、/|]|또는|혹은|이나|나|or)\s*$/i;
+const ONE_OF = /^\s*(?:[가-힣]{0,2}\s*)?중\s*(?:하나|한\s|택)/;
+/** The parts a sentence or line names, in its order, read into steps: consecutive names joined only as alternatives share a step. */
+export function flowSteps(text: string, parts: readonly FvPart[], loops: readonly FvLoop[] = [], words: readonly RecordWord[] = []): string[][] {
+  const sp = namedSpans(text, parts, loops, words), idx = normIndex(text), steps: string[][] = [];
+  const between = (a: Span, b: Span) => (idx && a.e > 0 && b.s < idx.length && idx[a.e - 1]! < idx[b.s]! ? text.slice(idx[a.e - 1]! + 1, idx[b.s]) : null);
+  const after = (a: Span) => (idx && a.e > 0 ? text.slice(idx[a.e - 1]! + 1, idx[a.e - 1]! + 12) : '');
+  sp.forEach((x, i) => {
+    const prev = sp[i - 1], gap = prev ? between(prev, x) : null;
+    // A comma joins alternatives only in a run the text closes with 「중 하나」.
+    let alt = gap !== null && ALT_JOIN.test(gap);
+    if (!alt && gap !== null && /^\s*[,，]\s*$/.test(gap)) {
+      let j = i; while (j + 1 < sp.length) { const g = between(sp[j]!, sp[j + 1]!); if (g === null || !(ALT_JOIN.test(g) || /^\s*[,，]\s*$/.test(g))) break; j++; }
+      alt = ONE_OF.test(after(sp[j]!));
+    }
+    if (alt && steps.length) steps.at(-1)!.push(x.part); else steps.push([x.part]);
+  });
+  return steps;
+}
+/** The parts a sentence or line names, in its order (flowSteps flattened). */
+export const flowParts = (text: string, parts: readonly FvPart[], loops: readonly FvLoop[] = [], words: readonly RecordWord[] = []): string[] => flowSteps(text, parts, loops, words).flat();
+/** The lines a sentence or line names: from each step to the next, only a line the map has running that way (never the other way, never
+ * between two alternatives of one step, never over a step); the gaps where none does. null when it names under two steps, or no line runs
+ * along it, or none of them is drawn. */
+export function namedFlow(text: string, inp: Pick<FlowInput, 'parts' | 'lines' | 'loops' | 'drawn' | 'words'>): { parts: string[]; steps: string[][]; lines: string[]; gaps: [string, string][] } | null {
+  const steps = flowSteps(text, inp.parts, inp.loops ?? [], inp.words ?? []); if (steps.length < 2) return null;
+  const lines: string[] = [], gaps: [string, string][] = [];
+  for (let i = 1; i < steps.length; i++) {
+    const a = steps[i - 1]!, b = steps[i]!, here = inp.lines.filter(l => a.includes(l.from) && b.includes(l.to) && l.from !== l.to).map(l => l.id);
+    if (here.length) lines.push(...here.filter(id => !lines.includes(id))); else gaps.push([a[0]!, b[0]!]);
+  }
+  return lines.length && drawnSome(lines, inp) ? { parts: steps.flat(), steps, lines, gaps } : null;
 }
 /** A part's first starting entry (by its hand-run order, then its row ID N01 < N02). */
 const entryNo = (ref: string | null | undefined): number => Number(/\d+/.exec(ref ?? '')?.[0] ?? 1e9);
@@ -169,32 +302,70 @@ function startEntry(p: FlowPart): { kind: string | null; name: string; order: nu
 }
 /** Whether any of the lines is drawn in the view now (every line counts when the caller says nothing of what is drawn). */
 const drawnSome = (ids: readonly string[], inp: { drawn?: ReadonlySet<string> | null | undefined }): boolean => !inp.drawn || ids.some(id => inp.drawn!.has(id));
-/** The flow's context and its notes (start, at most one branch, end) from the map's lines. */
-function dressed(rule: FlowRule, key: string, name: string, text: string | null, f: { parts: string[]; lines: string[]; gaps: [string, string][] }, inp: FlowInput,
-  start?: string | null, end?: string | null, branchLinks?: readonly { relation: string | null; from: string | null; condition?: string | null }[]): FlowCandidate {
-  const order = new Map(f.parts.map((p, i) => [p, i])), on = new Set(f.lines), byId = new Map(inp.parts.map(p => [p.id, p])), lineById = new Map(inp.lines.map(l => [l.id, l]));
-  // The flow's own context: a line back between its parts (to an earlier one, or a part to itself: a loop or a return), and at a part
-  // whose flow line out is conditional, that decision's other conditional exits (the branch it leaves). A forward line skipping a part
-  // is no context (it would read as a bridge over a gap); a conditional line of a part the flow passes unconditionally is not either.
+const isDrawn = (id: string, inp: { drawn?: ReadonlySet<string> | null | undefined }): boolean => !inp.drawn || inp.drawn.has(id);
+/** A note's words: the record's text through the labels' row-ID guard; null when nothing plain is left. */
+function noteWords(t: string | null | undefined, inp: Pick<FlowInput, 'plain'>): string | null {
+  const w = (t ?? '').replace(/\s+/g, ' ').trim(); if (!w) return null;
+  const p = inp.plain ? inp.plain(w) : hasRowId(w) ? null : w;
+  const r = (p ?? '').trim(); return r && !hasRowId(r) ? r : null;
+}
+/** A branch's words: only a condition the record wrote in plain words (never 「조건의 글자는 기록에 없음」, never a variant's name alone, never
+ * a row ID: through the guard, dropped when nothing plain is left). */
+export function branchWords(t: string | null | undefined, inp: Pick<FlowInput, 'plain'> = {}): string | null {
+  // A condition the record wrote whole in brackets reads without them (「(validateStatus(status))」).
+  let w = (t ?? '').trim(); if (/^[(（][^()（）]*(?:[(（][^()（）]*[)）][^()（）]*)*[)）]$/.test(w)) w = w.slice(1, -1).trim();
+  if (!w || w === COND_UNSAID || /^[「『]?\s*변형(?:\s|[‘'「X]|$)/.test(w)) return null;
+  return noteWords(w, inp);
+}
+/** The drawn lines' largest connected run, as layers by their place in the record (each layer's lines run to the next one, in their own
+ * direction), and how many drawn lines lie outside it. */
+function chainOf(drawnLines: readonly FlowLine[], order0: ReadonlyMap<string, number>, rep: (id: string) => string | null): { chain: string[][]; more: number } {
+  // On the cards drawn now: a line inside one card is drawn as nothing.
+  const lines = drawnLines.flatMap(l => { const a = rep(l.from), b = rep(l.to); return a && b && a !== b ? [{ ...l, from: a, to: b }] : []; });
+  const order = new Map<string, number>(); for (const [p, i] of order0) { const r = rep(p); if (r && (order.get(r) ?? 1e9) > i) order.set(r, i); }
+  if (!lines.length) return { chain: [], more: 0 };
+  const up = new Map<string, string>(), root = (x: string): string => { let r = x; while (up.get(r) && up.get(r) !== r) r = up.get(r)!; return r; };
+  for (const l of lines) { for (const x of [l.from, l.to]) if (!up.has(x)) up.set(x, x); const a = root(l.from), b = root(l.to); if (a !== b) up.set(b, a); }
+  const groups = new Map<string, FlowLine[]>(); for (const l of lines) { const r = root(l.from); groups.set(r, [...groups.get(r) ?? [], l]); }
+  const at = (ls: FlowLine[]) => Math.min(...ls.flatMap(l => [order.get(l.from) ?? 1e9, order.get(l.to) ?? 1e9]));
+  const best = [...groups.values()].sort((a, b) => b.length - a.length || at(a) - at(b))[0]!;
+  const ps = [...new Set(best.flatMap(l => [l.from, l.to]))];
+  // Layers along the lines' own direction: a part's depth is the longest run of drawn lines reaching it.
+  const depth = new Map(ps.map(p => [p, 0]));
+  for (let g = 0; g < ps.length; g++) for (const l of best) if (l.from !== l.to && depth.get(l.to)! < depth.get(l.from)! + 1 && depth.get(l.from)! + 1 < ps.length) depth.set(l.to, depth.get(l.from)! + 1);
+  const chain: string[][] = [];
+  for (const p of ps.sort((a, b) => depth.get(a)! - depth.get(b)! || (order.get(a) ?? 1e9) - (order.get(b) ?? 1e9))) (chain[depth.get(p)!] ??= []).push(p);
+  return { chain: chain.filter(Boolean), more: lines.length - best.length };
+}
+/** The candidate with its context, notes and words. */
+function dressed(rule: FlowRule, key: string, source: string, name: string, text: string | null, f: { parts: string[]; steps: string[][]; lines: string[]; gaps: [string, string][] }, inp: FlowInput,
+  notes: { start?: string | null; startPart?: string; end?: string | null } = {}, branchLinks?: readonly { relation: string | null; from: string | null; condition?: string | null }[]): FlowCandidate {
+  const order = new Map<string, number>(); f.steps.forEach((st, i) => st.forEach(p => { if (!order.has(p)) order.set(p, i); }));
+  const on = new Set(f.lines), lineById = new Map(inp.lines.map(l => [l.id, l]));
+  // The context: a line back between its parts (to an earlier step, or a part to itself: a loop or a return; never between two
+  // alternatives of one step), and at a part whose picked line is conditional, that decision's other conditional exits leaving the view
+  // (a conditional line to a later step skips a gap or bridges the view: no context).
   const decides = new Set(f.lines.map(id => lineById.get(id)).filter(l => !!l?.when && order.has(l.from)).map(l => l!.from));
   const context = rule === 'entry' ? [] : inp.lines.filter(l => !on.has(l.id) && order.has(l.from) && (
-    (order.has(l.to) && order.get(l.to)! <= order.get(l.from)!) || (!!l.when && decides.has(l.from)))).map(l => l.id);
-  // The notes stand where the drawn flow starts and ends: the first and the last named part a drawn line of it touches (a named part
-  // past a gap carries none: nothing reaches it).
-  const touched = new Set(f.lines.flatMap(id => { const l = lineById.get(id); return l ? [l.from, l.to] : []; }));
+    l.from === l.to || (order.has(l.to) && order.get(l.to)! < order.get(l.from)!) || (!!l.when && decides.has(l.from) && !order.has(l.to)))).map(l => l.id);
+  // Where it runs: from the lines drawn now only.
+  const drawnLines = f.lines.filter(id => isDrawn(id, inp)), dl = drawnLines.map(id => lineById.get(id)).filter((l): l is FlowLine => !!l);
+  const touched = new Set(dl.flatMap(l => [l.from, l.to]));
   const ends = f.parts.filter(p => touched.has(p)), first = ends[0] ?? f.parts[0]!, last = ends.at(-1) ?? f.parts.at(-1)!;
-  const part0 = byId.get(first), entry = part0 ? startEntry(part0) : null;
-  // A note says only what the lines show: 「시작」 where a drawn line of the flow leaves its first part (or the part has a starting entry),
-  // 「끝」 where one enters its last part, with what that line hands over; a line running against the record's order carries neither.
-  const lastIn = [...f.lines].reverse().map(id => lineById.get(id)).find(l => !!l && l.to === last), leaves = f.lines.some(id => lineById.get(id)?.from === first);
   let branch: FlowCandidate['branch'] = null;
-  if (branchLinks) { const b = branchLinks.find(l => l.relation && l.condition && l.from); if (b) branch = { line: b.relation!, part: b.from!, text: b.condition! }; }
-  else for (const id of [...f.lines, ...context]) { const l = lineById.get(id); if (l?.when && order.has(l.from)) { branch = { line: l.id, part: l.from, text: l.when }; break; } }
-  return { rule, key, name, text, parts: f.parts, lines: f.lines, gaps: f.gaps, context, branch, ends: [first, last],
-    start: start !== undefined ? { part: first, text: start } : entry || leaves ? { part: first, text: entry ? entry.name : null } : null,
-    end: rule === 'entry' ? null : end !== undefined ? { part: last, text: end } : lastIn ? { part: last, text: lastIn.payload ?? null } : null };
+  if (branchLinks) { for (const l of branchLinks) { const w = l.relation && l.from ? branchWords(l.condition, inp) : null; if (w) { branch = { line: l.relation!, part: l.from!, text: w }; break; } } }
+  else for (const id of [...drawnLines, ...context.filter(id => isDrawn(id, inp))]) { const l = lineById.get(id), w = l && order.has(l.from) ? branchWords(l.when, inp) : null; if (w) { branch = { line: l!.id, part: l!.from, text: w }; break; } }
+  const sp = notes.startPart ?? first, startText = 'start' in notes ? noteWords(notes.start, inp) : null, endText = 'end' in notes ? noteWords(notes.end, inp) : null;
+  const { chain, more } = chainOf(dl, order, inp.rep ?? (id => id));
+  return { rule, key, source, name, text, parts: f.parts, steps: f.steps, lines: f.lines, gaps: f.gaps, context, branch, ends: [first, last], chain, more, drawnLines: dl.length,
+    soft: rule === 'entry' && f.lines.length > ENTRY_SOFT_OVER,
+    // Only what the record says: a C-ENTRY row's start (its name, or the bare mark), a scenario's recorded start and end.
+    start: rule === 'entry' ? { part: sp, text: startText } : rule === 'scenario' && startText ? { part: first, text: startText } : null,
+    end: rule === 'scenario' && endText ? { part: last, text: endText } : null };
 }
-/** Every candidate of one rule, in the record's order. */
+/** Evidence first: the candidate with the most drawn lines, then the record's order. */
+const byEvidence = (cs: FlowCandidate[]): FlowCandidate[] => cs.map((c, i) => ({ c, i })).sort((a, b) => b.c.drawnLines - a.c.drawnLines || a.i - b.i).map(x => x.c);
+/** Every candidate of one rule (a scenario's in paste order; the others by evidence, then the record's order). */
 export function flowCandidates(rule: FlowRule, inp: FlowInput): FlowCandidate[] {
   if (rule === 'scenario') {
     const known = new Set(inp.lines.map(l => l.id)), parts = new Set(inp.parts.map(p => p.id));
@@ -202,27 +373,27 @@ export function flowCandidates(rule: FlowRule, inp: FlowInput): FlowCandidate[] 
       const lines = [...new Set(s.links.map(l => l.relation).filter((r): r is string => !!r && known.has(r)))]; if (!lines.length || !drawnSome(lines, inp)) return [];
       const ps = [...new Set(s.parts.filter(p => parts.has(p)))];
       const gaps = s.links.filter(l => (!l.relation || !known.has(l.relation)) && l.from && l.to).map(l => [l.from!, l.to!] as [string, string]);
-      return [dressed('scenario', s.id, s.name, null, { parts: ps, lines, gaps }, inp, s.start ?? null, s.end ?? null, s.links.filter(l => l.kind === 'branch'))];
+      return [dressed('scenario', s.id, FLOW_SOURCE.scenario, s.name, null, { parts: ps, steps: ps.map(p => [p]), lines, gaps }, inp, { start: s.start ?? null, end: s.end ?? null }, s.links.filter(l => l.kind === 'branch'))];
     });
   }
   if (rule === 'summary') {
     const t = inp.summaryFlow?.trim(), f = t ? namedFlow(t, inp) : null;
-    return f && t ? [dressed('summary', `summary:${t}`, '기록 요약', t, f, inp)] : [];
+    return f && t ? [dressed('summary', `summary:${t}`, statesOrder(t) ? FLOW_SOURCE.ordered : FLOW_SOURCE.summary, '기록 요약', t, f, inp)] : [];
   }
   if (rule === 'head') {
     const ls = inp.headLines ?? [];
-    return ls.flatMap((t, i) => { const f = namedFlow(t, inp); return f ? [dressed('head', `head:${t}`, ls.length > 1 ? `첫 구조 줄 ${i + 1}` : '첫 구조 줄', t, f, inp)] : []; });
+    return byEvidence(ls.flatMap(t => { const f = namedFlow(t, inp); return f ? [dressed('head', `head:${t}`, FLOW_SOURCE.head, '첫 구조 줄', t, f, inp)] : []; }));
   }
   // A recorded start: a part with a starting C-ENTRY (by its hand-run order, then the map's order) and the relations out of it.
   const starts = inp.parts.map((p, i) => ({ p, i, e: startEntry(p) })).filter(x => !!x.e)
     .sort((a, b) => (a.e!.order ?? 1e9) - (b.e!.order ?? 1e9) || entryNo(a.e!.ref) - entryNo(b.e!.ref) || a.i - b.i);
-  return starts.flatMap(({ p, e }) => {
+  return byEvidence(starts.flatMap(({ p, e }) => {
     const out = inp.lines.filter(l => l.from === p.id && l.to !== p.id); if (!out.length || !drawnSome(out.map(l => l.id), inp)) return [];
-    const parts = [p.id, ...new Set(out.map(l => l.to))];
-    return [dressed('entry', `entry:${p.id}`, FLOW_RULE_WORD.entry, null, { parts, lines: out.map(l => l.id), gaps: [] }, inp, e!.name, null)];
-  });
+    const to = [...new Set(out.map(l => l.to))];
+    return [dressed('entry', `entry:${p.id}`, FLOW_SOURCE.entry, FLOW_SOURCE.entry, null, { parts: [p.id, ...to], steps: [[p.id], to], lines: out.map(l => l.id), gaps: [] }, inp, { start: e!.name, startPart: p.id })];
+  }));
 }
-/** The first screen's flow (see the head of this file). */
+/** The first screen's lines (see the head of this file). */
 export function firstFlow(inp: FlowInput): FirstFlow {
   const none: FirstFlow = { rule: null, kept: false, candidates: [], index: -1, flow: null };
   const k = inp.kept;
@@ -234,9 +405,9 @@ export function firstFlow(inp: FlowInput): FirstFlow {
 }
 
 /* ---------- the hub fold ---------- */
-/** The cards on the flow whose drawn lines off the flow number six or more: each folds those lines behind one chip (「다른 연결 N개」),
- * N counted from the lines drawn now. lines: each drawn line's ends and whether it is the flow's or its context; cards: the drawn cards
- * of the flow's parts. */
+/** The cards of the view whose drawn lines off the view number six or more: each folds those lines behind one chip (「다른 연결 N개」).
+ * lines: each drawn line's ends and whether it belongs to the view (its picked lines, its context, a line between two of its parts: never
+ * folded); cards: the view's cards that may fold (never a recorded start's own card). */
 export const HUB_FOLD_MIN = 6;
 export function hubFolds(cards: readonly string[], lines: readonly { key: string; from: string; to: string; flow: boolean }[]): Map<string, string[]> {
   const out = new Map<string, string[]>();
@@ -246,13 +417,31 @@ export function hubFolds(cards: readonly string[], lines: readonly { key: string
   }
   return out;
 }
+/** What the folds hide with some hubs open: a line stays folded only while every hub holding it is folded; each folded hub's chip counts
+ * exactly the lines opening it would bring back (an open hub's: none, its chip says 「접기」). */
+export function foldedLines(folds: ReadonlyMap<string, readonly string[]>, open: ReadonlySet<string>): { hide: Set<string>; byHub: Map<string, string[]> } {
+  const shown = new Set([...folds].filter(([c]) => open.has(c)).flatMap(([, ks]) => ks));
+  const hide = new Set([...folds].filter(([c]) => !open.has(c)).flatMap(([, ks]) => ks).filter(k => !shown.has(k)));
+  return { hide, byHub: new Map([...folds].map(([c, ks]) => [c, open.has(c) ? [] : ks.filter(k => hide.has(k))])) };
+}
 /** The chip's words: folded, how many; open, 「접기」. */
 export const foldWord = (n: number, open: boolean): string => (open ? '접기' : `다른 연결 ${n}개`);
-/** The switcher line: 「먼저 보는 흐름: <where it starts> → <where it ends> · <its source> · 1/N」 (the count only when there are more;
- * an entry's flow says only where it starts, a scenario its own name). */
+/** The source the switcher says: a kept choice 「선택한 보기 · …」, a scenario with its name. */
+export function sourceText(f: FirstFlow): string | null {
+  const c = f.flow; if (!c) return f.rule === 'all' ? FLOW_SOURCE.all : null;
+  const own = c.rule === 'scenario' ? `${c.source} · ${cut(c.name, 24)}` : c.source;
+  return f.kept ? `${FLOW_SOURCE.kept} · ${own}` : own;
+}
+/** The switcher line: 「먼저 볼 연결: <the drawn lines in their own direction> · <its source> · 보기 i/N」 (the count only when there are
+ * more: it numbers the candidates, never steps). A recorded start says where its lines leave. */
 export function switcherText(f: FirstFlow, name: (id: string) => string = id => id): string | null {
   const c = f.flow; if (!c) return null;
-  const at = (id: string | undefined) => cut(id ? name(id) : '', 18);
-  const what = c.rule === 'scenario' ? cut(c.name, 28) : c.rule === 'entry' ? `${at(c.ends[0])}에서` : `${at(c.ends[0])} → ${at(c.ends[1])}`;
-  return `먼저 보는 흐름: ${what}${c.rule === 'scenario' ? '' : ` · ${c.name}`}${f.candidates.length > 1 ? ` · ${f.index + 1}/${f.candidates.length}` : ''}`;
+  const at = (id: string) => cut(name(id), 16);
+  let what: string;
+  if (c.rule === 'entry') what = `${at(c.parts[0]!)}에서 나가는 연결 ${c.drawnLines}개`;
+  else {
+    const ls = c.chain.map(l => l.map(at).join(', ')), shown = ls.length > 4 ? [ls[0]!, ls[1]!, '…', ls.at(-1)!] : ls;
+    what = `${shown.join(' → ')}${c.more ? ` 외 연결 ${c.more}개` : ''}`;
+  }
+  return `${FLOW_CONTROL}: ${what} · ${sourceText(f)}${f.candidates.length > 1 ? ` · 보기 ${f.index + 1}/${f.candidates.length}` : ''}`;
 }
