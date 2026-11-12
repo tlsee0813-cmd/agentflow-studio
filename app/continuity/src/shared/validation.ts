@@ -431,17 +431,19 @@ function readingRows(v:unknown,areaIds:Set<string>){
 }
 /** Recipe .50 step 5 (map-identity.ts): a reading's C-IDENT row decisions: each (record, id) once, a known state with a reason it allows, the part
  * it names (a known area or null), an operation of a known kind on known areas (rename: from and to, 60; retire: a successor or null; fold:
- * the canonical part), 바뀐 때 (60), up to eight F/E IDs, and where the row stands in its pasted text. */
+ * the canonical part; recipe .53 reimplement: from and to, on a 구현 바뀜 row), 바뀐 때 (60), up to eight F/E IDs, where the row stands in its pasted
+ * text and, recipe .53, a reflected 같음 row's other name (60), an alias candidate. */
 function readingIdentity(v:unknown,areaIds:Set<string>,records:Map<string,string>){
   list(v,256);const seen=new Set<string>(),area=(x:unknown)=>{ensure(typeof x==='string'&&areaIds.has(x));};
-  for(const x of v as unknown[]){obj(x,['record','id','map','answer','part','state','reason','areaId','op','when','evidence','at']);text(x.record,200);text(x.id,40);
+  for(const x of v as unknown[]){ensure(x!==null&&typeof x==='object');const named=Object.hasOwn(x as object,'name');obj(x,['record','id','map','answer','part','state','reason','areaId','op','when','evidence','at',...(named?['name']:[])]);text(x.record,200);text(x.id,40);
+    if(named){text(x.name,60);ensure(x.state==='reflected'&&x.answer==='same');}
     const key=JSON.stringify([x.record,x.id]);ensure(!seen.has(key));seen.add(key);
     ensure(x.map===null||typeof x.map==='string'&&/^P\d{2,3}$/.test(x.map));ensure(x.answer===null||IDENTITY_ANSWERS.includes(x.answer as never));ensure(x.part===null||typeof x.part==='string'&&/^B\d{1,3}$/.test(x.part));
     ensure(ROW_STATES.includes(x.state as never));ensure(x.state==='reflected'?x.reason===null:ROW_REASONS[x.state as RowState].includes(x.reason as string));
     if(x.areaId!==null)area(x.areaId);ensure(x.state!=='reflected'||x.areaId!==null);
     if(x.op!==null){const o=x.op as Record<string,unknown>;obj(o,['kind','areaId','successor','into','from','to','renamed']);ensure(x.state==='reflected');ensure(IDENTITY_OPS.includes(o.kind as never));area(o.areaId);ensure(typeof o.renamed==='boolean');
       ensure(o.kind==='retire'?o.successor===null||(area(o.successor),o.successor!==o.areaId):o.successor===null);ensure(o.kind==='fold'?(area(o.into),o.into!==o.areaId):o.into===null);
-      if(o.kind==='rename'){text(o.from,120);text(o.to,60);}else ensure(o.from===null&&o.to===null&&o.renamed===false);}
+      if(o.kind==='rename'){text(o.from,120);text(o.to,60);}else if(o.kind==='reimplement'){text(o.from,120);text(o.to,60);ensure(o.renamed===false&&x.answer==='reimplemented');}else ensure(o.from===null&&o.to===null&&o.renamed===false);}
     if(x.when!==null)text(x.when,60);list(x.evidence,8);for(const e of x.evidence as unknown[])ensure(typeof e==='string'&&/^[FE]\d{1,3}$/.test(e));
     obj(x.at,['record','from','to']);const at=x.at as Record<string,unknown>;ensure(records.has(at.record as string));integer(at.from);integer(at.to);ensure((at.from as number)<(at.to as number)&&(at.to as number)<=records.get(at.record as string)!.length);}
 }

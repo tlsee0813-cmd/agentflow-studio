@@ -6,6 +6,7 @@
  * - The display settings: a global default and an explicit per-project override, read and written with fallback; lenses are
  *   temporary and never write them. */
 import type { StorageLike } from '../shared/storage.js';
+import { planTail, clipKeepPlan, textWidth } from '../shared/studio.js';
 
 /* ---------- the status dot ---------- */
 export type DotKind = 'running' | 'stopped' | 'waiting' | 'conflict';
@@ -67,10 +68,15 @@ export function opsSaid(word: string | null, when: string | null, grade: Grade |
 }
 
 /* ---------- the role line ---------- */
-/** The first sentence of a description (the card's 「하는 일」 line), or null for none. */
+/** The first sentence of a description (the card's 「하는 일」 line), or null for none. Recipe .53 (ruling F6 Q1): a description that ends on a
+ * plan word (studio planTail) never loses it to the line's cut: the line is cut to ROLE_LINE_WIDTH in the middle, its ending kept (a plan
+ * word in a later sentence brings the description's ending onto the line the same way). */
+export const ROLE_LINE_WIDTH = 15;
 export function roleLine(text: string | null | undefined): string | null {
   const t = (text ?? '').replace(/\s+/g, ' ').trim(); if (!t) return null;
-  const m = /^(.+?[.!?。])(?=\s|$)/.exec(t); return m ? m[1]! : t;
+  const m = /^(.+?[.!?。])(?=\s|$)/.exec(t), first = m ? m[1]! : t;
+  if (!planTail(t)) return first;
+  return clipKeepPlan(/계획|예정/.test(first) ? first : t, ROLE_LINE_WIDTH, textWidth);
 }
 
 /* ---------- counted 「외 N」 ---------- */

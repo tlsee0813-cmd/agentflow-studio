@@ -10,6 +10,10 @@
  *   in effect and whole only: a planned or partial change retires nothing; the predecessor keeps its id, its relations stay where they are)
  *   and fold (two parts the map made for one B row: the later is folded onto the earlier, whose id its references resolve to). 나뉨 and 합침
  *   are kept as written and unsupported in .50.
+ * Recipe .53 (기록 요청 v5.3, ruling F6 Q3): 구현 바뀜, the same part whose implementation changed while its responsibility goes on (an OCR
+ * stage on another engine, CI on another service): a bind with the change noted on the part (reimplement: the implementation the map knew →
+ * the record's B row name, with 바뀐 때), never a retirement and never a rename. A 같음 row whose B row the record names otherwise keeps that
+ * name as an alias candidate on the row (never a rename). A v5.2 record (no 구현 바뀜) reads as before.
  * Nothing here calls a model; nothing here writes a project (applyReading applies what decideIdentity says). */
 import { isMapReading, type Project, type ReadingIdentityRow, type ReadingIdentityOp, type IdentityAnswer } from './types.js';
 import { fixedWord, type FoldRow } from './record-table.js';
@@ -18,7 +22,7 @@ import { ledgerKey, IDENT_TABLE_ID } from './row-ledger.js';
 import { partUnderstanding, unstampRole, likeNames, normName } from './map-reading.js';
 import { sha256 } from './validation.js';
 import { secretLike } from './secret.js';
-import type { StudioView, PartView, RelationView } from './studio.js';
+import { clipKeepPlan, type StudioView, type PartView, type RelationView } from './studio.js';
 
 /** Review of .50 (map-roster.2): a partial roster's copied line says how far it lists; the decisions need in-effect evidence, real evidence,
  * the hash of a map no reading changed since, and never fold two rows of one record. */
@@ -29,6 +33,8 @@ export const ROSTER_CHARS = 8000, ROSTER_NAME_CHARS = 60, ROSTER_NOTE_CHARS = 60
 export const IDENTITY_ROWS_MAX = 256;
 const pad = (n: number) => String(n).padStart(2, '0');
 const one = (s: string, n: number) => { const t = s.replace(/\s+/g, ' ').replace(/\|/g, '/').trim(); return t.length > n ? `${t.slice(0, n - 1)}…` : t; };
+/** Recipe .53 (ruling F6 Q1): a description cut for the roster keeps a plan ending (studio clipKeepPlan). */
+const oneKeepPlan = (s: string, n: number) => clipKeepPlan(s.replace(/\|/g, '/'), n);
 
 /* ---------- stable P numbers ---------- */
 /** A part's P number: its place among the project's areas (P01 the first), archived ones counted, so it never changes. */
@@ -49,16 +55,23 @@ export interface IdentityState {
   retired: Map<string, { successor: string | null; when: string | null; reading: string; at: string; record: string; row: string }>;
   /** A folded duplicate → the canonical part it is. */
   folded: Map<string, string>;
+  /** Recipe .53: each part's implementation changes (구현 바뀜), oldest first: the implementation the map knew, the record's name for the new
+   * one, 바뀐 때, the reading, its time, the record and the row. */
+  reimplemented: Map<string, { from: string; to: string; when: string | null; reading: string; at: string; record: string; row: string }[]>;
+  /** Recipe .53: other names records gave a part on 같음 rows (alias candidates, never renames), each once, oldest first. */
+  called: Map<string, { name: string; at: string; record: string }[]>;
 }
 const stateCache = new WeakMap<object, IdentityState>();
 export function identityState(p: Pick<Project, 'readings'>): IdentityState {
   const hit = stateCache.get(p.readings); if (hit) return hit;
-  const s: IdentityState = { created: new Map(), renames: new Map(), retired: new Map(), folded: new Map() };
+  const s: IdentityState = { created: new Map(), renames: new Map(), retired: new Map(), folded: new Map(), reimplemented: new Map(), called: new Map() };
   for (const r of p.readings) {
     if (!isMapReading(r)) continue;
     for (const x of r.parts) if (x.created && !s.created.has(x.areaId)) s.created.set(x.areaId, x.created.name);
     for (const x of r.identity ?? []) {
+      if (x.name && x.areaId && !(s.called.get(x.areaId) ?? []).some(y => normName(y.name) === normName(x.name!))) s.called.set(x.areaId, [...s.called.get(x.areaId) ?? [], { name: x.name, at: r.at, record: x.record }]);
       const op = x.op; if (!op) continue;
+      if (op.kind === 'reimplement' && op.from && op.to) s.reimplemented.set(op.areaId, [...s.reimplemented.get(op.areaId) ?? [], { from: op.from, to: op.to, when: x.when, reading: r.id, at: r.at, record: x.record, row: x.id }]);
       if (op.kind === 'rename' && op.from && op.to) s.renames.set(op.areaId, [...s.renames.get(op.areaId) ?? [], { from: op.from, to: op.to, reading: r.id, at: r.at, record: x.record }]);
       if (op.kind === 'retire') s.retired.set(op.areaId, { successor: op.successor, when: x.when, reading: r.id, at: r.at, record: x.record, row: x.id });
       if (op.kind === 'fold' && op.into) s.folded.set(op.areaId, op.into);
@@ -83,9 +96,19 @@ export function partAliases(p: Pick<Project, 'readings' | 'space'>, areaId: stri
   for (const x of identityState(p).renames.get(areaId) ?? []) if (normName(x.from) !== now && !out.some(y => normName(y.name) === normName(x.from))) out.push({ name: x.from, at: x.at, record: x.record });
   return out;
 }
+/** Recipe .53 (ruling F6 Q3): the other names records called the part on their 같음 rows, neither its official name nor an earlier one
+ * (oldest first, each once): alias candidates, kept with why, never a rename. */
+export function nameCandidates(p: Pick<Project, 'readings' | 'space'>, areaId: string): { name: string; at: string; record: string }[] {
+  const now = normName(officialName(p, areaId)), old = new Set(partAliases(p, areaId).map(x => normName(x.name)));
+  return (identityState(p).called.get(areaId) ?? []).filter(x => normName(x.name) !== now && !old.has(normName(x.name)));
+}
+/** Recipe .53: the part's implementation changes (구현 바뀜), oldest first. */
+export const implementationChanges = (p: Pick<Project, 'readings'>, areaId: string) => identityState(p).reimplemented.get(areaId) ?? [];
 
 /* ---------- the roster ---------- */
-export interface RosterEntry { pid: string; areaId: string; name: string; parent: string | null; life: string; note: string; old: string[]; folded: string[]; detail: string | null }
+export interface RosterEntry { pid: string; areaId: string; name: string; parent: string | null; life: string; note: string; old: string[]; folded: string[]; detail: string | null;
+  /** Recipe .53: the implementation the newest 구현 바뀜 named (null: none), and other names records called it (alias candidates). */
+  impl?: string | null; called?: string[] }
 export interface MapRoster { version: typeof ROSTER_VERSION; projectId: string; revision: number; hash: string; count: number; entries: RosterEntry[];
   /** How many entries the text lists (the first ones) and whether that is all of them. */
   shown: number; scope: 'full' | 'partial'; head: string; text: string }
@@ -101,19 +124,22 @@ export function mapRoster(p: Project, opts: { detail?: readonly string[]; max?: 
     const up = p.space.containment.parents[a.id], parent = up && liveIds.has(canonicalPart(s, up)) ? pid(canonicalPart(s, up)) : null;
     const u = partUnderstanding(p, a.id), retired = s.retired.get(a.id);
     const life = retired ? (retired.successor ? `대신함→${pid(retired.successor)}` : '없어짐') : LIFE[u?.stateRead?.state ?? ''] ?? '있음';
-    const role = u?.role ? unstampRole(u.role).role : '', note = role ? one(role, ROSTER_NOTE_CHARS) : u?.files[0] ? one(u.files[0], ROSTER_NOTE_CHARS) : '';
+    const role = u?.role ? unstampRole(u.role).role : '', note = role ? oneKeepPlan(role, ROSTER_NOTE_CHARS) : u?.files[0] ? one(u.files[0], ROSTER_NOTE_CHARS) : '';
+    const impl = implementationChanges(p, a.id).at(-1)?.to ?? null, called = nameCandidates(p, a.id).slice(-2).map(x => one(x.name, 40)).filter(x => !secretLike(x));
     const name = officialName(p, a.id), files = (u?.files ?? []).slice(0, 3);
     const want = opts.detail?.includes(a.id) ? [role ? `역할: ${one(role, 140)}` : '', files.length ? `파일: ${files.map(f => one(f, 60)).join(', ')}` : ''].filter(Boolean).join('; ') : '';
     return { pid: pid(a.id), areaId: a.id, name: secretLike(name) ? '[가림]' : one(name, ROSTER_NAME_CHARS), parent, life, note: secretLike(note) ? '' : note,
       old: partAliases(p, a.id).slice(0, 3).map(x => one(x.name, 40)), folded: [...s.folded].filter(([, to]) => canonicalPart(s, to) === a.id).map(([from]) => pid(from)).slice(0, 4),
-      detail: want && !secretLike(want) ? want : null };
+      detail: want && !secretLike(want) ? want : null, impl: impl && !secretLike(impl) ? one(impl, 40) : null, called };
   });
   const revision = p.readings.filter(isMapReading).length, count = p.space.areas.length;
   const hash = rosterHash(entries), base = `프로젝트 ${p.id} · 판 ${revision} · 해시 ${hash} · P01–P${pad(count)}`;
   // Review of .50 (K4): a partial roster says in the line the reply copies how far it lists (「목록 P01–P35」), so a row on a part it does
   // not list is held.
   const headOf = (shown: number) => shown >= entries.length ? base : `${base} · 목록 ${entries[0]!.pid}–${entries[shown - 1]!.pid}`;
-  const line = (e: RosterEntry, note: number, detail: boolean) => [`${e.pid} ${e.name} · ${e.parent ? `${e.parent} 안` : '—'} · ${e.life}${note && e.note ? ` · ${one(e.note, note)}` : ''}${e.old.length ? ` · 옛 이름 ${e.old.join('·')}` : ''}${e.folded.length ? ` · 옛 ID ${e.folded.join('·')}` : ''}`,
+  // Recipe .53: the implementation a 구현 바뀜 named (「지금 구현 새 저장소」) and the names records called the part on 같음 rows (「기록이 부른
+  // 이름 수집 서비스」) follow the old names, so the next session sees what the map knows the part by.
+  const line = (e: RosterEntry, note: number, detail: boolean) => [`${e.pid} ${e.name} · ${e.parent ? `${e.parent} 안` : '—'} · ${e.life}${note && e.note ? ` · ${oneKeepPlan(e.note, note)}` : ''}${e.old.length ? ` · 옛 이름 ${e.old.join('·')}` : ''}${e.impl ? ` · 지금 구현 ${e.impl}` : ''}${e.called?.length ? ` · 기록이 부른 이름 ${e.called.join('·')}` : ''}${e.folded.length ? ` · 옛 ID ${e.folded.join('·')}` : ''}`,
     ...(detail && e.detail ? [`  └ ${e.detail}`] : [])].join('\n');
   const build = (note: number, detail: boolean, shown: number) => {
     const scope = shown >= entries.length ? `범위: 전체 ${entries.length}개` : `범위: 일부 ${shown}/${entries.length}개(${entries[0]!.pid}–${entries[shown - 1]!.pid}만; 나머지 부분은 C-IDENT에 쓰지 않는다)`;
@@ -142,7 +168,11 @@ export function rosterEcho(rows: readonly FoldRow[]): RosterEcho | null {
   }
   return null;
 }
-const ANSWER_WORDS: Readonly<Record<string, IdentityAnswer>> = Object.freeze({ 같음: 'same', '이름 바뀜': 'renamed', 이름바뀜: 'renamed', 대신함: 'replaced', 없어짐: 'gone', 모름: 'unknown', 나뉨: 'split', 합침: 'merged' });
+const ANSWER_WORDS: Readonly<Record<string, IdentityAnswer>> = Object.freeze({ 같음: 'same', '이름 바뀜': 'renamed', 이름바뀜: 'renamed', 대신함: 'replaced', 없어짐: 'gone', 모름: 'unknown', 나뉨: 'split', 합침: 'merged',
+  '구현 바뀜': 'reimplemented', 구현바뀜: 'reimplemented' });
+/** 같음, 이름 바뀜 and (recipe .53) 구현 바뀜: the B row is that part. */
+const SAME_ANSWERS: ReadonlySet<IdentityAnswer | null> = new Set(['same', 'renamed', 'reimplemented']);
+const sameAnswer = (a: IdentityAnswer | null) => SAME_ANSWERS.has(a);
 /** A change the record says is still planned, or partial: neither retires anything (ruling F5 Q3). */
 const PLANNED = /계획|예정|하기로|할\s*것|나중에|아직/, PARTIAL = /일부|부분적|병행|함께\s*남/;
 /** Review of .50 (K3): a 바뀐 때 that says no time (모름, 불명, 미상, ?) shows no change in effect. */
@@ -176,7 +206,9 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
     for (const r of maps.slice(echo.revision)) {
       // Recipe .52 M1: a bind changes nothing the roster said (name, parent, life stay), so another record's bind does not hold this one's
       // rows (.51 stage 4 held 18 binds `roster` only because two records bound the same parts).
-      for (const x of r.identity ?? []) if (x.op && x.op.kind !== 'bind' && x.record !== f.key) for (const id of [x.op.areaId, x.op.successor, x.op.into]) if (id) affected.add(id);
+      // Recipe .53: an implementation change (reimplement) is a bind with a note: no roster field changes either. A rename, a retirement and a
+      // fold do (an explicit 이름 바뀜 still holds the rows of a record whose roster showed the old name).
+      for (const x of r.identity ?? []) if (x.op && x.op.kind !== 'bind' && x.op.kind !== 'reimplement' && x.record !== f.key) for (const id of [x.op.areaId, x.op.successor, x.op.into]) if (id) affected.add(id);
       for (const x of r.parts) if (x.created) affected.add(x.areaId);
     }
     if (echo.count !== null) p.space.areas.forEach((a, i) => { if (i >= echo.count!) affected.add(a.id); });
@@ -204,10 +236,10 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
     if (!evidence.length) { set(e, 'held', 'identity'); continue; }
     valid.push(e);
   }
-  // 같음 and 이름 바뀜: the B row is that part. One part for two B rows (a split?) or a part retired already is held; two parts the map made
+  // 같음, 이름 바뀜 and (recipe .53) 구현 바뀜: the B row is that part. One part for two B rows (a split?) or a part retired already is held; two parts the map made
   // for one B row are one part (the later folded onto the earlier); a B row the ledger binds to another part is held, unless both are parts
   // the map made with names alike (a duplicate the map made: folded the same way).
-  const same = valid.filter(e => e.answer === 'same' || e.answer === 'renamed'), binds = new Map<string, string>();
+  const same = valid.filter(e => sameAnswer(e.answer)), binds = new Map<string, string>();
   const made = (id: string) => s.created.has(id) && !area(id)?.archived;
   // Review of .50 (K1, deadlock 9): two parts are one duplicate the map made only when both are the map's and no record has them on two
   // different C-PART rows of its own (two rows of one record are two parts: folding them is a real merge, never applied in .50). A B row the
@@ -218,13 +250,26 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
   const twoRows = (a: string, b: string) => { const x = rowsOf.get(a), y = rowsOf.get(b); if (!x || !y) return false;
     for (const [rec, rows] of x) { const other = y.get(rec); if (other && [...other].some(r => !rows.has(r)) && [...rows].some(r => !other.has(r))) return true; } return false; };
   const duplicates = (ids: readonly string[]) => ids.every(a => made(a) && !s.retired.has(a)) && ids.every(a => ids.every(b => a === b || !twoRows(a, b)));
+  const bName = (e: ReadingIdentityRow) => one((partRows.get(e.part!)?.row.byColumn['이름'] ?? '').replace(/[*`]/g, ''), 60);
   const own = (e: ReadingIdentityRow, to: string): ReadingIdentityOp | null => {
-    if (e.answer !== 'renamed') return { kind: 'bind', areaId: to, successor: null, into: null, from: null, to: null, renamed: false };
-    const name = one((partRows.get(e.part!)!.row.byColumn['이름'] ?? '').replace(/[*`]/g, ''), 60), was = officialName(p, to);
+    const bind: ReadingIdentityOp = { kind: 'bind', areaId: to, successor: null, into: null, from: null, to: null, renamed: false };
+    // Recipe .53 (ruling F6 Q3): 구현 바뀜 binds and notes the change once per record row (a re-decided row binds only); a change still
+    // planned (바뀐 때 「계획」, or a B row not built) notes nothing. The official name stays: only 이름 바뀜 renames.
+    if (e.answer === 'reimplemented') {
+      const impl = partRows.get(e.part!)?.row.byColumn['구현 상태'] ?? '', list = s.reimplemented.get(to) ?? [];
+      if (PLANNED.test(e.when ?? '') || UNBUILT_IMPL.test(impl) || list.some(x => x.record === e.record && x.row === e.id)) return bind;
+      const was = one(list.at(-1)?.to ?? officialName(p, to), 120), name = bName(e);
+      return was ? { kind: 'reimplement', areaId: to, successor: null, into: null, from: was, to: name && !secretLike(name) ? name : one(was, 60), renamed: false } : bind;
+    }
+    if (e.answer !== 'renamed') return bind;
+    const name = bName(e), was = officialName(p, to);
     return name && normName(name) !== normName(was) && !secretLike(name) ? { kind: 'rename', areaId: to, successor: null, into: null, from: was, to: name, renamed: false } : { kind: 'bind', areaId: to, successor: null, into: null, from: null, to: null, renamed: false };
   };
   const fold = (dup: string, into: string): ReadingIdentityOp | null => s.folded.get(dup) === into ? null : { kind: 'fold', areaId: dup, successor: null, into, from: null, to: null, renamed: false };
   for (const e of same) if (same.some(o => o.areaId === e.areaId && o.part !== e.part)) set(e, 'held', 'identity');
+  // Recipe .53 (ruling F6 Q3: unclear, hold the life change): a 구현 바뀜 row whose B row the table also gives another part is held; it never
+  // folds two parts (only 같음 and 이름 바뀜 say two map parts are one).
+  for (const e of same) if (e.answer === 'reimplemented' && same.some(o => o.part === e.part && o.areaId !== e.areaId)) set(e, 'held', 'identity');
   for (const b of new Set(same.filter(e => e.state !== 'held').map(e => e.part!))) {
     const list = same.filter(e => e.part === b && e.state !== 'held'), areas = [...new Set(list.map(e => e.areaId!))];
     if (areas.length > 1) {
@@ -242,6 +287,10 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
       binds.set(b, canon); continue;
     }
     list.forEach((e, i) => set(e, 'reflected', null, i ? null : own(e, a)));
+    // Recipe .53 (ruling F6 Q3): a 같음 row whose B row the record names otherwise keeps that name on the row, an alias candidate (never a
+    // rename: only 이름 바뀜 renames).
+    for (const e of list) { const name = e.answer === 'same' ? bName(e) : '', was = officialName(p, a);
+      if (name && !secretLike(name) && normName(name) !== normName(was) && !likeNames(name, was)) e.name = name; }
     binds.set(b, a);
   }
   // 대신함 and 없어짐: in effect and whole only. The successor is the part the record's B row is (by this table or the ledger); a B row on no part
@@ -273,7 +322,7 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
 export function identityBindings(p: Project, folds: readonly V5Fold[], bound: ReadonlyMap<string, string>, live: (id: string) => boolean = () => true): Map<string, string> {
   const out = new Map<string, string>(), roster = folds.some(f => f.fold.rows.get(IDENT_TABLE_ID)?.length) ? mapRoster(p) : null, s = identityState(p);
   for (const f of folds) for (const e of decideIdentity(p, f, bound, roster)) {
-    if (e.state !== 'reflected' || !e.part || !(e.answer === 'same' || e.answer === 'renamed')) continue;
+    if (e.state !== 'reflected' || !e.part || !sameAnswer(e.answer)) continue;
     const to = canonicalPart(s, e.op?.kind === 'fold' ? e.op.into! : e.areaId!);
     if (live(to)) out.set(ledgerKey(f.key, 'C-PART', e.part), to);
   }
@@ -285,7 +334,7 @@ export function identityBindings(p: Project, folds: readonly V5Fold[], bound: Re
 export function identityHolds(p: Project, folds: readonly V5Fold[], bound: ReadonlyMap<string, string>): Map<string, string> {
   const out = new Map<string, string>(), roster = folds.some(f => f.fold.rows.get(IDENT_TABLE_ID)?.length) ? mapRoster(p) : null;
   for (const f of folds) for (const e of decideIdentity(p, f, bound, roster))
-    if (e.state === 'held' && e.part && e.areaId && (e.answer === 'same' || e.answer === 'renamed')) out.set(ledgerKey(f.key, 'C-PART', e.part), e.areaId);
+    if (e.state === 'held' && e.part && e.areaId && sameAnswer(e.answer)) out.set(ledgerKey(f.key, 'C-PART', e.part), e.areaId);
   return out;
 }
 

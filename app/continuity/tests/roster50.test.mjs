@@ -72,9 +72,9 @@ const recordB = (echo, rows, o = {}) => page1({ record: B, basis: B_BASIS, names
 test('R50-1 the record ask: v5.1 unchanged without a map; v5.2 carries the roster and C-IDENT right after C-PART, whose header parses clean', () => {
   const plain = R.recordAskV5('AF5-12345678');
   assert.ok(plain.startsWith('[AgentFlow 기록 요청 v5.1]') && !plain.includes('C-IDENT') && !plain.includes('지도 대장'), 'no map: v5.1 as it was');
-  assert.equal(R.RECORD_ASK_V5_VERSION, 'v5.1'); assert.equal(R.RECORD_ASK_V52_VERSION, 'v5.2');
+  assert.equal(R.RECORD_ASK_V5_VERSION, 'v5.1'); assert.equal(R.RECORD_ASK_V52_VERSION, 'v5.2'); assert.equal(R.RECORD_ASK_V53_VERSION, 'v5.3');
   const p = firstRead(project(page1())), roster = I.mapRoster(p), ask = R.recordAskV5('AF5-12345678', roster);
-  assert.ok(ask.startsWith('[AgentFlow 기록 요청 v5.2]'));
+  assert.ok(ask.startsWith('[AgentFlow 기록 요청 v5.3]'));
   assert.ok(ask.includes(`\n${roster.text}\n`) && roster.text.startsWith(`[대장] 프로젝트 ${p.id} · 판 1 · 해시 ${roster.hash} · P01–P07\n범위: 전체 7개\n`));
   const cpart = ask.indexOf('\nC-PART 부분\n'), ident = ask.indexOf('\nC-IDENT 지도 대응\n'), group = ask.indexOf('\nC-GROUP 묶음\n');
   assert.ok(cpart > 0 && cpart < ident && ident < group, 'C-IDENT right after C-PART');
@@ -82,7 +82,7 @@ test('R50-1 the record ask: v5.1 unchanged without a map; v5.2 carries the roste
   for (const w of ['같음', '이름 바뀜', '대신함', '없어짐', '모름', '「계획」', '「일부: 무엇」', '근거 없는 대응은 후보로만', '기준 커밋이 다르다는 것만으로 다른 대상이 아니고', 'git log --follow', 'P ID는 이 표에만 쓴다'])
     assert.ok(ask.includes(w), w);
   // Nothing else of the request changed: v5.2 is v5.1 with the roster section and the C-IDENT section added.
-  const back = ask.replace('[AgentFlow 기록 요청 v5.2]', '[AgentFlow 기록 요청 v5.1]').replace(/\n\n지도 대장\n[\s\S]*?\n\n지어내지 마/, '\n\n지어내지 마').replace(/\n\nC-IDENT 지도 대응\n[\s\S]*?(?=\n\nC-GROUP)/, '');
+  const back = ask.replace('[AgentFlow 기록 요청 v5.3]', '[AgentFlow 기록 요청 v5.1]').replace(/\n\n지도 대장\n[\s\S]*?\n\n지어내지 마/, '\n\n지어내지 마').replace(/\n\nC-IDENT 지도 대응\n[\s\S]*?(?=\n\nC-GROUP)/, '');
   assert.equal(back, plain);
   assert.deepEqual(T.readRecordTables(`${headOf(B, B_BASIS, 1)}\nC-IDENT 지도 대응\n대장: ${roster.head}\n${T.headerLine(T.IDENT_TABLE)}\n|---|---|---|---|---|---|\n|ID01|P02|같음|B01|—|F01|`).diagnostics, []);
   // The roster line the reply copies is read back.

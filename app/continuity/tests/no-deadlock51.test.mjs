@@ -194,7 +194,7 @@ test('D51-5 a revision verdict is never told its summary is unbacked; plan units
 });
 
 test('D51-6 the recipes name .51 and the later containment rules later-containment.4', () => {
-  assert.deepEqual([PIPELINE_RECIPE, LATER_PIPELINE_RECIPE, B.CONTAINMENT_VERSION], ['first-map-divided.52', 'later-map-divided.52', 'later-containment.4']);
+  assert.deepEqual([PIPELINE_RECIPE, LATER_PIPELINE_RECIPE, B.CONTAINMENT_VERSION], ['first-map-divided.53', 'later-map-divided.53', 'later-containment.4']);
 });
 
 /* ---------- the two stored refusals, replayed offline ---------- */

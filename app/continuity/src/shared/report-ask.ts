@@ -352,6 +352,9 @@ export const RECORD_ASK_V5_VERSION = 'v5.1';
  * table (the record's own correspondence of the roster's parts to its B rows). Without a map the request is v5.1, byte for byte; a v5 or
  * v5.1 record (no C-IDENT) reads as before. */
 export const RECORD_ASK_V52_VERSION = 'v5.2';
+/** Recipe .53 (ruling F6 Q3): v5.3, the v5.2 request whose C-IDENT also has 구현 바뀜 (the same part on another implementation, a bind with the
+ * change noted, never a retirement) and says when to use which answer. A v5.2 record (no 구현 바뀜) reads as before. */
+export const RECORD_ASK_V53_VERSION = 'v5.3';
 /** A new v5 record ID (「AF5-」 and 8 hex digits). */
 export function newRecordIdV5(random: () => number = Math.random): string {
   return `AF5-${Array.from({ length: 8 }, () => Math.floor(random() * 16).toString(16)).join('')}`;
@@ -380,7 +383,7 @@ export const TABLE_NOTES_V5: Readonly<Record<string, string>> = Object.freeze({
   'C-GATE': '근거 있는 관문만 0~5줄. 없음을 확인했으면 머리 줄 대신 「없음: 이유 근거」.',
   'C-UNKNOWN': '',
   'C-DOUBT': '1~3줄.',
-  'C-IDENT': 'C-PART 바로 다음에 쓴다(같은 쪽에 자리가 없으면 다음 쪽 첫머리). 제목 줄 바로 아래, 머리 줄 위에 한 줄 「대장: 」을 쓰고 그 뒤에 지도 대장 첫 줄의 「프로젝트 … · 판 … · 해시 … · P01–P…」를 글자 그대로 옮긴다. 대장의 부분마다 많아야 한 줄, 이 기록에서 확인한 것만 쓴다(쓰지 않은 부분은 앱이 그대로 둔다). 대응: 같음(같은 책임을 맡는 같은 대상) / 이름 바뀜(같은 대상을 이 기록이 다른 이름으로 부름) / 대신함(이 기록의 B가 그 부분을 대신해, 그 부분은 이 기준에서 더 쓰이지 않음) / 없어짐(대신하는 것 없이 더 쓰이지 않음) / 모름. 이 기록 부분: 같음·이름 바뀜·대신함이면 B ID 하나, 없어짐·모름이면 —. 바뀐 때: 이름 바뀜·대신함·없어짐이 일어난 커밋·날짜(모르면 모름, 같음이면 —). 아직 계획이면 「계획」, 일부만 바뀌었으면 「일부: 무엇」을 앞에 쓴다(앱은 계획·일부로는 아무것도 없애지 않는다). 근거는 이 기록의 F·E ID만: 같은 파일·경로, git log --follow, 이름을 바꾸거나 지운 커밋·PR. 근거 없는 대응은 후보로만 읽힌다. 기준 커밋이 다르다는 것만으로 다른 대상이 아니고, 이름이 비슷하다는 것만으로 같은 대상도 아니다. 대장의 부분이 이 기준에 보이지 않으면 git log --follow나 git log -S 이름으로 지우거나 옮긴 커밋을 찾아 근거로 쓰고, 못 찾으면 모름. 하나가 둘로 나뉘었거나 둘이 하나로 합쳐졌으면 그 부분마다 모름으로 쓰고 C-DOUBT에 적는다. P ID는 이 표에만 쓴다.',
+  'C-IDENT': 'C-PART 바로 다음에 쓴다(같은 쪽에 자리가 없으면 다음 쪽 첫머리). 제목 줄 바로 아래, 머리 줄 위에 한 줄 「대장: 」을 쓰고 그 뒤에 지도 대장 첫 줄의 「프로젝트 … · 판 … · 해시 … · P01–P…」를 글자 그대로 옮긴다. 대장의 부분마다 많아야 한 줄, 이 기록에서 확인한 것만 쓴다(쓰지 않은 부분은 앱이 그대로 둔다). 대응: 같음(같은 책임을 맡는 같은 대상) / 이름 바뀜(같은 대상을 이 기록이 다른 이름으로 부름) / 구현 바뀜(같은 책임이 이어지고 그 일을 하는 구현·도구·서비스만 바뀜) / 대신함(그 부분 자체가 끝나고 이 기록의 B가 그 일을 넘겨받음, 그 부분은 이 기준에서 더 쓰이지 않음) / 없어짐(대신하는 것 없이 더 쓰이지 않음) / 모름. 고르는 법: 대장의 부분이 이어지는 책임(OCR 단계, CI, 폴더 감시처럼 하는 일로 정한 부분)이면 같음이나 구현 바뀜이고, 엔진·라이브러리·서비스를 바꿨어도 대신함이 아니다. 대신함은 그 부분 자체가 끝나고 다른 것이 넘겨받았을 때만 쓴다. 새것이 더해졌다는 것만으로 옛것이 끝났다고 보지 않는다(옛것이 지워지거나 꺼진 커밋·파일이 근거로 있어야 한다). 이 기록 부분: 같음·이름 바뀜·구현 바뀜·대신함이면 B ID 하나, 없어짐·모름이면 —. 바뀐 때: 이름 바뀜·구현 바뀜·대신함·없어짐이 일어난 커밋·날짜(모르면 모름, 같음이면 —). 아직 계획이면 「계획」, 일부만 바뀌었으면 「일부: 무엇」을 앞에 쓴다(앱은 계획·일부로는 아무것도 없애지 않는다). 근거는 이 기록의 F·E ID만: 같은 파일·경로, git log --follow, 이름을 바꾸거나 지운 커밋·PR. 근거 없는 대응은 후보로만 읽힌다. 기준 커밋이 다르다는 것만으로 다른 대상이 아니고, 이름이 비슷하다는 것만으로 같은 대상도 아니다. 대장의 부분이 이 기준에 보이지 않으면 git log --follow나 git log -S 이름으로 지우거나 옮긴 커밋을 찾아 근거로 쓰고, 못 찾으면 모름. 하나가 둘로 나뉘었거나 둘이 하나로 합쳐졌으면 그 부분마다 모름으로 쓰고 C-DOUBT에 적는다. P ID는 이 표에만 쓴다.',
   'C-SRC': '기록 전체에서 이어 매기고, 쪽마다 그 쪽이 처음 인용하는 F만 쪽 머리 바로 뒤에(없으면 안 쓴다). 경로는 저장소 뿌리 기준(폴더는 끝에 /). 읽음: 읽음 / 일부(읽은 범위를 역할에) / 안 읽음. 실행 때 생기는 것은 역할에 「(실행 시)」, 생성물·시험·문서는 폴더 한 줄로.',
   'C-EVID': '파일보다 좁은 근거(함수, 명령 결과, 커밋·PR·릴리스 기록)가 필요할 때만, 쪽 머리 바로 뒤에. 등급: 파일(출처 칸에 F ID) / 실행(출처는 이 대화에서 돌린 읽기 명령) / 보고(커밋 sha · PR #n · 이슈 #n · 문서 이름 날짜 · 세션 이름 시각). 자리는 함수·줄 범위·절. 짧은 인용은 부정어와 조건을 자르지 않은 짧고 연속된 정확 인용이거나 —.',
   'C-DROP': '앞 쪽의 행을 지울 때만, 행 ID 칸에 쓴 ID 그대로(두 표에 같은 ID면 「C-STATE ST01」). 앱 형식 때문에 지우면 근거는 「앱 진단」. 지운 ID는 다시 쓰지 않는다.',
@@ -424,13 +427,13 @@ const tableSection5 = (id: string): string => {
 export const ROW_ID_FORMS = `행 ID 꼴: ${[...Q1_TABLES, ...Q2_TABLES, 'C-SRC', 'C-EVID'].flatMap(id => { const f = rowIdForm(V5_TABLE_DEFS.get(id)!); return f ? [`${id} ${f}`] : []; }).join(' · ')}. C-HEAD·C-SUMMARY·C-END에는 행 ID가 없고, C-DROP의 행 ID는 지울 ID다.`;
 /** Recipe .50 step 5: the roster block of a v5.2 request (map-identity.ts mapRoster's text, its first line the roster line the reply copies). */
 const rosterSection = (text: string): string => `지도 대장
-이 프로젝트에는 이미 지도가 있다. 아래 대장은 앱이 지금 지도에서 뽑은 부분 목록이다(한 줄에 「P ID 공식 이름 · 부모 · 상태 · 구별 말」, 옛 이름·옛 ID가 있으면 뒤에). P ID는 지도의 부분 번호로 이 기록의 B ID와 다르고, C-IDENT에만 쓴다(다른 표의 부분 칸에는 이 기록의 B ID). 대장은 앞선 이해일 뿐 이 기록의 근거가 아니다: 부분은 늘 코드에서 읽어 C-PART에 쓰고, 대장과의 대응은 C-IDENT에 이 기록의 F·E 근거로만 쓴다.
+이 프로젝트에는 이미 지도가 있다. 아래 대장은 앱이 지금 지도에서 뽑은 부분 목록이다(한 줄에 「P ID 공식 이름 · 부모 · 상태 · 구별 말」, 옛 이름·지금 구현·기록이 부른 이름·옛 ID가 있으면 뒤에). P ID는 지도의 부분 번호로 이 기록의 B ID와 다르고, C-IDENT에만 쓴다(다른 표의 부분 칸에는 이 기록의 B ID). 대장은 앞선 이해일 뿐 이 기록의 근거가 아니다: 부분은 늘 코드에서 읽어 C-PART에 쓰고, 대장과의 대응은 C-IDENT에 이 기록의 F·E 근거로만 쓴다.
 ${text}`;
 /** 기본 기록 요청 v5: {기록 ID} filled with the given ID (left as the slot when none). Recipe .50 step 5: with the map's roster (a project
  * that has a map), v5.2: the roster after the common rules and C-IDENT right after C-PART; without it, v5.1 as it was. */
 export function recordAskV5(recordId: string = ID_SLOT, roster: { text: string } | null = null): string {
   const q1 = Q1_TABLES.flatMap(id => roster && id === 'C-PART' ? [id, 'C-IDENT'] : [id]);
-  return `[AgentFlow 기록 요청 ${roster ? RECORD_ASK_V52_VERSION : RECORD_ASK_V5_VERSION}]
+  return `[AgentFlow 기록 요청 ${roster ? RECORD_ASK_V53_VERSION : RECORD_ASK_V5_VERSION}]
 이 프로젝트를 처음 보는 사람이 이어서 일할 수 있게, 지금 상태와 설계를 코드·문서·기록에서 읽어 아래 표로 써 줘. 표는 마크다운이다(머리 줄 다음에 |---| 줄). 표마다 제목 줄 「표 ID 제목」을 쓰고 바로 아래에 머리 줄을 글자 그대로 쓴다. 표 ID가 앱이 표를 찾는 열쇠다.
 
 쪽

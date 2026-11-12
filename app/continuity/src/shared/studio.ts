@@ -114,6 +114,26 @@ export function clip(text: string, n: number): string {
   const code = text.charCodeAt(n - 1);
   return text.slice(0, code >= 0xd800 && code <= 0xdbff ? n - 1 : n);
 }
+/** Recipe .53 (ruling F6 Q1): a description that ends on a plan word (계획 · 예정: 「…색인하도록 계획된 처리다.」, 「…(예정)」) keeps that ending
+ * when it is cut: the words from the one holding the plan word on (within PLAN_TAIL_CHARS of the end), else null. */
+export const PLAN_TAIL_CHARS = 14;
+export function planTail(text: string): string | null {
+  const t = text.replace(/\s+/g, ' ').trim(), re = /계획|예정/g; let at = -1;
+  for (let m = re.exec(t); m; m = re.exec(t)) at = m.index;
+  if (at < 0) return null;
+  const start = t.lastIndexOf(' ', at) + 1, tail = t.slice(start);
+  return tail.length <= PLAN_TAIL_CHARS ? tail : null;
+}
+/** A width in Korean characters: a Hangul or other wide character is 1, anything else 0.6 (a card line holds about 15). */
+export const textWidth = (t: string): number => [...t].reduce((n, ch) => n + (/[ᄀ-ᇿ⺀-꓏가-힣豈-﫿＀-￯]/.test(ch) ? 1 : 0.6), 0);
+/** Cut to at most n characters (or, with widthOf, n by that width) with 「…」, never leaving out a plan ending (planTail): such a text keeps
+ * its head and its ending, the middle cut. Whitespace is folded first. */
+export function clipKeepPlan(text: string, n: number, widthOf: (t: string) => number = t => [...t].length): string {
+  const t = text.replace(/\s+/g, ' ').trim(); if (widthOf(t) <= n) return t;
+  const headOf = (room: number) => { let head = ''; for (const ch of t) { if (widthOf(head + ch) > room) break; head += ch; } return head.trimEnd(); };
+  const tail = planTail(t), keep = tail ? ` ${tail}` : '', room = n - 1 - widthOf(keep);
+  return tail && room >= 2 ? `${headOf(room)}…${keep}` : `${headOf(n - 1)}…`;
+}
 /** Room kept for the coverage counts, which are filled in last. */
 const COVERAGE_ROOM = 256, META_BYTES = 32768, MIN_EXCERPT_BYTES = 600;
 

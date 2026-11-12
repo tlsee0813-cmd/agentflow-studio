@@ -266,16 +266,24 @@ export function behaviourSummary(loop: LoopLike | null | undefined, steps: reado
  * a description whose report was later taken back, lines resting only on reports taken back, another record's description that does
  * not replace the current one, a report that replaced an earlier one here. Nothing is guessed (a conflict the reading does not say is
  * not made up here). */
-export type CautionKind = 'unknown' | 'revised-basis' | 'revised-line' | 'other-role' | 'revised';
+export type CautionKind = 'unknown' | 'revised-basis' | 'revised-line' | 'other-role' | 'revised' | 'implementation' | 'other-name';
 export interface CautionRow<T> { key: string; kind: CautionKind; label: string; text: string; hint: string; about: string | null; claim: T | null }
-export function cautionRows<T extends PaneClaim>(u: { claims: readonly T[]; roleBasisRevised: boolean; revised: boolean; corrected?: unknown; others: readonly { text: string; about: string | null; replaced?: 'bound' | 'stated' }[] }, revisedLines: number): CautionRow<T>[] {
+/** Recipe .53 (ruling F6 Q1): an earlier description a new one took over from is 「이전 설명」, never a 정정: 「같은 부품에 대한 새 설명이
+ * 채택됨」, or with the new description's record's target time 「대상 2020-11-18 기록의 설명으로 갱신됨」. */
+export const replacedHint = (target: string | null | undefined): string => (target ? `대상 ${target} 기록의 설명으로 갱신됨` : '같은 부품에 대한 새 설명이 채택됨');
+export function cautionRows<T extends PaneClaim>(u: { claims: readonly T[]; roleBasisRevised: boolean; revised: boolean; corrected?: unknown; others: readonly { text: string; about: string | null; replaced?: 'bound' | 'stated'; target?: string | null }[];
+  identityNotes?: readonly { kind: 'implementation' | 'name'; from: string | null; text: string; when: string | null }[] }, revisedLines: number): CautionRow<T>[] {
   const out: CautionRow<T>[] = [];
   u.claims.forEach((c, i) => { if (claimTopic(c) === 'unknown') out.push({ key: `unknown:${i}`, kind: 'unknown', label: '모름', text: c.text, hint: '기록이 확인하지 못했다고 남긴 것', about: null, claim: c }); });
   if (u.roleBasisRevised && !u.corrected) out.push({ key: 'revised-basis', kind: 'revised-basis', label: '정정됨', text: '설명의 근거였던 보고는 이후 정정됨', hint: '설명은 그대로 두었지만, 지금의 근거에 기대지 않아요', about: null, claim: null });
   if (revisedLines > 0) out.push({ key: 'revised-line', kind: 'revised-line', label: '정정됨', text: `선 ${revisedLines}개는 이후 정정된 보고에서만 읽음`, hint: '선은 그대로 그렸지만, 그 근거였던 보고를 뒤의 기록이 거뒀어요', about: null, claim: null });
   u.others.forEach((x, i) => out.push(x.replaced
-    ? { key: `other-role:${i}`, kind: 'other-role', label: '이전 설명', text: x.text, hint: x.replaced === 'bound' ? '뒤의 기록이 같은 부분이라고 밝히고 새로 설명함 · 이력에 남김' : '뒤의 기록이 이 설명을 대신한다고 직접 적음 · 이력에 남김', about: x.about, claim: null }
+    ? { key: `other-role:${i}`, kind: 'other-role', label: '이전 설명', text: x.text, hint: replacedHint(x.target), about: x.about, claim: null }
     : { key: `other-role:${i}`, kind: 'other-role', label: '다른 설명', text: x.text, hint: '다른 기록의 설명 · 현재 설명을 대체한다는 근거 없음', about: x.about, claim: null }));
+  // Recipe .53 (ruling F6 Q3): an implementation change the record noted (the part stays, never retired) and another name a record called it.
+  (u.identityNotes ?? []).forEach((x, i) => out.push(x.kind === 'implementation'
+    ? { key: `implementation:${i}`, kind: 'implementation', label: '구현 바뀜', text: x.from ? `${x.from} → ${x.text}` : x.text, hint: `같은 부품의 구현이 바뀜 · 바뀐 때 ${x.when ?? '기록에 없음'}`, about: null, claim: null }
+    : { key: `other-name:${i}`, kind: 'other-name', label: '다른 이름', text: x.text, hint: '기록이 같은 부품이라고 하며 이 이름으로 부름 · 공식 이름은 그대로(별칭 후보)', about: null, claim: null }));
   if (u.revised) out.push({ key: 'revised', kind: 'revised', label: '정정', text: '이 부분의 앞 보고를 뒤 기록이 대체함', hint: '기록이 앞의 말을 대체한다고 적은 정정이 있어요 · 이력에서 이전 → 지금', about: null, claim: null });
   return out;
 }
