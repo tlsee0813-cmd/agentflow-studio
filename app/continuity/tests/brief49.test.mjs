@@ -152,7 +152,7 @@ test('49-7 instructions: the brief-parts rule goes only with a brief part; the l
   for (const said of ['"brief":true', '현재 유효한 기존 부분', 'name·readAs·부모(parentId)·relations', '새 부분으로 만들지 않는다', '없는 것', 'replaces나 corrections로 가리키지 않는다'])
     assert.ok(P.MAP7_BRIEF.includes(said), said);
   assert.ok(P.MAP7_RECIPE.startsWith('map7-recipe.9:') && P.MAP7_RECIPE.includes('brief-parts.1'));
-  assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.51', 'later-map-divided.51']);
+  assert.deepEqual([Pipe.PIPELINE_RECIPE, Pipe.LATER_PIPELINE_RECIPE], ['first-map-divided.52', 'later-map-divided.52']);
 });
 
 /* ---------- review of .49: what names a part ---------- */

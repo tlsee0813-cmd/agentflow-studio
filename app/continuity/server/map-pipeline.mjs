@@ -468,8 +468,8 @@ export const LINES_CORRECTION_USD = 0.07;
 // those reasons take the room the reasons of what the server left out of the wire leave. A semantic re-render or a final review that fails
 // on the revision path (refused after its correction, or cut at its cap) is the revision's verdict on what it was asked to revise: its
 // group keeps its first fragment, a failed final review leaves the fragments combined without a global rewrite. Never a refusal.
-export const PIPELINE_RECIPE = 'first-map-divided.51';
-export const LATER_PIPELINE_RECIPE = 'later-map-divided.51';
+export const PIPELINE_RECIPE = 'first-map-divided.52';
+export const LATER_PIPELINE_RECIPE = 'later-map-divided.52';
 /** .45 (RECORD_ASKS_V5_KO.md 12.4 (d)): the key sets beside a stage's INPUT: for each v5 record, the B, F and E IDs its own text cites
  * (each B with its name and one-line responsibility, F with its path, E with its grade and source), a closed set; nothing for an ask with
  * no v5 record (its stage inputs stay as .44 sent them). */

@@ -174,7 +174,9 @@ export function decideIdentity(p: Project, f: V5Fold, bound: ReadonlyMap<string,
   else if (echo.revision === maps.length) { if (echo.hash !== roster?.hash && echo.hash !== sinceOwn(echo.count)) status = 'unverified'; }
   else if (echo.hash !== roster?.hash) {
     for (const r of maps.slice(echo.revision)) {
-      for (const x of r.identity ?? []) if (x.op && x.record !== f.key) for (const id of [x.op.areaId, x.op.successor, x.op.into]) if (id) affected.add(id);
+      // Recipe .52 M1: a bind changes nothing the roster said (name, parent, life stay), so another record's bind does not hold this one's
+      // rows (.51 stage 4 held 18 binds `roster` only because two records bound the same parts).
+      for (const x of r.identity ?? []) if (x.op && x.op.kind !== 'bind' && x.record !== f.key) for (const id of [x.op.areaId, x.op.successor, x.op.into]) if (id) affected.add(id);
       for (const x of r.parts) if (x.created) affected.add(x.areaId);
     }
     if (echo.count !== null) p.space.areas.forEach((a, i) => { if (i >= echo.count!) affected.add(a.id); });

@@ -149,7 +149,7 @@ test('R50-3 C-IDENT is never sent; its 같음 and 이름 바뀜 rows bind B rows
   roundTrip(q);
   // The next ask's roster says what happened.
   const next = I.mapRoster(q).text;
-  assert.ok(next.includes(`\nP02 수집 서비스 · — · 있음 · 수집기의 일을 맡는다. · 옛 이름 수집기`) && next.includes(`\nP04 저장소 · — · 대신함→P08`) && next.includes('\nP06 알림기 · — · 없어짐'), next);
+  assert.ok(next.includes(`\nP02 수집 서비스 · — · 있음 · 수집 서비스의 일 · 옛 이름 수집기`) && next.includes(`\nP04 저장소 · — · 대신함→P08`) && next.includes('\nP06 알림기 · — · 없어짐'), next);
 });
 
 test('R50-4 retire with a successor: the predecessor keeps its part, leaves the current map and its lines stay its own; partial and planned retire nothing', () => {
@@ -208,7 +208,7 @@ test('R50-5 a duplicate the map made is folded onto one canonical part by eviden
   assert.ok(!cur.parts.some(x => x.id === dup) && cur.relations.some(x => x.from === keep && x.to === q.space.areas[0].id), 'its line goes to the canonical part');
   assert.ok(M.partUnderstanding(q, keep).claims.some(c => c.text === '수집 작업이 원문을 받는다.'), 'its reading reads as the canonical part');
   const roster = I.mapRoster(q);
-  assert.ok(roster.text.includes('\nP02 수집기 · — · 있음 · 수집기의 일을 맡는다. · 옛 ID P08') && !roster.text.includes('\nP08 '));
+  assert.ok(roster.text.includes('\nP02 수집기 · — · 있음 · 수집기의 일 · 옛 ID P08') && !roster.text.includes('\nP08 '));
   // A later table naming the old P ID resolves to the canonical part.
   const f = X.v5Folds([{ id: 'y', text: page1({ record: 'AF5-50f0f0f0', basis: 'f0c0de5', names: ['수집기'], pairs: [], ident: { echo: roster.head, rows: [[dupP, '같음', 'B01', '—', 'F01']] } }) }])[0];
   assert.equal(I.decideIdentity(q, f, new Map())[0].areaId, keep);

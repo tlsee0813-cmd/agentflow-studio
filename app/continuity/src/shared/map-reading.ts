@@ -9,7 +9,7 @@ import { CLAIM_KINDS, CLAIM_TOPICS, EVIDENCE_GRADES, PART_STATES, PART_TYPES, CH
 import { indexSpans, encodeSpans, decodeSpans, resolveRef, resolveRange, resolveEvidenceRange, textDigest, ANCHOR_QUOTE_MAX, SPANS_PER_RECORD, type Span, type SpanWire } from './evidence-span.js';
 import type { StudioView, RecordView } from './studio.js';
 import { addArea, addChildArea, addRelation, addReading, editArea } from './domain.js';
-import { decideIdentity, identityBindings, identityHolds, identityState, canonicalPart, mapRoster, areaOfNumber } from './map-identity.js';
+import { decideIdentity, identityBindings, identityHolds, identityState, canonicalPart, mapRoster, areaOfNumber, rosterEcho } from './map-identity.js';
 import { parseProject, sourceText } from './validation.js';
 import { quoteAt } from './digest-api.js';
 import { secretLike } from './secret.js';
@@ -18,7 +18,7 @@ import { validateFrozenRequest, validateRequestContext, requestContext, validate
 import { cellTexts, splitCells, rowsOf, rowsOfTexts, readRecordTables, v5PartNames, PAGE_HEAD, CHUNK_HEAD, PARTTYPE_TABLE, Q1_TABLES, Q2_TABLES, PROFILE_TABLES, type TableRow, type FoldRow } from './record-table.js';
 import { record43, record45, record45Parts, actorsOf, variantGloss, glossVariants, foldLevel, FOLD_DIAGNOSTICS, RECORD_DIAGNOSTICS_MAX, type Reading43, type Reading45, type Part43, type Line43 } from './record-reading.js';
 import { v5Folds, pasteExcerpt, leftText, rangeOf, placeOf, piecesStand, type ExcerptPiece, type PasteExcerpt, type PageRun, type V5Fold } from './record-excerpt.js';
-import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, rowBindings, ledgerKey, ownPartRow, type LedgerRow } from './row-ledger.js';
+import { rowLedger, resendRows, sentByPieces, decideRows, trackedRows, rowBindings, ledgerKey, ownPartRow, IDENT_TABLE_ID, type LedgerRow } from './row-ledger.js';
 export { glossVariants };
 
 export const MAP_SCHEMA = 'studio.map.1' as const;
@@ -3375,8 +3375,12 @@ export interface PartUnderstanding {
   corrected: { id: string; at: string } | null;
   /** The quotes the current description rests on (none for the person's correction). */
   roleBasis: ReadingQuote[];
-  /** Descriptions read later that did not replace the current one (another version, the same version, or none named), newest first. */
-  others: { text: string; about: string | null; at: string }[];
+  /** Recipe .52 M2: when the current description came from a record whose C-IDENT row bound the part, that reading's time; else null. */
+  roleBound?: string | null;
+  /** Descriptions read later that did not replace the current one (another version, the same version, or none named), newest first;
+   * replaced: an earlier description a later one took over from — 'stated' (the record said in its own words its description replaces
+   * it, roleReplaces) or 'bound' (a record whose C-IDENT row bound the part described it anew, .52). */
+  others: { text: string; about: string | null; at: string; replaced?: 'bound' | 'stated' }[];
   /** Current claims, newest reading first: superseded ones and repeats of the same words are left out. */
   claims: CurrentClaim[];
   /** Pipeline .44 (map-reading.18 fields, derived): the newest reading's v4 C-LOOP rows of the part (every loop, with its parent loop),
@@ -3424,10 +3428,44 @@ export interface PartUnderstanding {
   roleBasisRevised: boolean;
 }
 const norm = (t: string) => t.replace(/\s+/g, ' ').trim();
+/** Recipe .52: the v5 records of the pasted texts, for the bound-description rule: where each record's pages stand in which pasted text
+ * (one text may hold pages of several records, so a quote's record is found by its place), the map revision each record's C-IDENT copied
+ * from its roster (what the session saw), and each C-PART row's own 「하는 일 한 줄」 quoted from its row. Kept for the last list of pasted
+ * texts (ids, times and lengths; pasted texts are never edited), so an edit that leaves them alone reads none again. */
+interface FoldIndex { regions: Map<string, { from: number; to: number; key: string }[]>; echo: Map<string, number | null>; line: Map<string, { text: string; quote: ReadingQuote }> }
+let foldIndexCache: { sig: string; out: FoldIndex } | null = null;
+function foldIndex(p: Project): FoldIndex {
+  const sig = p.pasted.map(x => `${x.id}:${x.at}:${x.text.length}`).join('|');
+  if (foldIndexCache?.sig === sig) return foldIndexCache.out;
+  const regions = new Map<string, { from: number; to: number; key: string }[]>(), echo = new Map<string, number | null>(), line = new Map<string, { text: string; quote: ReadingQuote }>();
+  const texts = new Map(p.pasted.map(x => [x.id, x.text] as [string, string]));
+  try {
+    for (const f of v5Folds(p.pasted)) {
+      for (const pg of [...f.fold.pages, ...f.fold.held, ...f.fold.replaced]) regions.set(pg.record, [...regions.get(pg.record) ?? [], { from: pg.from, to: pg.to, key: f.key }]);
+      echo.set(f.key, rosterEcho(f.fold.rows.get(IDENT_TABLE_ID) ?? [])?.revision ?? null);
+      for (const r of f.fold.rows.get('C-PART') ?? []) {
+        const said = (r.row.byColumn['하는 일 한 줄'] ?? '').replace(/\s+/g, ' ').trim(), t = texts.get(r.record);
+        if (!said || /^[—–-]+$/.test(said) || said === '모름' || t === undefined || secretLike(said)) continue;
+        line.set(`${f.key}\u0000${r.id}`, { text: said.length > 300 ? `${said.slice(0, 299)}…` : said, quote: { record: r.record, quote: t.slice(r.row.from, r.row.to), from: r.row.from, to: r.row.to } });
+      }
+    }
+  } catch { /* not v5: no record is bound */ }
+  const out = { regions, echo, line }; foldIndexCache = { sig, out }; return out;
+}
+/** The v5 record (fold key) a quote stands in: the page region holding it, else the only record of its pasted text, else none. */
+function recordOfQuote(ix: FoldIndex, q: ReadingQuote): string {
+  const rs = ix.regions.get(q.record); if (!rs?.length) return '';
+  const at = q.from !== undefined ? rs.find(r => q.from! >= r.from && q.from! < r.to) : undefined; if (at) return at.key;
+  const keys = new Set(rs.map(r => r.key)); return keys.size === 1 ? [...keys][0]! : '';
+}
 export function partUnderstanding(p: Project, areaId: string): PartUnderstanding | null {
   const history: PartUnderstanding['history'] = []; let createdName: string | null = null, role: string | null = null, roleAbout: string | null = null;
   const others: PartUnderstanding['others'] = []; let roleBasis: ReadingQuote[] = [];
-  let corrected: PartUnderstanding['corrected'] = null;
+  let corrected: PartUnderstanding['corrected'] = null, roleBound: string | null = null; const boundBy = new Set<string>(), applied = new Set<string>();
+  // Recipe .52: the map revision (1-based count of map readings) whose reading set the current description, and that reading. A bound
+  // record replaces it only when the roster it was written against already showed it (its copied 판 is at least that revision): a record
+  // written earlier, read later (a backlog page, an older session's record pasted late), never turns the description back.
+  let roleRev = 0, roleReading: string | null = null, rev = 0; let ix: FoldIndex | null = null; const index = () => ix ??= foldIndex(p);
   const all: CurrentClaim[] = [], replaced = new Set<string>();
   let stateRead: PartUnderstanding['stateRead'] = null, typeRead: PartUnderstanding['typeRead'] = null, familyRead: PartUnderstanding['familyRead'] = null; const files: string[] = [], inputs: string[] = [], outputs: string[] = [], fields: string[] = [], config: string[] = [];
   // A later reading's names go first in its own order; one an earlier reading also named moves up with it.
@@ -3441,8 +3479,23 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   // retired the part gives it the state retired from that reading on.
   const ident = identityState(p), dups = new Set([...ident.folded.keys()].filter(id => id !== areaId && canonicalPart(ident, id) === areaId));
   for (const r of p.readings) {
-    if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; } continue; }
+    if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; roleBound = null; } continue; }
     for (const x of r.identity ?? []) if (x.op?.kind === 'retire' && x.op.areaId === areaId) stateRead = { state: 'retired', when: x.when, quote: null, at: r.at };
+    // Recipe .52 M2b: the bound record's own C-PART line (its 「하는 일 한 줄」) is the part as that record knows it now; a reply that wrote
+    // no description of the part (the usual case for a part the map has) still gives the card that line, quoted from its row.
+    rev++;
+    for (const x of r.identity ?? []) {
+      if (!((x.op?.kind === 'bind' || x.op?.kind === 'rename') && (x.op.areaId === areaId || dups.has(x.op.areaId)) && x.part)) continue;
+      boundBy.add(x.record);
+      const k = `${x.record}\u0000${x.part}`, own = index().line.get(k), seen = index().echo.get(x.record) ?? null;
+      // A record's own line goes on the card once; a later reading that sends the record again (its op re-decided) changes nothing.
+      if (!own || corrected || applied.has(k)) continue; applied.add(k);
+      if (role && (norm(role) === norm(own.text) || seen === null || seen < roleRev)) continue;
+      if (role && !others.some(o => norm(o.text) === norm(role!))) others.unshift({ text: role, about: roleAbout, at: r.at, replaced: 'bound' });
+      role = own.text; roleAbout = null; roleBasis = [own.quote]; roleBound = r.at; roleRev = rev; roleReading = r.id;
+      // The part had no entry yet (a part only the bind describes): the bind is its evidence history.
+      if (!r.parts.some(x2 => x2.areaId === areaId || dups.has(x2.areaId))) history.push({ reading: r.id, at: r.at, role: own.text, claims: [], basis: [own.quote] });
+    }
     const mine = r.parts.filter(x => x.areaId === areaId);
     for (const part of mine.length || !dups.size ? mine : r.parts.filter(x => dups.has(x.areaId)).slice(0, 1)) {
     if (part.created && part.areaId === areaId) createdName = part.created.name;
@@ -3481,7 +3534,18 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
     if (rows.length) portMap.splice(0, portMap.length, ...rows, ...portMap.filter(m => !rows.some(x => same(x, m))));
     // A correction holds the description only: a later reading's description reads apart, its claims still come in.
     if (part.role) {
-      if (!role || (!corrected && part.roleReplaces)) { if (role) others.unshift({ text: role, about: roleAbout, at: r.at }); role = part.role; roleAbout = part.roleAbout; roleBasis = part.basis; }
+      // Recipe .52 M2: a record whose own C-IDENT row says this is that map part (같음 / 이름 바뀜, with evidence, against the roster that
+      // showed it the current description) describes the part as it is now: its description, resting only on that record's lines and on
+      // none pasted before the current one's, takes the card. Never arrival order alone, never over the person's correction.
+      // Every quote in one record that bound the part, whose roster showed the current description (or the line it put on the card in
+      // this same reading, which the model's fuller words of the same record replace).
+      const recs = boundBy.size && part.basis.length ? new Set(part.basis.map(q => recordOfQuote(index(), q))) : null, rec = recs?.size === 1 ? [...recs][0]! : '';
+      const seen = rec ? index().echo.get(rec) ?? null : null;
+      const bound = !corrected && !!role && norm(role) !== norm(part.role) && !!rec && boundBy.has(rec) && ((seen !== null && seen >= roleRev) || (roleReading === r.id && roleBasis.every(q => recordOfQuote(index(), q) === rec)));
+      if (!role || (!corrected && part.roleReplaces) || bound) {
+        if (role && !others.some(o => norm(o.text) === norm(role!))) others.unshift({ text: role, about: roleAbout, at: r.at, replaced: bound ? 'bound' : 'stated' });
+        role = part.role; roleAbout = part.roleAbout; roleBasis = part.basis; roleRev = rev; roleReading = r.id; roleBound = bound ? r.at : null;
+      }
       else others.unshift({ text: part.role, about: part.roleAbout, at: r.at });
     }
     history.push({ reading: r.id, at: r.at, role: part.role, claims: part.claims, basis: part.basis });
@@ -3509,7 +3573,8 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   claims.sort((a, b) => Number(!!b.replaces) - Number(!!a.replaces));
   // AF140: every claim that still stands, never a silent cut (a limitation read early is as current as a feature read late). A reader
   // that needs fewer takes its own (the map ask and the plan's source take the first 6 of this same order).
-  return { role, roleAbout, roleBasis, corrected, others: others.slice(0, 6), claims, recordLoops, variants, statusClaims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, familyRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
+  if (corrected) roleBound = null;
+  return { role, roleAbout, roleBasis, corrected, roleBound, others: others.slice(0, 6), claims, recordLoops, variants, statusClaims, history, createdName, state, stateRead, files: files.slice(0, 8), typeRead, familyRead, inputs: inputs.slice(0, 8), outputs: outputs.slice(0, 8), fields: fields.slice(0, 24), config: config.slice(0, 8),
     steps: steps.slice(0, 12), loop, stateVars: stateVars.slice(0, 8), portMap: portMap.slice(0, 24), conditions: conditions.slice(0, 24), fileRoles: fileRoles.slice(0, 12), rules, withdrawals, gates, revised, roleBasisRevised };
 }
 
