@@ -12,7 +12,7 @@
      #6b717c would sit at 4.50 exactly on the canvas, so text-4 is one step darker). */
   /* map design v3 9.1: ink 17.74:1 on white, text-2 10.37, text-3 6.90, text-4 5.34 (4.90 on the canvas). */
   --text: #17181c; --text-2: #3d4048; --text-3: #565a64; --text-4: #676b74;
-  --accent: #3358ff; --accent-strong: #2343e0; --accent-soft: #eef1ff; --accent-line: #c3ccff;
+  --accent: #315eca; --accent-strong: #2343e0; --accent-soft: #eef1ff; --accent-line: #c3ccff;
   /* One weight per role: titles, names, quiet meta, body text. */
   --fw-title: 680; --fw-name: 590; --fw-meta: 500; --fw-body: 420;
   --change: #a55a0b; --change-soft: #fdf4e8; --change-line: #edc48d;
@@ -33,7 +33,7 @@
   /* The ladder a part's records climb: a request, a report of work, a check. Reported is not checked: amber, then green. */
   --rung-off: #e4e7ec; --rung-ask: #667085; --rung-report: #f79009; --rung-check: #12b76a;
   /* Status tints: a soft fill and a darker text of the same hue, for chips and short messages (text on its own soft at 4.5:1+). */
-  --line-hover: #c4cad4; --accent-hover: #e2e7ff; --focus-halo: rgba(51,88,255,.16);
+  --line-hover: #c4cad4; --accent-hover: #e2e7ff; --focus-halo: rgba(49,94,202,.16);
   --ok-soft: #ecfdf3; --ok-text: #067647; --warn-soft: #fef3f2; --warn-text: #b42318; --change-text: #7a3f07;
   --info: #2c5a95; --info-soft: #f5f8fd; --info-line: #dbe4f3;
   --record-soft: #f1eefb; --record-text: #55449a; --code-soft: #eef0f7; --code-text: #3b4a7a; --mark: #fbecb4; --mark-line: #f0d37a;
@@ -247,7 +247,7 @@ button:disabled { opacity: .5; cursor: default; }
 .world.travel { transition: transform .34s cubic-bezier(.2,.7,.2,1), opacity .34s ease; }
 .world.travel-in, .world.travel-out { opacity: .35; }
 .came-from { animation: came-from 1.1s ease 1; }
-@keyframes came-from { 0%, 30% { box-shadow: 0 0 0 4px rgba(51,88,255,.28); } }
+@keyframes came-from { 0%, 30% { box-shadow: 0 0 0 4px rgba(49,94,202,.28); } }
 /* density by zoom (the layout stays; only what is drawn inside the boxes changes) */
 .space.z-mid .node:not(.typed):not(.selected):not(.related):not(.dragging):not(.cited) :is(.node-note, .node-meta .meta-text),
 .space.z-mid .frame:not(.selected) > .frame-head .frame-note { visibility: hidden; }
@@ -263,7 +263,7 @@ button:disabled { opacity: .5; cursor: default; }
    both ends. Widths, dashes and heads are screen pixels at every zoom (--u is one screen pixel in map units, app.ts applyCamera):
    1.25 at rest far out, 1.5 nearer, 2 pointed at, 3 selected. A planned, corrected or summary line keeps its kind's dash. */
 .edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
-.edge-line { --lw: 1.25; fill: none; stroke: var(--edge); stroke-width: calc(var(--lw) * var(--u, 1) * 1px); stroke-linecap: round; stroke-linejoin: round; transition: stroke .12s, opacity .12s; }
+.edge-line { --lw: 1.25; fill: none; stroke: var(--edge-c, var(--edge)); stroke-width: calc(var(--lw) * var(--u, 1) * 1px); stroke-linecap: round; stroke-linejoin: round; transition: stroke .12s, opacity .12s; }
 .space:is(.tier-mid, .tier-near) .edge-line { --lw: 1.5; }
 /* The spine: the longest chain of flows through the scope, read first; its lines are darker and a little wider. */
 .edge.spine .edge-line { stroke: var(--edge-spine); --lw: 1.75; }
@@ -275,7 +275,7 @@ button:disabled { opacity: .5; cursor: default; }
    dots are always drawn. */
 .edge[data-start="none"]:not(.on):not(.near) .edge-line { marker-start: none; }
 /* A line drawn from a folded part summarises relations of its inside: a soft band, wider, its kind's dash kept. */
-.edge.agg .edge-line { stroke: var(--edge-soft); --lw: 3; }
+.edge.agg .edge-line { stroke: var(--edge-c, var(--edge-soft)); --lw: 3; }
 .edge.near .edge-line { stroke: var(--accent); --lw: 2.5; stroke-opacity: 1; }
 /* A spine line pointed at reads firmer than at rest, never lighter. */
 .edge.near.spine:not(.on) .edge-line { stroke: var(--accent); --lw: 2.5; }
@@ -357,6 +357,8 @@ button:disabled { opacity: .5; cursor: default; }
 .map-title:not(.meta-open) > .map-meta { display: none; }
 .map-meta-toggle { display: inline-flex; align-items: center; margin: 8px 0 0; padding: 0 calc(var(--t-kind, 12px) * .5); height: calc(var(--t-kind-lh, 16px) + 6px); border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text-3); font-size: var(--t-kind, 12px); line-height: var(--t-kind-lh, 16px); cursor: pointer; }
 .map-meta-toggle:hover { color: var(--text); border-color: var(--line-strong); }
+/* Review of v5 focus 3 (A3): the record's time and version under 「기록 정보 ▾」 at rest, on a row of its own (it never wraps after the title was measured), in its size (screen-sized with the zoom tier). */
+.map-when { display: block; width: max-content; max-width: 100%; overflow: hidden; text-overflow: ellipsis; margin: 4px 0 0; font-size: var(--t-kind, 12px); line-height: calc(var(--t-kind-lh, 16px) + 6px); color: var(--text-3); white-space: nowrap; pointer-events: auto; }
 .map-name { margin: 0; word-break: keep-all; font-size: 26px; line-height: 32px; font-weight: var(--fw-title); letter-spacing: -.025em; color: var(--text); overflow-wrap: anywhere; }
 .map-purpose > span:first-child:not(:last-child) { margin-right: var(--s-2); }
 /* Two lines at most; '설명 전체' opens the whole text in the pane. */
@@ -408,7 +410,7 @@ button:disabled { opacity: .5; cursor: default; }
 .frame.group { background: transparent; border-color: var(--hair-2); border-radius: var(--r-pop); }
 .frame.group.tint { background: rgba(16,24,40,.022); border-color: var(--hair-2); }
 .frame:has(> .frame-head:hover):not(.selected):not(.related) { border-color: var(--line-strong); }
-.frame.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(51,88,255,.14); }
+.frame.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(49,94,202,.14); }
 .frame.related { border-color: var(--accent-line); }
 .frame.cited { border-color: var(--accent); }
 .frame-head { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 6px; border-radius: var(--r-lg) var(--r-lg) 0 0; cursor: pointer; }
@@ -446,11 +448,11 @@ button:disabled { opacity: .5; cursor: default; }
 .node.unit.has-kids { padding-left: 6px; }
 .node.item { background: var(--surface); border-color: transparent; box-shadow: 0 0 0 1px rgba(17,24,39,.06); border-radius: var(--r-md); padding: 0 8px 0 10px; }
 .node.item:hover { background: var(--surface); border-color: var(--line-hover); box-shadow: 0 2px 6px -3px rgba(16,24,40,.14); }
-.node.selected, .node.selected:hover { background: var(--surface); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(51,88,255,.16), 0 4px 12px -6px rgba(51,88,255,.4); }
+.node.selected, .node.selected:hover { background: var(--surface); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(49,94,202,.16), 0 4px 12px -6px rgba(49,94,202,.4); }
 .node.selected .node-name { -webkit-text-stroke: .3px currentColor; }
 .node.related { border-color: var(--accent-line); background: var(--surface); }
 .node.cited { border-color: var(--accent); animation: cite 1.2s ease 2; }
-@keyframes cite { 50% { box-shadow: 0 0 0 6px rgba(51,88,255,.18); } }
+@keyframes cite { 50% { box-shadow: 0 0 0 6px rgba(49,94,202,.18); } }
 .node-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .node.has-kids { padding-left: 5px; }
 .node.unit .node-text { gap: 3px; }
@@ -488,7 +490,7 @@ button:disabled { opacity: .5; cursor: default; }
 .node.card:hover { box-shadow: 0 1px 2px rgb(15 23 42 / 6%), 0 4px 10px -4px rgba(17,24,39,.14); }
 .node.card.has-kids { padding-left: var(--c-pad); box-shadow: 0 1px 2px rgb(15 23 42 / 6%); }
 .node.card.has-kids:hover { box-shadow: 0 1px 2px rgb(15 23 42 / 6%), 0 4px 10px -4px rgba(17,24,39,.14); }
-.node.card.selected, .node.card.selected:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 4px 12px -6px rgba(51,88,255,.4); }
+.node.card.selected, .node.card.selected:hover { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 4px 12px -6px rgba(49,94,202,.4); }
 /* Silhouettes by family (3.1), kept at every zoom: a participant is rounder, a store has its 4px spine and a double rule under its
    head, a trigger or gate has square top corners under a heavier top edge; a process and a neutral part keep 8px corners. */
 .node.card.f-participant { border-radius: 14px; }
@@ -596,9 +598,9 @@ button:disabled { opacity: .5; cursor: default; }
 .node.card .plan-note:empty { display: none; }
 .space.dim .node.card:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) :is(.c-row, .c-val, .c-cline, .c-ops, .c-kind) { color: var(--text-4); }
 /* The short expansion (짧은 펼침): over the card and the empty space beside it, in the selection's accent; nothing under it moves. */
-.expansion { position: absolute; z-index: 6; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 3px rgba(51,88,255,.16), 0 14px 28px -14px rgba(16,24,40,.32); cursor: default; user-select: text; text-align: left; }
+.expansion { position: absolute; z-index: 6; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; overflow: hidden; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 0 0 3px rgba(49,94,202,.16), 0 14px 28px -14px rgba(16,24,40,.32); cursor: default; user-select: text; text-align: left; }
 .expansion:focus { outline: none; }
-.expansion:focus-visible { box-shadow: 0 0 0 3px rgba(51,88,255,.34), 0 14px 28px -14px rgba(16,24,40,.32); }
+.expansion:focus-visible { box-shadow: 0 0 0 3px rgba(49,94,202,.34), 0 14px 28px -14px rgba(16,24,40,.32); }
 .expansion.f-participant { border-radius: 18px; }
 .expansion.grow { transition: left .2s cubic-bezier(.2,.7,.2,1), top .2s cubic-bezier(.2,.7,.2,1), width .2s cubic-bezier(.2,.7,.2,1), height .2s cubic-bezier(.2,.7,.2,1); }
 .expansion.grow > * { animation: xp-in .2s ease both; }
@@ -731,7 +733,7 @@ button:disabled { opacity: .5; cursor: default; }
 /* The scope's own boundary end (the scope itself): solid, it is here, not elsewhere; it selects the scope part in place. */
 .ghost.self { border-style: solid; border-color: var(--line); background: var(--surface-2); color: var(--text-2); }
 .ghost.self.related { border-color: var(--accent-line); color: var(--accent); }
-.ghost.self.selected { border-color: var(--accent); background: var(--surface); color: var(--text); box-shadow: 0 0 0 3px rgba(51,88,255,.16); }
+.ghost.self.selected { border-color: var(--accent); background: var(--surface); color: var(--text); box-shadow: 0 0 0 3px rgba(49,94,202,.16); }
 .ghost-name { max-width: 100%; font-weight: var(--fw-name); line-height: 17px; overflow-wrap: anywhere; }
 /* Where a run of outside partners belongs, once over the run (map-layout GhostHead): a small tracked caption. */
 /* Drawn as map-layout headNeed measures it (590 11px through app.ts measureName, .04em = HEAD_TRACK): change both together. */
@@ -883,12 +885,8 @@ button:disabled { opacity: .5; cursor: default; }
 .space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):not(.s-long):not(.s-sparse) .edge-line { --lw: 2.25; }
 .space .world .edge.fv-emph:not(.on):not(.agg):not(.sum):not(.lit):not(.sc-path):not(.lg-pick):is(.s-long, .s-sparse) .edge-line { stroke: var(--text-2); }
 .space .world .edge-label.fv-emph { color: var(--text); border-color: var(--text-3); }
-/* What a lens does to the map (view-lens lensLook): each channel's lines at its opacity, lifted families with a firmer edge.
-   Selection, hover, a scenario path and the legend's own marks stay over it. */
-.space .edge.c-data:not(.on):not(.near):not(.lg-pick):not(.sc-path):not(.lit) .edge-line { opacity: var(--lo-data, 1); }
-.space .edge.c-control:not(.on):not(.near):not(.lg-pick):not(.sc-path):not(.lit) .edge-line { opacity: var(--lo-control, 1); }
-.space .edge.c-uses:not(.on):not(.near):not(.lg-pick):not(.sc-path):not(.lit) .edge-line { opacity: var(--lo-uses, 1); }
-.space .edge.k-related:not(.on):not(.near):not(.lg-pick):not(.sc-path):not(.lit) .edge-line { opacity: var(--lo-related, 1); }
+/* What a lens does to the map (view-lens lensLook): its subject's lines whole, the rest in a solid quieter tone (craft spec, never an
+   opacity: see the end of this file), lifted families with a firmer edge. Selection, hover, a scenario path and the legend's marks stay over it. */
 .space.lens-start .edge.c-control .edge-line { --lw: 2; stroke: var(--text-2); }
 .space.lens-data .edge.c-data .edge-line { stroke: var(--text-3); }
 .space.lens-lift-store .node.f-store, .space.lens-lift-trigger .node.f-trigger { border-color: var(--text-3); box-shadow: 0 0 0 1px var(--text-3); }
@@ -1023,7 +1021,7 @@ button:disabled { opacity: .5; cursor: default; }
 .record summary::-webkit-details-marker { display: none; }
 .record details[open] summary { border-bottom: 1px solid var(--hair); border-radius: var(--r-pop) 10px 0 0; }
 .record.flash details { animation: flash 1.4s ease; }
-@keyframes flash { 0%, 40% { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(51,88,255,.15); } }
+@keyframes flash { 0%, 40% { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(49,94,202,.15); } }
 .rec-top { display: flex; align-items: center; gap: var(--s-2); font-size: 12px; line-height: 16px; color: var(--text-3); }
 .rec-kind { font-weight: var(--fw-name); color: var(--text-2); }
 .rec-part { height: 18px; padding: 0 6px; border-radius: var(--r-sm); background: var(--chip); line-height: 18px; color: var(--text-2); }
@@ -1773,7 +1771,7 @@ button:disabled { opacity: .5; cursor: default; }
 .space.rest-sum .edge:not(.sum), .space:not(.rest-sum) .edge.sum { display: none; }
 /* With a selection on a busy map: its own lines are drawn one by one; everything else stays the dimmed summary, each line
    holding only the relations not drawn on their own (a summary left with none gives way, .hit). */
-.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx):not(.sc-path) { display: none; }
+.space.sel-sum .edge:not(.sum):not(.on):not(.near):not(.ctx):not(.sc-path):not(.ff-flow):not(.ff-ctx) { display: none; }
 .space.sel-sum .edge.sum:not(.hit) { display: block; }
 .edge-count { position: absolute; min-width: 24px; height: 16px; padding: 0 5px; white-space: nowrap; border: 0; border-radius: 4px; background: var(--bg); box-shadow: none; color: var(--text-3); font-size: 11px; line-height: 16px; font-weight: var(--fw-name); text-align: center; font-variant-numeric: tabular-nums; }
 .edge-count.beside { color: var(--text-4); }
@@ -2839,7 +2837,7 @@ li > .port + .fn-marks { margin: 0; padding-top: 6px; }
    recorded (「유형 미기록 · 단계 N」); never a family it was not given. */
 .node.card.structural { border-color: var(--line-essential); box-shadow: 0 1px 2px rgb(15 23 42 / 6%), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--fam-neutral-edge); }
 .node.card.structural:hover { box-shadow: 0 1px 2px rgb(15 23 42 / 6%), 0 4px 10px -4px rgba(17,24,39,.14), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--fam-neutral-edge); }
-.node.card.structural.selected, .node.card.structural.selected:hover { box-shadow: 0 0 0 1px var(--accent), 0 4px 12px -6px rgba(51,88,255,.4), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--fam-neutral-edge); }
+.node.card.structural.selected, .node.card.structural.selected:hover { box-shadow: 0 0 0 1px var(--accent), 0 4px 12px -6px rgba(49,94,202,.4), inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--fam-neutral-edge); }
 .node.card.structural .c-kind-word.unknown { color: var(--text-3); }
 /* A loop container (its well): framed in its family's edge; the ↻ tab reads on every card with a recorded loop, at every tier. */
 .node.card.has-well:not(.selected) { border-color: var(--fam-edge); }
@@ -3481,7 +3479,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space .world .edge .edge-line { stroke-width: calc(var(--bw) * var(--u, 1) * 1px); }
 /* A reference's long dash is faint (B1): lighter than a line of the same role. */
 .space .world .edge.s-long.lf-fg:not(.on):not(.near):not(.lit):not(.lg-pick):not(.sc-path) .edge-line { stroke-opacity: .75; }
-/* B5: a background line stays visible: the lens fades it to --lo (0.55), nothing fainter; a route round other parts on a busy map
+/* B5: a background line stays visible: a solid tone of its own (craft spec: never an opacity); a route round other parts on a busy map
    is not ghosted any more (B3 gives it its own room). */
 .space.dense-lines .world .edge.detour:not(.planned):not(.revised):not(.s-long) .edge-line { stroke-opacity: 1; }
 .space.rest-sum.dense-lines .world .edge.sum.agg.detour:not(.planned):not(.revised):not(.s-long) .edge-line { stroke-opacity: 1; }
@@ -3570,3 +3568,74 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .node.card.k-external { background: var(--ext-bg); border-color: var(--ext-edge); }
 .node.card.k-external :is(.c-kind, .c-tag-line:not(:first-child)) { color: var(--ext-ink); }
 .edge-labels > .edge-cue.cue-bg:not(.near):not(:hover):not(.lg-pick) { opacity: .5; }
+
+/* ---------- beauty v5 · the first screen's focus (first-flow.ts, ruling F6 Q2) ----------
+   The record's own first sentence fixed at the canvas's top left (18–20px, two lines at most), 「먼저 볼 연결」 under it, and the sentence
+   the lines stand on when it is not the top one (one line). At rest only (a selection owns the accent), by the reading focus, never by
+   importance: the picked lines 3px in the accent (2.25 once the person picks a lens: .ff-soft), their context 2.25px, the lens's
+   background lines 1.15px with their labels at rest in a quieter tone (only a label that would collide gives way, as everywhere; a
+   lens's foreground keeps its own weight, and its labels their full tone once the person picks it). Once a lens is picked the lines
+   step back whole: their stroke to the spine colour and their heads with it (markLines). Card text never fades here, except under
+   상태·공백, where the fade is the lens's information. Arrowhead grammar unchanged. */
+.focus-top { position: absolute; left: 16px; top: 16px; z-index: 3; max-width: min(860px, calc(100% - var(--plan-w, 0px) - 32px)); display: flex; flex-direction: column; gap: 4px; padding: 8px 14px 7px; background: rgba(245,246,248,.94); border: 1px solid var(--line); border-radius: var(--r-pop); box-shadow: var(--shadow-sm); pointer-events: none; }
+.focus-top > * { pointer-events: auto; }
+.focus-top .ft-sentence { margin: 0; padding: 0; border: 0; background: none; text-align: left; font: inherit; font-size: 19px; line-height: 26px; font-weight: var(--fw-name); letter-spacing: -.01em; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
+.focus-top button.ft-sentence { cursor: pointer; }
+.focus-top button.ft-sentence:hover { color: var(--accent-strong); }
+.focus-top button.ft-sentence:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.focus-top.ft-under .ft-sentence { display: none; }
+.focus-top.ft-one .ft-sentence { -webkit-line-clamp: 1; }
+.focus-top .ft-switch { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font-size: 13px; line-height: 20px; color: var(--text-2); }
+.focus-top .ft-name { font-weight: var(--fw-name); color: var(--accent-strong); }
+.focus-top .ft-name::before { content: ''; display: inline-block; width: 16px; height: 3px; margin: 0 6px 3px 0; border-radius: 2px; background: var(--accent); vertical-align: middle; }
+.focus-top .ft-dot { color: var(--text-4); }
+.focus-top .ft-b { height: 22px; min-width: 22px; padding: 0 6px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font: inherit; font-size: 12.5px; line-height: 20px; cursor: pointer; }
+.focus-top .ft-b:hover { border-color: var(--line-hover); color: var(--text); }
+.focus-top .ft-b:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.focus-top .ft-basis { margin: 0; min-width: 0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.focus-top .ft-basis-l { margin-right: 6px; color: var(--text-3); font-weight: var(--fw-name); }
+.focus-top .ft-basis.none .ft-basis-t { color: var(--text-3); }
+#space.ff-on.ff-rest .world .edge.lf-bg:not(.ff-flow):not(.ff-ctx):not(.s-sparse):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked) { --bw: 1.15; }
+#space.ff-on.ff-rest .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) { --bw: 2.25; }
+#space.ff-on.ff-rest .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) .edge-line { stroke: var(--edge-spine); stroke-opacity: 1; opacity: 1; }
+#space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 3; }
+#space.ff-on.ff-rest.ff-soft .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 2.25; }
+#space.ff-on.ff-rest:not(.ff-soft) .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--accent); stroke-opacity: 1; opacity: 1; }
+#space.ff-on.ff-rest.ff-soft .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--edge-spine); stroke-opacity: 1; opacity: 1; }
+#space.ff-on .world .edge.ff-fold:not(.on):not(.near):not(.lg-pick) { display: none; }
+#space.ff-on .edge-labels > .ff-folded:not(.near) { display: none; }
+#space.ff-on.ff-rest .edge-labels > :not(.ff-keep):not(.edge-cue):not(.edge-label):not(.near):not(:hover) { opacity: .6; }
+/* Craft spec (review of v5 focus 3): a line label on its halo is never made faint by an opacity (the line would show through its words);
+   a background label reads in the quieter text tone instead. */
+#space.ff-on.ff-rest .edge-labels > .edge-label:not(.ff-keep):not(.near):not(:hover) { color: var(--text-4); }
+#space.ff-on:not(.lens-state) .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible),
+#space.ff-on:not(.lens-state) .node.lg-fade, #space.ff-on:not(.lens-state) .ghost.lg-fade { opacity: 1; filter: none; border-color: var(--hair-2); box-shadow: none; }
+#space.ff-on:not(.lens-state) .node:is(.lens-off, .lg-fade) :is(.dot, .ladder, .c-tag-icon, .node-signs, .c-loop-tab) { opacity: .55; }
+.ff-note { position: absolute; z-index: 4; width: max-content; display: flex; gap: 6px; align-items: baseline; max-width: 260px; padding: 3px 8px; border: 1px solid var(--accent-line); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow-sm); font-size: 12px; line-height: 17px; color: var(--text-2); pointer-events: auto; }
+.ff-note-label { flex: none; font-weight: var(--fw-name); color: var(--accent-strong); }
+.ff-note-text { min-width: 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: keep-all; overflow-wrap: anywhere; }
+.ff-note-label { white-space: nowrap; }
+.ff-fold-chip { position: absolute; z-index: 4; box-shadow: var(--shadow-sm); height: 20px; padding: 0 7px; border: 1px dashed var(--line-hover); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font: inherit; font-size: 11.5px; line-height: 18px; font-weight: var(--fw-name); white-space: nowrap; cursor: pointer; }
+.ff-fold-chip.open { border-style: solid; }
+.ff-fold-chip:hover { color: var(--text); border-color: var(--text-3); }
+.ff-fold-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ---------- craft spec, first priority (위계/토큰; review of v5 focus 3) ----------
+   One accent (#315eca, the :root token) for the view's lines, borders and heads. A line is never made faint with an opacity: each
+   channel in its own solid colour at 1.15px (data #5f748e 4.32:1, control #748093 3.60:1, reference #7a8496 3.39:1 on the canvas);
+   a lens with a subject of its own (데이터, 시작·반복, 시나리오) draws the rest in one solid quieter tone, #7e8a9d (3.15:1 on #f6f7f9),
+   never an opacity. Heads follow their line (context-stroke). */
+.edge.c-data { --edge-c: #5f748e; }
+.edge.c-control { --edge-c: #748093; }
+.edge.c-uses { --edge-c: #7a8496; }
+.space:is(.lens-data, .lens-start, .lens-scenario) .world .edge.lf-bg { --edge-c: #7e8a9d; }
+/* The view's cards: a 1.5px accent edge on a normal face; the one start card (only where the record backs a start, first-flow startCard)
+   a light accent face and a 2px accent edge. Screen pixels at every zoom; the card's words keep their own colours. */
+#space.ff-on.ff-rest:not(.ff-soft) .node.ff-card:not(.selected) { border-color: var(--accent); outline: calc(1.5px * var(--u, 1)) solid var(--accent); outline-offset: calc(-1.5px * var(--u, 1)); }
+#space.ff-on.ff-rest:not(.ff-soft) .node.ff-start:not(.selected) { background: #eef3ff; border-color: var(--accent); outline: calc(2px * var(--u, 1)) solid var(--accent); outline-offset: calc(-2px * var(--u, 1)); }
+/* Line labels: 12px/500/16 in the label colour (#526176, apart from the line's colour), on a 3px halo of the ground they stand on
+   (--halo, app.ts haloLabels: a group's face where they stand in one, else the canvas), not a box. */
+.space .edge-labels > .edge-label:not(.on):not(.near):not(.type-chip):not(.revised) { height: 16px; padding: 0 1px; font-size: 12px; line-height: 16px; font-weight: 500; color: #526176; background: transparent; box-shadow: none;
+  -webkit-text-stroke: 6px var(--halo, var(--bg)); paint-order: stroke fill; stroke-linejoin: round; }
+/* A condition's label: a small rounded rectangle (radius 5, 22 high, 6 a side), never a pill; its words in the label colour. */
+.space .edge-labels > .edge-badge.b-condition:not(.on) { height: 22px; padding: 0 6px; border-radius: 5px; font-size: 12px; line-height: 20px; color: #526176; }

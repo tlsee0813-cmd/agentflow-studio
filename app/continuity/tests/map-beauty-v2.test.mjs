@@ -106,6 +106,6 @@ test('BV2-6 the built map: the face switch on the camera, the tag fit, the symbo
   // The hover card reads what left the face: the kind rows and the inner line.
   assert.ok(body(src, 'bindEdgeHints').includes("class: 'hc-row'"));
   // A4: the first view is the whole map where its tags read (FIRST_FIT_MIN); further out its focus at OPEN_MIN.
-  const fv = body(src, 'fitView');
+  const fv = body(src, 'fitView') + body(src, 'frameView');
   assert.ok(/const FIRST_FIT_MIN = 0\.3\d;/.test(src) && fv.includes('fit >= FIRST_FIT_MIN'));
 });

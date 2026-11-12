@@ -46,7 +46,7 @@ import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirs
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, markPx, markResize, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
-import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensLook, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
+import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
@@ -57,7 +57,8 @@ import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns,
 import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
-import { splitRecordChunks } from '../shared/record-table.js';
+import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
+import { firstFlow, startCard, hubFolds, foldedLines, foldWord, switcherText, sourceText, summarySource, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -2345,7 +2346,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     onclick: () => { metaOpen = !metaOpen; renderSpace('keep'); } }, metaOpen ? '기록 정보 접기 ▴' : '기록 정보 ▾') : null;
   const title = h('header', { class: `map-title${metaOpen ? ' meta-open' : ''}` }, h('h1', { class: 'map-name' }, sp ? sp.name : o.project.name),
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
-    metaBtn, meta.length ? h('div', { class: 'map-meta' }, ...meta) : null, scenarioStrip(o),
+    // Review of v5 focus 3 (A3): the record's time and version stay in sight at rest, under 「기록 정보 ▾」 (the whole line in its tip and,
+    // opened, under it).
+    metaBtn, !metaOpen && basis ? h('span', { class: 'map-when', title: basis.title }, basis.textContent) : null, meta.length ? h('div', { class: 'map-meta' }, ...meta) : null, scenarioStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -2370,6 +2373,8 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // groups they pass; they step back until selected, hovered or read as a change's context (kind, direction and hover meaning
   // unchanged).
   syncLineMode();
+  // Beauty v5: the first screen's focus (its top line's height counts in the fit below).
+  drawFocus();
   $('add-part').hidden = o.kind !== 'saved';
   $('arrange').hidden = !view.parts.length;
   renderPartForm();
@@ -2562,7 +2567,7 @@ let restRouted = new Map<string, Routed>(), shownKey = '';
 function routeShown() {
   if (dragQuick) return;
   const world = $('world'), sel = $('space').classList.contains('sel-sum');
-  const gs = sel ? [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => (g.classList.contains('sum') ? !g.classList.contains('hit') : ['on', 'path', 'ctx', 'sc-path'].some(c => g.classList.contains(c)))) : [];
+  const gs = sel ? [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => (g.classList.contains('sum') ? !g.classList.contains('hit') : ['on', 'path', 'ctx', 'sc-path', 'ff-flow', 'ff-ctx'].some(c => g.classList.contains(c)))) : [];
   const set = gs.map(g => edgeOf(g.dataset.key)).filter((e): e is Edge => !!e);
   const key = set.map(e => `${e.key}:${e.ids.length}`).join('|');
   if (key === shownKey) return;
@@ -2610,17 +2615,19 @@ const edgeOf = (key: string | undefined) => (key?.startsWith('sum:') ? sums : la
 /** A summary line that, beside the selection, holds fewer relations than at rest. */
 const restOf = (e: Edge) => e.key.startsWith('sum:') && sums !== restSums && (restSums.find(x => x.key === e.key)?.ids.length ?? 0) > e.ids.length;
 function syncLineMode() {
-  const sp = $('space'), rest = !selected && !scView && !planView.isOpen() && restSums.length > 0;
+  const sp = $('space'), ff = ffActive(), rest = !selected && !scView && !ff && !planView.isOpen() && restSums.length > 0;
   sp.classList.toggle('rest-sum', rest);
-  // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum).
-  sp.classList.toggle('sel-sum', (!!selected || !!scView) && !planView.isOpen() && restSums.length > 0);
+  // A selection on a busy map: its own lines one by one, the rest as the dimmed summary (see .sel-sum). Beauty v5: the first screen's
+  // flow is drawn the same way at rest.
+  sp.classList.toggle('sel-sum', (!!selected || !!scView || ff) && !planView.isOpen() && restSums.length > 0);
+  sp.classList.toggle('ff-rest', ff && !selected && !planView.isOpen());
   // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
   sp.classList.toggle('dense-lines', lay.edges.length >= 12);
 }
 /** Selected lines, a change's context lines, lines inside one group and lines that cross nothing else read above the groups. */
 function layerEdge(el: Element) {
   const top = document.querySelector('#world .edges-top'), base = document.querySelector('#world .edges:not(.edges-top)');
-  const layer = ['on', 'ctx', 'inner', 'clear', 'sc-path'].some(c => el.classList.contains(c)) ? top : base;
+  const layer = ['on', 'ctx', 'inner', 'clear', 'sc-path', 'ff-flow'].some(c => el.classList.contains(c)) ? top : base;
   if (layer && el.parentNode !== layer) layer.append(el);
 }
 /** The routes drawn last (positionWorld): the polylines the verbs and counts are placed on. */
@@ -2650,7 +2657,26 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); dropRowIds(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); }
+function placeEdgeLabels() { placeLineLabels(); dropRowIds(); haloLabels(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); markFocusLabels(); placeFocusMarks(); syncFocusTop(); }
+/** Craft spec (라벨 halo 3px, 바탕색): each line label's halo is the ground it actually stands on: the face of the innermost group drawn
+ * under its middle (a region's or a tinted group's colour, over the canvas), else the canvas itself. */
+function haloLabels() {
+  const world = $('world'), root = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#f4f5f7';
+  const rgb = (c: string): [number, number, number, number] | null => {
+    const m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,/\s]+([\d.]+))?\s*\)/.exec(c); if (m) return [+m[1]!, +m[2]!, +m[3]!, m[4] === undefined ? 1 : +m[4]];
+    const x = /^#([0-9a-f]{6})$/i.exec(c.trim()); return x ? [parseInt(x[1]!.slice(0, 2), 16), parseInt(x[1]!.slice(2, 4), 16), parseInt(x[1]!.slice(4), 16), 1] : null;
+  };
+  const frames = [...lay.boxes.values()].filter(b => b.kind === 'frame').sort((a, b) => a.depth - b.depth), faces = new Map<string, [number, number, number, number] | null>();
+  const faceOf = (id: string) => { if (!faces.has(id)) { const el = world.querySelector<HTMLElement>(`.frame[data-box="${CSS.escape(id)}"]`); faces.set(id, el ? rgb(getComputedStyle(el).backgroundColor) : null); } return faces.get(id)!; };
+  const k = lineInv();
+  for (const el of world.querySelectorAll<HTMLElement>('.edge-labels > .edge-label')) {
+    const x = (parseFloat(el.style.left) || 0) + el.offsetWidth * k / 2, y = (parseFloat(el.style.top) || 0) + el.offsetHeight * k / 2;
+    // The ground, outermost first: each group face over what lies under it (a 2% tint over the canvas reads as its own grey).
+    let c = rgb(root) ?? [244, 245, 247, 1];
+    for (const f of frames) if (x >= f.x && x <= f.x + f.w && y >= f.y && y <= f.y + f.h) { const g = faceOf(f.id); if (g && g[3] > 0) c = [0, 1, 2].map(i => Math.round(g[i]! * g[3] + c[i]! * (1 - g[3]))).concat(1) as typeof c; }
+    el.style.setProperty('--halo', `rgb(${c[0]}, ${c[1]}, ${c[2]})`);
+  }
+}
 /** Beauty v4 (P3): the last guard that no line label, badge or chip on the map shows a record row ID (CD01, B12, N02.63, LN13): each
  * reads the record's own words for that row where the map has them, else without the ID; a label with nothing of its own left goes
  * (its words read on hover, as written). A condition's or 선택 badge keeps its kind word then (a conditional line never reads as one
@@ -3097,7 +3123,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     // The protected order first (6.3: a path's labels, the spine's, a line naming what it hands over or what starts it, the rest),
     // then better places across all labels: every label's first place before any label's second.
     const word = wordOf(e), said = word !== (REL_LABEL[e.kind] ?? e.kind) && word !== '제어' && word !== '참조';
-    const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path'), spine: g.classList.contains('spine') || g.classList.contains('fv-emph'), said });
+    const rank = labelRank({ path: g.classList.contains('on') || g.classList.contains('sc-path') || g.classList.contains('ff-flow'), spine: g.classList.contains('spine') || g.classList.contains('fv-emph'), said });
     mine.forEach((r, i) => spots.push({ key: e.key, ...r, dist: i + ('beside' in r && r.beside ? 100 : 0), rank, el: label }));
   }
   const { kept, dropped } = resolveLabels(spots, 6);
@@ -3182,8 +3208,8 @@ function applyCamera(animate = false) {
   // their places are found again when the scale changed enough to matter.
   const inv = Math.min(1 / 0.3, Math.max(0.625, 1 / camera.k));
   sp.style.setProperty('--inv', inv.toFixed(3));
-  // Line labels follow the zoom a little (11–14px on screen, line-grammar labelPx): never heavier than a card's name far out.
-  sp.style.setProperty('--linv', (labelPx(camera.k) / (13 * camera.k)).toFixed(3));
+  // Craft spec (라벨 12/500): a line label reads 12px on screen at the first screen's zooms, growing with labelPx nearer in (never under 12).
+  sp.style.setProperty('--linv', (Math.max(12, labelPx(camera.k)) / (12 * camera.k)).toFixed(3));
   if ((Math.abs(inv - placedInv) / placedInv > 0.08 || tier !== placedTier) && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
   updateSticky();
   saveViewSoon();
@@ -3195,17 +3221,115 @@ function applyCamera(animate = false) {
 function fitView(explicit: boolean, animate = false) {
   const o = opened; if (!o) return;
   syncMapArea();
+  // Review of v5 focus (judges #9): the top line is top left and narrow, so the fit keeps room only for what it covers: first the map
+  // framed under the strip alone; if anything of the map would stand under the top line there, the same frame a little smaller (at most
+  // FT_GIVE) where nothing does; else where nothing stands under its short form (the sentence steps back, the switcher stays); else the
+  // room of that short form above the map. Review of v5 focus 3 (A2, A3): 「anything」 is a card, a lane caption, a drawn line's route, a
+  // label on the map or the map's own title, and the top line stands beside that title while the title is in its rows (ftPlace).
+  if (!ftShown()) { frameView(explicit, topInset() - ftH()); applyCamera(animate); return; }
+  const base = topInset() - ftH(), at = frameView(explicit, base);
+  const scene = ftScene(), ink = titleInk();
+  const inkAt = (k: number) => (k >= TITLE_FLOOR_K ? ink : null);
+  let done = false;
+  if (at.whole) for (const form of [null, 'ft-one', 'ft-under'] as const) {
+    for (let k = at.k; k >= at.k - FT_GIVE - 1e-9 && !done; k -= 0.002) { at.place(k); done = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); }
+    if (done) break;
+  }
+  // Else the least room above the map (8px at a time) where one form stands clear beside the title; at worst the short form's room.
+  const most = at.whole ? ftBox(null, camera, null).h + 8 : 0;
+  for (let d = 8; d <= most && !done; d += 8) {
+    const a2 = frameView(explicit, base + d); if (!a2.whole) break;
+    for (const form of [null, 'ft-one', 'ft-under'] as const) if (!ftCovers(ftBox(form, camera, inkAt(camera.k)), camera, scene, inkAt(camera.k))) { done = true; break; }
+  }
+  if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
+  applyCamera(animate);
+}
+/** What the top line must never stand over, besides the drawn lines and the labels (ftScene): the cards (and ghosts) and the lanes'
+ * captions (map units). */
+const ftObstacles = (): Rect[] => [...[...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost'), ...bandRects];
+/** How far the fit may shrink to keep the map from under the top line (3 points of zoom). */
+const FT_GIVE = 0.03;
+/** Whether the top line is shown. */
+const ftShown = () => { const el = document.getElementById('focus-top'); return !!el && !el.hidden && !!el.offsetWidth; };
+type Cam = { x: number; y: number; k: number };
+/** What the top line must never stand over (review of v5 focus 3, A2), read once per check: the cards and lane captions, the drawn lines'
+ * routes, and every label, badge, count, port mark, note and fold chip shown on the map (map units at their place; their size follows the
+ * zoom, so each says how it scales). */
+type FtScene = { boxes: Rect[]; routes: Point[][]; marks: { x: number; y: number; w: number; h: number; line: boolean }[] };
+function ftScene(): FtScene {
+  const world = $('world'), shown = shownLines(), marks: FtScene['marks'] = [];
+  world.querySelectorAll<HTMLElement>('.edge-labels > *, .ff-note, .ff-fold-chip').forEach(el => {
+    if (!el.offsetWidth) return; const cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden') return;
+    marks.push({ x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0, w: el.offsetWidth, h: el.offsetHeight, line: el.classList.contains('edge-label') });
+  });
+  return { boxes: ftObstacles(), routes: [...lastRouted.values()].filter(r => shown.has(r.key) && r.pts.length > 1).map(r => r.pts), marks };
+}
+/** Whether a box (in the camera's frame, as ftBox measures it) stands over anything of the map for this camera: a card, a lane caption, a
+ * drawn line, a label or chip (at the size it has at this zoom), or the map's own title as drawn. */
+function ftCovers(r: Rect, cam: Cam, scene: FtScene, ink: Rect | null): boolean {
+  const k = cam.k, m: Rect = { x: (r.x - cam.x) / k, y: (r.y - cam.y) / k, w: r.w / k, h: r.h / k };
+  const hit = (b: Rect) => b.x < m.x + m.w && m.x < b.x + b.w && b.y < m.y + m.h && m.y < b.y + b.h;
+  if (scene.boxes.some(hit) || (ink && hit(ink))) return true;
+  if (scene.routes.some(pts => polylineHitsRect(pts, m, 0))) return true;
+  const inv = Math.min(1 / 0.3, Math.max(0.625, 1 / k)), linv = Math.max(12, labelPx(k)) / (12 * k);
+  return scene.marks.some(x => { const s = x.line ? linv : inv; return hit({ x: x.x, y: x.y, w: x.w * s, h: x.h * s }); });
+}
+/** The map's own title as drawn, in map units: its name, its 「기록 정보 ▾」 and the record's time beside it, a purpose or scenario row
+ * (each child's ink, never the title's whole column); null when no title is drawn. */
+function titleInk(): Rect | null {
+  const el = document.querySelector<HTMLElement>('#world > .map-title'); if (!el || el.hidden || !titleH || !el.offsetWidth) return null;
+  const R = el.getBoundingClientRect(), s = R.width / el.offsetWidth; if (!(s > 0)) return null;
+  let right = 0, bottom = 0;
+  for (const c of el.children) {
+    if (!(c instanceof HTMLElement) || !c.getClientRects().length) continue;
+    const range = document.createRange(); range.selectNodeContents(c);
+    for (const q of [...range.getClientRects()]) if (q.width && q.height) { right = Math.max(right, (q.right - R.left) / s); bottom = Math.max(bottom, (q.bottom - R.top) / s); }
+  }
+  if (!right) return null;
+  const t = titleRect(), x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+  return { x: Number.isFinite(x) ? x : t.x, y: Number.isFinite(y) ? y : t.y, w: right, h: bottom };
+}
+/** The top line's place for a camera (review of v5 focus 3, A3): beside the map's own title while that title stands in its rows, so the
+ * title, its 「기록 정보 ▾」 and the record's time stay in sight and within reach at rest; else at the window's left. Sets its left and
+ * width (no room of 320px beside the title: it stays at the left and the fit frames the title under it instead). */
+function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
+  el.style.left = ''; el.style.maxWidth = '';
+  if (!ink) return;
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
+  const t = { x: ox + cam.x + ink.x * cam.k, y: oy + cam.y + ink.y * cam.k, w: ink.w * cam.k, h: ink.h * cam.k };
+  const r = { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight };
+  if (!(t.x < r.x + r.w + 8 && r.x - 8 < t.x + t.w && t.y < r.y + r.h + 8 && r.y - 8 < t.y + t.h)) return;
+  const left = Math.round(t.x + t.w + 24), room = $('space').clientWidth - (parseFloat(getComputedStyle($('space')).getPropertyValue('--plan-w')) || 0) - left - 16;
+  if (room < 320) return;
+  el.style.left = `${left}px`; el.style.maxWidth = `${Math.min(860, room)}px`;
+}
+/** The top line's box in the camera's frame (the viewport's) in one form (null: whole; ft-one: its sentence on one line; ft-under: its
+ * sentence stepped back), placed for that camera, with a 6px margin; the line is left as it was. */
+function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
+  const el = $('focus-top'), v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
+  const was = FT_FORMS.filter(c => el.classList.contains(c)), left = el.style.left, maxW = el.style.maxWidth;
+  el.classList.remove(...FT_FORMS); if (form) el.classList.add(form); ftPlace(el, cam, ink);
+  const out = { x: el.offsetLeft - ox - 6, y: el.offsetTop - oy - 6, w: el.offsetWidth + 12, h: el.offsetHeight + 12 };
+  el.classList.remove(...FT_FORMS); el.classList.add(...was); el.style.left = left; el.style.maxWidth = maxW;
+  return out;
+}
+/** The top line's shorter forms: its sentence on one line, or stepped back. */
+const FT_FORMS = ['ft-one', 'ft-under'];
+/** The whole view in the free area under `base` (the top inset without the top line): sets the camera and says its scale, whether it
+ * framed the whole map (no pan onto a focus), and how to set the same frame at a smaller scale. */
+type Framed = { k: number; whole: boolean; place: (k: number) => void };
+function frameView(explicit: boolean, base: number): Framed {
   const vp = $('viewport').getBoundingClientRect(), left = SAFE_SIDE, right = SAFE_SIDE, bottom = mapBottomInset();
   // Beauty v3 (F.1): while the map's own title reads in the frame the title chip is hidden, so its row (SAFE_TOP) is the map's: the
   // safe top is just under the strip. Only a fit that drops the title keeps the chip's row.
-  let top = topInset() + 16;
+  let top = base + 16;
   const w = Math.max(200, vp.width - left - right), room = (t: number) => Math.max(160, mapBottom() - t - bottom);
   // The map's own title is part of the whole view while it can be read there; below the text floor it is hidden and the title chip
   // at the top left says the name (map hygiene H3), so the fit does not keep room for it.
   const fitOf = (b: Rect, t = top) => Math.min(1, w / Math.max(1, b.w + 16), room(t) / Math.max(1, b.h + 16));
   let B = drawnBounds(), fit = fitOf(B);
   if (!titleH || fit < TITLE_FLOOR_K) {
-    top = Math.max(SAFE_TOP, topInset() + 12); fit = fitOf(B);
+    top = Math.max(SAFE_TOP, base + 12); fit = fitOf(B);
     // Without the title the whole map may fit at a scale where the title would be drawn again (at or above the floor): the fit stays
     // just under the floor then, so the title it left out of the frame stays hidden (the chip names the map).
     if (titleH && fit < TITLE_FLOOR_K) { const nb = drawnBounds(false); fit = Math.min(fitOf(nb), TITLE_FLOOR_K - 0.001); B = nb; }
@@ -3217,11 +3341,14 @@ function fitView(explicit: boolean, animate = false) {
   const k = explicit || fit >= FIRST_FIT_MIN || (f && fit < OPEN_MIN && (f.w * OPEN_MIN > w || f.h * OPEN_MIN > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
   // The whole view sits in the middle of the free area, both ways: the title and the parts together. A reading pane opened
   // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
-  const mw = B.w * k, mh = B.h * k, free = w - mw;
-  const xoff = free <= 0 ? 0 : free / 2;
-  // Beauty v3 (F.2): optical centring: of the free height 42% above, 58% below (the dock reads as weight at the bottom).
-  const yoff = mh <= hgt ? (hgt - mh) * 0.42 : 0;
-  camera = { k, x: left + xoff - B.x * k, y: top + yoff - B.y * k };
+  const place = (k: number) => {
+    const mw = B.w * k, mh = B.h * k, free = w - mw;
+    const xoff = free <= 0 ? 0 : free / 2;
+    // Beauty v3 (F.2): optical centring: of the free height 42% above, 58% below (the dock reads as weight at the bottom).
+    const yoff = mh <= hgt ? (hgt - mh) * 0.42 : 0;
+    camera = { k, x: left + xoff - B.x * k, y: top + yoff - B.y * k };
+  };
+  place(k);
   // Polish round fixes 1: a map that does not fit at the opening scale opens on what the first view points at (its emphasised parts,
   // else the main flow), centred where it can be, never past the map's own edges; not on its top-left corner and title.
   if (f && k >= OPEN_MIN && (B.w * k > w || B.h * k > hgt)) {
@@ -3230,8 +3357,9 @@ function fitView(explicit: boolean, animate = false) {
     camera = { k, x: B.w * k <= w ? camera.x : along(B.x, B.w, left, w, f.x + f.w / 2),
       y: B.h * k <= hgt ? camera.y : along(B.y, B.h, top, hgt, f.h * k > hgt ? f.y + (hgt / 2) / k : f.y + f.h / 2) };
     clearChrome(f, B, { left, top, w, hgt });
+    return { k, whole: false, place };
   }
-  applyCamera(animate);
+  return { k, whole: true, place };
 }
 /** A first view larger than the safe area (map hygiene H2): among small pans that keep its focus inside the safe area and the map's
  * edges no further in than the safe area's, the one with the fewest cards under the title chip, then the fewest cut by the window's
@@ -3241,7 +3369,7 @@ function clearChrome(f: Rect & { ids: string[] }, B: Rect, a: { left: number; to
   const k = camera.k, space = $('space'), vpw = $('viewport').clientWidth, vph = mapBottom();
   const chrome: Rect[] = [], sr = space.getBoundingClientRect();
   const own = (el: HTMLElement | null, pad: number) => { if (el && !el.hidden && el.offsetWidth) { const r = el.getBoundingClientRect(); chrome.push({ x: r.left - sr.left - pad, y: r.top - sr.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad }); } };
-  own(space.querySelector<HTMLElement>(':scope > .controls'), 8); own(document.getElementById('first-view'), 6); own(document.getElementById('line-key'), 6);
+  own(space.querySelector<HTMLElement>(':scope > .controls'), 8); own(document.getElementById('first-view'), 6); own(document.getElementById('line-key'), 6); own(document.getElementById('focus-top'), 6);
   // The title chip takes the top left while the map's own title is out of view.
   const chip: Rect = { x: 0, y: 0, w: Math.min(vpw, 420), h: Math.max(0, a.top - 12) };
   const cards = [...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost');
@@ -3287,7 +3415,7 @@ function clearChrome(f: Rect & { ids: string[] }, B: Rect, a: { left: number; to
 /** The parts the opening view centres on when the whole map does not fit (the first view's emphasis, else the main flow): their
  * boxes' bounds and their ids (the pan search weighs them most, clearChrome), or null. */
 function openFocus(): (Rect & { ids: string[] }) | null {
-  const ids = fvOn() && fvRec!.parts.length ? fvRec!.parts : lay.spine;
+  const fl = ffShown(), ids = fl && ffActive() ? fl.parts.map(p => opened ? drawnRep(opened, p) : p).filter((x): x is string => !!x) : fvOn() && fvRec!.parts.length ? fvRec!.parts : lay.spine;
   const bs = ids.map(id => lay.boxes.get(id)).filter((b): b is NonNullable<typeof b> => !!b); if (!bs.length) return null;
   const x = Math.min(...bs.map(b => b.x)), y = Math.min(...bs.map(b => b.y)), r = Math.max(...bs.map(b => b.x + b.w)), btm = Math.max(...bs.map(b => b.y + b.h));
   return { x, y, w: r - x, h: btm - y, ids };
@@ -3410,7 +3538,7 @@ const toScreen = (b: { x: number; y: number; w: number; h: number }): Rect => ({
 const union = <T extends Rect>(rs: T[]): Rect => { const x = Math.min(...rs.map(r => r.x)), y = Math.min(...rs.map(r => r.y)); return { x, y, w: Math.max(...rs.map(r => r.x + r.w)) - x, h: Math.max(...rs.map(r => r.y + r.h)) - y }; };
 /** The change plan's strip takes the top of the map while it is open. */
 const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 16 : strip.offsetTop + strip.offsetHeight + 10; };
-const topInset = () => stripInset() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
+const topInset = () => stripInset() + ftH() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
 function mapArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
 function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed', 'scenario-read'); readingFor = []; syncMapArea(); }
 const mapBottomInset = () => BOTTOM + legendInset();
@@ -3452,17 +3580,25 @@ function revealParts(ids: string[]) {
 function updateSticky() {
   const st = $('scope-sticky'), o = opened;
   if (!o || !titleH) { st.hidden = true; return; }
-  const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset();
+  syncFocusTop();
+  const vp = $('viewport').getBoundingClientRect(), t = toScreen(titleRect()), top = stripInset() + ftH();
+  // The title as drawn (its ink, not its column) and the top line in the camera's frame: the title reads in view under the strip, and
+  // under the top line only where that line stands over its columns (beside it, the title reads whole: review of v5 focus 3, A3).
+  const ink = titleInk(), ti = ink ? toScreen(ink) : t, ft = document.getElementById('focus-top'), v0 = $('viewport'), w0 = $('world');
+  const fr = ft && !ft.hidden ? { x: ft.offsetLeft - v0.offsetLeft - w0.offsetLeft, y: ft.offsetTop - v0.offsetTop - w0.offsetTop, w: ft.offsetWidth, h: ft.offsetHeight } : null;
+  const overCols = !!fr && fr.x < ti.x + ti.w && ti.x < fr.x + fr.w, below = overCols ? top : stripInset();
   st.style.top = `${top - 6}px`;
-  st.hidden = camera.k >= TITLE_FLOOR_K && t.y >= top - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
+  st.hidden = camera.k >= TITLE_FLOOR_K && t.y >= below - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
   // Map hygiene H2: the chip never covers a card (the header's path names the map all the same); it waits for room.
   if (!st.hidden) {
     const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
     const r = { x: st.offsetLeft - 4, y: st.offsetTop - 4, w: st.offsetWidth + 8, h: st.offsetHeight + 8 };
     st.hidden = [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k);
   }
-  // One title at a time: the map's own title steps back while its name is pinned.
-  document.querySelector('.map-title')?.classList.toggle('pinned', !st.hidden);
+  // One title at a time: the map's own title steps back while its name is pinned, and while the top line stands over it (never read
+  // through the top line's box).
+  const underTop = overCols && !!fr && fr.y < ti.y + ti.h && ti.y < fr.y + fr.h;
+  document.querySelector('.map-title')?.classList.toggle('pinned', !st.hidden || underTop);
 }
 /** The state of a part as the source of what is said about it: a received summary, a written plan, or nothing yet. */
 function stateText(part: PartView, records: RecordView[]): string {
@@ -3520,6 +3656,276 @@ function renderScopeLens() {
   l.hidden = false; syncMapArea();
 }
 function closeScopeReading() { scopeReading = false; if ($('lens').classList.contains('scope-read')) hideLens(); }
+
+/* ---------- the first screen's focus (beauty v5, ruling F6 Q2, first-flow.ts) ----------
+ * The record's own first sentence fixed at the canvas's top left (its C-SUMMARY, never the model's summary or the person's brief; its
+ * hover says it is the record's summary and where, and a press opens the source), and under it 「먼저 볼 연결」 chosen by fixed rules (the
+ * person's kept choice, a scenario, the summary's core-flow sentence, a first-structure line, a recorded start, or none), drawn on the
+ * lines the map already has in their own direction. When those lines stand on another sentence than the top one, that sentence shows
+ * under the switcher (one line, whole in its hover), so the top sentence never reads as their basis. At rest only (a selection owns the
+ * accent): the lines 3px in the accent (2.25 once the person picks a lens, and a recorded start's fan of more than three always), their
+ * context 2.25px, the lens's background lines 1.15px with their labels left to the hover. Card text never fades here, except under
+ * 상태·공백 (that lens's fade is its information). A card of the view with six or more other lines folds them behind one chip (「다른 연결
+ * N개」, N the lines it hides), never a recorded start's own card, never a line of the view. Nothing new is drawn on the map. */
+let ffNow: FirstFlow | null = null, ffSrc: (SummarySource & { label: string }) | null = null, ffOpen = new Set<string>(), ffFolds = new Map<string, string[]>(), ffFor = '';
+/** The person picked a lens on this map since it opened: the picked lines step back to the context weight (the lens keeps its own). */
+let ffLensPicked = false;
+/** The top line's height with its sentence whole (measured each sync): the fit keeps the map under it even while the sentence steps back. */
+let ftFull = 0;
+/** The lines drawn now (null: none, 전체 관계, inside a part, or a scenario lens shown). */
+const ffShown = (): FlowCandidate | null => (ffNow?.flow && !scope && !scView ? ffNow.flow : null);
+const ffActive = () => $('space').classList.contains('ff-on');
+/** The picked lines carry the accent only at rest, before the person picks a lens. */
+const ffLit = () => ffActive() && !selected && !planView.isOpen() && !ffLensPicked && !!ffShown() && !ffShown()!.soft;
+/** The newest map record's C-SUMMARY (its own first sentence and core-flow sentence) and where it stands. */
+function summaryOf(o: Opened): (SummarySource & { label: string }) | null {
+  const ids = new Set(o.project.readings.filter(isMapReading).flatMap(r => r.records.map(x => x.id)));
+  const recs = o.project.pasted.filter(p => ids.has(p.id)).map(p => {
+    const t = readRecordTables(p.text), table = (t.byId.get('C-SUMMARY') ?? []).filter(x => x.body.length).at(-1), page = table ? t.pages[table.page] ?? t.page : null;
+    return { id: p.id, body: table?.body ?? [], label: page ? `기록 ${page.recordId} · 쪽 ${page.n}` : '기록' };
+  });
+  const s = summarySource(recs); if (!s) return null;
+  // Its record and line: the page head it stands under and the line of the pasted text the sentence starts on.
+  const text = o.project.pasted.find(p => p.id === s.record)?.text ?? '', line = text.slice(0, s.from).split('\n').length;
+  return { ...s, label: `${recs.find(r => r.id === s.record)?.label ?? '기록'} · ${line}번째 줄` };
+}
+/** A record sentence as the top line shows it: without evidence groups and file tags (shownSentence), through the labels' row-ID guard;
+ * null when nothing plain is left (then it reads in the hover only). */
+const basisWords = (t: string): string | null => { const w = labelPlain(shownSentence(t)); return w && w.trim() ? w.trim() : null; };
+/** The scenario record's own heads as the basis of its lines (first-flow scenarioBasis), null when it wrote none in plain words. */
+function scenarioBasisOf(o: Opened, id: string): string | null {
+  const u = scenarioUnderstanding(o.project, id); if (!u) return null;
+  const hd = headTexts(u);
+  return scenarioBasis([...hd.start, ...hd.end.filter(x => x.label === '설계가 내놓는 결과')], { plain: labelPlain });
+}
+/** The record's own words for the parts (first-flow recordWords), read once per state of the project. */
+let ffWordsKey = '', ffWordsFor: object | null = null, ffWordsNow: RecordWord[] = [];
+function ffWords(o: Opened, paste: string | null): RecordWord[] {
+  if (!paste) return [];
+  const key = `${paste}|${o.project.pasted.length}|${o.project.space.areas.length}`;
+  if (ffWordsFor === o.project.readings && ffWordsKey === key) return ffWordsNow;
+  try { ffWordsNow = recordWords(o.project, paste); } catch { ffWordsNow = []; }
+  ffWordsFor = o.project.readings; ffWordsKey = key; return ffWordsNow;
+}
+/** What the rules read of the opened map: the first view's parts (with their C-ENTRY rows), each relation with its condition, the
+ * loops, the scenarios in paste order, the summary's core-flow sentence, the C-HEAD 「첫 구조 줄」 row's lines, the record's own words for
+ * the parts, the labels' row-ID guard and the person's choice. */
+function focusInput(o: Opened): FlowInput {
+  const base = firstViewInput(o), maps = o.project.readings.filter(isMapReading), latest = new Map<string, MapReading['parts'][number]>();
+  for (const r of maps) for (const p of r.parts) latest.set(p.areaId, p);
+  const said = relationLines(o.project);
+  const parts = base.parts.map(p => ({ ...p, entryRows: (latest.get(p.id)?.entries ?? []).map(e => ({ kind: e.kind, name: e.name, order: e.order, ref: e.recordRef })) }));
+  const lines = base.lines.map(l => ({ ...l, when: said.get(l.id)?.when ?? null }));
+  const scenarios = scenarioReadings(o).flatMap(e => {
+    const u = scenarioUnderstanding(o.project, e.id); if (!u || u.pathStatus === 'rejected') return [];
+    const area = new Map(u.visits.map(v => [v.id, v.partOnMap ? v.areaId : null])), heads = headTexts(u), c = e.scenario.scenario;
+    return [{ id: e.id, name: scenarioLabel(c?.name, c?.kind, e.pathStatus), parts: u.visits.filter(v => v.partOnMap).map(v => v.areaId),
+      links: u.links.map(l => ({ from: area.get(l.from) ?? null, to: area.get(l.to) ?? null, relation: l.relation && l.relationOnMap ? l.relation.relationId : null, kind: l.kind,
+        condition: (t => (t && t !== '모름' && t !== '없음' ? t : null))(saidText(l.condition)) })),
+      start: heads.start[0]?.text ?? null, end: heads.end[0]?.text ?? null }];
+  });
+  const withRows = [...maps].reverse().find(r => r.records.length);
+  const hq = headQuote((withRows ? maps.flatMap(r => r.records) : []).map(x => ({ id: x.id, text: o.project.pasted.find(r => r.id === x.id)?.text ?? '' })));
+  const cells = hq ? cellTexts(hq.quote) : [], at = cells.findIndex(c => /첫 구조 줄/.test(c)), value = at >= 0 ? cells[at + 1] ?? '' : '';
+  // A candidate needs a line drawn in this view (a relation inside a folded group is drawn on its group's line, which holds it).
+  const drawn = new Set(lay.edges.flatMap(e => e.ids));
+  return { parts, lines, loops: base.loops ?? [], scenarios, summaryFlow: ffSrc?.flow ?? null, headLines: headLines(value), kept: fvRec?.flow ?? null, drawn,
+    words: ffWords(o, ffSrc?.record ?? hq?.record ?? null), plain: labelPlain, rep: id => drawnRep(o, id) };
+}
+/** The picked lines' marks on the lines drawn now, the summary of the rest without them, the folds, the notes, the labels and the top line. */
+function drawFocus() {
+  const o = opened, world = $('world'), sp = $('space');
+  world.querySelectorAll('.edge.ff-flow, .edge.ff-ctx, .edge.ff-fold').forEach(g => g.classList.remove('ff-flow', 'ff-ctx', 'ff-fold'));
+  world.querySelectorAll('.node.ff-start, .node.ff-card').forEach(el => el.classList.remove('ff-start', 'ff-card'));
+  if (o && ffFor !== o.key) { ffFor = o.key; ffOpen = new Set(); ffLensPicked = false; }
+  ffSrc = o ? summaryOf(o) : null;
+  ffNow = o && o.view.parts.length ? firstFlow(focusInput(o)) : null;
+  const f = ffShown(); let any = false;
+  if (f) {
+    const fl = new Set(f.lines), cx = new Set(f.context);
+    world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => {
+      const e = edgeOf(g.dataset.key); if (!e) return;
+      // A recorded start's fan of more than three lines reads at the context weight (its card is marked instead).
+      if (e.ids.some(id => fl.has(id))) { g.classList.add(f.soft ? 'ff-ctx' : 'ff-flow'); any = true; } else if (e.ids.some(id => cx.has(id))) g.classList.add('ff-ctx'); else return;
+      layerEdge(g);
+    });
+    // Craft spec (위계): the cards the view's accent lines touch carry a 1.5px accent edge; the one start card (light accent face, 2px edge)
+    // only where the record backs a start (first-flow startCard: a C-ENTRY start, a scenario's recorded start, the first step of a flow the
+    // record describes in order), never the first named part of an unordered view.
+    const card = (id: string) => (o ? world.querySelector(`.node[data-box="${CSS.escape(drawnRep(o, id) ?? id)}"]`) : null);
+    if (any && o) {
+      for (const g of world.querySelectorAll<SVGGElement>('.edge.ff-flow')) for (const id of [g.dataset.from!, g.dataset.to!]) world.querySelector(`.node[data-box="${CSS.escape(id)}"]`)?.classList.add('ff-card');
+      const st = startCard(f); if (st) card(st.part)?.classList.add('ff-start');
+    }
+  }
+  sp.classList.toggle('ff-on', any);
+  sp.classList.toggle('ff-soft', any && ffLensPicked);
+  // At rest on a busy map the view's lines are drawn one by one and the rest stays its summary, each summary line holding only the
+  // relations not drawn on their own (as beside a selection or a scenario's path).
+  if (o && !selected) {
+    const keep = new Set([...world.querySelectorAll<SVGGElement>('.edge.sc-path, .edge.ff-flow, .edge.ff-ctx')].map(g => g.dataset.key!));
+    sums = keep.size ? sumLines(o, restSummary(lay.boxes, lay.edges, e => keep.has(e.key)), new Set(restSums.filter(x => x.both).map(x => x.key))) : restSums;
+    world.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
+  }
+  syncLineMode(); markLines(); foldHubs(); routeShown(); placeEdgeLabels(); renderFocusTop();
+}
+/** A lens the person picks keeps its foreground: the picked lines step back to the context weight (their accent heads too). */
+function focusLensPicked() {
+  if (!ffShown()) return;
+  ffLensPicked = true; $('space').classList.toggle('ff-soft', ffActive()); markLines();
+}
+/** A card of the view whose drawn lines off the view are six or more folds them (hub fold): only the view's lines stay, with 「다른 연결
+ * N개」; opened, they come back in place. A line touching two such cards stays folded only while both are folded. A recorded start's own
+ * card never folds, and no line of the view ever does (its picked lines, its context, a line between two of its parts). */
+function foldHubs() {
+  const o = opened, world = $('world'), f = ffShown(); ffFolds = new Map();
+  world.querySelectorAll('.edge.ff-fold').forEach(g => g.classList.remove('ff-fold'));
+  if (!o || !f || !ffActive()) return;
+  const rep = (id: string) => drawnRep(o, id) ?? id, view = new Set(f.parts.map(rep)), drawn = shownLines();
+  // The cards a picked line in the accent touches (a named part past a gap is on none; a recorded start's fan, drawn at the context weight,
+  // folds nothing around it). Never a recorded start's own card, and never a folded group standing for parts of the view (its lines are
+  // those parts' lines).
+  const touched = new Set([...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].filter(g => drawn.has(g.dataset.key!)).flatMap(g => [g.dataset.from!, g.dataset.to!]));
+  const holds = new Set(f.parts.filter(p => rep(p) !== p).map(rep));
+  const cards = [...view].filter(c => touched.has(c) && !holds.has(c) && !(f.rule === 'entry' && c === rep(f.parts[0]!)));
+  const ls = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('stub') && !g.classList.contains('hit'))
+    .map(g => ({ key: g.dataset.key!, from: g.dataset.from!, to: g.dataset.to!, flow: g.classList.contains('ff-flow') || g.classList.contains('ff-ctx') || (view.has(g.dataset.from!) && view.has(g.dataset.to!)) }));
+  ffFolds = hubFolds(cards, ls);
+  const { hide } = foldedLines(ffFolds, ffOpen);
+  world.querySelectorAll<SVGGElement>('.edge').forEach(g => g.classList.toggle('ff-fold', hide.has(g.dataset.key!)));
+}
+/** A hub's chip pressed: its other lines in place, or folded again (nothing else moves). */
+function toggleHub(id: string) {
+  if (ffOpen.has(id)) ffOpen.delete(id); else ffOpen.add(id);
+  foldHubs(); routeShown(); placeEdgeLabels();
+  document.querySelector<HTMLElement>(`#world .ff-fold-chip[data-hub="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
+}
+/** The labels of the view's lines (its picked lines and its context, and a lens's foreground once the person picks it) keep their full
+ * tone at rest; the others read in a quieter tone (never hidden: only a label that would collide gives way); a folded line's go with it. */
+function markFocusLabels() {
+  const world = $('world'), f = ffShown();
+  const keep = new Set(f ? [...world.querySelectorAll<SVGGElement>(`.edge.ff-flow, .edge.ff-ctx${ffLensPicked ? ', .edge.lf-fg' : ''}`)].map(g => g.dataset.key!) : []);
+  const folded = new Set([...world.querySelectorAll<SVGGElement>('.edge.ff-fold')].map(g => g.dataset.key!));
+  world.querySelectorAll<HTMLElement>('.edge-labels > *').forEach(el => {
+    const ks = [el.dataset.key, el.dataset.badge, el.dataset.once, el.dataset.cue, ...(el.dataset.also ?? '').split(' ')].filter((x): x is string => !!x);
+    el.classList.toggle('ff-keep', ks.some(k => keep.has(k)));
+    el.classList.toggle('ff-folded', ks.length > 0 && ks.every(k => folded.has(k)));
+  });
+}
+/** The notes (a recorded start, a scenario's recorded start and end, one branch in the record's plain words) and the hubs' chips, in map
+ * coordinates (they follow a drag, positionWorld), screen-sized like the line chips; a note that would cover a card or another note takes
+ * its next place or is left off (its words read in the switcher's tip). */
+function placeFocusMarks() {
+  const o = opened, world = $('world'), f = ffShown();
+  world.querySelectorAll('.ff-note, .ff-fold-chip').forEach(el => el.remove());
+  if (!o || !f || !ffActive()) return;
+  const inv = labelInv(), boxOf = (id: string) => { const r = drawnRep(o, id); return r ? lay.boxes.get(r) ?? null : null; };
+  const taken: Rect[] = [...lay.boxes.values()].filter(b => b.kind !== 'frame').map(b => ({ x: b.x, y: b.y, w: b.w, h: b.h }));
+  for (const b of lay.boxes.values()) if (b.kind === 'frame') taken.push({ x: b.x, y: b.y, w: b.w, h: b.head });
+  if (titleH) taken.push(titleRect());
+  // A place off the window's sides (as the camera stands now) is no place: the note's words would be cut.
+  const vpw = $('viewport').clientWidth, onScreen = (r: Rect) => camera.x + r.x * camera.k >= 4 && camera.x + (r.x + r.w) * camera.k <= vpw - 4;
+  const free = (r: Rect, own?: Rect) => onScreen(r) && !taken.some(b => b !== own && r.x < b.x + b.w + 2 && b.x < r.x + r.w + 2 && r.y < b.y + b.h + 2 && b.y < r.y + r.h + 2);
+  // A note is no wider than the card it stands at (its words wrap to two lines), so it fits the room between the rows.
+  const put = (el: HTMLElement, spots: (w: number, hh: number) => { x: number; y: number }[], maxW = 260 * inv, own?: Rect) => {
+    el.style.transform = `scale(${inv})`; el.style.transformOrigin = '0 0'; el.style.maxWidth = `${Math.max(120, maxW / inv)}px`; world.append(el);
+    // A card's own chip (own given) is never left off: with no free spot it takes its first one, on its card's edge.
+    const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, all = spots(w, hh).map(p => ({ ...p, w, h: hh })), at = all.find(r => free(r, own)) ?? (own ? all[0] : undefined);
+    if (!at) { el.remove(); return; }
+    el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at);
+  };
+  const note = (cls: string, label: string, text: string | null, tip: string) => h('div', { class: `ff-note ${cls}`, role: 'note', title: tip }, h('span', { class: 'ff-note-label' }, label), text ? h('span', { class: 'ff-note-text' }, text.length > 48 ? `${text.slice(0, 47)}…` : text) : null);
+  const a = f.start ? boxOf(f.start.part) : null, z = f.end ? boxOf(f.end.part) : null;
+  // Only what the record says: a C-ENTRY row's start, a scenario's recorded start and end (never a first or last named part's).
+  const startWord = f.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작';
+  if (a) put(note('ff-start', startWord, f.start!.text, `${startWord}${f.start!.text ? ` · ${f.start!.text}` : ''}`),
+    (w, hh) => [{ x: a.x, y: a.y - hh - 6 }, { x: a.x + a.w - w, y: a.y - hh - 6 }, { x: a.x - w - 8, y: a.y }, { x: a.x, y: a.y + a.h + 6 }], Math.max(a.w, 220 * inv));
+  if (z && z !== a) put(note('ff-end', '시나리오 끝', f.end!.text, `시나리오 끝${f.end!.text ? ` · ${f.end!.text}` : ''}`),
+    (w, hh) => [{ x: z.x, y: z.y + z.h + 6 }, { x: z.x + z.w - w, y: z.y + z.h + 6 }, { x: z.x + z.w + 8, y: z.y }, { x: z.x, y: z.y - hh - 6 }], z.w);
+  // The one branch: beside where its line leaves its card (the record's plain condition words, never a row ID or a meaning made up).
+  const br = f.branch, bg = br ? [...world.querySelectorAll<SVGGElement>('.edge.ff-flow, .edge.ff-ctx')].find(g => (g.dataset.ids ?? '').split(',').includes(br.line) && !g.classList.contains('ff-fold')) : null;
+  const pts = bg ? lastRouted.get(bg.dataset.key!)?.pts : null;
+  if (br && pts && pts.length > 1) { const p = pts[0]!; put(note('ff-branch', '갈림', br.text, `갈림 · 조건: ${br.text}`), (w, hh) => [{ x: p.x + 10, y: p.y + 8 }, { x: p.x + 10, y: p.y - hh - 8 }, { x: p.x - w - 10, y: p.y + 8 }, { x: p.x - w - 10, y: p.y - hh - 8 }]); }
+  // The hubs' chips, on the card's own edge (straddling its lower border at the right, else its upper border, else the lower left), so
+  // a chip always reads as the card's and never floats on a line between other cards: N is exactly the lines it hides.
+  const { byHub } = foldedLines(ffFolds, ffOpen);
+  for (const [id] of ffFolds) {
+    const b = lay.boxes.get(id), open = ffOpen.has(id), n = byHub.get(id)?.length ?? 0; if (!b || (!open && !n)) continue;
+    const own = taken.find(r => r.x === b.x && r.y === b.y && r.w === b.w) ?? { x: b.x, y: b.y, w: b.w, h: b.h };
+    const chip = h('button', { type: 'button', class: `ff-fold-chip${open ? ' open' : ''}`, 'data-hub': id, 'aria-expanded': String(open),
+      title: open ? '먼저 볼 연결 밖의 연결을 다시 접어요' : `이 카드의 먼저 볼 연결 밖 연결 ${n}개를 접어 두었어요 · 눌러서 제자리에 펼치기`,
+      onclick: (e: Event) => { e.stopPropagation(); toggleHub(id); } }, foldWord(n, open));
+    const m = 10 * inv;
+    put(chip, (w, hh) => [{ x: b.x + b.w - w - m, y: b.y + b.h - hh / 2 }, { x: b.x + b.w - w - m, y: b.y - hh / 2 }, { x: b.x + m, y: b.y + b.h - hh / 2 }], 260 * inv, own);
+  }
+}
+/** The top line: the record's first sentence (hover: whole, said to be the record's summary, with its record and line; pressed: the
+ * source), the switcher, and the sentence the picked lines stand on when it is not the top one. */
+function renderFocusTop() {
+  const el = $('focus-top'), o = opened, s = ffSrc, f = ffNow;
+  if (!o || scope || !o.view.parts.length || (!s && !f?.candidates.length)) { el.hidden = true; el.replaceChildren(); syncFocusTop(); return; }
+  const saved = o.kind === 'saved';
+  // Review of v5 focus 3 (A5): shown and hovered only through the guard (no evidence group, file tag or row ID); nothing plain left: no
+  // sentence at all (never the unguarded words).
+  const topWords = s ? basisWords(s.first) : null;
+  const sentence = s && topWords ? h(saved ? 'button' : 'p', { class: 'ft-sentence', ...(saved ? { type: 'button', onclick: () => showQuote(s.record, s.quote, s.from) } : {}),
+    title: `${topWords}\n출처: 기록 요약의 첫 문장 · ${s.label}${saved ? '\n눌러서 원문 보기' : ''}` }, topWords) : null;
+  const name = (id: string) => partOf(o, id)?.name ?? id;
+  const choose = (c: FlowChoice) => {
+    // The choice is the person's, kept with the map's first view (a map with none yet keeps only this).
+    fvRec = { ...(fvRec ?? { lens: viewLens === 'data' || viewLens === 'start' ? viewLens : 'compose', parts: [], lines: [], previews: [], reason: null, line: null, off: true, by: 'person' as const }), flow: c };
+    saveFirstView(); drawFocus();
+  };
+  const btn = (cls: string, text: string, title: string, on: () => void, extra: Record<string, string> = {}) => h('button', { type: 'button', class: `ft-b ${cls}`, title, onclick: on, ...extra }, text);
+  let row: HTMLElement | null = null, basis: HTMLElement | null = null;
+  if (f?.flow && !scView) {
+    const c = f.flow, n = f.candidates.length, step = (d: number) => { const x = f.candidates[(f.index + d + n) % n]!; choose({ rule: x.rule, key: x.key }); };
+    const byId = new Map(o.view.relations.map(r => [r.id, r])), drawnLs = c.lines.filter(id => lay.edges.some(e => e.ids.includes(id))).map(id => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r);
+    // The basis in plain words: no evidence group, no file tag, no row ID (the labels' guard); a scenario's own heads, or that it has none.
+    const said = c.text ? basisWords(c.text) : null, scBasis = c.rule === 'scenario' ? scenarioBasisOf(o, c.key) : null;
+    const tip = [sourceText(f), c.text ? (said ? `근거 문장: “${said}”` : null) : c.rule === 'scenario' ? `근거: ${scBasis ?? SCENARIO_NO_BASIS}` : null, c.start?.text ? `${c.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작'}: ${c.start.text}` : null, c.end?.text ? `시나리오 끝: ${c.end.text}` : null,
+      `이름이 나온 부분: ${c.steps.map(st => st.map(name).join(', ')).join(' / ')} (이름이 나온 순서는 방향도 실행 순서도 아니에요)`,
+      `그린 선 ${drawnLs.length}개 · 지도에 이미 있는 관계를 그 방향 그대로: ${drawnLs.slice(0, 6).map(r => `${name(r.from)} → ${name(r.to)}`).join(', ')}${drawnLs.length > 6 ? ` 외 ${drawnLs.length - 6}개` : ''}`,
+      c.gaps.length ? `끊긴 곳 ${c.gaps.length}개 · 이어진 관계가 없어 잇지 않았어요` : null,
+      c.soft ? '나가는 선이 많아 보통 굵기로 보여요' : '파란 선은 먼저 볼 연결이에요 · 중요도나 실행 빈도가 아니에요'].filter(Boolean).join('\n');
+    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': FLOW_CONTROL }, h('span', { class: 'ft-name', title: tip }, switcherText(f, name)),
+      n > 1 ? btn('ft-prev', '‹', '이전 보기', () => step(-1), { 'aria-label': '이전 보기' }) : null, n > 1 ? btn('ft-next', '›', '다음 보기', () => step(1), { 'aria-label': '다음 보기' }) : null,
+      h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'), btn('ft-all', FLOW_SOURCE.all, `모든 선을 같은 무게로 · ${FLOW_CONTROL} 끄기`, () => choose({ rule: 'all', key: '' })));
+    // The sentence the lines stand on, when it is not the top one (one line in plain words, whole as written in its hover; nothing plain
+    // left: in the hover only). A scenario's lines stand on that scenario record, never on the map record's sentence above.
+    if (c.text && shownSentence(c.text) !== s?.shown && said) {
+      basis = h('p', { class: 'ft-basis', title: `${FLOW_CONTROL}의 근거 문장 · ${c.source}\n${said}` }, h('span', { class: 'ft-basis-l' }, '근거 문장'), h('span', { class: 'ft-basis-t' }, said));
+    } else if (c.rule === 'scenario') {
+      basis = h('p', { class: `ft-basis${scBasis ? '' : ' none'}`, title: `${FLOW_CONTROL}의 근거 · ${sourceText(f)}\n${scBasis ?? SCENARIO_NO_BASIS}` }, h('span', { class: 'ft-basis-l' }, '시나리오 기록'), h('span', { class: 'ft-basis-t' }, scBasis ?? SCENARIO_NO_BASIS));
+    }
+  } else if (f?.rule === 'all' && f.candidates.length && !scView) {
+    const c = f.candidates[0]!;
+    row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': FLOW_CONTROL }, h('span', { class: 'ft-name' }, `${FLOW_CONTROL}: ${FLOW_SOURCE.all}`), h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'),
+      btn('ft-back', `${FLOW_CONTROL} 보기`, `${c.source}${c.text && basisWords(c.text) ? ` · “${basisWords(c.text)}”` : ''}`, () => choose({ rule: c.rule, key: c.key })));
+  }
+  el.replaceChildren(...[sentence, row, basis].filter((x): x is HTMLElement => !!x));
+  el.hidden = !el.childElementCount; syncFocusTop();
+}
+/** The top line's height, its sentence whole (the camera's fit keeps the map under it, collapsed or not). */
+const ftH = () => { const el = document.getElementById('focus-top'); return el && !el.hidden ? (ftFull || el.offsetHeight) + 8 : 0; };
+/** The top line under the change plan's strip, beside the map's own title while that title is in its rows (ftPlace); its sentence steps
+ * back while anything of the map is under it (the switcher stays). */
+function syncFocusTop() {
+  const el = document.getElementById('focus-top'); if (!el) return;
+  el.style.top = `${stripInset()}px`;
+  if (el.hidden) { ftFull = 0; el.style.left = ''; el.style.maxWidth = ''; return; }
+  const ink = camera.k >= TITLE_FLOOR_K ? titleInk() : null;
+  el.classList.remove(...FT_FORMS); ftPlace(el, camera, ink); ftFull = el.offsetHeight;
+  const s = el.querySelector<HTMLElement>('.ft-sentence'); if (!s) return;
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop, scene = ftScene();
+  // The whole box with its sentence (the rows under the sentence move down with it): anything of the map under it (a card, a lane
+  // caption, a drawn line, a label, the map's own title) and the sentence takes one line (whole in its hover); still something under it
+  // and the sentence steps back (the switcher stays).
+  const covers = () => ftCovers({ x: el.offsetLeft - ox - 4, y: el.offsetTop - oy - 4, w: el.offsetWidth + 8, h: el.offsetHeight + 8 }, camera, scene, ink);
+  if (!covers()) return;
+  el.classList.add('ft-one'); ftPlace(el, camera, ink); if (!covers()) return;
+  el.classList.remove('ft-one'); el.classList.add('ft-under'); ftPlace(el, camera, ink);
+}
 
 /* ---------- the scenario on the map (spec §3, cycle 3): one foreground scenario at a time ----------
  * Entering it changes no selection and no camera: each visit's badge sits at its part's card (top-left, never moving a card),
@@ -3789,9 +4195,9 @@ function badgeHolds(b: HTMLElement, id: string): boolean { return (b.getAttribut
 /** Each line's ends as it reads now: a selected line or a line of the scenario's path carries the accent's head and start dot. */
 function markLines() {
   // A picked line among the selection's (markPicked) is the one that keeps the accent's ends.
-  const picking = $('space').classList.contains('line-picked');
+  const picking = $('space').classList.contains('line-picked'), ffRest = ffLit();
   document.querySelectorAll<SVGGElement>('#world .edge').forEach(el => {
-    const lit = (el.classList.contains('on') && (!picking || el.classList.contains('picked'))) || el.classList.contains('sc-path'), line = el.querySelector('.edge-line'); if (!line) return;
+    const lit = (el.classList.contains('on') && (!picking || el.classList.contains('picked'))) || el.classList.contains('sc-path') || (ffRest && el.classList.contains('ff-flow')), line = el.querySelector('.edge-line'); if (!line) return;
     // A wait on the path reads as a control line: its open head (placeScenarioMarks dashes its end).
     const head = (el.classList.contains('sc-wait') && el.dataset.head === 'filled' ? 'open' : el.dataset.head ?? 'filled') as Head, start = (el.dataset.start ?? 'none') as Head;
     const mark = (h: Head) => (h === 'none' ? 'none' : `url(#m-${h}${lit ? '-on' : ''})`);
@@ -5010,7 +5416,7 @@ function syncFirstView(o: Opened) {
 /** The person picks the recommendation again (「추천 첫 보기로」) or an offered focus (「바꾸기」): its lens, emphasis and previews. */
 function applyFirstView(focus: FvFocus | null) {
   const o = opened; if (!o || !fvNow) return;
-  fvRec = recordOf(fvNow, 'person', focus); fvMenu = null; saveFirstView();
+  fvRec = { ...recordOf(fvNow, 'person', focus), flow: fvRec?.flow ?? null }; fvMenu = null; saveFirstView();
   if (fvRec.lens !== viewLens) setLens(fvRec.lens); else applyLens();
 }
 function clearEmphasis() { if (!fvRec) return; fvRec = { ...fvRec, off: true }; fvMenu = null; saveFirstView(); applyLens(); }
@@ -5024,8 +5430,10 @@ function markFirstView() {
   const was = cardMarks();
   world.querySelectorAll('.fv-emph, .fv-preview').forEach(el => el.classList.remove('fv-emph', 'fv-preview'));
   // Polish round fixes 1: while the first view emphasises lines, the other control lines step back at rest (styles.css fv-lines).
-  $('space').classList.toggle('fv-lines', fvOn() && fvRec!.lines.length > 0);
-  if (fvOn()) {
+  // Beauty v5: while the first screen draws its flow, the flow is the emphasis (the first view's marks wait).
+  const emphOn = fvOn() && !ffActive();
+  $('space').classList.toggle('fv-lines', emphOn && fvRec!.lines.length > 0);
+  if (emphOn) {
     const r = fvRec!, rels = new Set(r.lines);
     for (const id of r.parts) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('fv-emph');
     for (const id of r.previews) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('fv-preview');
@@ -5090,12 +5498,16 @@ function fvPop(o: Opened, v: FirstView, r: FirstViewRecord | null): HTMLElement 
     // 「추천 첫 보기로」 and 「강조 해제」 stay two actions, apart.
     h('div', { class: 'fv-acts' }, (v.reason || v.emphasis.parts.length) && differs(r, viewLens, v) ? fvRecButton(v) : null, fvOn() && (r!.parts.length || r!.lines.length) ? fvOffButton() : null));
 }
-function setLens(id: LensId) {
+function setLens(id: LensId, byPerson = false) {
   const o = opened; if (!o || !lensUsable(id) || id === viewLens) return;
+  // Beauty v5 (F6 review 5): a lens the person picks keeps its foreground; the first screen's lines step back to the context weight.
+  if (byPerson) focusLensPicked();
   const was = viewLens; viewLens = id; legend = NO_FILTER; legendMenu = null; // each lens reads its own legend
   if (id === 'scenario' && !scOn) { const first = scenarioReadings(o)[0]; if (first) enterScenario(first.id); }
   if (was === 'scenario' && scOn) leaveScenario();
   saveLens(); renderLegend(); applyLens();
+  // Its foreground's labels keep their full tone from now on (the lens's .lf-fg is known only once applied).
+  if (byPerson) markFocusLabels();
 }
 /** What the legend counts of the drawn parts: family, type, the overview's short status, a loop, the card's gaps. */
 function lensPartsOf(o: Opened): LensPart[] {
@@ -5112,7 +5524,7 @@ function lensPartsOf(o: Opened): LensPart[] {
   });
 }
 const lensLinesOf = (): LensLine[] => [...lay.edges.map(e => ({ e, sum: false })), ...restSums.map(e => ({ e, sum: true }))].map(({ e, sum }) => ({ key: e.key, channel: lineChans.get(e.key) ?? null, badge: lineBadges.has(e.key), from: e.from, to: e.to, sum }));
-/** The lens's classes on the space and its line opacities (lensLook); the switch's state; the legend's marks. */
+/** The lens's classes on the space and its line tones (styles: solid, never an opacity); the switch's state; the legend's marks. */
 /* ---------- display settings (spec cards v2 §5) ----------
  * 「표시」 in the bottom toolbar: four toggles, a global default and an explicit per-project override (card-face readDisplay /
  * writeDisplay under DISPLAY_KEY, by the project's entry). Lenses are temporary: the 상태·공백 lens shows every card's ops word
@@ -5175,7 +5587,7 @@ function applyLens() {
   for (const c of [...sp.classList]) if (c.startsWith('lens-')) sp.classList.remove(c);
   applyDisplay();
   for (const c of lensClasses(viewLens)) sp.classList.add(c);
-  for (const [k, v] of Object.entries(lensLook(viewLens).lines)) sp.style.setProperty(`--lo-${k}`, String(v));
+  // Craft spec: a lens never fades a line by an opacity (no --lo-* any more): its background takes a solid tone in styles.css.
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { const on = b.dataset.lens === viewLens; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); (b as HTMLButtonElement).disabled = !lensUsable(b.dataset.lens as LensId); });
   applyLegendMarks(); renderFirstView();
 }
@@ -5191,7 +5603,7 @@ function applyLegendMarks() {
     else world.querySelector(`[data-box="${CSS.escape(x)}"]`)?.classList.add(cls); } };
   mark(m.fade, 'lg-fade'); mark(m.dim, 'lg-dim'); mark(m.hide, 'lg-hide'); mark(m.picked, 'lg-pick');
   // Beauty v2 B5 (the lens contract): each line in the lens's foreground (.lf-fg, 2.25px, whole) or its background (.lf-bg, 1.15px,
-  // faded to view-lens BG_LINE and never fainter). The selected part's lines, a selected relation and a scenario path's lines are
+  // in a solid quieter tone, never an opacity: craft spec). The selected part's lines, a selected relation and a scenario path's lines are
   // always foreground. Classes only: nothing moves.
   const selBox = selected && selected === scope ? `ghost:${selected}` : selected;
   const fgEnds = new Set<string>(), drawnNow = shownLines();
@@ -5465,7 +5877,7 @@ function markSelection(partId: string | null) {
   for (const end of path.ends) related.add(end);
   // The summary beside a selection holds every other relation: a line that held some of the selection's relations keeps the
   // rest (its count drops by those, which are drawn one by one), and gives way (.hit, hidden by .sel-sum) only when none is left.
-  const scLines = new Set([...document.querySelectorAll<SVGGElement>('#world .edge.sc-path')].map(g => g.dataset.key!));
+  const scLines = new Set([...document.querySelectorAll<SVGGElement>('#world .edge.sc-path, #world .edge.ff-flow, #world .edge.ff-ctx')].map(g => g.dataset.key!));
   sums = me || scLines.size ? (opened ? sumLines(opened, restSummary(lay.boxes, lay.edges, e => (!!me && (e.from === me || e.to === me)) || path.lines.has(e.key) || scLines.has(e.key)), new Set(restSums.filter(x => x.both).map(x => x.key))) : []) : restSums;
   markLines();
   document.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
@@ -7003,7 +7415,7 @@ function bindCanvas() {
   $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k / 1.2, x, y, true); });
   $('zoom-level').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(1, x, y, true); });
   $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); if (syncLegendFold()) fitView(true, true); });
-  document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId)));
+  document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId, true)));
   bindLegendKeys();
   // S10: the first view's popovers close with Esc or a press outside the guide line.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && fvMenu) { e.preventDefault(); e.stopImmediatePropagation(); fvMenu = null; renderFirstView(); document.querySelector<HTMLElement>('#first-view .fv-b')?.focus(); } }, true);
@@ -7036,7 +7448,7 @@ function bindCanvas() {
     // Lenses (map design v3 7.3): Alt+1 … Alt+5 and [ ] pick one; L goes to the legend. On the map only, never inside a field.
     if (opened && !$('space').hidden && !$('space').classList.contains('sheet-read') && !openState) {
       const next = lensKey(e, viewLens, lensUsable);
-      if (next) { e.preventDefault(); setLens(next); return; }
+      if (next) { e.preventDefault(); setLens(next, true); return; }
       if ((e.key === 'l' || e.key === 'L') && !e.altKey && !e.ctrlKey && !e.metaKey && !(e.target as HTMLElement).closest('#lens, #panel, [contenteditable]')) {
         const first = document.querySelector<HTMLElement>(`#line-key .lg-item${legend.picked ? `[data-item="${CSS.escape(legend.picked)}"]` : ''}`) ?? document.querySelector<HTMLElement>('#line-key .lg-item');
         if (first) { e.preventDefault(); first.focus(); return; }
@@ -7109,6 +7521,8 @@ function bindEdgeHints() {
       if (near && getComputedStyle(x).display !== 'none') ends.add(x.dataset.from === id || boxInside(id, x.dataset.from!) ? x.dataset.to! : x.dataset.from!);
     });
     world.querySelectorAll('.near-end, .near-self, .edge-labels > .near').forEach(el => el.classList.remove('near-end', 'near-self', 'near'));
+    // Beauty v5 (F6 review G): at rest under 먼저 볼 연결 the other lines' labels wait for a hover; pointing at a part shows its lines'.
+    if (space.classList.contains('ff-rest')) { const ks = new Set([...world.querySelectorAll<SVGGElement>('.edge.near')].map(x => x.dataset.key!)); world.querySelectorAll<HTMLElement>('.edge-labels > *').forEach(el => { if ([el.dataset.key, el.dataset.badge, el.dataset.once, el.dataset.cue].some(k => !!k && ks.has(k))) el.classList.add('near'); }); }
     for (const far of ends) world.querySelector(`[data-box="${CSS.escape(far)}"]`)?.classList.add('near-end');
     world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('near-self');
     clearTimeout(linePeek); space.classList.remove('peek');

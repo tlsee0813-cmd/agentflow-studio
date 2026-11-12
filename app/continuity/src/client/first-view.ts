@@ -61,9 +61,9 @@ const GATE_WORDS = /승인|검토|사람|개입|확인|허가|\b(?:review|approv
 /** A flow drawn as a chain: it names a flow of either kind; the lines between the named parts say which. */
 const ARROW = /→|->|⇒/;
 /** The entry kinds that start a part on their own (a request hands data over; a call is called). */
-const STARTING_ENTRIES = new Set(['command', 'schedule', 'message', 'script', 'resident']);
+export const STARTING_ENTRIES: ReadonlySet<string> = new Set(['command', 'schedule', 'message', 'script', 'resident']);
 
-const norm = (s: string): string => s.toLowerCase().replace(/[\s·_\-.,:;'"`()[\]{}「」『』<>‘’“”]/g, '');
+export const norm = (s: string): string => s.toLowerCase().replace(/[\s·_\-.,:;'"`()[\]{}「」『』<>‘’“”]/g, '');
 const escRe = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const cutLine = (t: string, n: number): string => (t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t);
 /** 을 or 를 after a quoted line, by its last syllable (을(를) after anything that is not Hangul). */
@@ -87,6 +87,10 @@ export function nameStem(name: string): string | null {
 /** The real parts a first-structure line names, in the line's order: a part's whole name (a longer name wins where both stand), its
  * record row ID (B03), a loop's ID (B03:L01, its owner) or a C-STATE name the line repeats. Names under two characters never match. */
 export function namedParts(line: string, parts: readonly FvPart[], loops: readonly FvLoop[] = []): { parts: string[]; loops: string[] } {
+  const r = namedPartsAt(line, parts, loops); return { parts: r.at.map(([id]) => id), loops: r.loops };
+}
+/** namedParts with where each part is first named (its place in the line with spaces and punctuation taken out, as norm reads it). */
+export function namedPartsAt(line: string, parts: readonly FvPart[], loops: readonly FvLoop[] = []): { at: [string, number][]; loops: string[] } {
   const n = norm(line), at = new Map<string, number>(), taken: [number, number][] = [], loopRefs: string[] = [];
   // A Korean name read as the work it names: 「일정 계산기」 as 「일정 계산」, 「푸시 발송기」 as 「푸시 발송」 (its last syllable off, three or more
   // characters left); the whole name first where both stand.
@@ -105,7 +109,7 @@ export function namedParts(line: string, parts: readonly FvPart[], loops: readon
     const p = parts.find(x => x.ref === m[1]); if (p && !at.has(p.id)) at.set(p.id, pos);
   }
   for (const p of parts) for (const s of p.states ?? []) { const k = norm(s); if (k.length >= 2 && !at.has(p.id)) { const i = n.indexOf(k); if (i >= 0) at.set(p.id, i); } }
-  return { parts: [...at.entries()].sort((a, b) => a[1] - b[1]).map(([id]) => id), loops: loopRefs };
+  return { at: [...at.entries()].sort((a, b) => a[1] - b[1]), loops: loopRefs };
 }
 /** The focused groups and loops whose 「안에」 preview shows first: in the focus's order, at most two. */
 function previewsOf(parts: readonly string[], inp: FirstViewInput): string[] {
@@ -211,7 +215,9 @@ export function headQuote(records: readonly { id: string; text: string }[]): FvQ
  * put (by part and relation ids, so a target that disappears drops alone), the guide line it showed, whether the person switched the
  * emphasis off, and how it came (auto on the first visit, or the person's 「추천 첫 보기로」 or an offered focus). */
 export const FIRST_VIEW_KEY = 'agentflow.studio.firstview.1';
-export interface FirstViewRecord { lens: FirstLensId; parts: string[]; lines: string[]; previews: string[]; reason: string | null; line: string | null; off: boolean; by: 'auto' | 'person' }
+export interface FirstViewRecord { lens: FirstLensId; parts: string[]; lines: string[]; previews: string[]; reason: string | null; line: string | null; off: boolean; by: 'auto' | 'person';
+  /** Beauty v5: the 「먼저 보는 흐름」 the person chose for this map (a rule's candidate by its key, or 「전체 관계」), kept over the rules. */
+  flow?: { rule: 'scenario' | 'summary' | 'head' | 'entry' | 'all'; key: string } | null }
 export function recordOf(v: FirstView, by: FirstViewRecord['by'], focus: FvFocus | null = null): FirstViewRecord {
   if (focus) return { lens: focus.lens, parts: [...focus.parts], lines: [...focus.lines], previews: focus.previews.slice(0, 2), reason: reasonText(focus.lens, focus.line), line: focus.line, off: false, by };
   return { lens: v.lensId, parts: [...v.emphasis.parts], lines: [...v.emphasis.lines], previews: [...v.previews], reason: v.reason?.text ?? null, line: v.reason?.line ?? null, off: false, by };
@@ -221,7 +227,8 @@ export function readFirstView(raw: string | null, map: string): FirstViewRecord 
     const r = raw ? JSON.parse(raw)?.[map] : null; if (!r || typeof r !== 'object') return null;
     const ids = (x: unknown) => (Array.isArray(x) ? x.filter((s): s is string => typeof s === 'string').slice(0, 64) : []);
     const lens: FirstLensId = r.lens === 'data' || r.lens === 'start' ? r.lens : 'compose';
-    return { lens, parts: ids(r.parts), lines: ids(r.lines), previews: ids(r.previews).slice(0, 2), reason: typeof r.reason === 'string' ? r.reason : null, line: typeof r.line === 'string' ? r.line : null, off: r.off === true, by: r.by === 'person' ? 'person' : 'auto' };
+    return { lens, parts: ids(r.parts), lines: ids(r.lines), previews: ids(r.previews).slice(0, 2), reason: typeof r.reason === 'string' ? r.reason : null, line: typeof r.line === 'string' ? r.line : null, off: r.off === true, by: r.by === 'person' ? 'person' : 'auto',
+      ...(r.flow && typeof r.flow === 'object' && ['scenario', 'summary', 'head', 'entry', 'all'].includes(r.flow.rule) && typeof r.flow.key === 'string' ? { flow: { rule: r.flow.rule, key: r.flow.key.slice(0, 600) } } : {}) };
   } catch { return null; }
 }
 export function writeFirstView(raw: string | null, map: string, rec: FirstViewRecord): string {
