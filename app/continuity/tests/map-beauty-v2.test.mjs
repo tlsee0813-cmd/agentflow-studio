@@ -86,7 +86,10 @@ test('BV2-5 two card sizes: the width never grows with a name; the tall size for
 test('BV2-6 the built map: the face switch on the camera, the tag fit, the symbol budget and the first view at the whole map', () => {
   const src = app(), style = css();
   const cam = body(src, 'applyCamera');
-  assert.ok(cam.includes('cardFace(camera.k, face)') && cam.includes("'face-tag'") && cam.includes("'face-card'"));
+  // Polish 5: the zoom's page state moved to syncZoom (applyCamera calls it; a fit calls it fresh, without hysteresis).
+  assert.ok(cam.includes('syncZoom(camera.k)'));
+  const zoom = body(src, 'syncZoom');
+  assert.ok(zoom.includes('cardFace(k, fresh ? null : face)') && zoom.includes("'face-tag'") && zoom.includes("'face-card'"));
   assert.ok(body(src, 'renderSpace').includes('face = null'), 'a new view reads its face without hysteresis');
   const fit = body(src, 'fitCards');
   assert.ok(fit.includes('tagRoom(') && fit.includes('fitTags(') && fit.includes("'.c-tag-name'"));

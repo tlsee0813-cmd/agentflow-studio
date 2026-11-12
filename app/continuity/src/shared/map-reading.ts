@@ -3486,6 +3486,20 @@ function foldTarget(f: V5Fold): string | null {
   }
   return null;
 }
+/** Polish 5 (ruling F6 Q1, the same date rule as .53): each pasted text's target time, the 기준 시점 (YYYY-MM-DD) of the record its pages
+ * belong to (foldTarget; a text holding pages of several records takes the latest), else its own head line's 기준 시점, else null. Only a
+ * date compares: commit strings never order. */
+export function pastedTargets(pasted: readonly { id: string; text: string }[]): Map<string, string | null> {
+  const out = new Map<string, string | null>();
+  try {
+    for (const f of v5Folds(pasted)) {
+      const d = foldTarget(f); if (!d) continue;
+      for (const x of f.pastes) { const was = out.get(x.id); if (!was || d > was) out.set(x.id, d); }
+    }
+  } catch { /* not v5: the head line alone */ }
+  for (const x of pasted) if (!out.get(x.id)) { const nl = x.text.indexOf('\n'); out.set(x.id, BASIS_DATE.exec(nl >= 0 ? x.text.slice(0, nl) : x.text)?.[1] ?? null); }
+  return out;
+}
 /** Recipe .53 (ruling F6 Q1 (c)): whether a quote stands on a row of record `key` about one of the B rows `bs` (FoldIndex about). A quote
  * with no place is found by its words in its pasted text. */
 function quoteAbout(ix: FoldIndex, p: Project, key: string, bs: ReadonlySet<string>, q: ReadingQuote): boolean {

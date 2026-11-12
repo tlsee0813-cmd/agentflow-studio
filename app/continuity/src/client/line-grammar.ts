@@ -335,3 +335,51 @@ export function wholeWords(t: string, n = LABEL_SHORT): string {
 export const labelPx = (k: number): number => Math.min(14, Math.max(11, 12.5 * Math.sqrt(Math.max(0.01, k))));
 /** The badge's least height on screen at rest and selected (6.2, 9.6). */
 export const BADGE_H = 16, BADGE_H_ON = 20;
+
+/* ---------- code in a line label (polish 5) ----------
+ * The ruling keeps code as code when the record has no plain words for it (never a paraphrase made up): such a label reads as quoted
+ * code, not as broken prose. A run of code tokens is drawn as one monospace code chip at the label's size; the words around it stay
+ * words (「REDIS_URL 있을 때」: the code in the chip, 「있을 때」 as words). A cut is made only between tokens, with 「…」. */
+/** A token of code: ASCII with a letter and a mark only code has (an underscore, brackets, a slash, a dot between letters, an operator,
+ * camelCase), never a plain word (「fetch」, 「POST」, 「bind」) and never a token with Hangul. */
+export function codeToken(tok: string): boolean {
+  const t = tok.replace(/…+$|\.{3}$/, '');
+  if (t.length < 2 || !/^[\x21-\x7e]+$/.test(t) || !/[A-Za-z_$]/.test(t)) return false;
+  return /[_(){}[\]/%=<>$#`*]|[a-z][A-Z]|[A-Za-z0-9]\.[A-Za-z]|::|->/.test(t);
+}
+/** An ASCII token with no letter that reads as part of the code next to it (an operator, a bracket, 「…」). */
+const codeMark = (tok: string): boolean => /^[%=<>+\-*/!&|^~?:.,()[\]{}…]+$/.test(tok);
+/** A label's text as runs of words and code (each run with its own spacing, in order; joined they give the text back). A code token
+ * with a Hangul ending (「pb.skipBootstrap()이…」) gives the ending to the words; ASCII tokens beside code within the same run (「%…」, 「main)」
+ * after 「(src/main.rs」) join the code. */
+export function labelParts(text: string): { t: string; code: boolean }[] {
+  const toks = text.split(/(\s+)/), out: { t: string; code: boolean }[] = [];
+  const push = (t: string, code: boolean) => { if (!t) return; const last = out.at(-1); if (last && last.code === code) last.t += t; else out.push({ t, code }); };
+  const kinds = toks.map(t => {
+    if (!t || /^\s+$/.test(t)) return { t, k: 'space' as const };
+    const m = /^([\x21-\x7e]+?)([가-힣]{1,3}…?|[가-힣]{1,3}\.{3})$/.exec(t);
+    // Only a whole token takes a Hangul ending (「PR(병합」 opens words in brackets: no code there).
+    if (m && /[\w)\]}'"`]$/.test(m[1]!) && codeToken(m[1]!)) return { t, k: 'code' as const, head: m[1]!, tail: m[2]! };
+    return { t, k: codeToken(t) ? 'code' as const : codeMark(t) || (/^[\x21-\x7e]+$/.test(t) && /[()[\]{}]/.test(t)) ? 'mark' as const : 'word' as const };
+  });
+  // A mark joins the code only when code stands next to it (through spaces).
+  const near = (i: number, d: -1 | 1): boolean => { for (let j = i + d; j >= 0 && j < kinds.length; j += d) { const k = kinds[j]!.k; if (k === 'space') continue; return k === 'code' || (k === 'mark' && near(j, d)); } return false; };
+  kinds.forEach((x, i) => {
+    if (x.k === 'space') { const prev = out.at(-1), next = kinds.slice(i + 1).find(y => y.k !== 'space'); push(x.t, !!prev?.code && !!next && (next.k === 'code' || next.k === 'mark')); return; }
+    if (x.k === 'code' && 'head' in x && x.head) { push(x.head, true); push(x.tail!, false); return; }
+    push(x.t, x.k === 'code' || (x.k === 'mark' && (near(i, -1) || near(i, 1))));
+  });
+  // A cut's 「…」 reads outside the chip (the code itself is never made up longer or shorter than written).
+  return out.flatMap(p => { const m = p.code ? /^(.*?)(…+|\.{3})$/s.exec(p.t) : null; return m && m[1] ? [{ t: m[1], code: true }, { t: m[2]!, code: false }] : [p]; })
+    .reduce<{ t: string; code: boolean }[]>((acc, p) => { const last = acc.at(-1); if (last && last.code === p.code) last.t += p.t; else acc.push({ ...p }); return acc; }, []);
+}
+/** Whether a label shows code (then it is drawn with its code chip). */
+export const hasCode = (text: string): boolean => labelParts(text).some(p => p.code);
+/** The label cut to its first n tokens (spaces kept inside), with 「…」 when anything is left out: a cut never falls inside a token. */
+export function tokenCut(text: string, n: number): string {
+  const toks = text.trim().split(/(\s+)/).filter(Boolean), words = toks.filter(t => !/^\s+$/.test(t));
+  if (n >= words.length) return text.trim();
+  let seen = 0, out = '';
+  for (const t of toks) { if (!/^\s+$/.test(t)) { if (seen === n) break; seen++; } out += t; }
+  return `${out.trimEnd().replace(/…+$/, '')}…`;
+}
