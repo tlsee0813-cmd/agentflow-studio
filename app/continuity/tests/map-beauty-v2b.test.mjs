@@ -142,7 +142,7 @@ test('BV2B-9 strips laid again give the automatic places; a placed part is kept 
 // Beauty v2 review (H3, visual 4): the lines seen beside a selection are routed together, and a picked line is singled out.
 test('BV2B-10 a selection\'s lines and the summary beside it are routed as one set; a picked line is 3px in the accent, the others step back', () => {
   const app = readFileSync(new URL('../src/client/app.ts', import.meta.url), 'utf8');
-  const shown = app.slice(app.indexOf('function routeShown('), app.indexOf('function routeShown(') + 1400);
+  const shown = app.slice(app.indexOf('function routeShown('), app.indexOf('function routeShown(') + 3200);
   assert.ok(shown.includes('routeEdges(lay.boxes, set)') && shown.includes("'sel-sum'"), 'one routing for what is seen');
   assert.ok(/function markSelection[\s\S]*?routeShown\(\);[\s\S]*?markPicked\(\);/.test(app));
   assert.match(css, /\.space \.world \.edge\.picked \{ --bw: 3; \}/);

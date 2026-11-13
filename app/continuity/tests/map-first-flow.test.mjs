@@ -442,8 +442,11 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   assert.match(a, /const FT_GIVE = 0\.03;/);
   assert.match(a, /const base = topInset\(\) - ftH\(\), at = frameView\(explicit, base\);/, 'framed under the strip alone first');
   // Review of v5 focus 3 (A2, A3) changed exactly this: each form measured where it stands for that camera (beside the title).
-  assert.match(a, /for \(const form of \[null, 'ft-one', 'ft-under'\] as const\)/, 'whole, then its sentence on one line, then stepped back');
-  assert.match(a, /done = !ftCovers\(ftBox\(form, camera, inkAt\(k\)\), camera, scene, inkAt\(k\)\)/);
+  // Polish 5: the sentence's forms (whole, one line) with the give and then with room above, before the sentence steps back.
+  assert.match(a, /const FT_SAID = \[null, 'ft-one'\] as const;/, 'whole, then its sentence on one line');
+  assert.match(a, /let done = at\.whole && give\(FT_SAID\);/);
+  assert.match(a, /if \(!done && at\.whole\) \{ frameView\(explicit, base\); done = give\(\['ft-under'\]\); \}/, 'stepped back only when no room shows the sentence');
+  assert.match(a, /const clear = \(form: string \| null, k: number\) => !ftCovers\(ftBox\(form, camera, inkAt\(k\)\), camera, scene, inkAt\(k\)\);/);
   assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects\];/, 'never over a card or a lane caption');
   assert.match(a, /el\.classList\.add\('ft-one'\); ftPlace\(el, camera, ink\); if \(!covers\(\)\) return;/, 'the sentence on one line before it steps back');
   assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop\)/, 'the map\'s own title never reads through the top line');

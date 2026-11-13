@@ -137,9 +137,20 @@ export const shownSentence = (s: string): string => s.replace(new RegExp(CITES.s
  * sentence (the core flow), and the record and line it comes from. null when no record has one (then nothing is shown: never the
  * model's summary, never the person's brief). */
 export interface SummarySource { record: string; first: string; shown: string; flow: string | null; quote: string; from: number }
-export function summarySource(records: readonly { id: string; body: readonly { text: string; from: number }[] }[]): SummarySource | null {
-  for (let i = records.length - 1; i >= 0; i--) {
-    const r = records[i]!, lines = r.body.map(b => b.text.trim()).filter(Boolean); if (!lines.length) continue;
+/** Polish 5 (ruling F6 Q1): records in paste order, the one the map describes now last: a record about a later target time (its 기준 시점,
+ * map-reading pastedTargets) stands after one about an earlier time whatever order they were pasted in (a backlog record pasted late never
+ * speaks for the map). Polish 6: a total order. A record with no date is about a time not known, so it never outranks a dated one: the
+ * undated stand first, in paste order, then the dated by their date; paste order decides only among the undated and among equal dates. */
+export function byTarget<T extends { target?: string | null }>(records: readonly T[]): T[] {
+  const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  return records.map((r, i) => ({ r, i }))
+    .sort((a, b) => Number(!!a.r.target) - Number(!!b.r.target) || (a.r.target && b.r.target ? cmp(a.r.target, b.r.target) : 0) || a.i - b.i)
+    .map(x => x.r);
+}
+export function summarySource(records: readonly { id: string; target?: string | null; body: readonly { text: string; from: number }[] }[]): SummarySource | null {
+  const ordered = byTarget(records);
+  for (let i = ordered.length - 1; i >= 0; i--) {
+    const r = ordered[i]!, lines = r.body.map(b => b.text.trim()).filter(Boolean); if (!lines.length) continue;
     const ss = summarySentences(lines.join('\n')), first = ss[0]; if (!first) continue;
     const line = r.body.find(b => b.text.trim()) ?? r.body[0]!;
     return { record: r.id, first, shown: shownSentence(first), flow: ss[1] ?? null, quote: line.text.trim(), from: line.from };
