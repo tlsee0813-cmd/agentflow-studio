@@ -63,7 +63,7 @@ import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenar
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
-import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, hubChipSpots, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
+import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, hubChipSpots, hubChipOrder, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -4265,8 +4265,10 @@ function placeFocusMarks() {
     const g = 4 * inv, ring = { x: b.x - g, y: b.y - g, w: b.w + 2 * g, h: b.h + 2 * g };
     // v10 (review of v9: 「다른 연결 7개」 straddled its card's edge beside a blue head): just off the card's edge, never on it, a place no
     // line runs under first (hubChipSpots), clear of every head. v10 growth (review of v9: one stood a row apart, under the top bar, its card
-    // hidden above): every place touches its card, here the ring one gap off its edge (the places a row further under or over go).
-    put(chip, (w, hh) => chipSpots(hubChipSpots(b, w, hh, g), w, hh, titles, ring), 260 * inv, own, r => ![...lastRouted.values()].some(o => shownNow.has(o.key) && polylineHitsRect(o.pts, r, 2)));
+    // hidden above): the places touching its card, here the ring one gap off its edge, first; a place a row further under or over only when
+    // every touching one has a line under it (merge: the 1280 nanogpt map's chip sat on a line under 「sample.py」), and never while its card
+    // is not seen (chipsSeen).
+    put(chip, (w, hh) => hubChipOrder(hubChipSpots(b, w, hh, g), w, hh, titles, ring), 260 * inv, own, r => ![...lastRouted.values()].some(o => shownNow.has(o.key) && polylineHitsRect(o.pts, r, 2)));
   }
   chipsSeen();
 }

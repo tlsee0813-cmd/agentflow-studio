@@ -433,7 +433,7 @@ test('FF-27 the fold never leaves a card with no line shown; the chip sits on it
   assert.equal(hubFolds(['a'], lines.filter(l => !l.key.startsWith('k'))).size, 0, 'every end alone: nothing folds');
   const a = focusBlock(await app());
   // v10 (review of v9): just off its card's edge (first-flow hubChipSpots, tested in v10-maps), never across it, a place no line runs under first.
-  assert.match(a, /put\(chip, \(w, hh\) => chipSpots\(hubChipSpots\(b, w, hh, g\), w, hh, titles, ring\), 260 \* inv, own, r => /, 'off its card\'s lower edge first (where no title is)');
+  assert.match(a, /put\(chip, \(w, hh\) => hubChipOrder\(hubChipSpots\(b, w, hh, g\), w, hh, titles, ring\), 260 \* inv, own, r => /, 'off its card\'s lower edge first (where no title is)');
   assert.match(a, /\?\? \(own \? all\[0\] : undefined\)/, 'a chip is never left off');
   assert.match(a, /const free = \(r: Rect, own\?: Rect\) => onScreen\(r\) && /, 'a note is never placed off the window\'s sides');
 });

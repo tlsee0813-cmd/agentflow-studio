@@ -523,6 +523,13 @@ export function chipSpots(spots: readonly { x: number; y: number }[], w: number,
   const clear = own.filter(p => !titles.some(t => p.x < t.x + t.w + 2 && t.x < p.x + w + 2 && p.y < t.y + t.h + 2 && t.y < p.y + hh + 2));
   return clear.length ? clear : own.length ? own : [...spots];
 }
+/** v10 merge (v10-maps: never a line through a hub chip; v10-growth: a chip touches its card): a hub chip's places in the order they are
+ * tried: those touching its card (the ring a gap off its edge) first, then the rest (one row further), each clear of the cards' texts. The
+ * page takes the first of them no line runs under, else the first free: a row further only when every touching place has a line under it. */
+export function hubChipOrder(spots: readonly { x: number; y: number }[], w: number, hh: number, titles: readonly Box[], card: Box): { x: number; y: number }[] {
+  const near = chipSpots(spots, w, hh, titles, card);
+  return [...near, ...chipSpots(spots, w, hh, titles).filter(p => !near.includes(p))];
+}
 /** Whether a chip touches its card: it overlaps the card or meets its edge (within 3 units: a hair off the card's text), along a side. */
 export const touchesCard = (r: Box, c: Box, eps = 3): boolean => r.x <= c.x + c.w + eps && c.x <= r.x + r.w + eps && r.y <= c.y + c.h + eps && c.y <= r.y + r.h + eps;
 /** v10 (review of v9: 「다른 연결 21개」 stood alone under the top bar, its card hidden above): whether a card is seen on screen: at least a
