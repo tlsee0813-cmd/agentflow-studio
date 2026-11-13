@@ -69,14 +69,17 @@ test('P5-3 a cut never loses a plan word: the notes\' 48 characters, the top sen
   const c = clipKeepPlan(s, 300, w);
   assert.ok(c.includes('계획'), c); assert.ok(w(c) <= 300, c);
   const a = await app();
-  assert.match(a, /h\('span', \{ class: 'ff-note-text' \}, clipKeepPlan\(text, 48, undefined, false, KEEP_WORD\)\)/, 'a note\'s 48 characters keep the plan word');
+  // v12 (review of v11: 「hyperfine <command>... (」): a note's words whole or the note says its kind alone (its words in its hover): never
+  // cut, so never a plan word lost.
+  assert.match(a, /h\('span', \{ class: 'ff-note-text' \}, text\)/, 'a note\'s words whole');
+  assert.match(a, /if \(nt\) \{ const t0 = nt\.textContent \?\? ''; if \(!fillLabel\(nt, t0\) \|\| nt\.textContent !== t0 \|\| nt\.scrollHeight > nt\.clientHeight \+ 1 \|\| nt\.scrollWidth > nt\.clientWidth \+ 1\) nt\.remove\(\); \}/);
   assert.doesNotMatch(a, /text\.length > 48 \? `\$\{text\.slice\(0, 47\)\}…`/, 'never the plain 47-character cut');
   assert.match(a, /function keepPlanFit\(el: HTMLElement, text: string, lines: number, less = 0, words = false\): string/);
   // v11 (ruling F8 Q2): the top sentence is never cut (a whole sentence of the summary or none, v11-text); the basis line keeps its cut.
   assert.match(a, /if \(basis\) t\.textContent = keepPlanFit\(basis, t\.dataset\.text \?\? '', 1, \(lead\?\.offsetWidth \?\? 0\) \+ 6, true\);/,
     'the basis line measured to its box');
   assert.match(a, /sent\.dataset\.text = it\.text \?\? '';/); assert.match(a, /class: 'ft-basis-t', 'data-text': said/);
-  assert.match(a, /t1 = keepPlanFit\(nt, t0, 2\); fillLabel\(nt, t1\);/, 'a note\'s two clamped lines too');
+  assert.doesNotMatch(a, /keepPlanFit\(nt, t0, 2\)/, 'v12: a note is never clamped (its words whole, or its kind alone)');
 });
 
 test('P5-4 at rest the first screen\'s lines are routed as the summary strokes they stand for (hyperfine 19 → 5 crossings)', async () => {
@@ -118,7 +121,8 @@ test('P5-7 code in a label reads as quoted code: a monospace chip, words kept as
   const a = await app();
   // Polish 6 (P6-1 to P6-3) keeps these sites and the cut, and makes them say when no cut fits.
   assert.match(a, /function fillLabel\(el: HTMLElement, text: string, full = text\): boolean \{/);
-  for (const site of ['box.append(label); if (!fillLabel(label, cutWord, word))', 'box.append(label); fillLabel(label, verb);', 'fillLabel(s.el, s.text);', "filled = fillLabel(el, text); if (!filled) continue; el.classList.toggle('glyph'"]) assert.ok(a.includes(site), site);
+  // v12: a rest label goes through fillWhole (fillLabel, whole or nothing).
+  for (const site of ['box.append(label); if (!fillWhole(label, cutWord))', 'box.append(label); fillLabel(label, verb);', 'fillLabel(s.el, s.text);', "filled = fillLabel(el, text); if (!filled) continue; el.classList.toggle('glyph'"]) assert.ok(a.includes(site), site);
   assert.match(a, /for \(let n = cutCount\(text\) - 1; n >= 1; n--\) \{ const c = tokenCut\(text, n\); if \(c === null\) continue; draw\(c\); el\.dataset\.full = full; if \(!over\(\)\) return done\(true\); \}/, 'wider than its room: whole units off the end, the whole text in the tip');
   const c = await css();
   assert.match(c, /\.edge-labels code\.lb-code, \.ff-note code\.lb-code \{ font-family: ui-monospace,[^}]*font-size: 1em;[^}]*background: none;/, 'monospace at the label\'s own size (polish 7: on the label\'s own halo, no chip)');

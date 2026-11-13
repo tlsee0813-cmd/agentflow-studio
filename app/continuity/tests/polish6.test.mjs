@@ -17,10 +17,11 @@ test('P6-1 a code label counts its words at spaces (not at the letter s) and, fi
   assert.match(f, /function fillLabel\(el: HTMLElement, text: string, full = text\): boolean \{/);
   assert.match(f, /return done\(false\);\n?$/, 'no cut fits (one word, or the first word already too wide): false, never left clipped');
   // Every caller that places a label leaves one that fits in no cut to its line's hover.
-  assert.ok(a.includes('box.append(label); if (!fillLabel(label, cutWord, word)) { label.remove(); hidden.push(g); continue; }'), 'a rest label: removed, counted hidden');
-  assert.ok(a.includes("!c.endsWith('…') ? '…' : ''}`; if (!fillLabel(el, text)) return;"), 'a fit label: that form gets no place');
-  assert.ok(a.includes('filled = fillLabel(el, text); if (!filled) continue;') && a.includes('if (!spot && filled) {'), 'a badge: that form skipped, never forced clipped');
-  assert.ok(a.includes('fits = fillLabel(label, text); if (!fits) return null;'), 'a selection\'s label: no place');
+  // v12: whole or nothing (fillWhole); a label with no whole form is removed and counted hidden, its line keeps its detail cue.
+  assert.ok(a.includes('box.append(label); if (!fillWhole(label, cutWord)) { label.remove(); hidden.push(g); continue; }'), 'a rest label: removed, counted hidden');
+  assert.ok(a.includes('const text = c; if (!(cond ? fillLabel(el, text) : fillWhole(el, text))) return;'), 'a fit label: that form gets no place');
+  assert.ok(a.includes('filled = fillLabel(el, text); if (!filled) continue;') && a.includes("if (!spot && (filled || b.kind === 'condition')) {"), 'a badge: that form skipped, never forced clipped');
+  assert.ok(a.includes('fits = fillWhole(label, text); if (!fits) return null;'), 'a selection\'s label: no place (v12: whole or none)');
 });
 
 test('P6-2 one cut mark only, and never a cut that keeps only a lead (「기동 ·」) or a fragment', async () => {
@@ -76,8 +77,9 @@ test('P6-5 byTarget is a total order: the latest dated record speaks whatever th
 
 test('P6-6 a focus note is cut between tokens with one mark (never 「hyperfine <command> … …」); the code chip is regular weight', async () => {
   const a = await app();
-  assert.match(a, /for \(let n = cutCount\(t1\) - 1; n >= 1 && nt\.scrollHeight > nt\.clientHeight \+ 1; n--\) \{ const c = tokenCut\(t1, n\); if \(c && \(!KEEP_WORD\.test\(t1\) \|\| KEEP_WORD\.test\(c\)\)\) fillLabel\(nt, c, t1\); \}/,
-    'past its two lines: whole tokens off the end, a plan word kept');
+  // v12: past its two lines the note says its kind alone (its words whole in its hover), never a cut.
+  assert.match(a, /nt\.scrollHeight > nt\.clientHeight \+ 1 \|\| nt\.scrollWidth > nt\.clientWidth \+ 1\) nt\.remove\(\); \}/,
+    'past its two lines: no words but whole ones');
   const shown = labelParts(tokenCut('hyperfine <command>... (src/main.rs main)', 1)).map(p => (p.code ? `[${p.t}]` : p.t)).join('');
   assert.equal(shown, 'hyperfine…', 'polish 7: the code run (spaces and all) is whole or not shown, one mark after the cut');
   const c = await css();

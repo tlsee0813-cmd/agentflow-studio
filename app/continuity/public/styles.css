@@ -3992,3 +3992,23 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .world .growth-follow-note .gf-fine { color: var(--text-2); font-size: calc(12px * var(--u, 1)); }
 .world .growth-follow-note .gf-acts { display: flex; gap: calc(10px * var(--u, 1)); font-size: calc(12.5px * var(--u, 1)); }
 .world .growth-follow-note .link-button { font-size: calc(12.5px * var(--u, 1)); line-height: calc(18px * var(--u, 1)); }
+
+/* ---------- v12 lines (blind judges: every relation drawn read better than the static focus, 14 of 16 map votes) ----------
+   The opening view draws every relation, 「먼저 볼 연결」 over them at 3px in the accent; the static focus is a choice beside the count
+   (app.ts chooseOnly: 「먼저 볼 연결만」 / 「전체 관계」, aria-pressed). At rest every other line reads at the background width (1.15px)
+   whatever the lens, until the person picks one (ff-even); a picked card draws only its direct relations (sel-fold). */
+.focus-top .ft-choice { display: inline-flex; align-items: center; gap: 0; }
+.focus-top .ft-choice > .ft-b { border-radius: 0; }
+.focus-top .ft-choice > .ft-b:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); }
+.focus-top .ft-choice > .ft-b:last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0; margin-left: -1px; }
+.focus-top .ft-choice > .ft-b[aria-pressed="true"] { position: relative; border-color: var(--accent); background: var(--accent-soft, var(--surface)); color: var(--accent-strong); font-weight: var(--fw-name); }
+#space.ff-even.ff-rest .world .edge:not(.ff-flow):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.growth-lit):not(.growth-gone-line) { --bw: 1.15; }
+#space.ff-even.ff-rest .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked):not(.sc-path) .edge-line { stroke: var(--edge-c, var(--edge)); }
+#space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 3; }
+#space.ff-on.ff-rest:not(.ff-soft) .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--accent); stroke-opacity: 1; opacity: 1; }
+#space.sel-fold .world .edge:not(.on) { display: none; }
+/* v12: marks whose targets would meet stack into one 「조건 n」 mark (app.ts placeCue): its ◇ and the count of conditions it lists. */
+.edge-labels > .edge-cue.q-stack { width: auto; height: 8px; padding-left: 10px; }
+.edge-cue.q-stack .cue-open { display: none; }
+.edge-cue.q-stack .cue-n { display: block; margin-top: -3px; padding: 0 3px; border-radius: 3px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); font: 600 10px/14px var(--font); color: var(--text-2); white-space: nowrap; }
+.edge-cue.q-stack .cue-word { left: auto; right: -4px; transform: translateX(100%); }

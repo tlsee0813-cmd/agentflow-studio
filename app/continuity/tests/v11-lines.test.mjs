@@ -70,7 +70,7 @@ test('V11-3 a condition label is the record\'s words whole, at most 24 character
 test('V11-4 the page says a condition whole or folds it to its ◇: no cut forms, and the branch note only when whole and short', async () => {
   const a = await app(), fit = fn(a, 'placeFitLabels'), marks = fn(a, 'placeFocusMarks');
   assert.ok(!fit.includes('condCuts(base)'), 'v10a tried every shorter cut of a condition');
-  assert.match(fit, /const whole = cond \? condLabelWords\(full\) : null;/);
+  assert.match(fit, /const whole = cond \? condLabelWords\(full\) : /);
   assert.match(fit, /condLabelFits\(\{ widthPx: el\.offsetWidth \* s, heightPx: el\.offsetHeight \* s, fontPx: parseFloat\(cs\.fontSize\) \* s/);
   assert.match(fit, /if \(el\.textContent !== text \|\|/, 'a label the page would cut is no label');
   assert.match(marks, /if \(br && pts && pts\.length > 1 && condLabelWords\(br\.text\)\) \{/, 'the 갈림 note never carries a cut condition');
@@ -99,12 +99,13 @@ test('V11-6 a label with no room leaves a relation-detail cue; a badge with no c
 
 test('V11-7 the page folds by the static focus, routes the drawn lines among themselves, and says the count with 전체 관계 N개 보기', async () => {
   const a = await app(), fold = fn(a, 'foldHubs'), route = fn(a, 'routeShown'), top = fn(a, 'renderFocusTop'), marks = fn(a, 'placeFocusMarks');
-  assert.match(fold, /const fold = focusFold\(cards, ls, ffOpen\);/, 'v10a: hubFolds (six or more lines only)');
-  assert.match(fold, /if \(!o \|\| !f \|\| !ffActive\(\) \|\| ffLensPicked\) return;/, 'a lens the person picks shows its subject over the whole map');
+  // v12: the static focus is the person's choice (「먼저 볼 연결만」, ffOnly) and gives every card its chip (V12-1, V12-2).
+  assert.match(fold, /const fold = focusFold\(cards, ls, ffOpen, true\);/, 'v10a: hubFolds (six or more lines only)');
+  assert.match(fold, /if \(!o \|\| !f \|\| !ffActive\(\) \|\| ffLensPicked \|\| !ffOnly\(\)\) return;/, 'a lens the person picks shows its subject over the whole map');
   assert.match(route, /const folding = !!ffFold && ffActive\(\)/);
   assert.match(route, /: folding \? \[\.\.\.world\.querySelectorAll<SVGGElement>\('\.edge:not\(\.sum\)'\)\]\.filter\(g => !out\(g\)\) : \[\];/);
   assert.match(top, /shownWord\(ffCount\.shown, ffCount\.total\)/);
-  assert.match(top, /btn\('ft-all', allWord\(ffCount\.total\)/);
+  assert.match(top, /btn\('ft-all', ALL_RELATIONS_WORD, `관계 \$\{ffCount\.total\}개를 모두 그리고/, 'v12: 「전체 관계」 beside 「먼저 볼 연결만」');
   assert.match(top, /기록에 \$\{FLOW_CONTROL\}의 근거가 없어 모든 관계를 그렸어요/, 'a map with no basis starts with every relation and says so');
   assert.match(marks, /\|\| id === selected\) continue;/, 'a picked card shows all its direct relations: no chip');
   assert.match(a, /sp\.classList\.toggle\('ff-all', !!o && !any && !scope && !scView && !!o\.view\.parts\.length\);/);
@@ -150,6 +151,6 @@ test('V11-10 the static focus routes its own few lines at twice the map\'s pitch
   // Taken only when no worse a drawing than the map's own pitch (crossings, detours, length): here it is.
   assert.deepEqual([...R.focusRoutes(boxes, edges)].map(([k, r]) => [k, r.d]), [...half].map(([k, r]) => [k, r.d]));
   assert.equal(R.FOCUS_ROUTE_LONGER, 1.15);
-  assert.ok(src.includes('focusRoutes(lay.boxes, set, c)'));
+  assert.ok(src.includes('focusRoutes(lay.boxes, set, c, { pairGap: pairGapNow })'));
   assert.match(src, /const c = folding && !selected && !scView && set\.length <= FOCUS_ROUTE_MAX \? FOCUS_ROUTE_SCALE : 1;/, 'one fixed scale: a route that followed the zoom would move the fit that reads it');
 });

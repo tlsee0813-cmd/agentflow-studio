@@ -36,8 +36,9 @@ test('V8-2 the fit labels use those forms, with a last pass over other lines, an
   assert.match(fit, /if \(cond && labelParts\(s\)\.some\(p => p\.code\)\) \{ const f = condForms\(s, fold\); return n >= 14 \? f\.long : f\.short; \}/);
   assert.doesNotMatch(fit, /FIT_CODE_MAX \? s : null/, 'no fold at every zoom');
   // F8 Q4 supersedes the cut forms of a condition: it is said whole (condLabelWords, condLabelFits) or folds to its ◇.
-  assert.match(place, /const passes: \[number, boolean\]\[\] = cond \? \[\] : \[\[14, false\], \[8, false\]\];/);
-  assert.match(place, /const whole = cond \? condLabelWords\(full\) : null;/);
+  // v12: what a line sends is said whole too (never cut to 14 or 8 characters).
+  assert.match(place, /const whole = cond \? condLabelWords\(full\) : \/…\|\\\.\{3\}\/\.test\(full\) \|\| \[\.\.\.full\]\.length > COND_LABEL_CHARS \? null : full;/);
+  assert.match(place, /const whole = cond \? condLabelWords\(full\) : /);
   // v10 (review of v9: lines ran through a label's text): the last pass keeps off other lines as well (its ◇ with its cue otherwise).
   assert.match(place, /ok = free;/, 'the last pass keeps off cards, heads, the title, labels and other lines');
   assert.match(place, /const free = \(r: Rect\) => clear\(r\) && inMap\(r\) && !lineUnder\(r, e\.key, drawn\);/, 'never past the map\'s drawn extent');

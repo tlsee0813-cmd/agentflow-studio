@@ -106,7 +106,7 @@ test('GROWTH-W6 the person\'s name and note go through the log; the comparison f
   assert.doesNotMatch(un, /정리된 거절/);
   const view = await read('src/client/growth-view.ts');
   assert.doesNotMatch(view, /unread/, 'no row of a record not read yet');
-  assert.ok(fn(app, 'placeFocusMarks').includes('put(chip, (w, hh) => hubChipOrder(hubChipSpots('), 'a hub chip\'s places leave out every card title');
+  assert.ok(fn(app, 'placeFocusMarks').includes('put(chip, (w, hh) => [...hubChipOrder(hubChipSpots('), 'a hub chip\'s places leave out every card title');
 });
 
 test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes back as it was left, a part entered for comes first; the camera moves only for a card out of sight, never fits', async () => {
