@@ -432,7 +432,7 @@ test('FF-27 the fold never leaves a card with no line shown; the chip sits on it
   assert.equal(foldedLines(folds, new Set()).byHub.get('a').length, 6, 'N is exactly what it hides');
   assert.equal(hubFolds(['a'], lines.filter(l => !l.key.startsWith('k'))).size, 0, 'every end alone: nothing folds');
   const a = focusBlock(await app());
-  assert.match(a, /put\(chip, \(w, hh\) => \[\{ x: b\.x \+ b\.w - w - m, y: b\.y \+ b\.h - hh \/ 2 \}/, 'straddling its card\'s lower edge');
+  assert.match(a, /put\(chip, \(w, hh\) => chipSpots\(\[\{ x: b\.x \+ b\.w - w - m, y: b\.y \+ b\.h - hh \/ 2 \}/, 'straddling its card\'s lower edge first (where no title is)');
   assert.match(a, /\?\? \(own \? all\[0\] : undefined\)/, 'a chip is never left off');
   assert.match(a, /const free = \(r: Rect, own\?: Rect\) => onScreen\(r\) && /, 'a note is never placed off the window\'s sides');
 });
@@ -446,9 +446,11 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   assert.match(a, /const FT_SAID = \[null, 'ft-one'\] as const;/, 'whole, then its sentence on one line');
   assert.match(a, /let done = at\.whole && give\(FT_SAID\);/);
   assert.match(a, /if \(!done && at\.whole\) \{ frameView\(explicit, base\); done = give\(\['ft-under'\]\); \}/, 'stepped back only when no room shows the sentence');
-  assert.match(a, /const clear = \(form: string \| null, k: number\) => !ftCovers\(ftBox\(form, camera, inkAt\(k\)\), camera, scene, inkAt\(k\)\);/);
+  assert.ok(a.includes('if (!done && !at.whole) for (const form of FT_SAID) { frameView(explicit, base + ftBox(form, camera, null).h + 8); if (clear(form, camera.k)) { done = true; break; } }'), 'a frame on the first flow keeps the sentence the same way (first-user judge 9)');
+  // Review of the growth view (verifier, the fixture map at 1280): the one-line form may also stand narrower, clear of a caption at its end.
+  assert.ok(a.includes("const clear = (form: string | null, k: number) => (form === 'ft-one' ? FT_CAPS : [null]).some(cap => { ftCap = cap; const ok = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); ftCap = null; return ok; });"));
   assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects\];/, 'never over a card or a lane caption');
-  assert.match(a, /el\.classList\.add\('ft-one'\); ftPlace\(el, camera, ink\); if \(!covers\(\)\) return;/, 'the sentence on one line before it steps back');
+  assert.match(a, /el\.classList\.add\('ft-one'\);\n  for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/, 'the sentence on one line (narrower if need be) before it steps back');
   assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop\)/, 'the map\'s own title never reads through the top line');
   const css = await cssNoComments();
   assert.match(css, /\.focus-top\.ft-one \.ft-sentence \{ -webkit-line-clamp: 1; \}/);

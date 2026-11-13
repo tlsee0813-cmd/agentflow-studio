@@ -1,4 +1,4 @@
-import { type Project, type ManualPositions, type ViewState, FILE_LIMIT } from './types.js';
+import { type Project, type ManualPositions, type ViewState, type GrowthMemo, FILE_LIMIT } from './types.js';
 import { ensure, parseProject, isLegacy, isPrevious, assertPositions, cleanPositions } from './validation.js';
 import { restore } from './domain.js';
 export const STORAGE_KEY='agentflow.idea015.project.v1';
@@ -50,7 +50,8 @@ const VIEW_PROJECTS=60;
 export function cleanViewState(v:unknown):ViewState {
   const out:ViewState={folds:{},cameras:{}};
   if(!v||typeof v!=='object'||Array.isArray(v))return out;
-  const {folds,cameras}=v as Record<string,unknown>;
+  const {folds,cameras,growth}=v as Record<string,unknown>;
+  const g=cleanGrowth(growth);if(g)out.growth=g;
   // A key an ordinary object inherits ('__proto__'…) is no part's key: skipped, so it cannot replace a dictionary's prototype.
   if(folds&&typeof folds==='object'&&!Array.isArray(folds))for(const [k,b] of Object.entries(folds))if(typeof b==='boolean'&&k&&!(k in Object.prototype))out.folds[k]=b;
   if(cameras&&typeof cameras==='object'&&!Array.isArray(cameras))for(const [k,c] of Object.entries(cameras)){
@@ -62,6 +63,14 @@ export function cleanViewState(v:unknown):ViewState {
     }
   }
   return out;
+}
+/** The growth view's memo (ViewState.growth): version numbers are whole numbers from 1 (base and pick may be null), at a time; anything else
+ * reads as no memo (a first visit). */
+export function cleanGrowth(v:unknown):GrowthMemo|null {
+  if(!v||typeof v!=='object'||Array.isArray(v))return null;
+  const {seen,at,base,pick}=v as Record<string,unknown>,n=(x:unknown)=>typeof x==='number'&&Number.isSafeInteger(x)&&x>=1&&x<=100000;
+  if(!n(seen)||typeof at!=='string'||!Number.isFinite(Date.parse(at))||at.length>40||!(base===null||n(base))||!(pick===null||n(pick)))return null;
+  return {seen:seen as number,at,base:base as number|null,pick:pick as number|null};
 }
 function viewAll(storage:StorageLike):Record<string,unknown> {
   try {const v=JSON.parse(storage.getItem(VIEW_KEY)??'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v as Record<string,unknown>:{};} catch {return {};}

@@ -504,6 +504,12 @@ export function foldedLines(folds: ReadonlyMap<string, readonly string[]>, open:
 }
 /** The chip's words: folded, how many; open, 「접기」. */
 export const foldWord = (n: number, open: boolean): string => (open ? '접기' : `다른 연결 ${n}개`);
+/** A hub chip's places (w × hh each), in order, without those over a card's title (2 units of room); when every place meets a title, all of
+ * them (the chip still stands at its card). */
+export function chipSpots(spots: readonly { x: number; y: number }[], w: number, hh: number, titles: readonly { x: number; y: number; w: number; h: number }[]): { x: number; y: number }[] {
+  const clear = spots.filter(p => !titles.some(t => p.x < t.x + t.w + 2 && t.x < p.x + w + 2 && p.y < t.y + t.h + 2 && t.y < p.y + hh + 2));
+  return clear.length ? clear : [...spots];
+}
 /** The source the switcher says: a kept choice 「선택한 보기 · …」, a scenario with its name. */
 export function sourceText(f: FirstFlow): string | null {
   const c = f.flow; if (!c) return f.rule === 'all' ? FLOW_SOURCE.all : null;

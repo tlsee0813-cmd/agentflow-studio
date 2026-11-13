@@ -160,7 +160,12 @@ export type ManualPositions = Record<string, Record<string, Point>>;
 export interface Backup { project: Project; positions: ManualPositions | null }
 /** How a project was last looked at in this browser (folds and per-scope cameras), apart from the project data. Keys are part
  * ids (for an example: its stable part keys); a camera's scope '' is the whole map. */
-export interface ViewState { folds: Record<string, boolean>; cameras: Record<string, SavedCamera> }
+export interface ViewState { folds: Record<string, boolean>; cameras: Record<string, SavedCamera>;
+  /** The growing map (ruling F6 Q4): the map version (1-based count of map readings) shown when this map was last looked at, when that
+   * was (the visit's last write), the baseline fixed at this visit's start (null: none, a first visit) and the baseline the person picked
+   * in 지도 이력 (kept apart, null: none). Absent before the growth view. */
+  growth?: GrowthMemo }
+export interface GrowthMemo { seen: number; at: string; base: number | null; pick: number | null }
 /** A camera as saved: where and how large, and the window (inner width × height) it was saved in, when known; a window that
  * differs by a quarter or more fits the map instead of restoring it (a view saved small in a narrow window stays no fit elsewhere). */
 export interface SavedCamera { x: number; y: number; scale: number; win?: [number, number] }
@@ -181,7 +186,29 @@ export interface Project {
    * ever added parts and relations; it never renamed, moved, archived or re-described an existing part (recipe .50 step 5: but for the rename a
    * record's own C-IDENT row asks, map-identity.ts, which leaves a name the person gave as it is). */
   readings: ReadingEntry[];
+  /** The growth view (ruling F6 Q4 「시각 없는 사람 변경 소급 금지」): the person's own edits from the log's start on (a part's name or note,
+   * archive, parent change, relation added or removed), each with its sequence, time and the value before and after. Absent until the first
+   * such edit; earlier edits have no time and are never dated after the fact. */
+  edits?: HumanEditLog;
 }
+/* ---------- The person's edits (growth view, ruling F6 Q4): a small log, oldest first, never rewritten. ---------- */
+export const HUMAN_EDIT_KINDS = ['name', 'note', 'archive', 'parent', 'relation-add', 'relation-remove'] as const;
+export type HumanEditKind = typeof HUMAN_EDIT_KINDS[number];
+/** A relation as it stood when the person added or removed it. */
+export interface HumanRelation { id: string; from: string; to: string; kind: RelationKind; note: string }
+export type HumanEdit = { seq: number; at: string } & (
+  | { kind: 'name'; target: string; before: string; after: string }
+  | { kind: 'note'; target: string; before: string; after: string }
+  | { kind: 'archive'; target: string; before: boolean; after: boolean }
+  | { kind: 'parent'; target: string; before: string | null; after: string | null }
+  | { kind: 'relation-add'; target: string; before: null; after: HumanRelation }
+  | { kind: 'relation-remove'; target: string; before: HumanRelation; after: null });
+/** since: when the log started (the state then is its first snapshot: nothing before it is dated). At most HUMAN_EDITS_LIMIT entries, the
+ * oldest going first; seq goes on by one. */
+export interface HumanEditLog { version: 'human-edits.1'; since: string; entries: HumanEdit[] }
+export const HUMAN_EDITS_LIMIT = 1000;
+/** The log's names and notes, before and after, in characters at most: older entries go first past it (a note is up to 2,000 characters). */
+export const HUMAN_EDITS_TEXT = 400_000;
 /** One pasted record: the text exactly as pasted, a stable id, when it was added here (not when it was written or which
  * version it is about) and, optionally, the part being looked at when it was pasted. That part is the reading's context only,
  * never a claim that the whole text is about it. */

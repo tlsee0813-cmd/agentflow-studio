@@ -1,4 +1,4 @@
-import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile, type PastedRecord, type RecordEvidence, PASTED_TEXT_LIMIT, READINGS_LIMIT, isMapReading, type ReadingEntry } from './types.js';
+import { API_SCHEMA, SCHEMA, RESULT_SCHEMA, RESULT2_SCHEMA, TEXT_LIMIT, REQUEST_BYTES, EXCERPT_CHARS, BASIS_LABEL, SOURCE_LABEL, type PreviousIntent, type CurrentIntent, type Intent, type Basis, type ContextBasis, type ContextRequest, type Envelope, type Project, type Source, type Task, type Ticket, type WorkValues, type RelationKind, type Point, type Area, type Background, type ExportRecord, type PlanStamp, type ExportAnchor, type UnderstandingEntry, type UnderstandingInput, type HeldReason, type ResultFile, type PastedRecord, type RecordEvidence, PASTED_TEXT_LIMIT, READINGS_LIMIT, isMapReading, type ReadingEntry, type HumanEdit, HUMAN_EDITS_LIMIT, HUMAN_EDITS_TEXT } from './types.js';
 import { ensure, text, validateEnvelope, digest, sha256, parseResultFile, resultSourceText, parseProject, POSITION_LIMIT, SUMMARY_LIMIT } from './validation.js';
 import { planFacts, planFactsText } from './plan-facts.js';
 import { areaPath, childrenOf } from './hierarchy.js';
@@ -737,6 +737,42 @@ export function addRelation(p: Project, from: string, to: string, kind: Relation
 }
 export function removeRelation(p: Project, id: string): Project {
   ensure(p.space.relations.some(r=>r.id===id));const n=change(p);n.space.relations=n.space.relations.filter(r=>r.id!==id);return n;
+}
+/* ---------- Growth view (ruling F6 Q4): the person's own structure edits, logged with a time from now on ----------
+ * A reading adds parts and relations through addArea/addRelation (unlogged: the reading itself is dated). These are the person's: each
+ * makes the edit as the plain function does, then appends one entry (next sequence number, the time, before and after) to Project.edits.
+ * A call that changes nothing logs nothing. The log keeps its newest HUMAN_EDITS_LIMIT entries (and HUMAN_EDITS_TEXT characters of names and
+ * notes); nothing older is ever dated. A clock set back never stamps an entry before the one before it (the log reads in time order): the
+ * time is the later of now and the last entry's. */
+type EditBody=HumanEdit extends infer E?E extends HumanEdit?Omit<E,'seq'|'at'>:never:never;
+const editChars=(e:HumanEdit)=>e.kind==='name'||e.kind==='note'?e.before.length+e.after.length:0;
+function logged(n:Project,...es:EditBody[]):Project {
+  if(!es.length)return n;
+  const t=now(),log=n.edits??{version:'human-edits.1' as const,since:t,entries:[]},last=log.entries.at(-1)?.at??log.since,at=t>last?t:last;
+  let seq=(log.entries.at(-1)?.seq??0),entries=[...log.entries,...es.map(e=>({...e,seq:++seq,at} as HumanEdit))].slice(-HUMAN_EDITS_LIMIT);
+  let chars=entries.reduce((s,e)=>s+editChars(e),0);while(chars>HUMAN_EDITS_TEXT&&entries.length>1){chars-=editChars(entries[0]!);entries=entries.slice(1);}
+  n.edits={version:'human-edits.1',since:log.since,entries};return n;
+}
+/** The person's own name and note for a part (the part form): editArea, with each that changed logged (name, note: before and after). */
+export function editAreaByPerson(p:Project,id:string,name:string,note:string):Project {
+  const a=p.space.areas.find(a=>a.id===id),n=editArea(p,id,name,note),b=n.space.areas.find(a=>a.id===id)!;
+  return logged(n,...(a&&a.name!==b.name?[{kind:'name' as const,target:id,before:a.name,after:b.name}]:[]),...(a&&a.note!==b.note?[{kind:'note' as const,target:id,before:a.note,after:b.note}]:[]));
+}
+export function archiveAreaByPerson(p:Project,id:string,archived:boolean):Project {
+  const was=p.space.areas.find(a=>a.id===id)?.archived;const n=setAreaArchived(p,id,archived);
+  return was===archived?n:logged(n,{kind:'archive',target:id,before:!archived,after:archived});
+}
+export function setAreaParentByPerson(p:Project,id:string,parentId:string|null):Project {
+  const was=p.space.containment.parents[id]??null,n=setAreaParent(p,id,parentId);
+  return n===p?p:logged(n,{kind:'parent',target:id,before:was,after:parentId});
+}
+export function addRelationByPerson(p:Project,from:string,to:string,kind:RelationKind,note=''):Project {
+  const n=addRelation(p,from,to,kind,note),r=n.space.relations.at(-1)!;
+  return logged(n,{kind:'relation-add',target:r.id,before:null,after:{id:r.id,from:r.from,to:r.to,kind:r.kind,note:r.note}});
+}
+export function removeRelationByPerson(p:Project,id:string):Project {
+  const r=p.space.relations.find(x=>x.id===id);const n=removeRelation(p,id);
+  return logged(n,{kind:'relation-remove',target:id,before:{id,from:r!.from,to:r!.to,kind:r!.kind,note:r!.note},after:null});
 }
 /** The area the unsent request is written for (undefined = follow the current work). Changed only by the user. */
 export function setDraftTarget(p: Project, area: string|null|undefined): Project {
