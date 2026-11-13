@@ -18,8 +18,8 @@ import { recordTexts } from '../shared/request-return.js';
 import type { MapReading, ReadingExclusion } from '../shared/types.js';
 import { recordLabel } from '../shared/record-source.js';
 import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, SavedCamera, ViewState, GrowthMemo, RelationKind } from '../shared/types.js';
-import { mapVersions, pastVersion, changeSet, directLines, unreflectedAt, citeLines, changeReason, visitBaseline, growthMemo, compareBase, versionLabel, CHANGE_WORD, TAB_ORDER, type ChangeSet, type LineKey, type IdentityCite, type Unreflected } from '../shared/map-growth.js';
-import { cardTabs, placeTabs, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, unreflectedRow, tabWord, wasLabel, newTitle, pastKeepsCamera, type SummaryKey } from './growth-view.js';
+import { mapVersions, pastVersion, changeSet, directLines, unreflectedAt, unreadRecords, reflectGroups, citeLines, changeReason, visitBaseline, growthMemo, compareBase, versionLabel, CHANGE_WORD, type ChangeSet, type LineKey, type IdentityCite, type Unreflected, type PartChange } from '../shared/map-growth.js';
+import { placeTabs, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, reflectRow, groupTitle, tabWord, wasLabel, newTitle, changeScenes, shownTabs, sceneKind, sceneTitle, sceneSentence, stepWord, guideOf, guideText, kindCount, plainName, auxName, codeText, leastPan, readableInView, type Scene as ChangeScene, type GuideSeg, type SummaryKey } from './growth-view.js';
 import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
@@ -3249,7 +3249,8 @@ function fitView(explicit: boolean, animate = false) {
   const base = topInset() - ftH(), at = frameView(explicit, base);
   const scene = ftScene(), ink = titleInk();
   const inkAt = (k: number) => (k >= TITLE_FLOOR_K ? ink : null);
-  const clear = (form: string | null, k: number) => !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k));
+  // The one-line form may also stand narrower (FT_CAPS), clear of a caption or card at its right end (the fixture map at 1280).
+  const clear = (form: string | null, k: number) => (form === 'ft-one' ? FT_CAPS : [null]).some(cap => { ftCap = cap; const ok = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); ftCap = null; return ok; });
   // A frame that shows the map's own title never gives it up for the top line's room (the give stops at the title's floor).
   const least = Math.max(at.k - FT_GIVE, at.k >= TITLE_FLOOR_K ? TITLE_FLOOR_K : 0) - 1e-9;
   const give = (forms: readonly (string | null)[]) => { for (const form of forms) for (let k = at.k; k >= least; k -= 0.002) { at.place(k); if (clear(form, k)) return true; } return false; };
@@ -3257,17 +3258,32 @@ function fitView(explicit: boolean, animate = false) {
   // on one line, each with the give; else the least room above the map (8px at a time) where one of them stands clear beside the title; only
   // then the sentence steps back (the switcher alone), and at worst the room of that short form above the map.
   let done = at.whole && give(FT_SAID);
+  // Review of the growth view (verifier, the fixture map at 1280): room above the map first at the same scale, moved down within the free
+  // height under the map (8px at a time; the title and its floor kept), before a smaller frame is tried.
+  if (!done && at.whole) {
+    at.place(at.k); const y0 = camera.y, B = drawnBounds(), slack = mapBottom() - mapBottomInset() - (camera.y + (B.y + B.h) * camera.k);
+    for (let d = 8; d <= slack && !done; d += 8) { camera = { ...camera, y: y0 + d }; for (const form of FT_SAID) if (clear(form, camera.k)) { done = true; break; } }
+    if (!done) camera = { ...camera, y: y0 };
+  }
   const most = at.whole && !done ? ftBox(null, camera, null).h + 8 : 0;
   for (let d = 8; d <= most && !done; d += 8) {
-    const a2 = frameView(explicit, base + d); if (!a2.whole) break;
+    // A smaller frame that would drop the map's own title (under its floor) is no room: the title stays in sight.
+    const a2 = frameView(explicit, base + d); if (!a2.whole || (at.k >= TITLE_FLOOR_K && a2.k < TITLE_FLOOR_K)) break;
     for (const form of FT_SAID) if (clear(form, camera.k)) { done = true; break; }
   }
   if (!done && at.whole) { frameView(explicit, base); done = give(['ft-under']); }
   // A frame that cannot hold the whole map (it opens on the first flow) keeps the same order: the room of the sentence's own form above the
   // map (whole, then one line) before the sentence steps back (first-user judge 9: the growth map at 1280 lost its sentence here).
   if (!done && !at.whole) for (const form of FT_SAID) { frameView(explicit, base + ftBox(form, camera, null).h + 8); if (clear(form, camera.k)) { done = true; break; } }
-  // A frame on the first flow never cuts the map's own title at the window's left edge: the least pan that shows it whole or leaves it out.
-  if (!at.whole) { const ti = inkAt(camera.k), s = ti ? toScreen(ti) : null; if (s && s.x < 4 && s.x + s.w > 4) { const out = s.x + s.w + 8, whole = 16 - s.x; camera = { ...camera, x: camera.x + (out <= whole ? -out : whole) }; } }
+  // A frame on the first flow keeps the map's own title in sight whole, with its 「기록 정보」 (review of the growth view: the sideways pan
+  // pushed it out at 1280): the least pan that shows it. The top line then stands beside it (ftPlace); its sentence is shown whole or on one
+  // line, and when neither stands clear there the map moves down under the one-line form (the title kept, the sentence on one line).
+  if (!at.whole) {
+    const ti = inkAt(camera.k), s = ti ? toScreen(ti) : null;
+    if (s && s.x < 16) camera = { ...camera, x: camera.x + (16 - s.x) };
+    done = FT_SAID.some(form => clear(form, camera.k));
+    if (!done) { const r = ftBox('ft-one', camera, inkAt(camera.k)), top = toScreen(drawnBounds()).y, need = r.y + r.h + 8 - top; if (need > 0) camera = { ...camera, y: camera.y + need }; done = true; }
+  }
   if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
   applyCamera(animate);
 }
@@ -3319,8 +3335,12 @@ function titleInk(): Rect | null {
 /** The top line's place for a camera (review of v5 focus 3, A3): beside the map's own title while that title stands in its rows, so the
  * title, its 「기록 정보 ▾」 and the record's time stay in sight and within reach at rest; else at the window's left. Sets its left and
  * width (no room of 320px beside the title: it stays at the left and the fit frames the title under it instead). */
+/** A narrower width the top line takes (its one-line form only), else null (review of the growth view: its sentence on one line stays shown
+ * beside a caption at its right end rather than stepping back). */
+let ftCap: number | null = null;
+const FT_CAPS: readonly (number | null)[] = [null, 760, 680, 600, 520, 440];
 function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
-  el.style.left = ''; el.style.maxWidth = '';
+  el.style.left = ''; el.style.maxWidth = ftCap ? `${ftCap}px` : '';
   if (!ink) return;
   const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
   const t = { x: ox + cam.x + ink.x * cam.k, y: oy + cam.y + ink.y * cam.k, w: ink.w * cam.k, h: ink.h * cam.k };
@@ -3328,7 +3348,7 @@ function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
   if (!(t.x < r.x + r.w + 8 && r.x - 8 < t.x + t.w && t.y < r.y + r.h + 8 && r.y - 8 < t.y + t.h)) return;
   const left = Math.round(t.x + t.w + 24), room = $('space').clientWidth - (parseFloat(getComputedStyle($('space')).getPropertyValue('--plan-w')) || 0) - left - 16;
   if (room < 320) return;
-  el.style.left = `${left}px`; el.style.maxWidth = `${Math.min(860, room)}px`;
+  el.style.left = `${left}px`; el.style.maxWidth = `${Math.min(860, room, ftCap ?? 860)}px`;
 }
 /** The top line's box in the camera's frame (the viewport's) in one form (null: whole; ft-one: its sentence on one line; ft-under: its
  * sentence stepped back), placed for that camera, with a 6px margin; the line is left as it was. */
@@ -3904,6 +3924,10 @@ function placeFocusMarks() {
  * source), the switcher, and the sentence the picked lines stand on when it is not the top one. */
 function renderFocusTop() {
   const el = $('focus-top'), o = opened, s = ffSrc, f = ffNow;
+  // Ruling F7: while comparing, the top box says the change (「지도 변화 · v04 → v17」 and its two sentences) in the record sentence's place.
+  const gc = growthCmp && o && !scope && growthCmp.key === liveOpened()?.key ? growthCmp : null;
+  el.classList.toggle('growth-guide', !!gc);
+  if (gc) { el.replaceChildren(...growthGuideEls(gc)); el.hidden = false; syncFocusTop(); return; }
   if (!o || scope || !o.view.parts.length || (!s && !f?.candidates.length)) { el.hidden = true; el.replaceChildren(); syncFocusTop(); return; }
   const saved = o.kind === 'saved';
   // Review of v5 focus 3 (A5): shown and hovered only through the guard (no evidence group, file tag or row ID); nothing plain left: no
@@ -3964,7 +3988,8 @@ function syncFocusTop() {
   // and the sentence steps back (the switcher stays).
   const covers = () => ftCovers({ x: el.offsetLeft - ox - 4, y: el.offsetTop - oy - 4, w: el.offsetWidth + 8, h: el.offsetHeight + 8 }, camera, scene, ink);
   if (!covers()) return;
-  el.classList.add('ft-one'); ftPlace(el, camera, ink); if (!covers()) return;
+  el.classList.add('ft-one');
+  for (const cap of FT_CAPS) { ftCap = cap; ftPlace(el, camera, ink); ftCap = null; if (!covers()) return; }
   el.classList.remove('ft-one'); el.classList.add('ft-under'); ftPlace(el, camera, ink);
 }
 
@@ -6240,21 +6265,37 @@ const planView = createPlanView({
  * rebuilt from the records, its common parts at their current places and the camera where it was. */
 let growthVisit: { key: string; base: number | null; pick: number | null } | null = null;
 let growthMenuOpen = false;
-interface GrowthCmp { key: string; from: number; to: number; cs: ChangeSet; proj: Project; picked: SummaryKey | null; scene: string | null; pane: 'list' | 'unreflected' | 'scene' | null;
-  un: Unreflected[] | null; unState: 'all' | Unreflected['state']; unShown: number;
+type GrowthFilter = 'new' | 'desc';
+interface GrowthCmp { key: string; from: number; to: number; cs: ChangeSet; proj: Project; scenes: ChangeScene[]; picked: SummaryKey | null; scene: string | null; pane: 'list' | 'reflect' | 'scene' | null;
+  un: Unreflected[] | null; unread: { paste: string; rows: number }[] | null; rejOpen: boolean;
   saved: { lens: LensId; selected: string | null; camera: { x: number; y: number; k: number }; scope: string | null } }
 let growthCmp: GrowthCmp | null = null;
 let growthPast: { n: number; live: Opened; pins: Positions; extra: Positions; applied: number; undated: number } | null = null;
 let growthTabK = 0;
+/** Ruling F7: a comparison range seen in this session comes back as it was left (its scene, filter, pane and camera); a new one opens on its
+ * first scene. Keyed by map and range. */
+const growthRanges = new Map<string, { picked: SummaryKey | null; scene: string | null; pane: GrowthCmp['pane']; camera: { x: number; y: number; k: number } }>();
+const rangeKey = (key: string, from: number, to: number) => `${key}\u0000${from}\u0000${to}`;
+function rememberRange(c: GrowthCmp) { growthRanges.set(rangeKey(c.key, c.from, c.to), { picked: c.picked, scene: c.scene, pane: c.pane, camera: { ...camera } }); }
+/** The camera before 「이전 부품 위치 보기」 moved it (restored by 「원래 위치로」 or on leaving the past view). */
+let growthAside: { x: number; y: number; k: number } | null = null;
 /** The map as it is now (while a past version is looked at, the current one behind it): what saves, runs and the memo go by. */
 const liveOpened = (): Opened | null => growthPast?.live ?? opened;
 const growthCount = () => { const o = liveOpened(); return o ? mapVersions(o.project).length : 0; };
 const growthUnreflected = (): Unreflected[] | null => { const c = growthCmp, o = liveOpened(); if (!c || !o) return null; return c.un ??= unreflectedAt(o.project, c.to); };
+const growthFilter = (c: GrowthCmp): GrowthFilter | null => (c.picked === 'new' || c.picked === 'desc' ? c.picked : null);
+/** A filter's parts in the scene order (each once: a part has one change of a kind). */
+const filterParts = (c: GrowthCmp, k: GrowthFilter): string[] => c.scenes.filter(s => s.changes.some(x => x.kind === k)).map(s => s.part);
 /** A part's name now, else at the comparison's earlier version (a retired part). */
 function growthName(id: string): string | null {
   const o = liveOpened(); if (!o) return null;
   const now = o.view.parts.find(x => x.id === id)?.name; if (now) return now;
   return growthCmp ? pastVersion(o.project, growthCmp.from).view.parts.find(x => x.id === id)?.name ?? null : null;
+}
+/** A name as the guide and the scene say it: its person's words, the identifier in brackets left for the detail (F7). */
+function sceneName(id: string): string {
+  const o = liveOpened(), n = growthName(id) ?? '부품';
+  return plainName(n, o ? o.view.parts.map(x => x.name) : []);
 }
 function growthLoad(o: Opened, v: ViewState) { const b = visitBaseline(v.growth, Date.now()); growthVisit = { key: o.key, base: b.base, pick: v.growth?.pick ?? null }; }
 function growthMemoOf(o: Opened): GrowthMemo | null {
@@ -6274,21 +6315,37 @@ function renderGrowthEntry() {
     { compare: k => { if (growthVisit && growthVisit.key === live!.key) growthVisit.pick = k; saveViewSoon(); growthCompare(k); }, view: k => growthView(k), close: () => { growthMenuOpen = false; renderGrowthEntry(); } }));
   menu.hidden = false;
 }
-/** Opens the comparison from version `from` to the current one (the lens, selection, scope and camera are kept to come back to). */
-function growthCompare(from: number) {
+/** Opens the comparison from version `from` to the current one (the lens, selection, scope and camera are kept to come back to). Ruling F7:
+ * a range entered for a part opens on that part's scene; a range seen in this session comes back as it was left; a new one opens on its
+ * first scene (on the current map: never the past one by itself; the camera moves only when that card is out of sight). */
+function growthCompare(from: number, focus: string | null = null) {
   const o = liveOpened(), to = growthCount(); if (!o || from < 1 || from >= to) return;
   if (growthPast) growthLeavePast(false);
+  if (growthCmp) rememberRange(growthCmp);
   const saved = growthCmp?.saved ?? { lens: viewLens, selected, camera: { ...camera }, scope };
-  growthCmp = { key: o.key, from, to, cs: changeSet(o.project, from, to), proj: o.project, picked: null, scene: null, pane: null, un: null, unState: 'all', unShown: 80, saved };
+  const cs = changeSet(o.project, from, to), memo = growthRanges.get(rangeKey(o.key, from, to));
+  growthCmp = { key: o.key, from, to, cs, proj: o.project, scenes: changeScenes(cs), picked: null, scene: null, pane: null, un: null, unread: null, rejOpen: false, saved };
   growthMenuOpen = false;
   if ($('lens').classList.contains('growth-read')) hideLens();
   readMarks = []; applyReadMarks();
   renderSpace('keep');
+  const c = growthCmp;
+  // Entered for a part (asked for, or the part selected when the comparison opened on a new range): that part's scene first.
+  const want = focus ?? (saved.selected && !memo ? saved.selected : null);
+  if (want && c.scenes.some(s => s.part === want)) { growthScene(want); return; }
+  if (memo) {
+    Object.assign(c, { picked: memo.picked, scene: memo.scene }); camera = { ...memo.camera }; applyCamera();
+    readMarks = sceneMarks(c);
+    if (memo.pane) growthOpenPane(memo.pane); else { drawGrowth(); applyReadMarks(); }
+    return;
+  }
+  if (c.scenes[0]) growthScene(c.scenes[0].part);
 }
-/** Ends the comparison: the lens, the selection and the camera come back as they were. */
+/** Ends the comparison: the lens, the selection and the camera come back as they were before it (the range is remembered for the session). */
 function growthExit() {
   const c = growthCmp, o = liveOpened(); if (!c) return;
   if (growthPast) growthLeavePast(false);
+  rememberRange(c);
   growthCmp = null; readMarks = []; if ($('lens').classList.contains('growth-read')) hideLens();
   renderSpace('keep');
   if (!o || c.key !== o.key) return;
@@ -6296,26 +6353,50 @@ function growthExit() {
   const back = () => { camera = { ...c.saved.camera }; applyCamera(true); };
   if (selected !== c.saved.selected || scope !== c.saved.scope) { go(o.key, c.saved.selected, c.saved.scope); window.setTimeout(back, 80); } else back();
 }
-/** The parts and lines a summary item lights in place (the read-marks highlight; added lines in the accent). */
+/** The parts marked on the map now: a filter's parts (each outlined; the current one is also its tab), else the scene's part (and the
+ * duplicates a 중복 정리 folded). */
+function sceneMarks(c: GrowthCmp): string[] {
+  const f = growthFilter(c); if (f) return filterParts(c, f);
+  if (!c.scene) return [];
+  return [...new Set([c.scene, ...c.cs.changes.filter(x => x.part === c.scene).flatMap(x => (x.predecessor ? [] : x.others ?? []))])];
+}
+/** A summary item: a filter (설명 변경, 지도에 새로 표시) marks its parts, opens its first (or the shown) part and steps 1/N; another kind
+ * opens its list, or its scene when it has one; picked again, it lets go. */
 function growthPick(k: SummaryKey) {
   const c = growthCmp; if (!c) return;
-  c.picked = c.picked === k ? null : k; c.scene = null;
-  const list = c.cs.changes.filter(x => x.kind === k), lines = k === 'lines' ? [...c.cs.added, ...c.cs.removed] : [];
-  readMarks = c.picked ? [...new Set([...list.map(x => x.kind === 'retire' ? x.successor ?? '' : x.part), ...lines.flatMap(l => [l.from, l.to])].filter(Boolean))] : [];
-  // One change of its kind opens its scene; several open their list (and the 설명 item tabs their cards).
-  if (!c.picked) { c.pane = null; if ($('lens').classList.contains('growth-read')) hideLens(); drawGrowth(); applyReadMarks(); return; }
-  const scenes = list.filter(x => x.kind !== 'retire');
-  if (k !== 'lines' && k !== 'retire' && k !== 'desc' && scenes.length === 1) { growthScene(scenes[0]!.part); return; }
+  const was = c.picked; c.picked = was === k ? null : k;
+  if (!c.picked) { c.pane = c.scene ? 'scene' : null; readMarks = sceneMarks(c); if (c.pane) growthOpenPane('scene'); else { if ($('lens').classList.contains('growth-read')) hideLens(); drawGrowth(); applyReadMarks(); } return; }
+  if (k === 'new' || k === 'desc') { const list = filterParts(c, k); if (list.length) growthScene(list.includes(c.scene ?? '') ? c.scene! : list[0]!); return; }
+  const list = k === 'retire' ? c.cs.changes.filter(x => x.kind === 'retire' && !x.successor) : c.cs.changes.filter(x => x.kind === k);
+  const lines = k === 'lines' ? [...c.cs.added, ...c.cs.removed] : [];
+  readMarks = [...new Set([...list.map(x => x.part), ...lines.flatMap(l => [l.from, l.to])])];
+  if (k !== 'lines' && list.length === 1) { c.picked = null; growthScene(list[0]!.part); return; }
   growthOpenPane('list');
 }
+/** Shows a change's scene (its part's): the pane's top, the card where it is. The camera moves only when the card is out of sight (the
+ * least move into the map's area beside the pane; never a zoom, never a fit). */
 function growthScene(part: string) {
   const c = growthCmp, o = opened; if (!c || !o) return;
+  const f = growthFilter(c); if (f && !filterParts(c, f).includes(part)) c.picked = null;
+  if (c.picked && !growthFilter(c)) c.picked = null;
   c.scene = part; c.pane = 'scene';
-  const ch = c.cs.changes.filter(x => x.part === part);
-  readMarks = [...new Set([part, ...ch.flatMap(x => (x.predecessor ? [] : x.others ?? []))])];
+  readMarks = sceneMarks(c);
   growthOpenPane('scene');
-  // The card stays where it is: the camera moves only when the pane would cover it.
-  const b = lay.boxes.get(part); if (b) { const r = toScreen(b), a = mapArea(); if (r.x < a.x || r.y < a.y || r.x + Math.min(r.w, 200) > a.x + a.w || r.y + Math.min(r.h, 60) > a.y + a.h) revealParts([part]); }
+  growthReveal(part);
+}
+/** The least camera move that brings a card into the map's area (none when it reads there already). */
+function growthReveal(part: string) {
+  const o = opened; if (!o) return;
+  const id = drawnRep(o, part) ?? part, b = lay.boxes.get(id); if (!b || b.kind === 'ghost') return;
+  const [dx, dy] = leastPan(toScreen(b), mapArea());
+  if (dx || dy) { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(true); }
+}
+/** 이전 변화 / 다음 변화: within the filter that is on (설명 변경 1/9), else through every scene (변화 장면 1/N). Nothing plays by itself. */
+function growthStep(d: number) {
+  const c = growthCmp; if (!c) return;
+  const f = growthFilter(c), list = f ? filterParts(c, f) : c.scenes.map(s => s.part), i = list.indexOf(c.scene ?? ''), j = i < 0 ? 0 : i + d;
+  if (j < 0 || j >= list.length) return;
+  growthScene(list[j]!);
 }
 function growthOpenPane(pane: GrowthCmp['pane']) {
   const c = growthCmp, o = opened; if (!c || !o) return;
@@ -6326,89 +6407,152 @@ function growthOpenPane(pane: GrowthCmp['pane']) {
 function closeGrowthPane() { const c = growthCmp; if (c) { c.pane = null; c.scene = null; c.picked = null; } readMarks = []; hideLens(); drawGrowth(); applyReadMarks(); }
 const KIND_REL: Record<RelationKind, string> = { flow: '흐름', needs: '필요로 함', shares: '함께 씀', related: '관련' };
 const lineText = (l: LineKey) => `${growthName(l.from) ?? '부품'} → ${growthName(l.to) ?? '부품'} · ${KIND_REL[l.kind]}`;
-/** The record's identity row as the scene shows it: 바뀐 때, its cites as written, the row and the way to its line. */
+/** The record's identity row as the scene's detail shows it: its cites as written and the row (바뀐 때 and 이유 are the scene's own top). */
 function citeBlock(c: IdentityCite | null | undefined): HTMLElement[] {
   const o = liveOpened(); if (!c || !o) return [h('p', { class: 'gs-fine' }, '이 변화를 적은 기록 행을 찾지 못함')];
-  const cites = citeLines(o.project, c.record, c.evidence), paste = c.place ? o.project.pasted.find(x => x.id === c.place!.record) : null;
-  const reason = changeReason(o.project, c.record, c.part, c.when);
+  const cites = citeLines(o.project, c.record, c.evidence);
   return [h('dl', { class: 'gs-dl' },
-    h('dt', {}, '바뀐 때'), h('dd', {}, c.when && !/^[—–-]+$/.test(c.when) ? c.when : '기록 없음'),
-    h('dt', {}, '근거'), h('dd', {}, ...(cites.length ? cites.map(x => h('span', { class: 'gs-cite' }, h('b', {}, x.id), ` ${x.text}`)) : [c.evidence.length ? `${c.evidence.join(' · ')} (원문에서 찾지 못함)` : '근거 표시 없음'])),
-    h('dt', {}, '이유'), h('dd', {}, reason ? h('span', {}, reason.text, h('small', { class: 'gs-src' }, ` · 기록의 변화 이력${reason.date ? ` ${reason.date}` : ''}`)) : h('span', { class: 'gs-none' }, '이유 기록 없음')),
-    h('dt', {}, '기록 행'), h('dd', {}, `${c.record.split('@')[0]} · ${c.row} · ${fullTime(c.at)} 읽음`,
-      paste && c.place ? h('button', { type: 'button', class: 'link-button gs-quote', onclick: () => showQuote(paste.id, paste.text.slice(c.place!.from, c.place!.to), c.place!.from) }, '원문 보기') : null))];
+    h('dt', {}, '근거'), h('dd', {}, ...(cites.length ? cites.map(x => h('span', { class: 'gs-cite' }, h('b', {}, x.id), ' ', ...codeText(x.text))) : [c.evidence.length ? `${c.evidence.join(' · ')} (원문에서 찾지 못함)` : '근거 표시 없음'])),
+    h('dt', {}, '기록 행'), h('dd', {}, `${c.record.split('@')[0]} · ${c.row} · ${fullTime(c.at)} 읽음`))];
 }
+/** A record's table row as words (its cells joined by 「 · 」, the bars gone; every cell kept). */
+const tableCells = (t: string): string => t.split('\n').map(l => l.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(c => c.trim()).filter(Boolean).join(' · ')).join(' ');
+/** Where a change's own words stand in its record (원문): the identity row, the structured implementation cell, the description's quote,
+ * the part's first quote. null: none (a person's correction). */
+function changeQuote(x: PartChange): { record: string; quote: string; from?: number } | null {
+  const o = liveOpened(); if (!o) return null;
+  if (x.cite?.place) { const t = o.project.pasted.find(p => p.id === x.cite!.place!.record); return t ? { record: t.id, quote: t.text.slice(x.cite.place.from, x.cite.place.to), from: x.cite.place.from } : null; }
+  if (x.impl) return { record: x.impl.quote.record, quote: x.impl.quote.quote, ...(x.impl.quote.from !== undefined ? { from: x.impl.quote.from } : {}) };
+  const u = o.view.parts.find(p => p.id === x.part)?.reading; if (!u || x.kind === 'correct') return null;
+  const qt = x.kind === 'desc' ? u.roleBasis[0] : u.history[0]?.basis[0] ?? u.roleBasis[0];
+  return qt ? { record: qt.record, quote: qt.quote, ...(qt.from !== undefined ? { from: qt.from } : {}) } : null;
+}
+/** 시점 (F7): the change's own time when the record states it (the identity row's 바뀐 때); never the record's target date, which is named
+ * 기록 대상 날짜. */
+function sceneWhen(x: PartChange): { when: string | null; target: string | null } {
+  const o = liveOpened(), vs = o ? mapVersions(o.project) : [];
+  const when = x.cite?.when && !/^[—–-]+$/.test(x.cite.when.trim()) && !/^(모름|없음)$/.test(x.cite.when.trim()) ? x.cite.when.trim() : null;
+  const reading = x.cite?.reading ?? x.impl?.reading ?? null;
+  const target = x.kind === 'desc' ? x.target ?? null : reading ? vs.find(v => v.id === reading)?.target ?? null : x.kind === 'new' && x.since ? vs[x.since - 1]?.target ?? null : null;
+  return { when, target };
+}
+/** The scene (F7): the top of the pane says the change (kind, title, one sentence, 시점, 이유, the controls and 「변화 장면 1/N」); under it,
+ * the card's other changes, the record's cites, the direct lines that changed and the descriptions. */
 function growthSceneEl(c: GrowthCmp, part: string): HTMLElement[] {
-  const o = liveOpened()!, cur = o.view.parts.find(x => x.id === part), A = pastVersion(o.project, c.from).view, was = A.parts.find(x => x.id === part);
-  const changes = c.cs.changes.filter(x => x.part === part && x.kind !== 'retire').sort((a, b) => TAB_ORDER.indexOf(a.kind) - TAB_ORDER.indexOf(b.kind));
-  const lines = changes.reduce((acc, x) => { const d = directLines(c.cs, x); return { added: [...acc.added, ...d.added.filter(l => !acc.added.some(y => y.id === l.id))], removed: [...acc.removed, ...d.removed.filter(l => !acc.removed.some(y => y.id === l.id))] }; }, { added: [] as LineKey[], removed: [] as LineKey[] });
-  const blocks = changes.map(x => {
-    const title = x.kind === 'succeed' ? `${growthName(x.predecessor!) ?? '부품'} → ${x.name}` : x.kind === 'rename' || x.kind === 'reimpl' ? `${x.before ?? ''} → ${x.after ?? ''}` : x.kind === 'dedupe' ? `${(x.others ?? []).map(id => growthName(id) ?? '부품').join(' · ')} → ${x.name}` : x.kind === 'new' ? newTitle(x, c.from) : x.kind === 'correct' ? '사람이 고친 설명' : '같은 부품에 대한 새 설명';
-    const lead = x.kind === 'succeed' ? `기록이 ${growthName(x.predecessor!) ?? '이전 부품'}의 자리를 ${x.name}이(가) 대신한다고 적음 (기록의 대응 행에서만 읽음)` : x.kind === 'dedupe' ? '지도가 같은 부품을 두 번 만든 것을 하나로 정리함' : null;
-    return h('section', { class: `gs-change k-${x.kind}` }, h('h3', {}, h('span', { class: 'gs-word' }, tabWord(x)), h('span', { class: 'gs-title' }, title)), lead ? h('p', { class: 'gs-lead' }, lead) : null,
-      ...(x.kind === 'succeed' || x.kind === 'rename' || x.kind === 'reimpl' ? citeBlock(x.cite) : []));
-  });
-  const nowRole = cur?.reading?.role ?? null, wasRole = was?.reading?.role ?? null, desc = changes.find(x => x.kind === 'desc'), corr = changes.find(x => x.kind === 'correct'), succ = changes.find(x => x.kind === 'succeed');
-  const prev = succ ? A.parts.find(x => x.id === succ.predecessor) : null;
+  const o = liveOpened()!, sc = c.scenes.find(s => s.part === part); if (!sc) return [];
+  const f = growthFilter(c), list = f ? filterParts(c, f) : c.scenes.map(s => s.part), i = list.indexOf(part);
+  const main = (f && sc.changes.find(x => x.kind === f)) || sc.main;
+  const cur = o.view.parts.find(x => x.id === part), A = pastVersion(o.project, c.from).view, was = A.parts.find(x => x.id === part);
+  const full = growthName(part) ?? '부품', aux = auxName(full), plain = sceneName(part);
+  const lines = sc.changes.reduce((acc, x) => { const d = directLines(c.cs, x); return { added: [...acc.added, ...d.added.filter(l => !acc.added.some(y => y.id === l.id))], removed: [...acc.removed, ...d.removed.filter(l => !acc.removed.some(y => y.id === l.id))] }; }, { added: [] as LineKey[], removed: [] as LineKey[] });
+  const { when, target } = sceneWhen(main), reason = main.cite ? changeReason(o.project, main.cite.record, main.cite.part, main.cite.when) : null, qt = changeQuote(main);
+  const inPast = !!growthPast && growthPast.n === c.from;
+  // The predecessor (or the retired part) in the past view: when it is out of sight, an explicit move to it and back (never a zoom out).
+  const prev = main.kind === 'succeed' ? main.predecessor! : main.kind === 'retire' ? main.part : null, pb = inPast && prev ? lay.boxes.get(prev) : undefined;
+  const asideBtn = pb && (growthAside || !readableInView(toScreen(pb), mapArea()))
+    ? h('button', { type: 'button', class: 'gs-b gs-aside', onclick: () => { if (growthAside) { camera = { ...growthAside }; growthAside = null; applyCamera(true); } else { growthAside = { ...camera }; growthReveal(prev!); } renderGrowthPane(); } }, growthAside ? '원래 위치로' : '이전 부품 위치 보기') : null;
+  const btn = (cls: string, text: string, on: () => void, opts: { disabled?: boolean; pressed?: boolean; title?: string } = {}) => h('button', { type: 'button', class: `gs-b ${cls}`, onclick: on, ...(opts.disabled ? { disabled: '' } : {}), ...(opts.pressed !== undefined ? { 'aria-pressed': String(opts.pressed) } : {}), ...(opts.title ? { title: opts.title } : {}) }, text);
+  const others = sc.changes.filter(x => x !== main);
+  const nowRole = cur?.reading?.role ?? null, wasRole = was?.reading?.role ?? null, desc = sc.changes.find(x => x.kind === 'desc'), corr = sc.changes.find(x => x.kind === 'correct'), succ = sc.changes.find(x => x.kind === 'succeed');
+  const prevPart = succ ? A.parts.find(x => x.id === succ.predecessor) : main.kind === 'retire' ? was : null;
   const steps = (cur?.reading?.steps ?? []).slice(0, 6).map(s => s.name);
+  const impl = sc.changes.find(x => x.kind === 'impl');
   return [
-    h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.from)} → ${versionLabel(c.to)} · 바뀐 것`)), h('h2', { id: 'lens-title' }, cur?.name ?? growthName(part) ?? '부품'),
-      h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '변화 설명 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
-    h('div', { class: 'lens-body gs-body' }, ...blocks,
+    h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.from)} → ${versionLabel(c.to)}`), h('span', { class: 'gs-step', 'aria-live': 'polite' }, stepWord(f, Math.max(0, i), list.length))),
+      h('h2', { id: 'lens-title' }, sceneTitle(main, sceneName)),
+      h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '변화 장면 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
+    h('div', { class: 'lens-body gs-body' },
+      h('section', { class: `gs-scene k-${main.kind}` },
+        h('p', { class: 'gs-kind' }, sceneKind(main)),
+        aux && aux !== plain ? h('p', { class: 'gs-aux' }, '기록의 이름 · ', ...codeText(full)) : null,
+        h('p', { class: 'gs-sentence' }, sceneSentence(main, sceneName)),
+        h('dl', { class: 'gs-dl' },
+          h('dt', {}, '시점'), h('dd', {}, when ? h('span', {}, ...codeText(when)) : h('span', { class: 'gs-none' }, '변경 시점 기록 없음')),
+          target ? h('dt', {}, '기록 대상 날짜') : null, target ? h('dd', {}, target) : null,
+          h('dt', {}, '이유'), h('dd', {}, reason ? h('span', {}, ...codeText(reason.text), h('small', { class: 'gs-src' }, ` · 기록의 변화 이력${reason.date ? ` ${reason.date}` : ''}`)) : h('span', { class: 'gs-none' }, '이유 기록 없음'))),
+        h('div', { class: 'gs-ctl', role: 'group', 'aria-label': '변화 장면 조작' },
+          btn('gs-past', '이전 모습', () => growthView(c.from), { pressed: inPast, title: `${versionLabel(c.from)}을 같은 자리·같은 화면으로 보기` }),
+          btn('gs-now', '현재 모습', () => growthLeavePast(), { pressed: !growthPast, title: `${versionLabel(c.to)} · 지금 지도` }),
+          btn('gs-prev', '이전 변화', () => growthStep(-1), { disabled: i <= 0 }),
+          btn('gs-next', '다음 변화', () => growthStep(1), { disabled: i < 0 || i >= list.length - 1 }),
+          btn('gs-quote', '원문', () => { if (qt) showQuote(qt.record, qt.quote, qt.from); }, { disabled: !qt, title: qt ? '이 변화를 적은 기록의 원문 보기' : '사람이 고친 설명이라 기록 원문이 없음' }),
+          asideBtn)),
+      f ? h('section', { class: 'gs-flist' }, h('h3', {}, `${f === 'new' ? '지도에 새로 표시' : '설명 변경'} ${list.length}개`, h('small', {}, f === 'new' ? '기준 지도보다 새로 표시됨 · 새로 만들었다는 뜻이 아님' : '같은 부품에 대한 새 설명 · 정정이 아님')),
+        h('ol', {}, ...list.map(id => h('li', {}, h('button', { type: 'button', class: `gs-fitem${id === part ? ' on' : ''}`, 'aria-current': id === part ? 'true' : 'false', onclick: () => growthScene(id) }, sceneName(id)))))) : null,
+      others.length ? h('section', { class: 'gs-also' }, h('h3', {}, '이 카드의 다른 변화'), h('ul', {}, ...others.map(x => h('li', {}, h('span', { class: 'gs-word' }, tabWord(x)), ' ', x.kind === 'new' ? newTitle(x, c.from) : sceneSentence(x, sceneName))))) : null,
+      main.cite || others.some(x => x.cite) ? h('section', { class: 'gs-cites' }, h('h3', {}, '기록'), ...citeBlock(main.cite ?? others.find(x => x.cite)!.cite)) : null,
+      impl?.impl ? h('section', { class: 'gs-impl' }, h('h3', {}, '구현 상태'),
+        h('dl', { class: 'gs-dl' }, h('dt', {}, '이전'), h('dd', {}, impl.before ?? '정보 없음'), h('dt', {}, '지금'), h('dd', {}, impl.after ?? ''),
+          h('dt', {}, '근거'), h('dd', {}, ...codeText(tableCells(impl.impl.quote.quote)))),
+        h('p', { class: 'gs-fine' }, '기록의 구현 상태 칸에서만 읽음 · 구현됨은 가동 중이라는 뜻이 아님 · 가동·정지는 운영 상태')) : null,
       h('section', { class: 'gs-lines' }, h('h3', {}, '바뀐 직접 연결', lines.added.length ? h('small', {}, '＋는 지도에 밝힘') : null),
-        lines.added.length || lines.removed.length ? h('ul', {}, ...lines.added.map(l => h('li', { class: 'gs-add' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '＋'), lineText(l))),
-          ...lines.removed.map(l => h('li', { class: 'gs-rem' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '−'), lineText(l)))) : h('p', { class: 'gs-none' }, '이 부품에 닿은 연결은 그대로임'),
-        lines.removed.length ? h('p', { class: 'gs-fine' }, '빠진 연결은 지금 지도에 그리지 않음 · 남은 부품끼리 잇지 않음 ', h('button', { type: 'button', class: 'link-button', onclick: () => growthView(c.from) }, `${versionLabel(c.from)}에서 보기`)) : null),
+        lines.added.length || lines.removed.length ? h('ul', {}, ...lines.added.map(l => h('li', { class: 'gs-add' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '＋'), h('span', {}, ...codeText(lineText(l))))),
+          ...lines.removed.map(l => h('li', { class: 'gs-rem' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '−'), h('span', {}, ...codeText(lineText(l)))))) : h('p', { class: 'gs-none' }, main.kind === 'retire' ? '지금 지도에는 이 부품이 없음' : '이 부품에 닿은 연결은 그대로임'),
+        lines.removed.length ? h('p', { class: 'gs-fine' }, '빠진 연결은 지금 지도에 그리지 않음 · 남은 부품끼리 잇지 않음 · 바뀐 연결이 모두 이 변화 때문이라는 뜻은 아님') : null),
       h('section', { class: 'gs-desc' }, h('h3', {}, '설명'),
-        h('p', { class: 'gs-now' }, nowRole ?? '기록된 설명 없음'),
+        main.kind === 'retire' ? null : h('p', { class: 'gs-now' }, ...(nowRole ? codeText(nowRole) : ['기록된 설명 없음'])),
         wasRole && nowRole && wasRole.replace(/\s+/g, ' ').trim() !== nowRole.replace(/\s+/g, ' ').trim()
-          ? h('div', { class: 'gs-was' }, h('span', { class: 'gs-was-k' }, wasLabel(corr ? 'correct' : desc ? 'desc' : null, corr ? null : desc?.target ?? null)), h('p', {}, wasRole)) : null,
-        prev?.reading?.role ? h('div', { class: 'gs-was' }, h('span', { class: 'gs-was-k' }, `대신한 부품의 설명 · ${prev.name}`), h('p', {}, prev.reading.role)) : null,
-        steps.length ? h('div', { class: 'gs-steps' }, h('span', { class: 'gs-was-k' }, '기록된 내부 동작'), h('ol', {}, ...steps.map(s => h('li', {}, s)))) : null))];
+          ? h('div', { class: 'gs-was' }, h('span', { class: 'gs-was-k' }, wasLabel(corr ? 'correct' : desc ? 'desc' : null, corr ? null : desc?.target ?? null)), h('p', {}, ...codeText(wasRole))) : null,
+        prevPart?.reading?.role ? h('div', { class: 'gs-was' }, h('span', { class: 'gs-was-k' }, main.kind === 'retire' ? `은퇴한 부품의 설명 · ${prevPart.name}` : `대신한 부품의 설명 · ${prevPart.name}`), h('p', {}, ...codeText(prevPart.reading.role))) : null,
+        steps.length ? h('div', { class: 'gs-steps' }, h('span', { class: 'gs-was-k' }, '기록된 내부 동작'), h('ol', {}, ...steps.map(s => h('li', {}, ...codeText(s))))) : null))];
 }
 function growthListEl(c: GrowthCmp, k: SummaryKey): HTMLElement[] {
   const body: (HTMLElement | null)[] = [];
   if (k === 'lines') {
-    body.push(h('section', { class: 'gs-lines' }, h('h3', {}, `더해진 연결 ${c.cs.added.length}`, h('small', {}, ' · 지도에 밝힘')), h('ul', {}, ...c.cs.added.map(l => h('li', { class: 'gs-add' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '＋'), lineText(l))))));
-    if (c.cs.removed.length) body.push(h('section', { class: 'gs-lines' }, h('h3', {}, `빠진 연결 ${c.cs.removed.length}`), h('ul', {}, ...c.cs.removed.map(l => h('li', { class: 'gs-rem' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '−'), lineText(l)))),
+    body.push(h('section', { class: 'gs-lines' }, h('h3', {}, `더해진 연결 ${c.cs.added.length}`, h('small', {}, ' · 지도에 밝힘')), h('ul', {}, ...c.cs.added.map(l => h('li', { class: 'gs-add' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '＋'), h('span', {}, ...codeText(lineText(l))))))));
+    if (c.cs.removed.length) body.push(h('section', { class: 'gs-lines' }, h('h3', {}, `빠진 연결 ${c.cs.removed.length}`), h('ul', {}, ...c.cs.removed.map(l => h('li', { class: 'gs-rem' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '−'), h('span', {}, ...codeText(lineText(l)))))),
       h('p', { class: 'gs-fine' }, '빠진 연결은 지금 지도에 그리지 않음 ', h('button', { type: 'button', class: 'link-button', onclick: () => growthView(c.from) }, `${versionLabel(c.from)}에서 보기`))));
   } else {
-    const list = c.cs.changes.filter(x => x.kind === k);
-    body.push(h('ul', { class: 'gs-list' }, ...list.map(x => h('li', {}, k === 'retire'
-      ? h('div', { class: 'gs-item' }, h('strong', {}, x.name), h('span', { class: 'gs-item-sub' }, x.successor ? `대신하는 부품 · ${growthName(x.successor) ?? '부품'}` : '대신하는 부품 없음', x.cite?.when ? ` · 바뀐 때 ${x.cite.when}` : ''),
-        h('span', { class: 'gs-item-acts' }, x.successor ? h('button', { type: 'button', class: 'link-button', onclick: () => growthScene(x.successor!) }, '승계 보기') : null, h('button', { type: 'button', class: 'link-button', onclick: () => growthView(c.from) }, `${versionLabel(c.from)}에서 보기`)))
-      : h('button', { type: 'button', class: 'gs-item', onclick: () => growthScene(x.part) }, h('strong', {}, x.name),
-        h('span', { class: 'gs-item-sub' }, x.kind === 'desc' ? x.after ?? '' : x.before || x.after ? `${x.before ?? ''} → ${x.after ?? ''}` : x.kind === 'succeed' ? `${growthName(x.predecessor!) ?? '부품'} 대신` : x.kind === 'dedupe' ? `${(x.others?.length ?? 0) + 1}→1` : ''))))));
-    if (k === 'retire') body.push(h('p', { class: 'gs-fine' }, '은퇴한 부품은 지금 지도에 없음 · 지난 버전 보기나 이 목록에서만 보임'));
-    if (k === 'desc') body.push(h('p', { class: 'gs-fine' }, '설명 갱신은 정정이 아님 · 카드 위 「설명」 표시는 이 항목을 고른 동안만'));
+    const list = k === 'retire' ? c.cs.changes.filter(x => x.kind === 'retire' && !x.successor) : c.cs.changes.filter(x => x.kind === k);
+    body.push(h('ul', { class: 'gs-list' }, ...list.map(x => h('li', {}, h('button', { type: 'button', class: 'gs-item', onclick: () => growthScene(x.part) }, h('strong', {}, sceneTitle(x, sceneName)),
+      h('span', { class: 'gs-item-sub' }, sceneSentence(x, sceneName)))))));
+    if (k === 'retire') body.push(h('p', { class: 'gs-fine' }, '은퇴한 부품은 지금 지도에 없음 · 승계에 든 은퇴는 승계 장면에서 보임'));
+    if (k === 'impl') body.push(h('p', { class: 'gs-fine' }, '기록의 구현 상태 칸에서만 읽음 · 구현됨은 가동 중이라는 뜻이 아님'));
   }
-  const word = k === 'lines' ? '연결' : CHANGE_WORD[k], n = k === 'lines' ? c.cs.added.length + c.cs.removed.length : c.cs.counts[k];
+  const word = k === 'lines' ? '연결' : CHANGE_WORD[k], n = k === 'lines' ? c.cs.added.length + c.cs.removed.length : kindCount(c.cs, k);
   return [h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.from)} → ${versionLabel(c.to)}`)), h('h2', { id: 'lens-title' }, `${word} ${n}`),
     h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '목록 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
   h('div', { class: 'lens-body gs-body' }, ...body)];
 }
-function growthUnEl(c: GrowthCmp): HTMLElement[] {
-  const all = growthUnreflected() ?? [], o = liveOpened()!;
-  const unread = all.filter(x => x.unread).length, count = (s: Unreflected['state']) => all.filter(x => x.state === s).length, shown = c.unState === 'all' ? all : all.filter(x => x.state === c.unState);
-  const filt = (s: GrowthCmp['unState'], word: string, n: number) => h('button', { type: 'button', class: `gu-filter${c.unState === s ? ' on' : ''}`, 'aria-pressed': String(c.unState === s), onclick: () => { c.unState = s; c.unShown = 80; renderGrowthPane(); } }, `${word} ${n}`);
-  const rows = shown.slice(0, c.unShown).map(x => unreflectedRow(x, growthName, { part: id => { readMarks = [id]; applyReadMarks(); revealParts([drawnRep(o, id) ?? id].filter(id => lay.boxes.has(id))); },
-    source: x => { const t = o.project.pasted.find(p => p.id === x.paste); if (t) showQuote(t.id, t.text.slice(x.start, x.end), x.start); } }));
-  return [h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.to)}까지의 기록`)), h('h2', { id: 'lens-title' }, `미반영 ${all.length}`),
-    h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '미반영 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
+/** 기록 반영 상태 (F7): the waiting and held rows of the later version (open) and the rejected ones (folded), each grouped by the one part it
+ * is about; the records not read yet counted apart; the comparison's counts never added in. */
+function growthReflectEl(c: GrowthCmp): HTMLElement[] {
+  const all = growthUnreflected() ?? [], o = liveOpened()!, name = (id: string) => growthName(id) ?? '부품';
+  const open = all.filter(x => x.state !== 'rejected'), rej = all.filter(x => x.state === 'rejected'), nW = open.filter(x => x.state === 'waiting').length;
+  const unread = (c.unread ??= unreadRecords(o.project)).length;
+  const row = (x: Unreflected) => reflectRow(x, growthName, { part: id => { readMarks = [id]; applyReadMarks(); const b = lay.boxes.get(drawnRep(o, id) ?? id); if (b) growthReveal(b.id); },
+    source: x => { const t = o.project.pasted.find(p => p.id === x.paste); if (t) showQuote(t.id, t.text.slice(x.start, x.end), x.start); } });
+  const groups = (rows: Unreflected[]) => reflectGroups(rows, name).map(g => {
+    const t = groupTitle(g, name);
+    return h('section', { class: 'gr-group' }, h('h4', {}, g.part ? h('button', { type: 'button', class: 'gr-part', title: `${name(g.part)} · 지도에서 보기`, onclick: () => { readMarks = [g.part!]; applyReadMarks(); growthReveal(g.part!); } }, t.title) : t.title),
+      h('p', { class: 'gr-sub' }, t.sub, t.onMap ? h('span', { class: 'gr-on' }, ' · 이 부품은 현재 지도에 있습니다') : null),
+      h('ol', { class: 'gu-list' }, ...g.rows.map(row)));
+  });
+  const rejEl = h('details', { class: 'gr-sec gr-rej', ...(c.rejOpen ? { open: '' } : {}) }, h('summary', {}, `거절 ${rej.length}행`), ...(c.rejOpen ? groups(rej) : []));
+  rejEl.addEventListener('toggle', () => { const on = (rejEl as HTMLDetailsElement).open; if (on !== c.rejOpen) { c.rejOpen = on; renderGrowthPane(); } });
+  return [h('header', { class: 'lens-head' }, h('div', { class: 'lens-path' }, h('span', {}, `${versionLabel(c.from)} → ${versionLabel(c.to)} 비교 중`)), h('h2', { id: 'lens-title' }, `기록 반영 상태 · ${versionLabel(c.to)} 기준`),
+    h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '기록 반영 상태 닫기', title: '닫기', onclick: closeGrowthPane }, '×'))),
   h('div', { class: 'lens-body gs-body gu-body' },
-    h('p', { class: 'gs-fine' }, '기록의 행 가운데 지도에 들어가지 않은 것 · 대기는 다음 읽기에서 보냄, 보류는 정해지지 않은 것, 거절은 할 일이 아님', unread ? ` · 대기 가운데 ${unread}개는 아직 읽지 않은 기록의 행` : ''),
-    h('div', { class: 'gu-filters', role: 'group', 'aria-label': '미반영 나누어 보기' }, filt('all', '전체', all.length), filt('waiting', '대기', count('waiting')), filt('held', '보류', count('held')), filt('rejected', '거절', count('rejected'))),
-    shown.length ? h('ol', { class: 'gu-list' }, ...rows) : h('p', { class: 'gs-none' }, '없음'),
-    shown.length > c.unShown ? h('button', { type: 'button', class: 'link-button gu-more', onclick: () => { c.unShown += 120; renderGrowthPane(); } }, `${shown.length - c.unShown}개 더 보기`) : null)];
+    h('p', { class: 'gs-fine' }, `${versionLabel(c.to)}까지 읽은 기록의 행 가운데 지도에 아직 들어가지 않은 것 · 변화 집계와 따로 셈 · 대기·보류 ${open.length}행은 할 일의 수가 아님 · 한 행은 한 번만 셈`),
+    unread ? h('p', { class: 'gr-unread', title: '붙였지만 지도를 읽을 때 아직 읽지 않은 기록 · 이 기록의 행은 대기에 넣지 않음' }, `아직 읽지 않은 기록 ${unread}개`) : null,
+    h('details', { class: 'gr-sec gr-open', open: '' }, h('summary', {}, `대기 ${nW}행 · 보류 ${open.length - nW}행`), ...(open.length ? groups(open) : [h('p', { class: 'gs-none' }, '없음')])),
+    rej.length ? rejEl : null)];
 }
 function renderGrowthPane() {
   const c = growthCmp, l = $('lens'); if (!c || !c.pane || !opened) return;
-  const body = l.classList.contains('growth-read') ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0, same = l.classList.contains('growth-read') && l.dataset.growth === `${c.pane}|${c.scene ?? ''}|${c.picked ?? ''}`;
-  const content = c.pane === 'scene' && c.scene ? growthSceneEl(c, c.scene) : c.pane === 'unreflected' ? growthUnEl(c) : c.picked ? growthListEl(c, c.picked) : null;
-  if (!content) { closeGrowthPane(); return; }
-  l.replaceChildren(...content); l.classList.remove('compare', 'scope-read', 'railed', 'return-read', 'scenario-read'); l.classList.add('growth-read'); l.dataset.growth = `${c.pane}|${c.scene ?? ''}|${c.picked ?? ''}`; l.hidden = false; readingFor = [];
+  const sig = `${c.pane}|${c.scene ?? ''}|${c.picked ?? ''}`, body = l.classList.contains('growth-read') ? l.querySelector('.lens-body')?.scrollTop ?? 0 : 0, same = l.classList.contains('growth-read') && l.dataset.growth === sig;
+  const content = c.pane === 'scene' && c.scene ? growthSceneEl(c, c.scene) : c.pane === 'reflect' ? growthReflectEl(c) : c.picked && c.pane === 'list' ? growthListEl(c, c.picked) : null;
+  if (!content || !content.length) { closeGrowthPane(); return; }
+  l.replaceChildren(...content); l.classList.remove('compare', 'scope-read', 'railed', 'return-read', 'scenario-read'); l.classList.add('growth-read'); l.dataset.growth = sig; l.hidden = false; readingFor = [];
   if (same) { const b = l.querySelector('.lens-body'); if (b) b.scrollTop = body; }
   syncMapArea();
+}
+/** The guide in the top box's place (F7): 「지도 변화 · v04 → v17」 and its two sentences, each clause a button to its scene or list. */
+function growthGuideEls(c: GrowthCmp): HTMLElement[] {
+  const g = guideOf(c.cs, c.scenes, sceneName), whole = guideText(g);
+  const seg = (x: GuideSeg) => (x.to ? h('button', { type: 'button', class: 'gg-seg', title: 'scene' in x.to ? '이 변화 장면 보기' : '이 변화들 보기', onclick: () => { const t = x.to!; if ('scene' in t) growthScene(t.scene); else { if (growthCmp) growthCmp.picked = null; growthPick(t.kind); } } }, x.text) : x.text);
+  return [h('p', { class: 'gg-head', title: whole }, g.head),
+    h('div', { class: 'ft-sentence gg-text', role: 'group', 'aria-label': whole }, ...g.sentences.map(s => h('span', { class: 'gg-s' }, ...s.map(seg))))];
 }
 /* The past view. */
 function pinsOfLayout(): Positions {
@@ -6416,38 +6560,39 @@ function pinsOfLayout(): Positions {
   for (const b of lay.boxes.values()) if (b.kind !== 'ghost') (out[b.container] ??= {})[b.id] = { x: b.rel.x, y: b.rel.y };
   return out;
 }
-/** Shows version n, read-only: the current map's places pinned for the parts both have, the camera where it is. */
+/** Shows version n, read-only: the current map's places pinned for the parts both have, the camera where it is (F7: the same camera, the
+ * common parts at 0px; never fitted). A scene open stays open (its 이전 모습). */
 function growthView(n: number) {
   const live = liveOpened(); if (!live || n < 1 || n >= growthCount()) return;
   const pins = growthPast?.pins ?? pinsOfLayout(), pv = pastVersion(live.project, n);
   const past: Opened = { ...live, project: pv.project, view: plainMapView(pv.project), past: n };
   growthPast = { n, live, pins, extra: {}, applied: pv.applied, undated: pv.undated };
-  growthMenuOpen = false;
+  growthMenuOpen = false; growthAside = null;
   if (selected && !past.view.parts.some(x => x.id === selected)) select(null);
   if (scope && !past.view.parts.some(x => x.id === scope)) scope = null;
-  if ($('lens').classList.contains('growth-read') && growthCmp) { growthCmp.pane = null; hideLens(); }
+  if ($('lens').classList.contains('growth-read') && growthCmp && growthCmp.pane !== 'scene') { growthCmp.pane = null; hideLens(); }
   opened = past;
   renderSpace('keep');
-  // The camera stays where it was (common parts at 0px), unless it would show too little of this version (a camera a scene moved over parts
-  // only the current map has): then the version is fitted; its places stay pinned, only the camera moves.
-  if (!pastKeepsCamera([...lay.boxes.values()].filter(b => b.kind === 'node').map(toScreen), mapArea())) fitView(false);
+  if (growthCmp?.pane === 'scene') renderGrowthPane();
 }
 function growthLeavePast(redraw = true) {
   const g = growthPast; if (!g) return;
+  if (growthAside) { camera = { ...growthAside }; growthAside = null; }
   growthPast = null; opened = g.live;
   if (selected && !g.live.view.parts.some(x => x.id === selected)) select(null);
-  if (redraw) renderSpace('keep');
+  if (redraw) { renderSpace('keep'); if (growthCmp?.pane) renderGrowthPane(); }
 }
 /** The line, the banner, the tabs and the lit lines, after every redraw. */
 function drawGrowth() {
   const live = liveOpened(), sp = $('space');
   if (growthCmp && (!live || growthCmp.key !== live.key)) growthCmp = null;
   // The later end is the live map: a new version, a correction or the person's edit since redraws the comparison.
-  if (growthCmp && live) { const n = growthCount(); if ((growthCmp.to !== n || growthCmp.proj !== live.project) && n > growthCmp.from) Object.assign(growthCmp, { to: n, cs: changeSet(live.project, growthCmp.from, n), proj: live.project, un: null }); }
+  if (growthCmp && live) { const n = growthCount(); if ((growthCmp.to !== n || growthCmp.proj !== live.project) && n > growthCmp.from) { const cs = changeSet(live.project, growthCmp.from, n); Object.assign(growthCmp, { to: n, cs, scenes: changeScenes(cs), proj: live.project, un: null, unread: null }); } }
   renderGrowthEntry();
+  if ($('focus-top').classList.contains('growth-guide') !== !!(growthCmp && !scope)) renderFocusTop();
   const c = growthCmp, line = $('growth-line'), on = !!c && !growthPast;
   sp.classList.toggle('growth-cmp', on);
-  if (on) line.replaceChildren(compareLine(c!.cs, c!.picked, growthUnreflected()?.length ?? null, { pick: growthPick, unreflected: () => growthOpenPane('unreflected'), history: () => { growthMenuOpen = true; renderGrowthEntry(); }, exit: growthExit }));
+  if (on) line.replaceChildren(compareLine(c!.cs, c!.picked, growthUnreflected()?.filter(x => x.state !== 'rejected').length ?? null, { pick: growthPick, reflect: () => growthOpenPane('reflect'), history: () => { growthMenuOpen = true; renderGrowthEntry(); }, exit: growthExit }));
   else line.replaceChildren();
   line.hidden = !on;
   const banner = $('growth-past'); sp.classList.toggle('growth-in-past', !!growthPast);
@@ -6456,8 +6601,8 @@ function drawGrowth() {
   banner.hidden = !growthPast;
   drawGrowthMarks(); syncLineMode(); placeDock();
 }
-/** The relation ids lit now: the added lines (the 연결 item, or the picked scene's) on the current map; the removed ones on the earlier
- * version's own drawing only. */
+/** The relation ids lit now: the added lines (the 연결 item, or the scene's) on the current map; the removed ones on the earlier version's
+ * own drawing only. */
 function growthLit(): { ids: Set<string>; cls: 'growth-lit' | 'growth-gone-line' } | null {
   const c = growthCmp; if (!c) return null;
   const sceneLines = (part: string) => c.cs.changes.filter(x => x.part === part).map(x => directLines(c.cs, x));
@@ -6476,12 +6621,13 @@ function drawGrowthMarks() {
   if (lit) world.querySelectorAll<SVGGElement>('.edge:not(.sum)').forEach(g => { if ((g.dataset.ids ?? '').split(',').some(id => lit.ids.has(id))) { g.classList.add(lit.cls); layerEdge(g); } });
   const tab = (part: string, word: string, more: number, kind: string, on: boolean, tip: string, click: (() => void) | null) => {
     const b = lay.boxes.get(part); if (!b || b.kind === 'ghost') return;
-    world.append(h('button', { type: 'button', class: `growth-tab k-${kind}${on ? ' on' : ''}`, 'data-part': part, title: tip, ...(click ? { onclick: click } : { tabindex: '-1' }) }, word, more ? h('span', { class: 'gt-more' }, ` +${more}`) : null));
+    world.append(h('button', { type: 'button', class: `growth-tab k-${kind}${on ? ' on' : ' quiet'}`, 'data-part': part, title: tip, ...(click ? { onclick: click } : { tabindex: '-1' }) }, word, more ? h('span', { class: 'gt-more' }, ` +${more}`) : null));
   };
-  if (!growthPast) for (const t of cardTabs(c.cs, c.picked === 'desc')) tab(t.part, t.word, t.more, t.main.kind, c.scene === t.part, `${t.changes.map(x => tabWord(x)).join(' · ')} · 눌러서 무엇이 바뀌었는지 보기`, () => growthScene(t.part));
+  // F7: at most three tabs (the scene shown first, the next scenes quieter); 새 and 설명 only as a filter's current part.
+  if (!growthPast) for (const t of shownTabs(c.scenes, c.scene, growthFilter(c))) tab(t.part, t.word, t.more, t.kind, t.on, `${t.changes.map(x => tabWord(x)).join(' · ')} · 눌러서 이 변화 장면 보기`, () => growthScene(t.part));
   else if (growthPast.n === c.from) for (const x of c.cs.changes) if (x.kind === 'retire') {
     world.querySelector(`[data-part="${CSS.escape(x.part)}"]`)?.classList.add('growth-gone');
-    tab(x.part, `이후 은퇴`, 0, 'retire', false, `${versionLabel(c.to)}에는 없음${x.successor ? ` · ${growthName(x.successor) ?? '다른 부품'}이(가) 대신함` : ''}`, null);
+    if (x.part === c.scene || x.part === c.scenes.find(s => s.part === c.scene)?.main.predecessor) tab(x.part, `이후 은퇴`, 0, 'retire', false, `${versionLabel(c.to)}에는 없음${x.successor ? ` · ${growthName(x.successor) ?? '다른 부품'}이(가) 대신함` : ''}`, null);
   }
   placeGrowthTabs();
 }

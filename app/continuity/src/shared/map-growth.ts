@@ -10,14 +10,17 @@
  *   the fact (left out, and counted so the view can say so); a logged edit (Project.edits) is applied when it came before the version.
  * - The change set between two versions comes from the two rebuilt versions themselves (both-ends difference: a part made and retired between
  *   them is in neither; a rename and back is no rename), each change with the reading, row and record that made it.
- * - 미반영: the rows of the records read up to a version that are not reflected (waiting, held, rejected), each with plain reason words;
- *   at the latest version also the waiting rows of pasted records no reading has read yet (marked unread).
+ * - 기록 반영 상태 (ruling F7): the rows of the records read up to a version that are not reflected (waiting, held, rejected), each source
+ *   row once with plain reason words, its item title and the one part group it shows in; a record no reading has read yet is never one of
+ *   them (unreadRecords counts those apart).
+ * - 구현 상태 (F7): only the records' structured implementation field of the same part (implementationAt), never a 구현 바뀜 answer.
  * Nothing here calls a model or changes a project. */
-import { isMapReading, ROW_REASONS, type MapReading, type Project, type Relation, type RelationKind, type RowState, type ReadingIdentityRow, type GrowthMemo, type HumanEdit } from './types.js';
+import { isMapReading, ROW_REASONS, type MapReading, type Project, type Relation, type RelationKind, type RowState, type ReadingIdentityRow, type GrowthMemo, type HumanEdit, type PartImplementation, type ReadingQuote } from './types.js';
 import { identityState, officialName, currentView, canonicalPart } from './map-identity.js';
 import { studioView, type StudioView, type PartView } from './studio.js';
 import { rowLedger, rowBindings, type LedgerRow } from './row-ledger.js';
 import { v5Folds, type V5Fold } from './record-excerpt.js';
+import { V5_TABLE_DEFS } from './record-table.js';
 
 /* ---------- versions ---------- */
 export interface MapVersion {
@@ -96,17 +99,20 @@ export function pastVersion(p: Project, k: number): PastVersion {
     if (!byReading) applied++;
     // A past name and note: a logged value at or before the version; else, for a part a reading made, the record's official name of the
     // prefix and no note (a name or note of the person's own with no time is never dated after the fact: left out and counted). A part the
-    // person made keeps its name and note (it has its own time).
+    // person made has its own time: its name and note are those logged for the version (a later logged edit reads as its before-value).
     const lgName = loggedAt<string>(edits, at, e => (e.kind === 'name' && e.target === a.id ? e : null));
     const lgNote = loggedAt<string>(edits, at, e => (e.kind === 'note' && e.target === a.id ? e : null));
     let name = a.name, note = a.note;
     if (lgName?.dated) { name = lgName.value; applied++; }
+    // A part the person made: a name logged only after the version reads as it was then (the first logged change's before-value).
+    else if (!byReading && lgName) name = lgName.value;
     else if (byReading) {
       const base = lgName ? lgName.value : a.name, first = lgName ? edits.find(e => e.kind === 'name' && e.target === a.id)!.at : null;
       name = officialName(prefixSpace, a.id);
       if (normName(base) !== normName(first ? officialAt(a.id, first) : officialName(p, a.id))) undated++;
     }
     if (lgNote?.dated) { note = lgNote.value; applied++; }
+    else if (!byReading && lgNote) note = lgNote.value;
     else if (byReading) { if ((lgNote ? lgNote.value : a.note).trim()) undated++; note = ''; }
     // An archive: a logged one at or before the version; one with no time is left out (and counted).
     const arch = loggedAt<boolean>(edits, at, e => (e.kind === 'archive' && e.target === a.id ? e : null));
@@ -153,15 +159,37 @@ function pastedAt(p: Project, readings: Project['readings'], at: string) {
 }
 
 /* ---------- the change set between two versions ---------- */
-export const CHANGE_KINDS = ['new', 'rename', 'reimpl', 'desc', 'correct', 'dedupe', 'merge', 'succeed', 'retire'] as const;
+export const CHANGE_KINDS = ['new', 'rename', 'reimpl', 'impl', 'desc', 'correct', 'dedupe', 'merge', 'succeed', 'retire'] as const;
 export type ChangeKind = typeof CHANGE_KINDS[number];
-/** The tab words (ruling F6 Q4). A description update is 설명, never 정정; a fold the map made is 중복 정리, never 합침 or 통합 (통합 is a
- * record's own 합침, which the readings keep as written and never apply: it is never counted until one is). */
-export const CHANGE_WORD: Readonly<Record<ChangeKind, string>> = Object.freeze({ new: '새', rename: '이름', reimpl: '구현', desc: '설명', correct: '정정', dedupe: '중복 정리', merge: '통합', succeed: '승계', retire: '은퇴' });
-/** Which word a changed card's tab shows first (the others count in its 「+N」). */
-export const TAB_ORDER: readonly ChangeKind[] = ['succeed', 'new', 'rename', 'reimpl', 'dedupe', 'merge', 'correct', 'desc', 'retire'];
-/** The order of the summary line's items. */
-export const SUMMARY_ORDER: readonly ChangeKind[] = ['new', 'rename', 'reimpl', 'dedupe', 'merge', 'succeed', 'retire', 'correct'];
+/** The tab words (ruling F6 Q4; F7). A description update is 설명, never 정정; a fold the map made is 중복 정리, never 합침 or 통합 (통합 is a
+ * record's own 합침, which the readings keep as written and never apply: it is never counted until one is). 구현 상태 (F7) is its own kind,
+ * read only from the records' structured implementation field; 구현 바뀜 is a record's identity answer (another implementation of the same
+ * part), never a 구현 상태. */
+export const CHANGE_WORD: Readonly<Record<ChangeKind, string>> = Object.freeze({ new: '새', rename: '이름', reimpl: '구현 바뀜', impl: '구현 상태', desc: '설명', correct: '정정', dedupe: '중복 정리', merge: '통합', succeed: '승계', retire: '은퇴' });
+/** Ruling F7 (먼저 보여주는 순서, never an importance): 정정 > 승계 > 후계 없는 은퇴 > 구현 상태 > 이름 > 설명 > 중복 정리 > 새. 구현 바뀜 stands
+ * by 구현 상태 and 통합 by 중복 정리. A retirement inside a 승계 is that 승계's scene, never its own. */
+export const SCENE_ORDER: readonly ChangeKind[] = ['correct', 'succeed', 'retire', 'impl', 'reimpl', 'rename', 'desc', 'dedupe', 'merge', 'new'];
+/** Which word a changed card's tab shows first (the others count in its 「+N」): the scene order. */
+export const TAB_ORDER: readonly ChangeKind[] = SCENE_ORDER;
+/** The order of the summary line's items (the scene order; 설명 and 새 are the line's two filters, at its end). */
+export const SUMMARY_ORDER: readonly ChangeKind[] = ['correct', 'succeed', 'retire', 'impl', 'reimpl', 'rename', 'dedupe', 'merge'];
+/** The structured implementation words of a record (C-PART 구현 상태), as the growth view says them. */
+export const IMPL_WORD: Readonly<Record<PartImplementation, string>> = Object.freeze({ built: '구현됨', partial: '일부 구현', unbuilt: '미구현', removed: '제거됨', unknown: '모름' });
+/** A part's implementation as the readings of a project read it from the records' structured field (C-PART 구현 상태 of the part's own row,
+ * the same part ID): the newest reading that gave one, with its quote. Never a 구현 바뀜 answer, a description or a status claim (가동·정지 is
+ * 운영 상태). null: no reading gave one (정보 없음, never 미구현). */
+export function implementationAt(p: Pick<Project, 'readings'>, areaId: string): { value: PartImplementation; quote: ReadingQuote; reading: string; at: string } | null {
+  let out: { value: PartImplementation; quote: ReadingQuote; reading: string; at: string } | null = null;
+  for (const r of p.readings) if (isMapReading(r)) for (const x of r.parts) if (x.areaId === areaId && x.implementation && x.implementationQuote) out = { value: x.implementation, quote: x.implementationQuote, reading: r.id, at: r.at };
+  return out;
+}
+/** Ruling F7: what an implementation state difference is. Both explicit and different: 구현 상태 변경 (미구현 → 구현됨). Nothing known (or
+ * 모름) before and an explicit state after: 구현 정보 추가 (정보 없음 → 구현됨). The same state, or nothing after: no change. */
+export function implementationChange(before: PartImplementation | null, after: PartImplementation | null): 'change' | 'add' | null {
+  if (!after || after === 'unknown') return null;
+  if (!before || before === 'unknown') return 'add';
+  return before === after ? null : 'change';
+}
 export interface IdentityCite { reading: string; at: string; record: string; row: string; when: string | null;
   /** The record's own part row the identity row names (B…), null when none. */
   part: string | null; evidence: string[]; place: { record: string; from: number; to: number } | null }
@@ -181,6 +209,9 @@ export interface PartChange {
   replaced?: 'bound' | 'stated' | null; target?: string | null;
   /** 새: the version whose reading made the part. */
   since?: number | null;
+  /** 구현 상태 (F7): the structured implementation before (null: 정보 없음) and after, 'change' (both explicit) or 'add' (정보 없음 → explicit),
+   * with the record quote that gave the later one. */
+  impl?: { mode: 'change' | 'add'; from: PartImplementation | null; to: PartImplementation; quote: ReadingQuote; reading: string } | null;
   /** 새: who made the part (a reading, or the person by hand) and, for the person, when. */
   by?: 'reading' | 'person'; madeAt?: string;
   /** The identity row that made the change (이름, 구현, 중복 정리, 승계, 은퇴), with 바뀐 때 and its F/E cites. */
@@ -225,6 +256,9 @@ export function changeSet(p: Project, a: number, b: number): ChangeSet {
     }
     const re = (sB.reimplemented.get(id) ?? []).filter(r => window.has(r.reading));
     if (re.length) add({ kind: 'reimpl', part: id, name: y.name, before: re[0]!.from, after: re.at(-1)!.to, cite: citeOf(p, re.at(-1)!.reading, re.at(-1)!.record, re.at(-1)!.row) });
+    // 구현 상태 (F7): only the structured implementation field of the same part, at each end.
+    const ia = implementationAt(A.project, id), ib = implementationAt(B.project, id), im = implementationChange(ia?.value ?? null, ib?.value ?? null);
+    if (im && ib) add({ kind: 'impl', part: id, name: y.name, before: ia ? IMPL_WORD[ia.value] : null, after: IMPL_WORD[ib.value], impl: { mode: im, from: ia?.value ?? null, to: ib.value, quote: ib.quote, reading: ib.reading } });
     const ux = x.reading, uy = y.reading;
     const corrected = (uy?.corrected?.id ?? null) !== (ux?.corrected?.id ?? null) && !!uy?.corrected;
     if (corrected) add({ kind: 'correct', part: id, name: y.name, before: ux?.role ?? null, after: uy?.role ?? null });
@@ -294,17 +328,26 @@ export const ROW_REASON_WORDS: Readonly<Record<string, string>> = Object.freeze(
 export const rowReasonWords = (state: RowState, reason: string | null): string => (reason ? ROW_REASON_WORDS[`${state}:${reason}`] ?? '이유가 적히지 않음' : '이유가 적히지 않음');
 /** Every reason the ledger can give (for the words' completeness). */
 export const allRowReasons = (): string[] => (Object.entries(ROW_REASONS) as [RowState, readonly string[]][]).flatMap(([s, rs]) => rs.map(r => `${s}:${r}`));
-/** The words of a waiting row whose record no reading has read yet. */
-export const UNREAD_WORDS = '아직 읽지 않음';
+/** Ruling F7: a pasted record no map reading has read yet is not in 기록 반영 상태 at all (its rows are neither 대기 nor anything else): it
+ * is counted apart as 「아직 읽지 않은 기록 N개」. */
+export const UNREAD_WORDS = '아직 읽지 않은 기록';
+/** The item kinds of 기록 반영 상태 (F7: 연결 · 보내는 → 받는 / 단계 · 원문 단계 이름 / 설명 · 해당 부품의 설명 / 부품 · 원문 이름); another table reads
+ * by its own title. */
+export const ROW_ITEM_WORD: Readonly<Record<string, string>> = Object.freeze({ 'C-LINK': '연결', 'C-STEP': '단계', 'C-PART': '부품', 'C-IDENT': '부품 대응', 'C-DESIGN': '설명' });
 export interface Unreflected { state: Exclude<RowState, 'reflected'>; reason: string | null; words: string;
-  /** A row of a pasted record no reading has read yet (waiting, at the latest version only). */
-  unread: boolean;
   /** The record (fold key), the table and the row's own ID. */
   record: string; table: string; id: string;
-  /** What the row tried: its 이름 cell (a part row), else its cells as written, joined. */
+  /** What the row tried: its 이름 cell (a part row), else its cells as written, joined (whole: never cut, so no plan word goes). */
   tried: string;
-  /** The parts it is about (held with, bound, the parts its B ids are bound to), at that version. */
+  /** The item's kind word (연결, 단계, 부품, …) and its title as F7 has it (보내는 → 받는, the step's own name, the part's own name). */
+  item: string; title: string;
+  /** The parts it is about (its own part, the parts its B ids are bound to, held with) on the map of that version. */
   parts: string[];
+  /** The one group it shows in (F7): the part it is first about (a part row's own part, a line's sender, else the first part it names, else
+   * the one part it is held with), checked by part ID on the map of that version; null: none. related: the other parts it is about. */
+  principal: string | null; related: string[];
+  /** A part row whose part is not on the map of that version (「아직 지도에 놓이지 않음」, only then). */
+  unplaced: boolean;
   /** The source line: the pasted text, [start, end) in it and its 1-based line number. */
   paste: string; start: number; end: number; line: number }
 /** The columns that are references, not what the row says (its ID, its cites, the files it is filed under). */
@@ -315,30 +358,83 @@ export function plainCells(cells: readonly string[], partName: (id: string) => s
     .replace(/(?<![A-Za-z0-9])(?:ID|CH|[A-Z])\d{1,3}(?!\d)/g, '')
     .split(/\s*[·+,]\s*/).map(t => t.replace(/\s+/g, ' ').trim()).filter(Boolean).join(' · ')).filter(Boolean).join(' · ');
 }
-/** The rows not reflected among the records read up to version k (each record's rows by the ledger as it stood then), waiting first, then
- * held, then rejected, each in record order. At the latest version (the live map) the rows of pasted records no reading has read yet are
- * there too, as waiting rows marked unread (「대기 · 아직 읽지 않음」), after the waiting rows of read records. */
+/** The pasted texts the map readings of a project read. */
+const readPastes = (p: Pick<Project, 'readings'>) => new Set(p.readings.flatMap(r => (isMapReading(r) ? r.records.map(x => x.id) : [])));
+const B_REF = /(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g;
+/** The rows not reflected among the records read up to version k (each record's rows by the ledger as it stood then), each source row
+ * once (a row sent again is one row; a row about several parts is one row), waiting first, then held, then rejected, each in record
+ * order. A record no reading has read is never here (unreadRecords). */
 export function unreflectedAt(p: Project, k: number): Unreflected[] {
   const v = versionAt(p, k), past = v.project, folds = v5Folds(past.pasted); if (!folds.length) return [];
-  const read = new Set(past.readings.flatMap(r => (isMapReading(r) ? r.records.map(x => x.id) : [])));
+  const read = readPastes(past);
   const ledger = rowLedger(past, folds), live = new Set(past.space.areas.map(a => a.id)), bound = rowBindings(ledger, id => live.has(id));
+  const onMap = new Map(v.view.parts.map(x => [x.id, x.name]));
+  // A record's part row is a map part when a reading created it there, or when the record's own identity row (C-IDENT) was reflected onto
+  // it (its 이 기록 부분 → that part, a folded duplicate read as its canonical part).
+  const st = identityState(past);
+  for (const r of past.readings) if (isMapReading(r)) for (const e of r.identity ?? []) if (e.state === 'reflected' && e.part && e.areaId) {
+    const k = `${e.record}\u0000C-PART\u0000${e.part}`; if (!bound.has(k)) bound.set(k, canonicalPart(st, e.op?.kind === 'fold' && e.op.into ? e.op.into : e.areaId));
+  }
   const foldOf = new Map<string, V5Fold>(folds.map(f => [f.key, f])), text = new Map(past.pasted.map(x => [x.id, x.text]));
   const rank: Record<string, number> = { waiting: 0, held: 1, rejected: 2 };
-  const out: Unreflected[] = [];
+  const out: Unreflected[] = [], seen = new Set<string>();
   for (const x of ledger.values() as Iterable<LedgerRow>) {
-    const unread = !read.has(x.paste);
-    if (x.state === 'reflected' || (unread && !(v.live && x.state === 'waiting'))) continue;
+    if (x.state === 'reflected' || !read.has(x.paste)) continue;
+    const key = `${x.record}\u0000${x.table}\u0000${x.id}`; if (seen.has(key)) continue; seen.add(key);
     const row = foldOf.get(x.record)?.fold.rows.get(x.table)?.find(r => r.id === x.id);
-    const cells = row ? Object.entries(row.row.byColumn).filter(([c, v]) => !REF_COLS.has(c) && v.trim() && !/^[—–-]+$/.test(v.trim())).map(([, v]) => v.trim()) : [];
+    const by: Record<string, string> = row?.row.byColumn ?? {};
+    const cells = Object.entries(by).filter(([c, v]) => !REF_COLS.has(c) && v.trim() && !/^[—–-]+$/.test(v.trim())).map(([, v]) => v.trim());
     const names = new Map((foldOf.get(x.record)?.fold.rows.get('C-PART') ?? []).map(r => [r.id, (r.row.byColumn['이름'] ?? '').trim()]));
     const tried = (x.name ?? plainCells(cells, b => names.get(b) || null)).replace(/\s+/g, ' ').trim();
-    const ends = x.ends.map(b => bound.get(`${x.record}\u0000C-PART\u0000${b}`)).filter((y): y is string => !!y);
-    const parts = [...new Set([...x.with, ...(x.bound ? [x.bound] : []), ...ends])].filter(id => live.has(id));
+    const boundOf = (b: string): string | null => { const id = bound.get(`${x.record}\u0000C-PART\u0000${b}`); return id && onMap.has(id) ? id : null; };
+    const ends = x.ends.map(boundOf).filter((y): y is string => !!y);
+    const own = x.table === 'C-PART' && x.bound && onMap.has(x.bound) ? x.bound : null;
+    const held = x.with.filter(id => onMap.has(id));
+    const parts = [...new Set([...(own ? [own] : []), ...ends, ...held])];
+    const principal = own ?? ends[0] ?? (held.length === 1 ? held[0]! : null);
+    // The title: a line's two ends (the map's name when the end is a part on the map, else the record's own name), a step's own name, a
+    // part row's own name; any other row its words.
+    const endName = (b: string | undefined) => (b ? (boundOf(b) ? onMap.get(boundOf(b)!)! : names.get(b) || '이름 없는 부분') : '모름');
+    const refs = (col: string) => (by[col] ?? '').match(B_REF) ?? [];
+    const title = x.table === 'C-LINK' ? `${endName(refs('보내는 부분')[0] ?? x.ends[0])} → ${endName(refs('받는 부분')[0] ?? x.ends[1])}`
+      : x.table === 'C-STEP' ? ((by['단계 이름'] ?? '').trim() || tried)
+      : x.table === 'C-PART' ? (x.name ?? tried)
+      : x.table === 'C-IDENT' ? (names.get((by['이 기록 부분(Bxx)'] ?? '').match(/B\d{1,3}/)?.[0] ?? '') || tried)
+      : tried;
+    const item = ROW_ITEM_WORD[x.table] ?? V5_TABLE_DEFS.get(x.table)?.title ?? '행';
     const t = text.get(x.paste) ?? '';
-    out.push({ state: x.state, reason: x.reason, words: unread ? UNREAD_WORDS : rowReasonWords(x.state, x.reason), unread, record: x.record, table: x.table, id: x.id, tried: tried.length > 160 ? `${tried.slice(0, 159)}…` : tried,
-      parts, paste: x.paste, start: x.start, end: x.end, line: t.slice(0, x.start).split('\n').length });
+    out.push({ state: x.state, reason: x.reason, words: rowReasonWords(x.state, x.reason), record: x.record, table: x.table, id: x.id, tried, item, title: title.replace(/\s+/g, ' ').trim() || '내용 없는 행',
+      parts, principal, related: parts.filter(id => id !== principal), unplaced: x.table === 'C-PART' && !own,
+      paste: x.paste, start: x.start, end: x.end, line: t.slice(0, x.start).split('\n').length });
   }
-  return out.sort((a, b) => rank[a.state]! - rank[b.state]! || Number(a.unread) - Number(b.unread) || (a.paste < b.paste ? -1 : a.paste > b.paste ? 1 : a.start - b.start));
+  return out.sort((a, b) => rank[a.state]! - rank[b.state]! || (a.paste < b.paste ? -1 : a.paste > b.paste ? 1 : a.start - b.start));
+}
+/** Ruling F7: the pasted records no map reading has read yet (a text pasted after the last reading), each once, with how many rows they
+ * hold. Never 대기, never in 기록 반영 상태's counts. */
+export function unreadRecords(p: Project): { paste: string; rows: number }[] {
+  const folds = v5Folds(p.pasted); if (!folds.length) return [];
+  const read = readPastes(p), by = new Map<string, number>();
+  for (const x of rowLedger(p, folds).values()) if (!read.has(x.paste)) by.set(x.paste, (by.get(x.paste) ?? 0) + 1);
+  return p.pasted.filter(x => by.has(x.id)).map(x => ({ paste: x.id, rows: by.get(x.id)! }));
+}
+/** One group of 기록 반영 상태 (F7): the rows about one part on the map (its ID checked), else the part rows not yet on the map, the rows
+ * about several parts with none first, and the rows whose part is not settled. */
+export interface ReflectGroup { key: string; part: string | null; kind: 'part' | 'unplaced' | 'several' | 'unsettled'; rows: Unreflected[];
+  /** 「연결 2행 · 단계 1행」: the rows by item kind, most first. */
+  byItem: { item: string; n: number }[] }
+/** The groups of some rows (each row in exactly one): parts first (most rows first, then by name), then the part rows not yet on the map,
+ * the rows about several parts, and the unsettled ones. */
+export function reflectGroups(rows: readonly Unreflected[], name: (id: string) => string): ReflectGroup[] {
+  const by = new Map<string, ReflectGroup>();
+  for (const x of rows) {
+    const kind: ReflectGroup['kind'] = x.principal ? 'part' : x.unplaced ? 'unplaced' : x.parts.length > 1 ? 'several' : 'unsettled';
+    const key = kind === 'part' ? `P\u0000${x.principal}` : kind;
+    const g = by.get(key) ?? by.set(key, { key, part: x.principal, kind, rows: [], byItem: [] }).get(key)!;
+    g.rows.push(x);
+  }
+  const rankK = { part: 0, unplaced: 1, several: 2, unsettled: 3 } as const;
+  for (const g of by.values()) { const n = new Map<string, number>(); for (const x of g.rows) n.set(x.item, (n.get(x.item) ?? 0) + 1); g.byItem = [...n].map(([item, k]) => ({ item, n: k })).sort((a, b) => b.n - a.n); }
+  return [...by.values()].sort((a, b) => rankK[a.kind] - rankK[b.kind] || b.rows.length - a.rows.length || (a.part && b.part ? name(a.part).localeCompare(name(b.part), 'ko') : 0));
 }
 /** The F and E cites of an identity row in its record, as written: the file (경로 · 역할) or the evidence (출처 · 자리 · 짧은 인용). */
 export function citeLines(p: Pick<Project, 'pasted'>, record: string, ids: readonly string[]): { id: string; text: string }[] {

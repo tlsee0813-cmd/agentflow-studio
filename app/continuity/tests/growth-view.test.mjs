@@ -206,35 +206,43 @@ test('GROWTH-9 plain words for every row reason, by state; 대기 · 보류 · �
   assert.equal(G.plainCells(['B03 · B12·B15', '구성', 'F09+F04'], b => ({ B03: '수집기', B12: '정리기' })[b] ?? null), '수집기 · 정리기 · 구성');
 });
 
-test('GROWTH-10 미반영 on the anonymised growth map: the rows read up to a version that are not reflected, plain and sourced', () => {
+test('GROWTH-10 기록 반영 상태 on the anonymised growth map: the rows read up to a version that are not reflected, each source row once, plain and sourced', () => {
   const p = fixtureProject(growthFixture('track-a')), vs = G.mapVersions(p);
   assert.equal(vs.length, 9);
   const last = G.unreflectedAt(p, 9), first = G.unreflectedAt(p, 1);
   assert.ok(last.length > 0 && first.length > 0);
   const order = { waiting: 0, held: 1, rejected: 2 };
   for (let i = 1; i < last.length; i++) assert.ok(order[last[i - 1].state] <= order[last[i].state], 'waiting, then held, then rejected');
+  assert.equal(new Set(last.map(x => `${x.record}|${x.table}|${x.id}`)).size, last.length, 'each source row once');
   for (const x of last) {
     assert.ok(['waiting', 'held', 'rejected'].includes(x.state));
     assert.equal(x.words, G.rowReasonWords(x.state, x.reason));
     assert.doesNotMatch(x.tried, /(?<![A-Za-z0-9])(?:B|F|E|ID|CH)\d{2,3}(?!\d)/, `no row ID: ${x.tried}`);
+    assert.doesNotMatch(x.tried, /…$/, 'never cut (a plan word is never left out)');
     assert.ok(x.line >= 1 && p.pasted.some(t => t.id === x.paste));
+    assert.ok(x.item && x.title);
+    if (x.principal) assert.ok(x.parts.includes(x.principal) && !x.related.includes(x.principal));
+    if (x.table === 'C-LINK') assert.match(x.title, / → /, 'a line reads 보내는 → 받는');
   }
   // Only records read up to the version: version 1 read one record.
   const read1 = new Set(p.readings.slice(0, vs[0].end).flatMap(r => r.records?.map(x => x.id) ?? []));
   assert.ok(first.every(x => read1.has(x.paste)));
   const cs = G.changeSet(p, 4, 9);
   assert.ok(cs.counts.new > 0 && cs.added.length > 0);
-  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 새 \d+ · 연결 \+\d+/);
+  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 연결 \+\d+ · 지도에 새로 표시 \d+개$/);
 });
 
-test('GROWTH-11 the line and the tabs: nonzero items in order, 설명 tabs only once picked, main word first and +N, no two tabs meet', () => {
+test('GROWTH-11 the line and the tabs: nonzero items in the scene order, the two filters at its end, at most three tabs, no 새 or 설명 tab by default, no two tabs meet', () => {
   const p = workshop(), cs = G.changeSet(p, 1, 3);
-  assert.equal(V.summaryText(cs), '지도 v01 → 지도 v03 · 새 1 · 이름 1 · 구현 1 · 승계 1 · 은퇴 1 · 연결 +1 −1 · 설명 1');
-  assert.deepEqual(V.summaryItems(cs).map(i => i.key), ['new', 'rename', 'reimpl', 'succeed', 'retire', 'lines', 'desc']);
-  const tabs = V.cardTabs(cs, false);
-  assert.deepEqual(tabs.map(t => [t.part, t.word, t.more]), [['wat', '승계', 1], ['sto', '이름', 0], ['srt', '구현', 0]]);
+  assert.equal(V.summaryText(cs), '지도 v01 → 지도 v03 · 승계 1 · 구현 바뀜 1 · 이름 1 · 연결 +1 −1 · 설명 변경 1개 보기 · 지도에 새로 표시 1개');
+  assert.deepEqual(V.summaryItems(cs).map(i => [i.key, i.filter]), [['succeed', false], ['reimpl', false], ['rename', false], ['lines', false], ['desc', true], ['new', true]]);
+  assert.equal(V.summaryItems(cs).some(i => i.key === 'retire'), false, 'a retirement a 승계 holds counts in that 승계');
+  const scenes = V.changeScenes(cs);
+  const tabs = V.shownTabs(scenes, null, null);
+  assert.deepEqual(tabs.map(t => [t.part, t.word, t.more, t.on]), [['wat', '승계', 1, false], ['srt', '구현 바뀜', 1, false], ['sto', '이름', 0, false]]);
   assert.equal(tabs.some(t => t.part === 'tim'), false, 'a retired part has no tab on the current map');
-  assert.deepEqual(V.cardTabs(cs, true).find(t => t.part === 'srt').more, 1, 'with 설명 picked it counts');
+  assert.deepEqual(V.shownTabs(scenes, 'sto', null).map(t => [t.part, t.on]), [['sto', true], ['wat', false], ['srt', false]], 'the scene shown first');
+  assert.deepEqual(V.shownTabs(scenes, 'srt', 'desc')[0], { part: 'srt', word: '설명', more: 1, kind: 'desc', on: true, changes: scenes.find(s => s.part === 'srt').changes }, 'a filter\'s current part shows the filter\'s word');
   // Places: many cards in tight rows; tabs never meet each other or another card, and the ones with no room hide.
   const boxes = new Map(), obstacles = [], list = [];
   for (let i = 0; i < 24; i++) { const r = { x: (i % 6) * 240, y: Math.floor(i / 6) * 90, w: 224, h: 80 }; boxes.set(`p${i}`, r); obstacles.push({ id: `p${i}`, ...r }); list.push({ part: `p${i}`, w: 60 + (i % 3) * 30, h: 20 }); }
@@ -294,18 +302,18 @@ test('GROWTH-13 a past version shows the record\'s name of the time and no note;
   bad(y => { y.edits.entries[1].after = 7; });
 });
 
-test('GROWTH-14 미반영 at the latest version holds the waiting rows of pasted records no reading has read yet, marked unread', () => {
+test('GROWTH-14 a record no reading has read yet is never in 기록 반영 상태: no 대기 row of it, counted apart as 「아직 읽지 않은 기록 N개」', () => {
   const p = fixtureProject(growthFixture('track-a')), vs = G.mapVersions(p);
   const read = new Set(p.readings.flatMap(r => r.records?.map(x => x.id) ?? [])), unreadPastes = p.pasted.filter(x => !read.has(x.id)).map(x => x.id);
   assert.ok(unreadPastes.length > 0);
-  const last = G.unreflectedAt(p, vs.length), un = last.filter(x => x.unread);
-  assert.ok(un.length > 0, 'the unread records\' rows are there');
-  for (const x of un) { assert.ok(unreadPastes.includes(x.paste)); assert.equal(x.state, 'waiting'); assert.equal(x.words, '아직 읽지 않음'); }
-  assert.ok(last.filter(x => !x.unread).every(x => read.has(x.paste)));
-  // After the read records' waiting rows, before the held ones.
-  const i = last.findIndex(x => x.unread), j = last.findLastIndex(x => x.unread);
-  assert.ok(last.slice(0, i).every(x => x.state === 'waiting' && !x.unread)); assert.ok(last.slice(i, j + 1).every(x => x.unread));
-  assert.equal(G.unreflectedAt(p, 4).some(x => x.unread), false, 'an earlier version reads only what was read up to it');
+  const last = G.unreflectedAt(p, vs.length);
+  assert.equal(last.some(x => unreadPastes.includes(x.paste)), false, 'no row of a record not read yet');
+  assert.ok(last.every(x => read.has(x.paste)));
+  const un = G.unreadRecords(p);
+  assert.deepEqual(un.map(x => x.paste).sort(), [...unreadPastes].sort(), 'each record not read yet, once');
+  assert.ok(un.every(x => x.rows > 0));
+  assert.equal(G.UNREAD_WORDS, '아직 읽지 않은 기록');
+  assert.equal(G.unreflectedAt(p, 4).some(x => !read.has(x.paste)), false);
 });
 
 test('GROWTH-15 the scene\'s earlier description: a correction says the person changed it, a description update never does', () => {
@@ -336,12 +344,14 @@ test('GROWTH-17 a part the person made reads 「사람이 추가함」 with its 
   assert.equal(wat.by, 'reading'); assert.equal(V.newTitle(wat, 1), '지도 v02에서 처음 읽힘');
 });
 
-test('GROWTH-18 a past version opens under the camera only when it shows at least half its cards, else it is fitted', () => {
-  const area = { x: 16, y: 60, w: 1248, h: 560 }, card = (x, y) => ({ x, y, w: 134, h: 48 });
-  assert.equal(V.pastKeepsCamera([card(-900, 100), card(-700, 300), card(1500, 200)], area), false, 'an empty canvas is no view');
-  assert.equal(V.pastKeepsCamera([card(100, 100), card(-700, 300), card(1500, 200), card(1600, 200)], area), false, 'one of four');
-  assert.equal(V.pastKeepsCamera([card(100, 100), card(300, 300), card(1500, 200)], area), true);
-  assert.equal(V.pastKeepsCamera([], area), true);
+test('GROWTH-18 the camera (F7): a readable card never moves it; a card out of sight takes the least pan into the area; never a zoom or a fit', () => {
+  const area = { x: 16, y: 60, w: 1000, h: 560 };
+  assert.deepEqual(V.leastPan({ x: 100, y: 100, w: 134, h: 48 }, area), [0, 0]);
+  assert.equal(V.readableInView({ x: 100, y: 100, w: 134, h: 48 }, area), true);
+  assert.deepEqual(V.leastPan({ x: 1100, y: 100, w: 134, h: 48 }, area), [1016 - 16 - 134 - 1100, 0], 'off to the right: just inside the right edge');
+  assert.deepEqual(V.leastPan({ x: 100, y: 10, w: 134, h: 48 }, area), [0, 76 - 10], 'under the top: just under it');
+  assert.deepEqual(V.leastPan({ x: -500, y: 900, w: 134, h: 48 }, area), [32 - -500, 620 - 16 - 48 - 900]);
+  assert.equal('pastKeepsCamera' in V, false, 'a past version is never fitted');
 });
 
 test('GROWTH-19 a hub\'s 「다른 연결 N개」 chip never stands over a card\'s title, its own card\'s included', async () => {
