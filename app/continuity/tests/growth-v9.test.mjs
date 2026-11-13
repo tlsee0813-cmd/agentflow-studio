@@ -161,7 +161,7 @@ test('V9-4e the 구현 상태 scene names its kind with both ends and says 「�
 
 test('V9-4f 「비교를 끝냈어요」 only once the comparison really closed; a baseline change is said with the numbers counted again; notes go by themselves in a few seconds, above the tools', async () => {
   const app = await read('src/client/app.ts');
-  assert.match(fn(app, 'growthExit'), /if \(!growthCmp && \$\('growth-line'\)\.hidden && opened\?\.key === c\.key\) \{ const kind = restoreHeld\(/);
+  assert.match(fn(app, 'growthExit'), /if \(!growthCmp && \$\('growth-line'\)\.hidden && opened\?\.key === c\.key\) \{\n {6}const moved = r\.kind === 'exact' \? cardsMoved\(before\.cards \?\? \{\}\) : 0, kind = restoreHeld\(/);
   const cmp = fn(app, 'growthCompare');
   assert.match(cmp, /\n {2}dropNote\(\);\n/);
   assert.match(cmp, /lastCmp = growthCmp; const cmpNow = growthCmp; say\.f = \(\) => announceBase\(was, cmpNow\);/);
@@ -187,7 +187,8 @@ test('V9-4g the past view keeps the scene\'s card outlined: that part, or the pa
 
 test('V9-4h a scene lights only its own card\'s changed lines; the whole set only while the 연결 item is picked (the past view too)', async () => {
   const app = await read('src/client/app.ts'), lit = fn(app, 'growthLit');
-  assert.match(lit, /const ids = all \? c\.cs\.removed\.map\(l => l\.id\) : c\.scene \? sceneLines\(c\.scene\)\.flatMap\(d => d\.removed\.map\(l => l\.id\)\) : \[\];/, 'never every removed line by itself');
+  // v12 (first user of v11, 6): and only when the scene's change is about lines, or asked for (growth-v12 V12-6).
+  assert.match(lit, /const ids = all \? c\.cs\.removed\.map\(l => l\.id\) : lit \? sceneLines\(sc!\.part\)\.flatMap\(d => d\.removed\.map\(l => l\.id\)\) : \[\];/, 'never every removed line by itself');
   assert.match(lit, /const ends = all \|\| !sc \|\| !o \? null : new Set\(/);
   assert.match(fn(app, 'drawGrowthMarks'), /\(!lit\.ends \|\| lit\.ends\.has\(g\.dataset\.from \?\? ''\) \|\| lit\.ends\.has\(g\.dataset\.to \?\? ''\)\)/);
 });

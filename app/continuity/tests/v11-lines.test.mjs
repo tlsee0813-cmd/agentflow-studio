@@ -88,7 +88,8 @@ test('V11-6 a label with no room leaves a relation-detail cue; a badge with no c
   assert.match(lab, /detailCues\(box, blocks, drawn, fit\);/);
   assert.match(dc, /\.edge\.label-hidden/);
   assert.match(dc, /placeCue\(box, e, 'detail'/);
-  assert.match(dc, /cue\.dataset\.full = words; if \(lens\) cue\.dataset\.lens = lens;/, 'its words for its hover and keyboard name; a lens label\'s cue under that lens');
+  // v12-growth (first user of v11, 7): its title and keyboard name say what it opens too (growth-v12 V12-7).
+  assert.match(dc, /cue\.dataset\.full = words; cue\.title = detailTip\(words\); cue\.setAttribute\('aria-label', detailTip\(words\)\); if \(lens\) cue\.dataset\.lens = lens;/, 'its words for its hover and keyboard name; a lens label\'s cue under that lens');
   assert.match(cue, /cue === 'detail' \? '관계 보기'/);
   assert.ok(!badges.includes("el.classList.add('forced')"), 'v10a forced a badge over other lines and labels');
   assert.match(badges, /placeCue\(box, e, b\.kind === 'condition' \? 'condition' : b\.kind === 'optional' \? 'optional' : 'detail'/);

@@ -84,7 +84,9 @@ export const lensClasses = (id: LensId): string[] => [`lens-${id}`, ...lensLook(
 export interface LensPart { id: string; family: string; type: string | null; short: string; loop: boolean; unlinked: boolean; unmapped: number }
 /** A drawn line: its key, channel (null: a plain relation), whether it carries a badge, and its two ends. sum: a summary line of a
  * busy map (outlined with the item, never counted: its relations are counted on their own lines). */
-export interface LensLine { key: string; channel: Channel | null; badge: boolean; from: string; to: string; sum?: boolean; cond?: boolean }
+export interface LensLine { key: string; channel: Channel | null; badge: boolean; from: string; to: string; sum?: boolean; cond?: boolean;
+  /** v12: the line's label had no room and its relation opens from the three dots on it (the relation-detail cue). */
+  detail?: boolean }
 export type Sample = { kind: 'family'; family: string } | { kind: 'line'; channel: Channel | 'related' } | { kind: 'badge' } | { kind: 'mark'; text: string };
 export interface LegendItem { id: string; label: string; count: number; sample: Sample; parts: string[]; lines: string[] }
 const FAMILY_ORDER = ['participant', 'process', 'store', 'trigger', 'neutral'] as const;
@@ -104,6 +106,11 @@ export function lensFadeNote(id: LensId, faded: number): { text: string; tip: st
 export const NO_RECORD = '운영 기록 없음';
 /** F8 Q4: the legend's word for a condition's mark (its sample is the ◇ itself). */
 export const COND_ITEM = '조건 보기';
+/** v12 (first user of v11, 7: 「···」 had no visible meaning): the legend names the relation-detail cue the way it names the ◇ (「··· 관계 보기」),
+ * the cue's own word on hover and its keyboard name. */
+export const DETAIL_ITEM = '관계 보기', DETAIL_MARK = '···';
+/** The cue's hover and keyboard name: what it opens and the relation's own words. */
+export const detailTip = (words: string): string => `${DETAIL_ITEM} · ${words} · 이름표를 놓을 자리가 없어 접힌 관계 · 누르면 양 끝과 방향·근거 보기`;
 /** Polish round fixes 2: the legend's words for a status, in a reader's terms (the record said 「모름」; nothing self-contradicting). */
 const SHORT_LABEL: Readonly<Record<string, string>> = { '상태 미상(기록)': '기록에 「모름」으로 적힘' };
 /** The corner mark the 상태와 공백 lens puts on a part whose state the record says: its state's mark. Something to check (unlinked
@@ -124,16 +131,19 @@ export function legendItems(id: LensId, parts: readonly LensPart[], lines: reado
   const badgeItem = (): LegendItem => { const ls = lines.filter(l => l.badge); return { id: 'badge', label: '박자·조건 배지 (기록의 글자)', count: ls.filter(l => !l.sum).length, sample: { kind: 'badge' }, parts: [], lines: ls.map(l => l.key) }; };
   // F8 Q4: a condition folded to its ◇ opens from the map; the legend names the mark (「◇ 조건 보기」) and counts the lines that carry one.
   const condItem = (): LegendItem => { const ls = lines.filter(l => l.cond && !l.sum); return { id: 'cond', label: COND_ITEM, count: ls.length, sample: { kind: 'mark', text: '◇' }, parts: [], lines: ls.map(l => l.key) }; };
+  const detailItem = (): LegendItem => { const ls = lines.filter(l => l.detail && !l.sum); return { id: 'detail', label: DETAIL_ITEM, count: ls.length, sample: { kind: 'mark', text: DETAIL_MARK }, parts: [], lines: ls.map(l => l.key) }; };
   const famItem = (f: string): LegendItem => { const ps = parts.filter(p => p.family === f); return { id: `family-${f}`, label: FAMILY_NAME[f] ?? f, count: ps.length, sample: { kind: 'family', family: f }, parts: ps.map(p => p.id), lines: [] }; };
   switch (id) {
     case 'compose':
       for (const f of FAMILY_ORDER) add(famItem(f));
       add(condItem());
+      add(detailItem());
       break;
     case 'data': {
       add(lineItem('data'));
       add(famItem('store'));
       add(condItem());
+      add(detailItem());
       add(badgeItem());
       const um = parts.filter(p => p.unmapped > 0);
       add({ id: 'unmapped', label: '포트 대응 미기록', count: um.reduce((a, p) => a + p.unmapped, 0), sample: { kind: 'mark', text: '□' }, parts: um.map(p => p.id), lines: [] });
@@ -143,6 +153,7 @@ export function legendItems(id: LensId, parts: readonly LensPart[], lines: reado
       add(lineItem('control'));
       add(famItem('trigger'));
       add(condItem());
+      add(detailItem());
       const loops = parts.filter(p => p.loop);
       add({ id: 'loop', label: '반복이 기록된 부분', count: loops.length, sample: { kind: 'mark', text: '↻' }, parts: loops.map(p => p.id), lines: [] });
       add(badgeItem());

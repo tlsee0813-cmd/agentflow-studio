@@ -92,8 +92,9 @@ test('V11-4 (F8 Q6 ④) the guide says the scene shown: 「장면 n/N · 종류�
   assert.equal(V.SUMMARY_FOLD, '전체 비교 요약'); assert.equal(V.GUIDE_LOADING, '이 장면의 설명을 불러오는 중');
   const app = await read('src/client/app.ts');
   assert.match(fn(app, 'renderGrowthPane'), /syncGuide\(\); syncMapArea\(\);\n\}/, 'the guide is redrawn with the pane, in the same frame');
-  assert.match(fn(app, 'growthGuideEls'), /const sg = growthSceneGuide\(c\);/);
-  assert.match(fn(app, 'growthGuideEls'), /h\('section', \{ class: 'gg-sum', 'aria-label': SUMMARY_FOLD \}/);
+  // v12 (first user of v11, 1): a screen that is no scene says that screen (growth-v12 V12-1).
+  assert.match(fn(app, 'growthGuideEls'), /const sg = growthSceneGuide\(c\) \?\? growthScreenGuide\(c\);/);
+  assert.match(fn(app, 'growthGuideEls'), /h\('section', \{ class: 'gg-sum', id: 'gg-sum', 'aria-label': SUMMARY_FOLD \}/);
   assert.match(fn(app, 'growthSceneGuide'), /const list = f \? filterParts\(c, f\) : c\.scenes\.map\(s => s\.part\), i = list\.indexOf\(c\.scene\);|list = f \? filterParts\(c, f\) : c\.scenes\.map\(s => s\.part\), i = list\.indexOf\(c\.scene\)/, 'numbered as the pane numbers it');
 });
 
@@ -112,9 +113,10 @@ test('V11-5 (F8 Q6 ⑤) leaving restores the panels, then the camera, exactly (0
   assert.deepEqual(V.RESTORE_WORD, { exact: '비교 전 배율과 위치로 돌아왔어요.', center: '비교 전 배율과 중심을 유지했어요.', failed: '지도로 돌아왔어요. 비교 전 위치는 복원하지 못했어요.' });
   const app = await read('src/client/app.ts'), ex = fn(app, 'growthExit');
   assert.match(ex, /r = restoreCamera\(before\.camera, before\.area \?\? area, area\);\n {4}camera = \{ \.\.\.r\.camera \}; applyCamera\(true\);/);
-  assert.match(ex, /const kind = restoreHeld\(r\.camera, camera, anchor\) \? r\.kind : 'failed';/);
+  // v12 (first user of v11, 4): the cards' places on screen are measured too (growth-v12 V12-4).
+  assert.match(ex, /kind = restoreHeld\(r\.camera, camera, anchor\) && moved <= 1 \? r\.kind : 'failed';/);
   assert.match(ex, /\}, RESTORE_SETTLE_MS\);/, 'said once the camera has settled');
-  assert.match(fn(app, 'growthCompare'), /area: \{ w: \$\('viewport'\)\.clientWidth, h: \$\('viewport'\)\.clientHeight \} \};/);
+  assert.match(fn(app, 'growthCompare'), /area: \{ w: \$\('viewport'\)\.clientWidth, h: \$\('viewport'\)\.clientHeight \}, cards: cardsOnScreen\(\) \};/);
   assert.doesNotMatch(ex, /fitView/);
 });
 

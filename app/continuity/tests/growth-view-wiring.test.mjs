@@ -71,7 +71,8 @@ test('GROWTH-W4 compare: tabs only while comparing, lit parts by the read-marks 
   assert.match(exit, /const before = c\.saved;/); assert.match(exit, /camera = \{ \.\.\.r\.camera \}; applyCamera\(true\);/);
   assert.match(exit, /go\(o\.key, c\.saved\.selected, c\.saved\.scope\)/);
   assert.match(fn(app, 'growthPick'), /if \(k === 'new' \|\| k === 'desc'\) \{ const list = filterParts\(c, k\);/, 'the two filters step through their parts');
-  assert.match(fn(app, 'drawGrowthMarks'), /shownTabs\(c\.scenes, c\.scene, growthFilter\(c\)\)/, 'at most three tabs; 새 and 설명 only as a filter\'s');
+  // v12 (first user of v11, 1): the scene's tab only while its scene is the pane's (growth-v12 V12-1).
+  assert.match(fn(app, 'drawGrowthMarks'), /shownTabs\(c\.scenes, sceneShown\(c\), growthFilter\(c\)\)/, 'at most three tabs; 새 and 설명 only as a filter\'s');
   assert.match(fn(app, 'renderSpace'), /applyLens\(\);\n  drawGrowth\(\);/);
   assert.match(app, /if \(growthCmp && growthTabK && Math\.abs\(camera\.k - growthTabK\) \/ growthTabK > 0\.04\) requestAnimationFrame\(placeGrowthTabs\);/);
   // v11 (F8 Q6 ①): the compare line's own height (its second row with the count of parts the later map shows).
@@ -118,7 +119,9 @@ test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes bac
   assert.match(cmp, /renderSpace\('keep'\);/);
   assert.match(fn(app, 'growthExit'), /rememberRange\(c\);/);
   assert.match(fn(app, 'growthScene'), /growthReveal\(part\);/);
-  assert.match(fn(app, 'growthReveal'), /const \[dx, dy\] = leastPan\(toScreen\(b\), mapArea\(\)\);\n  if \(dx \|\| dy\) \{ camera = \{ \.\.\.camera, x: camera\.x \+ dx, y: camera\.y \+ dy \}; applyCamera\(true\); \}/, 'a pan, never a zoom');
+  // v12 (first user of v11, 5): among the pans that bring the card into sight, the one that puts the fewest readable cards under a band (growth-v12 V12-5).
+  assert.match(fn(app, 'growthReveal'), /\[lx, ly\] = leastPan\(card, area\); if \(!lx && !ly\) return;/);
+  assert.match(fn(app, 'growthReveal'), /if \(dx \|\| dy\) \{ camera = \{ \.\.\.camera, x: camera\.x \+ dx, y: camera\.y \+ dy \}; applyCamera\(true\); \}/, 'a pan, never a zoom');
   const own = app.slice(app.indexOf('/* ---------- the growing map'), app.indexOf('/* ---------- coming back'));
   assert.doesNotMatch(own, /fitView\(|setInterval|autoplay/, 'never fitted, never played by itself');
   // The scene's controls and its 1/N.

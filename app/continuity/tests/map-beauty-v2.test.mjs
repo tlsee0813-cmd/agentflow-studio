@@ -40,9 +40,11 @@ test('BV2-2 a tag fits its name in its lines, cut at the end with 「…」, bro
   assert.equal(linesNeeded('ReadWriteProxy·압축 워커', 90, measure), 3);
   assert.deepEqual(fitTag('GPTResearcher', 80, 2, measure).lines, ['GPT', 'Researcher']);
   assert.deepEqual(fitTag('WebSocketManager·run_agent', 90, 3, measure).lines, ['WebSocket', 'Manager·run_', 'agent']);
-  // A word wider than a line is cut at its end on a line of its own; the name goes on below. Hangul still breaks between syllables.
+  // v12 (first user of v11, 8: a first word cut at its middle): never cut inside a word: a first word wider than a line is left out whole, the rest after 「…」;
+  // a name of that one word alone keeps its start (nothing whole can stand for it). Hangul still breaks between syllables (growth-v12 V12-8).
   const long = fitTag('tinyshakespeare 데이터', 70, 2, measure);
-  assert.deepEqual(long.lines, ['tinyshak…', '데이터']); assert.equal(long.full, false);
+  assert.deepEqual(long.lines, ['…데이터']); assert.equal(long.full, false);
+  assert.deepEqual(fitTag('tinyshakespeare', 70, 2, measure).lines, ['tinyshak…']);
   assert.ok(fitTag('가나다라마바사아자차', 60, 2, measure).lines.every(l => measure(l) <= 60));
   // The last line reads the rest of the name as written (no space put where it had a separator).
   assert.deepEqual(fitTag('CancelToken·signal·abort·timeout', 95, 2, measure).lines, ['CancelToken·', 'signal·abort…']);

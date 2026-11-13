@@ -1,10 +1,11 @@
 /* The growing map on screen (rulings F6 Q4, Q5 and F7; map-growth.ts). The map stays the same map: time is something one chooses to look at.
  * - Entry: a quiet chip by the lens bar when the visit's baseline differs from the current version (「이전 방문 · 지도 v04 → 지도 v07」), and
  *   the 「지도 이력」 menu in the tools (every version: number, reading time, 기록 대상 판본; pick a baseline, or open a past version).
- * - Compare (F7): the map with its first change scene open. The top box says 「지도 변화 · v04 → v17」 and at most two sentences made only of
- *   the change ledger (kinds, names before and after, versions, counts), each clause a way to its scene or list. One 32px line under the
- *   lens bar counts the changes in the scene order (정정 · 승계 · 은퇴 · 구현 상태 · … · 연결 +56 −4), then the two filters 「설명 변경 9개
- *   보기」 and 「v04에 없던 부품 표시 23개」 (F8 Q6 ①: its own row, with what it counts), and 「대기·보류 66행」 (기록 반영 상태, its own count, never added to the changes) at its right end.
+ * - Compare (F7): the map with its first change scene open. The top box says the screen shown: a scene (F8 Q6 ④), 기록 반영 상태 or a list
+ *   (v12), else 「지도 변화 · v04 → v17」 with the counts by kind (v12: never a scene's sentence), each count a way to its list; the whole
+ *   summary opens over the map from 「전체 비교 요약」. One line under the lens bar counts the changes in the scene order (정정 · 승계 · 은퇴 ·
+ *   구현 상태 · …), then 「설명 변경 9개 보기」, and in its own row 「v04에 없던 부품 표시 23개」 (F8 Q6 ①) and 「연결 표시 +56 −4」 (v12), each
+ *   with what it counts, and 「대기·보류 66행」 (기록 반영 상태, its own count, never added to the changes) at its right end.
  * - At most three text tabs on cards at a time (the scene shown first, the next ones in the scene order quieter); never a tab for 새 or 설명
  *   until its filter is on; 「+N」 is how many other kinds of change the card has.
  * - A scene: the top of the pane (kind, title, one sentence, 시점, 이유, 「기록을 반영한 두 지도 비교」 기준 지도 · v04 / 비교 지도 · v17, 이전 변화 / 다음 변화 / 원문, 「변화 장면 1/N」).
@@ -160,6 +161,23 @@ export function sceneGuide(c: PartChange, i: number, n: number, nm: Name, say: S
   else s2 = '바뀐 때와 이유는 기록에 없습니다.';
   return { head, s1, s2 };
 }
+/** v12 (first user of v11, 1: 기록 반영 상태 kept the comparison's summary over it): the guide over a screen that is no scene says that screen,
+ * in the words its pane uses: 기록 반영 상태, a kind's list, the lines' list, the record's 철회·변경 rows. */
+export type ScreenKind = { pane: 'reflect'; to: number; waiting: number; held: number }
+  | { pane: 'list'; from: number; to: number; kind: ChangeKind; n: number }
+  | { pane: 'lines'; from: number; to: number; added: number; removed: number }
+  | { pane: 'history'; from: number; n: number };
+export function screenGuide(x: ScreenKind): { head: string; s1: string; s2: string } {
+  switch (x.pane) {
+    case 'reflect': return { head: `기록 반영 상태 · ${short(x.to)} 기준`, s1: `${short(x.to)}까지 읽은 기록의 행 가운데 지도에 아직 들어가지 않은 것은 대기 ${x.waiting}행, 보류 ${x.held}행입니다.`,
+      s2: '변화 집계와 따로 센 수이며, 할 일의 수가 아닙니다.' };
+    case 'lines': return { head: linesWord(x.added, x.removed), s1: `${short(x.to)} 지도에는 ${short(x.from)} 지도에 없던 연결 표시가 ${x.added}개 있고, ${short(x.from)} 지도의 연결 표시 ${x.removed}개가 없습니다.`, s2: '표시 차이를 센 수이며, 새로 만들었는지는 이 숫자로 알 수 없습니다.' };
+    case 'history': return { head: historyWord(x.n), s1: `${short(x.from)} 뒤에 읽은 기록의 철회·변경 행 가운데 지도에 있던 부품의 설명을 거두지 않은 것이 ${x.n}건입니다.`,
+      s2: '프로젝트 이력이며 정정이 아니고, 변화 집계와 따로 셉니다.' };
+    default: { const p = PHRASE[x.kind](x.n, x.from); return { head: `${tabKindWord(x.kind)} 목록 · ${short(x.from)} → ${short(x.to)}`, s1: `${short(x.from)}${josa(short(x.from), '과/와')} ${short(x.to)} 사이의 ${p}${josa(p, '을/를')} 목록으로 봅니다.`,
+      s2: '목록에서 하나를 누르면 그 변화 장면이 열립니다.' }; }
+  }
+}
 /** Said in the guide's place while a scene's words are not there yet (F8 Q6 ④): never the earlier scene's sentence. */
 export const GUIDE_LOADING = '이 장면의 설명을 불러오는 중';
 /** The fold that holds the whole comparison's summary (F8 Q6 ④). */
@@ -175,32 +193,23 @@ const PHRASE: Readonly<Record<ChangeKind, (n: number, from: number) => string>> 
   correct: n => `정정이 적힌 부품 ${n}개`, succeed: n => `승계 ${n}건`, retire: n => `비교 지도에 대신하는 부품이 없는 은퇴 부품 ${n}개`, impl: n => `구현 상태 기록이 달라진 부품 ${n}개`,
   reimpl: n => `구현이 바뀐 부품 ${n}개`, rename: n => `이름이 달라진 부품 ${n}개`, desc: n => `설명이 바뀐 부품 ${n}개`, dedupe: n => `중복을 정리한 부품 ${n}개`, merge: n => `합쳐진 부품 ${n}개`,
   new: (n, from) => newCountWord(from, n) });
-/** The lead of the second sentence when the first sentence's kind has more than one change (「승계는 총 2건이며,」). */
-const LEAD: Readonly<Record<ChangeKind, string>> = Object.freeze({ correct: '정정', succeed: '승계', retire: '비교 지도에 대신하는 부품이 없는 은퇴', impl: '구현 상태 기록의 변화', reimpl: '구현 바뀜',
-  rename: '이름 변경', desc: '설명 변경', dedupe: '중복 정리', merge: '통합', new: NEW_LIST });
 /** How many changes of a kind the guide and the line count: a retirement a 승계 holds counts in that 승계. */
 export const kindCount = (cs: ChangeSet, k: ChangeKind): number => (k === 'retire' ? cs.changes.filter(c => c.kind === 'retire' && !c.successor).length : cs.counts[k]);
-/** The guide: its head, the first scene in one named sentence (the change shown first), and the counts in a second (the first scene's kind
- * when it has more, then up to three other kinds in the scene order, 지도에 새로 표시 always last when there is any; 설명 has its own
- * filter on the line). Only confirmed changes: a held row or a candidate is never one. */
-export function guideOf(cs: ChangeSet, scenes: readonly Scene[], nm: Name, say: Say = n => plainName(n)): Guide {
-  const head = `지도 변화 · ${short(cs.from)} → ${short(cs.to)}`, first = scenes[0];
-  if (!first) return { head, sentences: [[{ text: '두 지도 버전 사이에 반영된 구조 변화가 없습니다.', to: null, fact: null }]] };
-  const c = first.main, n = nm(c.part);
-  const s1: GuideSeg = { text: c.kind === 'succeed' ? `${q(nm(c.predecessor!))}${josa(nm(c.predecessor!), '을/를')} ${q(n)}${josa(n, '이/가')} 대신한다는 기록이 반영됐습니다.` : sceneSentence(c, nm, say).split(/(?<=다\.)\s/)[0]!,
-    to: { scene: first.part }, fact: { kind: c.kind, count: null, parts: [c.part, ...(c.predecessor ? [c.predecessor] : [])] } };
-  const kinds = SCENE_ORDER.filter(k => k !== 'desc' && k !== c.kind && kindCount(cs, k) > 0);
-  const pick = kinds.includes('new') ? [...kinds.filter(k => k !== 'new').slice(0, 2), 'new' as const] : kinds.slice(0, 3);
-  const s2: GuideSeg[] = [], total = kindCount(cs, c.kind);
-  if (total > 1) { const w = LEAD[c.kind]; s2.push({ text: `${w}${josa(w, '은/는')} 총 ${total}${c.kind === 'succeed' || c.kind === 'correct' ? '건' : '개'}`, to: { kind: c.kind }, fact: { kind: c.kind, count: total, parts: [] } }); }
-  const phrases = pick.map(k => ({ k, text: PHRASE[k](kindCount(cs, k), cs.from) }));
-  if (s2.length) s2.push({ text: phrases.length ? '이며, ' : '입니다.', to: null, fact: null });
-  phrases.forEach((p, i) => {
-    s2.push({ text: p.text, to: { kind: p.k }, fact: { kind: p.k, count: kindCount(cs, p.k), parts: [] } });
-    const last = i === phrases.length - 1;
-    s2.push({ text: last ? `${josa(p.text, '이/가')} 있습니다.` : i === phrases.length - 2 ? `${josa(p.text, '과/와')} ` : ', ', to: null, fact: null });
+/** The whole comparison's summary (v12, first user of v11, 2: it began with scene 1's sentence and said the shown scene's sentence again
+ * under it): the counts by kind and nothing else, every kind with a count in the scene order (설명 included), 「v04에 없던 부품 표시」 last;
+ * each count a way to its scene or list. No single scene's sentence: the guide over a scene says that scene. Only confirmed changes: a held
+ * row or a candidate is never one. */
+export function guideOf(cs: ChangeSet, scenes: readonly Scene[], _nm?: Name, _say?: Say): Guide {
+  const head = `지도 변화 · ${short(cs.from)} → ${short(cs.to)}`;
+  if (!scenes.length) return { head, sentences: [[{ text: '두 지도 버전 사이에 반영된 구조 변화가 없습니다.', to: null, fact: null }]] };
+  const kinds = SCENE_ORDER.filter(k => k !== 'new' && kindCount(cs, k) > 0), all = kindCount(cs, 'new') > 0 ? [...kinds, 'new' as const] : kinds;
+  const s: GuideSeg[] = [{ text: `${short(cs.from)}${josa(short(cs.from), '과/와')} ${short(cs.to)} 사이에 `, to: null, fact: null }];
+  all.forEach((k, i) => {
+    const text = PHRASE[k](kindCount(cs, k), cs.from), last = i === all.length - 1;
+    s.push({ text, to: { kind: k }, fact: { kind: k, count: kindCount(cs, k), parts: [] } });
+    s.push({ text: last ? `${josa(text, '이/가')} 있습니다.` : i === all.length - 2 ? `${josa(text, '과/와')} ` : ', ', to: null, fact: null });
   });
-  return { head, sentences: s2.length ? [[s1], s2] : [[s1]] };
+  return { head, sentences: [s] };
 }
 /** Every change the line counts (a retirement a 승계 holds counted in that 승계; the lines apart). */
 export const kindTotal = (cs: ChangeSet): number => CHANGE_KINDS.reduce((a, k) => a + kindCount(cs, k), 0);
@@ -214,12 +223,16 @@ export const guideText = (g: Guide): string => g.sentences.map(s => s.map(x => x
 /* ---------- the summary line ---------- */
 export type SummaryKey = ChangeKind | 'lines';
 export interface SummaryItem { key: SummaryKey; text: string; count: number; filter: boolean }
+/** v12 (first user of v11, 3: 「연결 +56 −4」 read as 56 relations newly built): the lines' count says it counts what the maps show, with its
+ * note beside it like the parts' count. */
+export const linesWord = (added: number, removed: number): string => `연결 표시${added ? ` +${added}` : ''}${removed ? ` −${removed}` : ''}`;
+export const LINES_NOTE = '표시 차이 · 새로 만들었는지 모름';
 /** The line's items with a nonzero count, in the scene order (a retirement a 승계 holds is counted there), the lines (+ added − removed),
  * then the two filters (F7): 「설명 변경 N개 보기」 and 「v04에 없던 부품 표시 N개」 (F8 Q6 ①). */
 export function summaryItems(cs: ChangeSet): SummaryItem[] {
   const out: SummaryItem[] = [];
   for (const k of SUMMARY_ORDER) { const n = kindCount(cs, k); if (n) out.push({ key: k, text: `${CHANGE_WORD[k]} ${n}`, count: n, filter: false }); }
-  if (cs.added.length || cs.removed.length) out.push({ key: 'lines', text: `연결${cs.added.length ? ` +${cs.added.length}` : ''}${cs.removed.length ? ` −${cs.removed.length}` : ''}`, count: cs.added.length + cs.removed.length, filter: false });
+  if (cs.added.length || cs.removed.length) out.push({ key: 'lines', text: linesWord(cs.added.length, cs.removed.length), count: cs.added.length + cs.removed.length, filter: false });
   if (cs.counts.desc) out.push({ key: 'desc', text: `설명 변경 ${cs.counts.desc}개 보기`, count: cs.counts.desc, filter: true });
   if (cs.counts.new) out.push({ key: 'new', text: newCountWord(cs.from, cs.counts.new), count: cs.counts.new, filter: true });
   return out;
@@ -381,6 +394,53 @@ export function guidePan(guide: Rect, cards: readonly Rect[], keep: Rect | null,
   return best ? [best.dx, best.dy] : null;
 }
 
+/* ---------- v12 (first user of v11, 5): every band is covered space ---------- */
+/** Whether a card (screen pixels) reads as covered: on screen at all (it meets the view) and not wholly in the view, or under a band (the
+ * guide, the compare line, the tools, the legend chip, the past view's banner). */
+export function coveredBy(card: Rect, view: Rect, bands: readonly Rect[]): boolean {
+  const on = card.x < view.x + view.w && view.x < card.x + card.w && card.y < view.y + view.h && view.y < card.y + card.h;
+  return on && (!readableInView(card, view) || bands.some(b => meets(b, card)));
+}
+export const coveredCount = (cards: readonly Rect[], view: Rect, bands: readonly Rect[], dx = 0, dy = 0): number =>
+  cards.filter(c => coveredBy({ ...c, x: c.x + dx, y: c.y + dy }, view, bands)).length;
+/** The pan (screen pixels) that loses the fewest readable cards: a card that reads whole and clear of every band now is lost when the move
+ * covers it or takes it off the view; the least move among those; the scene's card (keep) stays readable when it is now. [0, 0] when no pan
+ * is needed (nothing must be cleared or brought into sight). Never a zoom. mustClear: a band no card may stay under (the guide): a pan that leaves a card
+ * under it is no answer; null when none clears it (the guide then stands at the pane's top). need: a card that must read whole in the free
+ * area after the move (a scene's card brought into sight: the least such move, leastPan, is tried first and the others only when they
+ * lose fewer readable cards). */
+export function coverPan(cards: readonly Rect[], view: Rect, bands: readonly Rect[], keep: Rect | null, cap: { x: number; y: number }, mustClear: Rect | null = null, clearOf: readonly Rect[] = cards, need: { card: Rect; area: Rect } | null = null): [number, number] | null {
+  const under = (dx: number, dy: number) => !!mustClear && clearOf.some(c => meets(mustClear, { ...c, x: c.x + dx, y: c.y + dy }));
+  const lacks = (dx: number, dy: number) => !!need && !readableInView({ ...need.card, w: Math.min(need.card.w, 420), h: Math.min(need.card.h, 220), x: need.card.x + dx, y: need.card.y + dy }, need.area);
+  const hold = keep && !coveredBy(keep, view, bands) ? keep : null;
+  // The moves worth trying put a covered card's edge just past a band's edge or the view's (each axis apart; the cards covered now only).
+  const near = [...cards.filter(c => coveredBy(c, view, bands)), ...(mustClear ? clearOf.filter(c => meets(mustClear, c)) : []), ...(need ? [need.card] : [])];
+  const least: [number, number] = need ? leastPan(need.card, need.area) : [0, 0];
+  const axis = (p: 'x' | 'y', q: 'w' | 'h', lim: number, d0: number) => [...new Set([0, d0, ...near.flatMap(c => [
+    ...bands.flatMap(b => [b[p] - 1 - (c[p] + c[q]), b[p] + b[q] + 1 - c[p]]), view[p] + 1 - c[p], view[p] + view[q] - 1 - (c[p] + c[q])].map(d => d + d0))].map(d => Math.round(d * 2) / 2))].filter(d => Math.abs(d) <= Math.max(lim, Math.abs(d0)));
+  const dxs = axis('x', 'w', cap.x, least[0]), dys = axis('y', 'h', cap.y, least[1]);
+  const ok = (c: Rect, dx: number, dy: number) => { const s = { ...c, x: c.x + dx, y: c.y + dy }; return readableInView(s, view) && !bands.some(b => meets(b, s)); };
+  const was = cards.filter(c => ok(c, 0, 0)), net = (dx: number, dy: number) => -was.filter(c => !ok(c, dx, dy)).length;
+  let best: { dx: number; dy: number; n: number; cost: number } | null = under(0, 0) || lacks(0, 0) ? null : { dx: 0, dy: 0, n: 0, cost: 0 };
+  for (const dx of dxs) for (const dy of dys) {
+    if (under(dx, dy) || lacks(dx, dy)) continue;
+    if (hold && coveredBy({ ...hold, x: hold.x + dx, y: hold.y + dy }, view, bands)) continue;
+    const n = net(dx, dy), cost = Math.abs(dx) + Math.abs(dy);
+    if (!best || n > best.n || (n === best.n && cost < best.cost)) best = { dx, dy, n, cost };
+  }
+  return best ? [best.dx, best.dy] : null;
+}
+
+/* ---------- v12 (first user of v11, 6): a scene lights the lines its change is about ---------- */
+/** The kinds of change that are about a card's lines: a 승계 (the successor's lines and the predecessor's), a retirement, a part the map
+ * newly shows, a 중복 정리 or a 통합. A rename, a description, a correction or an implementation state is about the card itself: its lines stay
+ * as the plain map draws them (the scene lists them, and lights them on request). */
+export const LINE_KINDS: ReadonlySet<ChangeKind> = new Set<ChangeKind>(['succeed', 'retire', 'new', 'dedupe', 'merge']);
+export const litByScene = (c: Pick<PartChange, 'kind'>): boolean => LINE_KINDS.has(c.kind);
+/** The pane's words for a scene's changed lines and whether they are lit now. */
+export const linesHint = (lit: boolean, about: boolean): string => (lit ? (about ? '＋는 지도에 밝힘' : '＋를 지도에 밝힘') : '이 변화는 연결에 관한 것이 아니라 지도에 밝히지 않음');
+export const LINES_LIGHT = '이 연결 지도에 밝히기', LINES_UNLIGHT = '밝힌 연결 끄기';
+
 /* ---------- the past view: parts that were there only then ---------- */
 /** Places for the parts of a past version the current map does not have (laid out automatically around the pinned common parts), moved
  * clear of every pinned box of their container: under the lowest box there, side by side. Only those that meet a pinned box move. Returns
@@ -438,29 +498,32 @@ export interface LineHandlers { pick: (k: SummaryKey) => void; reflect: () => vo
   withdrawals?: () => void }
 /** The 32px compare line: the two versions, the counts, the two filters, 「대기·보류 N행」 at the right end and the way out. */
 export function compareLine(cs: ChangeSet, picked: SummaryKey | 'history' | null, waiting: number | null, on: LineHandlers): HTMLElement {
-  const all = summaryItems(cs), items = all.filter(i => i.key !== 'new'), fresh = all.find(i => i.key === 'new');
+  // v12 (first user of v11, 3): the lines' count stands with its own note, beside the parts' count (both count what the maps show).
+  const all = summaryItems(cs), items = all.filter(i => i.key !== 'new' && i.key !== 'lines'), fresh = all.find(i => i.key === 'new'), lines = all.find(i => i.key === 'lines');
   const item = (i: SummaryItem) => h('button', { type: 'button', class: `gl-item k-${i.key}${i.filter ? ' gl-filter' : ''}${picked === i.key ? ' on' : ''}`, 'aria-pressed': String(picked === i.key), title: itemTip(i.key), onclick: () => on.pick(i.key) }, i.text);
   const row = h('div', { class: 'gl-row', role: 'toolbar', 'aria-label': `비교 · ${summaryText(cs)}` },
     h('button', { type: 'button', class: 'gl-pair', title: '기준 바꾸기 · 지도 이력', onclick: on.history }, `${versionLabel(cs.from)} → ${versionLabel(cs.to)}`),
     ...(items.length ? items.flatMap(i => [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), item(i)])
-      : fresh ? [] : [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), h('span', { class: 'gl-none' }, NO_CHANGE)]),
+      : fresh || lines ? [] : [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), h('span', { class: 'gl-none' }, NO_CHANGE)]),
     h('span', { class: 'gl-gap' }),
     // Review of v8: the right end (the history rows, 대기·보류 and the way out) never leaves the line: it stays put while the counts give way.
     h('span', { class: 'gl-end' },
     cs.history.length && on.withdrawals ? h('button', { type: 'button', class: `gl-hist${picked === 'history' ? ' on' : ''}`, 'aria-pressed': String(picked === 'history'), title: `${historyWord(cs.history.length)} · 기록이 적은 철회·변경 가운데 지도의 부품 설명을 거두지 않은 것 (프로젝트 이력) · 정정이 아님 · 변화 집계와 따로 셈 · 누르면 목록`, onclick: on.withdrawals }, historyShort(cs.history.length)) : null,
     waiting !== null ? h('button', { type: 'button', class: `gl-un${waiting ? '' : ' zero'}`, title: `기록 반영 상태 · 지도 ${short(cs.to)} 기준 · 기록의 행 가운데 지도에 아직 들어가지 않은 대기·보류 행 (변화 집계와 따로 셈)`, onclick: on.reflect }, waitingWord(waiting)) : null,
     h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 비교 전의 고른 카드와 배율·위치로 돌아가요', 'aria-label': '비교 끝내기 · 고른 카드와 배율·위치는 비교 전대로', onclick: on.exit }, '×')));
-  if (!fresh) return row;
+  if (!fresh && !lines) return row;
   // F8 Q6 ①: the count of parts shown that the earlier map did not show stands with what it is and what it cannot say, where the counts are
-  // first seen (13px, the body's colour, at most two lines).
+  // first seen (13px, the body's colour, at most two lines); v12: the lines' count the same way, beside it where the row has room.
   return h('div', { class: 'gl-wrap' }, row,
-    h('p', { class: 'gl-new' }, item(fresh), h('span', { class: 'gl-new-note' }, NEW_NOTE)));
+    h('div', { class: 'gl-notes' },
+      fresh ? h('p', { class: 'gl-new' }, item(fresh), h('span', { class: 'gl-new-note' }, NEW_NOTE)) : null,
+      lines ? h('p', { class: 'gl-new gl-lines' }, item(lines), h('span', { class: 'gl-new-note' }, LINES_NOTE)) : null));
 }
 /** The line's short word for the history rows (the pane and the title say 「기록된 철회·변경 N건」). */
 export const historyShort = (n: number): string => `철회·변경 ${n}건`;
 const itemTip = (k: SummaryKey): string => ({ new: `${NEW_LIST} · 기준 지도에 없고 비교 지도에 표시된 부품 · ${NEW_NOTE} · 누르면 지도에서 밝히고 목록으로 하나씩 보기`, rename: '이름이 바뀐 부품', reimpl: '같은 부품, 기록이 구현이 바뀌었다고 적음',
   impl: '기록의 구현 상태 칸이 달라진 부품 (구현 상태 변경 · 구현 정보 추가) · 가동 여부가 아님', desc: '같은 부품에 대한 새 설명이 채택되었거나 사람이 설명을 새로 쓴 부품 · 누르면 지도에서 밝히고 하나씩 보기', correct: '오류나 철회가 적힌 정정 (기록의 철회, 사람이 바로잡은 설명) · 문구를 다듬은 것은 설명 변경',
-  dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '비교 지도에 대신하는 부품이 없는 은퇴 부품 · 은퇴한 부품은 비교 지도에 없음', lines: '더해진 연결과 빠진 연결' } as Record<SummaryKey, string>)[k] + (k === 'new' || k === 'desc' ? '' : ' · 누르면 목록');
+  dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '비교 지도에 대신하는 부품이 없는 은퇴 부품 · 은퇴한 부품은 비교 지도에 없음', lines: `비교 지도에만 있는 연결 표시(+)와 기준 지도에만 있는 연결 표시(−) · ${LINES_NOTE}` } as Record<SummaryKey, string>)[k] + (k === 'new' || k === 'desc' ? '' : ' · 누르면 목록');
 /** The scene's line over the earlier description: a person's correction is never a description update, and the other way round. */
 export const wasLabel = (kind: 'desc' | 'correct' | null, target: string | null, by: PartChange['by'] = undefined): string => (kind === 'correct' ? '이전 설명 · 사람이 고친 설명으로 바뀜'
   : kind === 'desc' && by === 'person' ? '이전 설명 · 사람이 새로 쓴 설명으로 바뀜'

@@ -91,7 +91,8 @@ test('P7-6 a condition written as code reads as written on the first screen, or 
   assert.match(fa, /box\.removeAttribute\('aria-hidden'\);/);
   assert.match(fa, /el\.classList\.contains\('edge-cue'\) \|\| el\.classList\.contains\('b-condition'\)/, 'a condition\'s cue and badge');
   assert.match(fa, /const cut = !!el\.dataset\.full && el\.dataset\.full !== el\.textContent/, 'a label shown cut');
-  assert.match(fa, /el\.tabIndex = 0; el\.setAttribute\('role', 'button'\); el\.setAttribute\('aria-label', `\$\{words\} · 눌러서 이 선 고르기`\);/);
+  // v12-growth (first user of v11, 7): the relation-detail cue says 「관계 보기」 first (growth-v12 V12-7); every other mark as before.
+  assert.match(fa, /el\.tabIndex = 0; el\.setAttribute\('role', 'button'\); el\.setAttribute\('aria-label', el\.classList\.contains\('q-detail'\) \? detailTip\(el\.dataset\.full \?\? words\) : `\$\{words\} · 눌러서 이 선 고르기`\);/);
   assert.ok(a.includes('function placeEdgeLabels() { placeLineLabels(); dropRowIds(); foldAccess();'), 'after every placement');
   assert.match(a, /if \(x && \(x\.kind !== 'line' \|\| fold\) && !quiet\(x\)\) enter\(x, fold\);/, 'focus opens the line\'s tip (dismissed by Esc, kept while pointed at: the hover machine)');
   assert.match(a, /const k = lineHit\(t\), edge = k \? edgeOf\(k\) : null; if \(edge\) \{ e\.preventDefault\(\); hoverStop\(HOVER_ENTER_HOLD\); pickLine\(edge\);/, 'Enter or Space picks the line, as a click does');
