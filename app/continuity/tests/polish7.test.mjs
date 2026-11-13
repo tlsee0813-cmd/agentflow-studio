@@ -37,7 +37,8 @@ test('P7-2 an identifier in brackets after a plain-language card name goes to th
   // The box was measured for the whole name: the face never needs more lines than that (layout unchanged).
   assert.match(a, /const nl = cardNameLines\(p, !!dot, !!r\.loop\), hs = cardHeights\(t, nl\), fn = faceName\(o, p\);/);
   assert.match(fn(a, 'faceNameNodes'), /if \(w \* 1\.06 \+ 2 > room \* \(lines > 1 \? 1\.85 : 1\)\) return breakable\(name\);/, 'monospace only where it keeps the measured lines');
-  assert.match(fn(a, 'tagLineNodes'), /<= width \+ 0\.5/, 'a name tag\'s code in monospace only where every line still fits');
+  // v8 (V8-7): a name tag draws no monospace at all (its code read louder than the names around it).
+  assert.doesNotMatch(fn(a, 'tagLineNodes'), /MONO/, 'a name tag\'s code in the tag\'s own type');
 });
 
 test('P7-3 a cut falls only between units: a code run with spaces is one (「(src/main.rs main)」, 「iter_num % log_interval == 0」)', () => {
@@ -81,8 +82,9 @@ test('P7-5 a plain list label is cut at its list separators, never by the CSS el
 
 test('P7-6 a condition written as code reads as written on the first screen, or folds to its ◇, which pointer and keyboard open', async () => {
   const a = await app(), fit = fn(a, 'fitCut');
-  assert.match(fit, /if \(cond && labelParts\(s\)\.some\(p => p\.code\)\) return s\.length <= FIT_CODE_MAX \? s : null;/, 'whole, or no label (never 「iter_num %…」)');
-  assert.ok(a.includes('c = fitCut(base, n, cond);'), 'the fit labels say which are conditions');
+  // v8 (V8-1, V8-2): whole up to FIT_CODE_MAX, else cut between units (never 「iter_num %…」); folded to its ◇ only at the far zoom.
+  assert.match(fit, /if \(cond && labelParts\(s\)\.some\(p => p\.code\)\) \{ const f = condForms\(s, fold\); return n >= 14 \? f\.long : f\.short; \}/);
+  assert.ok(a.includes('c = fitCut(base, n, cond, fold)'), 'the fit labels say which are conditions');
   const fa = fn(a, 'foldAccess');
   assert.match(fa, /box\.removeAttribute\('aria-hidden'\);/);
   assert.match(fa, /el\.classList\.contains\('edge-cue'\) \|\| el\.classList\.contains\('b-condition'\)/, 'a condition\'s cue and badge');

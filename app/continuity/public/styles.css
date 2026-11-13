@@ -3328,6 +3328,12 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* Beauty v4 (P6): drawn 5px (the 8px box and its ::after keep the hover target). */
 .edge-cue.q-condition::before { left: 2.2px; top: 2.2px; width: 3.6px; height: 3.6px; border: 1.25px solid var(--text-3); transform: rotate(45deg); }
 .edge-cue.q-optional::before { inset: 1.5px; border: 1.25px dashed var(--text-3); border-radius: 50%; }
+/* v8 (review of v7: a folded condition never vanishes): a ◇ whose condition is not written on the map carries an open cue, three small dots
+   beside it (more to read: its hover, a click, or the keyboard's focus). */
+.edge-labels > .edge-cue.q-open { width: 15px; }
+.edge-cue .cue-open { position: absolute; left: 8.5px; top: 3px; width: 7px; height: 2px; background: radial-gradient(circle at 1px 1px, var(--text-3) .85px, transparent 1.05px) 0 0 / 2.5px 2px repeat-x; }
+.edge-cue.beside .cue-open { background-image: radial-gradient(circle at 1px 1px, var(--text-4) .85px, transparent 1.05px); }
+.edge-cue:is(.near, :hover) .cue-open, .edge-cue.lg-pick .cue-open { background-image: radial-gradient(circle at 1px 1px, var(--text) .85px, transparent 1.05px); }
 .edge-cue.beside::before { border-color: var(--text-4); }
 .edge-cue:is(.near, :hover)::before, .edge-cue.lg-pick::before { border-color: var(--text); }
 .edge-cue.lg-dim, .edge-cue.lg-fade { opacity: .3; }
@@ -3646,6 +3652,11 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    app adds the 「…」), so the CSS never cuts inside one. */
 .edge-labels code.lb-code, .ff-note code.lb-code { font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Consolas, Menlo, monospace; font-size: 1em; font-weight: inherit; letter-spacing: 0; padding: 0; margin: 0; border: 0; border-radius: 0; background: none; color: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 .edge-labels > .has-code { text-overflow: clip; }
+/* v8 (review of v7: 「코드 외침」, 「SKIP_DB_CHECK…」 「CLOUD_MODE가」): a monospace run looks no heavier than the words beside it: a
+   monospace face draws darker at the same weight and size, so it takes the regular weight a little smaller (the label's colour and halo
+   kept); a run followed by more words keeps a hair of room, so the halo of the next words never covers its last letter. */
+.edge-labels code.lb-code, .ff-note code.lb-code { font-weight: 400; font-size: .94em; word-spacing: -.2em; }
+.edge-labels code.lb-code.lb-tight, .ff-note code.lb-code.lb-tight { margin-right: .3em; }
 /* Polish 6: one 「…」 only: a label whose own words end on the app's cut mark takes none from the [data-full] rule; the chip's dark
    form only once the page opts in (data-theme="dark", or "auto" with a dark system), as every other dark rule; its weight regular. */
 .edge-labels > .edge-label.self-cut[data-full]::after { content: none; }
@@ -3653,6 +3664,9 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    border, no padding (the rule above); the same in every theme. A card's name, its hover and the pane's subtitle read code the same way;
    the identifier a card's face leaves out reads under the pane's title and in the hover. A folded label or cue in focus shows its ring. */
 .node.card :is(.c-name, .c-tag-name) code.nm-code, .edge-tip code.nm-code, .pane-ident code.nm-code { font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Consolas, Menlo, monospace; font-size: 1em; font-weight: inherit; letter-spacing: 0; padding: 0; margin: 0; border: 0; background: none; color: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+/* v8 (review of v7: 「코드 외침」): code in a card's title reads no louder than the words around it: the title's size and weight, in the role
+   line's colour (craft palette #526176); a name tag (the far view) draws none in monospace (app.ts tagLineNodes). */
+.node.card .c-name code.nm-code { color: #526176; }
 .edge-tip .hc-ident { font-size: 12px; color: var(--text-3); }
 .pane-ident { margin: 2px 0 0; font-size: 12.5px; color: var(--text-3); overflow-wrap: anywhere; }
 .edge-labels > [role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
