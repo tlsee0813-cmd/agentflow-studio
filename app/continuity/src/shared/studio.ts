@@ -151,6 +151,32 @@ export function planClause(sentence: string): string | null {
   const end = clauseStart(t, 0, w.at), clause = end > 0 ? t.slice(end).trim() : '';
   return clause && clause !== t ? clause : null;
 }
+/** v8 (review of v7: the top sentence cut 「… 2025-11 README에…」, 「… 운영자는 CLI·웹…」): where a sentence may be cut, longest first: at its
+ * clause boundaries (a comma or semicolon, which goes with the cut; a joining ending: 하고 · 이고 · 하며 · 이며 · 돌리며 · 하거나 · 하지만 ·
+ * 하는데 · 하면서; a sentence's end, which keeps its period and takes 「 …」), each with one 「…」; then at its spaces (whole words), longest
+ * first. A text holding a plan word (PLAN_WORD) has only the cuts that keep its last one (none: the caller keeps clipKeepPlan's cut).
+ * A cut keeps at least 8 characters. The whole text stays in its box's hover. */
+export function clauseCuts(text: string): { clauses: string[]; words: string[] } {
+  const t = text.replace(/\s+/g, ' ').trim(), w = lastPlanWord(t), keep = w ? w.at + w.len : 0;
+  const ends = new Set<number>(), spaces = new Set<number>();
+  for (const m of t.matchAll(/[,，;；](?= )|[.!?。](?= )|(?<=[가-힣](?:며|고|거나|지만|는데|면서))(?= )/g)) {
+    // A plain 「…고」 joins clauses only as a joining ending the list names (「보고」 is a report); 「…며」 「…거나」 「…지만」 「…는데」 「…면서」 always do.
+    if (/고$/.test(t.slice(0, m.index! + m[0].length)) && !/(?:하고|되고|이고|으며)$/.test(t.slice(0, m.index! + m[0].length))) continue;
+    ends.add(m.index! + m[0].length);
+  }
+  for (const m of t.matchAll(/ /g)) spaces.add(m.index!);
+  const make = (i: number): string | null => {
+    let head = t.slice(0, i).trimEnd(); if (i >= t.length || head.length < 8 || head.length < keep) return null;
+    if (/[.!?。]$/.test(head)) return `${head} …`;
+    // Nor ending on a mark that promises more (「,」 「·」 「:」) or an arrow pointing at what was cut (「… ckpt.pt) →」).
+    // A bracket the cut leaves open keeps only the words before it.
+    for (const [o, c] of [['(', ')'], ['[', ']'], ['{', '}'], ['「', '」']] as const) { const at = head.lastIndexOf(o); if (at >= 0 && head.indexOf(c, at) < 0) head = head.slice(0, at); }
+    head = head.replace(/(?:\s*[,，;；·\-–—:→←↔⇒])+$/, '').trimEnd();
+    return head.length >= 8 && head.length >= keep ? `${head}…` : null;
+  };
+  const list = (xs: Iterable<number>) => [...new Set([...xs].sort((a, b) => b - a).map(make).filter((x): x is string => !!x))];
+  return { clauses: list(ends), words: list(spaces) };
+}
 /** A width in Korean characters: a Hangul or other wide character is 1, anything else 0.6 (a card line holds about 15). */
 export const textWidth = (t: string): number => [...t].reduce((n, ch) => n + (/[ᄀ-ᇿ⺀-꓏가-힣豈-﫿＀-￯]/.test(ch) ? 1 : 0.6), 0);
 /** The head of a folded text that fits `room` by widthOf (trailing space dropped). */

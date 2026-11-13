@@ -428,6 +428,35 @@ export function tokenCut(text: string, n: number): string | null {
 }
 /** How many units tokenCut counts in a text (its cuts are 1 … this − 1). */
 export const cutCount = (text: string): number => cutUnits(text.trim()).filter(u => u.trim()).length;
+/** v8 (review of v7: 「GPT 모델」 beside 「model.py」, 「train.py 학습 실행기」 in two fonts): a card's title is drawn in one font. Monospace
+ * only when the whole title is code (what lies outside its code spans is spaces and 「·」 only) and that code is at least 4 characters;
+ * a title with words, or with a code part narrower than that, stays in the title's own type (its identifier as written in the pane and
+ * the hover). */
+export function monoTitle(name: string, spans: readonly (readonly [number, number])[]): boolean {
+  if (!spans.length) return false;
+  let at = 0, code = 0, rest = '';
+  for (const [a, b] of spans) { rest += name.slice(at, a); code += b - a; at = b; }
+  rest += name.slice(at);
+  return code >= 4 && /^[\s·]*$/.test(rest);
+}
+/** A condition written as code reads whole on the first screen up to this many characters (longer: cut between its units). */
+export const FIT_CODE_MAX = 32;
+/** v8 (review of v7: 「len(files) == 0가 거짓일 때」 and 「build 작업은 …」 left the map): a condition written as code never
+ * vanishes at a readable zoom. Its long form: whole up to FIT_CODE_MAX characters, else its longest cut between units within that
+ * (tokenCut: never inside a run, never ending on an operator), else whole; its short form: its longest such cut within LABEL_SHORT + 7,
+ * else its shortest, else whole. fold (the far zoom only): one longer than FIT_CODE_MAX folds to its line's ◇ (both null), whose open cue
+ * and hover read it whole. */
+export function condForms(text: string, fold = false): { long: string | null; short: string | null } {
+  const s = text.replace(/\s+/g, ' ').trim();
+  if (fold && s.length > FIT_CODE_MAX) return { long: null, short: null };
+  const cuts: string[] = [];
+  for (let n = cutCount(s) - 1; n >= 1; n--) { const c = tokenCut(s, n); if (c !== null && c !== s && !cuts.includes(c)) cuts.push(c); }
+  return { long: s.length <= FIT_CODE_MAX ? s : cuts.find(c => c.length <= FIT_CODE_MAX + 1) ?? cuts.at(-1) ?? s,
+    short: cuts.find(c => c.length <= LABEL_SHORT + 7) ?? cuts.at(-1) ?? s };
+}
+/** v8 (「Backups.Cron != ""」 drawn as 「Backups.Cron !=」): a label's quotation marks go (「」 『』 ‘’ “”), but the straight quotes
+ * of code stay (an empty string is an operand). */
+export const unquoteLabel = (t: string): string => { const s = t.replace(/[「」『』‘’“”]/g, ''); return (hasCode(s) ? s : s.replace(/"/g, '')).trim(); };
 /** Polish 7: a label's units, the places a cut may fall between: each run of code whole (spaces and all: 「(src/main.rs main)」,
  * 「iter_num % log_interval == 0」), the words split at spaces and after a list's 「·」 (「질의·」 「report_type·」); a piece with no space or
  * 「·」 between it and the next stays one with it (「pb.skipBootstrap()이…」). Joined, the units give the text back. */
