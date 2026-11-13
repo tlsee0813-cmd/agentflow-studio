@@ -7578,11 +7578,15 @@ function growthScene(part: string, kind: ChangeKind | null = null) {
 /** Review of v8 (first user, k): when a scene opens, the guide stands whole at the top with no card (nor a group's head) under it: the least pan
  * that clears it, sideways, up or down (guidePan: the scene's card stays readable; never a zoom); when no pan clears it, the guide goes to
  * the pane's top for that state (the map's top is then free). Each scene starts over with the guide at the top. */
-function growthClearGuide(still = false) {
+function growthClearGuide(still = false, again = false) {
   const el = document.getElementById('focus-top'), c = growthCmp; if (!el || !el.classList.contains('growth-guide') || !c) return;
   if (guideInPane) { guideInPane = false; document.querySelector('#lens .gg-pane')?.remove(); el.hidden = false; syncFocusTop(); syncMapArea(); }
   const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
   const r = { x: el.offsetLeft - ox - 8, y: el.offsetTop - oy - 8, w: el.offsetWidth + 16, h: el.offsetHeight + 16 };
+  // v13 merge (층's top band: the rename scene's guide was measured one line short, 62px, and took its second line two frames later, over six
+  // cards): once its words have settled, a guide that grew or narrowed is cleared again from where it stands (once).
+  if (!again) { const h0 = el.offsetHeight, w0 = el.offsetWidth; requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (growthCmp === c && !guideInPane && !el.hidden && (el.offsetHeight !== h0 || el.offsetWidth !== w0)) growthClearGuide(still, true); })); }
   const cards = [...lay.boxes.values()].filter(b => b.kind !== 'ghost').map(b => toScreen(b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
   // v10 (review of v9: 「사건 때」 under the guide at 1280): no label, badge, chip, tab, note or line end under it either.
   const sr = $('space').getBoundingClientRect(), fr = (q: DOMRect): Rect => ({ x: q.left - sr.left - ox, y: q.top - sr.top - oy, w: q.width, h: q.height });
@@ -7596,15 +7600,17 @@ function growthClearGuide(still = false) {
   // band is covered space: among the pans that clear the guide, the one that puts the fewest readable cards under a band (or off the map), the
   // least of those. Only when something is under the guide (F7: the camera stays otherwise).
   const blocks = guideBlocks(cards, marks, routes), bands = [r, ...growthBands(fr)], view = fr($('viewport').getBoundingClientRect());
-  if (!blocks.some(b => b.x < r.x + r.w && r.x < b.x + b.w && b.y < r.y + r.h && r.y < b.y + b.h)) return;
+  // v13 merge (층's top band: six cards stayed under the rename scene's guide at 1440): what is under the guide is read the same way before
+  // and after a pan; a pan that still leaves something under it, or no pan at all, is no answer (the guide goes to the pane's top).
+  const hits = (dx: number, dy: number) => blocks.some(b => b.x + dx < r.x + r.w && r.x < b.x + dx + b.w && b.y + dy < r.y + r.h && r.y < b.y + dy + b.h);
+  if (!hits(0, 0)) return;
   const d = coverPan(cards, view, bands, kb && kb.kind !== 'ghost' ? toScreen(kb) : null, { x: area.w / 2, y: area.h / 2 }, r, blocks);
   // v11 (F7, F8 Q6 ③: the past view keeps the camera; review of v10: the guide stood over 「집 서버 FTP 수신 위치」 in the past view at 1280):
   // where the camera must stay, anything under the guide sends it to the pane's top instead of moving the map.
   // V13-C HOOK (compare footer): with the footer, a pan that takes a card that reads whole now off the map's area (under its edge) is no
   // answer either: the guide goes to the pane's top instead.
   const lose = !!d && cmpFoot > 0 && lostBy(cards, view, growthBands(fr), d[0], d[1]) > 0;
-  if (d && (d[0] || d[1]) && !still && !lose) { camera = { ...camera, x: camera.x + d[0], y: camera.y + d[1] }; applyCamera(true); return; }
-  if (d && !d[0] && !d[1]) return;
+  if (d && (d[0] || d[1]) && !still && !lose && !hits(d[0], d[1])) { camera = { ...camera, x: camera.x + d[0], y: camera.y + d[1] }; applyCamera(true); return; }
   guideInPane = true; el.hidden = true; syncMapArea(); renderGrowthPane();
 }
 /** v12: the bands over the map besides the guide (the compare line, the tools, the legend chip, the past view's banner), in the camera's frame. */

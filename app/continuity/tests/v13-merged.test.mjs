@@ -75,3 +75,14 @@ test('V13M-6 at 쉽게 the first view\'s chip names its lens as the lens button 
   assert.match(src, /btn\('fv-why', `첫 보기 · \$\{\(easy\(\) \? EASY_LENS\[r\.lens\] : null\) \?\? LENSES\.find/);
   assert.equal(W.EASY_LENS.start, '시작과 반복');
 });
+
+test('V13M-7 a compare scene\'s guide is cleared from its settled size: a pan must leave nothing under it, a guide that grew is cleared again once', async () => {
+  const src = await app(), g = fn(src, 'growthClearGuide');
+  assert.match(g, /function growthClearGuide\(still = false, again = false\)/);
+  assert.match(g, /const hits = \(dx: number, dy: number\) => blocks\.some\(/);
+  assert.match(g, /if \(!hits\(0, 0\)\) return;/);
+  assert.match(g, /!still && !lose && !hits\(d\[0\], d\[1\]\)\) \{ camera = /, 'a pan that still leaves a card under the guide is no answer');
+  assert.doesNotMatch(g, /if \(d && !d\[0\] && !d\[1\]\) return;/, 'no pan with something under the guide sends it to the pane');
+  assert.match(g, /if \(!again\) \{ const h0 = el\.offsetHeight, w0 = el\.offsetWidth; requestAnimationFrame\(\(\) => requestAnimationFrame\(/);
+  assert.match(g, /growthClearGuide\(still, true\)/);
+});
