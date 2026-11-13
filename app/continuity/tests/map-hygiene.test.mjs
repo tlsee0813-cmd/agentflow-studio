@@ -61,7 +61,8 @@ test('HYG-5 styles: one dock width, a text floor, quiet fades, regions with a bo
   // the region name keeps the size its head was measured for.
   assert.match(tail, /\.space\.title-floor #world > \.map-title:not\(:focus-within\) \{ opacity: 0; \}/);
   assert.doesNotMatch(tail, /title-floor[^{]*\{[^}]*visibility: hidden/);
-  assert.match(tail, /\.node\.lens-off[^{]*\{ opacity: 1; filter: grayscale\(1\) contrast\(\.65\) brightness\(1\.22\); \}/);
+  // v13 (spec 2: a lens recolours the cards by the selection's light): half their colour, solid, its greys in order.
+  assert.match(tail, /\.node\.lens-off[^{]*\{ opacity: 1; filter: saturate\(\.5\); \}/);
   assert.doesNotMatch(tail, /lens-off[^{]*\{[^}]*--text-[234]:/, 'no flattened greys under the fade');
   assert.match(tail, /--region-bg: #e9ecf1;/);
   assert.match(tail, /\.frame\.region:where\(\*\) \{ background: var\(--region-bg\);/);

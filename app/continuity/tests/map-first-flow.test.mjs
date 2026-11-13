@@ -191,7 +191,8 @@ test('FF-11 the app reads the sentence from the record, draws only existing line
   assert.match(rule('#space.ff-on.ff-rest .world .edge.ff-ctx:not(.on)'), /--bw: 2\.25;/);
   assert.match(rule('#space.ff-on.ff-rest .world .edge.lf-bg:not(.ff-flow)'), /--bw: 1\.15;/);
   const off = css.split('\n').filter(l => /#space\.ff-on.*(lens-off|lg-fade)/.test(l)).join('\n');
-  assert.match(off, /opacity: 1; filter: none;/, 'a card off the lens keeps its words whole in focus');
+  // v13 (spec 2): half its colour by the selection's light, never faded.
+  assert.match(off, /opacity: 1; filter: saturate\(\.5\);/, 'a card off the lens keeps its words whole in focus');
   // v11 (ruling F8 Q2): 14px on 22px lines, whole in up to three lines (no clamp: the sentence is chosen to fit, v11-text).
   assert.match(css, /\.focus-top \.ft-sentence \{[^}]*font-size: 14px; line-height: 22px;/);
 });
