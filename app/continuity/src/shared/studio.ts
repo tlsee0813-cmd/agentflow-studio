@@ -115,7 +115,7 @@ export function clip(text: string, n: number): string {
   return text.slice(0, code >= 0xd800 && code <= 0xdbff ? n - 1 : n);
 }
 /** The plan words (the set of map-identity PLANNED, kept apart: the two modules import each other): a description holding one says
- * something is not built yet. v9 (review of v8: nanogpt's top sentence lost 「… README에서 폐기(…) 안내」): also the words that say it is no
+ * something is not built yet. v9 (review of v8: a top sentence lost 「… README에서 폐기(…) 안내」): also the words that say it is no
  * longer kept (폐기 · 사용 중단 · 중단), which a cut keeps the same way; map-identity PLANNED stays the plan words only (a retired part is
  * not an unbuilt one). */
 export const PLAN_WORD = /계획|예정|하기로|할\s*것|나중에|아직|폐기|사용\s*중단|중단/;
@@ -166,7 +166,7 @@ export function clauseCuts(text: string): { clauses: string[]; words: string[] }
   const ends = new Set<number>(), spaces = new Set<number>();
   for (const m of t.matchAll(/[,，;；](?= )|[.!?。](?= )|(?<=[가-힣](?:며|고|거나|지만|는데|면서))(?= )/g)) {
     // A 「…고」 joins clauses as a verb's joining ending (「넣고」 「돌리고」 「하고」), never as a noun that ends so (「보고」 is a report, 「창고」 a
-    // store: NOUN_GO); 「…며」 「…거나」 「…지만」 「…는데」 「…면서」 always do. v9 (review of v8: umami's 「…넣고 자체…」 was cut mid-clause).
+    // store: NOUN_GO); 「…며」 「…거나」 「…지만」 「…는데」 「…면서」 always do. v9 (review of v8: 「…넣고 자체…」 was cut mid-clause).
     if (/고$/.test(t.slice(0, m.index! + m[0].length)) && NOUN_GO.test(t.slice(0, m.index! + m[0].length))) continue;
     ends.add(m.index! + m[0].length);
   }

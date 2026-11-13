@@ -2895,7 +2895,7 @@ function placeLineLabels() {
   // v8 (review of v7): nor under the top line (its whole form as the camera stands): a label there is hidden by it, and would take the
   // sentence's place at the fit.
   const ftr = ftReserve(); if (ftr) blocks.push(ftr);
-  // v9 (review of v8: nanogpt at 82%, 「기동 · 명령 python」 stayed off after a pan took the top line off its place): the places only the top
+  // v9 (review of v8: a map at 82%, 「기동 · 명령 …」 stayed off after a pan took the top line off its place): the places only the top
   // line kept a label from are remembered (ftHeld); a camera that takes the line off one of them places the labels again (ftRecheck).
   ftHeld = [];
   const near = (r: Rect, b: Rect) => r.x < b.x + b.w + 3 && b.x < r.x + r.w + 3 && r.y < b.y + b.h + 3 && b.y < r.y + r.h + 3;
