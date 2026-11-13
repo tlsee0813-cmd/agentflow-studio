@@ -140,5 +140,6 @@ test('GROWTH-W8 the first screen keeps the map\'s own title and its sentence: a 
   assert.match(fit, /const r = ftBox\('ft-one', camera, inkAt\(camera\.k\)\)/, 'in conflict: the title kept and the sentence on one line');
   assert.match(fit, /for \(let d = 8; d <= slack && !done; d \+= 8\)/, 'room at the same scale first');
   assert.match(fit, /\(at\.k >= TITLE_FLOOR_K && a2\.k < TITLE_FLOOR_K\)\) break;/, 'a smaller frame never drops the title');
-  assert.match(fn(app, 'syncFocusTop'), /for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/);
+  // Merge v7: polish 5 moved the forms from syncFocusTop to placeFocusTop.
+  assert.match(fn(app, 'placeFocusTop'), /for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/);
 });

@@ -95,7 +95,8 @@ test('P5-5/6 the sentence shows before it steps back; the fit is the same whatev
   assert.match(a, /tier = zoomTier\(k, fresh \? null : tier\);/); assert.match(a, /face = cardFace\(k, fresh \? null : face\);/);
   assert.match(a, /const least = Math\.max\(at\.k - FT_GIVE, at\.k >= TITLE_FLOOR_K \? TITLE_FLOOR_K : 0\) - 1e-9;/, 'the give stops at the title\'s floor');
   assert.match(a, /el\.classList\.remove\(\.\.\.FT_FORMS\); el\.style\.left = ''; el\.style\.maxWidth = ''; ftFull = el\.offsetHeight; ftPlace\(el, camera, ink\);/, 'the whole height measured at the left, never as placed before');
-  const fit = a.slice(a.indexOf('function fitView('), a.indexOf('function fitView(') + 4000);
+  // Merge v7: the growth view's room at the same scale made fitView longer; the whole function is read.
+  const fit = a.slice(a.indexOf('function fitView('), a.indexOf('\n}\n', a.indexOf('function fitView(')));
   assert.ok(fit.indexOf('give(FT_SAID)') < fit.indexOf("give(['ft-under'])") && fit.indexOf('for (let d = 8; d <= most && !done; d += 8)') < fit.indexOf("give(['ft-under'])"), 'room above for the sentence comes before stepping it back');
 });
 
