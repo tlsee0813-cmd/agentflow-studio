@@ -3393,7 +3393,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 /* H6: a lens steps back the cards it is not about as 'not in this question', not 'disabled': grey and lighter, but solid (no dot grid
    or line showing through its body). Lower contrast keeps its greys in their order (name, role, the retired card's quieter rows, an
    unknown kind word), the quietest still at 3.5:1 or more on the card. The legend's own 흐리게 stays as it was. */
-.space .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { opacity: 1; filter: grayscale(1) contrast(.65) brightness(1.22); }
+.space .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { opacity: 1; filter: saturate(.5); }
 /* H7: regions with a body. The area's fill stands apart from the canvas (tokens; the cards and the canvas have no dark form yet, so
    neither has the region: a dark fill under light cards would break the rule at the top of this file), its name a step firmer in
    the head the layout measured for it (its size stays the head's: a larger name would be cut or run into the head's second line),
@@ -3419,7 +3419,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 
 .space .node.fv-emph:not(.selected):not(.lit):not(.plan-impact):not(:focus-visible) { outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: -1px; filter: drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 6px 12px rgba(16,24,40,.16)); }
 .space .frame.fv-emph:not(.selected):not(.plan-impact):not(:focus-visible) { outline: calc(1.5px * var(--u, 1)) solid var(--text-3); outline-offset: -1px; }
-.space .node.lens-off.fv-emph:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { filter: grayscale(1) contrast(.65) brightness(1.22) drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 6px 12px rgba(16,24,40,.16)); }
+.space .node.lens-off.fv-emph:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { filter: saturate(.5) drop-shadow(0 1px 2px rgba(16,24,40,.10)) drop-shadow(0 6px 12px rgba(16,24,40,.16)); }
 
 /* ---------- beauty v2 · 「읽히는 첫 전체 화면」 (A1 two card sizes, A2 the symbol budget, A3 the far view's name tags) ----------
    The ruling's surface: a light canvas, white cards, neutral lines, one accent. A card is one white surface with a 1px neutral edge,
@@ -3661,7 +3661,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    a background label reads in the quieter text tone instead. */
 #space.ff-on.ff-rest .edge-labels > .edge-label:not(.ff-keep):not(.near):not(:hover) { color: var(--text-4); }
 #space.ff-on:not(.lens-state) .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible),
-#space.ff-on:not(.lens-state) .node.lg-fade, #space.ff-on:not(.lens-state) .ghost.lg-fade { opacity: 1; filter: none; border-color: var(--hair-2); box-shadow: none; }
+#space.ff-on:not(.lens-state) .node.lg-fade, #space.ff-on:not(.lens-state) .ghost.lg-fade { opacity: 1; filter: saturate(.5); border-color: var(--hair-2); box-shadow: none; }
 #space.ff-on:not(.lens-state) .node:is(.lens-off, .lg-fade) :is(.dot, .ladder, .c-tag-icon, .node-signs, .c-loop-tab) { opacity: .55; }
 .ff-note { position: absolute; z-index: 4; width: max-content; display: flex; gap: 6px; align-items: baseline; max-width: 260px; padding: 3px 8px; border: 1px solid var(--accent-line); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow-sm); font-size: 12px; line-height: 17px; color: var(--text-2); pointer-events: auto; }
 .ff-note-label { flex: none; font-weight: var(--fw-name); color: var(--accent-strong); }
@@ -4067,3 +4067,74 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 #world.form-fly [data-box] { transition: transform .52s cubic-bezier(.65,0,.35,1) !important; will-change: transform; }
 #world.animate.form-cam { transition: transform .52s cubic-bezier(.65,0,.35,1); }
 @media (prefers-reduced-motion: reduce) { #world.form-fly [data-box], #world.animate.form-cam { transition: none !important; } }
+
+/* ---------- v13 opening and light (spec 1, 2: opening.ts, light.ts, flight.ts) ----------
+   The opening: the map's cards and lines come in from the record's versions or its recorded chain; while it plays the map's marks, the tools,
+   the top box and the hover step aside (the strip at the bottom says what is shown), and any input ends it. The light: a picked card and its
+   recorded neighbours stay lit, the rest recedes (half its colour, its words at 4.5:1 or more; the rest picture's lines at a quarter), hover
+   previews it at half strength and a lens recolours the cards the same way; every change eases over 180ms. Reduced motion: no motion. */
+/* 다시 보기 sits beside the project's name in the top bar (the map's tools keep their width: at 1280 their row had no room left). */
+.replay-open { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px 0 7px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); font: inherit; font-size: 12px; font-weight: 500; color: var(--text-3); cursor: pointer; }
+.replay-open[hidden] { display: none; }
+.replay-open:hover { border-color: var(--line-strong); background: var(--surface-2); color: var(--text); }
+.replay-open svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+#space #world > .node, #space #world > .frame { transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease, opacity .3s ease, scale .3s cubic-bezier(.2,.7,.2,1), filter .18s ease; }
+#space #world.arranging > [data-box]:not(.dragging) { transition: left .28s cubic-bezier(.2,.7,.2,1), top .28s cubic-bezier(.2,.7,.2,1), width .28s ease, height .28s ease, opacity .3s ease, filter .18s ease; }
+#space #world > .node.op-out, #space #world > .frame.op-out { opacity: 0; scale: .94; }
+#space #world .edge { transition: opacity .18s ease; }
+#space #world .edge.op-out { opacity: 0; }
+#space.op-run #world { pointer-events: none; }
+#space.op-setup #world > .node, #space.op-setup #world > .frame, #space.op-setup #world .edge { transition: none !important; }
+#space.op-run #world > :not(.node):not(.frame):not(.edges):not(.map-title):not(.op-ghost),
+#space.op-run > .controls, #space.op-run #line-key, #space.op-run #focus-top, #space.op-run #growth-line, #space.op-run #recent, #space.op-run #scope-sticky { opacity: 0; pointer-events: none; }
+#space.op-run #edge-tip { display: none; }
+#space.op-land #world > :not(.node):not(.frame):not(.edges):not(.map-title):not(.op-ghost),
+#space.op-land > .controls, #space.op-land #line-key, #space.op-land #focus-top, #space.op-land #growth-line, #space.op-land #recent, #space.op-land #scope-sticky { transition: opacity .3s ease; }
+#space #world > .node .op-oldname { color: var(--text-2); white-space: normal; overflow-wrap: anywhere; }
+.op-ghost { position: absolute; box-sizing: border-box; border: calc(1.5px * var(--u, 1)) dashed var(--text-4); border-radius: 10px; background: color-mix(in srgb, var(--surface) 70%, transparent);
+  display: flex; align-items: flex-start; padding: calc(8px * var(--u, 1)) calc(10px * var(--u, 1)); pointer-events: none; animation: op-ghost-in .3s ease both; transition: opacity .4s ease, scale .4s ease; z-index: 1; }
+.op-ghost-name { font-family: var(--font); font-size: var(--t-title, 15px); line-height: var(--t-title-lh, 20px); font-weight: 600; color: var(--text-3); overflow-wrap: anywhere; }
+.op-ghost-w { display: none; font-weight: 500; }
+.space.face-tag .op-ghost:not(.around) .op-ghost-name { font-size: calc(12.5px * var(--u, 1)); line-height: calc(14px * var(--u, 1)); }
+.op-ghost.around { border: 0; background: none; padding: 0; outline: calc(1.5px * var(--u, 1)) dashed var(--text-4); outline-offset: calc(5px * var(--u, 1)); }
+.op-ghost.around .op-ghost-name { position: absolute; left: 0; bottom: 100%; margin-bottom: calc(9px * var(--u, 1)); padding: 0 calc(4px * var(--u, 1)); font-size: calc(12px * var(--u, 1)); line-height: calc(16px * var(--u, 1)); white-space: nowrap; background: var(--bg); }
+.op-ghost.around .op-ghost-w { display: inline; }
+.op-ghost.op-dissolve { opacity: 0; scale: .97; }
+@keyframes op-ghost-in { from { opacity: 0; } }
+.op-strip { position: absolute; left: 50%; bottom: var(--s-4); translate: -50% 0; display: flex; align-items: center; gap: 14px; height: 42px; padding: 0 16px; max-width: calc(100% - 2 * var(--s-4));
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow); font-size: 12.5px; color: var(--text-2); z-index: 30; animation: op-strip-in .25s ease both; transition: opacity .3s ease; }
+.op-strip.op-gone { opacity: 0; }
+@keyframes op-strip-in { from { opacity: 0; } }
+.op-track { position: relative; flex: 0 1 auto; width: min(440px, 34vw); min-width: 160px; height: 26px; }
+.op-track::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 2px; border-radius: 1px; background: var(--line); }
+.op-tick { position: absolute; top: 6px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--line-strong); box-sizing: border-box; }
+.op-tick.past { border-color: var(--accent); background: var(--accent-soft); }
+.op-tick-l { position: absolute; top: 9px; left: 50%; translate: -50% 0; font-size: 10.5px; line-height: 12px; color: var(--text-4); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.op-tick:not(:first-child):not(.now):not(:nth-last-child(2)) .op-tick-l { visibility: hidden; }
+.op-tick.now .op-tick-l { color: var(--text); font-weight: var(--fw-name); }
+.op-head { position: absolute; top: 4px; left: 0; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); transition: left .3s cubic-bezier(.2,.7,.2,1); }
+.op-cap { flex: none; white-space: nowrap; font-weight: var(--fw-name); color: var(--text); font-variant-numeric: tabular-nums; }
+.op-strip.no-cap .op-cap { display: none; }
+.op-skip { flex: none; white-space: nowrap; color: var(--text-4); font-size: 11.5px; }
+.ft-sentence.op-typing { white-space: normal; }
+
+/* The light: receded cards (a pick's rest, a hover's rest at half, a lens's off cards) */
+#space #world > .node :is(.c-name, .node-name, .c-role, .c-row, .c-val, .c-cline, .c-ops, .c-kind, .c-tag-name, .node-note, .node-meta, .meta-text) { transition: color .18s ease; }
+#space.lt-sel #world > .node:not(.selected):not(.related):not(.cited):not(.sc-visit):not(.since-hit) { opacity: 1; filter: saturate(.5); background-color: color-mix(in srgb, var(--surface) 40%, var(--bg)); border-color: var(--hair-2); box-shadow: none; }
+#space.lt-sel #world > .frame:not(.selected):not(.related) { filter: saturate(.5); }
+#space #world > .node.lens-off:not(.selected):not(.related):not(.lg-pick):not(:hover):not(:focus-visible) { background-color: color-mix(in srgb, var(--surface) 40%, var(--bg)); }
+#space.peek:not(.dim) #world > .node:not(.near-end):not(.near-self):not(.dragging), #space.peek:not(.dim) #world > .ghost:not(.near-end) { opacity: 1; filter: saturate(.75); background-color: color-mix(in srgb, var(--surface) 70%, var(--bg)); }
+#space.peek:not(.dim) #world > .node:not(.near-end):not(.near-self):not(.dragging) :is(.c-role, .c-row, .c-val, .c-cline, .c-ops, .c-kind, .node-note, .node-meta, .meta-text) { color: var(--text-3); }
+#space.peek:not(.dim) .edge:not(.near) .edge-line { opacity: .55; }
+#space.dim .edge:not(.on):not(.near):not(.sc-path) .edge-line { opacity: .25; }
+.lt-ghosts { opacity: .25; pointer-events: none; }
+#space.lt-enter.lt-from .lt-ghosts { animation: lt-in .18s ease both; }
+.lt-ghosts path { fill: none; }
+@keyframes lt-in { from { opacity: 0; } }
+#space.lt-enter #world .edge.on .edge-line { animation: lt-on .18s ease both; }
+@keyframes lt-on { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  #space #world > .node, #space #world > .frame { transition: border-color .12s, box-shadow .12s, background .12s, color .12s; }
+  #space #world .edge, #space #world > .node :is(.c-name, .node-name, .c-role, .c-row, .c-val, .c-cline, .c-ops, .c-kind, .c-tag-name, .node-note, .node-meta, .meta-text) { transition: none; }
+  #space.lt-enter.lt-from .lt-ghosts, #space.lt-enter #world .edge.on .edge-line { animation: none; }
+}

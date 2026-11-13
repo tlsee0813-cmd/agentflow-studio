@@ -77,6 +77,12 @@ import { createCloudLink } from './cloud-link.js';
 import { partSessions, originLabel, handoverDoc, handoverCode } from '../shared/handover.js';
 import { UI62_KEY, buildUi62Project, ui62Keys } from '../shared/return-material.js';
 import { REL_LABEL, relationGroups, relLabel, dirMark, dirTitle, insideEnds } from '../shared/relation-groups.js';
+// v13 (spec 1, 2): the opening, the selection light, the camera's flight and glide.
+import { createMotion, releaseSpeed } from './flight.js';
+import { createLight } from './light.js';
+import { createOpening } from './opening.js';
+import { versionAt } from '../shared/map-growth.js';
+const light = createLight();
 
 /* ---------- small DOM helpers (shared with the change-plan view) ---------- */
 const firstLine = (text: string, n = 90) => { const line = text.split('\n').find(l => l.trim())?.trim() ?? ''; return line.length > n ? `${line.slice(0, n)}…` : line; };
@@ -365,7 +371,7 @@ async function render() {
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
-  if (!r.key) { quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); growthCmp = null; growthPast = null; growthMenuOpen = false; planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; openState = null; backStack = []; hideDetail(); renderHome(); autoSync.render(); return; }
+  if (!r.key) { opening.skip(); opening.offer(false); quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); growthCmp = null; growthPast = null; growthMenuOpen = false; planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; openState = null; backStack = []; hideDetail(); renderHome(); autoSync.render(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -433,6 +439,8 @@ async function render() {
   if (fresh && o.key === UI62_KEY && !part && !planView.isOpen() && !returnView.isOpen()) returnView.open();
   afterRenderOpen(o);
   const ar = afterRender; afterRender = null; ar?.();
+  // v13 hook (opening.ts): a map opened fresh on its own view (no part, no inside, no past version, no reading over it) comes into being.
+  if (fresh && !part && !scope && !o.past && !planView.isOpen() && !returnView.isOpen() && o.view.parts.length) opening.arrive(o.key, openingVersion(o));
 }
 /** v10: what waits for the next render to finish (leaving the comparison: the camera from before it, set after the selection's render). */
 let afterRender: (() => void) | null = null;
@@ -2472,6 +2480,8 @@ function pickStep(part: string, name: string) {
 /** camera: 'fit' (new view), 'restore' (a scope's own last camera, else fit), 'keep' (same view, structure changed). */
 function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay = true) {
   const o = opened!; setBar(o);
+  // v13 hook (opening.ts): a redraw ends an opening at once; 다시 보기 where one can play (the map's own view, before the fit measures the tools).
+  opening.skip(); opening.offer(!scope && !o.past && o.view.parts.length > 0);
   $('home').hidden = true; $('space').hidden = false; $('ai-pill').hidden = false;
   // A redraw of the structure ends the places held for a drag (holdPlaces) and the hover's peek; the open tip and the target it
   // holds go with the elements they stood for (review M6).
@@ -3699,6 +3709,8 @@ function placeTypeChip(box: HTMLElement, e: Edge, tp: { name: string; fields: st
   const chip = typeChipEl(e, tp, on), inv = lineInv(); box.append(chip);
   for (const form of typeChipForms(tp.name, tp.fields)) {
     fillTypeChip(chip, form);
+    // v13 (floor: no cut label): a form squeezed by the chip's widest (its words cut short inside) is no form; the next, shorter one is tried.
+    if ([...chip.children].some(c => (c as HTMLElement).scrollWidth > (c as HTMLElement).clientWidth + 1)) continue;
     const spot = labelSpots(pts, chip.offsetWidth * inv, chip.offsetHeight * inv, prefer).find(free);
     if (spot) { chip.style.left = `${spot.x}px`; chip.style.top = `${spot.y}px`; return spot; }
   }
@@ -3811,12 +3823,47 @@ const BOTTOM = 88;
 /** The safe area (map hygiene H2): a fit and a first view keep their cards inside it, under the title chip at the top
  * (SAFE_TOP), above the dock at the bottom (BOTTOM) and off the window's sides (SAFE_SIDE). */
 const SAFE_TOP = 64, SAFE_SIDE = 32;
+/* ---------- v13 hook (flight.ts, spec 2): the camera's long jumps fly, a let-go drag glides ---------- */
+/** Set by a jump to something the person asked for (a search hit, a list item, a scene: revealRect, growthReveal): a long one flies. Any other
+ * camera move (a restore, a fit, a zoom) keeps the plain eased move, so what reads the map after it reads it settled. */
+let flyNext = false;
+const writeCamera = (c0: { x: number; y: number; k: number }) => {
+  const world = $('world'), vp = $('viewport'), c = opening.look(c0, vp.clientWidth, vp.clientHeight);
+  world.style.transform = `translate(${c.x}px, ${c.y}px) scale(${c.k})`;
+  vp.style.backgroundPosition = `${c.x}px ${c.y - vp.offsetTop}px`;
+  vp.style.backgroundSize = `${28 * c.k}px ${28 * c.k}px`;
+};
+const motion = createMotion({ write: writeCamera, reduced: () => reducedMotion(), size: () => { const v = $('viewport'); return { w: v.clientWidth, h: v.clientHeight }; },
+  land: () => { const s = motion.shown(); if (s) camera = s; applyCamera(); } });
+/* ---------- v13 hook (opening.ts, spec 1): a map opened fresh comes into being from its record ---------- */
+const opening = createOpening({ space: () => $('space'), world: () => $('world'), rewrite: () => writeCamera(camera), reduced: () => reducedMotion(), landed: () => applyCamera(),
+  // The whole map while it comes into being when its frame shows only part of it (the tools and the top box step aside then; the strip keeps
+  // its row at the bottom).
+  overview: () => {
+    const v = $('viewport'), vw = v.clientWidth, vh = v.clientHeight, B = drawnBounds(), s = toScreen(B); if (!B.w || !B.h || !vw || !vh) return null;
+    if (s.x >= -1 && s.y >= -1 && s.x + s.w <= vw + 1 && s.y + s.h <= vh - 60) return null;
+    const k = Math.min((vw - 48) / B.w, (vh - 24 - 80) / B.h, camera.k); return { k, x: (vw - B.w * k) / 2 - B.x * k, y: 24 + (vh - 24 - 80 - B.h * k) / 2 - B.y * k };
+  },
+  sentence: () => { const el = document.getElementById('focus-top'); return el && !el.hidden && !el.classList.contains('growth-guide') ? el.querySelector<HTMLElement>('.ft-sentence') : null; },
+  storage: () => { try { const ls = window.localStorage; return { get: (k: string) => ls.getItem(k), set: (k: string, v: string) => ls.setItem(k, v) }; } catch { return null; } },
+  input: () => {
+    const o = opened; if (!o || scope || o.past) return null;
+    const world = $('world'), p = o.project, vs = mapVersions(p);
+    const boxes = [...lay.boxes.values()].filter(b => b.kind !== 'ghost' && !!world.querySelector(`:scope > [data-box="${CSS.escape(b.id)}"]`)).map(b => ({ id: b.id, container: b.container && lay.boxes.get(b.container)?.kind === 'frame' ? b.container : null }));
+    const edges = [...world.querySelectorAll<SVGGElement>('.edge')].map(g => ({ key: g.dataset.key!, ids: (g.dataset.ids ?? '').split(',').filter(Boolean), from: g.dataset.from!, to: g.dataset.to! }));
+    const names = new Map(boxes.map(b => [b.id, partOf(o, b.id)?.name ?? ''] as [string, string]));
+    // Growth: each version as the record rebuilt it (map-growth versionAt; the last is the live map) and what a record retired on it.
+    const versions = vs.length < 2 ? [] : vs.map(v => { const at = versionAt(p, v.n); return { n: v.n, parts: at.view.parts.map(x => ({ id: x.id, name: x.name })), rels: at.view.relations.map(r => r.id),
+      retired: v.n < 2 ? [] : changeSet(p, v.n - 1, v.n).changes.filter(c => c.kind === 'retire').map(c => ({ part: c.part, name: c.name, successor: c.successor ?? null })) }; });
+    const f = ffNow?.flow ?? null;
+    return { boxes, edges, names, versions, rep: (id: string) => drawnRep(o, id), chain: f && f.chain.length ? f.chain : null, chainRels: f?.lines ?? [] };
+  } });
+const openingVersion = (o: Opened) => mapVersions(o.project).at(-1)?.id ?? 'none';
 function applyCamera(animate = false) {
-  const world = $('world'), vp = $('viewport');
-  world.classList.toggle('animate', animate);
-  world.style.transform = `translate(${camera.x}px, ${camera.y}px) scale(${camera.k})`;
-  vp.style.backgroundPosition = `${camera.x}px ${camera.y - vp.offsetTop}px`;
-  vp.style.backgroundSize = `${28 * camera.k}px ${28 * camera.k}px`;
+  const world = $('world');
+  const flies = motion.take(camera, animate && !opening.running(), flyNext); flyNext = false;
+  world.classList.toggle('animate', animate && !flies);
+  if (!flies) writeCamera(camera);
   $('zoom-level').textContent = `${Math.round(camera.k * 100)}%`;
   const inv = syncZoom(camera.k);
   if ((Math.abs(inv - placedInv) / placedInv > 0.08 || tier !== placedTier) && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
@@ -3827,6 +3874,7 @@ function applyCamera(animate = false) {
   clipAtEdge();
   // v11 (review of v10: 「스캔 PDF」 read through the title chip after a scene's move): a moving camera's labels are looked at again where it stops.
   clearTimeout(clipLate); if (animate) clipLate = window.setTimeout(clipAtEdge, CAMERA_MOVE_MS);
+  if (flies) { clearTimeout(clipLate); clipLate = window.setTimeout(clipAtEdge, motion.ms() + 40); }
   saveViewSoon();
 }
 /** The zoom's state on the page for zoom k (its classes, type sizes, line units and chip scales; never the world's transform), and the
@@ -4193,7 +4241,7 @@ function revealRect(B: { x: number; y: number; w: number; h: number }, keepRight
   if (sx + dx < left) dx = left - sx;
   if (sy + sh > bottom) dy = bottom - (sy + sh);
   if (sy + dy < top) dy = top - sy;
-  if (dx || dy) { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(true); }
+  flyNext = true; if (dx || dy) { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(true); } flyNext = false;
 }
 /** Keep the selected part visible beside the pane (a large frame: its head and first rows). v12 (review of v11: picking a card moved the
  * map 157px to bring the other ends of its lines beside the pane, though the card itself stood clear): the camera moves only when the
@@ -6910,6 +6958,7 @@ function storeLine(o: Opened, p: PartView): HTMLElement | null {
 function markSelection(partId: string | null) {
   // The scope itself, selected in place, is drawn as its own boundary card (the '이 범위' end of its lines).
   const me = partId && partId === scope ? `ghost:${partId}` : partId;
+  light.before($('world'), me); // v13 hook (light.ts): from rest, the lines seen now are the picture that recedes
   const related = new Set<string>();
   document.querySelectorAll<SVGGElement>('.edge').forEach(el => {
     if (el.classList.contains('sum')) return; // summary lines read only at rest, never as a selection's own lines
@@ -6946,6 +6995,7 @@ function markSelection(partId: string | null) {
   // The step of the main flow that is selected reads as such in the title's flow line.
   document.querySelectorAll<HTMLElement>('#world .mf-step').forEach(el => el.classList.toggle('on', !!partId && el.dataset.part === partId));
   endNotes(partId);
+  light.after($('world'), me, $('space').classList.contains('sel-fold')); // v13 hook (light.ts): the rest at a quarter of its strength
 }
 /** The selection's own relations, read where they end: a card at the other end of one of them says that relation's stored note
  * on its state line (one line; the whole note reads in the pane, on the same row). Only a relation whose two ends are the two
@@ -7496,7 +7546,7 @@ function growthReveal(part: string) {
   const bands = [...(g && !g.hidden && g.offsetWidth ? [fr(g.getBoundingClientRect())] : []), ...growthBands(fr)];
   const cards = [...lay.boxes.values()].filter(x => x.kind !== 'ghost').map(x => toScreen(x.kind === 'frame' ? { x: x.x, y: x.y, w: x.w, h: x.head } : x));
   const [dx, dy] = coverPan(cards, fr(v.getBoundingClientRect()), bands, null, { x: area.w / 2, y: area.h / 2 }, null, cards, { card, area }) ?? [lx, ly];
-  if (dx || dy) { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(true); }
+  flyNext = true; if (dx || dy) { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(true); } flyNext = false;
 }
 /** 이전 변화 / 다음 변화: within the filter that is on (설명 변경 1/9), else through every scene (변화 장면 1/N). Nothing plays by itself. */
 function growthStep(d: number) {
@@ -9204,6 +9254,8 @@ function bindCanvas() {
   type Drag = { pointer: number; x: number; y: number; moved: boolean; mode: 'pan'; cx: number; cy: number; edge?: string }
     | { pointer: number; x: number; y: number; moved: boolean; mode: 'part'; id: string; container: string; start: Point };
   let drag: Drag | null = null;
+  // v13 hook (flight.ts): the hand's last moves while panning, for the glide when it lets go.
+  let panTrail: { t: number; x: number; y: number }[] = [];
   vp.addEventListener('pointerdown', e => {
     if (e.button !== 0) return;
     const target = e.target as HTMLElement;
@@ -9215,7 +9267,7 @@ function bindCanvas() {
       const id = handle.dataset.drag!, b = lay.boxes.get(id); if (!b) return;
       drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'part', id, container: b.container, start: { ...b.rel } };
     } else drag = { pointer: e.pointerId, x: e.clientX, y: e.clientY, moved: false, mode: 'pan', cx: camera.x, cy: camera.y, ...(lineHit(target) ? { edge: lineHit(target)! } : {}) };
-    vp.setPointerCapture(e.pointerId);
+    vp.setPointerCapture(e.pointerId); panTrail = [];
   });
   vp.addEventListener('pointermove', e => {
     if (!drag || drag.pointer !== e.pointerId) return;
@@ -9225,7 +9277,7 @@ function bindCanvas() {
       drag.moved = true; vp.classList.add(drag.mode === 'pan' ? 'grabbing' : 'moving');
       if (drag.mode === 'part') { if (openState?.mode === 'short') closeOpen(false); document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); holdPlaces(opened!, drag.container); }
     }
-    if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
+    if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); panTrail = [...panTrail.filter(s => e.timeStamp - s.t < 120), { t: e.timeStamp, x: e.clientX, y: e.clientY }]; return; }
     const o = opened!; const pos = formDragTarget(o, drag.container) ?? positionsOf(o); // v13 forms hook 9
     (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
     dragQuick = true; relayout(o); positionWorld();
@@ -9255,6 +9307,7 @@ function bindCanvas() {
       const edge = edgeOf(d.edge); if (edge) pickLine(edge);
       return;
     }
+    if (d.mode === 'pan' && d.moved) { const v = releaseSpeed(panTrail, e.timeStamp); panTrail = []; motion.glide(v, (dx, dy) => { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(); }); return; }
     if (!d.moved && selected) go(o.key);
   };
   vp.addEventListener('pointerup', end); vp.addEventListener('pointercancel', end);
@@ -9636,6 +9689,8 @@ async function main() {
   bindCanvas(); bindFind(); bindImport(); bindNewProject();
   $('add-part').addEventListener('click', () => openPartForm(scope));
   $('growth-history').addEventListener('click', () => { growthMenuOpen = !growthMenuOpen; renderGrowthEntry(); });
+  // v13 hook (opening.ts): 다시 보기 plays the opening again (the selection and any reading over the map let go first).
+  $('replay-open').addEventListener('click', () => { const o = opened; if (!o || scope || o.past || growthCmp || growthPast) return; const play = () => { if (opened === o && !selected && !scope) opening.replay(o.key, openingVersion(o)); }; if (selected) { afterRender = play; go(o.key); } else play(); });
   $('growth-chip').addEventListener('click', () => { const live = liveOpened(), base = live && growthVisit?.key === live.key ? compareBase(growthVisit.base, growthCount()) : null; if (base !== null) growthCompare(base); });
   document.addEventListener('pointerdown', e => { if (growthMenuOpen && !(e.target as HTMLElement).closest?.('.growth-wrap, #growth-line')) { growthMenuOpen = false; renderGrowthEntry(); } }, true);
   $('plan-entry').addEventListener('click', () => planView.toggle());
