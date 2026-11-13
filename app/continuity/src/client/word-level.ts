@@ -36,7 +36,9 @@ const OPERATOR = /[!=<>]=|&&|\|\||=>|->|::/;
  * word (「auth-with-oauth2」). A plain word (「start」, 「Bootstrap」, 「PR」, 「HTTP」) is not. */
 export function codeToken(t: string): boolean {
   return /[(){}[\]`'"$@#\\/=<>!&|;*]/.test(t) || /_/.test(t) || /\.[A-Za-z0-9]/.test(t) || /^[a-z]+[A-Z]/.test(t) || /[A-Za-z]\d|\d[A-Za-z]/.test(t)
-    || /^-{1,2}[A-Za-z]/.test(t) || /^[A-Z]{5,}$/.test(t) || /[A-Za-z]-[A-Za-z]/.test(t);
+    || /^-{1,2}[A-Za-z]/.test(t) || /^[A-Z]{5,}$/.test(t) || /[A-Za-z]-[A-Za-z]/.test(t)
+    // v13 merge (umami's 흐름 showed 「build·build:docker 때」 at 쉽게): a script or a key named with a colon inside it (「build:docker」).
+    || /[A-Za-z]:[A-Za-z0-9]|[0-9]:[A-Za-z]/.test(t);
 }
 /** Whether a text holds code (an operator, a code run) or a record row ID. */
 export function hasCode(text: string): boolean {
@@ -63,6 +65,10 @@ export function plainLabel(text: string): string | null {
 export const EASY_LENS: Readonly<Record<string, string>> = { compose: '구성', data: '데이터', start: '시작과 반복', state: '상태와 모름', scenario: '시나리오' };
 /** The legend's family names at 쉽게. */
 export const EASY_FAMILY: Readonly<Record<string, string>> = { '촉발·관문': '시작 신호와 관문', '상태·공백': '상태와 모름', '시작·반복': '시작과 반복' };
+/** v13 merge (spec 3 × 4: 쉽게 in every 보기): the band words of 층 at 쉽게, each unit of a band's words (「저장 · 관문」) in the legend's
+ * plain words (「촉발」 → 「시작 신호」, as 「촉발·관문」 reads 「시작 신호와 관문」 there); the record's family words stay in the band's tip. */
+export const EASY_BAND: Readonly<Record<string, string>> = { '촉발': '시작 신호' };
+export function easyBand(text: string): string { return text.split(' · ').map(u => EASY_BAND[u] ?? u).join(' · '); }
 /** The legend chip at 쉽게: the lens and what it shows, the counts behind the chip (it opens the legend with them): 「구성 · 참여자 · 처리 ···」. */
 export function easyLegendChip(lens: string, labels: readonly string[], max = 2): string {
   const shown = labels.slice(0, max).map(l => EASY_FAMILY[l] ?? l), more = labels.length > shown.length;

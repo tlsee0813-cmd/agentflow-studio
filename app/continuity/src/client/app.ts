@@ -40,8 +40,8 @@ import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWid
 import { routeEdges, focusRoutes, FOCUS_ROUTE_SCALE, samplePath, mixPath, openCorridors, applyStrips, stripShift, type Routed, type Strip } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
 // v13 (C-words-regressions): a mark's further places, the word level, the compare footer.
-import { cueSpots } from './mark-room.js';
-import { readWords, writeWords, plainLabel, hasCode, easyLegendChip, easyKind, partMark, leansBack, EASY_LENS, WORDS_TIP, type WordLevel } from './word-level.js';
+import { cueSpots, pathWalk } from './mark-room.js';
+import { readWords, writeWords, plainLabel, hasCode, easyLegendChip, easyKind, partMark, leansBack, easyBand, EASY_LENS, WORDS_TIP, type WordLevel } from './word-level.js';
 import { CARD_H, CARD_H_TALL, CARD_H_TALLER, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { cardFace, cutsWord, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
@@ -958,7 +958,7 @@ function drawFormLanes() {
   const first = world.firstChild;
   for (const l of formPlace.lanes) {
     const el = h('div', { class: `form-lane ${l.kind}${l.band ? ` b-${l.band}` : ''}`, 'data-lane': l.band ?? l.kind, 'aria-hidden': 'true' },
-      h('span', { class: 'form-lane-word', title: l.kind === 'band' ? `${l.text} · 기록이 정한 표현군 · 부품 ${l.count}` : `${l.text} · 기록이 빌드·배포·게시로 말한 부품 ${l.count}` }, l.kind === 'band' ? l.text.split(' · ').join('\n') : l.text, h('span', { class: 'form-lane-n' }, l.kind === 'band' ? `${l.count}개` : ` · ${l.count}`)));
+      h('span', { class: 'form-lane-word', title: l.kind === 'band' ? `${l.text} · 기록이 정한 표현군 · 부품 ${l.count}` : `${l.text} · 기록이 빌드·배포·게시로 말한 부품 ${l.count}` }, l.kind === 'band' ? (easy() ? easyBand(l.text) : l.text).split(' · ').join('\n') /* v13 merge: 쉽게's band words */ : l.text, h('span', { class: 'form-lane-n' }, l.kind === 'band' ? `${l.count}개` : ` · ${l.count}`)));
     world.insertBefore(el, first);
   }
   placeFormLanes();
@@ -3584,7 +3584,7 @@ function tightCue(el: HTMLElement, s: number, parts: readonly Rect[]) {
   el.dataset.tight = '1'; el.style.setProperty('--hit', `${-Math.max(0, Math.floor((room / inv - 0.5) * 2) / 2)}px`);
 }
 /** v13: the further places a mark may take on and beside its own line (mark-room cueSpots), as screen-sized rects in map units. */
-const cueExtra = (path: SVGPathElement, s: number, ow: number, inv: number, len: number) => cueSpots(d => path.getPointAtLength(Math.max(0, Math.min(len, d))), len, inv, s, ow);
+const cueExtra = (path: SVGPathElement, s: number, ow: number, inv: number, len: number) => { const w = pathWalk(path.getAttribute('d') ?? ''); return w ? cueSpots(w.at, w.len, inv, s, ow) : cueSpots(d => path.getPointAtLength(Math.max(0, Math.min(len, d))), len, inv, s, ow); };
 const cueOpens = (b: LineBadge): boolean => b.kind === 'condition' && b.words.some(w => !!w && w !== '조건' && w !== COND_UNSAID);
 function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'detail', beside: boolean, path: SVGPathElement,
   offParts: (r: Rect) => boolean, apart: (r: Rect) => boolean, offLabels: (r: Rect) => boolean, offLines: (r: Rect) => boolean, set: (el: HTMLElement, r: Rect) => void, open = false) {
@@ -3614,7 +3614,8 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'de
   // v13 (review of v12: 13 ◇ at 1280 whose target met a card: short lines between two cards, long ones running along a card): every 3px of
   // its own line (short of its head's run), then just beside it (cueBeside: 10–16px off the line, the nearer first), before a mark's target
   // may meet a card.
-  if (!spot) { const ex = cueExtra(path, s, ow, inv, len); spot = ex.along.find(r => base(r) && offLines(r)) ?? ex.along.find(base) ?? ex.beside.find(r => base(r) && offLines(r)) ?? ex.beside.find(base) ?? null; }
+  let exOnce: ReturnType<typeof cueExtra> | null = null; const exOf = () => (exOnce ??= cueExtra(path, s, ow, inv, len));
+  if (!spot) { const ex = exOf(); spot = ex.along.find(r => base(r) && offLines(r)) ?? ex.along.find(base) ?? ex.beside.find(r => base(r) && offLines(r)) ?? ex.beside.find(base) ?? null; }
   // With no place of its own: a condition joins the mark whose target it would meet into one 「조건 n」 mark that lists every line it stands
   // for (its tip and its keyboard name, data-also); another mark of the same kind leaving the same part stands for it as before. A
   // conditional line never reads unconditional.
@@ -3636,7 +3637,7 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'de
         if (parts.some(o => touch(hitOf(sr), o))) {
           const sp = $('world').querySelector<SVGPathElement>(`.edge[data-key="${CSS.escape(same.dataset.cue ?? '')}"] .edge-line`);
           if (sp) {
-            const sl = sp.getTotalLength(), ex = cueSpots(d => sp.getPointAtLength(Math.max(0, Math.min(sl, d))), sl, inv, s, sr.w);
+            const ex = cueExtra(sp, s, sr.w, inv, sp.getTotalLength());
             const rest = others.filter(o => o.c !== same), ok = (r: Rect) => { const t = hitOf(r); return !parts.some(o => touch(t, o)) && !rest.some(o => touch(t, o.r)) && offHeads(r); };
             const to = ex.along.find(ok) ?? ex.beside.find(ok); if (to) { same.style.left = `${to.x}px`; same.style.top = `${to.y}px`; } else {
               // No place along or beside its line: the mark folds its 「조건 n」 (its n in its name and tip, as at 쉽게) rather than lie on a card.
@@ -3649,8 +3650,9 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'de
     }
   }
   // Beauty v4: a short line squeezed between two cards (no place off them) still carries its mark, at its port: never bare.
-  const ex2 = cueExtra(path, s, ow, inv, len);
-  spot ??= [...near, ...far, ...farther, ...ex2.along, ...ex2.beside].find(r => hitFree(r) && offParts(r)) ?? [...near, ...far].find(offParts) ?? near[0] ?? (len > 0 ? at(path.getPointAtLength(Math.min(len / 2, (6 + CUE_PX / 2) * inv))) : null);
+  // v13 merge: the further places walked only when no place near the port served (each line's walk once).
+  const ex2 = spot ? null : exOf();
+  spot ??= [...near, ...far, ...farther, ...(ex2?.along ?? []), ...(ex2?.beside ?? [])].find(r => hitFree(r) && offParts(r)) ?? [...near, ...far].find(offParts) ?? near[0] ?? (len > 0 ? at(path.getPointAtLength(Math.min(len / 2, (6 + CUE_PX / 2) * inv))) : null);
   if (!spot) return;
   // Review of v7 (first user, j): the folded condition's ◇ shows that it opens (「조건 보기」 beside it on hover and keyboard focus); a
   // condition whose words are not on the map also keeps its open cue (three small dots) at rest (v8 maps).

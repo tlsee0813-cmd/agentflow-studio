@@ -21,3 +21,30 @@ export function cueSpots(at: (d: number) => Pt, len: number, inv: number, s: num
   }
   return { along, beside };
 }
+/** v13 merge (the opening waited 3.5 s on umami: a mark's further places asked the browser for a point at every 3px of its line, each ask
+ * walking the whole path): a drawn line's points read from its own path data once (M, L and Q, each curve flattened to 8 chords), its
+ * point at a length found on that walk. null for a path written with any other command (the caller asks the browser then). */
+export function pathWalk(d: string): { len: number; at: (s: number) => Pt } | null {
+  const toks = d.match(/[A-Za-z]|-?\d*\.?\d+(?:e[-+]?\d+)?/g); if (!toks || !toks.length) return null;
+  const pts: Pt[] = []; let i = 0, cmd = '';
+  const num = () => Number(toks[i++]);
+  while (i < toks.length) {
+    if (/[A-Za-z]/.test(toks[i]!)) cmd = toks[i++]!;
+    if (cmd === 'M' || cmd === 'L') { const x = num(), y = num(); if (!Number.isFinite(x) || !Number.isFinite(y)) return null; pts.push({ x, y }); }
+    else if (cmd === 'Q') {
+      const p0 = pts.at(-1); if (!p0) return null;
+      const cx = num(), cy = num(), x = num(), y = num(); if (![cx, cy, x, y].every(Number.isFinite)) return null;
+      for (let k = 1; k <= 8; k++) { const t = k / 8, u = 1 - t; pts.push({ x: u * u * p0.x + 2 * u * t * cx + t * t * x, y: u * u * p0.y + 2 * u * t * cy + t * t * y }); }
+    } else return null;
+  }
+  if (!pts.length) return null;
+  const cum = [0]; for (let k = 1; k < pts.length; k++) cum.push(cum[k - 1]! + Math.hypot(pts[k]!.x - pts[k - 1]!.x, pts[k]!.y - pts[k - 1]!.y));
+  const len = cum.at(-1)!;
+  const at = (s: number): Pt => {
+    const d0 = Math.max(0, Math.min(len, s)); let lo = 0, hi = cum.length - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m]! <= d0) lo = m; else hi = m; }
+    const a = pts[lo]!, b = pts[hi] ?? a, span = cum[hi]! - cum[lo]!, t = span > 0 ? (d0 - cum[lo]!) / span : 0;
+    return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+  };
+  return { len, at };
+}

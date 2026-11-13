@@ -4176,3 +4176,5 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .edge-labels > .edge-cue[data-tight]::after { inset: var(--hit, -8px) !important; }
 /* V13-C 「이은 선 없음」 over the unlinked cards: its count at 자세히 only (the cards under it are seen). */
 .space.words-easy .lone-head .lone-n { display: none; }
+/* v13 merge (spec 3 × 4): a form's lane counts (층's 「n개」, the build lane's 「· n」) at 자세히 only; the cards under them are seen, the count in the lane's tip. */
+.space.words-easy .form-lane-n { display: none; }
