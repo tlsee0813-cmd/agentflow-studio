@@ -433,7 +433,7 @@ test('FF-27 the fold never leaves a card with no line shown; the chip sits on it
   assert.equal(hubFolds(['a'], lines.filter(l => !l.key.startsWith('k'))).size, 0, 'every end alone: nothing folds');
   const a = focusBlock(await app());
   // v10 (review of v9): just off its card's edge (first-flow hubChipSpots, tested in v10-maps), never across it, a place no line runs under first.
-  assert.match(a, /put\(chip, \(w, hh\) => hubChipOrder\(hubChipSpots\(b, w, hh, g\), w, hh, titles, ring\), 260 \* inv, own, r => /, 'off its card\'s lower edge first (where no title is)');
+  assert.match(a, /put\(chip, \(w, hh\) => hubChipOrder\(hubChipSpots\(b, w, hh, g\), w, hh, titles, ring, screenCovers\), 260 \* inv, own, r => /, 'off its card\'s lower edge first (where no title is)');
   assert.match(a, /\?\? \(own \? all\[0\] : undefined\)/, 'a chip is never left off');
   assert.match(a, /const free = \(r: Rect, own\?: Rect\) => onScreen\(r\) && /, 'a note is never placed off the window\'s sides');
 });
@@ -454,7 +454,7 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   assert.ok(a.includes("const clear = (form: string | null, k: number) => (form === 'ft-one' ? FT_CAPS : [null, ...FT_CAPS_TWO]).some(cap => { ftCap = cap; const ok = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); ftCap = null; return ok; });"));
   assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects\];/, 'never over a card or a lane caption');
   assert.match(a, /el\.classList\.add\('ft-one'\);\n  for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/, 'the sentence on one line (narrower if need be) before it steps back');
-  assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop\)/, 'the map\'s own title never reads through the top line');
+  assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop \|\| cutSide\)/, 'the map\'s own title never reads through the top line');
   const css = await cssNoComments();
   assert.match(css, /\.focus-top\.ft-one \.ft-sentence \{ -webkit-line-clamp: 1; \}/);
   assert.match(css, /\.focus-top\.ft-under \.ft-sentence \{ display: none; \}/, 'stepped back, it takes no room');

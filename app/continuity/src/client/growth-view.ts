@@ -4,10 +4,10 @@
  * - Compare (F7): the map with its first change scene open. The top box says 「지도 변화 · v04 → v17」 and at most two sentences made only of
  *   the change ledger (kinds, names before and after, versions, counts), each clause a way to its scene or list. One 32px line under the
  *   lens bar counts the changes in the scene order (정정 · 승계 · 은퇴 · 구현 상태 · … · 연결 +56 −4), then the two filters 「설명 변경 9개
- *   보기」 and 「지도에 새로 표시 23개」, and 「대기·보류 66행」 (기록 반영 상태, its own count, never added to the changes) at its right end.
+ *   보기」 and 「v04에 없던 부품 표시 23개」 (F8 Q6 ①: its own row, with what it counts), and 「대기·보류 66행」 (기록 반영 상태, its own count, never added to the changes) at its right end.
  * - At most three text tabs on cards at a time (the scene shown first, the next ones in the scene order quieter); never a tab for 새 or 설명
  *   until its filter is on; 「+N」 is how many other kinds of change the card has.
- * - A scene: the top of the pane (kind, title, one sentence, 시점, 이유, 이전 모습 / 현재 모습 / 이전 변화 / 다음 변화 / 원문, 「변화 장면 1/N」).
+ * - A scene: the top of the pane (kind, title, one sentence, 시점, 이유, 「기록을 반영한 두 지도 비교」 기준 지도 · v04 / 비교 지도 · v17, 이전 변화 / 다음 변화 / 원문, 「변화 장면 1/N」).
  * Pure helpers (the scenes and their order, the guide, the items, tabs and their places, names and code) are exported for tests; the DOM
  * pieces take what they show and callbacks. */
 import { h } from './plan-dom.js';
@@ -27,8 +27,17 @@ export function auxName(name: string, others: readonly string[] = []): string | 
 }
 /** The particle after a word (shared/josa.ts): josa('cronjob', '을/를') → '을'. */
 export { josa };
-/** Words a guide or a scene never says (F7: no evaluation, cause or time made up). */
-export const GUIDE_BANNED: readonly string[] = Object.freeze(['개발됐', '안정적', '이를 위해', '핵심']);
+/** Words a guide or a scene never says (F7: no evaluation, cause or time made up; F8 Q6 ①: never 「처음 발견된」 or 「새로 찾음」 for a part the
+ * map shows). 「개발됐는지는 … 알 수 없습니다」 says a limit, never a claim: only the claim 「개발됐습니다」 is barred. */
+export const GUIDE_BANNED: readonly string[] = Object.freeze(['개발됐습니다', '개발되었습니다', '안정적', '이를 위해', '핵심', '처음 발견', '새로 찾']);
+/* ---------- F8 Q6 ① the parts a version shows that the earlier did not ---------- */
+/** The list's name for them (F8 Q6 ①): the map shows them now; whether they were made new is not what is counted. */
+export const NEW_LIST = '지도 표시 추가';
+/** The count's own words (F8 Q6 ①, with the real version number): 「v04에 없던 부품 표시 23개」. n: the permanent part IDs on the later version
+ * and not on the earlier. */
+export const newCountWord = (from: number, n: number): string => `${short(from)}에 없던 부품 표시 ${n}개`;
+/** What the count is and what it cannot say (F8 Q6 ①), shown with it where the counts are first seen. */
+export const NEW_NOTE = '표시의 추가를 센 수입니다. 새로 개발됐는지는 이 숫자로 알 수 없습니다.';
 
 /* ---------- code in the growth view's own text (F7: quiet monospace, never bold, filled or bordered; nothing reworded or left out) ---------- */
 const CODE_RUN = /`[^`]+`|[A-Za-z_][A-Za-z0-9_./:%#-]*(?:\([^()\s]*\))?/g;
@@ -68,7 +77,7 @@ export function changeScenes(cs: ChangeSet): Scene[] {
 export function sceneKind(c: PartChange): string {
   switch (c.kind) {
     case 'succeed': return '기록된 승계';
-    case 'retire': return c.named ? '기록된 은퇴 · 대신하는 부품은 지금 지도에 없음' : '기록된 은퇴 · 대신하는 부품 없음';
+    case 'retire': return c.named ? '기록된 은퇴 · 대신하는 부품은 비교 지도에 없음' : '기록된 은퇴 · 대신하는 부품 없음';
     case 'correct': return c.by === 'record' ? '정정 · 기록이 적은 철회' : '정정 · 사람이 바로잡은 설명';
     // Review of v8 (first user, e): the kind with its two ends.
     case 'impl': return c.impl?.mode === 'add' ? '구현 정보 추가' : `구현 상태 변경 · ${c.before ?? '정보 없음'} → ${c.after ?? ''}`;
@@ -77,7 +86,7 @@ export function sceneKind(c: PartChange): string {
     case 'desc': return c.by === 'person' ? '설명 변경 · 사람이 새로 씀' : '설명 변경';
     case 'dedupe': return '중복 정리';
     case 'merge': return '통합';
-    default: return '지도에 새로 표시';
+    default: return NEW_LIST;
   }
 }
 type Name = (id: string) => string;
@@ -102,7 +111,7 @@ export function sceneSentence(c: PartChange, nm: Name, say: Say = n => plainName
   switch (c.kind) {
     case 'succeed': return `${q(n)}${josa(n, '이/가')} ${q(nm(c.predecessor!))}${josa(nm(c.predecessor!), '을/를')} 대신한다는 기록이 반영됐습니다.`;
     // Review of v7: a successor the record names that is off the map is never 「none in the record」.
-    case 'retire': return `${q(n)}${josa(n, '이/가')} 은퇴했다는 기록이 반영됐습니다. ${c.named ? '대신하는 부품은 지금 지도에 없습니다.' : '대신하는 부품은 기록에 없습니다.'}`;
+    case 'retire': return `${q(n)}${josa(n, '이/가')} 은퇴했다는 기록이 반영됐습니다. ${c.named ? '대신하는 부품은 비교 지도에 없습니다.' : '대신하는 부품은 기록에 없습니다.'}`;
     case 'correct': return c.by === 'record' ? `기록이 ${q(n)}에 대한 철회를 적었습니다.` : `${q(n)}의 설명이 틀렸다고 사람이 바로잡았습니다.`;
     case 'impl': return c.impl?.mode === 'add' ? `${q(n)}에 구현 정보 ${q(c.after ?? '')}${josa(c.after ?? '', '이/가')} 더해졌습니다. 구현됨은 가동 중이라는 뜻이 아닙니다.`
       : `${q(n)}의 구현 상태가 ${q(c.before ?? '')}에서 ${q(c.after ?? '')}${josa(c.after ?? '', '으로/로')} 기록됐습니다.`;
@@ -111,11 +120,50 @@ export function sceneSentence(c: PartChange, nm: Name, say: Say = n => plainName
     case 'desc': return c.by === 'person' ? `${q(n)}의 설명을 사람이 새로 썼습니다.` : `${q(n)}의 설명이 같은 부품에 대한 새 설명으로 바뀌었습니다.`;
     case 'dedupe': return `지도가 두 번 만든 ${q(n)}${josa(n, '을/를')} 하나로 정리했습니다.`;
     case 'merge': return `${q(n)}에 다른 부품을 합쳤다는 기록이 반영됐습니다.`;
-    default: return `${q(n)}${josa(n, '이/가')} 지도에 새로 표시됐습니다.`;
+    // F8 Q6 ①: the map's showing of the part was added (never that it was made new).
+    default: return `${q(n)}의 표시가 지도에 추가됐습니다.`;
   }
 }
-/** 「변화 장면 1/N」, or a filter's 「설명 변경 1/9」. */
-export const stepWord = (filter: 'new' | 'desc' | null, i: number, n: number): string => `${filter === 'new' ? '지도에 새로 표시' : filter === 'desc' ? '설명 변경' : '변화 장면'} ${i + 1}/${n}`;
+/** 「변화 장면 1/N」, or a filter's 「설명 변경 1/9」 (「지도 표시 추가 5/23」). */
+export const stepWord = (filter: 'new' | 'desc' | null, i: number, n: number): string => `${filter === 'new' ? NEW_LIST : filter === 'desc' ? '설명 변경' : '변화 장면'} ${i + 1}/${n}`;
+
+/* ---------- F8 Q6 ④ the guide says the scene shown ---------- */
+/** The guide's word for a scene's kind (F8 Q6 ④: 「장면 2/5 · 대체 기록」). */
+export function guideKind(c: PartChange): string {
+  switch (c.kind) {
+    case 'succeed': return '대체 기록';
+    case 'retire': return '은퇴 기록';
+    case 'impl': return c.impl?.mode === 'add' ? '구현 정보 추가' : '구현 상태 변경';
+    case 'new': return NEW_LIST;
+    default: return sceneKind(c).split(' · ')[0]!;
+  }
+}
+/** What a scene's record says of when and why (null: not in the record). reason: the record's own words (short) or that it is long. */
+export interface SceneWhen { when: string | null; reason: string | null }
+/** The longest reason the guide quotes whole; a longer one is said to be in the scene's 이유 (never cut). */
+export const GUIDE_REASON_MAX = 48;
+/** The guide for one scene (F8 Q6 ④): 「장면 n/N · 종류」, then the change the scene's evidence confirms, then what the record says of its
+ * time and reason, or the limit of what it confirms. Made of that scene's change alone: never another scene's sentence. */
+export function sceneGuide(c: PartChange, i: number, n: number, nm: Name, say: Say, w: SceneWhen, from: number): { head: string; s1: string; s2: string } {
+  const head = `장면 ${i + 1}/${n} · ${guideKind(c)}`;
+  const s1 = c.kind === 'succeed' ? `${q(nm(c.predecessor!))}${josa(nm(c.predecessor!), '을/를')} ${q(nm(c.part))}${josa(nm(c.part), '이/가')} 대신한다는 기록이 반영됐습니다.`
+    : c.kind === 'new' ? `${q(nm(c.part))}${josa(nm(c.part), '은/는')} ${short(from)} 지도에 없던 부품 표시입니다.`
+    : sceneSentence(c, nm, say).split(/(?<=다\.)\s/)[0]!;
+  const reason = w.reason ? (w.reason.length <= GUIDE_REASON_MAX ? `이유는 ${q(w.reason)}${josa(w.reason, '으로/로')} 적혀 있습니다.` : '이유는 장면의 ‘이유’에 기록의 말로 있습니다.') : null;
+  let s2: string;
+  if (c.kind === 'new') s2 = c.by === 'person' ? '사람이 더한 표시이며, 새로 개발됐는지는 이 표시로 알 수 없습니다.'
+    : c.since ? `${short(c.since)} 지도에서 처음 표시됐으며, 새로 개발됐는지는 이 표시로 알 수 없습니다.` : '새로 개발됐는지는 이 표시로 알 수 없습니다.';
+  else if (c.kind === 'impl') s2 = '기록의 구현 상태 칸에서 읽은 것이며, 가동 중이라는 뜻은 아닙니다.';
+  else if (w.when) s2 = `바뀐 때는 기록에 ${q(w.when)}${josa(w.when, '으로/로')} 적혀 있고, ${reason ? reason : '이유는 기록에 없습니다.'}`;
+  else if (reason) s2 = `바뀐 때는 기록에 없고, ${reason}`;
+  else if (c.kind === 'succeed' || c.kind === 'retire') s2 = '바뀐 때와 이유는 기록에 없고, 실행이 멈췄는지는 이 기록으로 확인되지 않습니다.';
+  else s2 = '바뀐 때와 이유는 기록에 없습니다.';
+  return { head, s1, s2 };
+}
+/** Said in the guide's place while a scene's words are not there yet (F8 Q6 ④): never the earlier scene's sentence. */
+export const GUIDE_LOADING = '이 장면의 설명을 불러오는 중';
+/** The fold that holds the whole comparison's summary (F8 Q6 ④). */
+export const SUMMARY_FOLD = '전체 비교 요약';
 
 /* ---------- the guide (F7: 「지도 변화 · v04 → v17」 and at most two sentences, in the top box's place) ---------- */
 /** One clause of the guide: its words, where it leads (a scene, or a kind's list or filter) and the ledger fact it says (kind, count, parts). */
@@ -123,13 +171,13 @@ export interface GuideSeg { text: string; to: { scene: string } | { kind: Summar
 export interface Guide { head: string; sentences: GuideSeg[][] }
 const short = (n: number) => `v${String(n).padStart(2, '0')}`;
 /** How a kind is counted in the guide's second sentence (a noun phrase with its count). */
-const PHRASE: Readonly<Record<ChangeKind, (n: number) => string>> = Object.freeze({
-  correct: n => `정정이 적힌 부품 ${n}개`, succeed: n => `승계 ${n}건`, retire: n => `지금 지도에 대신하는 부품이 없는 은퇴 부품 ${n}개`, impl: n => `구현 상태 기록이 달라진 부품 ${n}개`,
+const PHRASE: Readonly<Record<ChangeKind, (n: number, from: number) => string>> = Object.freeze({
+  correct: n => `정정이 적힌 부품 ${n}개`, succeed: n => `승계 ${n}건`, retire: n => `비교 지도에 대신하는 부품이 없는 은퇴 부품 ${n}개`, impl: n => `구현 상태 기록이 달라진 부품 ${n}개`,
   reimpl: n => `구현이 바뀐 부품 ${n}개`, rename: n => `이름이 달라진 부품 ${n}개`, desc: n => `설명이 바뀐 부품 ${n}개`, dedupe: n => `중복을 정리한 부품 ${n}개`, merge: n => `합쳐진 부품 ${n}개`,
-  new: n => `지도에 새로 표시된 부품 ${n}개` });
+  new: (n, from) => newCountWord(from, n) });
 /** The lead of the second sentence when the first sentence's kind has more than one change (「승계는 총 2건이며,」). */
-const LEAD: Readonly<Record<ChangeKind, string>> = Object.freeze({ correct: '정정', succeed: '승계', retire: '지금 지도에 대신하는 부품이 없는 은퇴', impl: '구현 상태 기록의 변화', reimpl: '구현 바뀜',
-  rename: '이름 변경', desc: '설명 변경', dedupe: '중복 정리', merge: '통합', new: '새로 표시된 부품' });
+const LEAD: Readonly<Record<ChangeKind, string>> = Object.freeze({ correct: '정정', succeed: '승계', retire: '비교 지도에 대신하는 부품이 없는 은퇴', impl: '구현 상태 기록의 변화', reimpl: '구현 바뀜',
+  rename: '이름 변경', desc: '설명 변경', dedupe: '중복 정리', merge: '통합', new: NEW_LIST });
 /** How many changes of a kind the guide and the line count: a retirement a 승계 holds counts in that 승계. */
 export const kindCount = (cs: ChangeSet, k: ChangeKind): number => (k === 'retire' ? cs.changes.filter(c => c.kind === 'retire' && !c.successor).length : cs.counts[k]);
 /** The guide: its head, the first scene in one named sentence (the change shown first), and the counts in a second (the first scene's kind
@@ -145,7 +193,7 @@ export function guideOf(cs: ChangeSet, scenes: readonly Scene[], nm: Name, say: 
   const pick = kinds.includes('new') ? [...kinds.filter(k => k !== 'new').slice(0, 2), 'new' as const] : kinds.slice(0, 3);
   const s2: GuideSeg[] = [], total = kindCount(cs, c.kind);
   if (total > 1) { const w = LEAD[c.kind]; s2.push({ text: `${w}${josa(w, '은/는')} 총 ${total}${c.kind === 'succeed' || c.kind === 'correct' ? '건' : '개'}`, to: { kind: c.kind }, fact: { kind: c.kind, count: total, parts: [] } }); }
-  const phrases = pick.map(k => ({ k, text: PHRASE[k](kindCount(cs, k)) }));
+  const phrases = pick.map(k => ({ k, text: PHRASE[k](kindCount(cs, k), cs.from) }));
   if (s2.length) s2.push({ text: phrases.length ? '이며, ' : '입니다.', to: null, fact: null });
   phrases.forEach((p, i) => {
     s2.push({ text: p.text, to: { kind: p.k }, fact: { kind: p.k, count: kindCount(cs, p.k), parts: [] } });
@@ -167,13 +215,13 @@ export const guideText = (g: Guide): string => g.sentences.map(s => s.map(x => x
 export type SummaryKey = ChangeKind | 'lines';
 export interface SummaryItem { key: SummaryKey; text: string; count: number; filter: boolean }
 /** The line's items with a nonzero count, in the scene order (a retirement a 승계 holds is counted there), the lines (+ added − removed),
- * then the two filters (F7): 「설명 변경 N개 보기」 and 「지도에 새로 표시 N개」. */
+ * then the two filters (F7): 「설명 변경 N개 보기」 and 「v04에 없던 부품 표시 N개」 (F8 Q6 ①). */
 export function summaryItems(cs: ChangeSet): SummaryItem[] {
   const out: SummaryItem[] = [];
   for (const k of SUMMARY_ORDER) { const n = kindCount(cs, k); if (n) out.push({ key: k, text: `${CHANGE_WORD[k]} ${n}`, count: n, filter: false }); }
   if (cs.added.length || cs.removed.length) out.push({ key: 'lines', text: `연결${cs.added.length ? ` +${cs.added.length}` : ''}${cs.removed.length ? ` −${cs.removed.length}` : ''}`, count: cs.added.length + cs.removed.length, filter: false });
   if (cs.counts.desc) out.push({ key: 'desc', text: `설명 변경 ${cs.counts.desc}개 보기`, count: cs.counts.desc, filter: true });
-  if (cs.counts.new) out.push({ key: 'new', text: `지도에 새로 표시 ${cs.counts.new}개`, count: cs.counts.new, filter: true });
+  if (cs.counts.new) out.push({ key: 'new', text: newCountWord(cs.from, cs.counts.new), count: cs.counts.new, filter: true });
   return out;
 }
 /** The whole line as words (its accessible name, and what tests read). */
@@ -184,8 +232,8 @@ export const NO_CHANGE = '구조 변화 없음';
 export const waitingWord = (n: number): string => `대기·보류 ${n}행`;
 
 /* ---------- the card tabs ---------- */
-/** A card tab's word for a kind (review of v7: the panel's own words for its two filters, 「새로 표시」 and 「설명 변경」). */
-export const tabKindWord = (k: ChangeKind): string => (k === 'new' ? '새로 표시' : k === 'desc' ? '설명 변경' : CHANGE_WORD[k]);
+/** A card tab's word for a kind (review of v7: the panel's own words for its two filters; F8 Q6 ①: 「지도 표시 추가」 and 「설명 변경」). */
+export const tabKindWord = (k: ChangeKind): string => (k === 'new' ? NEW_LIST : k === 'desc' ? '설명 변경' : CHANGE_WORD[k]);
 export const tabWord = (c: PartChange): string => (c.kind === 'dedupe' ? `중복 정리 ${(c.others?.length ?? 1) + 1}→1` : tabKindWord(c.kind));
 /** At most three tabs at a time. */
 export const TAB_CAP = 3;
@@ -232,17 +280,20 @@ const meets = (a: Rect, b: Rect) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < 
  * v10, review of v9: never in a gap where it reads as the next card's): on its top edge, left-aligned, else right-aligned; else on its bottom
  * edge (left, then right); inside the card's own span; never over a placed tab, a card or a group's head, and every other card or head at
  * least `clear` from it (so it is clearly nearer its own card than any other). Tabs come in priority order; one that finds no place is hidden
- * (its part still counts in the line). gap: the room between a tab and its card, in map units. */
-export function placeTabs(tabs: readonly { part: string; w: number; h: number }[], boxes: ReadonlyMap<string, Rect>, obstacles: readonly (Rect & { id: string })[], gap: number, clear = 0): Map<string, Rect | null> {
+ * (its part still counts in the line). gap: the room between a tab and its card, in map units. v11 (review of v10: the Tesseract tab on its
+ * bottom edge read as Tika's, the card under it): the top edge first; the bottom edge only when the top cannot hold it and every other card
+ * or head is at least `below` from it there (16px on screen). */
+export function placeTabs(tabs: readonly { part: string; w: number; h: number }[], boxes: ReadonlyMap<string, Rect>, obstacles: readonly (Rect & { id: string })[], gap: number, clear = 0, below = clear, wide: 'center' | 'ends' = 'center', fits: (r: Rect) => boolean = () => true): Map<string, Rect | null> {
   const out = new Map<string, Rect | null>(), placed: Rect[] = [];
   const near = (o: Rect, r: Rect, m: number) => meets({ x: o.x - m, y: o.y - m, w: o.w + 2 * m, h: o.h + 2 * m }, r);
   for (const t of tabs) {
     const b = boxes.get(t.part); if (!b) { out.set(t.part, null); continue; }
     // Inside its card's span: left-aligned, right-aligned; a tab wider than its card stands centred on it.
-    const xs = t.w <= b.w ? [b.x, b.x + b.w - t.w] : [b.x + (b.w - t.w) / 2];
-    const at = (y: number): Rect[] => xs.map(x => ({ x, y, w: t.w, h: t.h }));
-    const tries: Rect[] = [...at(b.y - gap - t.h), ...at(b.y + b.h + gap)];
-    const ok = tries.find(r => !placed.some(p => meets(p, r)) && !obstacles.some(o => o.id !== t.part && near(o, r, clear)));
+    // wide 'ends' (F8 Q6 ③: the later records' word, often wider than its card): from the card's left edge, else to its right edge.
+    const xs = t.w <= b.w || wide === 'ends' ? [b.x, b.x + b.w - t.w] : [b.x + (b.w - t.w) / 2];
+    const at = (y: number, m: number) => xs.map(x => ({ r: { x, y, w: t.w, h: t.h }, m }));
+    const tries = [...at(b.y - gap - t.h, clear), ...at(b.y + b.h + gap, Math.max(clear, below))];
+    const ok = tries.find(({ r, m }) => fits(r) && !placed.some(p => meets(p, r)) && !obstacles.some(o => o.id !== t.part && near(o, r, m)))?.r;
     out.set(t.part, ok ?? null); if (ok) placed.push(ok);
   }
   return out;
@@ -267,16 +318,31 @@ export function toastSpot(size: { w: number; h: number }, area: Rect, top: numbe
   }
   return best ? { x: best.x, y: best.y } : { x: cx, y: top };
 }
-/** v10 (review of v9: the note said 「보던 위치로 돌아왔어요」 where the map came back elsewhere): what leaving the comparison says, only what
- * is true: the camera as it was before the comparison (zoom and place), the card picked before it. */
-export function exitWord(camera: boolean, picked: boolean): string {
-  const back = camera && picked ? '비교 전에 고른 카드와 보던 위치로 돌아왔어요' : camera ? '비교 전에 보던 위치로 돌아왔어요' : picked ? '비교 전에 고른 카드로 돌아왔어요' : '';
-  return `비교를 끝냈어요${back ? ` · ${back}` : ''}`;
+/* ---------- F8 Q6 ⑤ leaving the comparison: the state from just before it, exactly ---------- */
+export type RestoreKind = 'exact' | 'center' | 'failed';
+/** What leaving the comparison says (F8 Q6 ⑤), only what is so after it: the same zoom and place; the window's size changed, so the same
+ * zoom and centre; or the place could not be set again. */
+export const RESTORE_WORD: Readonly<Record<RestoreKind, string>> = Object.freeze({ exact: '비교 전 배율과 위치로 돌아왔어요.', center: '비교 전 배율과 중심을 유지했어요.', failed: '지도로 돌아왔어요. 비교 전 위치는 복원하지 못했어요.' });
+export const exitWord = (kind: RestoreKind): string => RESTORE_WORD[kind];
+type Cam = { x: number; y: number; k: number };
+/** The camera to set again (F8 Q6 ⑤): with the map's area the size it was, the camera as saved ('exact'); else the saved zoom with the map
+ * point that stood at the area's centre at its centre again ('center'). Never a fit. */
+export function restoreCamera(saved: Cam, savedArea: { w: number; h: number }, area: { w: number; h: number }): { camera: Cam; kind: 'exact' | 'center' } {
+  if (Math.abs(savedArea.w - area.w) < 0.5 && Math.abs(savedArea.h - area.h) < 0.5) return { camera: { ...saved }, kind: 'exact' };
+  const cx = (savedArea.w / 2 - saved.x) / saved.k, cy = (savedArea.h / 2 - saved.y) / saved.k;
+  return { camera: { x: area.w / 2 - cx * saved.k, y: area.h / 2 - cy * saved.k, k: saved.k }, kind: 'center' };
 }
-/** The same for coming back from a past version: the camera as it was before 이전 모습, the card picked then. */
-export function nowWord(camera: boolean, picked: boolean): string {
-  const back = camera && picked ? '고른 카드와 화면 위치는 이전 모습을 보기 전 그대로예요' : camera ? '화면 위치는 이전 모습을 보기 전 그대로예요' : picked ? '고른 카드는 그대로예요' : '';
-  return `현재 지도로 돌아왔어요${back ? ` · ${back}` : ''}`;
+/** Whether a restore held (F8 Q6 ⑤): the zoom within 0.1% and the anchor (a map point: the saved area's centre) within 1px of where it was
+ * wanted. */
+export function restoreHeld(want: Cam, got: Cam, anchor: { x: number; y: number }): boolean {
+  if (Math.abs(got.k - want.k) / want.k > 0.001) return false;
+  return Math.abs((want.x + anchor.x * want.k) - (got.x + anchor.x * got.k)) <= 1 && Math.abs((want.y + anchor.y * want.k) - (got.y + anchor.y * got.k)) <= 1;
+}
+/** Coming back from the earlier map (기준 지도) to the later one (F8 Q6 ②: never 「현재」 or 「지금」): its name, then the camera as it was before,
+ * the card picked then. */
+export function nowWord(camera: boolean, picked: boolean, back = '비교 지도'): string {
+  const kept = camera && picked ? '고른 카드와 배율·위치는 기준 지도를 보기 전 그대로예요' : camera ? '배율과 위치는 기준 지도를 보기 전 그대로예요' : picked ? '고른 카드는 그대로예요' : '';
+  return `${back}${josa(back, '으로/로')} 돌아왔어요${kept ? ` · ${kept}` : ''}`;
 }
 /** Whether two cameras are the same (zoom and place, within half a pixel). */
 export const sameCamera = (a: { x: number; y: number; k: number }, b: { x: number; y: number; k: number }): boolean => Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5 && Math.abs(a.k - b.k) < 1e-4;
@@ -353,13 +419,13 @@ export interface HistoryHandlers { compare: (n: number) => void; view: (n: numbe
  * the person's own baseline marked. */
 export function historyMenu(versions: readonly MapVersion[], marks: { current: number; visit: number | null; pick: number | null; viewing: number | null }, on: HistoryHandlers): HTMLElement {
   const rows = [...versions].reverse().map(v => {
-    const tags = [v.n === marks.current ? '현재' : null, v.n === marks.visit ? '이전 방문' : null, v.n === marks.pick ? '비교 기준' : null, v.n === marks.viewing ? '보는 중' : null].filter((x): x is string => !!x);
+    const tags = [v.n === marks.current ? '마지막 버전' : null, v.n === marks.visit ? '이전 방문' : null, v.n === marks.pick ? '비교 기준' : null, v.n === marks.viewing ? '보는 중' : null].filter((x): x is string => !!x);
     return h('li', { class: `gh-row${v.n === marks.viewing ? ' viewing' : ''}` },
       h('span', { class: 'gh-n' }, versionLabel(v.n)),
       h('span', { class: 'gh-meta' }, h('span', { class: 'gh-at' }, time(v.at)), v.target ? h('span', { class: 'gh-target', title: '기록 대상 판본 · 이 버전을 만든 기록이 적은 대상' }, `대상 ${v.target}`) : null,
         ...tags.map(t => h('span', { class: 'gh-tag' }, t))),
       h('span', { class: 'gh-acts' },
-        v.n < marks.current ? h('button', { type: 'button', class: 'gh-act', title: `${versionLabel(v.n)}을 기준으로 지금 지도와 비교 (기준으로 기억)`, onclick: () => on.compare(v.n) }, '기준으로 비교') : null,
+        v.n < marks.current ? h('button', { type: 'button', class: 'gh-act', title: `${versionLabel(v.n)}을 기준 지도로, ${versionLabel(marks.current)}을 비교 지도로 비교 (기준으로 기억)`, onclick: () => on.compare(v.n) }, '기준으로 비교') : null,
         v.n < marks.current ? h('button', { type: 'button', class: 'gh-act', title: `${versionLabel(v.n)}을 기록만으로 다시 그려 보기 (읽기 전용)`, onclick: () => on.view(v.n) }, '이 버전 보기') : null));
   });
   return h('div', { class: 'gh-pop', role: 'dialog', 'aria-label': '지도 이력' },
@@ -372,24 +438,29 @@ export interface LineHandlers { pick: (k: SummaryKey) => void; reflect: () => vo
   withdrawals?: () => void }
 /** The 32px compare line: the two versions, the counts, the two filters, 「대기·보류 N행」 at the right end and the way out. */
 export function compareLine(cs: ChangeSet, picked: SummaryKey | 'history' | null, waiting: number | null, on: LineHandlers): HTMLElement {
-  const items = summaryItems(cs);
-  return h('div', { class: 'gl-row', role: 'toolbar', 'aria-label': `비교 · ${summaryText(cs)}` },
+  const all = summaryItems(cs), items = all.filter(i => i.key !== 'new'), fresh = all.find(i => i.key === 'new');
+  const item = (i: SummaryItem) => h('button', { type: 'button', class: `gl-item k-${i.key}${i.filter ? ' gl-filter' : ''}${picked === i.key ? ' on' : ''}`, 'aria-pressed': String(picked === i.key), title: itemTip(i.key), onclick: () => on.pick(i.key) }, i.text);
+  const row = h('div', { class: 'gl-row', role: 'toolbar', 'aria-label': `비교 · ${summaryText(cs)}` },
     h('button', { type: 'button', class: 'gl-pair', title: '기준 바꾸기 · 지도 이력', onclick: on.history }, `${versionLabel(cs.from)} → ${versionLabel(cs.to)}`),
-    ...(items.length ? items.flatMap(i => [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'),
-      h('button', { type: 'button', class: `gl-item k-${i.key}${i.filter ? ' gl-filter' : ''}${picked === i.key ? ' on' : ''}`, 'aria-pressed': String(picked === i.key), title: itemTip(i.key), onclick: () => on.pick(i.key) }, i.text)])
-      : [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), h('span', { class: 'gl-none' }, NO_CHANGE)]),
+    ...(items.length ? items.flatMap(i => [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), item(i)])
+      : fresh ? [] : [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), h('span', { class: 'gl-none' }, NO_CHANGE)]),
     h('span', { class: 'gl-gap' }),
     // Review of v8: the right end (the history rows, 대기·보류 and the way out) never leaves the line: it stays put while the counts give way.
     h('span', { class: 'gl-end' },
     cs.history.length && on.withdrawals ? h('button', { type: 'button', class: `gl-hist${picked === 'history' ? ' on' : ''}`, 'aria-pressed': String(picked === 'history'), title: `${historyWord(cs.history.length)} · 기록이 적은 철회·변경 가운데 지도의 부품 설명을 거두지 않은 것 (프로젝트 이력) · 정정이 아님 · 변화 집계와 따로 셈 · 누르면 목록`, onclick: on.withdrawals }, historyShort(cs.history.length)) : null,
     waiting !== null ? h('button', { type: 'button', class: `gl-un${waiting ? '' : ' zero'}`, title: `기록 반영 상태 · 지도 ${short(cs.to)} 기준 · 기록의 행 가운데 지도에 아직 들어가지 않은 대기·보류 행 (변화 집계와 따로 셈)`, onclick: on.reflect }, waitingWord(waiting)) : null,
-    h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 비교 전에 고른 카드와 보던 위치로 돌아가요', 'aria-label': '비교 끝내기 · 고른 카드와 위치는 비교 전대로', onclick: on.exit }, '×')));
+    h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 비교 전의 고른 카드와 배율·위치로 돌아가요', 'aria-label': '비교 끝내기 · 고른 카드와 배율·위치는 비교 전대로', onclick: on.exit }, '×')));
+  if (!fresh) return row;
+  // F8 Q6 ①: the count of parts shown that the earlier map did not show stands with what it is and what it cannot say, where the counts are
+  // first seen (13px, the body's colour, at most two lines).
+  return h('div', { class: 'gl-wrap' }, row,
+    h('p', { class: 'gl-new' }, item(fresh), h('span', { class: 'gl-new-note' }, NEW_NOTE)));
 }
 /** The line's short word for the history rows (the pane and the title say 「기록된 철회·변경 N건」). */
 export const historyShort = (n: number): string => `철회·변경 ${n}건`;
-const itemTip = (k: SummaryKey): string => ({ new: '기준 지도보다 새로 표시된 부품 · 새로 만들었다는 뜻이 아님 · 누르면 지도에서 밝히고 목록으로 하나씩 보기', rename: '이름이 바뀐 부품', reimpl: '같은 부품, 기록이 구현이 바뀌었다고 적음',
+const itemTip = (k: SummaryKey): string => ({ new: `${NEW_LIST} · 기준 지도에 없고 비교 지도에 표시된 부품 · ${NEW_NOTE} · 누르면 지도에서 밝히고 목록으로 하나씩 보기`, rename: '이름이 바뀐 부품', reimpl: '같은 부품, 기록이 구현이 바뀌었다고 적음',
   impl: '기록의 구현 상태 칸이 달라진 부품 (구현 상태 변경 · 구현 정보 추가) · 가동 여부가 아님', desc: '같은 부품에 대한 새 설명이 채택되었거나 사람이 설명을 새로 쓴 부품 · 누르면 지도에서 밝히고 하나씩 보기', correct: '오류나 철회가 적힌 정정 (기록의 철회, 사람이 바로잡은 설명) · 문구를 다듬은 것은 설명 변경',
-  dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '지금 지도에 대신하는 부품이 없는 은퇴 부품 · 은퇴한 부품은 지금 지도에 없음', lines: '더해진 연결과 빠진 연결' } as Record<SummaryKey, string>)[k] + (k === 'new' || k === 'desc' ? '' : ' · 누르면 목록');
+  dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '비교 지도에 대신하는 부품이 없는 은퇴 부품 · 은퇴한 부품은 비교 지도에 없음', lines: '더해진 연결과 빠진 연결' } as Record<SummaryKey, string>)[k] + (k === 'new' || k === 'desc' ? '' : ' · 누르면 목록');
 /** The scene's line over the earlier description: a person's correction is never a description update, and the other way round. */
 export const wasLabel = (kind: 'desc' | 'correct' | null, target: string | null, by: PartChange['by'] = undefined): string => (kind === 'correct' ? '이전 설명 · 사람이 고친 설명으로 바뀜'
   : kind === 'desc' && by === 'person' ? '이전 설명 · 사람이 새로 쓴 설명으로 바뀜'
@@ -397,14 +468,35 @@ export const wasLabel = (kind: 'desc' | 'correct' | null, target: string | null,
 /** A 새 change's line in its scene: the version whose reading made the part, or the person who added it and when. */
 export const newTitle = (c: PartChange, from: number): string => (c.by === 'person' ? `사람이 추가함${c.madeAt && time(c.madeAt) ? ` · ${time(c.madeAt)}` : ''}`
   : c.since ? `${versionLabel(c.since)}에서 처음 표시됨` : `${versionLabel(from)} 뒤에 처음 표시됨`);
-/** The past view's banner: what is drawn and the way back. */
-export function pastBanner(n: number, applied: number, undated: number, onNow: () => void): HTMLElement {
+/** The past view's banner: what is drawn and the way back (F8 Q6 ②: the way back names the map it goes to, 「비교 지도 · v17」 while
+ * comparing, never 「현재」). */
+export function pastBanner(n: number, applied: number, undated: number, onNow: () => void, back = '비교 지도'): HTMLElement {
   const main = applied ? `${versionLabel(n)} 보기 중 · 기록과 날짜가 남은 사람 편집 ${applied}건으로 다시 그림 (날짜 없는 사람 편집은 포함하지 않음)` : `${versionLabel(n)} 보기 중 · 기록만으로 다시 그림 (그때의 사람 편집은 포함하지 않음)`;
   return h('div', { class: 'gp-row', role: 'status' }, h('span', { class: 'gp-text' }, main),
     undated ? h('span', { class: 'gp-fine', title: '편집 기록이 생기기 전에 사람이 고친 이름·설명, 보관·옮김·연결은 언제 했는지 몰라 넣지 않음 · 이름은 그때 기록의 이름' }, `날짜 없는 편집 ${undated}건 제외`) : null,
     h('span', { class: 'gp-fine' }, '읽기 전용'),
-    h('button', { type: 'button', class: 'gp-now', title: '현재 지도로 · 이전 모습을 보기 전의 화면 위치로', onclick: onNow }, '현재로'));
+    h('button', { type: 'button', class: 'gp-now', title: `${back}${josa(back, '으로/로')} · 이 지도를 보기 전의 배율과 위치로`, onclick: onNow }, back));
 }
+/* ---------- F8 Q6 ③ what the later records say of a part the earlier map shows ---------- */
+export type FollowKind = 'replaced' | 'gone' | 'reported' | 'absent';
+/** The words outside a past card (F8 Q6 ③), never on its state mark: a record says another part takes its place; a record says it is gone;
+ * the source reports it retired; or only that the later map does not show it. */
+export function followWord(kind: FollowKind, part: string, successor: string | null): string {
+  switch (kind) {
+    case 'replaced': { const b = successor ?? '다른 부품'; return `후속 기록: ${b}${josa(b, '이/가')} ${part}${josa(part, '을/를')} 대신함`; }
+    case 'gone': return '후속 기록: 없어짐';
+    case 'reported': return '후속 기록: 은퇴로 보고됨';
+    default: return '비교 지도에 표시 없음';
+  }
+}
+/** Which of the four a past part is (F8 Q6 ③): its retirement change (with a successor, on the later map or named by the record, or none),
+ * else the source's own retired report, else absent from the later map. */
+export function followKind(retire: Pick<PartChange, 'successor' | 'named'> | null, reported: boolean): FollowKind {
+  if (retire) return retire.successor || retire.named ? 'replaced' : 'gone';
+  return reported ? 'reported' : 'absent';
+}
+/** The first line of the opened note (F8 Q6 ③) when no record gives either part's running state. */
+export const FOLLOW_NO_OPS = '이 기록으로 실행 중지나 후계의 가동 여부는 확인되지 않습니다.';
 /* 기록 반영 상태 (F7). */
 /** A group's title and its line: 「문서 소비기에 관한 미반영 기록 3행」, 「연결 2행 · 단계 1행」, and 「이 부품은 현재 지도에 있습니다」 only for a part
  * checked by its ID on the map. */
@@ -429,3 +521,5 @@ export function reflectRow(x: Unreflected, name: (id: string) => string | null, 
       h('span', { class: 'gu-foot' }, ...parts.map(p => h('button', { type: 'button', class: 'gu-part', title: `관련 부품 · ${p.name} · 지도에서 보기`, onclick: () => on.part(p.id) }, p.name)),
         h('button', { type: 'button', class: 'gu-src link-button', title: '원문의 그 줄 보기', onclick: () => on.source(x) }, `원문 ${x.line}번째 줄`))));
 }
+/** F8 Q6 ②: the scene's two map buttons, 「기준 지도 · v04」 and 「비교 지도 · v17」, under 「기록을 반영한 두 지도 비교」 (the same at 1280). */
+export const mapWord = (which: '기준' | '비교', n: number): string => `${which} 지도 · ${short(n)}`;

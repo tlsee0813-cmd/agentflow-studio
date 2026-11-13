@@ -524,11 +524,14 @@ export function chipSpots(spots: readonly { x: number; y: number }[], w: number,
   return clear.length ? clear : own.length ? own : [...spots];
 }
 /** v10 merge (v10-maps: never a line through a hub chip; v10-growth: a chip touches its card): a hub chip's places in the order they are
- * tried: those touching its card (the ring a gap off its edge) first, then the rest (one row further), each clear of the cards' texts. The
- * page takes the first of them no line runs under, else the first free: a row further only when every touching place has a line under it. */
-export function hubChipOrder(spots: readonly { x: number; y: number }[], w: number, hh: number, titles: readonly Box[], card: Box): { x: number; y: number }[] {
-  const near = chipSpots(spots, w, hh, titles, card);
-  return [...near, ...chipSpots(spots, w, hh, titles).filter(p => !near.includes(p))];
+ * tried, each clear of the cards' texts; the page takes the first of them no line runs under, else the first free. v11 (review of v10: one
+ * stood 28px under its card a row further, one under the legend chip at 1280): only the places touching its card (the ring a gap off its
+ * edge), never a row further; those under a cover of the window (the legend chip, the first-view line, the title chip, the top box and the
+ * bars, in map units) after the rest. */
+export function hubChipOrder(spots: readonly { x: number; y: number }[], w: number, hh: number, titles: readonly Box[], card: Box, covers: readonly Box[] = []): { x: number; y: number }[] {
+  const near = chipSpots(spots, w, hh, titles, card).filter(p => touchesCard({ x: p.x, y: p.y, w, h: hh }, card));
+  const under = (p: { x: number; y: number }) => covers.some(c => p.x < c.x + c.w && c.x < p.x + w && p.y < c.y + c.h && c.y < p.y + hh);
+  return [...near.filter(p => !under(p)), ...near.filter(under)];
 }
 /** Whether a chip touches its card: it overlaps the card or meets its edge (within 3 units: a hair off the card's text), along a side. */
 export const touchesCard = (r: Box, c: Box, eps = 3): boolean => r.x <= c.x + c.w + eps && c.x <= r.x + r.w + eps && r.y <= c.y + c.h + eps && c.y <= r.y + r.h + eps;
