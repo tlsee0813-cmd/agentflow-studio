@@ -499,3 +499,20 @@ function codeSpans(text: string): [number, number][] {
   for (const p of labelParts(text)) { if (p.code) out.push([at, at + p.t.length]); at += p.t.length; }
   return out;
 }
+
+/* ---------- F8 Q4: a condition on the map is whole and short, or its ◇ ----------
+ * A condition's words go on the map only as the record wrote them (its short name or complete words, else its whole source expression:
+ * never a paraphrase), and only when they are short (COND_LABEL_CHARS characters, spaces included), narrow (COND_LABEL_PX on screen), on
+ * one line, at COND_LABEL_FONT px or more on screen, and clear of the lines and cards. Otherwise the line keeps its ◇ (its words, both
+ * ends and the source one press away). Never a cut condition: no 「…」 inside one, no OR losing a branch, no bracket losing its close. */
+export const COND_LABEL_CHARS = 24, COND_LABEL_PX = 160, COND_LABEL_FONT = 12;
+/** The words a condition's label may show: the record's words whole when they are short enough and not themselves cut; else null (◇). */
+export function condLabelWords(t: string | null | undefined): string | null {
+  const s = (t ?? '').replace(/\s+/g, ' ').trim();
+  if (!s || s === '조건' || s === COND_UNSAID || /…|\.{3}/.test(s)) return null;
+  return [...s].length <= COND_LABEL_CHARS ? s : null;
+}
+/** Whether a condition's label, as measured on screen, may stand: narrow enough, one line, and large enough to read. */
+export function condLabelFits(m: { widthPx: number; heightPx: number; fontPx: number; linePx: number }): boolean {
+  return m.widthPx <= COND_LABEL_PX && m.fontPx >= COND_LABEL_FONT - 0.01 && m.heightPx <= m.linePx * 1.5;
+}

@@ -557,6 +557,8 @@ export function switcherText(f: FirstFlow, name: (id: string) => string = id => 
   const at = (id: string) => tokenFit(name(id), 16);
   let what: string;
   if (c.rule === 'entry') what = `${at(c.parts[0]!)}에서 나가는 연결 ${c.drawnLines}개`;
+  // F8 Q3: a recorded set of more lines than the foreground's target is said as such (never cut): every one of them is drawn.
+  else if (c.drawnLines > FOCUS_FG_MAX) what = recordedSetWord(c.drawnLines);
   else {
     const ls = c.chain.map(l => l.map(at).join(', ')), shown = ls.length > 4 ? [ls[0]!, ls[1]!, '…', ls.at(-1)!] : ls;
     what = `${shown.join(' → ')}${c.more ? ` 외 연결 ${c.more}개` : ''}`;
@@ -590,3 +592,45 @@ export function sentenceRoom<F>(forms: readonly F[], k0: number, least: number, 
   }
   return null;
 }
+
+/* ---------- F8 Q1 + Q3: the static focus ----------
+ * The opening view is one set of lines, 「먼저 볼 연결」 as the rules above choose it (its picked lines and their context), and every other
+ * relation folded: not drawn faint, not drawn at all, its count said (「표시 n/N」) and one press away (「전체 관계 N개 보기」, a focus card's
+ * own 「다른 연결 k개」). Nothing releases it by itself: only the person's choice of another view, a card, a chip or 전체 관계. A recorded
+ * set is never cut to fit a number: past FOCUS_FG_MAX lines it says 「기록된 연결 n개」 and shows them all. */
+/** The opening view's targets (the ruling's initial spec): at most this many relations in the foreground, and through one gap between two
+ * columns of cards. Measured and reported; never enforced by cutting a recorded set. */
+export const FOCUS_FG_MAX = 6, FOCUS_GAP_MAX = 4;
+/** A line drawn now: its key, the cards it joins (as drawn), the relations it holds, and whether it belongs to the view (its picked lines
+ * and their context). */
+export interface FoldLine { key: string; from: string; to: string; ids: readonly string[]; flow: boolean }
+export interface FocusFold {
+  /** The lines folded (not drawn). */
+  hide: Set<string>;
+  /** Each focus card with folded direct relations: how many (its own relations only, never summed over cards). */
+  byCard: Map<string, number>;
+  /** Each opened focus card: how many of its direct relations its chip brought back (its chip says 「접기」). */
+  opened: Map<string, number>;
+  /** Unique relations drawn (n) and in the view (N). */
+  shown: number; total: number;
+}
+/** The static focus's fold: every line outside the view is folded, unless it touches a focus card the person opened. */
+export function focusFold(cards: readonly string[], lines: readonly FoldLine[], open: ReadonlySet<string> = new Set()): FocusFold {
+  const focus = new Set(cards), opens = (l: FoldLine) => (focus.has(l.from) && open.has(l.from)) || (focus.has(l.to) && open.has(l.to));
+  const hide = new Set(lines.filter(l => !l.flow && !opens(l)).map(l => l.key));
+  const ids = (ls: readonly FoldLine[]) => new Set(ls.flatMap(l => l.ids));
+  const all = ids(lines), seen = ids(lines.filter(l => !hide.has(l.key)));
+  const byCard = new Map<string, number>(), opened = new Map<string, number>();
+  for (const c of focus) {
+    const own = lines.filter(l => !l.flow && (l.from === c || l.to === c));
+    if (open.has(c)) { const n = ids(own).size; if (n) opened.set(c, n); continue; }
+    // A relation of this card also drawn on a shown line is not folded for it.
+    const n = [...ids(own.filter(l => hide.has(l.key)))].filter(id => !seen.has(id)).length; if (n) byCard.set(c, n);
+  }
+  return { hide, byCard, opened, shown: seen.size, total: all.size };
+}
+/** The global count and its control: 「표시 n/N」, 「전체 관계 N개 보기」 (N unique relations). */
+export const shownWord = (n: number, total: number): string => `표시 ${n}/${total}`;
+export const allWord = (total: number): string => `전체 관계 ${total}개 보기`;
+/** A recorded set past FOCUS_FG_MAX lines: said as such, shown whole. */
+export const recordedSetWord = (n: number): string => `기록된 연결 ${n}개`;

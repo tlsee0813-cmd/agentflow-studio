@@ -12,7 +12,7 @@ test('V8M-1 a folded condition keeps both: the open cue (three dots) at rest and
   const cue = fn(await app(), 'placeCue');
   // One element carries both (v8 maps: q-open and its dots; v8 growth: the word), never one in place of the other.
   assert.match(cue, /\$\{open \? ' q-open' : ''\}/);
-  assert.match(cue, /open \? h\('span', \{ class: 'cue-open', 'aria-hidden': 'true' \}\) : null, h\('span', \{ class: 'cue-word', 'aria-hidden': 'true' \}, cue === 'condition' \? '조건 보기' : '선택 보기'\)/);
+  assert.match(cue, /open \? h\('span', \{ class: 'cue-open', 'aria-hidden': 'true' \}\) : null, h\('span', \{ class: 'cue-word', 'aria-hidden': 'true' \}, cue === 'condition' \? '조건 보기' : cue === 'detail' \? '관계 보기' : '선택 보기'\)/); // F8: and a relation-detail cue says 관계 보기
   const c = await css();
   // The dots run from 8.5px to 15.5px: the word (at 11px beside a bare ◇) starts past them beside an open cue.
   const dots = /\.edge-cue \.cue-open \{[^}]*left: ([\d.]+)px;[^}]*width: ([\d.]+)px;/.exec(c);

@@ -97,8 +97,8 @@ test('V9-5 a condition finds room beside its line and in shorter cuts before it 
   // The last pass's shorter cuts, longest first, down to the first unit.
   assert.deepEqual(condCuts('SKIP_A_CHECK·SKIP_B_STEP이 없을 때'), ['SKIP_A_CHECK·SKIP_B_STEP이 없을…', 'SKIP_A_CHECK·SKIP_B_STEP이…', 'SKIP_A_CHECK…']);
   const place = fn(await app(), 'placeFitLabels');
-  assert.ok(place.includes("if (cond && !fold && last) for (const c of condCuts(base)) if (c.length < last.length && !/[(（[][^)）\\]]*$/.test(c) && !forms.some(([t]) => t === c)) forms.push([c, true]);"),
-    'each shorter cut, never one that leaves a bracket open (「(type이…」)');
+  // F8 Q4 supersedes the shorter cuts: a condition is never cut (no 「…」 inside one); it stays whole or folds to its ◇.
+  assert.ok(!place.includes('condCuts(base)') && place.includes('if (whole) forms.push([whole, true]);'), 'no cut condition on the map');
   assert.ok(/[(（[][^)）\]]*$/.test('(type이…') && !/[(（[][^)）\]]*$/.test('len(items) == 0가…'));
   assert.match(place, /if \(cond\) besideSpots\(pts, w, hh, 3 \* inv\)\.filter\(r => free\(r\) && !polylineHitsRect\(pts, r, 1\)\)/, 'beside: never over another line');
 });

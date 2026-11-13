@@ -290,13 +290,13 @@ button:disabled { opacity: .5; cursor: default; }
 .edge.near:not(.on)[data-head="ref"] .edge-line { marker-end: url(#m-ref-near); }
 /* A selected line: 3px in the accent (2.5 for a reference). */
 .edge.on .edge-line { stroke: var(--accent); --lw: 3; stroke-opacity: 1; }
-.edge.agg.near .edge-line { stroke: #a9b1bd; --lw: 3; }
+.edge.agg.near .edge-line { stroke: var(--text-3); --lw: 3; }
 /* A line resting only on a withdrawn report keeps its kind's dash; lighter at rest, its 「보고 정정됨」 mark on its label. */
 .edge.revised:not(.on):not(.near) .edge-line { stroke-opacity: .6; }
 /* A relation the record states as a plan keeps its kind's dash, lighter, so it never reads as a flow that runs. */
 .edge.planned .edge-line { stroke-opacity: .8; }
 .edge.planned.spine .edge-line { --lw: 1.5; }
-.edge.agg.on .edge-line { stroke: #a9b8f5; --lw: 3; }
+.edge.agg.on .edge-line { stroke: var(--accent); --lw: 3; }
 /* The end marks (app.ts endMarkDefs): a filled triangle, open Vs, the ear's ring (canvas inside) and a dot, in their line's
    paint where supported. */
 .mk .mk-fill { fill: var(--edge); } .mk-on .mk-fill { fill: var(--accent); } .mk-near .mk-fill { fill: var(--accent); }
@@ -3911,3 +3911,25 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .gl-row .gl-item:not(.gl-filter) { padding: 0 5px; }
 .node.card .c-tag-text .c-tag-old { font-size: calc(12px * var(--u, 1)); line-height: calc(14px * var(--u, 1)); font-weight: var(--fw-meta); color: var(--text-3); }
 .space.face-tag .node.card .c-tag-text:has(.c-tag-old:not(.cut)) .c-tag-kind { display: none; }
+
+/* ---------- F8 Q1 + Q3: the static focus (first-flow focusFold, app.ts foldHubs) ----------
+   At rest the view's lines alone (3px in the accent, their context 2.25), every other relation folded (not drawn), its count in the top
+   line (「표시 n/N」) and one press away (「전체 관계 N개 보기」, a focus card's 「다른 연결 k개」). A card picked: its direct relations 2.25px
+   (the accent), a line picked among them 3px. 전체 관계: every relation at the background width 1.15. */
+.space .world .edge.on:not(.picked) { --bw: 2.25; }
+#space.ff-all.lens-compose .world .edge:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.s-sparse):not(.growth-lit):not(.growth-gone-line) { --bw: 1.15; }
+.focus-top .ft-count { color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.focus-top .ft-name.ft-plain { color: var(--text-2); }
+.focus-top .ft-name.ft-plain::before { display: none; }
+/* F8 Q4: a ◇ (a condition folded to its mark) and the relation-detail cue are pressed with a 24 × 24 screen-pixel target around them. */
+.edge-labels > .edge-cue::after { inset: -8px; }
+.edge-labels > .edge-cue.q-open::after { inset: -8px -4px -8px -8px; }
+/* The relation-detail cue: a line whose label had no room keeps three small dots on the line (its words in the line's hover, its detail
+   one press away). */
+.edge-cue.q-detail::before { display: none; }
+.edge-labels > .edge-cue.q-detail { width: 9px; }
+.edge-cue.q-detail .cue-open { left: 1px; }
+/* A relation-detail cue for a lens label that found no room reads only under that lens. */
+.edge-labels > .edge-cue.q-detail[data-lens] { display: none; }
+.space.lens-data .edge-labels > .edge-cue.q-detail[data-lens="data"], .space.lens-start .edge-labels > .edge-cue.q-detail[data-lens="start"],
+.space.lens-scenario .edge-labels > .edge-cue.q-detail[data-lens="scenario"], .space.lens-compose .edge-labels > .edge-cue.q-detail[data-lens="compose"] { display: block; }

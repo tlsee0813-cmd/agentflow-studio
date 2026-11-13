@@ -714,3 +714,31 @@ export function mixPath(from: Point[], to: Point[], t: number): string {
   for (let i = 0; i < to.length; i++) { const a = from[i] ?? to[i]!, b = to[i]!; d += `${i ? ' L' : 'M'}${(a.x + (b.x - a.x) * t).toFixed(1)},${(a.y + (b.y - a.y) * t).toFixed(1)}`; }
   return d;
 }
+
+/* ---------- F8 Q3: the foreground's room on screen ----------
+ * The routing keeps its pitches in map units (ports PORT_PITCH apart, runs LANE_TRACK apart), so at a fit of about half size two lines
+ * of one pair run 6 screen pixels apart and one's head touches the other. The few lines a static focus draws (its own, every other
+ * relation folded) are routed with their room counted on screen: the cards as if drawn at scale c (c < 1), the routes read back at
+ * full size, so every pitch is 1/c times as wide in map units. Cards never move; only the drawn lines' routes change. */
+/** The scale the focus lines are routed at: one fixed scale (never the camera's: a route that followed the zoom would move the fit that
+ * reads it), so their pitches are twice the map's, about 12–14 screen pixels at a fit of 0.5–0.6. */
+export const FOCUS_ROUTE_SCALE = 0.5;
+export function routeAtScale(boxes: Map<string, Box>, edges: Edge[], c: number, opts: { quick?: boolean } = {}): Map<string, Routed> {
+  if (!(c > 0) || c >= 0.999) return routeEdges(boxes, edges, opts);
+  const s = (v: number) => v * c, u = (v: number) => v / c;
+  const sb = new Map([...boxes].map(([id, b]) => [id, { ...b, x: s(b.x), y: s(b.y), w: s(b.w), h: s(b.h), head: s(b.head),
+    ...(b.contact !== undefined ? { contact: s(b.contact) } : {}), ...(b.ear !== undefined ? { ear: s(b.ear) } : {}),
+    ...(b.pins ? { pins: Object.fromEntries(Object.entries(b.pins).map(([k, v]) => [k, s(v)])) } : {}) } as Box]));
+  const out = routeEdges(sb, edges, opts);
+  return new Map([...out].map(([k, r]) => { const pts = r.pts.map(p => ({ x: u(p.x), y: u(p.y) })); return [k, { ...r, pts, mx: u(r.mx), my: u(r.my), d: rounded(pts) }]; }));
+}
+/** The focus lines' routes: at FOCUS_ROUTE_SCALE when that is no worse a drawing than the map's own pitch (no more crossings, no more
+ * detours, at most FOCUS_ROUTE_LONGER times the length: a wider pitch that sends a line round the map is no gain); else the map's own. */
+export const FOCUS_ROUTE_LONGER = 1.15;
+export function focusRoutes(boxes: Map<string, Box>, edges: Edge[], c: number = FOCUS_ROUTE_SCALE): Map<string, Routed> {
+  const own = routeEdges(boxes, edges); if (!(c > 0) || c >= 0.999) return own;
+  const wide = routeAtScale(boxes, edges, c);
+  const len = (m: Map<string, Routed>) => [...m.values()].reduce((a, r) => a + r.pts.reduce((s, p, i) => (i ? s + Math.abs(p.x - r.pts[i - 1]!.x) + Math.abs(p.y - r.pts[i - 1]!.y) : 0), 0), 0);
+  const detours = (m: Map<string, Routed>) => [...m.values()].filter(r => r.detour).length;
+  return allCrossings(wide) <= allCrossings(own) && detours(wide) <= detours(own) && len(wide) <= FOCUS_ROUTE_LONGER * len(own) ? wide : own;
+}
