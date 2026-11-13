@@ -634,11 +634,11 @@ export function addReading(p: Project, entry: ReadingEntry): Project {
 }
 /** The person corrects a part's description as read (not the part's own note, not a received return.2 description). It names
  * the reading whose description it corrects and holds that description only. */
-export function correctReadingRole(p: Project, areaId: string, value: string): Project {
+export function correctReadingRole(p: Project, areaId: string, value: string, error = false): Project {
   const v=value.trim();text(v,300);ensure(p.space.areas.some(a=>a.id===areaId&&!a.archived),'AREA_MISSING');
   const from=[...p.readings].reverse().find(r=>isMapReading(r)&&r.parts.some(x=>x.areaId===areaId&&x.role));
   ensure(p.readings.some(r=>isMapReading(r)&&r.parts.some(x=>x.areaId===areaId)),'NOTHING_TO_CORRECT');
-  return addReading(p,{version:'map-correction.1',id:uid('M'),at:now(),areaId,text:v,corrects:from?.id??null});
+  return addReading(p,{version:'map-correction.1',id:uid('M'),at:now(),areaId,text:v,corrects:from?.id??null,...(error?{error:true as const}:{})});
 }
 export function restore(p: Project): Project {
   return {...copy(p),pending:null,notice:p.pending ? '중단된 요청의 입력을 복구했습니다. 자동으로 다시 전송하지 않습니다.' : null};

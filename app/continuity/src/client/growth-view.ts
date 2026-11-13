@@ -11,37 +11,22 @@
  * Pure helpers (the scenes and their order, the guide, the items, tabs and their places, names and code) are exported for tests; the DOM
  * pieces take what they show and callbacks. */
 import { h } from './plan-dom.js';
-import { CHANGE_WORD, SCENE_ORDER, SUMMARY_ORDER, ROW_STATE_WORD, versionLabel, type ChangeKind, type ChangeSet, type PartChange, type MapVersion, type Unreflected, type ReflectGroup } from '../shared/map-growth.js';
+import { josa } from '../shared/josa.js';
+import { faceSplit, facePlain, faceCounts as faceCountsOf } from './face-name.js';
+import { CHANGE_WORD, CHANGE_KINDS, SCENE_ORDER, SUMMARY_ORDER, ROW_STATE_WORD, versionLabel, type ChangeKind, type ChangeSet, type PartChange, type MapVersion, type Unreflected, type ReflectGroup } from '../shared/map-growth.js';
 
 /* ---------- names and words ---------- */
-/** A name as a sentence says it (F7): a person's-words name keeps its words, and an identifier in brackets after it (「소비 폴더
- * 감시기(document_consumer)」) is a secondary identifier, said in the selected detail; it stays when it is the only thing that tells two
- * names apart (others: every other name it could be taken for). */
-export function plainName(name: string, others: readonly string[] = []): string {
-  const m = /^(.*[가-힣].*?)\s*[(（]([\x20-\x7e]*[A-Za-z][\x20-\x7e]*)[)）]\s*$/.exec(name.trim()); if (!m) return name.trim();
-  const core = m[1]!.trim(), clash = others.some(o => o.trim() !== name.trim() && (o.trim() === core || plainName(o) === core));
-  return clash ? name.trim() : core;
+/** A name as a sentence says it (F7; review of v7: exactly as its card's face says it, face-name.ts): a person's-words name keeps its
+ * words, and a code identifier in brackets after it (「소비 폴더 감시기(document_consumer)」) is a secondary identifier, said in the selected
+ * detail; it stays when it is the only thing that tells two names apart (others: the map's names). A bracket of plain words
+ * (「문서 소비기(Consumer)」) is the name's own. */
+export const plainName = (name: string, others: readonly string[] = []): string => facePlain(name, others);
+/** The secondary identifier plainName leaves out (null: none), among the map's names as plainName reads them. */
+export function auxName(name: string, others: readonly string[] = []): string | null {
+  return faceSplit(name, faceCountsOf(others.includes(name) ? others : [...others, name])).ident;
 }
-/** The secondary identifier plainName leaves out (null: none). */
-export function auxName(name: string): string | null {
-  const m = /^(.*[가-힣].*?)\s*[(（]([\x20-\x7e]*[A-Za-z][\x20-\x7e]*)[)）]\s*$/.exec(name.trim()); return m ? m[2]!.trim() : null;
-}
-/** Whether a word ends in a closed syllable for a particle (그 받침이 있는가): a Hangul syllable by its final; a digit or Latin letter as it is
- * read aloud. For 으로/로 a final ㄹ (or l) reads as open. */
-function closed(word: string, ro = false): boolean {
-  // A bracketed part after the word is read past (「운영자(설치·관리)」 takes 운영자's particle).
-  const t = word.replace(/[\s'"’‘」』.,…]+$/u, '').replace(/\s*[(（][^()（）]*[)）]$/u, '').replace(/[\s'"’‘」』)\]）.,…]+$/u, ''), ch = t.at(-1) ?? '';
-  const c = ch.charCodeAt(0);
-  if (c >= 0xac00 && c <= 0xd7a3) { const j = (c - 0xac00) % 28; return ro ? j !== 0 && j !== 8 : j !== 0; }
-  if (/\d/.test(ch)) return ro ? '0368'.includes(ch) : '013678'.includes(ch);
-  if (/[A-Za-z]/.test(ch)) return ro ? 'bcdgkmnpqt'.includes(ch.toLowerCase()) : 'bcdgklmnpqt'.includes(ch.toLowerCase());
-  return false;
-}
-/** The particle after a word: josa('cronjob', '을/를') → '을'. */
-export function josa(word: string, pair: '이/가' | '을/를' | '은/는' | '과/와' | '으로/로'): string {
-  const [a, b] = pair.split('/') as [string, string];
-  return closed(word, pair === '으로/로') ? a : b;
-}
+/** The particle after a word (shared/josa.ts): josa('cronjob', '을/를') → '을'. */
+export { josa };
 /** Words a guide or a scene never says (F7: no evaluation, cause or time made up). */
 export const GUIDE_BANNED: readonly string[] = Object.freeze(['개발됐', '안정적', '이를 위해', '핵심']);
 
@@ -83,40 +68,44 @@ export function changeScenes(cs: ChangeSet): Scene[] {
 export function sceneKind(c: PartChange): string {
   switch (c.kind) {
     case 'succeed': return '기록된 승계';
-    case 'retire': return '기록된 은퇴 · 대신하는 부품 없음';
-    case 'correct': return '정정 · 사람이 고친 설명';
+    case 'retire': return c.named ? '기록된 은퇴 · 대신하는 부품은 지금 지도에 없음' : '기록된 은퇴 · 대신하는 부품 없음';
+    case 'correct': return c.by === 'record' ? '정정 · 기록이 적은 철회' : '정정 · 사람이 바로잡은 설명';
     case 'impl': return c.impl?.mode === 'add' ? '구현 정보 추가' : '구현 상태 변경';
     case 'reimpl': return '구현 바뀜';
     case 'rename': return '이름 변경';
-    case 'desc': return '설명 변경';
+    case 'desc': return c.by === 'person' ? '설명 변경 · 사람이 새로 씀' : '설명 변경';
     case 'dedupe': return '중복 정리';
     case 'merge': return '통합';
     default: return '지도에 새로 표시';
   }
 }
 type Name = (id: string) => string;
+/** A name given as text (a rename's before and after) as the card's face says it (review of v7: one helper for every name). */
+type Say = (name: string) => string;
 const q = (n: string) => `‘${n}’`;
 /** A scene's title (F7: 「cronjob → 소비 폴더 감시기」). */
-export function sceneTitle(c: PartChange, nm: Name): string {
+export function sceneTitle(c: PartChange, nm: Name, say: Say = n => plainName(n)): string {
   switch (c.kind) {
     case 'succeed': return `${nm(c.predecessor!)} → ${nm(c.part)}`;
-    case 'rename': case 'reimpl': case 'impl': return `${c.before ?? '정보 없음'} → ${c.after ?? ''}`;
+    case 'rename': return `${say(c.before ?? '')} → ${say(c.after ?? '')}`;
+    case 'reimpl': case 'impl': return `${c.before ?? '정보 없음'} → ${c.after ?? ''}`;
     case 'dedupe': return `${[...(c.others ?? []).map(nm), nm(c.part)].join(' · ')} → ${nm(c.part)}`;
     default: return nm(c.part);
   }
 }
 /** A scene's one sentence: what the change ledger says, as the record has it; no evaluation, cause or time. */
-export function sceneSentence(c: PartChange, nm: Name): string {
+export function sceneSentence(c: PartChange, nm: Name, say: Say = n => plainName(n)): string {
   const n = nm(c.part);
   switch (c.kind) {
     case 'succeed': return `${q(n)}${josa(n, '이/가')} ${q(nm(c.predecessor!))}${josa(nm(c.predecessor!), '을/를')} 대신한다는 기록이 반영됐습니다.`;
-    case 'retire': return `${q(n)}${josa(n, '이/가')} 은퇴했다는 기록이 반영됐습니다. 대신하는 부품은 기록에 없습니다.`;
-    case 'correct': return `${q(n)}의 설명을 사람이 고쳤습니다.`;
+    // Review of v7: a successor the record names that is off the map is never 「none in the record」.
+    case 'retire': return `${q(n)}${josa(n, '이/가')} 은퇴했다는 기록이 반영됐습니다. ${c.named ? '대신하는 부품은 지금 지도에 없습니다.' : '대신하는 부품은 기록에 없습니다.'}`;
+    case 'correct': return c.by === 'record' ? `기록이 ${q(n)}에 대한 철회를 적었습니다.` : `${q(n)}의 설명이 틀렸다고 사람이 바로잡았습니다.`;
     case 'impl': return c.impl?.mode === 'add' ? `${q(n)}에 구현 정보 ${q(c.after ?? '')}${josa(c.after ?? '', '이/가')} 더해졌습니다. 구현됨은 가동 중이라는 뜻이 아닙니다.`
       : `${q(n)}의 구현 상태가 ${q(c.before ?? '')}에서 ${q(c.after ?? '')}${josa(c.after ?? '', '으로/로')} 기록됐습니다.`;
     case 'reimpl': return `${q(n)}의 구현이 ${q(c.before ?? '')}에서 ${q(c.after ?? '')}${josa(c.after ?? '', '으로/로')} 바뀌었다는 기록이 반영됐습니다.`;
-    case 'rename': { const a = plainName(c.after ?? n); return `${q(plainName(c.before ?? ''))}의 이름이 ${q(a)}${josa(a, '으로/로')} 바뀌었다는 기록이 반영됐습니다.`; }
-    case 'desc': return `${q(n)}의 설명이 같은 부품에 대한 새 설명으로 바뀌었습니다.`;
+    case 'rename': { const a = say(c.after ?? n); return `${q(say(c.before ?? ''))}의 이름이 ${q(a)}${josa(a, '으로/로')} 바뀌었다는 기록이 반영됐습니다.`; }
+    case 'desc': return c.by === 'person' ? `${q(n)}의 설명을 사람이 새로 썼습니다.` : `${q(n)}의 설명이 같은 부품에 대한 새 설명으로 바뀌었습니다.`;
     case 'dedupe': return `지도가 두 번 만든 ${q(n)}${josa(n, '을/를')} 하나로 정리했습니다.`;
     case 'merge': return `${q(n)}에 다른 부품을 합쳤다는 기록이 반영됐습니다.`;
     default: return `${q(n)}${josa(n, '이/가')} 지도에 새로 표시됐습니다.`;
@@ -132,22 +121,22 @@ export interface Guide { head: string; sentences: GuideSeg[][] }
 const short = (n: number) => `v${String(n).padStart(2, '0')}`;
 /** How a kind is counted in the guide's second sentence (a noun phrase with its count). */
 const PHRASE: Readonly<Record<ChangeKind, (n: number) => string>> = Object.freeze({
-  correct: n => `사람이 설명을 고친 부품 ${n}개`, succeed: n => `승계 ${n}건`, retire: n => `대신하는 부품 없이 은퇴한 부품 ${n}개`, impl: n => `구현 상태 기록이 달라진 부품 ${n}개`,
+  correct: n => `정정이 적힌 부품 ${n}개`, succeed: n => `승계 ${n}건`, retire: n => `지금 지도에 대신하는 부품이 없는 은퇴 부품 ${n}개`, impl: n => `구현 상태 기록이 달라진 부품 ${n}개`,
   reimpl: n => `구현이 바뀐 부품 ${n}개`, rename: n => `이름이 달라진 부품 ${n}개`, desc: n => `설명이 바뀐 부품 ${n}개`, dedupe: n => `중복을 정리한 부품 ${n}개`, merge: n => `합쳐진 부품 ${n}개`,
   new: n => `지도에 새로 표시된 부품 ${n}개` });
 /** The lead of the second sentence when the first sentence's kind has more than one change (「승계는 총 2건이며,」). */
-const LEAD: Readonly<Record<ChangeKind, string>> = Object.freeze({ correct: '정정', succeed: '승계', retire: '대신하는 부품 없는 은퇴', impl: '구현 상태 기록의 변화', reimpl: '구현 바뀜',
+const LEAD: Readonly<Record<ChangeKind, string>> = Object.freeze({ correct: '정정', succeed: '승계', retire: '지금 지도에 대신하는 부품이 없는 은퇴', impl: '구현 상태 기록의 변화', reimpl: '구현 바뀜',
   rename: '이름 변경', desc: '설명 변경', dedupe: '중복 정리', merge: '통합', new: '새로 표시된 부품' });
 /** How many changes of a kind the guide and the line count: a retirement a 승계 holds counts in that 승계. */
 export const kindCount = (cs: ChangeSet, k: ChangeKind): number => (k === 'retire' ? cs.changes.filter(c => c.kind === 'retire' && !c.successor).length : cs.counts[k]);
 /** The guide: its head, the first scene in one named sentence (the change shown first), and the counts in a second (the first scene's kind
  * when it has more, then up to three other kinds in the scene order, 지도에 새로 표시 always last when there is any; 설명 has its own
  * filter on the line). Only confirmed changes: a held row or a candidate is never one. */
-export function guideOf(cs: ChangeSet, scenes: readonly Scene[], nm: Name): Guide {
+export function guideOf(cs: ChangeSet, scenes: readonly Scene[], nm: Name, say: Say = n => plainName(n)): Guide {
   const head = `지도 변화 · ${short(cs.from)} → ${short(cs.to)}`, first = scenes[0];
   if (!first) return { head, sentences: [[{ text: '두 지도 버전 사이에 반영된 구조 변화가 없습니다.', to: null, fact: null }]] };
   const c = first.main, n = nm(c.part);
-  const s1: GuideSeg = { text: c.kind === 'succeed' ? `${q(nm(c.predecessor!))}${josa(nm(c.predecessor!), '을/를')} ${q(n)}${josa(n, '이/가')} 대신한다는 기록이 반영됐습니다.` : sceneSentence(c, nm).split(/(?<=다\.)\s/)[0]!,
+  const s1: GuideSeg = { text: c.kind === 'succeed' ? `${q(nm(c.predecessor!))}${josa(nm(c.predecessor!), '을/를')} ${q(n)}${josa(n, '이/가')} 대신한다는 기록이 반영됐습니다.` : sceneSentence(c, nm, say).split(/(?<=다\.)\s/)[0]!,
     to: { scene: first.part }, fact: { kind: c.kind, count: null, parts: [c.part, ...(c.predecessor ? [c.predecessor] : [])] } };
   const kinds = SCENE_ORDER.filter(k => k !== 'desc' && k !== c.kind && kindCount(cs, k) > 0);
   const pick = kinds.includes('new') ? [...kinds.filter(k => k !== 'new').slice(0, 2), 'new' as const] : kinds.slice(0, 3);
@@ -161,6 +150,13 @@ export function guideOf(cs: ChangeSet, scenes: readonly Scene[], nm: Name): Guid
     s2.push({ text: last ? `${josa(p.text, '이/가')} 있습니다.` : i === phrases.length - 2 ? `${josa(p.text, '과/와')} ` : ', ', to: null, fact: null });
   });
   return { head, sentences: s2.length ? [[s1], s2] : [[s1]] };
+}
+/** Every change the line counts (a retirement a 승계 holds counted in that 승계; the lines apart). */
+export const kindTotal = (cs: ChangeSet): number => CHANGE_KINDS.reduce((a, k) => a + kindCount(cs, k), 0);
+/** Review of v7 (first user, a): why 「변화 장면 1/32」 and the line's items (summing to 36) differ, in one line; null when they agree. */
+export function sceneWhy(cs: ChangeSet, scenes: readonly Scene[]): string | null {
+  const n = kindTotal(cs); if (n === scenes.length) return null;
+  return `장면은 부품마다 하나 · 변화 ${n}건이 부품 ${scenes.length}개에 있어 한 부품의 여러 변화는 한 장면에 함께 보임`;
 }
 export const guideText = (g: Guide): string => g.sentences.map(s => s.map(x => x.text).join('')).join(' ');
 
@@ -185,7 +181,9 @@ export const NO_CHANGE = '구조 변화 없음';
 export const waitingWord = (n: number): string => `대기·보류 ${n}행`;
 
 /* ---------- the card tabs ---------- */
-export const tabWord = (c: PartChange): string => (c.kind === 'dedupe' ? `중복 정리 ${(c.others?.length ?? 1) + 1}→1` : CHANGE_WORD[c.kind]);
+/** A card tab's word for a kind (review of v7: the panel's own words for its two filters, 「새로 표시」 and 「설명 변경」). */
+export const tabKindWord = (k: ChangeKind): string => (k === 'new' ? '새로 표시' : k === 'desc' ? '설명 변경' : CHANGE_WORD[k]);
+export const tabWord = (c: PartChange): string => (c.kind === 'dedupe' ? `중복 정리 ${(c.others?.length ?? 1) + 1}→1` : tabKindWord(c.kind));
 /** At most three tabs at a time. */
 export const TAB_CAP = 3;
 export interface CardTab { part: string; word: string; more: number; kind: ChangeKind; on: boolean; changes: PartChange[] }
@@ -194,7 +192,7 @@ export interface CardTab { part: string; word: string; more: number; kind: Chang
  * the current map: it has no tab. */
 export function shownTabs(scenes: readonly Scene[], current: string | null, filter: 'new' | 'desc' | null): CardTab[] {
   const kinds = (s: Scene) => new Set(s.changes.map(c => c.kind)).size;
-  const tabOf = (s: Scene, on: boolean, kind: ChangeKind = s.main.kind): CardTab => ({ part: s.part, word: kind === s.main.kind ? tabWord(s.main) : CHANGE_WORD[kind], more: kinds(s) - 1, kind, on, changes: s.changes });
+  const tabOf = (s: Scene, on: boolean, kind: ChangeKind = s.main.kind): CardTab => ({ part: s.part, word: kind === s.main.kind ? tabWord(s.main) : tabKindWord(kind), more: kinds(s) - 1, kind, on, changes: s.changes });
   const out: CardTab[] = [], cur = current ? scenes.find(s => s.part === current) : undefined;
   // The shown scene's own tab, but never a 새 tab with no filter on (F7: no 새 tab by default; its card is outlined all the same).
   if (cur && cur.main.kind !== 'retire' && (cur.main.kind !== 'new' || filter === 'new')) out.push(tabOf(cur, true, filter && cur.changes.some(c => c.kind === filter) ? filter : cur.main.kind));
@@ -293,24 +291,25 @@ export function compareLine(cs: ChangeSet, picked: SummaryKey | null, waiting: n
       : [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), h('span', { class: 'gl-none' }, NO_CHANGE)]),
     h('span', { class: 'gl-gap' }),
     waiting !== null ? h('button', { type: 'button', class: `gl-un${waiting ? '' : ' zero'}`, title: `기록 반영 상태 · 지도 ${short(cs.to)} 기준 · 기록의 행 가운데 지도에 아직 들어가지 않은 대기·보류 행 (변화 집계와 따로 셈)`, onclick: on.reflect }, waitingWord(waiting)) : null,
-    h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 보던 렌즈와 선택, 화면으로', 'aria-label': '비교 끝내기', onclick: on.exit }, '×'));
+    h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 비교 전에 고른 카드와 보던 위치로 돌아가요', 'aria-label': '비교 끝내기 · 고른 카드와 위치는 비교 전대로', onclick: on.exit }, '×'));
 }
 const itemTip = (k: SummaryKey): string => ({ new: '기준 지도보다 새로 표시된 부품 · 새로 만들었다는 뜻이 아님 · 누르면 지도에서 밝히고 목록으로 하나씩 보기', rename: '이름이 바뀐 부품', reimpl: '같은 부품, 기록이 구현이 바뀌었다고 적음',
-  impl: '기록의 구현 상태 칸이 달라진 부품 (구현 상태 변경 · 구현 정보 추가) · 가동 여부가 아님', desc: '같은 부품에 대한 새 설명이 채택된 부품 · 누르면 지도에서 밝히고 하나씩 보기', correct: '사람이 고친 설명',
-  dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '대신하는 부품 없이 은퇴한 부품 · 지금 지도에는 없음', lines: '더해진 연결과 빠진 연결' } as Record<SummaryKey, string>)[k] + (k === 'new' || k === 'desc' ? '' : ' · 누르면 목록');
+  impl: '기록의 구현 상태 칸이 달라진 부품 (구현 상태 변경 · 구현 정보 추가) · 가동 여부가 아님', desc: '같은 부품에 대한 새 설명이 채택되었거나 사람이 설명을 새로 쓴 부품 · 누르면 지도에서 밝히고 하나씩 보기', correct: '오류나 철회가 적힌 정정 (기록의 철회, 사람이 바로잡은 설명) · 문구를 다듬은 것은 설명 변경',
+  dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '지금 지도에 대신하는 부품이 없는 은퇴 부품 · 은퇴한 부품은 지금 지도에 없음', lines: '더해진 연결과 빠진 연결' } as Record<SummaryKey, string>)[k] + (k === 'new' || k === 'desc' ? '' : ' · 누르면 목록');
 /** The scene's line over the earlier description: a person's correction is never a description update, and the other way round. */
-export const wasLabel = (kind: 'desc' | 'correct' | null, target: string | null): string => (kind === 'correct' ? '이전 설명 · 사람이 고친 설명으로 바뀜'
+export const wasLabel = (kind: 'desc' | 'correct' | null, target: string | null, by: PartChange['by'] = undefined): string => (kind === 'correct' ? '이전 설명 · 사람이 고친 설명으로 바뀜'
+  : kind === 'desc' && by === 'person' ? '이전 설명 · 사람이 새로 쓴 설명으로 바뀜'
   : target ? `이전 설명 · 대상 ${target} 기록의 설명으로 갱신됨` : '이전 설명 · 같은 부품에 대한 새 설명이 채택됨');
 /** A 새 change's line in its scene: the version whose reading made the part, or the person who added it and when. */
 export const newTitle = (c: PartChange, from: number): string => (c.by === 'person' ? `사람이 추가함${c.madeAt && time(c.madeAt) ? ` · ${time(c.madeAt)}` : ''}`
-  : c.since ? `${versionLabel(c.since)}에서 처음 읽힘` : `${versionLabel(from)} 뒤에 처음 읽힘`);
+  : c.since ? `${versionLabel(c.since)}에서 처음 표시됨` : `${versionLabel(from)} 뒤에 처음 표시됨`);
 /** The past view's banner: what is drawn and the way back. */
 export function pastBanner(n: number, applied: number, undated: number, onNow: () => void): HTMLElement {
   const main = applied ? `${versionLabel(n)} 보기 중 · 기록과 날짜가 남은 사람 편집 ${applied}건으로 다시 그림 (날짜 없는 사람 편집은 포함하지 않음)` : `${versionLabel(n)} 보기 중 · 기록만으로 다시 그림 (그때의 사람 편집은 포함하지 않음)`;
   return h('div', { class: 'gp-row', role: 'status' }, h('span', { class: 'gp-text' }, main),
     undated ? h('span', { class: 'gp-fine', title: '편집 기록이 생기기 전에 사람이 고친 이름·설명, 보관·옮김·연결은 언제 했는지 몰라 넣지 않음 · 이름은 그때 기록의 이름' }, `날짜 없는 편집 ${undated}건 제외`) : null,
     h('span', { class: 'gp-fine' }, '읽기 전용'),
-    h('button', { type: 'button', class: 'gp-now', onclick: onNow }, '현재로'));
+    h('button', { type: 'button', class: 'gp-now', title: '현재 지도로 · 고른 카드와 화면 위치는 그대로', onclick: onNow }, '현재로'));
 }
 /* 기록 반영 상태 (F7). */
 /** A group's title and its line: 「문서 소비기에 관한 미반영 기록 3행」, 「연결 2행 · 단계 1행」, and 「이 부품은 현재 지도에 있습니다」 only for a part
@@ -318,7 +317,9 @@ export function pastBanner(n: number, applied: number, undated: number, onNow: (
 export function groupTitle(g: ReflectGroup, name: (id: string) => string): { title: string; sub: string; onMap: boolean } {
   const n = g.rows.length, sub = g.byItem.map(x => `${x.item} ${x.n}행`).join(' · ');
   if (g.kind === 'part') return { title: `${name(g.part!)}에 관한 미반영 기록 ${n}행`, sub, onMap: true };
-  return { title: g.kind === 'unplaced' ? `아직 지도에 놓이지 않은 부품의 기록 ${n}행` : g.kind === 'several' ? `여러 부품 관련 기록 ${n}행` : `대상 미확정 기록 ${n}행`, sub, onMap: false };
+  // Review of v7: a part of a record no map part can be, by the record's own name for it (its rows together).
+  if (g.kind === 'unplaced') return { title: `${g.name ? plainName(g.name) : '이름 없는 부분'}에 관한 미반영 기록 ${n}행`, sub: `${sub} · 이 부품은 아직 지도에 놓이지 않았습니다`, onMap: false };
+  return { title: g.kind === 'several' ? `여러 부품 관련 기록 ${n}행` : g.kind === 'whole' ? `특정 부품을 가리키지 않는 기록 ${n}행` : `대상 미확정 기록 ${n}행`, sub, onMap: false };
 }
 /** One row: its state, 「연결 · 보내는 → 받는」 (the item's own title), why (plain words), the other parts it is about and the source line. */
 export function reflectRow(x: Unreflected, name: (id: string) => string | null, on: { part: (id: string) => void; source: (x: Unreflected) => void }): HTMLElement {

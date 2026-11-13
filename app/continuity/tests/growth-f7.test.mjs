@@ -38,7 +38,7 @@ function workshop() {
       ident('ID03', { kind: 'reimplement', areaId: 'srt', from: '옛 엔진', to: '새 엔진' })]),
     reading(4, [made('dup', '정리기 사본', '모은 것을 고른다', 'grp'), made('tmp', '임시 도구', '잠깐 쓰는 도구'),
       said('sto', null, { statusClaims: [{ dimension: 'operation', value: 'running', scope: null, basis: null, successor: null, quote: Q, scopeKind: null }] })], [rel('L5', 'dup', 'sto')]),
-    { version: 'map-correction.1', id: 'M1', at: '2026-10-04T12:00:00.000Z', areaId: 'col', text: '자료를 모아 하루에 한 번 넘긴다', corrects: 'R1' },
+    { version: 'map-correction.1', id: 'M1', at: '2026-10-04T12:00:00.000Z', areaId: 'col', text: '자료를 모아 하루에 한 번 넘긴다', corrects: 'R1', error: true },
     reading(5, [said('srt', null, { implementation: 'built', implementationQuote: Q })], [], [ident('ID04', { kind: 'fold', areaId: 'dup', into: 'srt' }), ident('ID05', { kind: 'retire', areaId: 'tmp' })])];
   return p;
 }
@@ -135,7 +135,7 @@ test('F7-5 기록 반영 상태 on the anonymised growth map: 대기·보류 N e
       const t = V.groupTitle(g, name);
       if (g.kind === 'part') { assert.equal(t.title, `${name(g.part)}에 관한 미반영 기록 ${g.rows.length}행`); assert.ok(t.onMap); assert.ok(G.versionAt(p, n).view.parts.some(x => x.id === g.part), 'on the map by its ID'); }
       else assert.equal(t.onMap, false, '「이 부품은 현재 지도에 있습니다」 only for a part checked by its ID');
-      assert.equal(t.sub, g.byItem.map(x => `${x.item} ${x.n}행`).join(' · '));
+      assert.equal(t.sub, g.byItem.map(x => `${x.item} ${x.n}행`).join(' · ') + (g.kind === 'unplaced' ? ' · 이 부품은 아직 지도에 놓이지 않았습니다' : ''));
     }
   }
   assert.equal(V.waitingWord(open.length), `대기·보류 ${open.length}행`);

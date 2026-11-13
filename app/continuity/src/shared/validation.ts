@@ -563,7 +563,7 @@ function readings(v:unknown,areaIds:Set<string>,texts:Map<string,RecordText>,pro
       validateScenarioReading(r,areaIds,new Set([...texts.keys()]),new Set(seen.keys()));ensure(!entries.has((r as {id:string}).id));entries.add((r as {id:string}).id);continue;
     }
     if(!!r&&typeof r==='object'&&(r as {version?:unknown}).version==='map-correction.1'){
-      obj(r,['version','id','at','areaId','text','corrects']);id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);
+      obj(r,['version','id','at','areaId','text','corrects',...(Object.hasOwn(r as object,'error')?['error']:[])]);ensure(!Object.hasOwn(r as object,'error')||r.error===true);id(r.id);ensure(!entries.has(r.id as string));entries.add(r.id as string);date(r.at);
       ensure(areaIds.has(r.areaId as string));text(r.text,300);ensure(r.corrects===null||seen.has(r.corrects as string));continue;
     }
     const version=!!r&&typeof r==='object'?(r as {version?:unknown}).version:null;

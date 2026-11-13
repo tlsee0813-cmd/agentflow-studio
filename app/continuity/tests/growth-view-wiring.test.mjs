@@ -24,8 +24,8 @@ test('GROWTH-W1 the entry: 「지도 이력」 and the quiet chip in the existin
   assert.match(css, /\.space\.growth-in-past > \.controls \{ bottom: calc\(var\(--s-4\) \+ 40px\); \}/, 'the past view\'s banner takes the same place');
   assert.match(css, /\.gp-row \{[^}]*height: 32px;/);
   assert.match(css, /\.world \.growth-tab \{[^}]*height: calc\(20px \* var\(--u, 1\)\);[^}]*font-size: calc\(12px \* var\(--u, 1\)\);/);
-  // One change colour; 미반영 alone in a quiet amber.
-  assert.match(css, /\.gl-row \.gl-un \{ color: #8a641d; \}/);
+  // One change colour; 대기·보류 in a neutral grey (review of v7: never read as a warning).
+  assert.match(css, /\.gl-row \.gl-un \{ color: var\(--text-2\); \}/);
 });
 
 test('GROWTH-W2 the baseline: read when the map opens, kept for the visit, written back as the version shown (the live map, never a past one)', async () => {
@@ -109,7 +109,7 @@ test('GROWTH-W6 the person\'s name and note go through the log; the comparison f
 
 test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes back as it was left, a part entered for comes first; the camera moves only for a card out of sight, never fits', async () => {
   const app = await read('src/client/app.ts'), cmp = fn(app, 'growthCompare');
-  assert.match(cmp, /const want = focus \?\? \(saved\.selected && !memo \? saved\.selected : null\);\n  if \(want && c\.scenes\.some\(s => s\.part === want\)\) \{ growthScene\(want\); return; \}/, 'a part entered for (or selected) comes first');
+  assert.match(cmp, /const want = focus \?\? saved\.selected;\n  if \(want && c\.scenes\.some\(s => s\.part === want\)\) \{/, 'a part entered for (or selected) comes first');
   assert.match(cmp, /const cs = changeSet\(o\.project, from, to\), memo = growthRanges\.get\(rangeKey\(o\.key, from, to\)\);/);
   assert.match(cmp, /camera = \{ \.\.\.memo\.camera \}; applyCamera\(\);/);
   assert.match(cmp, /if \(c\.scenes\[0\]\) growthScene\(c\.scenes\[0\]\.part\);/, 'on the current map: never the past one by itself');
@@ -125,7 +125,7 @@ test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes bac
   assert.match(scene, /stepWord\(f, Math\.max\(0, i\), list\.length\)/);
   // The guide in the top box's place, only while comparing.
   assert.match(fn(app, 'renderFocusTop'), /if \(gc\) \{ el\.replaceChildren\(\.\.\.growthGuideEls\(gc\)\); el\.hidden = false; syncFocusTop\(\); return; \}/);
-  assert.match(fn(app, 'growthGuideEls'), /guideOf\(c\.cs, c\.scenes, sceneName\)/);
+  assert.match(fn(app, 'growthGuideEls'), /guideOf\(c\.cs, c\.scenes, sceneName, sceneSay\)/);
   // 대기·보류 at the line's end: the waiting and held rows only.
   assert.match(fn(app, 'drawGrowth'), /growthUnreflected\(\)\?\.filter\(x => x\.state !== 'rejected'\)\.length/);
   // Code the growth view shows: quiet monospace, never bold, filled or bordered; 12px.

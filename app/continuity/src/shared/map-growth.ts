@@ -21,6 +21,8 @@ import { studioView, type StudioView, type PartView } from './studio.js';
 import { rowLedger, rowBindings, type LedgerRow } from './row-ledger.js';
 import { v5Folds, type V5Fold } from './record-excerpt.js';
 import { V5_TABLE_DEFS } from './record-table.js';
+import { claimTopic } from './claim-topic.js';
+import { josa, josaPair } from './josa.js';
 
 /* ---------- versions ---------- */
 export interface MapVersion {
@@ -28,15 +30,19 @@ export interface MapVersion {
   n: number; id: string; at: string;
   /** 기록 대상 판본: the target version the reading's records name (as written), else the basis time they name, else null. */
   target: string | null;
+  /** Review of v7: what target is: a version the records name ('version': 기록 대상 판본) or a basis time ('date': 기록 대상 날짜). */
+  targetKind: 'version' | 'date' | null;
   /** The readings slice end: readings.slice(0, end) is this version. */
   end: number }
 export function mapVersions(p: Pick<Project, 'readings'>): MapVersion[] {
   const out: MapVersion[] = [];
-  p.readings.forEach((r, i) => { if (isMapReading(r)) out.push({ n: out.length + 1, id: r.id, at: r.at, target: r.basisVersion ?? r.basisAt ?? null, end: i + 1 }); });
+  p.readings.forEach((r, i) => { if (isMapReading(r)) out.push({ n: out.length + 1, id: r.id, at: r.at, target: r.basisVersion ?? r.basisAt ?? null, targetKind: r.basisVersion ? 'version' : r.basisAt ? 'date' : null, end: i + 1 }); });
   return out;
 }
 /** 「지도 v07」: two digits at least. */
 export const versionLabel = (n: number): string => `지도 v${String(n).padStart(2, '0')}`;
+/** What a 기록 대상 is called by its kind (review of v7: a version is never a date). */
+export const targetWord = (kind: 'version' | 'date' | null): string => (kind === 'date' ? '기록 대상 날짜' : '기록 대상 판본');
 /** The words of the growth view (ruling F6 Q4). */
 export const GROWTH_WORDS = Object.freeze({ version: '지도 버전', history: '지도 이력', target: '기록 대상 판본', plan: '변경 계획', lastVisit: '이전 방문', now: '현재로' });
 
@@ -212,8 +218,15 @@ export interface PartChange {
   /** 구현 상태 (F7): the structured implementation before (null: 정보 없음) and after, 'change' (both explicit) or 'add' (정보 없음 → explicit),
    * with the record quote that gave the later one. */
   impl?: { mode: 'change' | 'add'; from: PartImplementation | null; to: PartImplementation; quote: ReadingQuote; reading: string } | null;
-  /** 새: who made the part (a reading, or the person by hand) and, for the person, when. */
-  by?: 'reading' | 'person'; madeAt?: string;
+  /** 새: who made the part (a reading, or the person by hand) and, for the person, when. 설명 (review of v7): 'person' when the person
+   * wrote the description anew (a plain rewrite, never a 정정). 정정: 'person' (the person marked their correction as fixing an error) or
+   * 'record' (the record's own 철회 rows). */
+  by?: 'reading' | 'person' | 'record'; madeAt?: string;
+  /** 정정 by the record (review of v7): the withdrawals a record wrote about the part between the two versions (철회·변경 rows read as
+   * withdrawn claims), each with what stood before, what stands now and its quote. */
+  withdrawn?: { before: string | null; text: string; quote: ReadingQuote; reading: string }[];
+  /** 은퇴 (review of v7): the successor the record names when it is not on the later map (the change's successor is then null). */
+  named?: string | null;
   /** The identity row that made the change (이름, 구현, 중복 정리, 승계, 은퇴), with 바뀐 때 and its F/E cites. */
   cite?: IdentityCite | null }
 export interface LineKey { id: string; from: string; to: string; kind: RelationKind }
@@ -260,9 +273,16 @@ export function changeSet(p: Project, a: number, b: number): ChangeSet {
     const ia = implementationAt(A.project, id), ib = implementationAt(B.project, id), im = implementationChange(ia?.value ?? null, ib?.value ?? null);
     if (im && ib) add({ kind: 'impl', part: id, name: y.name, before: ia ? IMPL_WORD[ia.value] : null, after: IMPL_WORD[ib.value], impl: { mode: im, from: ia?.value ?? null, to: ib.value, quote: ib.quote, reading: ib.reading } });
     const ux = x.reading, uy = y.reading;
-    const corrected = (uy?.corrected?.id ?? null) !== (ux?.corrected?.id ?? null) && !!uy?.corrected;
-    if (corrected) add({ kind: 'correct', part: id, name: y.name, before: ux?.role ?? null, after: uy?.role ?? null });
-    else if (ux?.role && uy?.role && normText(ux.role) !== normText(uy.role)) {
+    // Review of v7 (ruling F7: 정정 = an error or a withdrawal said so): the record's own 철회 rows read between the two (withdrawn claims of
+    // a reading in the range, not there before), or the person's correction they marked as fixing an error. The person's plain rewrite of
+    // a description is a 설명 변경 by the person, never a 정정.
+    const fixed = (uy?.corrected?.id ?? null) !== (ux?.corrected?.id ?? null) && !!uy?.corrected, error = fixed && uy!.corrected!.error === true;
+    const had = new Set((ux?.claims ?? []).map(c => normText(c.text)));
+    const withdrawn = (uy?.claims ?? []).filter(c => window.has(c.reading) && claimTopic(c) === 'withdrawn' && !had.has(normText(c.text)))
+      .map(c => ({ before: c.before ?? null, text: c.text, quote: { record: c.record, quote: c.quote, ...(c.from !== undefined ? { from: c.from } : {}), ...(c.to !== undefined ? { to: c.to } : {}) } as ReadingQuote, reading: c.reading }));
+    if (error || withdrawn.length) add({ kind: 'correct', part: id, name: y.name, before: error ? ux?.role ?? null : null, after: error ? uy?.role ?? null : null, by: error ? 'person' : 'record', withdrawn });
+    if (fixed && !error) add({ kind: 'desc', part: id, name: y.name, before: ux?.role ?? null, after: uy?.role ?? null, by: 'person', replaced: null, target: null });
+    else if (!fixed && ux?.role && uy?.role && normText(ux.role) !== normText(uy.role)) {
       const was = uy.others.find(o => normText(o.text) === normText(ux.role!));
       add({ kind: 'desc', part: id, name: y.name, before: ux.role, after: uy.role, replaced: was?.replaced ?? null, target: was?.target ?? null });
     }
@@ -275,7 +295,8 @@ export function changeSet(p: Project, a: number, b: number): ChangeSet {
   for (const [id, r] of sB.retired) {
     if (!inA.has(id) || inB.has(id) || !window.has(r.reading)) continue;
     const cite = citeOf(p, r.reading, r.record, r.row), succ = r.successor && inB.has(canonicalPart(sB, r.successor)) ? canonicalPart(sB, r.successor) : null;
-    add({ kind: 'retire', part: id, name: inA.get(id)!.name, successor: succ, cite });
+    // Review of v7: a successor the record names that is not on the later map is kept (named), never read as 「none in the record」.
+    add({ kind: 'retire', part: id, name: inA.get(id)!.name, successor: succ, named: succ ? null : r.successor ?? null, cite });
     if (succ) add({ kind: 'succeed', part: succ, name: inB.get(succ)!.name, predecessor: id, cite });
   }
   const counts = Object.fromEntries(CHANGE_KINDS.map(k => [k, changes.filter(c => c.kind === k).length])) as Record<ChangeKind, number>;
@@ -300,10 +321,12 @@ export const ROW_STATE_WORD: Readonly<Record<Exclude<RowState, 'reflected'>, str
 /** Plain words for every row reason (types.ts ROW_REASONS), by state. Never the code itself. */
 export const ROW_REASON_WORDS: Readonly<Record<string, string>> = Object.freeze({
   'waiting:limit': '한 번에 넣을 수 있는 양을 넘어 다음 읽기로 미룸',
-  'waiting:budget': '요청에 자리가 모자라 이번에는 보내지 않음',
+  'waiting:budget': '이번 읽기에 자리가 모자라 다음 읽기로 미룸',
   'waiting:unresolved-endpoint': '이어질 부품이 아직 지도에 없음',
-  'waiting:transient': '보냈지만 아직 지도에 놓이지 않음 · 다시 보냄',
-  'waiting:not-yet-sent': '아직 읽지 않음',
+  // Review of v7 (first user, d): what happens next in plain words, never 「보냈지만 … 다시 보냄」.
+  'waiting:transient': '지도에 아직 들어가지 않아 다음 읽기에 다시 넣음',
+  // Review of v7: the row of a record already read that no reading has taken up yet (a record not read at all is never listed).
+  'waiting:not-yet-sent': '읽은 기록에 있지만 아직 지도에 보내지 않음',
   'held:identity': '이미 있는 부품과 같은 것인지 정해지지 않음',
   'held:parent': '어느 부품 안에 들어가는지 정해지지 않음',
   'held:attribution': '어느 부품에 대한 말인지 정해지지 않음',
@@ -314,7 +337,7 @@ export const ROW_REASON_WORDS: Readonly<Record<string, string>> = Object.freeze(
   'held:revision': '마지막 검토에서 다시 보기로 함',
   'rejected:material': '이 프로젝트의 것이 아닌 예시나 자료로 읽음',
   'rejected:depends': '이 행이 기대는 다른 행이 거절됨',
-  'rejected:unplaced': '여러 번 보냈지만 지도에 놓이지 않음',
+  'rejected:unplaced': '여러 번 읽었지만 지도에 들어가지 않아 더 넣지 않음',
   'rejected:form': '표의 형식이 맞지 않음',
   'rejected:unknown-part': '지도에 없는 부품 번호를 가리킴',
   'rejected:other-project': '다른 프로젝트의 지도를 가리킴',
@@ -323,7 +346,7 @@ export const ROW_REASON_WORDS: Readonly<Record<string, string>> = Object.freeze(
   'rejected:planned': '계획만 있고 아직 바뀌지 않음',
   'rejected:partial': '일부만 바뀌어 통째로 바꾸지 않음',
   'rejected:unconfirmed': '바뀐 때나 대신하는 부품이 확인되지 않음',
-  'rejected:revision': '다시 검토해도 보류되어 더 보내지 않음',
+  'rejected:revision': '다시 검토해도 정해지지 않아 더 넣지 않음',
   'rejected:empty-group': '안에 아무것도 없는 묶음이라 만들지 않음' });
 export const rowReasonWords = (state: RowState, reason: string | null): string => (reason ? ROW_REASON_WORDS[`${state}:${reason}`] ?? '이유가 적히지 않음' : '이유가 적히지 않음');
 /** Every reason the ledger can give (for the words' completeness). */
@@ -346,24 +369,46 @@ export interface Unreflected { state: Exclude<RowState, 'reflected'>; reason: st
   /** The one group it shows in (F7): the part it is first about (a part row's own part, a line's sender, else the first part it names, else
    * the one part it is held with), checked by part ID on the map of that version; null: none. related: the other parts it is about. */
   principal: string | null; related: string[];
-  /** A part row whose part is not on the map of that version (「아직 지도에 놓이지 않음」, only then). */
+  /** A part row whose part no part on the map of that version can be (「아직 지도에 놓이지 않음」, only then: review of v7). */
   unplaced: boolean;
+  /** Review of v7: the record's own part the row is about (its C-PART row ID and the record's name for it) when no part on the map can be
+   * it: the row's group is that part's. null: on the map, unknown, or about several. */
+  pending: { b: string; name: string } | null;
+  /** How many of the record's parts the row names (its own, its B ids): none is a row about the whole record. */
+  named: number;
   /** The source line: the pasted text, [start, end) in it and its 1-based line number. */
   paste: string; start: number; end: number; line: number }
 /** The columns that are references, not what the row says (its ID, its cites, the files it is filed under). */
-const REF_COLS = new Set(['행 ID', 'F ID', 'E ID', '근거', '담당 F']);
-/** A row's cells as plain words: a part row's ID (B…) reads as the record's own name for that part; any other code goes. */
-export function plainCells(cells: readonly string[], partName: (id: string) => string | null): string {
-  return cells.map(v => v.replace(/(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g, b => partName(b) ?? '')
-    .replace(/(?<![A-Za-z0-9])(?:ID|CH|[A-Z])\d{1,3}(?!\d)/g, '')
-    .split(/\s*[·+,]\s*/).map(t => t.replace(/\s+/g, ' ').trim()).filter(Boolean).join(' · ')).filter(Boolean).join(' · ');
+const REF_COLS = new Set(['행 ID', 'F ID', 'E ID', '근거', '담당 F', '지도 부분(Pxx)']);
+const escRe = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/** A row's cells as plain words (review of v7): only the record's own row IDs (ids: every row ID of its tables) go, and only where they
+ * stand as a reference (a whole token): a part row's ID (B…) reads as the record's own name for that part, with the particle after it
+ * chosen again for that name (이/가, 을/를, 은/는, 과/와, 으로/로); anything else as written (S3, H2, K8s, E2E stay). */
+export function plainCells(cells: readonly string[], partName: (id: string) => string | null, ids: ReadonlySet<string> = new Set()): string {
+  const list = [...ids].filter(Boolean).sort((a, b) => b.length - a.length);
+  const ref = list.length ? new RegExp(`(?<![A-Za-z0-9_./-])(${list.map(escRe).join('|')})(?![A-Za-z0-9_])(?:(으로|로|이|가|을|를|은|는|와|과)(?![가-힣]))?`, 'g') : null;
+  return cells.map(v => (ref ? v.replace(ref, (_m, id: string, particle: string | undefined) => {
+    const name = /^B\d{1,3}$/.test(id) ? partName(id) : null;
+    if (!name) return particle ?? '';
+    const pair = particle ? josaPair(particle) : null;
+    return `${name}${pair ? josa(name, pair) : ''}`;
+  }) : v)
+    .replace(/[(（]\s*[)）]/g, '').replace(/\s+([)）\]])/g, '$1').replace(/([(（[])\s+/g, '$1')
+    .split(/\s*[·+,]\s*/).map(t => t.replace(/\s+/g, ' ').trim()).filter(t => /[가-힣A-Za-z0-9]/.test(t)).join(' · ')).filter(Boolean).join(' · ');
 }
 /** The pasted texts the map readings of a project read. */
 const readPastes = (p: Pick<Project, 'readings'>) => new Set(p.readings.flatMap(r => (isMapReading(r) ? r.records.map(x => x.id) : [])));
 const B_REF = /(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g;
+/** A name's core for matching a record's part row to a part (as row-ledger's nameCore): NFKC, case folded, bracketed qualifiers and spacing
+ * left out. */
+const nameCore = (n: string) => n.normalize('NFKC').toLowerCase().replace(/[(（[［][^()（）[\]［］]*[)）\]］]/g, ' ').replace(/\s+/g, '');
 /** The rows not reflected among the records read up to version k (each record's rows by the ledger as it stood then), each source row
  * once (a row sent again is one row; a row about several parts is one row), waiting first, then held, then rejected, each in record
- * order. A record no reading has read is never here (unreadRecords). */
+ * order. A record no reading has read is never here (unreadRecords).
+ * Review of v7: a record's part row (B…) is a map part when a reading created that part on it (the ledger), when the record's own identity
+ * row was reflected onto it, when a part a reading created bears the row's name (the one row of that record named so, the one such part),
+ * or when every reflected row of that record standing on a map part names the same one B. A part row no map part can be (none bound, none
+ * named so, none held with) is 「아직 지도에 놓이지 않음」, and a row about it alone shows in that part's group; unknown says neither. */
 export function unreflectedAt(p: Project, k: number): Unreflected[] {
   const v = versionAt(p, k), past = v.project, folds = v5Folds(past.pasted); if (!folds.length) return [];
   const read = readPastes(past);
@@ -376,6 +421,46 @@ export function unreflectedAt(p: Project, k: number): Unreflected[] {
     const k = `${e.record}\u0000C-PART\u0000${e.part}`; if (!bound.has(k)) bound.set(k, canonicalPart(st, e.op?.kind === 'fold' && e.op.into ? e.op.into : e.areaId));
   }
   const foldOf = new Map<string, V5Fold>(folds.map(f => [f.key, f])), text = new Map(past.pasted.map(x => [x.id, x.text]));
+  const partNames = new Map(folds.map(f => [f.key, new Map((f.fold.rows.get('C-PART') ?? []).map(r => [r.id, (r.row.byColumn['이름'] ?? '').trim()]))]));
+  const rowIds = new Map(folds.map(f => [f.key, new Set([...f.fold.rows.values()].flatMap(rs => rs.map(r => r.id)))]));
+  const keyOf = (record: string, b: string) => `${record}\u0000C-PART\u0000${b}`;
+  const onMapId = (id: string) => { const c = canonicalPart(st, id); return onMap.has(c) ? c : null; };
+  // Review of v7: more bindings, each only where it is the one answer (a row two parts could be binds to neither).
+  const proposed = new Map<string, Set<string>>(), propose = (key: string, id: string) => { if (!bound.has(key)) (proposed.get(key) ?? proposed.set(key, new Set()).get(key)!).add(id); };
+  // (1) A part by its name (the name a reading created it with, or its name on the map): the one row of a record named so, when no other
+  // part on the map bears that name.
+  const created = new Map<string, Set<string>>(), nameOn = (n: string, id: string | null) => { const c = nameCore(n); if (id && c) (created.get(c) ?? created.set(c, new Set()).get(c)!).add(id); };
+  for (const r of past.readings) if (isMapReading(r)) for (const x of r.parts) if (x.created) nameOn(x.created.name, onMapId(x.areaId));
+  for (const [id, n] of onMap) nameOn(n, id);
+  for (const [record, rows] of partNames) {
+    const byCore = new Map<string, string[]>(); for (const [b, n] of rows) { const c = nameCore(n); if (c) byCore.set(c, [...byCore.get(c) ?? [], b]); }
+    for (const [c, bs] of byCore) { const ids = created.get(c); if (bs.length === 1 && ids?.size === 1) propose(keyOf(record, bs[0]!), [...ids][0]!); }
+  }
+  // (2) The one B every reflected row of a record standing on a map part names (a part row's own ID among them), for a part that record
+  // has bound to none of its rows yet.
+  const boundParts = new Set([...bound].map(([key, id]) => `${key.split('\u0000')[0]}\u0000${id}`));
+  const standing = new Map<string, Set<string>[]>();
+  for (const x of ledger.values()) {
+    if (x.state !== 'reflected' || x.table === 'C-IDENT') continue;
+    const bs = new Set([...(x.table === 'C-PART' ? [x.id] : []), ...x.ends]); if (!bs.size) continue;
+    for (const id of new Set(x.to.filter(t => t.kind === 'part' || t.kind === 'claim').map(t => onMapId(t.id)).filter((y): y is string => !!y))) {
+      const key = `${x.record}\u0000${id}`; if (!boundParts.has(key)) (standing.get(key) ?? standing.set(key, []).get(key)!).push(bs);
+    }
+  }
+  for (const [key, sets] of standing) {
+    const [record, id] = key.split('\u0000') as [string, string], shared = [...sets[0]!].filter(b => sets.every(s => s.has(b)));
+    if (shared.length === 1 && partNames.get(record)?.has(shared[0]!)) propose(keyOf(record, shared[0]!), id);
+  }
+  for (const [key, ids] of proposed) if (ids.size === 1) bound.set(key, [...ids][0]!);
+  // Whether a part on the map could be a record's part row: one bound to it, one held with it, or one whose name (now, or as a reading
+  // made it) is the row's name. No: the row's part is not on the map.
+  const madeNames = new Map<string, string[]>(); for (const r of past.readings) if (isMapReading(r)) for (const x of r.parts) if (x.created) { const id = onMapId(x.areaId); if (id) madeNames.set(id, [...madeNames.get(id) ?? [], x.created.name]); }
+  const mapCores = new Set([...onMap].flatMap(([id, n]) => [n, ...madeNames.get(id) ?? []].map(nameCore)));
+  const mayBe = (record: string, b: string): boolean => {
+    if (bound.has(keyOf(record, b))) return true;
+    const row = ledger.get(keyOf(record, b)); if (row?.with.some(id => !!onMapId(id))) return true;
+    const c = nameCore(partNames.get(record)?.get(b) ?? ''); return !!c && mapCores.has(c);
+  };
   const rank: Record<string, number> = { waiting: 0, held: 1, rejected: 2 };
   const out: Unreflected[] = [], seen = new Set<string>();
   for (const x of ledger.values() as Iterable<LedgerRow>) {
@@ -384,27 +469,32 @@ export function unreflectedAt(p: Project, k: number): Unreflected[] {
     const row = foldOf.get(x.record)?.fold.rows.get(x.table)?.find(r => r.id === x.id);
     const by: Record<string, string> = row?.row.byColumn ?? {};
     const cells = Object.entries(by).filter(([c, v]) => !REF_COLS.has(c) && v.trim() && !/^[—–-]+$/.test(v.trim())).map(([, v]) => v.trim());
-    const names = new Map((foldOf.get(x.record)?.fold.rows.get('C-PART') ?? []).map(r => [r.id, (r.row.byColumn['이름'] ?? '').trim()]));
-    const tried = (x.name ?? plainCells(cells, b => names.get(b) || null)).replace(/\s+/g, ' ').trim();
-    const boundOf = (b: string): string | null => { const id = bound.get(`${x.record}\u0000C-PART\u0000${b}`); return id && onMap.has(id) ? id : null; };
-    const ends = x.ends.map(boundOf).filter((y): y is string => !!y);
-    const own = x.table === 'C-PART' && x.bound && onMap.has(x.bound) ? x.bound : null;
+    const names = partNames.get(x.record) ?? new Map<string, string>();
+    const tried = (x.name ?? plainCells(cells, b => names.get(b) || null, rowIds.get(x.record))).replace(/\s+/g, ' ').trim();
+    const boundOf = (b: string): string | null => { const id = bound.get(keyOf(x.record, b)); return id && onMap.has(id) ? id : null; };
+    // The record's parts the row names: a part row its own, an identity row its 이 기록 부분, any other row the B ids in its cells.
+    const refsOf = (col: string) => (by[col] ?? '').match(B_REF) ?? [];
+    const own = x.table === 'C-PART' ? x.id : x.table === 'C-IDENT' ? refsOf('이 기록 부분(Bxx)')[0] ?? null : null;
+    const bs = [...new Set([...(own ? [own] : []), ...x.ends])];
+    const ownPart = own ? boundOf(own) : null, ends = x.ends.map(boundOf).filter((y): y is string => !!y);
     const held = x.with.filter(id => onMap.has(id));
-    const parts = [...new Set([...(own ? [own] : []), ...ends, ...held])];
-    const principal = own ?? ends[0] ?? (held.length === 1 ? held[0]! : null);
+    const parts = [...new Set([...(ownPart ? [ownPart] : []), ...ends, ...held])];
+    const principal = ownPart ?? ends[0] ?? (held.length === 1 ? held[0]! : null);
+    // A row about one part of the record that no map part can be: that part's group (its part row says 「아직 지도에 놓이지 않음」).
+    const one = !principal && !held.length && bs.length === 1 && names.has(bs[0]!) && !mayBe(x.record, bs[0]!) ? bs[0]! : null;
+    const pending = one ? { b: one, name: names.get(one) || '이름 없는 부분' } : null;
     // The title: a line's two ends (the map's name when the end is a part on the map, else the record's own name), a step's own name, a
     // part row's own name; any other row its words.
     const endName = (b: string | undefined) => (b ? (boundOf(b) ? onMap.get(boundOf(b)!)! : names.get(b) || '이름 없는 부분') : '모름');
-    const refs = (col: string) => (by[col] ?? '').match(B_REF) ?? [];
-    const title = x.table === 'C-LINK' ? `${endName(refs('보내는 부분')[0] ?? x.ends[0])} → ${endName(refs('받는 부분')[0] ?? x.ends[1])}`
+    const title = x.table === 'C-LINK' ? `${endName(refsOf('보내는 부분')[0] ?? x.ends[0])} → ${endName(refsOf('받는 부분')[0] ?? x.ends[1])}`
       : x.table === 'C-STEP' ? ((by['단계 이름'] ?? '').trim() || tried)
       : x.table === 'C-PART' ? (x.name ?? tried)
-      : x.table === 'C-IDENT' ? (names.get((by['이 기록 부분(Bxx)'] ?? '').match(/B\d{1,3}/)?.[0] ?? '') || tried)
+      : x.table === 'C-IDENT' ? (names.get(own ?? '') || tried)
       : tried;
     const item = ROW_ITEM_WORD[x.table] ?? V5_TABLE_DEFS.get(x.table)?.title ?? '행';
     const t = text.get(x.paste) ?? '';
     out.push({ state: x.state, reason: x.reason, words: rowReasonWords(x.state, x.reason), record: x.record, table: x.table, id: x.id, tried, item, title: title.replace(/\s+/g, ' ').trim() || '내용 없는 행',
-      parts, principal, related: parts.filter(id => id !== principal), unplaced: x.table === 'C-PART' && !own,
+      parts, principal, related: parts.filter(id => id !== principal), unplaced: x.table === 'C-PART' && !!pending, pending, named: bs.length,
       paste: x.paste, start: x.start, end: x.end, line: t.slice(0, x.start).split('\n').length });
   }
   return out.sort((a, b) => rank[a.state]! - rank[b.state]! || (a.paste < b.paste ? -1 : a.paste > b.paste ? 1 : a.start - b.start));
@@ -417,24 +507,27 @@ export function unreadRecords(p: Project): { paste: string; rows: number }[] {
   for (const x of rowLedger(p, folds).values()) if (!read.has(x.paste)) by.set(x.paste, (by.get(x.paste) ?? 0) + 1);
   return p.pasted.filter(x => by.has(x.id)).map(x => ({ paste: x.id, rows: by.get(x.id)! }));
 }
-/** One group of 기록 반영 상태 (F7): the rows about one part on the map (its ID checked), else the part rows not yet on the map, the rows
- * about several parts with none first, and the rows whose part is not settled. */
-export interface ReflectGroup { key: string; part: string | null; kind: 'part' | 'unplaced' | 'several' | 'unsettled'; rows: Unreflected[];
+/** One group of 기록 반영 상태 (F7): the rows about one part on the map (its ID checked), the rows about one part of a record that is not on
+ * the map (review of v7: that part's own group, by the record's name for it), the rows about several parts with none first, and the rows
+ * whose part is not settled. */
+export interface ReflectGroup { key: string; part: string | null; kind: 'part' | 'unplaced' | 'several' | 'unsettled' | 'whole'; rows: Unreflected[];
+  /** 'unplaced': the record's name for the part not on the map. */
+  name: string | null;
   /** 「연결 2행 · 단계 1행」: the rows by item kind, most first. */
   byItem: { item: string; n: number }[] }
-/** The groups of some rows (each row in exactly one): parts first (most rows first, then by name), then the part rows not yet on the map,
- * the rows about several parts, and the unsettled ones. */
+/** The groups of some rows (each row in exactly one): parts first (most rows first, then by name), then the parts not yet on the map (most
+ * rows first), the rows about several parts, the unsettled ones, and the rows that name no part (about the whole record). */
 export function reflectGroups(rows: readonly Unreflected[], name: (id: string) => string): ReflectGroup[] {
   const by = new Map<string, ReflectGroup>();
   for (const x of rows) {
-    const kind: ReflectGroup['kind'] = x.principal ? 'part' : x.unplaced ? 'unplaced' : x.parts.length > 1 ? 'several' : 'unsettled';
-    const key = kind === 'part' ? `P\u0000${x.principal}` : kind;
-    const g = by.get(key) ?? by.set(key, { key, part: x.principal, kind, rows: [], byItem: [] }).get(key)!;
+    const kind: ReflectGroup['kind'] = x.principal ? 'part' : x.pending ? 'unplaced' : x.parts.length > 1 ? 'several' : !x.named && !x.parts.length ? 'whole' : 'unsettled';
+    const key = kind === 'part' ? `P\u0000${x.principal}` : kind === 'unplaced' ? `U\u0000${x.record}\u0000${x.pending!.b}` : kind;
+    const g = by.get(key) ?? by.set(key, { key, part: x.principal, kind, rows: [], name: kind === 'unplaced' ? x.pending!.name : null, byItem: [] }).get(key)!;
     g.rows.push(x);
   }
-  const rankK = { part: 0, unplaced: 1, several: 2, unsettled: 3 } as const;
+  const rankK = { part: 0, unplaced: 1, several: 2, unsettled: 3, whole: 4 } as const;
   for (const g of by.values()) { const n = new Map<string, number>(); for (const x of g.rows) n.set(x.item, (n.get(x.item) ?? 0) + 1); g.byItem = [...n].map(([item, k]) => ({ item, n: k })).sort((a, b) => b.n - a.n); }
-  return [...by.values()].sort((a, b) => rankK[a.kind] - rankK[b.kind] || b.rows.length - a.rows.length || (a.part && b.part ? name(a.part).localeCompare(name(b.part), 'ko') : 0));
+  return [...by.values()].sort((a, b) => rankK[a.kind] - rankK[b.kind] || b.rows.length - a.rows.length || (a.part && b.part ? name(a.part).localeCompare(name(b.part), 'ko') : (a.name ?? '').localeCompare(b.name ?? '', 'ko')));
 }
 /** The F and E cites of an identity row in its record, as written: the file (경로 · 역할) or the evidence (출처 · 자리 · 짧은 인용). */
 export function citeLines(p: Pick<Project, 'pasted'>, record: string, ids: readonly string[]): { id: string; text: string }[] {

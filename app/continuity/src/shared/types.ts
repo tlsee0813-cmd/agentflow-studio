@@ -706,7 +706,10 @@ export interface ReadingRow { record: string; table: string; id: string; state: 
   to: ReadingRowTarget[]; with: string[] }
 /** The person's own correction of a part's description as read (never Area.note, never a return.2 description): it names the
  * reading whose description it corrects. It holds that description only; later claims of later readings still come in. */
-export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null }
+export interface ReadingCorrection { version: 'map-correction.1'; id: string; at: string; areaId: string; text: string; corrects: string | null;
+  /** Review of v7 (ruling F7: 정정 is an error said so): the person marked this correction as fixing a wrong description (the growth view
+   * counts it as 정정); absent: a rewrite in the person's own words (설명 변경 by the person). */
+  error?: true }
 /* ---------- The scenario record (시나리오 기록 v2, spec §8.2–8.3) as the app read it, without any AI: scenario-reading.1. ---------- */
 /** A cell as the record says it: its own words, '모름' (or an empty cell) as 'unknown', '없음' as null. */
 export type ScenarioSaid = string | 'unknown' | null;

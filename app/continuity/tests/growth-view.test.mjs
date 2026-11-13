@@ -41,7 +41,7 @@ function workshop() {
     reading(3, [], [], [ident('ID01', { kind: 'rename', areaId: 'sto', from: '저장소', to: '기록 저장소', renamed: true }), ident('ID02', { kind: 'retire', areaId: 'tim', successor: 'wat' }, 'c0ffee1 2026-09-29'),
       ident('ID03', { kind: 'reimplement', areaId: 'srt', from: '옛 엔진', to: '새 엔진' })]),
     reading(4, [made('dup', '정리기 사본', '모은 것을 고른다', 'grp'), made('tmp', '임시 도구', '잠깐 쓰는 도구')], [rel('L5', 'dup', 'sto')]),
-    { version: 'map-correction.1', id: 'M1', at: '2026-10-04T12:00:00.000Z', areaId: 'col', text: '자료를 모아 하루에 한 번 넘긴다', corrects: 'R1' },
+    { version: 'map-correction.1', id: 'M1', at: '2026-10-04T12:00:00.000Z', areaId: 'col', text: '자료를 모아 하루에 한 번 넘긴다', corrects: 'R1', error: true },
     reading(5, [], [], [ident('ID04', { kind: 'fold', areaId: 'dup', into: 'srt' }), ident('ID05', { kind: 'retire', areaId: 'tmp' })])];
   return p;
 }
@@ -203,7 +203,8 @@ test('GROWTH-9 plain words for every row reason, by state; 대기 · 보류 · �
   assert.equal(new Set(all.map(k => G.ROW_REASON_WORDS[k])).size, all.length, 'no two reasons read the same');
   assert.deepEqual(G.ROW_STATE_WORD, { waiting: '대기', held: '보류', rejected: '거절' });
   assert.equal(G.rowReasonWords('held', 'nothing-like-this'), '이유가 적히지 않음');
-  assert.equal(G.plainCells(['B03 · B12·B15', '구성', 'F09+F04'], b => ({ B03: '수집기', B12: '정리기' })[b] ?? null), '수집기 · 정리기 · 구성');
+  // Review of v7: only the record's own row IDs go (ids), a part row's ID read as its name.
+  assert.equal(G.plainCells(['B03 · B12·B15', '구성', 'F09+F04'], b => ({ B03: '수집기', B12: '정리기' })[b] ?? null, new Set(['B03', 'B12', 'B15', 'F09', 'F04'])), '수집기 · 정리기 · 구성');
 });
 
 test('GROWTH-10 기록 반영 상태 on the anonymised growth map: the rows read up to a version that are not reflected, each source row once, plain and sourced', () => {
@@ -229,7 +230,8 @@ test('GROWTH-10 기록 반영 상태 on the anonymised growth map: the rows read
   assert.ok(first.every(x => read1.has(x.paste)));
   const cs = G.changeSet(p, 4, 9);
   assert.ok(cs.counts.new > 0 && cs.added.length > 0);
-  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 연결 \+\d+ · 지도에 새로 표시 \d+개$/);
+  // Review of v7: the records' own 철회 rows between the two are 정정.
+  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 정정 \d+ · 연결 \+\d+ · 지도에 새로 표시 \d+개$/);
 });
 
 test('GROWTH-11 the line and the tabs: nonzero items in the scene order, the two filters at its end, at most three tabs, no 새 or 설명 tab by default, no two tabs meet', () => {
@@ -242,7 +244,7 @@ test('GROWTH-11 the line and the tabs: nonzero items in the scene order, the two
   assert.deepEqual(tabs.map(t => [t.part, t.word, t.more, t.on]), [['wat', '승계', 1, false], ['srt', '구현 바뀜', 1, false], ['sto', '이름', 0, false]]);
   assert.equal(tabs.some(t => t.part === 'tim'), false, 'a retired part has no tab on the current map');
   assert.deepEqual(V.shownTabs(scenes, 'sto', null).map(t => [t.part, t.on]), [['sto', true], ['wat', false], ['srt', false]], 'the scene shown first');
-  assert.deepEqual(V.shownTabs(scenes, 'srt', 'desc')[0], { part: 'srt', word: '설명', more: 1, kind: 'desc', on: true, changes: scenes.find(s => s.part === 'srt').changes }, 'a filter\'s current part shows the filter\'s word');
+  assert.deepEqual(V.shownTabs(scenes, 'srt', 'desc')[0], { part: 'srt', word: '설명 변경', more: 1, kind: 'desc', on: true, changes: scenes.find(s => s.part === 'srt').changes }, 'a filter\'s current part shows the filter\'s word');
   // Places: many cards in tight rows; tabs never meet each other or another card, and the ones with no room hide.
   const boxes = new Map(), obstacles = [], list = [];
   for (let i = 0; i < 24; i++) { const r = { x: (i % 6) * 240, y: Math.floor(i / 6) * 90, w: 224, h: 80 }; boxes.set(`p${i}`, r); obstacles.push({ id: `p${i}`, ...r }); list.push({ part: `p${i}`, w: 60 + (i % 3) * 30, h: 20 }); }
@@ -256,7 +258,7 @@ test('GROWTH-11 the line and the tabs: nonzero items in the scene order, the two
 
 test('GROWTH-12 the later end is the live map: a correction after the last map reading is 정정, a part archived with no log entry is archived', () => {
   const p = workshop();
-  p.readings.push({ version: 'map-correction.1', id: 'M9', at: '2026-10-06T09:00:00.000Z', areaId: 'srt', text: '모은 것을 하루에 한 번 고른다', corrects: 'R2' });
+  p.readings.push({ version: 'map-correction.1', id: 'M9', at: '2026-10-06T09:00:00.000Z', areaId: 'srt', text: '모은 것을 하루에 한 번 고른다', corrects: 'R2', error: true });
   p.space.areas.find(a => a.id === 'wat').archived = true;
   const v = G.versionAt(p, 5);
   assert.equal(v.live, true); assert.equal(v.project, p, 'the project as it stands, not a rebuild');
@@ -335,13 +337,13 @@ test('GROWTH-16 a clock set back never stamps an edit before the one before it, 
   assert.deepEqual(parseProject(serializeProject(p)).edits, p.edits);
 });
 
-test('GROWTH-17 a part the person made reads 「사람이 추가함」 with its time, never 「처음 읽힘」', () => {
+test('GROWTH-17 a part the person made reads 「사람이 추가함」 with its time, never 「처음 표시됨」', () => {
   const p = workshop();
   p.space.areas.push({ id: 'own', name: '손으로 만든 부품', note: '', archived: false, createdAt: '2026-10-07T09:00:00.000Z' }); p.space.containment.revisions.own = 0;
   const cs = G.changeSet(p, 1, 5), own = cs.changes.find(c => c.part === 'own'), wat = cs.changes.find(c => c.part === 'wat' && c.kind === 'new');
   assert.deepEqual([own.kind, own.by, own.madeAt, own.since], ['new', 'person', '2026-10-07T09:00:00.000Z', null]);
   assert.match(V.newTitle(own, 1), /^사람이 추가함 · \d{4}/); assert.doesNotMatch(V.newTitle(own, 1), /읽힘/);
-  assert.equal(wat.by, 'reading'); assert.equal(V.newTitle(wat, 1), '지도 v02에서 처음 읽힘');
+  assert.equal(wat.by, 'reading'); assert.equal(V.newTitle(wat, 1), '지도 v02에서 처음 표시됨');
 });
 
 test('GROWTH-18 the camera (F7): a readable card never moves it; a card out of sight takes the least pan into the area; never a zoom or a fit', () => {
