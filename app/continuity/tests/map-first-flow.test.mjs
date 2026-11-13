@@ -444,11 +444,12 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   // Review of v5 focus 3 (A2, A3) changed exactly this: each form measured where it stands for that camera (beside the title).
   // Polish 5: the sentence's forms (whole, one line) with the give and then with room above, before the sentence steps back.
   assert.match(a, /const FT_SAID = \[null, 'ft-one'\] as const;/, 'whole, then its sentence on one line');
-  assert.match(a, /let done = at\.whole && give\(FT_SAID\);/);
+  // v9 (review of v8): each form by the give and then by the free height before the next (two lines before one).
+  assert.match(a, /if \(at\.whole\) for \(const form of FT_SAID\) \{\n    if \(give\(\[form\]\)\) \{ done = true; break; \}/);
   assert.match(a, /if \(!done && at\.whole\) \{ frameView\(explicit, base\); done = give\(\['ft-under'\]\); \}/, 'stepped back only when no room shows the sentence');
   assert.ok(a.includes('if (!done && !at.whole) for (const form of FT_SAID) { frameView(explicit, base + ftBox(form, camera, null).h + 8); if (clear(form, camera.k)) { done = true; break; } }'), 'a frame on the first flow keeps the sentence the same way (first-user judge 9)');
   // Review of the growth view (verifier, the fixture map at 1280): the one-line form may also stand narrower, clear of a caption at its end.
-  assert.ok(a.includes("const clear = (form: string | null, k: number) => (form === 'ft-one' ? FT_CAPS : [null]).some(cap => { ftCap = cap; const ok = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); ftCap = null; return ok; });"));
+  assert.ok(a.includes("const clear = (form: string | null, k: number) => (form === 'ft-one' ? FT_CAPS : [null, ...FT_CAPS_TWO]).some(cap => { ftCap = cap; const ok = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); ftCap = null; return ok; });"));
   assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects\];/, 'never over a card or a lane caption');
   assert.match(a, /el\.classList\.add\('ft-one'\);\n  for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/, 'the sentence on one line (narrower if need be) before it steps back');
   assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop\)/, 'the map\'s own title never reads through the top line');

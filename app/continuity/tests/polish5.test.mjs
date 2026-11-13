@@ -71,8 +71,8 @@ test('P5-3 a cut never loses a plan word: the notes\' 48 characters, the top sen
   const a = await app();
   assert.match(a, /h\('span', \{ class: 'ff-note-text' \}, clipKeepPlan\(text, 48\)\)/, 'a note\'s 48 characters keep the plan word');
   assert.doesNotMatch(a, /text\.length > 48 \? `\$\{text\.slice\(0, 47\)\}…`/, 'never the plain 47-character cut');
-  assert.match(a, /function keepPlanFit\(el: HTMLElement, text: string, lines: number, less = 0\): string/);
-  assert.match(a, /t\.textContent = basis \? keepPlanFit\(basis, t\.dataset\.text \?\? '', 1, \(lead\?\.offsetWidth \?\? 0\) \+ 6\) : keepPlanFit\(t, t\.dataset\.text \?\? '', el\.classList\.contains\('ft-one'\) \? 1 : 2\);/,
+  assert.match(a, /function keepPlanFit\(el: HTMLElement, text: string, lines: number, less = 0, words = false\): string/);
+  assert.match(a, /t\.textContent = basis \? keepPlanFit\(basis, t\.dataset\.text \?\? '', 1, \(lead\?\.offsetWidth \?\? 0\) \+ 6, true\) : keepPlanFit\(t, t\.dataset\.text \?\? '', el\.classList\.contains\('ft-one'\) \? 1 : 2, 0, true\);/,
     'the sentence (1 or 2 lines, as its form shows it) and the basis line, each measured to its box');
   assert.match(a, /'data-text': topWords/); assert.match(a, /class: 'ft-basis-t', 'data-text': said/);
   assert.match(a, /t1 = keepPlanFit\(nt, t0, 2\); fillLabel\(nt, t1\);/, 'a note\'s two clamped lines too');
@@ -97,7 +97,7 @@ test('P5-5/6 the sentence shows before it steps back; the fit is the same whatev
   assert.match(a, /el\.classList\.remove\(\.\.\.FT_FORMS\); el\.style\.left = ''; el\.style\.maxWidth = ''; ftFull = el\.offsetHeight; ftPlace\(el, camera, ink\);/, 'the whole height measured at the left, never as placed before');
   // Merge v7: the growth view's room at the same scale made fitView longer; the whole function is read.
   const fit = a.slice(a.indexOf('function fitView('), a.indexOf('\n}\n', a.indexOf('function fitView(')));
-  assert.ok(fit.indexOf('give(FT_SAID)') < fit.indexOf("give(['ft-under'])") && fit.indexOf('for (let d = 8; d <= most && !done; d += 8)') < fit.indexOf("give(['ft-under'])"), 'room above for the sentence comes before stepping it back');
+  assert.ok(fit.indexOf('give([form])') > 0 && fit.indexOf('give([form])') < fit.indexOf("give(['ft-under'])") && fit.indexOf('for (let d = 8; d <= most && !done; d += 8)') < fit.indexOf("give(['ft-under'])"), 'room above for the sentence comes before stepping it back');
 });
 
 test('P5-7 code in a label reads as quoted code: a monospace chip, words kept as words, cut only between tokens', async () => {

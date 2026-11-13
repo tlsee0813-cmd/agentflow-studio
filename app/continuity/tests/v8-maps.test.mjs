@@ -108,8 +108,10 @@ test('V8-7 one font per card title: monospace only for a title that is all code,
 
 test('V8-8 code reads no louder than the words around it: a title\'s code in the role line\'s colour, a label\'s at the regular weight', async () => {
   const c = await css();
-  assert.match(c, /\.node\.card \.c-name code\.nm-code \{ color: #526176; \}/, 'the role line\'s colour, the title\'s size and weight');
-  assert.match(c, /\.edge-labels code\.lb-code, \.ff-note code\.lb-code \{ font-weight: 400; font-size: \.94em; word-spacing: -\.2em; \}/, 'its wide spaces no wider than the halo covers (its own line never shows through)');
-  assert.match(c, /\.edge-labels code\.lb-code\.lb-tight, \.ff-note code\.lb-code\.lb-tight \{ margin-right: \.3em; \}/, 'the next words\' halo never covers its last letter');
-  assert.match(fn(await app(), 'fillLabel'), /h\('code', \{ class: \/\^\\S\/\.test\(ps\[i \+ 1\]\?\.t \?\? ''\) \? 'lb-code lb-tight' : 'lb-code' \}, p\.t\)/, 'only where words follow with no space');
+  // v9 (review of v8): the colour is a token (--code-quiet, #526176); the code at the label's own size (F7's 12px); no gap before the
+  // words that follow (the later run keeps its halo off the letter before it: v9-maps V9-1, V9-2, V9-3).
+  assert.match(c, /\.node\.card \.c-name code\.nm-code \{ color: var\(--code-quiet\); \}/, 'the role line\'s colour, the title\'s size and weight');
+  assert.match(c, /\.edge-labels code\.lb-code, \.ff-note code\.lb-code \{ font-weight: 400; font-size: 1em; word-spacing: -\.2em; \}/, 'its wide spaces no wider than the halo covers (its own line never shows through)');
+  assert.match(c, /\.edge-labels \.lb-join, \.ff-note \.lb-join \{ clip-path: inset\(-8px -8px -8px 0\); \}/, 'the next words\' halo never covers its last letter');
+  assert.match(fn(await app(), 'fillLabel'), /h\('code', \{ class: join \? 'lb-code lb-join' : 'lb-code' \}, p\.t\)/, 'only where words follow with no space');
 });

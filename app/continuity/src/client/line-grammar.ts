@@ -164,8 +164,10 @@ export function conditionWords(raw: string | null | undefined): string | null {
   const rest = t.replace(/^조건\s*그대로\s*[:：]?\s*/, '').trim();
   return rest || COND_UNSAID;
 }
-/** One condition in a tip: 「조건: …」 (the record's words), or what the record left unsaid. */
-export const conditionTip = (w: string): string => (w === COND_UNSAID ? `조건 · ${COND_UNSAID}` : `조건: ${w}`);
+/** One condition in a tip: 「조건: …」 (the record's words), or what the record left unsaid. v9 (review of v8: a ◇'s tip read 「조건: CD04가
+ * 거짓일 때」, 「조건: LN13과 같음」): plain says the record's row IDs in it as the record's own words (app.ts condPlain: a condition row by
+ * its words, 「<line>과 같음」 by that line's condition); the record's own row (원문) keeps them as written. */
+export const conditionTip = (w: string, plain: (t: string) => string = t => t): string => (w === COND_UNSAID ? `조건 · ${COND_UNSAID}` : `조건: ${plain(w)}`);
 export interface LineBadge {
   /** What it says: 'condition' (when), 'optional', or 'cadence' (the record's words). */
   kind: 'condition' | 'optional' | 'cadence';
@@ -204,7 +206,7 @@ export function isRelativeRef(t: string): boolean {
 }
 /** The badge of a stroke from what its relations' readings say; null when none says anything of when it flows (no badge is
  * ever made from a name, a payload or a kind). A condition outranks an optional mark, which outranks cadence words. */
-export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
+export function lineBadge(rels: readonly BadgeRead[], plain: (t: string) => string = t => t): LineBadge | null {
   const pick = (k: LineBadge['kind']) => rels.map(r => (k === 'condition' ? conditionWords(r.when) : k === 'optional' ? (r.optional ? '선택' : null) : r.cadence ?? null)).filter((x): x is string => !!x && !!x.trim());
   for (const kind of ['condition', 'optional', 'cadence'] as const) {
     const said = pick(kind); if (!said.length) continue;
@@ -222,7 +224,7 @@ export function lineBadge(rels: readonly BadgeRead[]): LineBadge | null {
     if (kind === 'condition') {
       // A condition that only points at another row of the record (「위와 같음」) is said as such, muted, never resolved here.
       const unresolved = words.every(isRelativeRef);
-      const tip = `조건 · 이 조건일 때만 흐름${unresolved ? ' · 기록 안의 상대 참조 (풀지 않음)' : ''}\n${words.map(conditionTip).join('\n')}${count}${modeSaid}`;
+      const tip = `조건 · 이 조건일 때만 흐름${unresolved ? ' · 기록 안의 상대 참조 (풀지 않음)' : ''}\n${words.map(w => conditionTip(w, plain)).join('\n')}${count}${modeSaid}`;
       return { kind, short: cue, full: cue, tip, words, n: said.length, unresolved, lead: words[0]!, quiet: false };
     }
     if (kind === 'optional') {
@@ -449,10 +451,32 @@ export const FIT_CODE_MAX = 32;
 export function condForms(text: string, fold = false): { long: string | null; short: string | null } {
   const s = text.replace(/\s+/g, ' ').trim();
   if (fold && s.length > FIT_CODE_MAX) return { long: null, short: null };
-  const cuts: string[] = [];
-  for (let n = cutCount(s) - 1; n >= 1; n--) { const c = tokenCut(s, n); if (c !== null && c !== s && !cuts.includes(c)) cuts.push(c); }
+  const cuts = condCuts(s);
   return { long: s.length <= FIT_CODE_MAX ? s : cuts.find(c => c.length <= FIT_CODE_MAX + 1) ?? cuts.at(-1) ?? s,
     short: cuts.find(c => c.length <= LABEL_SHORT + 7) ?? cuts.at(-1) ?? s };
+}
+/** A text's cuts between its units (tokenCut), longest first, each shorter than the text; none for one unit. v9 (review of v8: a condition
+ * left the map at 1280): the last pass tries each of them, down to the shortest, before a condition folds to its ◇. */
+export function condCuts(text: string): string[] {
+  const s = text.replace(/\s+/g, ' ').trim(), cuts: string[] = [];
+  for (let n = cutCount(s) - 1; n >= 1; n--) { const c = tokenCut(s, n); if (c !== null && c !== s && !cuts.includes(c)) cuts.push(c); }
+  return cuts;
+}
+/** v9 (review of v8: 「CLOUD_MODE 가」): two runs of a label meet with no space between (a run of code and its particle, a word and its
+ * 「…」): the later one keeps its halo off the letter before it (styles.css lb-join), never a gap. */
+export const joinsRun = (prev: string, next: string): boolean => /\S$/.test(prev) && /^\S/.test(next);
+/** v9 (review of v8: 「먼저 볼 연결: … → WebSocketManage…」, 「{out_dir}…」, 「ReadWriteProxy·…」): a name in at most n characters, cut between its
+ * units as a label is (tokenCut: never inside a run of code or a word, never ending on 「·」 or an operator): whole when it fits; else its
+ * longest such cut within n that keeps at least half of it; else whole up to n + 8 characters (「체크포인트 {out_dir}/ckpt.pt」 says which
+ * checkpoint, 「체크포인트…」 does not); else that cut; else its first unit whole up to n + 8 characters; else cut at n (a single unit that long). */
+export function tokenFit(text: string, n: number): string {
+  const s = text.replace(/\s+/g, ' ').trim(); if (s.length <= n) return s;
+  const cuts = condCuts(s), fit = cuts.find(c => c.length <= n);
+  if (fit && fit.length - 1 >= s.length / 2) return fit;
+  if (s.length <= n + 8) return s;
+  if (fit) return fit;
+  const first = cuts.at(-1) ?? null; if (first && first.length <= n + 8) return first;
+  return `${s.slice(0, n - 1).trimEnd()}…`;
 }
 /** v8 (「Backups.Cron != ""」 drawn as 「Backups.Cron !=」): a label's quotation marks go (「」 『』 ‘’ “”), but the straight quotes
  * of code stay (an empty string is an operand). */

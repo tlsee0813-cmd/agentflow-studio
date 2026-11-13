@@ -37,6 +37,8 @@
   --ok-soft: #ecfdf3; --ok-text: #067647; --warn-soft: #fef3f2; --warn-text: #b42318; --change-text: #7a3f07;
   --info: #2c5a95; --info-soft: #f5f8fd; --info-line: #dbe4f3;
   --record-soft: #f1eefb; --record-text: #55449a; --code-soft: #eef0f7; --code-text: #3b4a7a; --mark: #fbecb4; --mark-line: #f0d37a;
+  /* v9: code in a card's title, quieter than the title's ink (craft palette #526176, 6.0:1 on white). */
+  --code-quiet: #526176;
   --chip: #f2f4f7; --chip-line: #e4e7ec;
   --shadow-region: 0 1px 2px rgba(16,24,40,.04);
   --radius: 10px; --shadow-sm: 0 1px 2px rgba(16,24,40,.05); --shadow: 0 1px 3px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.04);
@@ -66,6 +68,7 @@
     --fam-store-bg: #1f2e27; --fam-store-ink: #92d3b0; --fam-store-strip: #1b2621; --fam-store-edge: #4c7a62;
     --fam-trigger-bg: #33291b; --fam-trigger-ink: #e9bb6c; --fam-trigger-strip: #2a2218; --fam-trigger-edge: #8a6a3a;
     --fam-neutral-bg: #2a2b2e; --fam-neutral-ink: #b6b9bf; --fam-neutral-strip: #1b1d21; --fam-neutral-edge: #63666c;
+    --code-quiet: var(--text-3); /* the map's cards keep their light face on a dark page: its quiet card ink, as the tag icon (9.2) */
   }
 }
 :root[data-theme="dark"] {
@@ -74,6 +77,7 @@
   --fam-store-bg: #1f2e27; --fam-store-ink: #92d3b0; --fam-store-strip: #1b2621; --fam-store-edge: #4c7a62;
   --fam-trigger-bg: #33291b; --fam-trigger-ink: #e9bb6c; --fam-trigger-strip: #2a2218; --fam-trigger-edge: #8a6a3a;
   --fam-neutral-bg: #2a2b2e; --fam-neutral-ink: #b6b9bf; --fam-neutral-strip: #1b1d21; --fam-neutral-edge: #63666c;
+  --code-quiet: var(--text-3);
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; overflow: hidden; }
@@ -3652,11 +3656,14 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    app adds the 「…」), so the CSS never cuts inside one. */
 .edge-labels code.lb-code, .ff-note code.lb-code { font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Consolas, Menlo, monospace; font-size: 1em; font-weight: inherit; letter-spacing: 0; padding: 0; margin: 0; border: 0; border-radius: 0; background: none; color: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 .edge-labels > .has-code { text-overflow: clip; }
-/* v8 (review of v7: 「코드 외침」, 「SKIP_DB_CHECK…」 「CLOUD_MODE가」): a monospace run looks no heavier than the words beside it: a
-   monospace face draws darker at the same weight and size, so it takes the regular weight a little smaller (the label's colour and halo
-   kept); a run followed by more words keeps a hair of room, so the halo of the next words never covers its last letter. */
-.edge-labels code.lb-code, .ff-note code.lb-code { font-weight: 400; font-size: .94em; word-spacing: -.2em; }
-.edge-labels code.lb-code.lb-tight, .ff-note code.lb-code.lb-tight { margin-right: .3em; }
+/* v8 (review of v7: 「코드 외침」): a monospace run looks no heavier than the words beside it: a monospace face draws darker at the same
+   weight, so it takes the regular weight (the label's colour and halo kept). v9 (review of v8, F7's 12px): at the label's own size, 12px
+   at rest, never smaller. */
+.edge-labels code.lb-code, .ff-note code.lb-code { font-weight: 400; font-size: 1em; word-spacing: -.2em; }
+/* v9 (review of v8: 「CLOUD_MODE 가」, 「pb.skipBootstrap() 이…」): no gap between a run and the words that follow it with no space (its
+   particle, its 「…」). What covered the run's last letter was the next run's halo, painted after it: a run that follows another with no
+   space between (app.ts fillLabel lb-join) keeps its halo to its own box on that side, so the letter before it is never covered. */
+.edge-labels .lb-join, .ff-note .lb-join { clip-path: inset(-8px -8px -8px 0); }
 /* Polish 6: one 「…」 only: a label whose own words end on the app's cut mark takes none from the [data-full] rule; the chip's dark
    form only once the page opts in (data-theme="dark", or "auto" with a dark system), as every other dark rule; its weight regular. */
 .edge-labels > .edge-label.self-cut[data-full]::after { content: none; }
@@ -3665,8 +3672,9 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    the identifier a card's face leaves out reads under the pane's title and in the hover. A folded label or cue in focus shows its ring. */
 .node.card :is(.c-name, .c-tag-name) code.nm-code, .edge-tip code.nm-code, .pane-ident code.nm-code { font-family: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Consolas, Menlo, monospace; font-size: 1em; font-weight: inherit; letter-spacing: 0; padding: 0; margin: 0; border: 0; background: none; color: inherit; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 /* v8 (review of v7: 「코드 외침」): code in a card's title reads no louder than the words around it: the title's size and weight, in the role
-   line's colour (craft palette #526176); a name tag (the far view) draws none in monospace (app.ts tagLineNodes). */
-.node.card .c-name code.nm-code { color: #526176; }
+   line's colour; a name tag (the far view) draws none in monospace (app.ts tagLineNodes). v9: that colour is a token (--code-quiet, craft
+   palette #526176), with its value for a dark page. */
+.node.card .c-name code.nm-code { color: var(--code-quiet); }
 .edge-tip .hc-ident { font-size: 12px; color: var(--text-3); }
 .pane-ident { margin: 2px 0 0; font-size: 12.5px; color: var(--text-3); overflow-wrap: anywhere; }
 .edge-labels > [role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
