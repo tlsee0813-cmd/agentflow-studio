@@ -1012,7 +1012,8 @@ function setMapForm(next: MapForm) {
     const to = new Map<string, Point>(); for (const b of lay.boxes.values()) to.set(b.id, { x: b.x, y: b.y });
     const v = $('viewport'), vw = v.clientWidth, vh = v.clientHeight, B = lay.bounds, top = topInset();
     const k1 = Math.max(0.05, Math.min(cam0.k * 1.6, (vw - 2 * SAFE_SIDE) / Math.max(1, B.w), (vh - top - BOTTOM) / Math.max(1, B.h)));
-    const cam1 = { x: (vw - B.w * k1) / 2 - B.x * k1, y: top + (vh - top - BOTTOM - B.h * k1) / 2 - B.y * k1, k: k1 };
+    // The frame this 보기 fitted at before in this window when there is one (the flight lands where the map will stand), else round the cards.
+    const cam1 = formFitK.get(formFitKey(o, next)) ?? { x: (vw - B.w * k1) / 2 - B.x * k1, y: top + (vh - top - BOTTOM - B.h * k1) / 2 - B.y * k1, k: k1 };
     const layer = h('div', { class: 'world form-flight', 'aria-hidden': 'true' });
     layer.style.cssText = world.style.cssText; layer.style.transform = `translate(${cam0.x}px, ${cam0.y}px) scale(${cam0.k})`;
     for (const el of els) { const a = from.get(el)!; el.style.transform = ''; el.style.left = `${a.x}px`; el.style.top = `${a.y}px`; if (!el.dataset.box) el.style.opacity = '0'; layer.append(el); }
@@ -1026,7 +1027,7 @@ function setMapForm(next: MapForm) {
     // then the map takes the layer's place. Nothing heavy runs while the cards fly.
     formTimers.push(window.setTimeout(() => {
       if (opened !== o || formFlight?.layer !== layer) return;
-      pairGapNow = Math.max(PAIR_PX / Math.max(formFitK.get(formFitKey(o, next)) ?? k1, 0.05), 12);
+      pairGapNow = Math.max(PAIR_PX / Math.max(cam1.k, 0.05), 12);
       formSwitching = true; try { renderSpace('keep'); } finally { formSwitching = false; }
       world.style.visibility = 'hidden';
       fitView(false);
@@ -1036,8 +1037,8 @@ function setMapForm(next: MapForm) {
   };
   formTimers.push(window.setTimeout(fly, FORM_LINES_OUT_MS));
 }
-/** v13 fix 1: the zoom each 보기 of a map fitted at in this window (pairRoute keeps it), so a switch routes the new form's lines for it. */
-const formFitK = new Map<string, number>();
+/** v13 fix 1: the frame each 보기 of a map fitted at in this window (pairRoute keeps it): a switch flies there and routes the new form's lines for its zoom. */
+const formFitK = new Map<string, { x: number; y: number; k: number }>();
 const formFitKey = (o: Opened, f: MapForm) => { const v = $('viewport'); return `${o.key}|${f}|${v.clientWidth}x${v.clientHeight}|${easy() ? 'e' : 'd'}`; };
 /** v13 fix 1 (review of v13: lines through arrowheads rose from 155 to 233 with 층 and 흐름 as the maps' own views): in a 보기 the ends on one side
  * of a card stand FORM_PORT_PX screen pixels apart at the fit while the side holds them (so a head never touches its neighbour's line); 구성
@@ -4153,7 +4154,7 @@ function fitView(explicit: boolean, animate = false) {
 function pairRoute(explicit: boolean, animate: boolean): boolean {
   const want = Math.max(PAIR_PX / Math.max(camera.k, 0.05), 12);
   // v13 fix 1: the zoom each 보기 fitted at (this map, this window), so a switch back routes its lines once.
-  if (opened && formApplies(opened)) formFitK.set(formFitKey(opened, formNow), camera.k);
+  if (opened && formApplies(opened)) formFitK.set(formFitKey(opened, formNow), { x: camera.x, y: camera.y, k: camera.k });
   if (pairRefit || Math.abs(want - routedGap) <= 0.75) return false;
   pairGapNow = want; pairRefit = true;
   try { positionWorld(); fitView(explicit, animate); } finally { pairRefit = false; }

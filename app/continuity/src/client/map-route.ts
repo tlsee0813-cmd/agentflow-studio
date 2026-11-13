@@ -69,8 +69,8 @@ function facePorts(boxes: Map<string, Box>, edges: Edge[], sidePorts: ReadonlyMa
 /** v13 fix 1: the gaps (the first 0) between the ends of one face, left to right: PORT_GAP, and pairGap across the two ends of a pair
  * running opposite ways between the same two cards (the gaps between them widened evenly); room: the most the run may span (the face
  * inside its corners). Past the room the widened gaps take what is left, never less than PORT_GAP. Pure. */
-export function faceGaps(es: readonly Pick<Edge, 'from' | 'to'>[], pairGap: number, room: number): number[] {
-  const g: number[] = es.map((_, i) => (i ? PORT_GAP : 0)); if (pairGap <= PORT_GAP || es.length < 2) return g;
+export function faceGaps(es: readonly Pick<Edge, 'from' | 'to'>[], pairGap: number, room: number, step: number = PORT_GAP): number[] {
+  const g: number[] = es.map((_, i) => (i ? step : 0)); if (pairGap <= PORT_GAP || es.length < 2) return g;
   const need = [...g];
   for (let i = 0; i < es.length; i++) for (let j = i + 1; j < es.length; j++) {
     const a = es[i]!, b = es[j]!; if (a.from !== b.to || a.to !== b.from || a.from === a.to) continue;
@@ -178,7 +178,16 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
     // ends), never on one point (they ran together out of it as one line).
     const ys: number[] = [];
     const fars: number[] = [];
-    for (const [y, ps] of tied) { ps.sort((p, q) => p.far - q.far); pinSlots(y, ps.length).forEach((at2, i) => { put(ps[i]!.key, ps[i]!.end, at2); ys.push(at2); fars.push(ps[i]!.far); }); }
+    for (const [y, ps] of tied) {
+      ps.sort((p, q) => p.far - q.far);
+      // v13 fix 1 (review of v13: nanogpt's picked 체크포인트 met train.py's port mark with both lines of its pair, 3.5px apart at 1280): two
+      // ends of a pair at one pin stand pairGap apart across it (as far as the side holds), the others PORT_FLOOR apart as before.
+      const len = box.kind === 'frame' ? box.head : box.h, gs = faceGaps(ps.map(p => sides.get(p.key)!.e), pairGap, Math.max(0, len - 2 * PAIR_INSET), PORT_FLOOR);
+      const span = gs.reduce((a, b) => a + b, 0), lo = box.y + PAIR_INSET, hi = box.y + len - PAIR_INSET;
+      let at2 = span > PORT_FLOOR * (ps.length - 1) + 0.01 ? Math.min(Math.max(y - span / 2, lo), Math.max(lo, hi - span)) : NaN;
+      const slots = Number.isNaN(at2) ? pinSlots(y, ps.length) : gs.map(g => (at2 += g, Math.round(at2 * 2) / 2));
+      slots.forEach((v, i) => { put(ps[i]!.key, ps[i]!.end, v); ys.push(v); fars.push(ps[i]!.far); });
+    }
     if (ys.length) { pinnedAt.set(k, ys); pinnedFar.set(k, fars); }
     // Beauty v5 (hub lanes): an end whose port the layout planned (Channel.ports, the shared port model) stands at it, so its tracks meet
     // the ports they were planned from even where this drawn set has fewer ends on the side (a summary stroke holding both ways); the
@@ -505,7 +514,8 @@ export const sideBudget = (b: Box): number => sideCapacity(b.h, PORT_INSET);
 /** Beauty v3 (D.3): a card side over its budget sends its ends whose partner lies wholly above it (or below it, 24 clear) to its top (or
  * bottom) face, the steepest first, until the side is within budget. Only where the geometry is real; the line keeps its stroke and
  * head (the face carries no meaning), its end never shares a port, and no trunk joins it to another line. Returns the faces to take. */
-export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[]): Map<string, { a?: PortFace; b?: PortFace }> {
+export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[], pairGap = 0): Map<string, { a?: PortFace; b?: PortFace }> {
+  const ways = new Set(edges.map(e => `${e.from}\u0000${e.to}`));
   type End = { key: string; end: 'a' | 'b'; me: Box; other: Box; laid: boolean };
   const by = new Map<string, End[]>(), out = new Map<string, { a?: PortFace; b?: PortFace }>(), tied = new Map<string, number>();
   for (const e of edges) {
@@ -531,7 +541,9 @@ export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[]): M
     // v13 fix 1 (review of v13: umami's API 라우트 picked held eight ends on one 80-high side, two tied to its port marks, and its pair with
     // 방문자 브라우저 stood 3px apart): the ends tied to pins count toward the side's budget too (they take its room), so the free ends over
     // it go to the face toward their partners as on any other full side.
-    const n = Math.max(list.length + (tied.get(sk) ?? 0) - sideBudget(me), cands.filter(x => x.laid).length); if (n <= 0) continue;
+    // Only where the routing parts pairs (pairGap) and the side holds an end of one: elsewhere the plan round the pins stays as it was.
+    const paired = pairGap > PORT_PITCH && list.some(x => ways.has(`${x.other.id}\u0000${x.me.id}`) && ways.has(`${x.me.id}\u0000${x.other.id}`));
+    const n = Math.max(list.length + (paired ? tied.get(sk) ?? 0 : 0) - sideBudget(me), cands.filter(x => x.laid).length); if (n <= 0) continue;
     for (const x of cands.slice(0, n)) out.set(x.key, { ...out.get(x.key), [x.end]: face(x)! });
   }
   return out;
@@ -584,7 +596,7 @@ interface Searched { face: Map<string, Route | null>; line: Map<string, { r: Rou
 function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: RouteOpts, flips: readonly FaceTie[], memo: Searched, ties?: FaceTie[]): Map<string, Routed> {
   // Beauty v3 (D): ends over a side's budget take the top or bottom face toward a partner that really lies above or below.
   const edges = memo.edges ??= (() => {
-    const over = opts.quick ? new Map<string, { a?: PortFace; b?: PortFace }>() : faceOverflow(boxes, edgesIn);
+    const over = opts.quick ? new Map<string, { a?: PortFace; b?: PortFace }>() : faceOverflow(boxes, edgesIn, opts.pairGap ?? 0);
     return over.size ? edgesIn.map(e => { const o = over.get(e.key); return o ? { ...e, faces: { a: o.a ?? e.faces?.a ?? 'side', b: o.b ?? e.faces?.b ?? 'side' }, overflow: { a: !!o.a, b: !!o.b } } : e; }) : edgesIn;
   })();
   // A control line read as such leaves its card's bottom and comes in at the top (map design v3 3.6): routed first, kept only

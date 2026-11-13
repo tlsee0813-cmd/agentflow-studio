@@ -101,7 +101,7 @@ test('V12-5 (first user of v11, 5) every band is covered space: the pan that cle
   assert.match(fn(app, 'growthClearGuide'), /const d = coverPan\(cards, view, bands, kb && kb\.kind !== 'ghost' \? toScreen\(kb\) : null, \{ x: area\.w \/ 2, y: area\.h \/ 2 \}, r, blocks\);/);
   // v13 merge: the same test of what is under the guide, before a pan and after it (hits).
   assert.match(fn(app, 'growthClearGuide'), /const hits = \(dx: number, dy: number\) => blocks\.some\(b => b\.x \+ dx < r\.x \+ r\.w && r\.x < b\.x \+ dx \+ b\.w && b\.y \+ dy < r\.y \+ r\.h && r\.y < b\.y \+ dy \+ b\.h\);/);
-  assert.match(fn(app, 'growthClearGuide'), /if \(!hits\(0, 0\)\) return;/, 'no move unless something is under the guide');
+  assert.match(fn(app, 'growthClearGuide'), /if \(!hits\(0, 0\)\) \{ if \(!still\) cmpEdgeTidy\(cards, view, hits\); return; \}/, 'no move unless something is under the guide');
   assert.match(fn(app, 'growthBands'), /\['growth-line', 'growth-past', 'line-key'\]/);
   assert.match(fn(app, 'growthReveal'), /coverPan\(cards, fr\(v\.getBoundingClientRect\(\)\), bands, null, \{ x: area\.w \/ 2, y: area\.h \/ 2 \}, null, cards, \{ card, area \}\)/);
   assert.match(app, /const center = \(\) => \{ const a = mapArea\(\); return \[a\.x \+ a\.w \/ 2, a\.y \+ a\.h \/ 2\] as const; \};/, 'the zoom buttons zoom about the free area\'s middle');

@@ -80,7 +80,7 @@ test('V13M-7 a compare scene\'s guide is cleared from its settled size: a pan mu
   const src = await app(), g = fn(src, 'growthClearGuide');
   assert.match(g, /function growthClearGuide\(still = false, again = false\)/);
   assert.match(g, /const hits = \(dx: number, dy: number\) => blocks\.some\(/);
-  assert.match(g, /if \(!hits\(0, 0\)\) return;/);
+  assert.match(g, /if \(!hits\(0, 0\)\) \{ if \(!still\) cmpEdgeTidy\(cards, view, hits\); return; \}/);
   assert.match(g, /!still && !lose && !hits\(d\[0\], d\[1\]\)\) \{ camera = /, 'a pan that still leaves a card under the guide is no answer');
   assert.doesNotMatch(g, /if \(d && !d\[0\] && !d\[1\]\) return;/, 'no pan with something under the guide sends it to the pane');
   assert.match(g, /if \(!again\) \{ const h0 = el\.offsetHeight, w0 = el\.offsetWidth; requestAnimationFrame\(\(\) => requestAnimationFrame\(/);

@@ -140,7 +140,8 @@ test('V13X-12 the switch flies at once in a layer of its own; the new form is dr
   assert.match(fly, /\}, FORM_FLY_MS \+ 20\)\);/, 'the redraw waits for the landing');
   assert.match(l, /f\.layer\.remove\(\);/); assert.match(l, /world\.classList\.add\('animate', 'form-cam'\); writeCamera\(camera\);/);
   assert.match(await css(), /\.world\.form-flight\.flying > \[data-box\] \{ transition: transform \.52s/);
-  assert.match(fn(a, 'pairRoute'), /formFitK\.set\(formFitKey\(opened, formNow\), camera\.k\)/, 'a switch back routes its lines once');
+  assert.match(fn(a, 'pairRoute'), /formFitK\.set\(formFitKey\(opened, formNow\), \{ x: camera\.x, y: camera\.y, k: camera\.k \}\)/, 'a switch back flies to its frame and routes its lines once');
+  assert.match(fly, /const cam1 = formFitK\.get\(formFitKey\(o, next\)\) \?\? \{/);
 });
 
 test('V13X-13 쉽게 names the lens 「역할」 (「구성」 is the whole map\'s 보기); a tag line that only repeats the name is left off', async () => {
@@ -168,7 +169,8 @@ test('V13X-15 a side with an end tied to a port mark still parts an opposite pai
   const gap = Math.abs(out.get('back').pts.at(-1).y - out.get('fwd').pts[0].y);
   assert.ok(gap >= 26 - 0.6, `${gap}`);
   const src = await readFile(new URL('../src/client/map-route.ts', import.meta.url), 'utf8');
-  assert.match(src, /const n = Math\.max\(list\.length \+ \(tied\.get\(sk\) \?\? 0\) - sideBudget\(me\), cands\.filter\(x => x\.laid\)\.length\);/);
+  assert.match(src, /const n = Math\.max\(list\.length \+ \(paired \? tied\.get\(sk\) \?\? 0 : 0\) - sideBudget\(me\), cands\.filter\(x => x\.laid\)\.length\);/);
+  assert.match(src, /const paired = pairGap > PORT_PITCH && list\.some\(/, 'only where pairs are parted');
 });
 
 test('V13X-16 comparing in the map\'s own frame, a card cut by the area\'s bottom edge comes up whole when nothing goes under the guide', async () => {
@@ -185,4 +187,15 @@ test('V13X-17 a condition\'s mark wholly out of view on a line that runs in view
   assert.match(c, /if \(!g \|\| getComputedStyle\(g\)\.display === 'none' \|\| g\.classList\.contains\('stub'\)\) continue;\n\s*slideMark\(el, r, vp, sr,/);
   const src = await readFile(new URL('../src/client/map-route.ts', import.meta.url), 'utf8');
   assert.match(src, /\.\.\.\(opts\.pitch \? \{ pitch: opts\.pitch \* c \} : \{\}\)/);
+});
+
+test('V13X-18 the two lines of a pair tied to one port mark stand pairGap apart across it (others PORT_FLOOR apart as before)', () => {
+  const B = (id, x, pins) => ({ id, x, y: 0, w: 224, h: 104, kind: 'node', container: '__root__', depth: 0, rel: { x, y: 0 }, head: 0, ...(pins ? { pins } : {}) });
+  const bx = new Map([['p', B('p', 0, { 'ra|out': 52, 'rb|in': 52 })], ['q', B('q', 420)]]);
+  const E = (key, from, to, ids) => ({ key, from, to, ids, kind: 'flow', notes: [] });
+  const out = R.routeEdges(bx, [E('go', 'p', 'q', ['ra']), E('back', 'q', 'p', ['rb'])], { pairGap: 30 });
+  const gap = Math.abs(out.get('go').pts[0].y - out.get('back').pts.at(-1).y);
+  assert.ok(gap >= 30 - 0.6, `${gap}`);
+  const plain = R.routeEdges(bx, [E('go', 'p', 'q', ['ra']), E('back', 'q', 'p', ['rb'])], {});
+  assert.equal(Math.abs(plain.get('go').pts[0].y - plain.get('back').pts.at(-1).y), 9, 'without a pair gap: PORT_FLOOR across the pin');
 });
