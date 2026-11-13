@@ -3372,7 +3372,7 @@ export interface PartUnderstanding {
    * are never a reason: a v1 document arriving after v2 does not turn the description back. */
   role: string | null; roleAbout: string | null;
   /** The person corrected the description (it stays until they correct it again). */
-  corrected: { id: string; at: string } | null;
+  corrected: { id: string; at: string; error?: true } | null;
   /** The quotes the current description rests on (none for the person's correction). */
   roleBasis: ReadingQuote[];
   /** Recipe .52 M2: when the current description came from a record whose C-IDENT row bound the part, that reading's time; else null. */
@@ -3553,7 +3553,7 @@ export function partUnderstanding(p: Project, areaId: string): PartUnderstanding
   // retired the part gives it the state retired from that reading on.
   const ident = identityState(p), dups = new Set([...ident.folded.keys()].filter(id => id !== areaId && canonicalPart(ident, id) === areaId));
   for (const r of p.readings) {
-    if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at }; roleBound = null; roleTarget = null; roleFrom = null; } continue; }
+    if (!isMapReading(r)) { if (r.version === 'map-correction.1' && r.areaId === areaId) { role = r.text; roleAbout = null; roleBasis = []; corrected = { id: r.id, at: r.at, ...(r.error === true ? { error: true as const } : {}) }; roleBound = null; roleTarget = null; roleFrom = null; } continue; }
     for (const x of r.identity ?? []) if (x.op?.kind === 'retire' && x.op.areaId === areaId) stateRead = { state: 'retired', when: x.when, quote: null, at: r.at };
     // Recipe .52 M2b: the bound record's own C-PART line (its 「하는 일 한 줄」) is the part as that record knows it now; a reply that wrote
     // no description of the part (the usual case for a part the map has) still gives the card that line, quoted from its row.

@@ -323,8 +323,9 @@ export function createAutoSync(host: AutoSyncHost) {
     // The state in words as well as the dot's colour (a look running only turns the dot, so the pill does not change width every
     // minute); a phone keeps the dot only, and the folder's name gives way first (the whole line stays its name and title).
     const tail = waiting ? ' · 허용 필요' : error ? ' · 확인 필요' : '';
-    pill.title = `자동 연결${b ? ` · ${name}${tail}` : ' 안 됨'}`; pill.setAttribute('aria-label', pill.title);
-    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, h('span', {}, '자동 연결'), h('span', b ? { class: 'sync-pill-name' } : {}, b ? ` · ${name}` : ' 안 됨'), tail ? h('span', {}, tail) : null));
+    // Review of v7 (first user, g): not connected, the pill says what it offers (never 「안 됨」, which reads as a stop).
+    pill.title = b ? `자동 연결 · ${name}${tail}` : '자동 연결 켜기 · 작업 폴더를 연결하면 새 기록을 알아서 가져와요'; pill.setAttribute('aria-label', b ? pill.title : '자동 연결 켜기');
+    pill.replaceChildren(h('i', { 'aria-hidden': 'true' }), h('span', {}, h('span', {}, '자동 연결'), h('span', b ? { class: 'sync-pill-name' } : {}, b ? ` · ${name}` : ' 켜기'), tail ? h('span', {}, tail) : null));
     panel.hidden = !panelOpen; if (!panelOpen) { said = null; return; }
     // A folder name being composed (a Korean syllable) is not drawn over: a new field would end the composition and split the
     // syllable. The redraw follows once it is committed (draw).

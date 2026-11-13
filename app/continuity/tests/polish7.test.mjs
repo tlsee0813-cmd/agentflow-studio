@@ -23,17 +23,18 @@ test('P7-1 code is quiet monospace: the words\' size, weight and colour, the lab
 });
 
 test('P7-2 an identifier in brackets after a plain-language card name goes to the pane\'s subtitle and the hover, unless it alone tells two cards apart', async () => {
-  const a = await app();
-  assert.ok(a.includes("const NAME_IDENT = /^(.*[가-힣].*?)\\s*\\(([^()\\s]+)\\)$/;"), 'a bracketed identifier after words with Hangul');
-  const face = fn(a, 'faceName');
-  assert.match(face, /s && count\.get\(s\.plain\) === 1 \? \{ name: s\.plain, ident: s\.ident \} : \{ name: x\.name, ident: null \}/, 'kept on the face when another card has the same plain name');
+  // Review of v7: the face's name lives in face-name.ts, shared by the card, the pane and the growth view.
+  const a = await app(), fnm = await readFile(new URL('../src/client/face-name.ts', import.meta.url), 'utf8');
+  assert.ok(fnm.includes("const NAME_IDENT = /^(.*[가-힣].*?)\\s*\\(([^()\\s]+)\\)$/;"), 'a bracketed identifier after words with Hangul');
+  assert.ok(fn(a, 'faceName').includes('const counts = faceCounts(o.view.parts.map(x => x.name)); m = new Map(o.view.parts.map(x => [x.id, faceSplit(x.name, counts)]));'));
+  assert.ok(fnm.includes('return s && (counts.get(s.plain) ?? 0) <= 1 ? { name: s.plain, ident: s.ident } : { name: name.trim(), ident: null };'), 'kept on the face when another card has the same plain name');
   assert.match(a, /h\('span', \{ class: 'hc-ident' \}, h\('code', \{ class: 'nm-code' \}, fn\.ident\)\)/, 'the hover (pointer and keyboard focus) reads it as written');
   assert.match(a, /h\('p', \{ class: 'pane-ident', title: '식별자 · 기록에 적힌 그대로' \}, h\('code', \{ class: 'nm-code' \}, faceName\(o, part\)\.ident!\)\)/, 'the pane\'s subtitle');
   assert.match(a, /'aria-label': \[p\.name, t\.kind/, 'the card\'s accessible name keeps the whole name');
   // A name that is only code keeps it, in quiet monospace (never a paraphrase); a bare capitalised word stays the name's own type.
-  assert.match(a, /const nameCode = \(t: string\): boolean => \{\n  let u = t\.replace\(/);
-  assert.ok(a.includes("!/^[A-Z][A-Za-z0-9]*$/.test(u)"), 'PostgreSQL, GitHub, StateManager: names, not code');
-  assert.ok(a.includes("let u = t.replace(/\\([A-Za-z][A-Za-z0-9 .-]*\\)/g, '');") && a.includes("u = u.replace(/^\\(+|\\)+$/g, '');"), 'a gloss in brackets (「Karpathy(karpathy)」) and a tag line\'s lone bracket (「Base)」) are no code');
+  assert.match(fnm, /export const nameCode = \(t: string\): boolean => \{\n  let u = t\.replace\(/);
+  assert.ok(fnm.includes("!/^[A-Z][A-Za-z0-9]*$/.test(u)"), 'PostgreSQL, GitHub, StateManager: names, not code');
+  assert.ok(fnm.includes("let u = t.replace(/\\([A-Za-z][A-Za-z0-9 .-]*\\)/g, '');") && fnm.includes("u = u.replace(/^\\(+|\\)+$/g, '');"), 'a gloss in brackets (「Karpathy(karpathy)」) and a tag line\'s lone bracket (「Base)」) are no code');
   // The box was measured for the whole name: the face never needs more lines than that (layout unchanged).
   assert.match(a, /const nl = cardNameLines\(p, !!dot, !!r\.loop\), hs = cardHeights\(t, nl\), fn = faceName\(o, p\);/);
   assert.match(fn(a, 'faceNameNodes'), /if \(w \* 1\.06 \+ 2 > room \* \(lines > 1 \? 1\.85 : 1\)\) return breakable\(name\);/, 'monospace only where it keeps the measured lines');

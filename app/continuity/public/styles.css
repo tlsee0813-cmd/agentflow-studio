@@ -3711,7 +3711,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .gl-dot { flex: none; color: var(--text-4); padding: 0 1px; }
 .gl-none { color: var(--text-3); padding: 0 6px; }
 .gl-gap { flex: 1 1 12px; min-width: 12px; }
-.gl-row .gl-un { color: #8a641d; }
+.gl-row .gl-un { color: var(--text-2); }
 .gl-row .gl-un.zero { color: var(--text-3); }
 .gl-row .gl-exit { min-width: 24px; padding: 0; font-size: 15px; color: var(--text-3); }
 /* Tabs over the changed cards: outside the card's box, 20px and 12px on screen at any zoom. */
@@ -3795,8 +3795,8 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .g-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; font-weight: inherit; color: inherit; background: none; border: 0; padding: 0; letter-spacing: 0; overflow-wrap: anywhere; }
 /* The guide in the top box (지도 변화 · v04 → v17 and its two sentences): every clause that says a fact is a button to its scene or list. */
 .focus-top.growth-guide .gg-head { margin: 0; font-size: 12.5px; line-height: 18px; font-weight: 600; color: var(--accent-strong); font-variant-numeric: tabular-nums; }
-.focus-top.growth-guide .gg-text { font-size: 16px; line-height: 23px; font-weight: 500; letter-spacing: -.005em; -webkit-line-clamp: 3; }
-.focus-top.growth-guide.ft-one .gg-text { -webkit-line-clamp: 1; }
+/* Review of v7: the guide is never cut or stepped back; it reads whole (the camera keeps the cards clear of it). */
+.focus-top.growth-guide .gg-text { display: block; overflow: visible; -webkit-line-clamp: none; font-size: 16px; line-height: 23px; font-weight: 500; letter-spacing: -.005em; }
 .focus-top .gg-s + .gg-s::before { content: " "; }
 .focus-top .gg-seg { display: inline; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: var(--line); text-decoration-thickness: 1px; text-underline-offset: 4px; }
 .focus-top .gg-seg:hover { color: var(--accent-strong); text-decoration-color: var(--accent-line); }
@@ -3836,3 +3836,26 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .gr-on { color: var(--text-2); }
 .gu-item { color: var(--text-3); }
 .gu-said { font-size: 12px; line-height: 18px; color: var(--text-3); overflow-wrap: anywhere; }
+
+/* Review of v7 (growth view, first user). */
+/* f: a description's change, 이전 설명 and 지금 설명 first, stacked; one line on what each date means. */
+.gs-pair { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 2px; }
+.gs-pair > div { padding: 6px 10px; border-left: 2px solid var(--line); }
+.gs-pair .gs-pair-now { border-left-color: var(--accent); }
+.gs-pair p { margin: 2px 0 0; font-size: 13px; line-height: 20px; color: var(--text); }
+.gs-pair .gs-pair-was p { color: var(--text-2); }
+.gs-pair > .gs-fine { margin: 0; }
+.gs-scene .gs-dates, .gs-scene .gs-why { margin: 0; }
+/* 정정 by the record: its 철회 rows as written. */
+.gs-withdrawn ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.gs-withdrawn li { display: flex; flex-direction: column; gap: 1px; font-size: 12.5px; line-height: 19px; color: var(--text); }
+.gs-wd-before { color: var(--text-3); }
+.gs-wd-src { align-self: flex-start; font-size: 12px; }
+/* The person's correction: whether it fixes an error (정정) or rewrites the description. */
+.edit-form .fix-error { display: flex; align-items: baseline; gap: 6px; font-weight: 500; color: var(--text-2); }
+/* j: a folded condition's ◇ says it opens; a label the map's edge would cut steps back. */
+.edge-cue .cue-word { display: none; position: absolute; left: 11px; top: -4px; padding: 0 4px; border-radius: 3px; background: var(--surface); box-shadow: 0 0 0 1px var(--line); font: 500 11px/16px var(--font); color: var(--text-2); white-space: nowrap; pointer-events: none; }
+.edge-cue:is(:hover, :focus-visible, .near) .cue-word { display: block; }
+/* Merged v8: with the open cue (three dots, v8 maps) beside the ◇, the word sits past the dots. */
+.edge-cue.q-open .cue-word { left: 18px; }
+.edge-labels > .edge-cut { visibility: hidden; }

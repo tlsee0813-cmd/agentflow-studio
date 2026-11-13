@@ -2743,13 +2743,13 @@ def sessions_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("미용실 예약")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
-    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 켜기")
     # On a phone the pill is its dot alone (its words stay its name): opened, the bar stays within the window and nothing slides.
     page.set_viewport_size({"width": 390, "height": 844})
     page.locator("#sync-pill").click()
     expect(page.locator("#sync-panel .sync-folder-pick")).to_have_count(1)
     assert page.evaluate("[document.body.scrollLeft, document.querySelector('.bar').scrollWidth <= innerWidth]") == [0, True]
-    expect(page.locator("#sync-pill")).to_have_accessible_name("자동 연결 안 됨")
+    expect(page.locator("#sync-pill")).to_have_accessible_name("자동 연결 켜기")
     page.mouse.click(200, 600)  # a press outside closes the panel, as a popover does
     expect(page.locator("#sync-panel")).to_be_hidden()
     page.set_viewport_size({"width": 1280, "height": 720})
@@ -2856,7 +2856,7 @@ def sessions_flow(browser, base):
     page.locator("#sync-panel").get_by_role("button", name="/work/salon-api 연결 빼기").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
     page.locator("#sync-panel").get_by_role("button", name="연결 끊기").click()
-    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 켜기")
     # Connecting the same folder again goes on from where each session was taken: nothing comes in twice.
     page.locator("#sync-panel .sync-folder-pick", has_text="/work/salon").click()
     expect(page.locator("#sync-pill")).to_have_text("자동 연결 · salon")
@@ -3100,7 +3100,7 @@ def folder_sessions_flow(browser, base):
     page.locator("#new-open").click()
     page.locator("#new-name").fill("폴더로 연결")
     page.locator("#new-form").get_by_role("button", name="만들기").click()
-    expect(page.locator("#sync-pill")).to_have_text("자동 연결 안 됨")
+    expect(page.locator("#sync-pill")).to_have_text("자동 연결 켜기")
     page.locator("#sync-pill").click()
     panel = page.locator("#sync-panel")
     expect(panel.locator("h3")).to_have_text("내 AI 세션 연결")
