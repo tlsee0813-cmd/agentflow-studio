@@ -2974,6 +2974,7 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
    narrow card the successor gives way first, then the kind word, each with an ellipsis (their whole words in the tips). The pane's
    head says it in words beside the kind word. */
 .c-kind .c-life-to { flex: 0 4 auto; min-width: 0; margin-left: -2px; overflow: hidden; text-overflow: ellipsis; color: var(--text-2); }
+.node.card .c-kind .kw-off { display: none; }
 .lens-maint { padding: 0 5px; border: 1px solid var(--line-essential); border-radius: 6px; color: var(--text-2); white-space: nowrap; }
 /* Recipe .45 (merged with S9): the record family and role beside the kind word; 「미정: 이유」 and 「대응 불명확」 as a quiet chip (the pane only). */
 .lens-family { color: var(--text-2); white-space: nowrap; }
@@ -3404,6 +3405,8 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .band-head { font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: .04em; color: var(--band-caption); transform: scale(max(1, min(var(--u, 1), max(calc(var(--u, 1) * .7692), 1.5385)))); }
 /* Ruling F8 Q5: a head that says a recorded group's name carries its kind small beside it. */
 .band-head .band-kind { font-size: 11px; font-weight: 500; letter-spacing: 0; color: var(--text-3); }
+/* v12: a kind head's reach along its own members, closed under the last one (a card after it in the column reads outside the group). */
+.band-reach { position: absolute; width: 8px; border-left: calc(2px * var(--u, 1)) solid var(--band-caption); border-bottom: calc(2px * var(--u, 1)) solid var(--band-caption); border-bottom-left-radius: 3px; pointer-events: auto; }
 .line-key .lk-kind .lk-kind-word { padding-left: 2px; letter-spacing: .04em; font-weight: 600; color: var(--band-caption, var(--text-3)); }
 .band-line { border-left-width: calc(2px * var(--u, 1)); }
 .band-tick { pointer-events: auto; cursor: default; }
@@ -3621,6 +3624,10 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .focus-top .ft-sentence { margin: 0; padding: 0; border: 0; background: none; text-align: left; font: inherit; font-size: 14px; line-height: 22px; font-weight: var(--fw-name); letter-spacing: -.005em; color: var(--text); display: block; overflow: hidden; word-break: keep-all; overflow-wrap: break-word; }
 .focus-top .ft-sentence[hidden] { display: none; }
 .focus-top.ft-under .ft-sentence { display: none; }
+/* v12: the basis line gives way before the sentence (and with it); a separator never opens or closes a control line. */
+.focus-top:is(.ft-nobasis, .ft-under) .ft-basis { display: none; }
+.focus-top .ft-dot.ft-dot-off { display: none; }
+.focus-top .ft-full .ft-full-basis { margin-top: 4px; }
 .focus-top .ft-switch { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 6px; font-size: 13px; line-height: 20px; color: var(--text-2); }
 .focus-top:not(.growth-guide) .ft-b { height: 20px; line-height: 18px; }
 .focus-top .ft-full-open { margin-left: auto; color: var(--accent-strong); border-color: var(--accent-line, var(--line)); }

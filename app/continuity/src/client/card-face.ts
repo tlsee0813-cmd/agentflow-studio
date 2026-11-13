@@ -104,29 +104,59 @@ export function wrapWords(text: string, w: number, measure: (s: string) => numbe
   }
   return out;
 }
-/** Words a shorter phrase may never drop: a plan or a stopped use (KEEP_WORD), a negation, a condition or a guess. */
-const ROLE_KEEPS = new RegExp(`${KEEP_WORD.source}|않|없|못|아니|(?:으|하|이|되|있)?면(?=[\\s,]|$)|때|경우|조건|만\\s|추정|모름|불명확|미상`);
+/** Words a shorter phrase may never drop: a plan or a stopped use (KEEP_WORD), a negation, a condition (「…하면」, 「…때」, 「실패 시」; never
+ * the noun 「화면」) or a guess. */
+const IF_SRC = String.raw`(?:(?:으|하|이|되|있)면|(?<![화장측표전정평단방국내외후대])면)(?=[\s,]|$)`;
+const COND_SRC = String.raw`${IF_SRC}|때|경우|조건|(?:^|\s)시(?=\s|$)`;
+const IF = new RegExp(IF_SRC);
+const ROLE_KEEPS = new RegExp(`${KEEP_WORD.source}|않|없|못|아니|${COND_SRC}|만\\s|추정(?!값|치)|모름|불명확|미상`);
+/** v12: where a sentence's closing run may begin: right after a clause's link (「…하고」, 「…하며」, 「…생성해」, 「…를 받아」) or an
+ * adverbial word (「…에서」, 「…에」, 「…으로」, 「…를 통해」), or the 「등」 that closes a list of examples; never after a noun that only
+ * ends like one (「경고」, 「창고」, 「경로」, 「주로」). */
+const LINK = /(?:고|며|면서|하여|해서|아서|어서|[가-힣]{2,}해|받아|거쳐|불러|모아|읽어|넘겨|맞춰|묶어|골라|담아|나눠|다뤄|만들어)$/;
+const NOT_LINK = /(?:경고|참고|창고|광고|최고|재고|사고|원고|잔고|공고|보고|이해|방해|피해|손해|침해)$/;
+const ADVERB = /(?:에서|에게|에|으로|로|통해|따라|위해|대해|의해|인해|향해|등)$/;
+const NOT_ADVERB = /(?:경로|회로|통로|도로|미로|새로|주로|서로|따로|별로|스스로|대로)$/;
+/** A first word that leans on the words a phrase would drop: an active verb's modifier form (「실행하는」, 「받는」, 「만든」), whose object
+ * the dropped words held (never a noun that only ends like one: 「권한」, 「로그인」), or a joining word. */
+const LEANS = /(?:[하있없받내주쓰읽보만들]는|[하했]던|[가-힣]한|[가-힣]할|든)$|^(?:또는|및|이나|혹은|그리고|거나)$/;
+const NOT_LEANS = /(?:권한|제한|기한|무한|유한|간한)$/;
 /** An action noun closing a role word (「목록 생성」, 「요청 분배」, 「파일 쓰기」): what makes a closing run a role phrase. */
 const ACTION = /(?:생성|분배|실행|정리|처리|관리|갱신|검사|해석|결정|직렬화|전달|저장|수신|송신|배정|접수|감시|기록|조정|출력|변환|검증|병합|호출|등록|배포|빌드|계산|추출|수집|선택|표시|보관|제공|발행|구독|분석|게시|교체|감지|적재|예약|열람|조회|편집|작성|제출|승인|배달|복구|백업|정렬|측정|보고|판정|차단|인증|기|하기)$/;
-/** A word that only relates the words before it (「인스턴스 사이」, 「유형별」, 「작업 중」): a phrase never starts on it. */
+/** A word that only relates the words before it (「인스턴스 사이」, 「유형별」, 「작업 중」): a phrase never starts on it (in a sentence, the
+ * word standing alone: 「학습·검증용 파일」 relates to the words after it). */
 const RELATES = /(?:사이|간|별|중|용|적|위|아래|안|밖|전|후|및|등)$/;
-/** The shorter phrases of a role, longest first: for a sentence, each closing clause (after 「고 · 며 · 면서 · 하여 · 해서」 or a comma: it
- * ends as the sentence does, three words or more: its object with its action); for a role word, each closing run of two words or more
- * that ends on an action noun (「벤치마크 명령 목록 생성」 → 「명령 목록 생성」, 「HTTP·WS 요청 분배」 → 「요청 분배」). Never one that breaks
- * a list (no 「·」 in it, nothing dropped right after 「와 · 과 · 및 · ,」) or starts on a word that only relates (「사이 변경 신호」). */
+const RELATES_ALONE = /^(?:사이|간|별|중|용|위|아래|안|밖|전|후|및|등|따라|통해|위해|대해|의해|인해|향해|거쳐)$/;
+/** A sentence's predicate with its own target: a copula (「…대상이다」, 「…배포처다」: an open syllable before 다). */
+const copula = (w: string) => { const m = /([가-힣])다[.。]?$/.exec(w); return !!m && (/이다[.。]?$/.test(w) || (m[1]!.charCodeAt(0) - 0xac00) % 28 === 0 && !/[하되]다[.。]?$/.test(w)); };
+/** The shorter phrases of a role, longest first. For a sentence (v12): each closing run that ends as the sentence does and begins right
+ * after a clause's link or an adverbial word (LINK, ADVERB: 「…를 받아 | 실행과 결과를 제공한다.」, 「…화면에서 | 사용자 조작을 받아 …」),
+ * two words or more, holding its object (a word with 을·를) or ending on a copula (「…대상이다」): the target and the action, the same words
+ * in the same order (never an ending changed, never a word added). For a role word, each closing run of two words or more that ends on an
+ * action noun (「벤치마크 명령 목록 생성」 → 「명령 목록 생성」, 「HTTP·WS 요청 분배」 → 「요청 분배」). Never one that breaks a list (no 「·」
+ * in a role word's run, no comma in a sentence's, nothing dropped right after 「와 · 과 · 및 · 또는 · 이나」, never one side of 「…거나」),
+ * starts on a word that only relates or leans on the dropped words (「사이 변경 신호」, 「실행하는 …」, 「바꾸고 …」), or whose dropped words
+ * hold a plan, a negation, a condition or a guess (ROLE_KEEPS). */
 export function rolePhrases(text: string): string[] {
   const t = text.trim(), out: string[] = [];
   const sentence = /[.。]$|(?:다|요|함|됨|음|임)$/.test(t);
-  // A role phrase says what the part does: never a clause that only denies, doubts or adds (「흐름을 멈추지 않는다」, 「대상 범위는
-  // 불명확하다」, 「구 보고서 경로도 처리한다」).
-  const aside = (s: string) => /않|없|못|아니|불명확|모르|모름|추정|미상/.test(s) || /\S도\s/.test(s);
-  const tail = (at: number) => {
-    const head = t.slice(0, at).trim(), rest = t.slice(at).trim(), words = rest.split(/\s+/);
-    if (words.length < (sentence ? 3 : 2) || ROLE_KEEPS.test(head) || aside(rest) || /(?:와|과|및|[·,，]|또는|이나)$/.test(head)) return;
-    if (!sentence && (rest.includes('·') || RELATES.test(words[0]!) || !ACTION.test(words.at(-1)!))) return;
+  // A role phrase says what the part does: never one that opens on a clause that only denies or doubts (「흐름을 멈추지 않는다」, 「대상
+  // 범위는 불명확하다」; a later clause of the run keeps its words whole) or opens on a 「…하면」 (its other half may be dropped), never one
+  // that adds to dropped words (「구 보고서 경로도 처리한다」, 「노트북도 …」).
+  const aside = (s: string) => /않|없|못|아니|불명확|모르|모름|추정(?!값|치)|미상/.test(s);
+  const adds = (s: string) => /\S도(?:\s|$)/.test(s);
+  const words = t.split(/\s+/);
+  for (let i = 1; i < words.length; i++) {
+    const last = words[i - 1]!.replace(/[,，]$/, ''), head = words.slice(0, i).join(' '), run = words.slice(i), rest = run.join(' ');
+    if (ROLE_KEEPS.test(head) || /(?:와|과|및|[·]|또는|이나|거나|든지)$/.test(last)) continue;
+    if (sentence) {
+      const linkAt = run.findIndex(w => LINK.test(w) && !NOT_LINK.test(w)), first = run.slice(0, linkAt < 0 ? run.length : linkAt + 1).join(' ');
+      const cut = (LINK.test(last) && !NOT_LINK.test(last)) || (ADVERB.test(last) && !NOT_ADVERB.test(last));
+      const target = run.slice(0, -1).some(w => /\S(?:을|를)$/.test(w)) || copula(run.at(-1)!);
+      if (!cut || run.length < 2 || aside(first) || IF.test(first) || adds(rest) || RELATES_ALONE.test(run[0]!) || (LEANS.test(run[0]!) && !NOT_LEANS.test(run[0]!)) || linkAt === 0 || /[,，]/.test(rest) || !target) continue;
+    } else if (run.length < 2 || aside(rest) || adds(rest) || RELATES.test(run[0]!) || rest.includes('·') || !ACTION.test(run.at(-1)!) || /[,，]$/.test(words[i - 1]!)) continue;
     out.push(rest);
-  };
-  for (const m of t.matchAll(sentence ? /(?:고|며|면서|하여|해서)\s+|[,，]\s*/g : /\s+/g)) tail(m.index! + m[0].length);
+  }
   return [...new Set(out)].filter(x => x !== t).sort((a, b) => b.length - a.length);
 }
 /** Ruling F8 Q5: the role as the card shows it in at most `lines` lines of width w (measure: the type it is drawn in). */
@@ -135,6 +165,20 @@ export function roleFit(text: string, w: number, lines: number, measure: (s: str
   const whole = n(t); if (whole) return { text: t, lines: whole, kind: 'whole' };
   for (const p of rolePhrases(t)) { const k = n(p); if (k) return { text: p, lines: k, kind: 'phrase' }; }
   return { text: ROLE_MORE, lines: 1, kind: 'fold' };
+}
+
+/** v12 (whole units): a kind line's words as a line too narrow for them shows them: the whole, else a phrase of the role word that reads on
+ * its own (rolePhrases), else the leading whole units of a kind said in parts (「사람 · 실행 위치 · 안쪽 2」 → 「사람 · 실행 위치」,
+ * 「사람」), else the record's family word (「처리」), else nothing (the card opens the whole). Never 「역할 전문 보기」 in place of words, never
+ * a word or a unit cut. fits: whether a candidate stands whole in the line. */
+export type KindShort = { text: string; how: 'whole' | 'phrase' | 'kind' | 'none' };
+export function kindShort(kind: string, familyWord: string | null | undefined, fits: (s: string) => boolean): KindShort {
+  const t = kind.trim(); if (!t || fits(t)) return { text: t, how: 'whole' };
+  for (const p of rolePhrases(t)) if (fits(p)) return { text: p, how: 'phrase' };
+  const units = t.split(' · '), lead: string[] = [];
+  for (let i = units.length - 1; i >= 1; i--) lead.push(units.slice(0, i).join(' · '));
+  for (const p of [...lead, familyWord ?? ''].filter(x => x && x !== t)) if (fits(p)) return { text: p, how: 'kind' };
+  return { text: '', how: 'none' };
 }
 
 /* ---------- counted 「외 N」 ---------- */

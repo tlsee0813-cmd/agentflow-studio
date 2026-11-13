@@ -601,6 +601,23 @@ export function switcherText(f: FirstFlow, name: (id: string) => string = id => 
   }
   return `${FLOW_CONTROL}: ${what} · ${sourceText(f)}${f.candidates.length > 1 ? ` · 보기 ${f.index + 1}/${f.candidates.length}` : ''}`;
 }
+/** v12 (review of v11, a map at 1280: the control line wrapped, a 「·」 alone at its first line's end): the switcher's words, longest first, for a control
+ * line that stays on one line: whole, then its chain's later names giving way to 「…」 between names (never inside one), then the view's
+ * subject whole without the basis's name, then the view's name with the basis's; the view's number always kept. The whole stays in the
+ * switcher's hover. */
+export function switcherForms(f: FirstFlow, name: (id: string) => string = id => id): string[] {
+  const whole = switcherText(f, name), c = f.flow; if (!whole || !c) return [];
+  const tail = ` · ${sourceText(f)}${f.candidates.length > 1 ? ` · 보기 ${f.index + 1}/${f.candidates.length}` : ''}`, out = [whole];
+  if (c.rule !== 'entry' && c.drawnLines <= FOCUS_FG_MAX) {
+    const ls = c.chain.map(l => l.map(id => tokenFit(name(id), 16)).join(', ')), more = c.more ? ` 외 연결 ${c.more}개` : '';
+    for (let k = Math.min(ls.length - 1, 3); k >= 1; k--) out.push(`${FLOW_CONTROL}: ${[...ls.slice(0, k), '…'].join(' → ')}${more}${tail}`);
+  }
+  // The view's subject whole before its basis's name (that name stays in the hover, with the basis); then the basis's name alone.
+  const src = ` · ${sourceText(f)}`, at = whole.lastIndexOf(src);
+  if (at > 0) out.push(whole.slice(0, at) + whole.slice(at + src.length));
+  out.push(`${FLOW_CONTROL}${tail}`);
+  return [...new Set(out)].filter((x, i, a) => i === 0 || x.length < a[0]!.length);
+}
 
 /** v10 (review of v9: a map's 근거 문장 shrank to 「…실행기로 나뉘고…」 once a verb's 「…고」 became a clause end): a top-line text's
  * cut: its longest clause cut that fits, unless the longest whole-word cut that fits keeps much more of it (a clause cut holds at least

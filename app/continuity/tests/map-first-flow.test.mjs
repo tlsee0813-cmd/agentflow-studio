@@ -448,7 +448,8 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   // Review of v5 focus 3 (A2, A3) changed exactly this: each form measured where it stands for that camera (beside the title).
   // Polish 5: the sentence's forms (whole, one line) with the give and then with room above, before the sentence steps back.
   // v11 (ruling F8 Q2): whole only (never one line); the map makes the room.
-  assert.match(a, /const FT_SAID = \[null\] as const;/, 'whole only');
+  // v12: whole only, with its basis line and then without it (the basis line gives way before the sentence).
+  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis'\] as const;/, 'whole only');
   // v9 (review of v8): each form by the give and then by the free height before the next (two lines before one); v10: first-flow
   // sentenceRoom (its order tested in v10-maps), the free height measured per column (mapSlack).
   assert.match(a, /const room = sentenceRoom\(FT_SAID, at\.k, least, /);
