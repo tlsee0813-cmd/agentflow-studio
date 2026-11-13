@@ -110,14 +110,14 @@ test('P5-7 code in a label reads as quoted code: a monospace chip, words kept as
   assert.equal(show('REDIS_URL 있을 때'), '[REDIS_URL] 있을 때', 'words and a code part: the words kept, the code in the chip');
   for (const t of ['기동 · bind…', '명령 python…', 'HTTP 요청', '넘겨줌 3', 'PR(병합 요청)', 'type이 event·identify·performance']) assert.equal(hasCode(t), false, t);
   assert.deepEqual([codeToken('fetch'), codeToken('POST'), codeToken('runQuery'), codeToken('a_b')], [false, false, true, true]);
-  assert.equal(tokenCut('len(files) == 0 이면 건너뜀', 3), 'len(files) == 0…', 'never inside a token');
+  assert.equal(tokenCut('len(files) == 0 이면 건너뜀', 1), 'len(files) == 0…', 'never inside a token (polish 7: the expression is one unit)');
   assert.equal(tokenCut('a_b c_d', 5), 'a_b c_d');
   const a = await app();
   // Polish 6 (P6-1 to P6-3) keeps these sites and the cut, and makes them say when no cut fits.
   assert.match(a, /function fillLabel\(el: HTMLElement, text: string, full = text\): boolean \{/);
   for (const site of ['box.append(label); if (!fillLabel(label, cutWord, word))', 'box.append(label); fillLabel(label, verb);', 'fillLabel(s.el, s.text);', "filled = fillLabel(el, text); if (!filled) continue; el.classList.toggle('glyph'"]) assert.ok(a.includes(site), site);
-  assert.match(a, /for \(let n = words - 1; n >= 1; n--\) \{ const c = tokenCut\(text, n\); if \(c === null\) continue; draw\(c\); el\.dataset\.full = full; if \(!over\(\)\) return done\(true\); \}/, 'wider than its room: whole tokens off the end, the whole text in the tip');
+  assert.match(a, /for \(let n = cutCount\(text\) - 1; n >= 1; n--\) \{ const c = tokenCut\(text, n\); if \(c === null\) continue; draw\(c\); el\.dataset\.full = full; if \(!over\(\)\) return done\(true\); \}/, 'wider than its room: whole units off the end, the whole text in the tip');
   const c = await css();
-  assert.match(c, /\.edge-labels code\.lb-code, \.ff-note code\.lb-code \{ font-family: ui-monospace,[^}]*font-size: 1em;[^}]*-webkit-text-stroke: 0; \}/, 'monospace at the label\'s own size, on its own ground');
+  assert.match(c, /\.edge-labels code\.lb-code, \.ff-note code\.lb-code \{ font-family: ui-monospace,[^}]*font-size: 1em;[^}]*background: none;/, 'monospace at the label\'s own size (polish 7: on the label\'s own halo, no chip)');
   assert.match(c, /\.edge-labels > \.has-code \{ text-overflow: clip; \}/, 'the CSS never cuts inside a token');
 });

@@ -45,7 +45,7 @@ import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, markPx, markResize, labelParts, tokenCut, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, markPx, markResize, labelParts, tokenCut, cutCount, codeToken, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
@@ -1018,7 +1018,7 @@ function fitCards() {
   for (const x of items) {
     const f = fitted.get(x.id); if (!f) continue;
     const tn = x.el.querySelector<HTMLElement>('.c-tag-name'); if (!tn) continue;
-    tn.replaceChildren(...f.lines.map(l => h('span', { class: 'c-tag-line' }, l)));
+    tn.replaceChildren(...tagLineNodes(f.lines, x.width, x.measure === compactW ? TAG_COMPACT.name : TAG.name));
     x.el.dataset.tagK = k.toFixed(3); x.el.classList.toggle('tag-cut', !f.full);
   }
 }
@@ -1412,6 +1412,75 @@ const CONTACT_TIP = '포트 대응 미기록 · 이 선들은 카드 수준 접�
 /** A name with a line break opportunity after each of its separators (card-family nameBreaks): it wraps at 'CancelToken·|signal'
  * or 'train.bin/|val.bin', never inside a word. */
 const breakable = (name: string): (string | HTMLElement)[] => nameBreaks(name).flatMap((s, i) => (i ? [document.createElement('wbr'), s] : [s]));
+/* ---------- code in a card's name (polish 7, F7 Q3) ----------
+ * An identifier the record wrote in brackets after a card's plain-language name (「소비 폴더 (CONSUMPTION_DIR)」) is the card's second
+ * name: the face reads the plain name, and the identifier reads as written under the pane's title and in the card's hover (pointer and
+ * keyboard focus). It stays on the face when it alone tells two same-named cards apart. A name that is only code keeps it; code in a
+ * name reads as quiet monospace at the name's own size and weight (styles.css .nm-code), never a chip, never a paraphrase. */
+const NAME_IDENT = /^(.*[가-힣].*?)\s*\(([^()\s]+)\)$/;
+/** A token that reads as code in a name: codeToken's marks, never a bare capitalised word (「PostgreSQL」, 「GitHub」, 「StateManager」 are
+ * names as much as code: they stay in the name's own type). */
+// A word in brackets is a gloss, not a call (「Karpathy(karpathy)」, 「(tobspr)」), and a bracket the token only closes or opens is the
+// name's own (a tag line's 「Base)」 of 「런처(Pocket Base)」): the token is read without them.
+const nameCode = (t: string): boolean => {
+  let u = t.replace(/\([A-Za-z][A-Za-z0-9 .-]*\)/g, '');
+  if ((u.match(/\(/g) ?? []).length !== (u.match(/\)/g) ?? []).length) u = u.replace(/^\(+|\)+$/g, '');
+  return /^[\x21-\x7e]+$/.test(u) && codeToken(u) && !/^[A-Z][A-Za-z0-9]*$/.test(u); };
+const nameSplit = (name: string): { plain: string; ident: string } | null => { const m = NAME_IDENT.exec(name.trim()); return m && nameCode(m[2]!) ? { plain: m[1]!.trim(), ident: m[2]! } : null; };
+const faceNames = new WeakMap<StudioView, Map<string, { name: string; ident: string | null }>>();
+function faceName(o: Opened, p: PartView): { name: string; ident: string | null } {
+  let m = faceNames.get(o.view);
+  if (!m) {
+    m = new Map(); const split = o.view.parts.map(x => ({ x, s: nameSplit(x.name) })), count = new Map<string, number>();
+    for (const { x, s } of split) for (const k of new Set([x.name.trim(), s?.plain ?? ''])) if (k) count.set(k, (count.get(k) ?? 0) + 1);
+    for (const { x, s } of split) m.set(x.id, s && count.get(s.plain) === 1 ? { name: s.plain, ident: s.ident } : { name: x.name, ident: null });
+    faceNames.set(o.view, m);
+  }
+  return m.get(p.id) ?? { name: p.name, ident: null };
+}
+/** Where a name's code lies: its tokens (split at spaces and 「·」; a bracket a token opens and does not close starts words, 「torchrun(PyTorch,」)
+ * that read as code (nameCode). */
+function nameCodeSpans(name: string): [number, number][] {
+  const out: [number, number][] = [];
+  for (const m of name.matchAll(/[^\s·]+/g)) {
+    let t = m[0]; const o = t.indexOf('('); if (o > 0 && t.indexOf(')', o) < 0) t = t.slice(0, o);
+    t = t.replace(/[,;:]+$/, ''); if (nameCode(t)) out.push([m.index!, m.index! + t.length]);
+  }
+  return out;
+}
+const MONO = 'ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", Consolas, Menlo, monospace';
+let monoCtx: CanvasRenderingContext2D | null = null;
+/** A name's pieces for the card face: breakable, its code (when it keeps the lines the name was measured for in its own type) in quiet
+ * monospace. */
+function faceNameNodes(name: string, lines: number, room: number): (string | HTMLElement)[] {
+  const spans = nameCodeSpans(name); if (!spans.length) return breakable(name);
+  monoCtx ??= document.createElement('canvas').getContext('2d');
+  if (monoCtx) {
+    monoCtx.font = `680 14.5px ${MONO}`;
+    let w = 0, at = 0; for (const [a, b] of spans) { w += measureName(name.slice(at, a), 'head') + monoCtx.measureText(name.slice(a, b)).width; at = b; } w += measureName(name.slice(at), 'head');
+    if (w * 1.06 + 2 > room * (lines > 1 ? 1.85 : 1)) return breakable(name);
+  }
+  const out: (string | HTMLElement)[] = []; let at = 0;
+  nameBreaks(name).forEach((piece, i) => { if (i) out.push(document.createElement('wbr')); out.push(...codeNodes(name, spans, at, at + piece.length)); at += piece.length; });
+  return out;
+}
+/** The characters a0 … a1 of a text as words and quiet monospace code (its code spans). */
+function codeNodes(text: string, spans: readonly [number, number][], a0 = 0, a1 = text.length): (string | HTMLElement)[] {
+  const out: (string | HTMLElement)[] = []; let c = a0;
+  for (const [a, b] of spans) { const x = Math.max(a, a0), y = Math.min(b, a1); if (x >= y) continue; if (x > c) out.push(text.slice(c, x)); out.push(h('code', { class: 'nm-code' }, text.slice(x, y))); c = y; }
+  if (c < a1) out.push(text.slice(c, a1));
+  return out;
+}
+/** A name tag's lines (the far view), the code in them in quiet monospace when every line still fits the tag's width in that type
+ * (measured at the heavier title weight); else as fitted, in the tag's own type. */
+function tagLineNodes(lines: readonly string[], width: number, px: number): HTMLElement[] {
+  const spans = lines.map(l => nameCodeSpans(l));
+  let mono = spans.some(x => x.length > 0);
+  if (mono) { monoCtx ??= document.createElement('canvas').getContext('2d'); const ctx = monoCtx;
+    if (!ctx) mono = false;
+    else { ctx.font = `700 ${px}px ${MONO}`; mono = lines.every((l, i) => { let w = 0, at = 0; for (const [a, b] of spans[i]!) { w += tagMeasure(l.slice(at, a), px, 700) + ctx.measureText(l.slice(a, b)).width; at = b; } return w + tagMeasure(l.slice(at), px, 700) <= width + 0.5; }); } }
+  return lines.map((l, i) => h('span', { class: 'c-tag-line' }, ...(mono ? codeNodes(l, spans[i]!) : [l])));
+}
 /** A typed card's DOM (styles.css .node.card): the head (glyph tile · name · kind word with the lifecycle chip and, for the
  * overview, the short status), the kind rows, the contract area, the inner line, the sign row and the bottom line. */
 /** How many relation rows a bundled line's tip lists before it counts the rest (polish round fixes 1). */
@@ -1423,7 +1492,7 @@ function cardEl(o: Opened, p: PartView, r: PartUnderstanding, t: CardTemplate, f
   const maint = life ? null : maintenanceOf(r.statusClaims), maintQuote = maint ? r.statusClaims.find(x => x.dimension === 'maintenance')?.quote.quote ?? null : null;
   const ev = s ? claimEvidence({ quote: s.quote?.quote ?? '' }) : null, kids = p.childIds.length, dot = cardDot(r);
   // The shape the box was measured for (its near content), written on the card so the zoom's fit reads it without measuring.
-  const nl = cardNameLines(p, !!dot, !!r.loop), hs = cardHeights(t, nl);
+  const nl = cardNameLines(p, !!dot, !!r.loop), hs = cardHeights(t, nl), fn = faceName(o, p);
   // A group (S8) reads as a group: an untyped one's tile is its axis glyph (a place pin, or the composition squares) with no badge
   // over it; a typed one keeps its type's glyph and the composition badge.
   const grp = t.group, typedGroup = !!grp && !!r.typeRead?.type;
@@ -1454,7 +1523,7 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
     : h('span', { class: `c-opsw${s ? ` os-${dot?.kind ?? 'other'}` : ' ops-none'}`, 'data-mark': s ? opsMark : '–', 'data-tip': s ? (dot?.kind === 'waiting' ? dot.line : ops.tip) : '운영 기록 없음 · 기록이 이 부분의 운영 상태를 말하지 않았다 (멈춤이라는 뜻이 아님)' },
       h('span', { class: 'c-opsw-t' }, s ? (dot?.kind === 'waiting' ? `${dot.word}${s.when ? ` · ${opsWhen(s.when, opsRef)}` : ''}` : ops.text) : '운영 기록 없음'));
   const head = h('div', { class: 'c-head' }, tile,
-    h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name' }, ...breakable(p.name)),
+    h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name', ...(fn.ident ? { 'data-ident': fn.ident } : {}) }, ...faceNameNodes(fn.name, nl, nameRoomOf(p.childIds.length > 0, !!dot || !!r.loop, !!dot && shownDisplay().evidence))),
       h('span', { class: 'c-kind' }, h('span', { class: `c-kind-word${t.family === 'neutral' && !grp ? ' unknown' : ''}${grp ? ' grp-word' : ''}` }, t.kind),
         life ? h('span', { class: 'c-life', 'data-tip': `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null,
         // S9: the policy word stays whole on a narrow card; only its successor (' → update') gives way (styles.css .c-life-to).
@@ -1501,7 +1570,7 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
       ? h('button', { type: 'button', class: 'c-go entry-open', 'data-tip': `안으로 · 내부 상세${stepWord}\n${words.join(' · ')}`, 'aria-label': `${p.name} 내부 상세 열기${stepWord}`, onclick: () => openAction(p.id) }, goGlyph()) : null;
   // The far view's name tag (A3): the same box drawn as the kind icon and the name at a fixed screen size (fitCards writes its lines).
   const tagIcon = h('span', { class: `c-tag-icon g-${t.family}`, 'aria-hidden': 'true' }); tagIcon.innerHTML = glyphSvg(t.glyph);
-  const tag = h('div', { class: 'c-tag', 'aria-hidden': 'true' }, tagIcon, h('span', { class: 'c-tag-text' }, h('span', { class: 'c-tag-name' }, p.name), h('span', { class: 'c-tag-kind' }, life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? null, life || maint || t.undecided ? h('span', { class: 'c-tag-sep' }, ' · ') : null, t.kind)));
+  const tag = h('div', { class: 'c-tag', 'aria-hidden': 'true' }, tagIcon, h('span', { class: 'c-tag-text' }, h('span', { class: 'c-tag-name' }, fn.name), h('span', { class: 'c-tag-kind' }, life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? null, life || maint || t.undecided ? h('span', { class: 'c-tag-sep' }, ' · ') : null, t.kind)));
   const mark = t.container ? 'loop' : dot ? 'dot' : r.loop ? 'loop' : '';
   const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${t.container ? ' container' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${maint ? ' maint' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''}${go ? ' has-go' : ''}${hs.total > CARD_H ? ' tall' : ''} ${extra.cls}`, style: `--nl:${nl}`,
     'data-mark': mark, 'data-life': life || maint ? '1' : '',
@@ -2670,7 +2739,7 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); dropRowIds(); haloLabels(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); markFocusLabels(); placeFocusMarks(); syncFocusTop(); }
+function placeEdgeLabels() { placeLineLabels(); dropRowIds(); foldAccess(); haloLabels(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); markFocusLabels(); placeFocusMarks(); syncFocusTop(); }
 /** Craft spec (라벨 halo 3px, 바탕색): each line label's halo is the ground it actually stands on: the face of the innermost group drawn
  * under its middle (a region's or a tinted group's colour, over the canvas), else the canvas itself. */
 function haloLabels() {
@@ -2688,6 +2757,21 @@ function haloLabels() {
     let c = rgb(root) ?? [244, 245, 247, 1];
     for (const f of frames) if (x >= f.x && x <= f.x + f.w && y >= f.y && y <= f.y + f.h) { const g = faceOf(f.id); if (g && g[3] > 0) c = [0, 1, 2].map(i => Math.round(g[i]! * g[3] + c[i]! * (1 - g[3]))).concat(1) as typeof c; }
     el.style.setProperty('--halo', `rgb(${c[0]}, ${c[1]}, ${c[2]})`);
+  }
+}
+/** Polish 7 (F7 Q3: what a label folds stays in reach by pointer and keyboard): a label shown cut, a condition's or 선택 cue on its line
+ * and a condition badge take the keyboard's focus, named by their whole words (Enter or Space picks their line, as a click does; focus
+ * opens the line's tip, as the pointer does, and Esc closes it); every other label stays out of the reading order (its line reads in the
+ * pane). */
+function foldAccess() {
+  const box = $('world').querySelector<HTMLElement>('.edge-labels'); if (!box) return;
+  box.removeAttribute('aria-hidden');
+  for (const el of box.children as HTMLCollectionOf<HTMLElement>) {
+    const key = el.dataset.key ?? el.dataset.badge ?? el.dataset.cue ?? el.dataset.once ?? null, b = key ? lineBadges.get(key) : undefined;
+    const cut = !!el.dataset.full && el.dataset.full !== el.textContent, fold = el.classList.contains('edge-cue') || el.classList.contains('b-condition') || el.classList.contains('b-optional');
+    if (!key || el.tagName === 'BUTTON' || !(cut || fold)) { el.setAttribute('aria-hidden', 'true'); if (el.tagName !== 'BUTTON') el.removeAttribute('tabindex'); continue; }
+    const words = fold && b ? b.tip.split('\n').filter(x => x && !COUNT_RE.test(x)).join(' · ') : el.dataset.full ?? el.textContent ?? '';
+    el.removeAttribute('aria-hidden'); el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', `${words} · 눌러서 이 선 고르기`);
   }
 }
 /** Beauty v4 (P3): the last guard that no line label, badge or chip on the map shows a record row ID (CD01, B12, N02.63, LN13): each
@@ -2728,14 +2812,25 @@ function fillLabel(el: HTMLElement, text: string, full = text): boolean {
     el.replaceChildren(...ps.map(p => (p.code ? h('code', { class: 'lb-code' }, p.t) : document.createTextNode(p.t)))); return ps; };
   const done = (ok: boolean) => { el.classList.toggle('self-cut', /(?:…|\.{3})$/.test(el.textContent ?? '')); return ok; };
   const code = labelParts(text).some(p => p.code);
-  if (full !== text) el.dataset.full = full; else delete el.dataset.full;
+  const whole = () => { if (full !== text) el.dataset.full = full; else delete el.dataset.full; };
+  whole();
   if (!code) el.classList.remove('has-code', 'is-code');
-  if (!code) { el.textContent = text; return done(true); }
-  draw(text);
+  el.classList.remove('wide-cut');
   const over = () => el.isConnected && el.scrollWidth > el.clientWidth + 1;
+  // Polish 7: a plain label wider than its room is cut between its units too (at a space or after a list's 「·」, cutUnits), with one mark,
+  // never by the CSS ellipsis inside a word or a list item (「질의·report_type·report_sou…」); with no such cut it keeps the CSS ellipsis.
+  if (!code) {
+    el.textContent = text; if (text.length < 9 || !over()) return done(true);
+    let least: string | null = null;
+    for (let n = cutCount(text) - 1; n >= 1; n--) { const c = tokenCut(text, n); if (c === null) continue; least = c; el.textContent = c; el.dataset.full = full; if (!over()) return done(true); }
+    // The shortest such cut may take a little more room (LABEL_WIDE) before the label is left to the CSS ellipsis.
+    if (least !== null) { el.textContent = least; el.classList.add('wide-cut'); if (!over()) return done(true); el.classList.remove('wide-cut'); }
+    el.textContent = text; whole(); return done(true);
+  }
+  draw(text);
   if (!over()) return done(true);
-  const words = text.trim().split(/\s+/).length;
-  for (let n = words - 1; n >= 1; n--) { const c = tokenCut(text, n); if (c === null) continue; draw(c); el.dataset.full = full; if (!over()) return done(true); }
+  // Polish 7: the cuts fall between units: a run of code is one, spaces and all (「(src/main.rs main)」, 「iter_num % log_interval == 0」).
+  for (let n = cutCount(text) - 1; n >= 1; n--) { const c = tokenCut(text, n); if (c === null) continue; draw(c); el.dataset.full = full; if (!over()) return done(true); }
   return done(false);
 }
 /** Polish 5: a text a box cuts by its CSS (a line clamp or an ellipsis), measured in the box's own font: unchanged where it fits or the cut
@@ -2890,12 +2985,18 @@ type FitSet = { keys: Set<string>; conds: Set<string>; rects: Rect[] };
 const FIT_LENSES = ['data', 'start', 'scenario'] as const;
 /** A fit label's words cut to n characters: its whole words and 「…」, at least 4 characters of them; else a single code word
  * (`G_IS_STANDALONE`) whole up to n + 6; else null (no such form: a fragment like 「원시…」 or 「not…」 says nothing; the hover does). */
-function fitCut(t: string, n: number): string | null {
+function fitCut(t: string, n: number, cond = false): string | null {
   const s = t.replace(/\s+/g, ' ').trim(); if (s.length <= n) return s;
+  // Polish 7 (F7 Q3: a condition written as code reads as written): whole up to FIT_CODE_MAX characters, else folded to its line's ◇
+  // (its words in the line's hover and on the ◇'s keyboard focus), never cut.
+  if (cond && labelParts(s).some(p => p.code)) return s.length <= FIT_CODE_MAX ? s : null;
   const w = wholeWords(s, n - 1); if (w.length >= Math.max(4, (n - 1) / 2)) return `${w}…`;
-  const tok = /^\S+/.exec(s)?.[0] ?? s; if (tok.length >= 4 && tok.length <= n + 6) return tok === s ? s : `${tok}…`;
+  // Polish 7: the first unit (a code run whole, 「len(files) == 0」가) as tokenCut makes it: never ending on an operator or inside a run.
+  const one = tokenCut(s, 1); if (one !== null && one.replace(/…$/, '').length <= n + 6) return one;
   return null;
 }
+/** A condition in code whole on the first screen up to this many characters (longer: its ◇ and its hover). */
+const FIT_CODE_MAX = 32;
 function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Set<string>, far = false): Map<string, FitSet> {
   const world = $('world'), inv = lineInv(), said = opened ? relationLines(opened.project) : new Map<string, LineSaid>(), out = new Map<string, FitSet>();
   const all = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit') && !g.classList.contains('stub'));
@@ -2930,7 +3031,7 @@ function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Se
       // Measured as drawn: a fit label of a lens not on now is display:none (styles.css), and a hidden label measures 0 × 0.
       el.style.display = 'block';
       [14, 8].forEach((n, fi) => {
-        const base = full.replace(/[….]+$/, ''), c = fitCut(base, n); if (c === null) return;
+        const base = full.replace(/[….]+$/, ''), c = fitCut(base, n, cond); if (c === null) return;
         const text = `${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; if (!fillLabel(el, text)) return;
         const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
         // Along a level or upright run (the short form may sit closer to a bend, 6px), then beside an end of its line: a condition
@@ -3925,7 +4026,7 @@ function placeFocusMarks() {
     if (nt) { const t0 = nt.textContent ?? '', t1 = keepPlanFit(nt, t0, 2); fillLabel(nt, t1);
       // Polish 6: words that still run past the two lines are cut between tokens with one 「…」 (never the clamp's 「…」 after the record's
       // own 「...」: 「hyperfine <command> … …」), keeping a plan word the text holds; the whole words stay in the note's hover.
-      for (let n = t1.trim().split(/\s+/).length - 1; n >= 1 && nt.scrollHeight > nt.clientHeight + 1; n--) { const c = tokenCut(t1, n); if (c && (!PLAN_WORD.test(t1) || PLAN_WORD.test(c))) fillLabel(nt, c, t1); } }
+      for (let n = cutCount(t1) - 1; n >= 1 && nt.scrollHeight > nt.clientHeight + 1; n--) { const c = tokenCut(t1, n); if (c && (!PLAN_WORD.test(t1) || PLAN_WORD.test(c))) fillLabel(nt, c, t1); } }
     // A card's own chip (own given) is never left off: with no free spot it takes its first one, on its card's edge.
     const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, all = spots(w, hh).map(p => ({ ...p, w, h: hh })), at = all.find(r => free(r, own)) ?? (own ? all[0] : undefined);
     if (!at) { el.remove(); return; }
@@ -4737,7 +4838,8 @@ function paneHead(c: PaneCtx, tools: HTMLElement): HTMLElement {
   const crumbs = path.flatMap((x, i) => [i ? h('span', { 'aria-hidden': 'true' }, '›') : null, h('a', { href: hashFor(o.key, x.id, scope), title: x.name }, x.name)]);
   return h('header', { class: `${w ? 'panel-head' : 'lens-head'} pane-head` },
     path.length ? h('div', { class: w ? 'panel-path' : 'lens-path' }, ...crumbs) : w ? h('div', { class: 'panel-path' }, h('span', {}, o.project.name)) : null,
-    h('h2', { id: w ? 'panel-title' : 'lens-title', ...(w ? { tabindex: '-1' } : {}) }, part.name),
+    h('h2', { id: w ? 'panel-title' : 'lens-title', ...(w ? { tabindex: '-1' } : {}) }, faceName(o, part).name),
+    faceName(o, part).ident ? h('p', { class: 'pane-ident', title: '식별자 · 기록에 적힌 그대로' }, h('code', { class: 'nm-code' }, faceName(o, part).ident!)) : null,
     aliasOf(o.view, part.id) ? h('p', { class: 'lens-alias' }, aliasOf(o.view, part.id)) : null,
     // Cards v2 §4: the operations line always (above the ladder sentence when nothing is recorded), the definition blanks in words.
     ...(c.u?.stateRead ? [kindLine(c), opsLineEl(c)] : [opsLineEl(c), kindLine(c)]), blanksLine(c), w ? null : formEntries(o, part.id), storeLine(o, part), scLine, visitEntry(o), tools);
@@ -7721,7 +7823,9 @@ function bindEdgeHints() {
     const ops = dot?.kind === 'conflict' ? dot.line : s && !life ? opsSaid(dot?.kind === 'waiting' ? dot.word : opsCard(s.state, s.when, opsRef).short, s.when ? opsWhen(s.when, opsRef) : null, grade) : null;
     const role = (r?.role ?? p.note ?? '').replace(/\s+/g, ' ').trim(), io = r ? cardIo(o, p, r) : null;
     const roleRevised = !!r?.roleBasisRevised && !!r.role;
-    return [h('span', { class: 'hc-name' }, p.name), path.length || alias ? h('span', { class: 'hc-path' }, [path.join(' › '), alias].filter(Boolean).join(' · ')) : null,
+    const fn = faceName(o, p);
+    return [h('span', { class: 'hc-name' }, fn.name), fn.ident ? h('span', { class: 'hc-ident' }, h('code', { class: 'nm-code' }, fn.ident)) : null,
+      path.length || alias ? h('span', { class: 'hc-path' }, [path.join(' › '), alias].filter(Boolean).join(' · ')) : null,
       // Polish round fixes 1: a group's kind word already says it is a group (「구성 · 안쪽 6」): no 「묶음 ·」 before it.
       t ? h('span', { class: 'hc-kind' }, [t.group && !r?.typeRead ? null : FAMILY_WORD[t.family], t.kind, life].filter(Boolean).join(' · ')) : null,
       role ? h('span', { class: `hc-role${roleRevised ? ' revised' : ''}` }, role) : null,
@@ -7815,7 +7919,13 @@ function bindEdgeHints() {
   // Keyboard focus: the same content as the pointer (a card, its dot, its buttons).
   world.addEventListener('focusin', e => {
     const t = e.target as Element, part = t.closest<HTMLElement>('.node[data-box], .frame-head[data-part], .ghost[data-box]'); if (part) nearPart(part.dataset.box ?? part.dataset.part!);
-    const x = targetOf(t, null); if (x && x.kind !== 'line' && !quiet(x)) enter(x);
+    // Polish 7: a folded label or cue in focus (foldAccess) opens its line's tip, as the pointer does.
+    const x = targetOf(t, null), fold = !!t.closest('.edge-labels'); if (x?.kind === 'line' && fold) nearLine(x.edge);
+    if (x && (x.kind !== 'line' || fold) && !quiet(x)) enter(x, fold);
+  });
+  world.addEventListener('keydown', e => {
+    const t = e.target as HTMLElement; if ((e.key !== 'Enter' && e.key !== ' ') || !t.closest?.('.edge-labels > [role="button"]')) return;
+    const k = lineHit(t), edge = k ? edgeOf(k) : null; if (edge) { e.preventDefault(); hoverStop(); pickLine(edge); }
   });
   world.addEventListener('focusout', e => { const to = e.relatedTarget as Element | null; if (!to?.closest?.('.node, .frame-head, .ghost')) { clearNear(); hover?.dismiss(); } });
   // Esc closes the popup first (WCAG 1.4.13 dismissable), and nothing else on that press.

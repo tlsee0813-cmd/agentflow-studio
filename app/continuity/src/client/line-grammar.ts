@@ -320,15 +320,31 @@ export const shortLabel = (t: string, n = LABEL_SHORT): string => cut(t, n);
  * its first word does not fit (the label is left to the line's tip then). */
 export function wholeWords(t: string, n = LABEL_SHORT): string {
   const s = t.trim(); if (s.length <= n) return s;
+  // Polish 7: whole units (cutUnits: a code run, spaces and all, is one; words split at spaces and 「·」).
   let out = '';
-  for (const tok of s.split(/(\s*·\s*|\s+)/)) { if ((out + tok).length > n) break; out += tok; }
+  for (const u of cutUnits(s)) { if ((out + u).replace(/[\s·]+$/, '').length > n) break; out += u; }
   // A quotation cut open (「고정 질의 "Is AI」) keeps only the words before it.
   if (((out.match(/["“”]/g) ?? []).length % 2) === 1) out = out.slice(0, out.search(/["“][^"“”]*$/));
   // Map hygiene H4: a bracket cut open (「JSON 응답(token,」, 「fs-job {type,」, 「경고 문구(stderr,」) keeps only the words before it, and
   // no label ends on punctuation that promises more (「,」 「(」 「{」 「:」 「;」 「/」 「-」 「·」) or on an arrow pointing at what was cut
   // (「발행 layout →」; review fixes).
   for (const [o, c] of [['(', ')'], ['{', '}'], ['[', ']'], ['（', '）'], ['「', '」']] as const) { const i = out.lastIndexOf(o); if (i >= 0 && out.indexOf(c, i) < 0) out = out.slice(0, i); }
-  return out.replace(/[\s·,;:(\[{（「/\-→←↔⇒]+$/, '').trim();
+  // Polish 7: nor on an operator (「len(files) ==」: the operator goes, never a cut that promises an operand), nor inside a code run (a
+  // run the end would cut goes whole).
+  return cutEnd(s, out, false) ?? '';
+}
+/** The end of a cut of s to its first characters out: punctuation that promises more and every trailing token that is only an
+ * operator or a mark (「·」 「→」 「==」 「&&」) off the end; a code run the end would fall inside goes whole (strict: null instead, the
+ * cut is not made at all). */
+function cutEnd(s: string, out: string, strict: boolean): string | null {
+  const spans = codeSpans(s);
+  for (let prev = ''; prev !== out;) {
+    prev = out;
+    out = out.trimEnd().replace(/(?:…+|\.{3})$|[·,;:(\[{（「/\-→←↔⇒]+$|(?:^|\s)[·,;:/\-→←↔⇒=<>!&|+*%^~?]+$/, '').trimEnd();
+    const inside = spans.find(([a, b]) => out.length > a && out.length < b && s.slice(out.length, b).trim());
+    if (inside) { if (strict) return null; out = s.slice(0, inside[0]); }
+  }
+  return out.trim();
 }
 /** A line label's size on screen at zoom k: it follows the zoom a little (12.5 × √k) between 11 and 14px, so it never outweighs a
  * card's name (14px or more on screen, 5.2) far out and is not left tiny near in. */
@@ -349,6 +365,9 @@ export function codeToken(tok: string): boolean {
 }
 /** An ASCII token with no letter that reads as part of the code next to it (an operator, a bracket, 「…」). */
 const codeMark = (tok: string): boolean => /^[%=<>+\-*/!&|^~?:.,()[\]{}…]+$/.test(tok);
+/** Polish 7: an operator mark (「==」 「!=」 「%」 「&&」), and what reads as its operand when code stands on its other side: a name, a
+ * number or a quoted word (「== 0」 「!= Disabled」 「!= 'detailed_report'」), and the words that join an expression (「and」 「or」 「not」). */
+const OP_MARK = /^[%=<>!&|+\-*/^~?:]+$/, OPERAND = /^[A-Za-z0-9_.$'"]+$/, CONNECTIVE = /^(?:and|or|not|in|is|None|True|False|null|nil)$/;
 /** A label's text as runs of words and code (each run with its own spacing, in order; joined they give the text back). A code token
  * with a Hangul ending (「pb.skipBootstrap()이…」) gives the ending to the words; ASCII tokens beside code within the same run (「%…」, 「main)」
  * after 「(src/main.rs」) join the code. */
@@ -364,6 +383,24 @@ export function labelParts(text: string): { t: string; code: boolean }[] {
   });
   // A mark joins the code only when code stands next to it (through spaces).
   const near = (i: number, d: -1 | 1): boolean => { for (let j = i + d; j >= 0 && j < kinds.length; j += d) { const k = kinds[j]!.k; if (k === 'space') continue; return k === 'code' || (k === 'mark' && near(j, d)); } return false; };
+  // Polish 7: an expression is one run of code (「iter_num % log_interval == 0 and master_process」, 「len(files) == 0」가…): an operand
+  // beside an operator that touches code, and a joining word between code, join it (a cut then never falls inside the expression).
+  const nb = (i: number, d: -1 | 1): number => { for (let j = i + d; j >= 0 && j < kinds.length; j += d) if (kinds[j]!.k !== 'space') return j; return -1; };
+  type K = { t: string; k: 'space' | 'code' | 'mark' | 'word'; head?: string; tail?: string };
+  const ks = kinds as K[];
+  for (let changed = true, g = 0; changed && g < 12; g++) {
+    changed = false;
+    ks.forEach((x, i) => {
+      if (x.k === 'mark' && (near(i, -1) || near(i, 1))) { x.k = 'code'; changed = true; return; }
+      if (x.k !== 'word') return;
+      const L = nb(i, -1), R = nb(i, 1), lc = L >= 0 && ks[L]!.k === 'code', rc = R >= 0 && ks[R]!.k === 'code';
+      const lop = lc && !ks[L]!.tail && OP_MARK.test(ks[L]!.t), rop = rc && OP_MARK.test(ks[R]!.t);
+      if (OPERAND.test(x.t) && (lop || rop)) { x.k = 'code'; changed = true; return; }
+      if (CONNECTIVE.test(x.t) && ((lc && !ks[L]!.tail && rc) || (L < 0 && rc && x.t === 'not'))) { x.k = 'code'; changed = true; return; }
+      const m = /^([A-Za-z0-9_.$'"]+)([가-힣]{1,3}(?:…|\.{3})?)$/.exec(x.t);
+      if (m && lop) { x.k = 'code'; x.head = m[1]!; x.tail = m[2]!; changed = true; }
+    });
+  }
   kinds.forEach((x, i) => {
     if (x.k === 'space') { const prev = out.at(-1), next = kinds.slice(i + 1).find(y => y.k !== 'space'); push(x.t, !!prev?.code && !!next && (next.k === 'code' || next.k === 'mark')); return; }
     if (x.k === 'code' && 'head' in x && x.head) { push(x.head, true); push(x.tail!, false); return; }
@@ -379,12 +416,31 @@ export const hasCode = (text: string): boolean => labelParts(text).some(p => p.c
  * nor ends on a mark that promises more (「기동 ·」, 「==」, 「→」). null when what is left says nothing: fewer than 4 characters of words
  * (「기동 ·」 is only its lead, 「원시」 a fragment); the label is then left to its line's hover (polish 6). */
 export function tokenCut(text: string, n: number): string | null {
-  const toks = text.trim().split(/(\s+)/).filter(Boolean), words = toks.filter(t => !/^\s+$/.test(t));
-  if (n >= words.length) return text.trim();
+  const s = text.trim(), us = cutUnits(s), solid = us.filter(u => u.trim()).length;
+  if (n >= solid) return s;
   let seen = 0, out = '';
-  for (const t of toks) { if (!/^\s+$/.test(t)) { if (seen === n) break; seen++; } out += t; }
+  for (const u of us) { if (u.trim()) { if (seen === n) break; seen++; } out += u; }
   // Off the end: a cut mark of its own (「...」, 「…」), a comma or 「·」 on the last word, and every whole token that is only such a mark
-  // (「·」, 「→」, 「==」); a token's own characters never (「<command>」 keeps its 「>」).
-  for (let prev = ''; prev !== out;) { prev = out; out = out.trimEnd().replace(/(?:…+|\.{3})$|[·,;]+$|(?:^|\s)[·,;:/\-→←↔⇒=<>!&|+*]+$/, '').trimEnd(); }
-  return out.replace(/[\s·,;:()[\]{}…]/g, '').length < 4 ? null : `${out}…`;
+  // (「·」, 「→」, 「==」); a token's own characters never (「<command>」 keeps its 「>」). Polish 7: a code run's own characters never
+  // either: a cut whose end would trim into a run (「len(files) ==」) is not made (null; a shorter one may be).
+  const end = cutEnd(s, out, true); if (end === null) return null;
+  return end.replace(/[\s·,;:()[\]{}…]/g, '').length < 4 ? null : `${end}…`;
+}
+/** How many units tokenCut counts in a text (its cuts are 1 … this − 1). */
+export const cutCount = (text: string): number => cutUnits(text.trim()).filter(u => u.trim()).length;
+/** Polish 7: a label's units, the places a cut may fall between: each run of code whole (spaces and all: 「(src/main.rs main)」,
+ * 「iter_num % log_interval == 0」), the words split at spaces and after a list's 「·」 (「질의·」 「report_type·」); a piece with no space or
+ * 「·」 between it and the next stays one with it (「pb.skipBootstrap()이…」). Joined, the units give the text back. */
+export function cutUnits(text: string): string[] {
+  const pieces: string[] = [];
+  for (const p of labelParts(text)) { if (p.code) pieces.push(p.t); else for (const w of p.t.split(/(?<=[\s·])(?=[^\s·])/)) if (w) pieces.push(w); }
+  const out: string[] = [];
+  for (const p of pieces) { const last = out.at(-1); if (last !== undefined && ((!/[\s·]$/.test(last) && !/^\s/.test(p)) || !p.trim())) out[out.length - 1] = last + p; else out.push(p); }
+  return out;
+}
+/** Where the code runs of a text lie ([start, end) in its characters). */
+function codeSpans(text: string): [number, number][] {
+  const out: [number, number][] = []; let at = 0;
+  for (const p of labelParts(text)) { if (p.code) out.push([at, at + p.t.length]); at += p.t.length; }
+  return out;
 }
