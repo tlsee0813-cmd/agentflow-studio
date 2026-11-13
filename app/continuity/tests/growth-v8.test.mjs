@@ -192,10 +192,11 @@ test('V8-11 first user (f, g, h): a description\'s change shows 이전 설명 / 
 
 test('V8-12 first user (i, j): leaving says what stayed and past/current keeps the card in view; a folded ◇ says 「조건 보기」; a label the pane edge would cut steps back', async () => {
   const app = await read('src/client/app.ts'), css = await read('public/styles.css');
-  assert.match(fn(app, 'growthExit'), /toast\(EXIT_HINT\);/);
-  assert.match(app, /const EXIT_HINT = '비교를 끝냈어요 · 비교 전에 고른 카드와 보던 위치로 돌아왔어요';/);
-  assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); toast\(NOW_HINT\);/);
-  assert.match(fn(app, 'growthView'), /keepInView\(\);/); assert.match(fn(app, 'growthLeavePast'), /keepInView\(\);/);
+  // v10: what it says is only what is so (growth-view exitWord, nowWord; growth-v10 V10-7).
+  assert.match(fn(app, 'growthExit'), /note\(exitWord\(/);
+  assert.equal(V.exitWord(true, true), '비교를 끝냈어요 · 비교 전에 고른 카드와 보던 위치로 돌아왔어요');
+  assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); note\(nowWord\(/);
+  assert.match(fn(app, 'growthView'), /keepInView\(\);/); assert.match(fn(app, 'growthLeavePast'), /else keepInView\(\);/);
   assert.match(fn(app, 'placeCue'), /h\('span', \{ class: 'cue-word', 'aria-hidden': 'true' \}, cue === 'condition' \? '조건 보기' : '선택 보기'\)/);
   assert.match(css, /\.edge-cue:is\(:hover, :focus-visible, \.near\) \.cue-word \{ display: block; \}/);
   assert.match(fn(app, 'clipAtEdge'), /el\.classList\.toggle\('edge-cut'/);

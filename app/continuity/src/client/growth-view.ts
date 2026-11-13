@@ -196,8 +196,9 @@ export interface CardTab { part: string; word: string; more: number; kind: Chang
 export function shownTabs(scenes: readonly Scene[], current: string | null, filter: 'new' | 'desc' | null): CardTab[] {
   const tabOf = (s: Scene, on: boolean, kind: ChangeKind = s.main.kind): CardTab => ({ part: s.part, word: kind === s.main.kind ? tabWord(s.main) : tabKindWord(kind), more: otherKinds(s.changes), kind, on, changes: s.changes });
   const out: CardTab[] = [], cur = current ? scenes.find(s => s.part === current) : undefined;
-  // The shown scene's own tab, but never a 새 tab with no filter on (F7: no 새 tab by default; its card is outlined all the same).
-  if (cur && cur.main.kind !== 'retire' && (cur.main.kind !== 'new' || filter === 'new')) out.push(tabOf(cur, true, filter && cur.changes.some(c => c.kind === filter) ? filter : cur.main.kind));
+  // The shown scene's own tab, whatever its kind (v10, review of v9: a 새 scene's card had no mark on one map while the other map's had its
+  // tab); the quieter tabs of the next scenes still leave out 새 and 설명.
+  if (cur && cur.main.kind !== 'retire') out.push(tabOf(cur, true, filter && cur.changes.some(c => c.kind === filter) ? filter : cur.main.kind));
   for (const s of scenes) {
     if (out.length >= TAB_CAP) break;
     if (s.part === current || s.main.kind === 'new' || s.main.kind === 'desc' || s.main.kind === 'retire') continue;
@@ -227,21 +228,58 @@ export const oldNameWord = (before: string): string => `옛 이름 ${plainName(b
 export const heldName = (own: string, holder: string | null): string => (holder && holder !== own ? `${holder} 안의 ${own}` : own);
 export interface Rect { x: number; y: number; w: number; h: number }
 const meets = (a: Rect, b: Rect) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-/** Where each tab goes (in map units), always touching its own card (review of v8, first user j: a tab never floats apart from its card):
- * on its top edge, left-aligned, else right-aligned; else on its bottom edge (left, then right); never over a placed tab, a card or a
- * group's head. Tabs come in priority order; one that finds no place is hidden (its part
- * still counts in the line). gap: the room between a tab and its card, in map units. */
-export function placeTabs(tabs: readonly { part: string; w: number; h: number }[], boxes: ReadonlyMap<string, Rect>, obstacles: readonly (Rect & { id: string })[], gap: number): Map<string, Rect | null> {
+/** Where each tab goes (in map units), always on its own card's edge (review of v8, first user j: a tab never floats apart from its card;
+ * v10, review of v9: never in a gap where it reads as the next card's): on its top edge, left-aligned, else right-aligned; else on its bottom
+ * edge (left, then right); inside the card's own span; never over a placed tab, a card or a group's head, and every other card or head at
+ * least `clear` from it (so it is clearly nearer its own card than any other). Tabs come in priority order; one that finds no place is hidden
+ * (its part still counts in the line). gap: the room between a tab and its card, in map units. */
+export function placeTabs(tabs: readonly { part: string; w: number; h: number }[], boxes: ReadonlyMap<string, Rect>, obstacles: readonly (Rect & { id: string })[], gap: number, clear = 0): Map<string, Rect | null> {
   const out = new Map<string, Rect | null>(), placed: Rect[] = [];
+  const near = (o: Rect, r: Rect, m: number) => meets({ x: o.x - m, y: o.y - m, w: o.w + 2 * m, h: o.h + 2 * m }, r);
   for (const t of tabs) {
     const b = boxes.get(t.part); if (!b) { out.set(t.part, null); continue; }
-    const at = (y: number): Rect[] => [{ x: b.x, y, w: t.w, h: t.h }, { x: b.x + b.w - t.w, y, w: t.w, h: t.h }];
+    // Inside its card's span: left-aligned, right-aligned; a tab wider than its card stands centred on it.
+    const xs = t.w <= b.w ? [b.x, b.x + b.w - t.w] : [b.x + (b.w - t.w) / 2];
+    const at = (y: number): Rect[] => xs.map(x => ({ x, y, w: t.w, h: t.h }));
     const tries: Rect[] = [...at(b.y - gap - t.h), ...at(b.y + b.h + gap)];
-    const ok = tries.find(r => !placed.some(p => meets(p, r)) && !obstacles.some(o => o.id !== t.part && meets(o, r)));
+    const ok = tries.find(r => !placed.some(p => meets(p, r)) && !obstacles.some(o => o.id !== t.part && near(o, r, clear)));
     out.set(t.part, ok ?? null); if (ok) placed.push(ok);
   }
   return out;
 }
+/** v10 (review of v9: 「사건 때」 under the guide at 1280): what the guide box must never stand over besides the cards: every label, badge,
+ * chip, tab and note (marks), and each drawn line's ends (its arrowhead and the port it leaves): a line may pass under the box only where it
+ * stays visible on both sides. end: the side of the square kept clear around a line's end. */
+export function guideBlocks(cards: readonly Rect[], marks: readonly Rect[], routes: readonly (readonly { x: number; y: number }[])[], end = 12): Rect[] {
+  const ends = routes.filter(p => p.length > 1).flatMap(p => [p[0]!, p[p.length - 1]!]).map(q => ({ x: q.x - end / 2, y: q.y - end / 2, w: end, h: end }));
+  return [...cards, ...marks, ...ends];
+}
+/** v10 (review of v9: a note covered a card at 1440): where a note stands (its left and top in the host's frame): its usual place (centred
+ * over the bars, at top) first, then along that row, then a row higher at a time; the first place that covers no card; none free: the
+ * place covering the least of them. */
+export function toastSpot(size: { w: number; h: number }, area: Rect, top: number, cards: readonly Rect[]): { x: number; y: number } {
+  const cx = Math.round(area.x + (area.w - size.w) / 2), lo = area.x + 8, hi = area.x + area.w - size.w - 8;
+  const cover = (r: Rect) => cards.reduce((s, c) => s + Math.max(0, Math.min(r.x + r.w, c.x + c.w) - Math.max(r.x, c.x)) * Math.max(0, Math.min(r.y + r.h, c.y + c.h) - Math.max(r.y, c.y)), 0);
+  let best: { x: number; y: number; c: number } | null = null;
+  for (let y = top; y >= area.y + 8; y -= size.h + 8) {
+    const xs = [cx, ...Array.from({ length: 24 }, (_, i) => [cx - (i + 1) * 40, cx + (i + 1) * 40]).flat()].filter(x => x >= lo && x <= hi);
+    for (const x of xs.length ? xs : [cx]) { const c = cover({ x, y, w: size.w, h: size.h }); if (!c) return { x, y }; if (!best || c < best.c) best = { x, y, c }; }
+  }
+  return best ? { x: best.x, y: best.y } : { x: cx, y: top };
+}
+/** v10 (review of v9: the note said 「보던 위치로 돌아왔어요」 where the map came back elsewhere): what leaving the comparison says, only what
+ * is true: the camera as it was before the comparison (zoom and place), the card picked before it. */
+export function exitWord(camera: boolean, picked: boolean): string {
+  const back = camera && picked ? '비교 전에 고른 카드와 보던 위치로 돌아왔어요' : camera ? '비교 전에 보던 위치로 돌아왔어요' : picked ? '비교 전에 고른 카드로 돌아왔어요' : '';
+  return `비교를 끝냈어요${back ? ` · ${back}` : ''}`;
+}
+/** The same for coming back from a past version: the camera as it was before 이전 모습, the card picked then. */
+export function nowWord(camera: boolean, picked: boolean): string {
+  const back = camera && picked ? '고른 카드와 화면 위치는 이전 모습을 보기 전 그대로예요' : camera ? '화면 위치는 이전 모습을 보기 전 그대로예요' : picked ? '고른 카드는 그대로예요' : '';
+  return `현재 지도로 돌아왔어요${back ? ` · ${back}` : ''}`;
+}
+/** Whether two cameras are the same (zoom and place, within half a pixel). */
+export const sameCamera = (a: { x: number; y: number; k: number }, b: { x: number; y: number; k: number }): boolean => Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5 && Math.abs(a.k - b.k) < 1e-4;
 
 /* ---------- the camera (F7) ---------- */
 /** Whether a scene's card is readable where it is: wholly inside the area (in screen pixels). Then the camera never moves. */
@@ -365,7 +403,7 @@ export function pastBanner(n: number, applied: number, undated: number, onNow: (
   return h('div', { class: 'gp-row', role: 'status' }, h('span', { class: 'gp-text' }, main),
     undated ? h('span', { class: 'gp-fine', title: '편집 기록이 생기기 전에 사람이 고친 이름·설명, 보관·옮김·연결은 언제 했는지 몰라 넣지 않음 · 이름은 그때 기록의 이름' }, `날짜 없는 편집 ${undated}건 제외`) : null,
     h('span', { class: 'gp-fine' }, '읽기 전용'),
-    h('button', { type: 'button', class: 'gp-now', title: '현재 지도로 · 고른 카드와 화면 위치는 그대로', onclick: onNow }, '현재로'));
+    h('button', { type: 'button', class: 'gp-now', title: '현재 지도로 · 이전 모습을 보기 전의 화면 위치로', onclick: onNow }, '현재로'));
 }
 /* 기록 반영 상태 (F7). */
 /** A group's title and its line: 「문서 소비기에 관한 미반영 기록 3행」, 「연결 2행 · 단계 1행」, and 「이 부품은 현재 지도에 있습니다」 only for a part

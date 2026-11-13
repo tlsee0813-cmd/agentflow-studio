@@ -37,14 +37,15 @@ test('RS-2 a conditional or optional line carries a text-free mark at the mid, f
     assert.equal(restCue(cad, false, tier), null, 'a cadence word is no condition');
   }
   // 가까이 or a picked line: the pill with its words, no mark.
-  assert.equal(restCue(cond, false, 'near'), null); assert.equal(restCue(cond, true, 'mid'), null);
+  // v10 (review of v9: a lone 「조건」 pill took a label's place): a condition at rest is its ◇ at 가까이 too; 선택 keeps its pill there.
+  assert.equal(restCue(cond, false, 'near'), 'condition'); assert.equal(restCue(opt, false, 'near'), null); assert.equal(restCue(cond, true, 'mid'), null);
   assert.ok(badgeForms(cond, false, 'near').includes('조건'));
   // A bundle only partly conditional is still marked (its tip says 1/3).
   assert.equal(restCue(lineBadge([{ when: 'a' }, {}, {}]), false, 'mid'), 'condition');
   assert.equal(CUE_PX, 8);
   // The app draws it whenever the pill is skipped below 가까이, under every lens (시작·반복 included: nothing lens-gated).
   const pb = body('placeBadges');
-  assert.match(pb, /if \(!on && tier !== 'near'\) \{ const cue = restCue\(b, on, tier\); if \(cue\) placeCue\(/);
+  assert.match(pb, /if \(!on && \(tier !== 'near' \|\| b\.kind === 'condition'\)\) \{ const cue = restCue\(b, on, tier\); if \(cue\) placeCue\(/);
   assert.ok(!/viewLens/.test(body('placeCue')), 'no lens turns the mark off');
   assert.ok(body('placeCue').includes("class: `edge-cue q-${cue}") && body('placeCue').includes("'data-cue': e.key"));
   // Text-free: the element carries no words of its own (the tip has them), and it joins the line's hover, pick and legend marks.

@@ -67,7 +67,7 @@ test('GROWTH-W4 compare: tabs only while comparing, lit parts by the read-marks 
   assert.match(cmp, /const saved = growthCmp\?\.saved \?\? \{ lens: viewLens, selected, camera: \{ \.\.\.camera \}, scope \};/);
   const exit = fn(app, 'growthExit');
   assert.match(exit, /if \(viewLens !== c\.saved\.lens\) setLens\(c\.saved\.lens\);/);
-  assert.match(exit, /camera = \{ \.\.\.c\.saved\.camera \}; applyCamera\(true\);/);
+  assert.match(exit, /const want = \{ \.\.\.c\.saved\.camera \}, sel = c\.saved\.selected;/); assert.match(exit, /camera = \{ \.\.\.want \}; applyCamera\(true\);/);
   assert.match(exit, /go\(o\.key, c\.saved\.selected, c\.saved\.scope\)/);
   assert.match(fn(app, 'growthPick'), /if \(k === 'new' \|\| k === 'desc'\) \{ const list = filterParts\(c, k\);/, 'the two filters step through their parts');
   assert.match(fn(app, 'drawGrowthMarks'), /shownTabs\(c\.scenes, c\.scene, growthFilter\(c\)\)/, 'at most three tabs; 새 and 설명 only as a filter\'s');
