@@ -201,6 +201,9 @@ export interface CardTemplate {
   /** Cards v2: the role line (null: none); the foot (the way in and the sign chips) drawn; the kind's defining blanks, by label, which
    * the card no longer draws (the pane says 「X 미기록」). */
   role?: string | null; foot?: boolean; blanks?: string[];
+  /** Ruling F8 Q5: the role as the card draws it (card-face roleFit at 13px in the 192px body, one line or two), measured once before the
+   * map is laid out: its lines give the card its height. Absent: one line. */
+  roleFit?: { text: string; lines: number; kind: 'whole' | 'phrase' | 'fold' } | null;
 }
 
 /** The most kind rows a card holds (the blank slot included), the most pins a side holds. */
@@ -351,7 +354,7 @@ function shownContract(f: CardFacts): CardContract {
 /** The card's width (map px), its two heights, and its name's room: 224 − 16 left (the family stripe in it) − 12 right − 20 glyph −
  * 8 gap = 168; a card with an inside gives its fold toggle 28 more. */
 export { CARD_W };
-export const CARD_H = 80, CARD_H_TALL = 104, PAD_L = 16, PAD_R = 12;
+export const CARD_H = 80, CARD_H_TALL = 104, CARD_H_TALLER = 128, PAD_L = 16, PAD_R = 12;
 export const NAME_ROOM = CARD_W - PAD_L - PAD_R - 20 - 8, TOGGLE_W = 28;
 /** Padding above and below; the name lines (20), the kind line (16), the role line (18) and the gap before it; a row (20) and the
  * rows' gap; the inner line; the old pin rows (title, row, gap: the pins now sit on the card's sides). */
@@ -374,12 +377,15 @@ function sidePins(names: readonly string[], total: number): number[] {
 export function cardHeights(t: CardTemplate, nameLines: number, planned = 0): CardHeights {
   const nl = Math.min(2, Math.max(1, Math.floor(nameLines) || 1));
   const head = nl * NAME_LH + KIND_LH + planned;
-  const role = t.role ? ROLE_GAP + ROLE_H : 0;
+  // Ruling F8 Q5: the role's lines (one, or two when one line of the body does not hold it) decided before the layout, never on hover.
+  const rl = t.role ? Math.min(2, Math.max(1, t.roleFit?.lines ?? 1)) : 0;
+  const role = t.role ? ROLE_GAP + ROLE_H * rl : 0;
   // The forms a card keeps of its own: a group's 「안에」 row, the value rows behind the display setting, a loop container's well.
   const members = t.group && t.rows[0]?.members ? ROW_H + ROWS_GAP / 2 : 0;
   const c = t.contract, contract = c.kind === 'values' && c.rows.length ? ROWS_GAP / 2 + c.rows.length * ROW_H : 0;
   const inner = t.well ? wellHeight(t.well) : 0;
-  const size = nl === 2 && t.role ? CARD_H_TALL : CARD_H;
+  // 80 for one name line and one role line; 104 when the name or the role takes a second line; both: CARD_H_TALLER (their lines whole).
+  const size = nl === 2 && rl === 2 ? CARD_H_TALLER : (nl === 2 && t.role) || rl === 2 ? CARD_H_TALL : CARD_H;
   // The 1px border a side is not added: at worst it takes 2px of the bottom padding, which stays inside the card.
   // The change preview's lines under the name (planned) add to the card they belong to, whatever its size.
   const raw = PAD_Y + head + role + members + contract + inner + PAD_Y, own = members || contract || inner;

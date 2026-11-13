@@ -32,14 +32,14 @@ import { correctRequestMatch, unlinkReplacement, requestComparison } from '../sh
 import { clipKeepPlan, planCutNeeded, KEEP_WORD, clauseCuts } from '../shared/studio.js';
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type RelationView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
-import { groupAxis, groupWordOf, recordedAxis, filedUnder, SHELF_TITLE, SHELF_TIP, OUTSIDE_TITLE, OUTSIDE_TIP, BOUNDARY_TITLE, BOUNDARY_TIP } from './map-regions.js';
+import { groupAxis, groupWordOf, recordedAxis, filedUnder, kindHeads, type RecordedSet, SHELF_TITLE, SHELF_TIP, OUTSIDE_TITLE, OUTSIDE_TIP, BOUNDARY_TITLE, BOUNDARY_TIP } from './map-regions.js';
 import { layoutScope, stickyAspect, lead, mapLead, isListGroup, boundaryCounts, budgetFold, summaryEdges, restSummary, resolveLabels, unionRect, ROOT, HEAD, type Box, type Edge, type Face, type TypedCard, type LabelSpot, type TextMeasure, type ScopeLayout, type Positions, type Point } from './map-layout.js';
 import { aiStatus, askStudio, AskError, ERROR_TEXT, RELEASE_TEXT, PUBLIC_EDITION, connectorRecords, publishHandover, type AiStatus } from './studio-api.js';
 import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, samplePath, mixPath, openCorridors, applyStrips, stripShift, type Routed, type Strip } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
-import { CARD_H, CARD_H_TALL, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
+import { CARD_H, CARD_H_TALL, CARD_H_TALLER, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { cardFace, cutsWord, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
@@ -56,14 +56,14 @@ import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anch
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
 import { PROGRAM_LABEL, PROGRAM_HINT, isProgram, ruleHasProgram, ruleHasProgramEnforce, programLoopItems, loopSegments, typeChipForms, chipText, edgeFields, contractList, lineFacts, type ChipForm } from './line-view.js';
 import { opsLines, opsHead, opsCard, opsWhen } from './ops-line.js';
-import { statusDot, opsSaid, ioLine, moreText, moreTip, DOT_LEGEND, DOT_WORD, OP_VALUE_WORD, opsConflict, conflictWords, namesOf, DISPLAY_DEFAULT, DISPLAY_KEYS, DISPLAY_WORD, readDisplay, writeDisplay, clearDisplayOverride, displayUnder, roleLine, type StatusDot, type DisplaySettings, type Grade } from './card-face.js';
+import { statusDot, opsSaid, ioLine, moreText, moreTip, DOT_LEGEND, DOT_WORD, OP_VALUE_WORD, opsConflict, conflictWords, namesOf, DISPLAY_DEFAULT, DISPLAY_KEYS, DISPLAY_WORD, readDisplay, writeDisplay, clearDisplayOverride, displayUnder, roleLine, firstSentence, roleFit, ROLE_PX, ROLE_BODY, ROLE_LINES, ROLE_MORE, wrapWords, rolePhrases, type StatusDot, type DisplaySettings, type Grade } from './card-face.js';
 import { hoverMachine, placeTip, DIM_AFTER_MS, type TipSide, type HoverMachine } from './hover-tip.js';
 import { projectRuleList, projectRuleEntry, RULE_ROW_LABEL, partSigns, hasSigns, signTabs, ruleSaid, ruleView, unplacedCount, gateKind, gateSplit, gateSplitLine, changeRow, failureBlanks, sinceMatch, sinceSummary, timeSpan, readSince, writeSince, SIGN_LABEL, RULE_BLANKS, RULE_BLANK_HINT, RULE_DESIGN_PROGRAM_HINT, GATE_BLANK, GATE_BLANK_HINT, GATE_LABEL, GATE_HINT, ANCHOR_HINT, ENFORCER_HINT, PLACE_LABEL, NATURE_HINT, FAILURE_BLANK, RECOVERY_BLANK, SINCE_OFF, type PartSigns, type PartPlaces, type SignKind, type SinceState } from './signs-view.js';
 import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenarioAskWithLedger, plannedNote } from '../shared/report-ask.js';
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
-import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, hubChipSpots, hubChipOrder, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
+import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, hubChipSpots, hubChipOrder, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, topIntro, INTRO_FULL, INTRO_PART, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -1020,19 +1020,21 @@ function fitCards() {
   fitFrame = 0;
   const k = camera.k, cards = [...document.querySelectorAll<HTMLElement>('#world .node.card')];
   if (face !== 'tag') return;
-  // A tag's lines are fitted again when the zoom moved enough to change them (2%) or the cards changed.
-  if (Math.abs(k - tagAt.k) / Math.max(tagAt.k, 0.01) < 0.02 && tagAt.n === cards.length && cards.every(el => el.dataset.tagK)) return;
+  // A tag's lines are fitted again when the zoom moved enough to change them or the cards changed. v11 (ruling F8 Q5): 0.5% (was 2%):
+  // a second line fitted for a zoom 2% larger ran past its box at the zoom the fit settled on (never a word cut by the box).
+  if (Math.abs(k - tagAt.k) / Math.max(tagAt.k, 0.01) < 0.005 && tagAt.n === cards.length && cards.every(el => el.dataset.tagK)) return;
   tagAt = { k, n: cards.length };
   const nameW = (s: string) => tagMeasure(s, TAG.name), compactW = (s: string) => tagMeasure(s, TAG_COMPACT.name);
-  const items: { id: string; name: string; width: number; lines: number; el: HTMLElement; measure: (s: string) => number }[] = [];
+  const items: { id: string; name: string; width: number; lines: number; el: HTMLElement; measure: (s: string) => number; boxH: number; compact: boolean }[] = [];
   for (const el of cards) {
     const name = el.querySelector('.c-name')?.textContent ?? '', w = (parseFloat(el.style.width) || el.offsetWidth) * k, hgt = (parseFloat(el.style.height) || el.offsetHeight) * k;
     // A group or a loop container keeps its own (taller) box. Beauty v2 review (visual 2): its tag takes the whole box and reads in its
     // middle like any other tag (it stood in the box's head, over an empty half of the box).
     const own = el.classList.contains('has-well') || el.classList.contains('grp');
-    const room = tagRoom(w, own ? hgt : Math.min(hgt, (el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), (x, px) => linesNeeded(name, x, px === TAG.name ? nameW : compactW), el.dataset.life === '1', (x, px) => cutsWord(name, x, px === TAG.name ? nameW : compactW));
+    const room = tagRoom(w, own ? hgt : Math.min(hgt, (el.classList.contains('taller') ? CARD_H_TALLER : el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), (x, px) => linesNeeded(name, x, px === TAG.name ? nameW : compactW), el.dataset.life === '1', (x, px) => cutsWord(name, x, px === TAG.name ? nameW : compactW));
     el.classList.toggle('tag-noicon', !room.icon); el.classList.toggle('tag-kind', room.kind); el.classList.toggle('tag-compact', room.compact);
-    items.push({ id: el.dataset.part ?? '', name, width: room.width, lines: room.lines, el, measure: room.compact ? compactW : nameW });
+    items.push({ id: el.dataset.part ?? '', name, width: room.width, lines: room.lines, el, measure: room.compact ? compactW : nameW,
+      boxH: own ? hgt : Math.min(hgt, (el.classList.contains('taller') ? CARD_H_TALLER : el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), compact: room.compact });
   }
   const fitted = fitTags(items, nameW);
   for (const x of items) {
@@ -1040,7 +1042,25 @@ function fitCards() {
     const tn = x.el.querySelector<HTMLElement>('.c-tag-name'); if (!tn) continue;
     tn.replaceChildren(...tagLineNodes(f.lines, x.width, x.measure === compactW ? TAG_COMPACT.name : TAG.name));
     x.el.dataset.tagK = k.toFixed(3); x.el.classList.toggle('tag-cut', !f.full);
+    fitTagKind(x.el, x.width, x.boxH - 2 * (x.compact ? TAG_COMPACT.padY : TAG.padY) - f.lines.length * (x.compact ? TAG_COMPACT.nameLh : TAG.nameLh));
   }
+}
+/** Ruling F8 Q5 at the overview: the tag's second line (a lifecycle word, then the kind or the record's role word) in the rows the box
+ * leaves under the name (two at most), broken between words only: whole, else a phrase of the role that reads on its own, else
+ * 「역할 전문 보기」 (card-face roleFit's rule); never cut inside a word by an ellipsis. */
+// v11: 3% and 1px over the canvas's measure: the tag's type is drawn scaled (its size in map units through the camera), and at 1280 the
+// canvas measured a line 1px short of the drawn one (hyperfine-sized maps: 155 vs 157 map units), so it ran past its box.
+const tagKindW = (s: string) => tagMeasure(s, TAG.kind, 520) * 1.03 + 1;
+function fitTagKind(el: HTMLElement, width: number, room: number) {
+  const kd = el.querySelector<HTMLElement>('.c-tag-kind'); if (!kd || kd.dataset.kind === undefined) return;
+  const kind = kd.dataset.kind, pre = kd.dataset.pre ?? '', rows = Math.max(1, Math.min(ROLE_LINES, Math.floor((room + 0.5) / TAG.kindLh)));
+  const n = (s: string) => { const l = wrapWords(pre ? `${pre} · ${s}` : s, width, tagKindW); return l && l.length <= rows ? l.length : 0; };
+  let shown = kind, lines = n(kind), how: 'whole' | 'phrase' | 'fold' = 'whole';
+  if (!lines) for (const p of rolePhrases(kind)) { const m = n(p); if (m) { shown = p; lines = m; how = 'phrase'; break; } }
+  // The way to the whole only where it stands whole too; else the lifecycle word alone (the card itself opens its whole role).
+  if (!lines) { how = 'fold'; lines = n(ROLE_MORE); shown = lines ? ROLE_MORE : ''; lines ||= 1; }
+  kd.replaceChildren(...(pre ? [pre, ...(shown ? [h('span', { class: 'c-tag-sep' }, ' · ')] : [])] : []), shown);
+  kd.classList.toggle('tk2', lines > 1); kd.classList.toggle('tk-empty', !shown && !pre); kd.dataset.fit = how;
 }
 /** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
 /** A card's 「여기서 펼치기」 glyph: a plus (polish round fixes 1). */
@@ -1307,8 +1327,14 @@ function cardFactsOf(o: Opened, p: PartView, r: PartUnderstanding, said: Map<str
     role: roleOf(p, r), foot: p.childIds.length > 0,
     values: shownDisplay().values };
 }
-/** The card's 「하는 일」 (cards v2 §1): the first sentence of the description the pane reads (the reading's, else the person's note). */
-const roleOf = (p: PartView, r: PartUnderstanding | null) => roleLine(r?.role ?? p.note) ?? roleLine(p.note);
+/** The card's 「하는 일」 (cards v2 §1): the first sentence of the description the pane reads (the reading's, else the person's note), whole
+ * (ruling F8 Q5: the card shows it in its lines or a phrase of it, card-face roleFit; never a cut the record did not make). */
+const roleOf = (p: PartView, r: PartUnderstanding | null) => firstSentence(r?.role ?? p.note) ?? firstSentence(p.note);
+/** Ruling F8 Q5: the role as the card draws it, measured in its own type (13px, the role line's weight) in the 192px body, before layout. */
+const roleMeasure = (s: string) => tagMeasure(s, ROLE_PX, 450) * 1.03 + 1;
+function withRoleFit(t: CardTemplate): CardTemplate {
+  return { ...t, roleFit: t.role ? roleFit(t.role, ROLE_BODY, ROLE_LINES, roleMeasure) : null };
+}
 /* ---------- loop containers (map design v3 4; container-view.ts) ----------
  * A container's well opens to every step only when the person asks (its 펼치기, a fold row, a nested row); the view keeps that as a
  * view record, never as a layout: the places held for it and the moves made for it are overlays, dropped on 접기. */
@@ -1418,7 +1444,7 @@ function typedRoom(o: Opened, tpls?: Map<string, CardTemplate>): (id: string, fa
   const said = relationLines(o.project);
   return (id, face) => {
     const p = partOf(o, id), r = p?.reading; if (!p || !r || face === 'item') return 0;
-    const t = cardTemplate(cardFactsOf(o, p, r, said)); tpls?.set(id, t);
+    const t = withRoleFit(cardTemplate(cardFactsOf(o, p, r, said))); tpls?.set(id, t);
     const pm = (r.portMap ?? []).filter(m => m.program !== true);
     const dotted = !!cardDot(r);
     return { nameRoom: nameRoomOf(p.childIds.length > 0, dotted || !!r.loop, dotted && shownDisplay().evidence), shape: (nl, planned) => {
@@ -1540,7 +1566,13 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
   // Cards v2 §1: 「하는 일」, one line under the head (the full text in the hover card and the pane).
   // Review M4: a role whose every report was later revised is muted and says so at its contact point (as a revised line does).
   const roleRevised = !!r.roleBasisRevised && !!r.role;
-  const role = t.role ? h('div', { class: `c-role${roleRevised ? ' revised' : ''}` }, h('span', { class: 'c-role-text' }, t.role),
+  // Ruling F8 Q5: its one or two lines as measured before the layout (t.roleFit), whole, a phrase of it, or the way to the whole.
+  const rf = t.roleFit ?? (t.role ? { text: t.role, lines: 1, kind: 'whole' as const } : null);
+  const roleText = !rf ? null : rf.kind === 'fold'
+    ? h('button', { type: 'button', class: 'c-role-text c-role-more', 'data-full': t.role ?? '', 'data-tip': `하는 일 · ${t.role}`, 'aria-label': `${p.name}의 ${ROLE_MORE}`,
+      onclick: (e: Event) => { e.stopPropagation(); select(p.id); } }, ROLE_MORE)
+    : h('span', { class: `c-role-text${rf.kind === 'phrase' ? ' c-role-phrase' : ''}`, 'data-full': t.role ?? '', ...(rf.kind === 'phrase' ? { 'data-tip': `하는 일 · ${t.role}` } : {}) }, rf.text);
+  const role = t.role && roleText ? h('div', { class: `c-role${roleRevised ? ' revised' : ''}${rf!.lines === 2 ? ' two' : ''}` }, roleText,
     roleRevised ? h('span', { class: 'c-role-rev', 'data-tip': `하는 일${REVISED_BASIS} · 읽기면의 하는 일에서` }, REVISED_SHORT) : null) : null;
   // Beauty v2 (A1): the card face keeps its own forms only: a group's 「안에」 row (its first parts by name), the value rows behind the
   // display setting 「받는·내는 것 행」, a loop container's well. The kind rows read in the hover card and the pane.
@@ -1572,9 +1604,9 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
       ? h('button', { type: 'button', class: 'c-go entry-open', 'data-tip': `안으로 · 내부 상세${stepWord}\n${words.join(' · ')}`, 'aria-label': `${p.name} 내부 상세 열기${stepWord}`, onclick: () => openAction(p.id) }, goGlyph()) : null;
   // The far view's name tag (A3): the same box drawn as the kind icon and the name at a fixed screen size (fitCards writes its lines).
   const tagIcon = h('span', { class: `c-tag-icon g-${t.family}`, 'aria-hidden': 'true' }); tagIcon.innerHTML = glyphSvg(t.glyph);
-  const tag = h('div', { class: 'c-tag', 'aria-hidden': 'true' }, tagIcon, h('span', { class: 'c-tag-text' }, h('span', { class: 'c-tag-name' }, fn.name), h('span', { class: 'c-tag-kind' }, life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? null, life || maint || t.undecided ? h('span', { class: 'c-tag-sep' }, ' · ') : null, t.kind)));
+  const tag = h('div', { class: 'c-tag', 'aria-hidden': 'true' }, tagIcon, h('span', { class: 'c-tag-text' }, h('span', { class: 'c-tag-name' }, fn.name), h('span', { class: 'c-tag-kind', 'data-kind': t.kind, 'data-pre': life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? '' }, life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? null, life || maint || t.undecided ? h('span', { class: 'c-tag-sep' }, ' · ') : null, t.kind)));
   const mark = t.container ? 'loop' : dot ? 'dot' : r.loop ? 'loop' : '';
-  const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${t.container ? ' container' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${maint ? ' maint' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''}${go ? ' has-go' : ''}${hs.total > CARD_H ? ' tall' : ''} ${extra.cls}`, style: `--nl:${nl}`,
+  const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${t.container ? ' container' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${maint ? ' maint' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''}${go ? ' has-go' : ''}${hs.total > CARD_H ? ' tall' : ''}${hs.total > CARD_H_TALL && !kids && !t.well ? ' taller' : ''} ${extra.cls}`, style: `--nl:${nl}`,
     'data-mark': mark, 'data-life': life || maint ? '1' : '',
     // Review (spec §7): focus gives what the hover card says first: the name, the kind, the role and a recorded state's words.
     'data-part': p.id, 'data-box': p.id, 'data-drag': p.id, role: 'button', tabindex: '0', 'aria-label': [p.name, t.kind, life, maint, t.role, dot?.word ?? null].filter(Boolean).join(' · '), onkeydown: extra.onkeydown },
@@ -2511,7 +2543,9 @@ function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   const onLine = (r: Rect) => [...routed.values()].some(q => crosses(q, r));
   // A caption is drawn scaled up at low zoom (styles.css .band-head): its place is checked at that size (at least the fit view's).
   const u = parseFloat($('space').style.getPropertyValue('--u')) || 1, capScale = Math.max(1.3, Math.min(u, Math.max(u * 0.7692, 1.5385)));
-  const capSize = (cls: string, text: string) => { const el = h('div', { class: `band-head ${cls}`, style: 'left:0;top:0;visibility:hidden' }, text); world.append(el); const w = el.offsetWidth * capScale, hh = el.offsetHeight * capScale; el.remove(); return { w, h: hh }; };
+  // Ruling F8 Q5: a head may carry its kind (or its members) small beside its words.
+  const capEl = (cls: string, text: string, small: string | null, attrs: Record<string, string>) => h('div', { class: `band-head ${cls}`, ...attrs }, text, small ? h('small', { class: 'band-kind' }, ` · ${small}`) : null);
+  const capSize = (cls: string, text: string, small: string | null = null) => { const el = capEl(cls, text, small, { style: 'left:0;top:0;visibility:hidden' }); world.append(el); const w = el.offsetWidth * capScale, hh = el.offsetHeight * capScale; el.remove(); return { w, h: hh }; };
   // Beauty v4 (P2): per connected block, a rule between the system's parts and its external systems at the block's edge (below), with
   // the caption 「시스템 경계 · 기록 기준」 once; no rule for a block with no external system there, or where no clean gap parts the two
   // (the kind marks say it then). It claims what the old long rule claimed: lines crossing here
@@ -2520,13 +2554,13 @@ function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   const byBlock = new Map<number, Box[]>();
   for (const [id, bi] of lay.blocks) { const b = lay.boxes.get(id); if (b && b.kind !== 'ghost') (byBlock.get(bi) ?? byBlock.set(bi, []).get(bi)!).push(b); }
   const verticals = [...routed.values()].flatMap(q => q.pts.slice(1).map((p, i) => ({ a: q.pts[i]!, b: p })).filter(s => Math.abs(s.a.x - s.b.x) < 0.5));
-  const placeCap = (cls: string, text: string, tip: string, x: number, y: number) => {
-    const { w, h: hh } = capSize(cls, text);
+  const placeCap = (cls: string, text: string, tip: string, x: number, y: number, small: string | null = null) => {
+    const { w, h: hh } = capSize(cls, text, small);
     // At its place, else a step up (clear of every box and head; of the lines too when it can).
     const tries = [0, 1, 2, 3].map(i => ({ x, y: y - hh - i * (hh * 0.5 + 2), w, h: hh }));
     const cap = tries.find(r => !hit(r) && !onLine(r)) ?? tries.find(r => !hit(r)); if (!cap) return;
     // Drawn from its top left: its box grows down and right from there (transform-origin 0 100% is its bottom left).
-    world.append(h('div', { class: `band-head ${cls}`, title: tip, style: `left:${cap.x}px;top:${cap.y + cap.h - cap.h / capScale}px` }, text)); bandRects.push(cap);
+    world.append(capEl(cls, text, small, { title: tip, style: `left:${cap.x}px;top:${cap.y + cap.h - cap.h / capScale}px` })); bandRects.push(cap);
   };
   // Beauty v4 review: an external system that only calls into the system is laid before it (layered.ts), so a block may have a rule on
   // each side: on the right between every part of the block and the externals past them, on the left between the externals before the
@@ -2556,11 +2590,47 @@ function placeBands(routed: ReadonlyMap<string, Routed> = lastRouted) {
   // reads by its glyph and kind word). A caption of recorded kinds, not a group.
   const firstCol = new Map<number, string[]>();
   for (const col of lay.layers) { const bi = col.length ? lay.blocks.get(col[0]!) : undefined; if (bi !== undefined && !firstCol.has(bi)) firstCol.set(bi, col); }
+  const sets: Box[][] = [];
   for (const [, col] of firstCol) {
     const ps = col.filter(isPart).map(id => lay.boxes.get(id)).filter((b): b is Box => !!b && b.kind !== 'ghost').sort((p, q) => p.y - q.y);
-    if (ps.length < 2) continue;
-    placeCap('band-outside', OUTSIDE_TITLE, OUTSIDE_TIP, ps[0]!.x, ps[0]!.y - 2);
+    if (ps.length >= 2) sets.push(ps);
   }
+  // Ruling F8 Q5: two or more such heads say what the record says of each set (map-regions kindHeads: a recorded group's name, a recorded
+  // place, its members); heads that would still read the same leave the map and the kind reads once in the legend.
+  const o = opened, kh = kindHeads(sets.map(ps => ps.map(b => b.id)), o ? recordedSets(o) : [], OUTSIDE_TITLE, id => (o ? partOf(o, id)?.name ?? id : id));
+  sets.forEach((ps, i) => {
+    const hd = kh.heads[i]; if (!hd) return;
+    const tip = hd.how === 'named' ? `${OUTSIDE_TIP}\n머리: 기록의 묶음 이름` : hd.how === 'place' ? `${OUTSIDE_TIP}\n머리: 기록의 실행 위치` : hd.how === 'members' ? `${OUTSIDE_TIP}\n기록이 따로 묶었고 이름은 적지 않음` : OUTSIDE_TIP;
+    placeCap('band-outside', hd.text, tip, ps[0]!.x, ps[0]!.y - 2, hd.small);
+  });
+  kindKey(kh.legend ? OUTSIDE_TITLE : null);
+}
+/** Ruling F8 Q5: the kind a head no longer says on the map (its sets were only split by the layout), once in the legend. */
+let keyKind: string | null = null;
+function kindKey(word: string | null) {
+  keyKind = word;
+  const key = document.getElementById('line-key'); if (!key) return;
+  key.querySelector('.lk-kind')?.remove();
+  if (word) { key.append(h('span', { class: 'lk-row lk-kind', role: 'listitem', title: OUTSIDE_TIP }, h('span', { class: 'lk-kind-word' }, word))); key.hidden = false; }
+}
+/** The record's groups that have no part of their own (a C-GROUP row whose parent is a label, map-regions RecordedSet), from the records
+ * the newest map reading read: its members as the parts that reading bound to their rows. */
+let setsFor: object | null = null, setsNow: RecordedSet[] = [];
+function recordedSets(o: Opened): RecordedSet[] {
+  if (setsFor === o.project) return setsNow;
+  setsFor = o.project; setsNow = [];
+  const maps = o.project.readings.filter(isMapReading), r = maps.at(-1); if (!r) return setsNow;
+  const byRow = new Map(r.parts.filter(x => x.recordRef).map(x => [x.recordRef!, x.areaId]));
+  for (const rec of new Set(r.records.map(x => x.id))) {
+    const text = o.project.pasted.find(p => p.id === rec)?.text; if (!text) continue;
+    for (const t of readRecordTables(text).byId.get('C-GROUP') ?? []) for (const row of t.rows) {
+      const c = row.byColumn, parent = (c['부모'] ?? c['부모 이름'] ?? '').trim(), kids = c['자식들'] ?? c['자식 이름들'] ?? '', axis = (c['묶음 뜻'] ?? '').trim();
+      if (!parent || /^\s*B\d{1,3}\s*$/.test(parent)) continue;
+      const members = [...new Set([...kids.matchAll(/(?<![A-Za-z0-9])B\d{1,3}(?!\d)/g)].map(m => byRow.get(m[0])).filter((x): x is string => !!x))];
+      if (members.length) setsNow.push({ name: parent, axis: axis === '참여자' ? 'participants' : axis === '실행 위치' ? 'place' : 'other', members });
+    }
+  }
+  return setsNow;
 }
 function moveLoneHead() {
   const el = $('world').querySelector<HTMLElement>('.lone-head'); if (!el) return;
@@ -3509,9 +3579,8 @@ function fitView(explicit: boolean, animate = false) {
   placedInv = syncZoom(at.k, true); placeEdgeLabels();
   const scene = ftScene(), ink = titleInk();
   const inkAt = (k: number) => (k >= TITLE_FLOOR_K ? ink : null);
-  // The one-line form may also stand narrower (FT_CAPS), clear of a caption or card at its right end (the fixture map at 1280); v9: so
-  // may the sentence's two lines (FT_CAPS_TWO), first.
-  const clear = (form: string | null, k: number) => (form === 'ft-one' ? FT_CAPS : [null, ...FT_CAPS_TWO]).some(cap => { ftCap = cap; const ok = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); ftCap = null; return ok; });
+  // Ruling F8 Q2: the box as it is (its sentence whole, up to three lines): never narrower, never one line; the map makes the room.
+  const clear = (form: string | null, k: number) => !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k));
   // A frame that shows the map's own title never gives it up for the top line's room (the give stops at the title's floor).
   const least = Math.max(at.k - FT_GIVE, at.k >= TITLE_FLOOR_K ? TITLE_FLOOR_K : 0) - 1e-9;
   const give = (forms: readonly (string | null)[]) => { for (const form of forms) for (let k = at.k; k >= least; k -= 0.002) { at.place(k); if (clear(form, k)) return true; } return false; };
@@ -3546,7 +3615,7 @@ function fitView(explicit: boolean, animate = false) {
     const ti = inkAt(camera.k), s = ti ? toScreen(ti) : null;
     if (s && s.x < 16) camera = { ...camera, x: camera.x + (16 - s.x) };
     done = FT_SAID.some(form => clear(form, camera.k));
-    if (!done) { const r = ftBox('ft-one', camera, inkAt(camera.k)), top = toScreen(drawnBounds()).y, need = r.y + r.h + 8 - top; if (need > 0) camera = { ...camera, y: camera.y + need }; done = true; }
+    if (!done) { const r = ftBox(null, camera, inkAt(camera.k)), top = toScreen(drawnBounds()).y, need = r.y + r.h + 8 - top; if (need > 0) camera = { ...camera, y: camera.y + need }; done = true; }
   }
   if (!done && at.whole) { frameView(explicit, base); done = give(['ft-under']); }
   if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
@@ -3621,15 +3690,8 @@ function titleInk(): Rect | null {
 /** The top line's place for a camera (review of v5 focus 3, A3): beside the map's own title while that title stands in its rows, so the
  * title, its 「기록 정보 ▾」 and the record's time stay in sight and within reach at rest; else at the window's left. Sets its left and
  * width (no room of 320px beside the title: it stays at the left and the fit frames the title under it instead). */
-/** A narrower width the top line takes (its one-line form only), else null (review of the growth view: its sentence on one line stays shown
- * beside a caption at its right end rather than stepping back). */
-let ftCap: number | null = null;
-const FT_CAPS: readonly (number | null)[] = [null, 760, 680, 600, 520, 440];
-/** v9 (review of v8): the narrower widths the sentence's two lines take before it goes to one line (never so narrow that two lines hold
- * fewer of its words than one line at the full width). */
-const FT_CAPS_TWO: readonly number[] = [760, 680, 600, 520];
 function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
-  el.style.left = ''; el.style.maxWidth = ftCap ? `${ftCap}px` : '';
+  el.style.left = ''; el.style.maxWidth = '';
   if (!ink) return;
   const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
   const t = { x: ox + cam.x + ink.x * cam.k, y: oy + cam.y + ink.y * cam.k, w: ink.w * cam.k, h: ink.h * cam.k };
@@ -3637,26 +3699,34 @@ function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
   if (!(t.x < r.x + r.w + 8 && r.x - 8 < t.x + t.w && t.y < r.y + r.h + 8 && r.y - 8 < t.y + t.h)) return;
   const left = Math.round(t.x + t.w + 24), room = $('space').clientWidth - (parseFloat(getComputedStyle($('space')).getPropertyValue('--plan-w')) || 0) - left - 16;
   if (room < 320) return;
-  el.style.left = `${left}px`; el.style.maxWidth = `${Math.min(860, room, ftCap ?? 860)}px`;
+  el.style.left = `${left}px`; el.style.maxWidth = `${Math.min(860, room)}px`;
 }
-/** The top line's box in the camera's frame (the viewport's) in one form (null: whole; ft-one: its sentence on one line; ft-under: its
- * sentence stepped back), placed for that camera, with a 6px margin; the line is left as it was. */
+/** The top line's box in the camera's frame (the viewport's) in one form (null: whole; ft-under: its sentence stepped back), placed for
+ * that camera, with a 6px margin; the line is left as it was. Ruling F8 Q2: its sentence chosen for the width it has there (ftIntro). */
 function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
   const el = $('focus-top'), v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
   const was = FT_FORMS.filter(c => el.classList.contains(c)), left = el.style.left, maxW = el.style.maxWidth;
   // v8: measured with the whole words (as placeFocusTop measures them), never with the clause cut a placed form shows.
-  const cut = [...el.querySelectorAll<HTMLElement>('[data-text]')].filter(t => t.textContent !== t.dataset.text).map(t => [t, t.textContent] as const);
+  const cut = [...el.querySelectorAll<HTMLElement>('.ft-basis-t[data-text]')].filter(t => t.textContent !== t.dataset.text).map(t => [t, t.textContent] as const);
   for (const [t] of cut) t.textContent = t.dataset.text ?? '';
-  el.classList.remove(...FT_FORMS); if (form) el.classList.add(form); ftPlace(el, cam, ink);
+  const sent = el.hidden || el.classList.contains('growth-guide') ? null : el.querySelector<HTMLElement>('.ft-sentence'), btn = el.querySelector<HTMLElement>('.ft-full-open');
+  const keep = sent ? { text: sent.textContent, hidden: sent.hidden, kind: sent.dataset.kind, data: sent.dataset.text, title: sent.getAttribute('title'), btn: btn?.textContent ?? null } : null;
+  el.classList.remove(...FT_FORMS); ftPlace(el, cam, ink);
+  if (sent) { ftIntro(el, sent); ftPlace(el, cam, ink); }
+  if (form) el.classList.add(form);
   const out = { x: el.offsetLeft - ox - 6, y: el.offsetTop - oy - 6, w: el.offsetWidth + 12, h: el.offsetHeight + 12 };
   el.classList.remove(...FT_FORMS); el.classList.add(...was); el.style.left = left; el.style.maxWidth = maxW;
   for (const [t, c] of cut) t.textContent = c;
+  if (sent && keep) {
+    sent.textContent = keep.text; sent.hidden = keep.hidden; if (keep.kind !== undefined) sent.dataset.kind = keep.kind; if (keep.data !== undefined) sent.dataset.text = keep.data;
+    if (keep.title !== null) sent.setAttribute('title', keep.title); else sent.removeAttribute('title'); if (btn && keep.btn !== null) btn.textContent = keep.btn;
+  }
   return out;
 }
-/** The top line's shorter forms: its sentence on one line, or stepped back. */
-const FT_FORMS = ['ft-one', 'ft-under'];
-/** Polish 5: the forms that say the record's sentence: whole, then on one line. */
-const FT_SAID = [null, 'ft-one'] as const;
+/** The top line's shorter form: its sentence stepped back (ruling F8 Q2: never on one line). */
+const FT_FORMS = ['ft-under'];
+/** Polish 5: the forms that say the record's sentence (ruling F8 Q2: whole only). */
+const FT_SAID = [null] as const;
 /** The whole view in the free area under `base` (the top inset without the top line): sets the camera and says its scale, whether it
  * framed the whole map (no pan onto a focus), and how to set the same frame at a smaller scale. */
 type Framed = { k: number; whole: boolean; place: (k: number) => void };
@@ -4326,9 +4396,19 @@ function renderFocusTop() {
   const saved = o.kind === 'saved';
   // Review of v5 focus 3 (A5): shown and hovered only through the guard (no evidence group, file tag or row ID); nothing plain left: no
   // sentence at all (never the unguarded words).
-  const topWords = s ? basisWords(s.first) : null;
-  const sentence = s && topWords ? h(saved ? 'button' : 'p', { class: 'ft-sentence', ...(saved ? { type: 'button', onclick: () => showQuote(s.record, s.quote, s.from) } : {}),
-    title: `${topWords}\n출처: 기록 요약의 첫 문장 · ${s.label}${saved ? '\n눌러서 원문 보기' : ''}`, 'data-text': topWords }, topWords) : null;
+  // Ruling F8 Q2: the summary's first sentence whole in up to three lines, else another whole sentence of it said to be part of it, else
+  // nothing (ftIntro, at the box's width); the way to the whole summary always in the box, by click or key, its words saying which.
+  if (ftFullFor !== o.key) { ftFullFor = o.key; ftFullOpen = false; }
+  ftSaid = s ? s.sentences.map(x => basisWords(x)) : [];
+  const sentence = s && ftSaid.some(Boolean) ? h('p', { class: 'ft-sentence' }) : null;
+  const full = s && ftSaid.some(Boolean) ? h('button', { type: 'button', class: 'ft-b ft-full-open', 'aria-expanded': String(ftFullOpen), 'aria-controls': 'ft-full',
+    title: `기록 요약의 모든 문장 · ${s.label}`, onclick: (e: Event) => { e.stopPropagation(); ftFullOpen = !ftFullOpen; renderFocusTop(); if (ftFullOpen) document.getElementById('ft-full')?.focus(); } }, INTRO_FULL) : null;
+  const fullPanel = s && full && ftFullOpen ? h('div', { id: 'ft-full', class: 'ft-full', role: 'region', 'aria-label': '기록 요약 전문', tabindex: '-1',
+    onkeydown: (e: Event) => { if ((e as KeyboardEvent).key === 'Escape') { e.stopPropagation(); ftFullOpen = false; renderFocusTop(); el.querySelector<HTMLElement>('.ft-full-open')?.focus(); } } },
+    h('p', { class: 'ft-full-head' }, h('span', {}, `기록 요약 · ${s.label}`),
+      h('button', { type: 'button', class: 'ft-b ft-full-close', onclick: () => { ftFullOpen = false; renderFocusTop(); el.querySelector<HTMLElement>('.ft-full-open')?.focus(); } }, '닫기')),
+    ...ftSaid.flatMap(x => (x ? [h('p', { class: 'ft-full-s' }, x)] : [])),
+    saved ? h('button', { type: 'button', class: 'ft-b ft-full-src', onclick: () => showQuote(s.record, s.quote, s.from) }, '기록 원문에서 보기') : null) : null;
   const name = (id: string) => partOf(o, id)?.name ?? id;
   const choose = (c: FlowChoice) => {
     // The choice is the person's, kept with the map's first view (a map with none yet keeps only this).
@@ -4362,8 +4442,29 @@ function renderFocusTop() {
     row = h('div', { class: 'ft-switch', role: 'group', 'aria-label': FLOW_CONTROL }, h('span', { class: 'ft-name' }, `${FLOW_CONTROL}: ${FLOW_SOURCE.all}`), h('span', { class: 'ft-dot', 'aria-hidden': 'true' }, '·'),
       btn('ft-back', `${FLOW_CONTROL} 보기`, `${c.source}${c.text && basisWords(c.text) ? ` · “${basisWords(c.text)}”` : ''}`, () => choose({ rule: c.rule, key: c.key })));
   }
-  el.replaceChildren(...[sentence, row, basis].filter((x): x is HTMLElement => !!x));
+  // The controls on a line of their own (never beside the sentence, eating its width): the switcher, then the way to the whole summary.
+  if (full) { if (row) row.append(full); else row = h('div', { class: 'ft-switch ft-ctl' }, full); }
+  el.replaceChildren(...[sentence, row, basis, fullPanel].filter((x): x is HTMLElement => !!x));
   el.hidden = !el.childElementCount; syncFocusTop();
+}
+/** Ruling F8 Q2: the summary's sentences as the box shows them (null: nothing plain left in one), whether its whole text is open, for
+ * which map. */
+let ftSaid: (string | null)[] = [], ftFullOpen = false, ftFullFor = '';
+/** The top box's height at most, its controls and padding included, and its sentence's lines at most. */
+const FT_MAX_H = 120, FT_LINES = 3;
+/** Ruling F8 Q2: the introduction at the box's width as it stands (first-flow topIntro): the sentence's text, its kind, its hover, and
+ * the words of the way to the whole summary. Measured with the sentence shown (the stepped-back form put aside). */
+function ftIntro(el: HTMLElement, sent: HTMLElement): string {
+  const under = el.classList.contains('ft-under'); if (under) el.classList.remove('ft-under');
+  sent.hidden = false;
+  const lh = parseFloat(getComputedStyle(sent).lineHeight) || 22;
+  const fits = (t: string) => { sent.textContent = t; return sent.offsetHeight <= lh * FT_LINES + 1 && el.offsetHeight <= FT_MAX_H; };
+  const it = topIntro(ftSaid, fits), s = ffSrc;
+  sent.textContent = it.text ?? ''; sent.hidden = !it.text; sent.dataset.kind = it.kind; sent.dataset.text = it.text ?? '';
+  if (it.text) sent.title = `${it.text}\n${it.index ? `출처: 기록 요약의 ${it.index + 1}번째 문장` : '출처: 기록 요약의 첫 문장'}${s ? ` · ${s.label}` : ''}`; else sent.removeAttribute('title');
+  const b = el.querySelector<HTMLElement>('.ft-full-open'); if (b) b.textContent = it.kind === 'part' ? INTRO_PART : INTRO_FULL;
+  if (under) el.classList.add('ft-under');
+  return `${it.kind}|${it.text ?? ''}`;
 }
 /** The top line's height, its sentence whole (the camera's fit keeps the map under it, collapsed or not). */
 const ftH = () => { const el = document.getElementById('focus-top'); return el && !el.hidden ? (ftFull || el.offsetHeight) + 8 : 0; };
@@ -4373,17 +4474,22 @@ function syncFocusTop() {
   const el = document.getElementById('focus-top'); if (!el) return;
   // Polish 5: each form measured with the whole words; once placed, a cut the CSS makes (the sentence's clamp, the basis's ellipsis) keeps
   // the plan word (keepPlanFit).
-  const texts = [...el.querySelectorAll<HTMLElement>('[data-text]')];
+  // Ruling F8 Q2 (the v9/v10 clause cut of the top sentence replaced): the sentence is chosen whole for the box's width (ftIntro), before
+  // the box is placed and again at its placed width; the basis line keeps its own cut.
+  const texts = [...el.querySelectorAll<HTMLElement>('.ft-basis-t[data-text]')];
   for (const t of texts) if (t.textContent !== t.dataset.text) t.textContent = t.dataset.text ?? '';
+  const sent = el.hidden || el.classList.contains('growth-guide') ? null : el.querySelector<HTMLElement>('.ft-sentence');
+  const was = sent ? ftIntro(el, sent) : '';
   placeFocusTop(el);
+  if (sent && ftIntro(el, sent) !== was) placeFocusTop(el);
   for (const t of texts) {
     if (el.hidden || !t.offsetWidth) continue;
-    const basis = t.classList.contains('ft-basis-t') ? t.parentElement : null, lead = basis?.querySelector<HTMLElement>('.ft-basis-l');
+    const basis = t.parentElement, lead = basis?.querySelector<HTMLElement>('.ft-basis-l');
     // v8 (review of v7: 「… README에…」, 「… 운영자는 CLI·웹…」): words that run past the box are cut at a clause boundary that fits (else at a
     // whole word), keeping a plan word, never by the box's own clamp or ellipsis; with no such cut, keepPlanFit's.
-    const at = clauseFit(basis ?? t, t, t.dataset.text ?? '', !!basis); if (at !== null) { t.textContent = at; continue; }
+    const at = clauseFit(basis ?? t, t, t.dataset.text ?? '', true); if (at !== null) { t.textContent = at; continue; }
     // v9: the head before the plan word's clause ends on a whole word (clipKeepPlan words).
-    t.textContent = basis ? keepPlanFit(basis, t.dataset.text ?? '', 1, (lead?.offsetWidth ?? 0) + 6, true) : keepPlanFit(t, t.dataset.text ?? '', el.classList.contains('ft-one') ? 1 : 2, 0, true);
+    if (basis) t.textContent = keepPlanFit(basis, t.dataset.text ?? '', 1, (lead?.offsetWidth ?? 0) + 6, true);
   }
 }
 /** The words of a top-line text as its box shows them (box: the sentence's clamp, or the basis line's ellipsis): whole when they fit, else
@@ -4414,11 +4520,9 @@ function placeFocusTop(el: HTMLElement) {
   // to its head; the camera keeps the cards clear of it instead (growthClearGuide).
   if (el.classList.contains('growth-guide')) return;
   if (!covers()) return;
-  // v9 (review of v8: at 1280 the one-line sentence was cut mid-clause, 「…워커)로…」): its two lines, narrower, before one line.
-  for (const cap of FT_CAPS_TWO) { ftCap = cap; ftPlace(el, camera, ink); ftCap = null; if (!covers()) return; }
-  el.classList.add('ft-one');
-  for (const cap of FT_CAPS) { ftCap = cap; ftPlace(el, camera, ink); ftCap = null; if (!covers()) return; }
-  el.classList.remove('ft-one'); el.classList.add('ft-under'); ftPlace(el, camera, ink);
+  // Ruling F8 Q2: never a narrower or one-line sentence (the fit gives the map's room to the whole box instead, fitView); when the person
+  // has moved the map under it, the sentence steps back and the way to the whole summary stays in the box.
+  el.classList.add('ft-under'); ftPlace(el, camera, ink);
 }
 
 /* ---------- the scenario on the map (spec §3, cycle 3): one foreground scenario at a time ----------
@@ -5843,7 +5947,7 @@ function renderLineKey(present: Set<Channel>) {
     return s;
   };
   key.replaceChildren(...(['data', 'control', 'uses'] as const).filter(c => present.has(c)).map(c => h('span', { class: `lk-row lk-${c}`, role: 'listitem' }, sample(c), h('span', {}, CHANNEL_LABEL[c]))));
-  key.hidden = !present.size;
+  key.hidden = !present.size; if (keyKind) kindKey(keyKind);
 }
 /* ---------- lenses and the legend (map design v3 7; view-lens.ts) ----------
  * The lens switch in the map's tools and the legend in its lower left. A lens only puts classes on the space; the legend's marks

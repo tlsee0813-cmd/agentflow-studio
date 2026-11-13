@@ -192,7 +192,8 @@ test('FF-11 the app reads the sentence from the record, draws only existing line
   assert.match(rule('#space.ff-on.ff-rest .world .edge.lf-bg:not(.ff-flow)'), /--bw: 1\.15;/);
   const off = css.split('\n').filter(l => /#space\.ff-on.*(lens-off|lg-fade)/.test(l)).join('\n');
   assert.match(off, /opacity: 1; filter: none;/, 'a card off the lens keeps its words whole in focus');
-  assert.match(css, /\.focus-top \.ft-sentence \{[^}]*font-size: 19px;[^}]*-webkit-line-clamp: 2;/);
+  // v11 (ruling F8 Q2): 14px on 22px lines, whole in up to three lines (no clamp: the sentence is chosen to fit, v11-text).
+  assert.match(css, /\.focus-top \.ft-sentence \{[^}]*font-size: 14px; line-height: 22px;/);
 });
 
 test('FF-12 alternatives in one step are never paired with each other (review #1)', () => {
@@ -373,7 +374,8 @@ test('FF-22 the basis sentence and the top line show no evidence group, file tag
   assert.match(a, /const said = c\.text \? basisWords\(c\.text\) : null/);
   // Review of v5 focus 3 (A5) changed exactly this: no fallback to the unguarded words; nothing plain left, nothing shown (the source only).
   assert.match(a, /c\.text \? \(said \? `근거 문장: “\$\{said\}”` : null\)/, 'the switcher\'s tip: plain words, never an evidence group or file tag');
-  assert.match(a, /const topWords = s \? basisWords\(s\.first\) : null;/, 'the top sentence too');
+  // v11 (ruling F8 Q2): every sentence of the summary through the guard (the top box may show a later one, and its whole text).
+  assert.match(a, /ftSaid = s \? s\.sentences\.map\(x => basisWords\(x\)\) : \[\];/, 'the top sentence too');
   assert.doesNotMatch(a, /\$\{c\.text\}”/, 'never the raw sentence in quotes on screen');
 });
 
@@ -444,19 +446,21 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   assert.match(a, /const base = topInset\(\) - ftH\(\), at = frameView\(explicit, base\);/, 'framed under the strip alone first');
   // Review of v5 focus 3 (A2, A3) changed exactly this: each form measured where it stands for that camera (beside the title).
   // Polish 5: the sentence's forms (whole, one line) with the give and then with room above, before the sentence steps back.
-  assert.match(a, /const FT_SAID = \[null, 'ft-one'\] as const;/, 'whole, then its sentence on one line');
+  // v11 (ruling F8 Q2): whole only (never one line); the map makes the room.
+  assert.match(a, /const FT_SAID = \[null\] as const;/, 'whole only');
   // v9 (review of v8): each form by the give and then by the free height before the next (two lines before one); v10: first-flow
   // sentenceRoom (its order tested in v10-maps), the free height measured per column (mapSlack).
   assert.match(a, /const room = sentenceRoom\(FT_SAID, at\.k, least, /);
   assert.match(a, /if \(!done && at\.whole\) \{ frameView\(explicit, base\); done = give\(\['ft-under'\]\); \}/, 'stepped back only when no room shows the sentence');
   assert.ok(a.includes('if (!done && !at.whole) for (const form of FT_SAID) { frameView(explicit, base + ftBox(form, camera, null).h + 8); if (clear(form, camera.k)) { done = true; break; } }'), 'a frame on the first flow keeps the sentence the same way (first-user judge 9)');
   // Review of the growth view (verifier, the fixture map at 1280): the one-line form may also stand narrower, clear of a caption at its end.
-  assert.ok(a.includes("const clear = (form: string | null, k: number) => (form === 'ft-one' ? FT_CAPS : [null, ...FT_CAPS_TWO]).some(cap => { ftCap = cap; const ok = !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k)); ftCap = null; return ok; });"));
+  // v11 (ruling F8 Q2): the box as it is, never narrower.
+  assert.ok(a.includes("const clear = (form: string | null, k: number) => !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k));"));
   assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects\];/, 'never over a card or a lane caption');
-  assert.match(a, /el\.classList\.add\('ft-one'\);\n  for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/, 'the sentence on one line (narrower if need be) before it steps back');
+  assert.ok(!a.includes("el.classList.add('ft-one')"), 'v11 (ruling F8 Q2): never on one line before it steps back');
   assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop\)/, 'the map\'s own title never reads through the top line');
   const css = await cssNoComments();
-  assert.match(css, /\.focus-top\.ft-one \.ft-sentence \{ -webkit-line-clamp: 1; \}/);
+  assert.doesNotMatch(css, /\.focus-top\.ft-one/, 'v11: no one-line form');
   assert.match(css, /\.focus-top\.ft-under \.ft-sentence \{ display: none; \}/, 'stepped back, it takes no room');
   assert.match(a, /if \(!done\) frameView\(explicit, base \+ ftBox\('ft-under', camera, null\)\.h \+ 8\);/, 'at worst the short form\'s room, never the whole sentence\'s');
 });
@@ -508,7 +512,7 @@ test('FF-33 every shown or hovered sentence goes through the guard; nothing plai
   assert.doesNotMatch(code, /\$\{s\.first\}/, 'never the raw sentence in the top line\'s hover');
   assert.doesNotMatch(code, /\$\{c\.text\}/, 'never the raw basis in a hover');
   assert.doesNotMatch(code, /said \?\? shownSentence/, 'never the unguarded basis in the switcher\'s hover');
-  assert.match(code, /const sentence = s && topWords \?/, 'no sentence when nothing plain is left');
+  assert.match(code, /const sentence = s && ftSaid\.some\(Boolean\) \?/, 'no sentence when nothing plain is left');
   assert.match(code, /title: `\$\{FLOW_CONTROL\}의 근거 문장 · \$\{c\.source\}\\n\$\{said\}`/);
 });
 

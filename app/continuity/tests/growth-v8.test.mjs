@@ -45,8 +45,9 @@ const namesOf = (p, a, b) => { const A = G.pastVersion(p, a).view, B = G.version
 test('V8-1 the guide is never stepped back or cut to one line: the box stays whole, at any camera', async () => {
   const app = await read('src/client/app.ts'), css = await read('public/styles.css');
   const place = fn(app, 'placeFocusTop');
-  const guard = place.indexOf("if (el.classList.contains('growth-guide')) return;"), one = place.indexOf("el.classList.add('ft-one')"), under = place.indexOf("el.classList.add('ft-under')");
-  assert.ok(guard > 0 && guard < one && guard < under, 'in guide mode the forms are never applied, whatever the camera puts under it');
+  // v11 (ruling F8 Q2): the top box has no one-line form any more; the stepped-back form is the only one, never in guide mode.
+  const guard = place.indexOf("if (el.classList.contains('growth-guide')) return;"), under = place.indexOf("el.classList.add('ft-under')");
+  assert.ok(guard > 0 && guard < under && !place.includes("'ft-one'"), 'in guide mode the forms are never applied, whatever the camera puts under it');
   assert.doesNotMatch(css, /\.focus-top\.growth-guide\.ft-one/, 'no one-line form of the guide');
   const rule = css.match(/\.focus-top\.growth-guide \.gg-text \{([^}]*)\}/)?.[1] ?? '';
   assert.match(rule, /-webkit-line-clamp: none;/); assert.match(rule, /overflow: visible;/);
