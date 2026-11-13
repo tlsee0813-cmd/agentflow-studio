@@ -197,7 +197,7 @@ test('V8-12 first user (i, j): leaving says what stayed and past/current keeps t
   assert.equal(V.exitWord(true, true), '비교를 끝냈어요 · 비교 전에 고른 카드와 보던 위치로 돌아왔어요');
   assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); note\(nowWord\(/);
   assert.match(fn(app, 'growthView'), /keepInView\(\);/); assert.match(fn(app, 'growthLeavePast'), /else keepInView\(\);/);
-  assert.match(fn(app, 'placeCue'), /h\('span', \{ class: 'cue-word', 'aria-hidden': 'true' \}, cue === 'condition' \? '조건 보기' : '선택 보기'\)/);
+  assert.match(fn(app, 'placeCue'), /h\('span', \{ class: 'cue-word', 'aria-hidden': 'true' \}, cue === 'condition' \? '조건 보기' : cue === 'detail' \? '관계 보기' : '선택 보기'\)/); // F8: and a relation-detail cue says 관계 보기
   assert.match(css, /\.edge-cue:is\(:hover, :focus-visible, \.near\) \.cue-word \{ display: block; \}/);
   assert.match(fn(app, 'clipAtEdge'), /el\.classList\.toggle\('edge-cut'/);
   assert.match(css, /\.edge-labels > \.edge-cut \{ visibility: hidden; \}/);
