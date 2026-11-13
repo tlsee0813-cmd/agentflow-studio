@@ -139,3 +139,27 @@ export function labelWords(t: string, g: IdGloss = NO_GLOSS): string | null {
   if (!s || hasRowId(s) || EMPTY_REST.test(s)) return null;
   return s;
 }
+const condRowCache = new WeakMap<Project, Map<string, string>>();
+/** v9 (review of v8: a ◇'s tip read 「조건: CD05」 where no part's reading kept that row): each C-COND row of the records the project holds by
+ * its 조건 as the record wrote it (the newest record's row last). For a tip only: the map's own surfaces keep the gloss as it was (a branch
+ * note picks the first condition said in plain words, and a row read nowhere else stays off it). */
+export function recordConditionRows(p: Pick<Project, 'pasted'>): Map<string, string> {
+  const hit = condRowCache.get(p as Project); if (hit) return hit;
+  const out = new Map<string, string>();
+  for (const r of p.pasted ?? []) for (const t of readRecordTables(r.text).tables) for (const row of t.rows) {
+    const c = (row.byColumn['행 ID'] ?? row.cells[0]?.text ?? '').trim(), w = (row.byColumn['조건'] ?? '').trim();
+    if (/^CD\d{2,3}[a-z]?$/.test(c) && w) out.set(c, w);
+  }
+  condRowCache.set(p as Project, out); return out;
+}
+/** 「LN13과 같음」: a condition that says it is another line's (a record row of the relations table). */
+const SAME_AS = new RegExp(String.raw`^\s*(${ID})\s*(?:과|와)?\s*(?:같음|같다|동일|동일함|마찬가지)\.?\s*$`);
+/** v9 (review of v8: a ◇'s tip read 「조건: CD04가 거짓일 때」, 「조건: LN13과 같음」): a condition's words as the map says them: one that says it is
+ * another line's (「LN13과 같음」) reads that line's condition (conds: a relation row ID → its condition as written, followed as far as three
+ * such steps); the record's row IDs in it read as the record's own words (labelWords). null when an ID is left that nothing names (the
+ * caller keeps the record's words as written). */
+export function conditionRefWords(t: string, g: IdGloss = NO_GLOSS, conds: ReadonlyMap<string, string> = new Map(), depth = 0): string | null {
+  const m = SAME_AS.exec(t);
+  if (m) { const c = conds.get(m[1]!); return c && depth < 3 ? conditionRefWords(c, g, conds, depth + 1) : null; }
+  return labelWords(t, g);
+}

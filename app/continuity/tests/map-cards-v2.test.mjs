@@ -221,7 +221,7 @@ test('CARD-8 the built card and map: no ops footer, no c-short, no card title; t
   assert.ok(hov.includes("$('viewport').getBoundingClientRect()") && hov.includes('.near-end, .near-self') && hov.includes('.c-head'), 'tips stay in the map area, off lit neighbours and names');
   assert.ok(hov.includes('hoverQuiet') && !hov.includes('누르면 출발 부분을 고르고'), 'a picked card keeps its tip shut; no click hint');
   assert.ok(!hov.includes('실선 · 채운 머리'), 'no stroke vocabulary in the line tip');
-  assert.ok(hov.includes('conditionTip(s.when)') && body(src, 'relationLines').includes('(conditionWords(x.when))'), 'M3: each relation row says its condition (polish round: 「조건: …」, the form word left off)');
+  assert.ok(hov.includes('conditionTip(s.when, condPlain)') && body(src, 'relationLines').includes('(conditionWords(x.when))'), 'M3: each relation row says its condition (polish round: 「조건: …」, the form word left off)');
   assert.ok(body(src, 'cardIo').includes('relationEnds('), 'the hover card falls back to the lines the pane reads');
   // Beauty v2 (A1/A3): the card face is drawn at its own fixed sizes (nothing to fit); further out the box draws its name tag.
   assert.ok(body(src, 'fitCards').includes('fitTags(') && css.includes('.space.face-tag .node.card > :not(.c-tag) { display: none !important; }'), 'the far view draws name tags');

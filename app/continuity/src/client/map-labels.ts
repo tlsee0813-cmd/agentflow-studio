@@ -60,6 +60,30 @@ export function portSpots(pts: Point[], w: number, h: number, gap = 12): Rect[] 
   const y = tip.y > prev.y ? tip.y - gap - h : tip.y + gap;
   return [{ x: tip.x + 4, y, w, h }, { x: tip.x - w - 4, y, w, h }];
 }
+/** v9 (review of v8: a condition left the map at 1280 where its line ran between cards with no run free for it): places beside a run
+ * rather than on it, its near edge gap off the line: above and below a level run, right and left of an upright one, from the run's start
+ * in steps of a third of the chip (at least 6), every run long enough to hold the chip beside it; 'start' takes the runs nearest the
+ * line's start first (a condition reads by the port it branches from), 'long' the longest first. The caller keeps only places clear of
+ * the line itself, the parts and the other labels. */
+export function besideSpots(pts: Point[], w: number, h: number, gap: number, prefer: 'long' | 'start' = 'start'): Rect[] {
+  const runs: { a: Point; b: Point; horiz: boolean; len: number; idx: number }[] = [];
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1]!, b = pts[i]!, horiz = Math.abs(a.y - b.y) < 0.5, upright = Math.abs(a.x - b.x) < 0.5, len = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    if ((horiz || upright) && len >= (horiz ? w : h)) runs.push({ a, b, horiz, len, idx: i });
+  }
+  runs.sort((p, q) => (prefer === 'start' ? p.idx - q.idx : q.len - p.len));
+  const out: Rect[] = [];
+  for (const r of runs) {
+    const span = r.horiz ? w : h, step = Math.max(6, span / 3), n = Math.floor((r.len - span) / step);
+    for (let i = 0; i <= n; i++) {
+      // From the run's own start, along its direction.
+      const d = i * step, fwd = r.horiz ? r.b.x >= r.a.x : r.b.y >= r.a.y;
+      if (r.horiz) { const x = fwd ? r.a.x + d : r.a.x - d - w; out.push({ x, y: r.a.y - gap - h, w, h }, { x, y: r.a.y + gap, w, h }); }
+      else { const y = fwd ? r.a.y + d : r.a.y - d - h; out.push({ x: r.a.x + gap, y, w, h }, { x: r.a.x - gap - w, y, w, h }); }
+    }
+  }
+  return out;
+}
 /** Whether a polyline passes through a rectangle grown by margin on every side. */
 export function polylineHitsRect(pts: Point[], r: Rect, margin = 2): boolean {
   const x0 = r.x - margin, y0 = r.y - margin, x1 = r.x + r.w + margin, y1 = r.y + r.h + margin;

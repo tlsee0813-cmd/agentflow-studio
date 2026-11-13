@@ -19,7 +19,7 @@
  * Pure: no DOM, no storage. */
 import { norm, nameStem, STARTING_ENTRIES, type FvLoop, type FvPart } from './first-view.js';
 import { hasRowId } from './plain-ids.js';
-import { COND_UNSAID } from './line-grammar.js';
+import { COND_UNSAID, tokenFit } from './line-grammar.js';
 import { isMapReading, type Channel, type Project } from '../shared/types.js';
 import { v5Folds } from '../shared/record-excerpt.js';
 import { rowLedger, rowBindings } from '../shared/row-ledger.js';
@@ -520,7 +520,8 @@ export function sourceText(f: FirstFlow): string | null {
  * more: it numbers the candidates, never steps). A recorded start says where its lines leave. */
 export function switcherText(f: FirstFlow, name: (id: string) => string = id => id): string | null {
   const c = f.flow; if (!c) return null;
-  const at = (id: string) => cut(name(id), 16);
+  // v9 (review of v8: 「WebSocketManage…」, 「{out_dir}…」): each name cut between its units, as a label is (line-grammar tokenFit).
+  const at = (id: string) => tokenFit(name(id), 16);
   let what: string;
   if (c.rule === 'entry') what = `${at(c.parts[0]!)}에서 나가는 연결 ${c.drawnLines}개`;
   else {
