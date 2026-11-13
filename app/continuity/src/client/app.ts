@@ -6606,7 +6606,7 @@ function renderFirstView() {
   const btn = (cls: string, text: string, title: string, on: () => void, extra: Record<string, string> = {}) => h('button', { type: 'button', class: `fv-b ${cls}`, title, onclick: on, ...extra }, text);
   // The reason speaks for the lens it chose: once the person reads with another lens it steps back (「추천 첫 보기로」 offers it again).
   // Polish round fixes 1: the toolbar says the first view in a few words (「첫 보기 · 시작·반복 ▾」); its sentence is the tip and the popover.
-  const why = r?.reason && r.lens === viewLens ? btn('fv-why', `첫 보기 · ${LENSES.find(l => l.id === r.lens)?.short ?? FIRST_LENS_NAME[r.lens]} ▾`, `${r.reason}\n${r.line ? `기록의 첫 구조 줄 “${r.line}” · 눌러서 그 문장과 쓴 연결 보기` : '첫 구조 줄 없이 지도의 선과 반복만 보고 고른 첫 보기 · 눌러서 자세히'}`,
+  const why = r?.reason && r.lens === viewLens ? btn('fv-why', `첫 보기 · ${(easy() ? EASY_LENS[r.lens] : null) ?? LENSES.find(l => l.id === r.lens)?.short ?? FIRST_LENS_NAME[r.lens]} ▾` /* v13 merge: 쉽게 names the lens as its button does */, `${r.reason}\n${r.line ? `기록의 첫 구조 줄 “${r.line}” · 눌러서 그 문장과 쓴 연결 보기` : '첫 구조 줄 없이 지도의 선과 반복만 보고 고른 첫 보기 · 눌러서 자세히'}`,
     () => { fvMenu = fvMenu === 'why' ? null : 'why'; renderFirstView(); }, { 'aria-expanded': String(fvMenu === 'why') }) : null;
   if (fvMenu === 'why' && !why) fvMenu = null;
   const change = r?.reason || v.alternatives.length ? btn('fv-change', '바꾸기', '렌즈 바꾸기 · 다른 중심', () => { fvMenu = fvMenu === 'change' ? null : 'change'; renderFirstView();

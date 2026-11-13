@@ -62,3 +62,16 @@ test('V13M-4 층 at 쉽게: the band words in the legend\'s plain words, the lan
   assert.match(lanes, /title: l\.kind === 'band' \? `\$\{l\.text\} · 기록이 정한 표현군 · 부품 \$\{l\.count\}`/, 'the tip keeps the record\'s words and the count');
   assert.match(await css(), /\.space\.words-easy \.form-lane-n \{ display: none; \}/);
 });
+
+test('V13M-5 the opening plays in the record\'s 보기: a form\'s lanes are its stage from the start, only their counts (the last version\'s) wait for the landing', async () => {
+  const s = await css();
+  assert.match(s, /#space\.op-run #world > :not\(\.node\):not\(\.frame\):not\(\.edges\):not\(\.map-title\):not\(\.op-ghost\):not\(\.form-lane\),/);
+  assert.match(s, /#space\.op-land #world > :not\(\.node\):not\(\.frame\):not\(\.edges\):not\(\.map-title\):not\(\.op-ghost\):not\(\.form-lane\),/);
+  assert.match(s, /#space\.op-run #world > \.form-lane \.form-lane-n \{ visibility: hidden; \}/);
+});
+
+test('V13M-6 at 쉽게 the first view\'s chip names its lens as the lens button does (「첫 보기 · 시작과 반복」)', async () => {
+  const src = await app();
+  assert.match(src, /btn\('fv-why', `첫 보기 · \$\{\(easy\(\) \? EASY_LENS\[r\.lens\] : null\) \?\? LENSES\.find/);
+  assert.equal(W.EASY_LENS.start, '시작과 반복');
+});
