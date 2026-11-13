@@ -114,11 +114,13 @@ export function clip(text: string, n: number): string {
   const code = text.charCodeAt(n - 1);
   return text.slice(0, code >= 0xd800 && code <= 0xdbff ? n - 1 : n);
 }
-/** The plan words (the set of map-identity PLANNED, kept apart: the two modules import each other): a description holding one says
- * something is not built yet. v9 (review of v8: a top sentence lost 「… README에서 폐기(…) 안내」): also the words that say it is no
- * longer kept (폐기 · 사용 중단 · 중단), which a cut keeps the same way; map-identity PLANNED stays the plan words only (a retired part is
- * not an unbuilt one). */
-export const PLAN_WORD = /계획|예정|하기로|할\s*것|나중에|아직|폐기|사용\s*중단|중단/;
+/** The plan words (the same set as map-identity PLANNED, kept apart: the two modules import each other): a description holding one says
+ * something is not built yet. Every cut of what the model reads, the roster and the handover keeps these (unchanged since recipe .54). */
+export const PLAN_WORD = /계획|예정|하기로|할\s*것|나중에|아직/;
+/** v9 (review of v8: a top sentence lost 「… README에서 폐기(…) 안내」): what the screen keeps the same way, the plan words and the words
+ * that say a thing is no longer kept (폐기, 사용·지원·개발·배포·서비스 중단). Never a bare 중단, which is as often a run's halt (「예외가
+ * 나면 그 문서의 처리를 중단한다」). Display only: the model's material, the roster and the handover cut by PLAN_WORD. */
+export const KEEP_WORD = /계획|예정|하기로|할\s*것|나중에|아직|폐기|(?:사용|지원|개발|배포|서비스)\s*중단/;
 /** Recipe .53 (ruling F6 Q1): a description that ends on a plan word (「…색인하도록 계획된 처리다.」, 「…(예정)」) keeps that ending
  * when it is cut: the words from the one holding the plan word on (within PLAN_TAIL_CHARS of the end, measured by widthOf: recipe .54, the
  * same unit the cut's room is measured in), else null. Review of .54 (finding 3): a reading aid only; clipKeepPlan no longer stops at
@@ -126,8 +128,8 @@ export const PLAN_WORD = /계획|예정|하기로|할\s*것|나중에|아직|폐
 export const PLAN_TAIL_CHARS = 14;
 const charCount = (t: string) => [...t].length;
 /** The last plan word (PLAN_WORD) of a folded text: its place and length, or null. */
-function lastPlanWord(t: string): { at: number; len: number } | null {
-  const re = new RegExp(PLAN_WORD.source, 'g'); let last: { at: number; len: number } | null = null;
+function lastPlanWord(t: string, keep: RegExp = PLAN_WORD): { at: number; len: number } | null {
+  const re = new RegExp(keep.source, 'g'); let last: { at: number; len: number } | null = null;
   for (let m = re.exec(t); m; m = re.exec(t)) last = { at: m.index, len: m[0].length };
   return last;
 }
@@ -161,8 +163,8 @@ export function planClause(sentence: string): string | null {
 /** Words ending in 고 that are nouns, not a verb's joining ending (the word alone, or its last two syllables after a noun: 「실행 보고」,
  * 「자료 창고」, 「결과 참고」). */
 const NOUN_GO = /(?:^|[\s(·,])(?:[가-힣]*(?:보고|창고|광고|참고|경고|재고|최고|사고|신고|원고|금고|잔고|공고|투고|기고|예고|권고|충고|노고|선고|고고))$/;
-export function clauseCuts(text: string): { clauses: string[]; words: string[] } {
-  const t = text.replace(/\s+/g, ' ').trim(), w = lastPlanWord(t), keep = w ? w.at + w.len : 0;
+export function clauseCuts(text: string, keepWord: RegExp = PLAN_WORD): { clauses: string[]; words: string[] } {
+  const t = text.replace(/\s+/g, ' ').trim(), w = lastPlanWord(t, keepWord), keep = w ? w.at + w.len : 0;
   const ends = new Set<number>(), spaces = new Set<number>();
   for (const m of t.matchAll(/[,，;；](?= )|[.!?。](?= )|(?<=[가-힣](?:며|고|거나|지만|는데|면서))(?= )/g)) {
     // A 「…고」 joins clauses as a verb's joining ending (「넣고」 「돌리고」 「하고」), never as a noun that ends so (「보고」 is a report, 「창고」 a
@@ -189,9 +191,9 @@ export const textWidth = (t: string): number => [...t].reduce((n, ch) => n + (/[
 const headFit = (t: string, room: number, widthOf: (t: string) => number) => { let head = ''; for (const ch of t) { if (widthOf(head + ch) > room) break; head += ch; } return head.trimEnd(); };
 /** Whether a plain cut of the folded text to n would leave out its last plan word: the text is wider than n and that word is not whole in
  * the head a plain cut keeps. */
-export function planCutNeeded(text: string, n: number, widthOf: (t: string) => number = charCount): boolean {
+export function planCutNeeded(text: string, n: number, widthOf: (t: string) => number = charCount, keep: RegExp = PLAN_WORD): boolean {
   const t = text.replace(/\s+/g, ' ').trim(); if (widthOf(t) <= n) return false;
-  const w = lastPlanWord(t); return !!w && headFit(t, n - 1, widthOf).length < w.at + w.len;
+  const w = lastPlanWord(t, keep); return !!w && headFit(t, n - 1, widthOf).length < w.at + w.len;
 }
 /** Cut to at most n characters (or, with widthOf, n by that width) with 「…」. Whitespace is folded first. Review of .54 (finding 3): a
  * cut never leaves out the text's last plan word (PLAN_WORD), wherever it sits. A plain cut that keeps it whole stays a plain cut;
@@ -209,9 +211,9 @@ function wordHead(t: string, room: number, widthOf: (t: string) => number): stri
   for (const [o, c] of [['(', ')'], ['[', ']'], ['{', '}'], ['「', '」']] as const) { const at = head.lastIndexOf(o); if (at >= 0 && head.indexOf(c, at) < 0) head = head.slice(0, at); }
   return head.replace(/(?:\s*[,，;；·\-–—:→←↔⇒])+$/, '').trimEnd();
 }
-export function clipKeepPlan(text: string, n: number, widthOf: (t: string) => number = charCount, words = false): string {
+export function clipKeepPlan(text: string, n: number, widthOf: (t: string) => number = charCount, words = false, keep: RegExp = PLAN_WORD): string {
   const t = text.replace(/\s+/g, ' ').trim(); if (widthOf(t) <= n) return t;
-  const plain = headFit(t, n - 1, widthOf), w = lastPlanWord(t);
+  const plain = headFit(t, n - 1, widthOf), w = lastPlanWord(t, keep);
   if (!w || plain.length >= w.at + w.len) return `${plain}…`;
   // The sentence holding the plan word: after the last sentence end before it, to the first sentence end after it (or the text's end).
   let s0 = 0; for (const m of t.slice(0, w.at).matchAll(/[.!?。](?= )/g)) s0 = m.index! + 2;

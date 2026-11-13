@@ -69,7 +69,7 @@ test('P5-3 a cut never loses a plan word: the notes\' 48 characters, the top sen
   const c = clipKeepPlan(s, 300, w);
   assert.ok(c.includes('계획'), c); assert.ok(w(c) <= 300, c);
   const a = await app();
-  assert.match(a, /h\('span', \{ class: 'ff-note-text' \}, clipKeepPlan\(text, 48\)\)/, 'a note\'s 48 characters keep the plan word');
+  assert.match(a, /h\('span', \{ class: 'ff-note-text' \}, clipKeepPlan\(text, 48, undefined, false, KEEP_WORD\)\)/, 'a note\'s 48 characters keep the plan word');
   assert.doesNotMatch(a, /text\.length > 48 \? `\$\{text\.slice\(0, 47\)\}…`/, 'never the plain 47-character cut');
   assert.match(a, /function keepPlanFit\(el: HTMLElement, text: string, lines: number, less = 0, words = false\): string/);
   assert.match(a, /t\.textContent = basis \? keepPlanFit\(basis, t\.dataset\.text \?\? '', 1, \(lead\?\.offsetWidth \?\? 0\) \+ 6, true\) : keepPlanFit\(t, t\.dataset\.text \?\? '', el\.classList\.contains\('ft-one'\) \? 1 : 2, 0, true\);/,

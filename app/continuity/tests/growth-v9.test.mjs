@@ -132,7 +132,7 @@ test('V9-4b 「+N」 is how many other kinds of change the card has: said in the
 });
 
 test('V9-4c a renamed card says its old name small under its title while comparing (the full card and the zoomed-out tag)', async () => {
-  assert.equal(V.oldNameWord('paperless OCR·색인'), '옛 이름 paperless OCR·색인');
+  assert.equal(V.oldNameWord('문서 OCR·색인'), '옛 이름 문서 OCR·색인');
   assert.equal(V.oldNameWord('옛 소비기(old_consumer)'), '옛 이름 옛 소비기');
   const app = await read('src/client/app.ts'), css = await read('public/styles.css'), marks = fn(app, 'drawGrowthMarks');
   assert.match(marks, /if \(!growthPast\) for \(const x of c\.cs\.changes\) if \(x\.kind === 'rename' && x\.before\) \{/);

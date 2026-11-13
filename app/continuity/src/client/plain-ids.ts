@@ -9,6 +9,7 @@ import type { StudioView } from '../shared/studio.js';
 import type { Project } from '../shared/types.js';
 import { isMapReading } from '../shared/types.js';
 import { readRecordTables } from '../shared/record-table.js';
+import { josa, josaPair } from '../shared/josa.js';
 
 /** The record's row-ID prefixes (v5 table definitions: B, GR, LN, L, S, D, CD, X, K, F, …). A token of another shape that happens to be
  * two capitals and two digits (FP16, BF16, TF32) is a technical name, never a row ID. */
@@ -132,7 +133,8 @@ export function labelWords(t: string, g: IdGloss = NO_GLOSS): string | null {
   const named = (id: string) => g.names.get(id) ?? g.names.get(head(id)) ?? g.names.get(id.replace(/\.\d+$/, '')) ?? null;
   // The IDs the record names read as its words, held apart while the rest is looked at.
   const held: string[] = [];
-  let s = t.replace(LABEL_ID, (all: string, id: string, particle: string | undefined) => { const n = named(id); if (!n) return all; held.push(`${n}${particle ?? ''}`); return `\u0001${held.length - 1}\u0001`; });
+  let s = t.replace(LABEL_ID, (all: string, id: string, particle: string | undefined) => { const n = named(id); if (!n) return all; // The particle after the ID is chosen again for the words that replace it (「CD03가」 → 「len(files) == 0이」).
+    const pair = particle ? josaPair(particle) : null; held.push(`${n}${pair ? josa(n, pair) : particle ?? ''}`); return `\u0001${held.length - 1}\u0001`; });
   s = s.replace(TAIL_IDS, '').replace(BRACKET_ID, '').replace(LEAD_ID, '');
   if (hasRowId(s)) return null;
   s = s.replace(/\s{2,}/g, ' ').trim().replace(/\u0001(\d+)\u0001/g, (_a: string, i: string) => held[Number(i)] ?? '');

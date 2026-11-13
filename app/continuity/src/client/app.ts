@@ -29,7 +29,7 @@ import { mapBatchLines, mapPendingText } from '../shared/map-route.js';
 import { JobReservations, JOBS_KEY, type JobLocks } from './map-jobs.js';
 import { requestResults, frozenRequests, displayAbout, captureRequestReading, restoreRequestReading, createWideReading } from './request-results.js';
 import { correctRequestMatch, unlinkReplacement, requestComparison } from '../shared/request-return.js';
-import { clipKeepPlan, planCutNeeded, PLAN_WORD, clauseCuts } from '../shared/studio.js';
+import { clipKeepPlan, planCutNeeded, KEEP_WORD, clauseCuts } from '../shared/studio.js';
 import { studioView, subtreeRecords, partPath, buildAsk, draftAfterAnswer, STATUS_LABEL, STATUS_SHORT, RECORD_LABEL, type AskCoverage, type StudioView, type PartView, type RecordView, type RelationView, type AskIntent, type StudioReply } from '../shared/studio.js';
 import { EXAMPLES, buildExample, exampleKeys } from '../shared/studio-examples.js';
 import { groupAxis, groupWordOf, recordedAxis, filedUnder, SHELF_TITLE, SHELF_TIP, OUTSIDE_TITLE, OUTSIDE_TIP, BOUNDARY_TITLE, BOUNDARY_TIP } from './map-regions.js';
@@ -2857,12 +2857,12 @@ function fillLabel(el: HTMLElement, text: string, full = text): boolean {
  * goes with the cut. The whole text stays in the box's hover. */
 let measureCtx: CanvasRenderingContext2D | null = null;
 function keepPlanFit(el: HTMLElement, text: string, lines: number, less = 0, words = false): string {
-  if (!PLAN_WORD.test(text) || !el.isConnected) return text;
+  if (!KEEP_WORD.test(text) || !el.isConnected) return text;
   const cs = getComputedStyle(el), ctx = measureCtx ??= document.createElement('canvas').getContext('2d'); if (!ctx) return text;
   ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
   // A wrapped line seldom fills its width (a word that does not fit goes down whole): 0.9 of each line but the last.
   const room = (el.clientWidth - less) * (lines > 1 ? lines - 0.1 * (lines - 1) : 1) - ctx.measureText('…').width, w = (t: string) => ctx.measureText(t).width;
-  return room > 0 && planCutNeeded(text, room, w) ? clipKeepPlan(text, room, w, words) : text;
+  return room > 0 && planCutNeeded(text, room, w, KEEP_WORD) ? clipKeepPlan(text, room, w, words, KEEP_WORD) : text;
 }
 function placeLineLabels() {
   const world = $('world'), o = opened; if (!o) return;
@@ -4165,7 +4165,7 @@ function placeFocusMarks() {
     if (nt) { const t0 = nt.textContent ?? '', t1 = keepPlanFit(nt, t0, 2); fillLabel(nt, t1);
       // Polish 6: words that still run past the two lines are cut between tokens with one 「…」 (never the clamp's 「…」 after the record's
       // own 「...」: 「hyperfine <command> … …」), keeping a plan word the text holds; the whole words stay in the note's hover.
-      for (let n = cutCount(t1) - 1; n >= 1 && nt.scrollHeight > nt.clientHeight + 1; n--) { const c = tokenCut(t1, n); if (c && (!PLAN_WORD.test(t1) || PLAN_WORD.test(c))) fillLabel(nt, c, t1); } }
+      for (let n = cutCount(t1) - 1; n >= 1 && nt.scrollHeight > nt.clientHeight + 1; n--) { const c = tokenCut(t1, n); if (c && (!KEEP_WORD.test(t1) || KEEP_WORD.test(c))) fillLabel(nt, c, t1); } }
     // A card's own chip (own given) is never left off: with no free spot it takes its first one, on its card's edge.
     const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, all = spots(w, hh).map(p => ({ ...p, w, h: hh })), at = all.find(r => free(r, own)) ?? (own ? all[0] : undefined);
     if (!at) { el.remove(); return; }
@@ -4173,7 +4173,7 @@ function placeFocusMarks() {
     el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at);
     if (gave) for (const m of marks) if (m.r.x < at.x + at.w + 2 && at.x < m.r.x + m.r.w + 2 && m.r.y < at.y + at.h + 2 && at.y < m.r.y + m.r.h + 2) m.el.classList.add('ff-gave');
   };
-  const note = (cls: string, label: string, text: string | null, tip: string) => h('div', { class: `ff-note ${cls}`, role: 'note', title: tip }, h('span', { class: 'ff-note-label' }, label), text ? h('span', { class: 'ff-note-text' }, clipKeepPlan(text, 48)) : null);
+  const note = (cls: string, label: string, text: string | null, tip: string) => h('div', { class: `ff-note ${cls}`, role: 'note', title: tip }, h('span', { class: 'ff-note-label' }, label), text ? h('span', { class: 'ff-note-text' }, clipKeepPlan(text, 48, undefined, false, KEEP_WORD)) : null);
   const a = f.start ? boxOf(f.start.part) : null, z = f.end ? boxOf(f.end.part) : null;
   // Only what the record says: a C-ENTRY row's start, a scenario's recorded start and end (never a first or last named part's).
   const startWord = f.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작';
@@ -4293,7 +4293,7 @@ function syncFocusTop() {
 function clauseFit(box: HTMLElement, t: HTMLElement, text: string): string | null {
   const over = () => box.scrollHeight > box.clientHeight + 1 || box.scrollWidth > box.clientWidth + 1;
   t.textContent = text; if (!over()) return text;
-  const { clauses, words } = clauseCuts(text);
+  const { clauses, words } = clauseCuts(text, KEEP_WORD);
   for (const c of clauses) { t.textContent = c; if (!over()) return c; }
   // The whole words, longest first: a shorter cut fits wherever a longer one does, so a binary search finds the longest that fits.
   let lo = 0, hi = words.length - 1, best: string | null = null;

@@ -76,7 +76,7 @@ test('P6-5 byTarget is a total order: the latest dated record speaks whatever th
 
 test('P6-6 a focus note is cut between tokens with one mark (never 「hyperfine <command> … …」); the code chip is regular weight', async () => {
   const a = await app();
-  assert.match(a, /for \(let n = cutCount\(t1\) - 1; n >= 1 && nt\.scrollHeight > nt\.clientHeight \+ 1; n--\) \{ const c = tokenCut\(t1, n\); if \(c && \(!PLAN_WORD\.test\(t1\) \|\| PLAN_WORD\.test\(c\)\)\) fillLabel\(nt, c, t1\); \}/,
+  assert.match(a, /for \(let n = cutCount\(t1\) - 1; n >= 1 && nt\.scrollHeight > nt\.clientHeight \+ 1; n--\) \{ const c = tokenCut\(t1, n\); if \(c && \(!KEEP_WORD\.test\(t1\) \|\| KEEP_WORD\.test\(c\)\)\) fillLabel\(nt, c, t1\); \}/,
     'past its two lines: whole tokens off the end, a plan word kept');
   const shown = labelParts(tokenCut('hyperfine <command>... (src/main.rs main)', 1)).map(p => (p.code ? `[${p.t}]` : p.t)).join('');
   assert.equal(shown, 'hyperfine…', 'polish 7: the code run (spaces and all) is whole or not shown, one mark after the cut');

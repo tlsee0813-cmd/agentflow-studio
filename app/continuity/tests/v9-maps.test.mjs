@@ -6,9 +6,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { conditionTip, lineBadge, joinsRun, tokenFit, condCuts, labelParts } from '../dist/public/client/line-grammar.js';
-import { conditionRefWords, projectIdGloss, recordConditionRows } from '../dist/public/client/plain-ids.js';
+import { conditionRefWords, projectIdGloss, recordConditionRows, labelWords } from '../dist/public/client/plain-ids.js';
+import { josa } from '../dist/public/shared/josa.js';
 import { besideSpots, polylineHitsRect } from '../dist/public/client/map-labels.js';
-import { PLAN_WORD, clauseCuts, clipKeepPlan, textWidth } from '../dist/public/shared/studio.js';
+import { PLAN_WORD, KEEP_WORD, clauseCuts, clipKeepPlan, textWidth } from '../dist/public/shared/studio.js';
 
 const app = () => readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
 const flow = () => readFile(new URL('../src/client/first-flow.ts', import.meta.url), 'utf8');
@@ -54,7 +55,7 @@ test('V9-3 a card title\'s code colour is a token with a value for a dark page',
 test('V9-4 a condition\'s tip reads the record\'s own words for its row IDs, and 「<line>과 같음」 that line\'s condition', async () => {
   const g = { ids: null, names: new Map([['CD07', 'len(items) == 0'], ['CD08', 'cfg.skipSetup()']]) };
   const lines = new Map([['LN21', '묶음 안이면 끝난 뒤'], ['LN22', 'LN21과 같음']]);
-  assert.equal(conditionRefWords('CD07가 거짓일 때', g, lines), 'len(items) == 0가 거짓일 때');
+  assert.equal(conditionRefWords('CD07가 거짓일 때', g, lines), 'len(items) == 0이 거짓일 때', 'the particle follows the words, not the ID');
   assert.equal(conditionRefWords('LN21과 같음', g, lines), '묶음 안이면 끝난 뒤');
   assert.equal(conditionRefWords('LN22와 같음', g, lines), '묶음 안이면 끝난 뒤', 'followed through another line that points on');
   assert.equal(conditionRefWords('LN29과 같음', g, lines), null, 'a line the record does not hold: the words as written');
@@ -67,7 +68,7 @@ test('V9-4 a condition\'s tip reads the record\'s own words for its row IDs, and
   assert.match(fn(await app(), 'tipGloss'), /names: new Map\(\[\.\.\.rows, \.\.\.g\.names\]\)/, 'the gloss\'s own names first');
   const g2 = { ids: null, names: rows };
   assert.equal(conditionRefWords('CD05', g2), 'mode_raw && !opts.no_shell');
-  assert.equal(conditionRefWords('CD05가 참일 때', g2), 'mode_raw && !opts.no_shell가 참일 때');
+  assert.equal(conditionRefWords('CD05가 참일 때', g2), 'mode_raw && !opts.no_shell이 참일 때');
   const plain = t => conditionRefWords(t, g, lines) ?? t;
   assert.equal(conditionTip('CD08이 거짓일 때', plain), '조건: cfg.skipSetup()이 거짓일 때');
   assert.equal(conditionTip('LN29과 같음', plain), '조건: LN29과 같음');
@@ -124,13 +125,26 @@ test('V9-7 a name in the 먼저 볼 연결 line is cut between its units, never 
   assert.match(await flow(), /const at = \(id: string\) => tokenFit\(name\(id\), 16\);/);
 });
 
-test('V9-8 폐기 · 사용 중단 · 중단 are kept like plan words', () => {
-  for (const t of ['README에서 폐기 안내', '2025년 사용 중단', '배포 중단']) assert.ok(PLAN_WORD.test(t), t);
+test('V9-8 the screen keeps 폐기 · 사용 중단 like plan words; a run\'s halt (중단) and what the model reads stay as they were', () => {
+  for (const t of ['README에서 폐기 안내', '2025년 사용 중단', '배포 중단']) assert.ok(KEEP_WORD.test(t), t);
+  for (const t of ['예외면 중단', '그 문서의 처리를 중단한다', '하강 중단']) assert.ok(!KEEP_WORD.test(t), t);
+  // The model's material, the roster and the handover cut by the plan words alone (unchanged since recipe .54).
+  for (const t of ['README에서 폐기 안내', '2025년 사용 중단']) assert.ok(!PLAN_WORD.test(t), t);
+  const halt = '문서를 받아 파서를 고르고 처리하며, 처리 중 예외가 나면 그 문서의 처리를 중단한다.';
+  assert.equal(clipKeepPlan(halt, 20, undefined, false, KEEP_WORD), clipKeepPlan(halt, 20), 'a halt is a plain cut');
   const s = '도구는 작은 모델을 학습하는 스크립트 묶음이고, 사용자가 명령줄에서 직접 돌리며 2024-03 안내문에서 폐기(후속 도구) 안내가 붙었다.';
-  const { clauses, words } = clauseCuts(s);
+  const { clauses, words } = clauseCuts(s, KEEP_WORD);
   assert.ok([...clauses, ...words].every(c => c.includes('폐기')), 'no cut leaves it out');
-  const cut = clipKeepPlan(s, 40);
+  const cut = clipKeepPlan(s, 40, undefined, false, KEEP_WORD);
   assert.ok(cut.includes('폐기(후속 도구) 안내') && [...cut].length <= 40, cut);
+});
+
+test('V9-10 a particle follows the words it stands after: digits read aloud, and an ID replaced by its words', () => {
+  assert.equal(josa('v08', '으로/로'), '로'); assert.equal(josa('v01', '으로/로'), '로'); assert.equal(josa('v07', '으로/로'), '로');
+  assert.equal(josa('v03', '으로/로'), '으로'); assert.equal(josa('v06', '으로/로'), '으로'); assert.equal(josa('v10', '으로/로'), '으로');
+  const g = { names: new Map([['CD03', 'len(files) == 0'], ['CD01', 'pb.skipBootstrap()']]) };
+  assert.equal(labelWords('CD03가 거짓일 때', g), 'len(files) == 0이 거짓일 때');
+  assert.equal(labelWords('CD01이 거짓일 때', g), 'pb.skipBootstrap()이 거짓일 때');
 });
 
 test('V9-9 a one-line sentence is cut at a clause boundary or a whole word; its two lines come first wherever they stand clear', async () => {
@@ -140,7 +154,7 @@ test('V9-9 a one-line sentence is cut at a clause boundary or a whole word; its 
   // The head kept before a plan word's clause ends on a whole word (the top line; v8: 「… 가…」 inside 「가중치로」).
   const s = '도구는 모델을 처음부터 학습하거나 공개 가중치로 미세조정하는 스크립트 묶음이고, 사용자가 직접 돌리며 2024-03 안내문에서 폐기 안내가 붙었다.';
   for (const n of [44, 48, 52, 56, 60]) {
-    const out = clipKeepPlan(s, n, textWidth, true), head = out.split('…')[0];
+    const out = clipKeepPlan(s, n, textWidth, true, KEEP_WORD), head = out.split('…')[0];
     assert.ok(out.includes('폐기'), out);
     assert.ok(!head || s.startsWith(head) && [' ', ','].includes(s[head.length]), `${n}: ${out}`);
   }

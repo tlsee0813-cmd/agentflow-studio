@@ -7,7 +7,8 @@ function closed(word: string, ro = false): boolean {
   const t = word.replace(/[\s'"’‘」』.,…]+$/u, '').replace(/\s*[(（][^()（）]*[)）]$/u, '').replace(/[\s'"’‘」』)\]）.,…]+$/u, ''), ch = t.at(-1) ?? '';
   const c = ch.charCodeAt(0);
   if (c >= 0xac00 && c <= 0xd7a3) { const j = (c - 0xac00) % 28; return ro ? j !== 0 && j !== 8 : j !== 0; }
-  if (/\d/.test(ch)) return ro ? '0368'.includes(ch) : '013678'.includes(ch);
+  // 영·삼·육 close for 으로; 일·칠·팔 end in ㄹ, which reads as open for 로 (「v08로」, 「v01로」).
+  if (/\d/.test(ch)) return ro ? '036'.includes(ch) : '013678'.includes(ch);
   if (/[A-Za-z]/.test(ch)) return ro ? 'bcdgkmnpqt'.includes(ch.toLowerCase()) : 'bcdgklmnpqt'.includes(ch.toLowerCase());
   return false;
 }

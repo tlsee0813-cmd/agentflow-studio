@@ -6,7 +6,7 @@
  * - The display settings: a global default and an explicit per-project override, read and written with fallback; lenses are
  *   temporary and never write them. */
 import type { StorageLike } from '../shared/storage.js';
-import { clipKeepPlan, planCutNeeded, textWidth } from '../shared/studio.js';
+import { clipKeepPlan, planCutNeeded, textWidth, KEEP_WORD } from '../shared/studio.js';
 
 /* ---------- the status dot ---------- */
 export type DotKind = 'running' | 'stopped' | 'waiting' | 'conflict';
@@ -78,7 +78,7 @@ export const ROLE_LINE_WIDTH = 15;
 export function roleLine(text: string | null | undefined): string | null {
   const t = (text ?? '').replace(/\s+/g, ' ').trim(); if (!t) return null;
   const m = /^(.+?[.!?。])(?=\s|$)/.exec(t), first = m ? m[1]! : t;
-  return planCutNeeded(first, ROLE_LINE_WIDTH, textWidth) ? clipKeepPlan(first, ROLE_LINE_WIDTH, textWidth) : first;
+  return planCutNeeded(first, ROLE_LINE_WIDTH, textWidth, KEEP_WORD) ? clipKeepPlan(first, ROLE_LINE_WIDTH, textWidth, false, KEEP_WORD) : first;
 }
 
 /* ---------- counted 「외 N」 ---------- */
