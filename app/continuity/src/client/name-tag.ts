@@ -88,12 +88,29 @@ function cutEnd(s: string, w: number, measure: (s: string) => number): string {
   while (n > 0 && measure(`${cs.slice(0, n).join('').trimEnd()}…`) > w) n--;
   return `${cs.slice(0, Math.max(n, 1)).join('').trimEnd()}…`;
 }
-/** A name in at most `lines` lines of width w, cut at the end with 「…」 (its start reads). full: nothing was cut. */
+/** A name in at most `lines` lines of width w. v12 (first user of v11, 8: 「문서 소비…」 and a parser's name cut inside its first word at 1280): what does not fit is left out
+ * in whole units only, the way the plain map shortens a label (line-grammar cutUnits: never inside a word, a Hangul word included): its
+ * first whole units with 「…」 after them; when not even its first unit fits, 「…」 and its last whole units; only a name of one word wider
+ * than every line keeps that word's start with 「…」. full: nothing was left out. */
 export function fitTag(name: string, w: number, lines: number, measure: (s: string) => number): { lines: string[]; full: boolean } {
-  const nm = name.trim(), at = wrapAt(nm, w, measure), all = at.map(l => l.text), n = Math.max(1, lines);
-  // A word cut on its own line (wrap) leaves the name not full either.
+  const nm = name.trim(), n = Math.max(1, lines), all = wrapAt(nm, w, measure).map(l => l.text);
+  const bare = (t: string) => t.replace(/\s+/g, '');
+  // Laid out whole: every line within w, nothing cut by wrap (it cuts a word wider than a line) and every line starting where a unit starts
+  // (a Hangul word is not broken between its syllables either).
+  const whole = (t: string): string[] | null => {
+    const at = wrapAt(t, w, measure), ls = at.map(l => l.text), starts = new Set<number>(); let o = 0; for (const p of pieces(t)) { starts.add(o); o += p.length; }
+    return ls.length <= n && bare(ls.join('')) === bare(t) && ls.every(l => measure(l) <= w + 0.01) && at.every(l => starts.has(l.start)) ? ls : null;
+  };
+  const fit = whole(nm); if (fit) return { lines: fit, full: true };
+  // The units after a cut: a tail never starts inside a bracket it does not open (「…Ellis)」 is left out).
+  const trim = (t: string) => t.replace(/[\s·/,_:;.-]+$/u, '').replace(/^[\s·/,_:;.-]+/u, '');
+  const closeTail = (t: string) => { let x = t; while ((x.match(/[)\]}]/g) ?? []).length > (x.match(/[([{]/g) ?? []).length) { const i = Math.min(...[')', ']', '}'].map(c => x.indexOf(c)).filter(j => j >= 0)); x = trim(x.slice(i + 1)); } return x; };
+  const units = pieces(nm);
+  for (let k = units.length - 1; k >= 1; k--) { const head = trim(units.slice(0, k).join('')); if (!head) continue; const ls = whole(`${head}…`); if (ls) return { lines: ls, full: false }; }
+  for (let k = 1; k < units.length; k++) { const tail = closeTail(trim(units.slice(k).join(''))); if (!tail) continue; const ls = whole(`…${tail}`); if (ls) return { lines: ls, full: false }; }
+  // One word wider than every line: its start, cut at its end (nothing whole can stand for it).
   if (all.length <= n) return { lines: all, full: !all.some(l => l.endsWith('…')) };
-  // The last line reads the rest of the name as written (no space put where the name had a separator), cut at its end.
+  const at = wrapAt(nm, w, measure);
   return { lines: [...all.slice(0, n - 1), cutEnd(nm.slice(at[n - 1]!.start).trim(), w, measure)], full: false };
 }
 /** The part of a name that tells it from others that start alike: its first word (at most 8 characters) and 「…」, then the name from

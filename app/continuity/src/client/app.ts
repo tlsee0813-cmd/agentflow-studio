@@ -21,7 +21,7 @@ import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, 
 import { mapVersions, pastVersion, changeSet, directLines, unreflectedAt, unreadRecords, reflectGroups, citeLines, changeReason, visitBaseline, growthMemo, compareBase, versionLabel, targetWord, CHANGE_WORD, METHOD_WORD, historyWord, type ChangeKind, type ChangeSet, type LineKey, type IdentityCite, type Unreflected, type PartChange, type HistoryRow } from '../shared/map-growth.js';
 import { nameCode, faceCounts, faceSplit } from './face-name.js';
 import { josa } from '../shared/josa.js';
-import { placeTabs, guideBlocks, toastSpot, exitWord, nowWord, sameCamera, restoreCamera, restoreHeld, followWord, followKind, FOLLOW_NO_OPS, sceneGuide, GUIDE_LOADING, SUMMARY_FOLD, NEW_LIST, NEW_NOTE, mapWord, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, reflectRow, groupTitle, tabWord, wasLabel, newTitle, changeScenes, shownTabs, sceneKind, sceneTitle, sceneSentence, sceneWhy, stepWord, guideOf, guideText, kindCount, plainName, auxName, codeText, leastPan, readableInView, guidePan, otherKinds, tabTip, pastMark, oldNameWord, heldName, kindTotal, summaryText, baseWord, TOAST_MS, toastBottom, type Scene as ChangeScene, type GuideSeg, type SummaryKey } from './growth-view.js';
+import { placeTabs, guideBlocks, toastSpot, exitWord, nowWord, sameCamera, restoreCamera, restoreHeld, followWord, followKind, FOLLOW_NO_OPS, sceneGuide, screenGuide, LINES_NOTE, coverPan, coveredBy, litByScene, linesHint, LINES_LIGHT, LINES_UNLIGHT, GUIDE_LOADING, SUMMARY_FOLD, NEW_LIST, NEW_NOTE, mapWord, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, reflectRow, groupTitle, tabWord, wasLabel, newTitle, changeScenes, shownTabs, sceneKind, sceneTitle, sceneSentence, sceneWhy, stepWord, guideOf, guideText, kindCount, plainName, auxName, codeText, leastPan, readableInView, guidePan, otherKinds, tabTip, pastMark, oldNameWord, heldName, kindTotal, summaryText, baseWord, TOAST_MS, toastBottom, type Scene as ChangeScene, type GuideSeg, type SummaryKey } from './growth-view.js';
 import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
@@ -50,7 +50,7 @@ import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep,
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
 import { lineStyle, lineBadge, badgeForms, condLabelWords, condLabelFits, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, markPx, markResize, labelParts, tokenCut, cutCount, codeToken, condForms, unquoteLabel, monoTitle, joinsRun, condCuts, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
-import { stateMark } from './view-lens.js';
+import { stateMark, detailTip } from './view-lens.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
   READING_GUIDE, PLAIN_UNSAID, PLAIN_PROGRAM, PLAIN_PROGRAM_HINT, PLAIN_PROGRAM_FIELD, LOOP_FIELD_WORD, PLAIN_KEPT, noPortsPlain, type LoopField } from './pane-plain.js';
@@ -2902,7 +2902,8 @@ function foldAccess() {
     const cut = !!el.dataset.full && el.dataset.full !== el.textContent, fold = el.classList.contains('edge-cue') || el.classList.contains('b-condition') || el.classList.contains('b-optional');
     if (!key || el.tagName === 'BUTTON' || !(cut || fold)) { el.setAttribute('aria-hidden', 'true'); if (el.tagName !== 'BUTTON') el.removeAttribute('tabindex'); continue; }
     const words = fold && b ? b.tip.split('\n').filter(x => x && !COUNT_RE.test(x)).join(' · ') : el.dataset.full ?? el.textContent ?? '';
-    el.removeAttribute('aria-hidden'); el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', `${words} · 눌러서 이 선 고르기`);
+    // v12-growth (first user of v11, 7): the relation-detail cue says what it is first (「관계 보기」, as its legend entry does).
+    el.removeAttribute('aria-hidden'); el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', el.classList.contains('q-detail') ? detailTip(el.dataset.full ?? words) : `${words} · 눌러서 이 선 고르기`);
   }
 }
 /** Beauty v4 (P3): the last guard that no line label, badge or chip on the map shows a record row ID (CD01, B12, N02.63, LN13): each
@@ -3057,6 +3058,8 @@ function placeLineLabels() {
     // F8 (v10a: 「config 또는」, 「공유 링크 열기」, 「실행 권한…」 left the map with nothing in their place): a line whose label found no room
     // keeps a relation-detail cue (its words in its hover, its detail one press away).
     detailCues(box, blocks, drawn, fit);
+    // v12: the legend's 「··· 관계 보기」 follows the cues drawn.
+    { const sig = [...detailKeys()].sort().join(' '); if (sig !== detailSig) { detailSig = sig; if (opened) renderLegend(); } }
     // Beauty v4 (P5): at every zoom a line holding several relations says so: one whose own label (with its count) is not shown carries
     // the overview's 「관계 N개」 chip, clear of the labels set; under a lens it gives way to that lens's label of it, as at the overview.
     const inv = labelInv(), labelled = new Set<string>(), labRects: Rect[] = [];
@@ -3382,7 +3385,8 @@ function detailCues(box: HTMLElement, blocks: Rect[], shown: Set<string>, fit: R
     const before = box.childElementCount;
     placeCue(box, e, 'detail', false, path, offParts, apart, offLabels, r => !lineUnder(r, key, shown), (el, r) => { mine.push(r); el.style.left = `${r.x}px`; el.style.top = `${r.y}px`; }, true);
     const cue = box.childElementCount > before ? box.lastElementChild as HTMLElement : null;
-    if (cue) { cue.dataset.full = words; if (lens) cue.dataset.lens = lens; has.add(key); }
+    // v12 (first user of v11, 7): its meaning on hover and in its keyboard name, as the legend says it (「··· 관계 보기」).
+    if (cue) { cue.dataset.full = words; cue.title = detailTip(words); cue.setAttribute('aria-label', detailTip(words)); if (lens) cue.dataset.lens = lens; has.add(key); }
   }
 }
 /** How many relations a summary line holds, on the line where it reads clear of parts (a line of one relation has none).
@@ -6238,7 +6242,13 @@ function lensPartsOf(o: Opened): LensPart[] {
       unlinked: !!t && ((whole?.kind === 'values' && whole.rows.length > 0) || t.rows.some(x => x.unlinked) || (!!t.well && (f?.stateVars ?? 0) > 0)), unmapped: f?.unmapped ?? 0 };
   });
 }
-const lensLinesOf = (): LensLine[] => [...lay.edges.map(e => ({ e, sum: false })), ...restSums.map(e => ({ e, sum: true }))].map(({ e, sum }) => ({ key: e.key, channel: lineChans.get(e.key) ?? null, badge: lineBadges.has(e.key), cond: lineBadges.get(e.key)?.kind === 'condition', from: e.from, to: e.to, sum }));
+const lensLinesOf = (): LensLine[] => { const dk = detailKeys(); return [...lay.edges.map(e => ({ e, sum: false })), ...restSums.map(e => ({ e, sum: true }))].map(({ e, sum }) => ({ key: e.key, channel: lineChans.get(e.key) ?? null, badge: lineBadges.has(e.key), cond: lineBadges.get(e.key)?.kind === 'condition', detail: dk.has(e.key), from: e.from, to: e.to, sum })); };
+/** v12 (first user of v11, 7): the lines whose relation opens from a relation-detail cue under the lens shown (the legend's 「··· 관계 보기」). */
+function detailKeys(): Set<string> {
+  return new Set([...document.querySelectorAll<HTMLElement>('#world .edge-labels > .edge-cue.q-detail')].filter(el => !el.dataset.lens || el.dataset.lens === viewLens)
+    .flatMap(el => [el.dataset.cue ?? '', ...(el.dataset.also ?? '').split(' ')]).filter(Boolean));
+}
+let detailSig = '';
 /** The lens's classes on the space and its line tones (styles: solid, never an opacity); the switch's state; the legend's marks. */
 /* ---------- display settings (spec cards v2 §5) ----------
  * 「표시」 in the bottom toolbar: four toggles, a global default and an explicit per-project override (card-face readDisplay /
@@ -6406,7 +6416,14 @@ function placeDock() {
   const order = (keyOn && key!.classList.contains('folded') ? [key, fv] : [fv, key]).filter((el): el is HTMLElement => !!el && !el.hidden);
   const docked = new Set<HTMLElement>(), at = new Map<HTMLElement, number>();
   let x = ctl.offsetLeft + ctl.offsetWidth + 8, above = base + row + 8;
-  for (const el of order) if (x + el.offsetWidth <= limit) { docked.add(el); at.set(el, x); x += el.offsetWidth + 8; }
+  // v12 (first user of v11, 5: the legend chip, the tools and the compare line stacked over the bottom row at 1280): a folded chip with no
+  // room beside the tools first takes its short form (「범례」: the lens is the one lit in the tools; its whole words in its tip, a click opens
+  // it) before it goes above them.
+  if (keyOn) key!.classList.remove('lg-short');
+  for (const el of order) {
+    if (el === key && key.classList.contains('folded') && x + el.offsetWidth > limit) key.classList.add('lg-short');
+    if (x + el.offsetWidth <= limit) { docked.add(el); at.set(el, x); x += el.offsetWidth + 8; } else if (el === key) key.classList.remove('lg-short');
+  }
   if (fvOn) {
     if (docked.has(fv!)) fv!.style.left = `${at.get(fv!)! - ctl.offsetLeft - ctl.clientLeft}px`;
     else { fv!.classList.add('fv-above'); above += fv!.offsetHeight + 8; }
@@ -6449,8 +6466,8 @@ function renderLegend() {
   if (!legendOpenNow) {
     key.classList.add('folded');
     // Review: what a missing dot means is reachable from the folded chip too.
-    key.replaceChildren(h('button', { type: 'button', class: 'lg-chip', 'aria-expanded': 'false', title: `범례 펼치기 · ${def.name}${head ? ` · ${head}` : ''}${fade ? `\n${fade.tip}` : ''}\n${DOT_LEGEND}`, onclick: () => setLegendOpen(true) },
-      h('span', { class: 'lg-chip-text' }, legendChip(viewLens, legendNow)), head ? h('span', { class: 'lg-chip-state' }, head) : null, fadeEl(true), h('span', { class: 'lg-chip-v', 'aria-hidden': 'true' }, '▴')));
+    key.replaceChildren(h('button', { type: 'button', class: 'lg-chip', 'aria-expanded': 'false', title: `범례 펼치기 · ${def.name}${head ? ` · ${head}` : ''}\n${legendChip(viewLens, legendNow)}${fade ? `\n${fade.tip}` : ''}\n${DOT_LEGEND}`, onclick: () => setLegendOpen(true) },
+      h('span', { class: 'lg-chip-text' }, legendChip(viewLens, legendNow)), h('span', { class: 'lg-chip-short' }, '범례'), head ? h('span', { class: 'lg-chip-state' }, head) : null, fadeEl(true), h('span', { class: 'lg-chip-v', 'aria-hidden': 'true' }, '▴')));
     key.hidden = false; placeDock(); return;
   }
   key.classList.remove('folded');
@@ -6919,10 +6936,14 @@ interface GrowthCmp { key: string; from: number; to: number; cs: ChangeSet; proj
   /** The kind the scene was entered for (its change shown first), null: the scene's own first. */
   sceneKind?: ChangeKind | null;
   un: Unreflected[] | null; unread: { paste: string; rows: number }[] | null; rejOpen: boolean;
-  /** F8 Q6 ④: whether 「전체 비교 요약」 is open under the scene's guide. */
+  /** F8 Q6 ④: whether 「전체 비교 요약」 is open under the scene's guide (v12: over the map, never moving it). */
   sumOpen?: boolean;
+  /** v12 (first user of v11, 6): the scene whose changed lines were lit on request (a change that is not about lines lights none by itself). */
+  litOn?: string | null;
   /** F8 Q6 ⑤: the state just before the comparison (the lens, the selection and its panel, the camera) and the map area's size then. */
-  saved: { lens: LensId; selected: string | null; camera: { x: number; y: number; k: number }; scope: string | null; area: { w: number; h: number } } }
+  saved: { lens: LensId; selected: string | null; camera: { x: number; y: number; k: number }; scope: string | null; area: { w: number; h: number };
+    /** v12 (first user of v11, 4): where each card stood on screen just before (what the way back is measured by, not the camera alone). */
+    cards?: Record<string, Rect> } }
 let growthCmp: GrowthCmp | null = null;
 let growthPast: { n: number; live: Opened; pins: Positions; extra: Positions; applied: number; undated: number } | null = null;
 let growthTabK = 0;
@@ -6979,7 +7000,7 @@ function growthCompare(from: number, focus: string | null = null) {
   const o = liveOpened(), to = growthCount(); if (!o || from < 1 || from >= to) return;
   if (growthPast) growthLeavePast(false);
   if (growthCmp) rememberRange(growthCmp);
-  const saved = growthCmp?.saved ?? { lens: viewLens, selected, camera: { ...camera }, scope, area: { w: $('viewport').clientWidth, h: $('viewport').clientHeight } };
+  const saved = growthCmp?.saved ?? { lens: viewLens, selected, camera: { ...camera }, scope, area: { w: $('viewport').clientWidth, h: $('viewport').clientHeight }, cards: cardsOnScreen() };
   const cs = changeSet(o.project, from, to), memo = growthRanges.get(rangeKey(o.key, from, to));
   // Review of v8 (first user, f): a note about leaving never stays over an open comparison.
   dropNote();
@@ -7034,12 +7055,36 @@ function growthExit() {
     camera = { ...r.camera }; applyCamera(true);
     const anchor = { x: (area.w / 2 - r.camera.x) / r.camera.k, y: (area.h / 2 - r.camera.y) / r.camera.k };
     // Review of v8 (first user, f): said only when the comparison really closed (nothing of it left on screen).
-    window.setTimeout(() => { if (!growthCmp && $('growth-line').hidden && opened?.key === c.key) { const kind = restoreHeld(r.camera, camera, anchor) ? r.kind : 'failed'; $('space').dataset.restore = kind; note(exitWord(kind)); } }, RESTORE_SETTLE_MS);
+    // v12 (first user of v11, 4): what one sees is measured too: with the area the size it was, every card where it stood (1px).
+    window.setTimeout(() => { if (!growthCmp && $('growth-line').hidden && opened?.key === c.key) {
+      const moved = r.kind === 'exact' ? cardsMoved(before.cards ?? {}) : 0, kind = restoreHeld(r.camera, camera, anchor) && moved <= 1 ? r.kind : 'failed';
+      $('space').dataset.restore = kind; $('space').dataset.restoreCards = String(moved); note(exitWord(kind)); } }, RESTORE_SETTLE_MS);
   };
   if (selected !== c.saved.selected || scope !== c.saved.scope) {
     afterRender = back; go(o.key, c.saved.selected, c.saved.scope);
     window.setTimeout(() => { if (afterRender === back) { afterRender = null; back(); } }, 1200);
   } else back();
+}
+/** v12 (first user of v11, 4): each drawn card's place on screen now (by part), and how far (px, the most) the cards that stood before stand
+ * from there now (the cards both have). */
+function cardsOnScreen(): Record<string, Rect> {
+  const out: Record<string, Rect> = {};
+  for (const el of $('world').querySelectorAll<HTMLElement>('.node[data-part]')) { const q = el.getBoundingClientRect(); if (q.width > 0) out[el.dataset.part!] = { x: q.left, y: q.top, w: q.width, h: q.height }; }
+  return out;
+}
+function cardsMoved(was: Record<string, Rect>): number {
+  const now = cardsOnScreen(); let most = 0;
+  for (const [id, a] of Object.entries(was)) { const b = now[id]; if (b) most = Math.max(most, Math.abs(a.x - b.x), Math.abs(a.y - b.y), Math.abs(a.w - b.w)); }
+  return Math.round(most * 10) / 10;
+}
+/** v12 (first user of v11, 1): the scene shown on the map now: only while its pane is the scene's (기록 반영 상태, a list or the 철회·변경 rows
+ * clear its tab, its lines and its mark). */
+const sceneShown = (c: GrowthCmp): string | null => (c.pane === 'scene' ? c.scene : null);
+/** The change a scene shows first: a filter's, else the kind it was entered for, else its own first. */
+function shownChange(c: GrowthCmp): PartChange | null {
+  const part = sceneShown(c), sc = part ? c.scenes.find(x => x.part === part) : undefined; if (!sc) return null;
+  const f = growthFilter(c);
+  return (f && sc.changes.find(x => x.kind === f)) || (c.sceneKind && sc.changes.find(x => x.kind === c.sceneKind)) || sc.main;
 }
 /** F8 Q6 ⑤: how long the camera's move back takes to settle (styles: .world.animate 0.22s) before what it came to is read and said. */
 const RESTORE_SETTLE_MS = 300;
@@ -7049,8 +7094,8 @@ const RESTORE_SETTLE_MS = 300;
  * duplicates a 중복 정리 folded). */
 function sceneMarks(c: GrowthCmp): string[] {
   const f = growthFilter(c); if (f) return filterParts(c, f);
-  if (!c.scene) return [];
-  return [...new Set([c.scene, ...c.cs.changes.filter(x => x.part === c.scene).flatMap(x => (x.predecessor ? [] : x.others ?? []))])];
+  const at = sceneShown(c); if (!at) return [];
+  return [...new Set([at, ...c.cs.changes.filter(x => x.part === at).flatMap(x => (x.predecessor ? [] : x.others ?? []))])];
 }
 /** A summary item: a filter (설명 변경, 지도에 새로 표시) marks its parts, opens its first (or the shown) part and steps 1/N; another kind
  * opens its list, or its scene when it has one; picked again, it lets go. */
@@ -7074,6 +7119,7 @@ function growthScene(part: string, kind: ChangeKind | null = null) {
   const f = growthFilter(c); if (f && !filterParts(c, f).includes(part)) c.picked = null;
   if (c.picked && !growthFilter(c)) c.picked = null;
   // Review of v7 (first user, h): a scene entered for a kind (a summary item, a list's row, a guide clause) shows that change first.
+  if (c.scene !== part) c.litOn = null;
   c.scene = part; c.pane = 'scene'; c.sceneKind = kind && c.scenes.find(s => s.part === part)?.changes.some(x => x.kind === kind) ? kind : null;
   readMarks = sceneMarks(c);
   growthOpenPane('scene');
@@ -7097,12 +7143,22 @@ function growthClearGuide(still = false) {
   }).map(e => e.getBoundingClientRect()).filter(q => q.width > 0 && q.height > 0).map(fr);
   const drawn = shownLines(), routes = [...lastRouted.values()].filter(x => drawn.has(x.key) && x.pts.length > 1).map(x => x.pts.map(q => ({ x: camera.x + q.x * camera.k, y: camera.y + q.y * camera.k })));
   const o = opened, rep = o && c.scene ? drawnRep(o, c.scene) : null, kb = rep ? lay.boxes.get(rep) : undefined, area = mapArea();
-  const d = guidePan(r, guideBlocks(cards, marks, routes), kb && kb.kind !== 'ghost' ? toScreen(kb) : null, area, { x: area.w / 2, y: area.h / 2 });
+  // v12 (first user of v11, 5: a pan to clear the guide pushed the bottom row under the compare line, the tools and the legend chip): every
+  // band is covered space: among the pans that clear the guide, the one that puts the fewest readable cards under a band (or off the map), the
+  // least of those. Only when something is under the guide (F7: the camera stays otherwise).
+  const blocks = guideBlocks(cards, marks, routes), bands = [r, ...growthBands(fr)], view = fr($('viewport').getBoundingClientRect());
+  if (!blocks.some(b => b.x < r.x + r.w && r.x < b.x + b.w && b.y < r.y + r.h && r.y < b.y + b.h)) return;
+  const d = coverPan(cards, view, bands, kb && kb.kind !== 'ghost' ? toScreen(kb) : null, { x: area.w / 2, y: area.h / 2 }, r, blocks);
   // v11 (F7, F8 Q6 ③: the past view keeps the camera; review of v10: the guide stood over 「집 서버 FTP 수신 위치」 in the past view at 1280):
   // where the camera must stay, anything under the guide sends it to the pane's top instead of moving the map.
   if (d && (d[0] || d[1]) && !still) { camera = { ...camera, x: camera.x + d[0], y: camera.y + d[1] }; applyCamera(true); return; }
   if (d && !d[0] && !d[1]) return;
   guideInPane = true; el.hidden = true; syncMapArea(); renderGrowthPane();
+}
+/** v12: the bands over the map besides the guide (the compare line, the tools, the legend chip, the past view's banner), in the camera's frame. */
+function growthBands(fr: (q: DOMRect) => Rect): Rect[] {
+  return ['growth-line', 'growth-past', 'line-key'].map(id => document.getElementById(id)).concat(document.querySelector<HTMLElement>('#space > .controls'))
+    .filter((e): e is HTMLElement => !!e && !e.hidden && e.offsetWidth > 0).map(e => fr(e.getBoundingClientRect()));
 }
 /** Review of v8 (first user, k): the guide stands at the pane's top (no pan cleared the map's top for this scene). */
 let guideInPane = false;
@@ -7110,7 +7166,14 @@ let guideInPane = false;
 function growthReveal(part: string) {
   const o = opened; if (!o) return;
   const id = drawnRep(o, part) ?? part, b = lay.boxes.get(id); if (!b || b.kind === 'ghost') return;
-  const [dx, dy] = leastPan(toScreen(b), mapArea());
+  const card = toScreen(b), area = mapArea(), [lx, ly] = leastPan(card, area); if (!lx && !ly) return;
+  // v12 (first user of v11, 5): among the moves that bring it into sight, the one that puts the fewest readable cards under a band (the guide, the
+  // compare line, the tools, the legend chip), the least of those.
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop, sr = $('space').getBoundingClientRect();
+  const fr = (q: DOMRect): Rect => ({ x: q.left - sr.left - ox, y: q.top - sr.top - oy, w: q.width, h: q.height }), g = document.getElementById('focus-top');
+  const bands = [...(g && !g.hidden && g.offsetWidth ? [fr(g.getBoundingClientRect())] : []), ...growthBands(fr)];
+  const cards = [...lay.boxes.values()].filter(x => x.kind !== 'ghost').map(x => toScreen(x.kind === 'frame' ? { x: x.x, y: x.y, w: x.w, h: x.head } : x));
+  const [dx, dy] = coverPan(cards, fr(v.getBoundingClientRect()), bands, null, { x: area.w / 2, y: area.h / 2 }, null, cards, { card, area }) ?? [lx, ly];
   if (dx || dy) { camera = { ...camera, x: camera.x + dx, y: camera.y + dy }; applyCamera(true); }
 }
 /** 이전 변화 / 다음 변화: within the filter that is on (설명 변경 1/9), else through every scene (변화 장면 1/N). Nothing plays by itself. */
@@ -7124,8 +7187,12 @@ function growthOpenPane(pane: GrowthCmp['pane']) {
   const c = growthCmp, o = opened; if (!c || !o) return;
   dropNote();
   c.pane = pane;
+  // v12 (first user of v11, 1): a screen that is no scene keeps none of the scene's marks.
+  if (pane === 'reflect' || pane === 'history') readMarks = [];
   if (selected) { go(o.key); return; } // select(null) draws the pane (renderGrowthPane)
   renderGrowthPane(); drawGrowth(); applyReadMarks();
+  // v12: its own words in the guide may take another height: nothing stays under it (the scenes clear it in growthScene).
+  if (pane !== 'scene') growthClearGuide();
 }
 function closeGrowthPane() { dropNote(); const c = growthCmp; if (c) { c.pane = null; c.scene = null; c.picked = null; } readMarks = []; hideLens(); guideBack(); drawGrowth(); applyReadMarks(); }
 /** The guide back at the map's top (no pane holds it). */
@@ -7180,7 +7247,7 @@ function growthSceneEl(c: GrowthCmp, part: string): HTMLElement[] {
   // v11 (F7, F8 Q6 ③: the past view keeps the camera): the card the past view outlines for any scene (its part, else the part it came from).
   const prev = inPast ? (main.kind === 'succeed' ? main.predecessor! : main.kind === 'retire' ? main.part : pastMark(sc, id => !!opened && !!drawnRep(opened, id))) : null, pb = inPast && prev ? lay.boxes.get(drawnRep(opened!, prev) ?? prev) : undefined;
   const asideBtn = pb && (growthAside || !readableInView(toScreen(pb), mapArea()))
-    ? h('button', { type: 'button', class: 'gs-b gs-aside', onclick: () => { if (growthAside) { camera = { ...growthAside }; growthAside = null; applyCamera(true); } else { growthAside = { ...camera }; growthReveal(prev!); } renderGrowthPane(); } }, growthAside ? '원래 위치로' : '이전 부품 위치 보기') : null;
+    ? h('button', { type: 'button', class: 'gs-b gs-aside', onclick: () => { if (growthAside) { camera = { ...growthAside }; growthAside = null; applyCamera(true); } else { growthAside = { ...camera }; growthReveal(prev!); } renderGrowthPane(); growthClearGuide(true); } }, growthAside ? '원래 위치로' : '이전 부품 위치 보기') : null;
   const btn = (cls: string, text: string, on: () => void, opts: { disabled?: boolean; pressed?: boolean; title?: string } = {}) => h('button', { type: 'button', class: `gs-b ${cls}`, onclick: on, ...(opts.disabled ? { disabled: '' } : {}), ...(opts.pressed !== undefined ? { 'aria-pressed': String(opts.pressed) } : {}), ...(opts.title ? { title: opts.title } : {}) }, text);
   const others = sc.changes.filter(x => x !== main);
   const nowRole = cur?.reading?.role ?? null, wasRole = was?.reading?.role ?? null, desc = sc.changes.find(x => x.kind === 'desc'), corr = sc.changes.find(x => x.kind === 'correct' && x.by === 'person'), succ = sc.changes.find(x => x.kind === 'succeed');
@@ -7205,7 +7272,11 @@ function growthSceneEl(c: GrowthCmp, part: string): HTMLElement[] {
       h('dt', {}, '근거'), h('dd', {}, ...codeText(tableCells(impl.impl.quote.quote))),
       h('dt', {}, '운영 상태'), h('dd', {}, opsOn ? `${STATE_WORD[opsOn.state]}${opsOn.when ? ` · ${opsOn.when} 기준` : ''}` : h('span', { class: 'gs-none' }, '운영 상태 기록 없음'))),
     h('p', { class: 'gs-fine' }, '기록의 구현 상태 칸에서만 읽음 · 구현됨은 가동 중이라는 뜻이 아님 · 가동·정지는 운영 상태')) : null;
-  const linesEl = h('section', { class: 'gs-lines' }, h('h3', {}, '바뀐 직접 연결', lines.added.length ? h('small', {}, '＋는 지도에 밝힘') : null),
+  const about = litByScene(main), litNow = about || c.litOn === part;
+  const lightBtn = !about && (lines.added.length || lines.removed.length) ? h('button', { type: 'button', class: 'link-button gs-light', 'aria-pressed': String(litNow), onclick: () => { c.litOn = litNow ? null : part; drawGrowth(); renderGrowthPane(); } }, litNow ? LINES_UNLIGHT : LINES_LIGHT) : null;
+  const linesEl = h('section', { class: 'gs-lines' }, h('h3', {}, '바뀐 직접 연결', about && lines.added.length ? h('small', {}, linesHint(true, true)) : null),
+    // v12: a change that is not about lines says so, with the way to light them, on a line of its own under the head.
+    !about && (lines.added.length || lines.removed.length) ? h('p', { class: 'gs-fine gs-light-row' }, linesHint(litNow, false), ' ', lightBtn) : null,
     lines.added.length || lines.removed.length ? h('ul', {}, ...lines.added.map(l => h('li', { class: 'gs-add' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '＋'), h('span', {}, ...codeText(lineText(l))))),
       ...lines.removed.map(l => h('li', { class: 'gs-rem' }, h('span', { class: 'gs-sign', 'aria-hidden': 'true' }, '−'), h('span', {}, ...codeText(lineText(l)))))) : h('p', { class: 'gs-none' }, main.kind === 'retire' ? '비교 지도에는 이 부품이 없음' : '이 부품에 닿은 연결은 그대로임'),
     lines.removed.length ? h('p', { class: 'gs-fine' }, '빠진 연결은 비교 지도에 그리지 않음 · 남은 부품끼리 잇지 않음 · 바뀐 연결이 모두 이 변화 때문이라는 뜻은 아님') : null);
@@ -7333,18 +7404,32 @@ function renderGrowthPane() {
 /** The guide in the top box's place (F7): 「지도 변화 · v04 → v17」 and its two sentences, each clause a button to its scene or list. */
 function growthGuideEls(c: GrowthCmp): HTMLElement[] {
   const g = guideOf(c.cs, c.scenes, sceneName, sceneSay), whole = guideText(g);
-  const seg = (x: GuideSeg) => (x.to ? h('button', { type: 'button', class: 'gg-seg', title: 'scene' in x.to ? '이 변화 장면 보기' : '이 변화들 보기', onclick: () => { const t = x.to!; if ('scene' in t) growthScene(t.scene, x.fact?.kind ?? null); else { if (growthCmp) growthCmp.picked = null; growthPick(t.kind); } } }, x.text) : x.text);
+  // v12: a clause of the summary leads somewhere; the summary over the map closes as it does (it never stays over the scene it opened).
+  const seg = (x: GuideSeg) => (x.to ? h('button', { type: 'button', class: 'gg-seg', title: 'scene' in x.to ? '이 변화 장면 보기' : '이 변화들 보기', onclick: () => { const t = x.to!; if (growthCmp) growthCmp.sumOpen = false; if ('scene' in t) growthScene(t.scene, x.fact?.kind ?? null); else { if (growthCmp) growthCmp.picked = null; growthPick(t.kind); } } }, x.text) : x.text);
   const summary = () => h('div', { class: 'ft-sentence gg-text', role: 'group', 'aria-label': whole }, ...g.sentences.map(s => h('span', { class: 'gg-s' }, ...s.map(seg))));
   // F8 Q6 ④: with a scene shown, the guide says that scene (「장면 n/N · 종류」, its change, its time and reason or the limit of what it
   // confirms), made of that scene's change alone; the whole comparison's summary is its own fold (「전체 비교 요약」). No scene: the summary.
-  const sg = growthSceneGuide(c);
+  // v12 (first user of v11, 1): a screen that is no scene (기록 반영 상태, a kind's list, the lines, the 철회·변경 rows) has its own words.
+  const sg = growthSceneGuide(c) ?? growthScreenGuide(c);
   if (!sg) return [h('p', { class: 'gg-head', title: whole }, g.head), summary()];
   const open = !!c.sumOpen;
-  const fold = h('button', { type: 'button', class: 'gg-fold', 'aria-expanded': String(open), title: open ? '전체 비교 요약 접기' : `${g.head} · 두 지도 사이의 변화 전체를 한 번에 보기`, onclick: () => { c.sumOpen = !c.sumOpen; syncGuide(true); } }, SUMMARY_FOLD, h('span', { class: 'gg-fold-mark', 'aria-hidden': 'true' }, open ? '▴' : '▾'));
-  const head = h('div', { class: 'gg-top' }, h('p', { class: 'gg-head', 'data-scene': sg.part }, sg.head), fold);
+  // v12 (first user of v11, 4: the summary left open grew the top band and the map stood 68px lower after it): the summary opens over the
+  // map under the guide, never changing the guide's height or moving the map; it closes from the same button.
+  const fold = h('button', { type: 'button', class: 'gg-fold', 'aria-expanded': String(open), 'aria-controls': 'gg-sum', title: open ? '전체 비교 요약 접기' : `${g.head} · 두 지도 사이의 변화 전체를 한 번에 보기`, onclick: () => { c.sumOpen = !c.sumOpen; syncGuide(); } }, SUMMARY_FOLD, h('span', { class: 'gg-fold-mark', 'aria-hidden': 'true' }, open ? '▴' : '▾'));
+  const head = h('div', { class: 'gg-top' }, h('p', { class: 'gg-head', ...(sg.part ? { 'data-scene': sg.part } : { 'data-screen': c.pane ?? '' }) }, sg.head), fold);
   if (sg.loading) return [head, h('p', { class: 'ft-sentence gg-text gg-loading' }, GUIDE_LOADING)];
-  return [head, h('div', { class: 'ft-sentence gg-text gg-scene', role: 'group', 'aria-label': `${sg.head} · ${sg.s1} ${sg.s2}`, 'data-scene': sg.part }, h('span', { class: 'gg-s' }, sg.s1), h('span', { class: 'gg-s' }, sg.s2)),
-    ...(open ? [h('section', { class: 'gg-sum', 'aria-label': SUMMARY_FOLD }, h('p', { class: 'gg-sum-head' }, g.head), summary())] : [])];
+  return [head, h('div', { class: `ft-sentence gg-text ${sg.part ? 'gg-scene' : 'gg-screen'}`, role: 'group', 'aria-label': `${sg.head} · ${sg.s1} ${sg.s2}`, ...(sg.part ? { 'data-scene': sg.part } : {}) }, h('span', { class: 'gg-s' }, sg.s1), h('span', { class: 'gg-s' }, sg.s2)),
+    ...(open ? [h('section', { class: 'gg-sum', id: 'gg-sum', 'aria-label': SUMMARY_FOLD }, h('p', { class: 'gg-sum-head' }, g.head), summary())] : [])];
+}
+/** v12 (first user of v11, 1): the guide's words for the pane shown when it is no scene; null with no pane (the summary then). */
+function growthScreenGuide(c: GrowthCmp): { part: null; head: string; s1: string; s2: string; loading: false } | null {
+  const un = c.pane === 'reflect' ? (growthUnreflected() ?? []).filter(x => x.state !== 'rejected') : [];
+  const g = c.pane === 'reflect' ? screenGuide({ pane: 'reflect', to: c.to, waiting: un.filter(x => x.state === 'waiting').length, held: un.filter(x => x.state === 'held').length })
+    : c.pane === 'history' ? screenGuide({ pane: 'history', from: c.from, n: c.cs.history.length })
+    : c.pane === 'list' && c.picked === 'lines' ? screenGuide({ pane: 'lines', from: c.from, to: c.to, added: c.cs.added.length, removed: c.cs.removed.length })
+    : c.pane === 'list' && c.picked && c.picked !== 'lines' && c.picked !== 'new' && c.picked !== 'desc' ? screenGuide({ pane: 'list', from: c.from, to: c.to, kind: c.picked, n: kindCount(c.cs, c.picked) })
+    : null;
+  return g ? { part: null, ...g, loading: false } : null;
 }
 /** F8 Q6 ④: the guide's words for the scene shown now (its number in the pane's own list, its kind, its two sentences); loading: the scene's
  * change is not there yet (its words are never another scene's). null: no scene shown. */
@@ -7361,6 +7446,7 @@ function growthSceneGuide(c: GrowthCmp): { part: string; head: string; s1: strin
  * redrawn only when what it says changed (force: the fold was toggled). */
 function syncGuide(force = false) {
   const el = document.getElementById('focus-top'), c = growthCmp; if (!el || !c || !el.classList.contains('growth-guide')) return;
+  // v12: what a screen that is no scene says depends on its pane's own counts (and on the scene shown).
   const sig = `${c.from}|${c.to}|${c.pane ?? ''}|${c.scene ?? ''}|${c.picked ?? ''}|${c.sceneKind ?? ''}|${c.sumOpen ? 1 : 0}|${c.scenes.length}`;
   if (!force && el.dataset.guide === sig) return;
   el.dataset.guide = sig;
@@ -7369,7 +7455,6 @@ function syncGuide(force = false) {
   const pg = document.querySelector('#lens .gg-pane'); if (pg) pg.replaceChildren(...growthGuideEls(c));
   syncFocusTop();
   if ((el.hidden ? 0 : el.offsetHeight) !== was) syncMapArea();
-  if (force) growthClearGuide(!!growthPast);
 }
 /* The past view. */
 function pinsOfLayout(): Positions {
@@ -7384,7 +7469,7 @@ function growthView(n: number) {
   const pins = growthPast?.pins ?? pinsOfLayout(), pv = pastVersion(live.project, n);
   const past: Opened = { ...live, project: pv.project, view: plainMapView(pv.project), past: n };
   // v10 (review of v9): the camera before the past view, set again exactly when coming back.
-  if (!growthPast) { pastCam = { ...camera }; pastSel = selected; }
+  if (!growthPast) { pastCam = { ...camera }; pastSel = selected; pastSum = !!growthCmp?.sumOpen; pastCards = cardsOnScreen(); }
   dropNote();
   growthPast = { n, live, pins, extra: {}, applied: pv.applied, undated: pv.undated };
   growthMenuOpen = false; growthAside = null;
@@ -7401,16 +7486,24 @@ function growthView(n: number) {
 }
 /** v10: the camera and the picked card before the past view (null: not in it). */
 let pastCam: { x: number; y: number; k: number } | null = null, pastSel: string | null = null;
+/** v12 (first user of v11, 4): the summary's fold and the cards' places on screen before the past view (set again, and measured, on the way back). */
+let pastSum = false, pastCards: Record<string, Rect> | null = null;
+/** How far (px) the cards stood from their places before the past view, the last time it was left (what its note may say). */
+let pastMoved = 0;
 function growthLeavePast(redraw = true) {
   const g = growthPast; if (!g) return;
   growthAside = null;
   // v10 (review of v9): back to the zoom and place from before the past view, exactly.
-  const back = pastCam; pastCam = null;
+  const back = pastCam, cardsWere = pastCards; pastCam = null; pastCards = null;
   if (back) camera = { ...back };
+  // v12 (first user of v11, 4): the guide's summary as it was (open or folded), so nothing grew over the map meanwhile.
+  if (growthCmp) growthCmp.sumOpen = pastSum;
   growthPast = null; opened = g.live;
   if (selected && !g.live.view.parts.some(x => x.id === selected)) select(null);
   // v11: the camera as it was, nothing else moving it (the guide back at the map's top where nothing is under it there).
-  if (redraw) { renderSpace('keep'); if (growthCmp?.pane) renderGrowthPane(); if (back) applyCamera(); growthClearGuide(true); }
+  if (redraw) { renderSpace('keep'); if (growthCmp?.pane) renderGrowthPane(); syncGuide(); if (back) applyCamera(); growthClearGuide(true); }
+  // What one sees is measured: every card where it stood before the past view (1px), else said as it is.
+  pastMoved = redraw && cardsWere ? cardsMoved(cardsWere) : 0; $('space').dataset.backCards = String(pastMoved);
 }
 /** The line, the banner, the tabs and the lit lines, after every redraw. */
 function drawGrowth() {
@@ -7431,7 +7524,7 @@ function drawGrowth() {
   const banner = $('growth-past'); sp.classList.toggle('growth-in-past', !!growthPast);
   // F8 Q6 ②: the way back names the map it goes to (「비교 지도 · v17」 while comparing, else its version), never 「현재」.
   const backWord = growthPast ? (growthCmp && growthCmp.from === growthPast.n ? mapWord('비교', growthCmp.to) : versionLabel(growthCount())) : '';
-  if (growthPast) banner.replaceChildren(pastBanner(growthPast.n, growthPast.applied, growthPast.undated, () => { const was = pastCam && { ...pastCam }, sel = pastSel; growthLeavePast(); note(nowWord(!!was && sameCamera(camera, was), !!sel && selected === sel, backWord)); }, backWord));
+  if (growthPast) banner.replaceChildren(pastBanner(growthPast.n, growthPast.applied, growthPast.undated, () => { const was = pastCam && { ...pastCam }, sel = pastSel; growthLeavePast(); note(nowWord(!!was && sameCamera(camera, was) && pastMoved <= 1, !!sel && selected === sel, backWord)); }, backWord));
   else banner.replaceChildren();
   banner.hidden = !growthPast;
   drawGrowthMarks(); syncLineMode(); placeDock();
@@ -7445,11 +7538,16 @@ function growthLit(): { ids: Set<string>; cls: 'growth-lit' | 'growth-gone-line'
   const sceneLines = (part: string) => c.cs.changes.filter(x => x.part === part).map(x => directLines(c.cs, x));
   // Review of v8 (first user, h): a scene lights only its own card's changed lines (a drawn line with an end at that card, or at the part it
   // came from); the whole set only while the 연결 item is picked.
-  const all = c.picked === 'lines', sc = c.scene ? c.scenes.find(s => s.part === c.scene) : undefined;
+  // v12 (first user of v11, 6: the rename scene lit its card's 17 added lines into a tangle): a scene lights only the lines its change is
+  // about (a 승계, a retirement, a part the map newly shows, a 중복 정리 or 통합); a rename, a description or an implementation state lights
+  // none (its card's lines stay as the plain map draws them) unless asked from the scene's 「이 연결 지도에 밝히기」. 기록 반영 상태 and the lists
+  // light none of a scene's.
+  const all = c.picked === 'lines', at = sceneShown(c), sc = at ? c.scenes.find(s => s.part === at) : undefined, main = shownChange(c);
+  const lit = !!sc && !!main && (litByScene(main) || c.litOn === sc.part);
   const ends = all || !sc || !o ? null : new Set([sc.part, ...sc.changes.flatMap(x => [...(x.predecessor ? [x.predecessor] : []), ...x.others ?? []])].map(id => drawnRep(o, id)).filter((x): x is string => !!x));
-  if (!growthPast) { const ids = all ? c.cs.added.map(l => l.id) : c.scene ? sceneLines(c.scene).flatMap(d => d.added.map(l => l.id)) : []; return ids.length ? { ids: new Set(ids), cls: 'growth-lit', ends } : null; }
+  if (!growthPast) { const ids = all ? c.cs.added.map(l => l.id) : lit ? sceneLines(sc!.part).flatMap(d => d.added.map(l => l.id)) : []; return ids.length ? { ids: new Set(ids), cls: 'growth-lit', ends } : null; }
   if (growthPast.n !== c.from) return null;
-  const ids = all ? c.cs.removed.map(l => l.id) : c.scene ? sceneLines(c.scene).flatMap(d => d.removed.map(l => l.id)) : [];
+  const ids = all ? c.cs.removed.map(l => l.id) : lit ? sceneLines(sc!.part).flatMap(d => d.removed.map(l => l.id)) : [];
   return ids.length ? { ids: new Set(ids), cls: 'growth-gone-line', ends } : null;
 }
 function drawGrowthMarks() {
@@ -7474,7 +7572,7 @@ function drawGrowthMarks() {
     world.append(h('button', { type: 'button', class: `growth-tab k-${kind}${on ? ' on' : ' quiet'}`, 'data-part': part, title: tip, ...(click ? { onclick: click } : { tabindex: '-1' }) }, word, more ? h('span', { class: 'gt-more' }, ` +${more}`) : null));
   };
   // F7: at most three tabs (the scene shown first, the next scenes quieter); 새 and 설명 only as a filter's current part.
-  if (!growthPast) for (const t of shownTabs(c.scenes, c.scene, growthFilter(c))) tab(t.part, t.word, t.more, t.kind, t.on, tabTip(t), () => growthScene(t.part));
+  if (!growthPast) for (const t of shownTabs(c.scenes, sceneShown(c), growthFilter(c))) tab(t.part, t.word, t.more, t.kind, t.on, tabTip(t), () => growthScene(t.part));
   else if (growthPast.n === c.from) {
     for (const x of c.cs.changes) if (x.kind === 'retire') world.querySelector(`[data-part="${CSS.escape(x.part)}"]`)?.classList.add('growth-gone');
     followMark(c, o, world);
@@ -7487,7 +7585,7 @@ function drawGrowthMarks() {
 let followOpen: string | null = null;
 function followMark(c: GrowthCmp, o: Opened, world: HTMLElement) {
   const g = growthPast; if (!g) return;
-  const sc = c.scene ? c.scenes.find(s => s.part === c.scene) : undefined, id = sc ? pastMark(sc, x => !!drawnRep(o, x)) : null;
+  const at = sceneShown(c), sc = at ? c.scenes.find(s => s.part === at) : undefined, id = sc ? pastMark(sc, x => !!drawnRep(o, x)) : null;
   if (!id || g.live.view.parts.some(p => p.id === id)) { followOpen = null; return; }
   const rep = drawnRep(o, id) ?? id, b = lay.boxes.get(rep); if (!b || b.kind === 'ghost') return;
   const x = c.cs.changes.find(y => y.kind === 'retire' && y.part === id) ?? null, all = studioView(g.live.project).parts;
@@ -8844,7 +8942,9 @@ function bindCanvas() {
     // Pinch (ctrlKey) sends small deltas; a mouse notch is about 100.
     mapMoved = true; zoomAt(camera.k * Math.exp(-delta * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX - r.left, e.clientY - r.top + vp.offsetTop);
   }, { passive: false });
-  const center = () => { const r = vp.getBoundingClientRect(); return [r.width / 2, vp.offsetTop + r.height / 2] as const; };
+  // v12 (first user of v11, 5): about the middle of the map's free area (under the top box, above the bars at the bottom), so a zoom keeps
+  // what stood in the middle of what one sees there, not under a band.
+  const center = () => { const a = mapArea(); return [a.x + a.w / 2, a.y + a.h / 2] as const; };
   $('zoom-in').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k * 1.2, x, y, true); });
   $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k / 1.2, x, y, true); });
   $('zoom-level').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(1, x, y, true); });

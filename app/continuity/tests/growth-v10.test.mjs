@@ -114,16 +114,18 @@ test('V10-7 the past view keeps the scene\'s part (or the part it came from) on 
   assert.equal(V.sameCamera({ x: 1, y: 2, k: 0.3 }, { x: 1, y: 2, k: 0.6 }), false);
   const app = await read('src/client/app.ts');
   const gv = fn(app, 'growthView');
-  assert.match(gv, /if \(!growthPast\) \{ pastCam = \{ \.\.\.camera \}; pastSel = selected; \}/);
+  // v12 (first user of v11, 4): the summary's fold and the cards' places on screen are kept with the camera (growth-v12 V12-4).
+  assert.match(gv, /if \(!growthPast\) \{ pastCam = \{ \.\.\.camera \}; pastSel = selected; pastSum = !!growthCmp\?\.sumOpen; pastCards = cardsOnScreen\(\); \}/);
   // v11 (F8 Q6 ③, review of v10: a 384px pan at 1280 60%): the past view never moves the camera by itself (growth-v11 V11-6).
   assert.doesNotMatch(gv, /growthReveal|keepInView/);
-  assert.match(fn(app, 'growthLeavePast'), /const back = pastCam; pastCam = null;\n {2}if \(back\) camera = \{ \.\.\.back \};/);
+  assert.match(fn(app, 'growthLeavePast'), /const back = pastCam, cardsWere = pastCards; pastCam = null; pastCards = null;\n {2}if \(back\) camera = \{ \.\.\.back \};/);
   const ex = fn(app, 'growthExit');
   assert.match(ex, /afterRender = back; go\(o\.key, c\.saved\.selected, c\.saved\.scope\);/);
   assert.match(ex, /note\(exitWord\(kind\)\)/);
   assert.doesNotMatch(app, /window\.setTimeout\(back, 80\)/);
   assert.match(fn(app, 'render'), /const ar = afterRender; afterRender = null; ar\?\.\(\);/);
-  assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); note\(nowWord\(!!was && sameCamera\(camera, was\), !!sel && selected === sel, backWord\)\);/);
+  // v12 (first user of v11, 4): 「그대로」 only when the cards stand where they stood too (growth-v12 V12-4).
+  assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); note\(nowWord\(!!was && sameCamera\(camera, was\) && pastMoved <= 1, !!sel && selected === sel, backWord\)\);/);
 });
 
 test('V10-8 the shown scene\'s card always has its tab, a 새 scene\'s too, on every map', () => {

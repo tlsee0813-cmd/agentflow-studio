@@ -232,13 +232,14 @@ test('GROWTH-10 기록 반영 상태 on the anonymised growth map: the rows read
   assert.ok(cs.counts.new > 0 && cs.added.length > 0);
   // Review of v8: the records' 철회·변경 rows between the two withdraw no claim the map had on their parts (one is an 옮김): project
   // history, never a 정정, listed apart.
-  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 연결 \+\d+ · v04에 없던 부품 표시 \d+개$/);
+  // v12 (first user of v11, 3): the lines' count says it counts what the maps show (growth-v12 V12-3).
+  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 연결 표시 \+\d+ · v04에 없던 부품 표시 \d+개$/);
   assert.ok(cs.history.length > 0); assert.equal(cs.counts.correct, 0);
 });
 
 test('GROWTH-11 the line and the tabs: nonzero items in the scene order, the two filters at its end, at most three tabs, no 새 or 설명 tab by default, no two tabs meet', () => {
   const p = workshop(), cs = G.changeSet(p, 1, 3);
-  assert.equal(V.summaryText(cs), '지도 v01 → 지도 v03 · 승계 1 · 구현 바뀜 1 · 이름 1 · 연결 +1 −1 · 설명 변경 1개 보기 · v01에 없던 부품 표시 1개');
+  assert.equal(V.summaryText(cs), '지도 v01 → 지도 v03 · 승계 1 · 구현 바뀜 1 · 이름 1 · 연결 표시 +1 −1 · 설명 변경 1개 보기 · v01에 없던 부품 표시 1개');
   assert.deepEqual(V.summaryItems(cs).map(i => [i.key, i.filter]), [['succeed', false], ['reimpl', false], ['rename', false], ['lines', false], ['desc', true], ['new', true]]);
   assert.equal(V.summaryItems(cs).some(i => i.key === 'retire'), false, 'a retirement a 승계 holds counts in that 승계');
   const scenes = V.changeScenes(cs);

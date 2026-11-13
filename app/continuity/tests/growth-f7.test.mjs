@@ -99,10 +99,11 @@ test('F7-3 a scene says the change as the ledger has it: 「기록된 승계」,
   assert.ok(V.GUIDE_BANNED.includes('개발됐습니다') && V.GUIDE_BANNED.includes('안정적') && V.GUIDE_BANNED.includes('이를 위해') && V.GUIDE_BANNED.includes('핵심'));
 });
 
-test('F7-4 the guide: 「지도 변화 · v01 → v03」 and at most two sentences made only of the change ledger, every count and name traced back, every fact a way in', () => {
+test('F7-4 the guide: 「지도 변화 · v01 → v03」 and the counts by kind made only of the change ledger, every count traced back, every fact a way in (v12: no scene\'s sentence)', () => {
   const p = workshop(), cs = G.changeSet(p, 1, 3), scenes = V.changeScenes(cs), nm = namesOf(p, 1, 3), g = V.guideOf(cs, scenes, nm);
   assert.equal(g.head, '지도 변화 · v01 → v03');
-  assert.equal(V.guideText(g), '‘옛 타이머’를 ‘새 감시기’가 대신한다는 기록이 반영됐습니다. 구현 상태 기록이 달라진 부품 1개, 구현이 바뀐 부품 1개와 v01에 없던 부품 표시 1개가 있습니다.');
+  // v12 (first user of v11, 2): the summary says the counts by kind, never a single scene's sentence first (growth-v12 V12-2).
+  assert.equal(V.guideText(g), 'v01과 v03 사이에 승계 1건, 구현 상태 기록이 달라진 부품 1개, 구현이 바뀐 부품 1개, 이름이 달라진 부품 1개, 설명이 바뀐 부품 1개와 v01에 없던 부품 표시 1개가 있습니다.');
   assert.ok(g.sentences.length <= 2);
   const facts = g.sentences.flat().filter(x => x.fact);
   for (const x of facts) {
@@ -110,13 +111,13 @@ test('F7-4 the guide: 「지도 변화 · v01 → v03」 and at most two sentenc
     if (x.fact.count !== null) { assert.equal(x.fact.count, V.kindCount(cs, x.fact.kind), x.text); assert.ok(x.text.includes(String(x.fact.count))); }
     for (const id of x.fact.parts) { assert.ok(cs.changes.some(c => c.part === id || c.predecessor === id), id); assert.ok(x.text.includes(`‘${nm(id)}’`), nm(id)); }
   }
-  assert.ok(facts.filter(x => x.fact.parts.length).length <= 2, 'at most two named changes');
-  assert.equal('scene' in facts[0].to && facts[0].to.scene, scenes[0].part, 'the first sentence leads to the first scene');
+  assert.equal(facts.filter(x => x.fact.parts.length).length, 0, 'no named change: the counts only');
+  assert.ok(facts.every(x => 'kind' in x.to), 'each count leads to its kind');
   for (const b of V.GUIDE_BANNED) assert.ok(!V.guideText(g).includes(b));
   assert.doesNotMatch(V.guideText(g), /대기|보류|후보|거절|중요|개발/, 'a held row or candidate is never a change; 새 is no new development');
   // More of the first kind: its total leads the second sentence; nothing changed: one plain sentence.
   const two = { ...cs, changes: [...cs.changes, { ...cs.changes.find(c => c.kind === 'succeed'), part: 'x2', predecessor: 'tim' }], counts: { ...cs.counts, succeed: 2 } };
-  assert.match(V.guideText(V.guideOf(two, V.changeScenes(two), nm)), / 승계는 총 2건이며, /);
+  assert.match(V.guideText(V.guideOf(two, V.changeScenes(two), nm)), / 승계 2건, /);
   const none = { ...cs, changes: [], counts: Object.fromEntries(Object.keys(cs.counts).map(k => [k, 0])), added: [], removed: [] };
   assert.equal(V.guideText(V.guideOf(none, [], nm)), '두 지도 버전 사이에 반영된 구조 변화가 없습니다.');
 });

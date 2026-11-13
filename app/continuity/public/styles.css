@@ -3992,3 +3992,18 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .world .growth-follow-note .gf-fine { color: var(--text-2); font-size: calc(12px * var(--u, 1)); }
 .world .growth-follow-note .gf-acts { display: flex; gap: calc(10px * var(--u, 1)); font-size: calc(12.5px * var(--u, 1)); }
 .world .growth-follow-note .link-button { font-size: calc(12.5px * var(--u, 1)); line-height: calc(18px * var(--u, 1)); }
+/* v12 (first user of v11, 3): the lines' count with its note, beside the parts' count where the row has room, else under it. */
+.gl-notes { display: flex; flex-wrap: wrap; column-gap: 6px; row-gap: 0; min-width: 0; }
+.gl-notes > .gl-new { flex: 0 0 auto; max-width: 100%; padding-right: 2px; }
+.gl-notes .gl-new-note { flex: 1 1 auto; }
+/* v12 (first user of v11, 4): 「전체 비교 요약」 opens over the map under the guide; the guide keeps its height and the map stays where it is. */
+.focus-top.growth-guide > .gg-sum { position: absolute; left: -1px; right: -1px; top: calc(100% + 6px); z-index: 4; margin: 0; padding: 10px 14px 12px; max-height: min(50vh, 360px); overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-pop); box-shadow: var(--shadow-md, var(--shadow-sm)); }
+/* v12 (first user of v11, 6): lighting a scene's changed lines on request (a change that is not about lines lights none by itself). */
+.gs-lines .gs-light { margin-left: 4px; font-size: 12.5px; }
+/* v12 (first user of v11, 7): the relation-detail cue's legend mark (「··· 관계 보기」). */
+.lg-mark { letter-spacing: -.5px; }
+/* v12 (first user of v11, 5): the folded legend chip's short form beside the tools when its whole words have no room there (no stacked row). */
+.lg-chip-short { display: none; }
+.line-key.lg-short .lg-chip-short { display: inline; }
+.line-key.lg-short :is(.lg-chip-text, .lg-chip-fade) { display: none; }
+.line-key.lg-short .lg-chip { gap: 4px; padding: 0 8px; }
