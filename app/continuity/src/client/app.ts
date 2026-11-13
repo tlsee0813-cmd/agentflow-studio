@@ -373,6 +373,8 @@ function projectFor(key: string): Opened | null {
 let renderedHash = '';
 async function render() {
   renderedHash = location.hash;
+  // v13 fix 1: when the map was asked for (the opening's 4.5 s count from here, its own drawing included).
+  const askedAt = performance.now();
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
@@ -445,7 +447,7 @@ async function render() {
   afterRenderOpen(o);
   const ar = afterRender; afterRender = null; ar?.();
   // v13 hook (opening.ts): a map opened fresh on its own view (no part, no inside, no past version, no reading over it) comes into being.
-  if (fresh && !part && !scope && !o.past && !planView.isOpen() && !returnView.isOpen() && o.view.parts.length) opening.arrive(o.key, openingVersion(o));
+  if (fresh && !part && !scope && !o.past && !planView.isOpen() && !returnView.isOpen() && o.view.parts.length) opening.arrive(o.key, openingVersion(o), askedAt);
 }
 /** v10: what waits for the next render to finish (leaving the comparison: the camera from before it, set after the selection's render). */
 let afterRender: (() => void) | null = null;
@@ -988,35 +990,78 @@ function setMapForm(next: MapForm) {
   keepMapForm(o, next); if (next === formNow) return;
   formTimers.forEach(t => clearTimeout(t)); formTimers = [];
   const world = $('world'), sp = $('space');
+  // A flight still under way lands at once (its layer goes, the map shows where it is).
+  landFormFlight();
   if (reducedMotion() || world.hidden) { sp.classList.remove('form-lines-out', 'form-lines-in'); world.classList.remove('form-fly'); renderSpace('keep'); fitView(false); if (selected) select(selected); return; }
-  // Where each box is drawn now (a flight under way included), in map units.
-  const from = new Map<string, Point>();
-  world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => { let tx = 0, ty = 0; try { const m = new DOMMatrixReadOnly(getComputedStyle(el).transform); tx = m.m41; ty = m.m42; } catch { /* none */ } from.set(el.dataset.box!, { x: parseFloat(el.style.left) + tx, y: parseFloat(el.style.top) + ty }); });
+  // The switcher shows the choice at once (the map follows).
+  $('map-forms-host').querySelectorAll<HTMLElement>('.vf-form').forEach(b => { const on = b.dataset.form === next; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
   sp.classList.remove('form-lines-in'); sp.classList.add('form-lines-out');
   const fly = () => {
     if (opened !== o) return;
-    world.classList.remove('form-fly'); const cam0 = { ...camera };
-    formSwitching = true; try { renderSpace('keep'); } finally { formSwitching = false; }
-    const moved: HTMLElement[] = [];
-    world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => {
-      const a = from.get(el.dataset.box!); if (!a) return;
-      const dx = a.x - parseFloat(el.style.left), dy = a.y - parseFloat(el.style.top); if (Math.abs(dx) + Math.abs(dy) < 0.5) return;
-      el.style.transform = `translate(${dx}px, ${dy}px)`; moved.push(el);
-    });
-    // The new fit is found at once (it reads the page), then the camera is set back where it stood and eased to it with the cards: one
-    // flight from the picture that was seen (a fit that animates by itself would start from the frame its own reads committed).
-    fitView(false);
-    if (selected) select(selected);
-    const to = world.style.transform;
-    world.classList.remove('animate'); world.style.transform = `translate(${cam0.x}px, ${cam0.y}px) scale(${cam0.k})`;
-    void world.offsetWidth; // the old places and the old camera take hold before the flight starts
-    world.classList.add('animate', 'form-fly', 'form-cam'); world.style.transform = to;
-    for (const el of moved) el.style.transform = '';
-    formTimers.push(window.setTimeout(() => { world.classList.remove('form-fly', 'form-cam', 'animate'); sp.classList.remove('form-lines-out'); sp.classList.add('form-lines-in'); }, FORM_FLY_MS));
-    formTimers.push(window.setTimeout(() => sp.classList.remove('form-lines-in'), FORM_FLY_MS + FORM_LINES_IN_MS));
+    world.classList.remove('form-fly', 'form-cam'); const cam0 = { ...camera };
+    // v13 fix 1 (review of v13: on a 33-card map the screen stood still 1.2 s between the lines going and the cards moving, while the new
+    // form's lines were routed): the cards fly at once in a layer of their own, the browser moving them while the new form is laid out,
+    // routed and framed under them (the map itself hidden until then); then the map takes the layer's place where it landed and the camera
+    // settles into the new frame as the lines come in.
+    // Where each card and lane is drawn now, in map units (a flight under way included).
+    const els = [...world.querySelectorAll<HTMLElement>(':scope > [data-box], :scope > .form-lane')];
+    const from = new Map<HTMLElement, Point>();
+    for (const el of els) { let tx = 0, ty = 0; try { const m = new DOMMatrixReadOnly(getComputedStyle(el).transform); tx = m.m41; ty = m.m42; } catch { /* none */ } from.set(el, { x: parseFloat(el.style.left) + tx, y: parseFloat(el.style.top) + ty }); }
+    // The new places (the layout alone: quick), and a first frame round them.
+    formSwitching = true; try { relayout(o); } finally { formSwitching = false; }
+    const to = new Map<string, Point>(); for (const b of lay.boxes.values()) to.set(b.id, { x: b.x, y: b.y });
+    const v = $('viewport'), vw = v.clientWidth, vh = v.clientHeight, B = lay.bounds, top = topInset();
+    const k1 = Math.max(0.05, Math.min(cam0.k * 1.6, (vw - 2 * SAFE_SIDE) / Math.max(1, B.w), (vh - top - BOTTOM) / Math.max(1, B.h)));
+    const cam1 = { x: (vw - B.w * k1) / 2 - B.x * k1, y: top + (vh - top - BOTTOM - B.h * k1) / 2 - B.y * k1, k: k1 };
+    const layer = h('div', { class: 'world form-flight', 'aria-hidden': 'true' });
+    layer.style.cssText = world.style.cssText; layer.style.transform = `translate(${cam0.x}px, ${cam0.y}px) scale(${cam0.k})`;
+    for (const el of els) { const a = from.get(el)!; el.style.transform = ''; el.style.left = `${a.x}px`; el.style.top = `${a.y}px`; if (!el.dataset.box) el.style.opacity = '0'; layer.append(el); }
+    world.after(layer); world.style.visibility = 'hidden';
+    void layer.offsetWidth; // the places as seen take hold before the flight starts
+    layer.classList.add('flying');
+    for (const el of els) { const id = el.dataset.box, a = from.get(el)!, b = id ? to.get(id) : undefined; if (b) el.style.transform = `translate(${b.x - a.x}px, ${b.y - a.y}px)`; else el.style.opacity = '0'; }
+    layer.style.transform = `translate(${cam1.x}px, ${cam1.y}px) scale(${cam1.k})`;
+    formFlight = { layer, cam1 };
+    // The new form drawn under the landed cards (its lines routed for the frame the flight flew to, so the fit seldom routes them twice),
+    // then the map takes the layer's place. Nothing heavy runs while the cards fly.
+    formTimers.push(window.setTimeout(() => {
+      if (opened !== o || formFlight?.layer !== layer) return;
+      pairGapNow = Math.max(PAIR_PX / Math.max(formFitK.get(formFitKey(o, next)) ?? k1, 0.05), 12);
+      formSwitching = true; try { renderSpace('keep'); } finally { formSwitching = false; }
+      world.style.visibility = 'hidden';
+      fitView(false);
+      if (selected) select(selected);
+      landFormFlight();
+    }, FORM_FLY_MS + 20));
   };
   formTimers.push(window.setTimeout(fly, FORM_LINES_OUT_MS));
 }
+/** v13 fix 1: the zoom each 보기 of a map fitted at in this window (pairRoute keeps it), so a switch routes the new form's lines for it. */
+const formFitK = new Map<string, number>();
+const formFitKey = (o: Opened, f: MapForm) => { const v = $('viewport'); return `${o.key}|${f}|${v.clientWidth}x${v.clientHeight}|${easy() ? 'e' : 'd'}`; };
+/** v13 fix 1 (review of v13: lines through arrowheads rose from 155 to 233 with 층 and 흐름 as the maps' own views): in a 보기 the ends on one side
+ * of a card stand FORM_PORT_PX screen pixels apart at the fit while the side holds them (so a head never touches its neighbour's line); 구성
+ * keeps the layered map's pitch. Map units, from the fit's zoom as the pair gap reads it. */
+const FORM_PORT_PX = 10.5;
+const formPitch = (): number | undefined => (formPlace ? pairGapNow * (FORM_PORT_PX / PAIR_PX) : undefined);
+/** The switch's flight layer (the cards as they fly) and the frame it flies to; null when none flies. */
+let formFlight: { layer: HTMLElement; cam1: { x: number; y: number; k: number } } | null = null;
+/** The flight lands: the map takes the layer's place where the layer's camera stands, eases into its own frame, and its lines come in. */
+function landFormFlight() {
+  const f = formFlight; if (!f) return; formFlight = null;
+  const world = $('world'), sp = $('space');
+  f.layer.remove();
+  world.style.removeProperty('visibility');
+  world.classList.remove('animate', 'form-cam');
+  world.style.transform = `translate(${f.cam1.x}px, ${f.cam1.y}px) scale(${f.cam1.k})`;
+  void world.offsetWidth;
+  world.classList.add('animate', 'form-cam'); writeCamera(camera);
+  sp.classList.remove('form-lines-out'); sp.classList.add('form-lines-in');
+  formTimers.push(window.setTimeout(() => { world.classList.remove('animate', 'form-cam'); }, FORM_SETTLE_MS));
+  formTimers.push(window.setTimeout(() => sp.classList.remove('form-lines-in'), FORM_LINES_IN_MS + 40));
+}
+/** The camera's ease from the flight's frame into the map's own (ms; styles: #world.animate.form-cam). */
+const FORM_SETTLE_MS = 320;
 /** V on the map: the next form offered. */
 function cycleMapForm(): boolean { const o = opened; if (!o || !formInfo || !formApplies(o)) return false; const next = nextMapForm(formNow, formInfo.choice.offered); if (next === formNow) return false; setMapForm(next); return true; }
 /** A card the person drags in a form: its place for this tab in that form (never the 구성 map's stored places). */
@@ -1247,7 +1292,12 @@ function fitTagKind(el: HTMLElement, width: number, room: number) {
   const kind = ez ? easyKind(kd.dataset.kind) : kd.dataset.kind, pre = [mark, life].filter(Boolean).join(' · '), rows = Math.max(1, Math.min(ROLE_LINES, Math.floor((room + 0.5) / TAG.kindLh)));
   const n = (s: string) => { const l = wrapWords(pre ? `${pre} · ${s}` : s, width, tagKindW); return l && l.length <= rows ? l.length : 0; };
   const byRole = role ? [role, ...rolePhrases(role).filter(x => !leansBack(x))].filter(x => !hasCode(x)).find(x => n(x) > 0) : undefined;
-  const k = byRole ? { text: byRole, how: 'role' } : mark ? { text: '', how: 'none' } : kindShort(kind, kd.dataset.fam || null, x => n(x) > 0), shown = k.text, lines = shown ? n(shown) : 1, how = k.how;
+  const k0 = byRole ? { text: byRole, how: 'role' } : mark ? { text: '', how: 'none' } : kindShort(kind, kd.dataset.fam || null, x => n(x) > 0);
+  // v13 fix 1 (review of v13: 「취소·시한 신호 / 취소·시한 신호」 read as a machine's echo): a line that only repeats the card's own name says
+  // nothing more and is left off (the kind words stay in the hover and the pane).
+  const same = (a: string, b: string) => a.normalize('NFKC').replace(/\s+/g, '') === b.normalize('NFKC').replace(/\s+/g, '');
+  const tagName = el.querySelector('.c-tag-name')?.textContent ?? '';
+  const k = k0.text && tagName && same(k0.text, tagName) ? { text: '', how: 'none' } : k0, shown = k.text, lines = shown ? n(shown) : 1, how = k.how;
   const preEls = [...(mark ? [h('span', { class: 'c-tag-mark' }, mark)] : []), ...(mark && life ? [h('span', { class: 'c-tag-sep' }, ' · ')] : []), ...(life ? [life] : [])];
   kd.replaceChildren(...(pre ? [...preEls, ...(shown ? [h('span', { class: 'c-tag-sep' }, ' · ')] : [])] : []), shown);
   kd.classList.toggle('tk2', lines > 1); kd.classList.toggle('tk-empty', !shown && !pre); kd.dataset.fit = how;
@@ -2492,7 +2542,8 @@ function pickStep(part: string, name: string) {
 function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay = true) {
   const o = opened!; setBar(o);
   // v13 hook (opening.ts): a redraw ends an opening at once; 다시 보기 where one can play (the map's own view, before the fit measures the tools).
-  opening.skip(); opening.offer(!scope && !o.past && o.view.parts.length > 0);
+  // v13 fix 1 (review of v13: 다시 보기 stood in a comparison and did nothing there): not while comparing or in a past version.
+  opening.skip(); opening.offer(!scope && !o.past && !growthCmp && !growthPast && o.view.parts.length > 0);
   $('home').hidden = true; $('space').hidden = false; $('ai-pill').hidden = false;
   // A redraw of the structure ends the places held for a drag (holdPlaces) and the hover's peek; the open tip and the target it
   // holds go with the elements they stood for (review M6).
@@ -2896,7 +2947,7 @@ function positionWorld() {
   // The lines of each drawn set routed together (ports and nudging among themselves); while a part is dragged, their plain
   // shapes, so they follow the hand continuously; after the drop, the full routes, each morphing from the shape it had.
   // v12: the two lines of a pair running opposite ways stand PAIR_PX apart on screen at the fit (pairGapNow, fitView).
-  const routed = new Map([...routeEdges(lay.boxes, lay.edges, { quick: dragQuick, pairGap: pairGapNow }), ...routeEdges(lay.boxes, sums, { quick: dragQuick, pairGap: pairGapNow })]);
+  const routed = new Map([...routeEdges(lay.boxes, lay.edges, { quick: dragQuick, pairGap: pairGapNow, pitch: formPitch() }), ...routeEdges(lay.boxes, sums, { quick: dragQuick, pairGap: pairGapNow, pitch: formPitch() })]);
   routedGap = pairGapNow;
   lastRouted = restRouted = routed; shownKey = '';
   placeBands(routed);
@@ -2926,7 +2977,8 @@ let restRouted = new Map<string, Routed>(), shownKey = '';
 /** v12 (review of v11: a pair of lines running opposite ways between two cards stood 4–8px apart at the fit and read as one line with two
  * heads): their ends stand PAIR_PX screen pixels apart at the zoom the map fits at (map units: PAIR_PX / that zoom, pairGapNow; until a
  * fit is known, at a half-size fit); routedGap is the gap the lines drawn now were routed with. */
-const PAIR_PX = 12.5;
+/** v13 fix 1 (review of v13: pairs stood 11.9px apart where the half-unit grid and the side's corners took a little): a little over the 12. */
+const PAIR_PX = 13.5;
 let pairGapNow = PAIR_PX / 0.5, routedGap = 0, pairRefit = false;
 /** F8: the most lines the static focus routes at its wider pitch (FOCUS_ROUTE_SCALE). */
 const FOCUS_ROUTE_MAX = 10;
@@ -2959,7 +3011,7 @@ function routeShown() {
   const key = `${c}|${set.map(e => `${alias.get(e.key) ?? e.key}:${e.ids.length}`).join('|')}`;
   if (key === shownKey) return;
   shownKey = key;
-  const own = set.length ? new Map([...(c < 1 ? focusRoutes(lay.boxes, set, c, { pairGap: pairGapNow }) : routeEdges(lay.boxes, set, { pairGap: pairGapNow }))].map(([k, r]) => { const d = alias.get(k) ?? k; return [d, d === k ? r : { ...r, key: d }] as [string, Routed]; })) : null;
+  const own = set.length ? new Map([...(c < 1 ? focusRoutes(lay.boxes, set, c, { pairGap: pairGapNow, pitch: formPitch() }) : routeEdges(lay.boxes, set, { pairGap: pairGapNow, pitch: formPitch() }))].map(([k, r]) => { const d = alias.get(k) ?? k; return [d, d === k ? r : { ...r, key: d }] as [string, Routed]; })) : null;
   lastRouted = own ? new Map([...restRouted, ...own]) : restRouted;
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const r = lastRouted.get(g.dataset.key!), line = g.querySelector('.edge-line'); if (!r || !line || line.getAttribute('d') === r.d) return;
@@ -3059,7 +3111,7 @@ function noteHead(n: string): string {
  * selection's lines carry theirs. Each sits at a free spot along its own line; a label that would cover a part, a group's
  * head, the title or another label is left off the map (the pane lists every relation by its verb). Nothing is drawn for a
  * relation the project does not hold. */
-function placeEdgeLabels() { placeLineLabels(); dropRowIds(); foldAccess(); haloLabels(); placeScenarioMarks(); applyLegendMarks(); mergeHeads(); markFocusLabels(); placeFocusMarks(); clipAtEdge(); syncFocusTop(); }
+function placeEdgeLabels() { placeLineLabels(); dropRowIds(); foldAccess(); haloLabels(); placeScenarioMarks(); applyLegendMarks(); lensCueFallback(); mergeHeads(); markFocusLabels(); placeFocusMarks(); clipAtEdge(); syncFocusTop(); }
 /** Review of v7 (first user, j): a line's label the map's edge (the pane's, or the window's) would cut through is not shown cut: it steps
  * back until the camera brings it whole into view (its words stay in its line's hover). Measured after a pan or a zoom, once a frame. */
 let clipFrame = 0;
@@ -3074,15 +3126,61 @@ function clipAtEdge() {
     // v11 (review of v10: 「스캔 PDF」 read faintly through the title chip at 1280): a label under the title chip is not drawn either (its words
     // stay in its line's hover, as a cut label's do).
     const st = document.getElementById('scope-sticky'), sr = st && !st.hidden && st.offsetWidth ? st.getBoundingClientRect() : null;
-    for (const el of $('world').querySelectorAll<HTMLElement>('.edge-labels > *')) {
+    const world = $('world');
+    // v13 fix 1: a condition's mark slid along its line back to its own place first (each measure starts from where the labels placed it).
+    for (const el of world.querySelectorAll<HTMLElement>('.edge-labels > [data-slid]')) { if (el.dataset.slid === `${el.style.left}|${el.style.top}`) { el.style.left = el.dataset.slidL ?? el.style.left; el.style.top = el.dataset.slidT ?? el.style.top; } delete el.dataset.slid; delete el.dataset.slidL; delete el.dataset.slidT; }
+    let cardRects: DOMRect[] | null = null, markRects: DOMRect[] | null = null;
+    for (const el of world.querySelectorAll<HTMLElement>('.edge-labels > *')) {
       const text = el.classList.contains('edge-label') || el.classList.contains('edge-badge');
       if (!text && !el.classList.contains('edge-cut') && !sr) continue;
       el.classList.remove('edge-cut'); const r = el.getBoundingClientRect(); if (!r.width) continue;
       // Every mark of the label layer (a label, a badge, a cue) under the title chip; labels and badges also where the window's side cuts them.
-      el.classList.toggle('edge-cut', (text && ((r.left < vp.right && r.right > vp.right + 1) || (r.right > vp.left && r.left < vp.left - 1)))
-        || (!!sr && r.left < sr.right && sr.left < r.right && r.top < sr.bottom && sr.top < r.bottom));
+      const cut = (text && ((r.left < vp.right && r.right > vp.right + 1) || (r.right > vp.left && r.left < vp.left - 1)))
+        || (!!sr && r.left < sr.right && sr.left < r.right && r.top < sr.bottom && sr.top < r.bottom);
+      // v13 fix 1 (review of v13: a picked hub's condition 「조건」 at the pane's edge stepped back and its line read with no condition): a
+      // condition's mark the edge would cut moves along its own line to the nearest spot wholly in view, on no card and no other mark; only
+      // where its line has none does it step back (its words in the line's hover).
+      if (cut && /\b(?:b-condition|q-condition|fit-cond)\b/.test(el.className) && slideMark(el, r, vp, sr, () => (cardRects ??= [...world.querySelectorAll<HTMLElement>(':scope > .node')].map(c => c.getBoundingClientRect())), () => (markRects ??= [...world.querySelectorAll<HTMLElement>('.edge-labels > *')].filter(m => m !== el && !m.classList.contains('edge-cut') && getComputedStyle(m).display !== 'none').map(m => m.getBoundingClientRect())))) continue;
+      el.classList.toggle('edge-cut', cut);
+    }
+    // v13 fix 1 (review of v13: at 1280 a picked GPTResearcher's line to CLI ran into view while its 「조건」 stood past the pane's edge): a
+    // condition's mark wholly out of view, on a line that runs in view, comes along its line into view the same way.
+    for (const el of world.querySelectorAll<HTMLElement>('.edge-labels > :is(.b-condition, .q-condition, .fit-cond):not(.edge-cut):not([data-slid])')) {
+      const r = el.getBoundingClientRect(); if (!r.width || !(r.right <= vp.left || r.left >= vp.right || r.bottom <= vp.top || r.top >= vp.bottom)) continue;
+      if (el.hidden || getComputedStyle(el).display === 'none') continue;
+      const g = world.querySelector<SVGGElement>(`.edge[data-key="${CSS.escape(el.dataset.badge || el.dataset.cue || el.dataset.key || '')}"]`);
+      if (!g || getComputedStyle(g).display === 'none' || g.classList.contains('stub')) continue;
+      slideMark(el, r, vp, sr, () => (cardRects ??= [...world.querySelectorAll<HTMLElement>(':scope > .node')].map(c => c.getBoundingClientRect())), () => (markRects ??= [...world.querySelectorAll<HTMLElement>('.edge-labels > *')].filter(m => m !== el && !m.classList.contains('edge-cut') && getComputedStyle(m).display !== 'none').map(m => m.getBoundingClientRect())));
     }
   });
+}
+/** v13 fix 1: moves a condition's mark (screen rect r) along its own drawn line to the nearest spot wholly inside the viewport (and clear of the
+ * title chip), on no card and over no other mark; true when it moved. Its own place is kept in data-slid-l/-t (clipAtEdge puts it back first). */
+function slideMark(el: HTMLElement, r: DOMRect, vp: DOMRect, sr: DOMRect | null, cards: () => DOMRect[], marks: () => DOMRect[]): boolean {
+  const key = el.dataset.badge || el.dataset.cue || el.dataset.key; if (!key) return false;
+  const p = $('world').querySelector<SVGPathElement>(`.edge[data-key="${CSS.escape(key)}"] .edge-line`); if (!p) return false;
+  let len = 0, m: DOMMatrix | null = null; try { len = p.getTotalLength(); m = p.getScreenCTM(); } catch { return false; }
+  if (!m || len < 1) return false;
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2, w = r.width, hgt = r.height, M = 3;
+  const hits = (a: { l: number; t: number; r: number; b: number }, b: DOMRect) => a.l < b.right && b.left < a.r && a.t < b.bottom && b.top < a.b;
+  let best: { x: number; y: number; d: number } | null = null;
+  const steps = Math.min(240, Math.max(24, Math.ceil(len / 4)));
+  for (let i = 0; i <= steps; i++) {
+    const q = p.getPointAtLength((len * i) / steps), x = q.x * m.a + q.y * m.c + m.e, y = q.x * m.b + q.y * m.d + m.f;
+    const box = { l: x - w / 2, t: y - hgt / 2, r: x + w / 2, b: y + hgt / 2 };
+    if (box.l < vp.left + M || box.r > vp.right - M || box.t < vp.top + M || box.b > vp.bottom - M) continue;
+    if (sr && hits(box, sr)) continue;
+    const d = Math.hypot(x - cx, y - cy); if (best && d >= best.d) continue;
+    if (cards().some(c => hits(box, c)) || marks().some(c => hits(box, c))) continue;
+    best = { x, y, d };
+  }
+  if (!best) return false;
+  const k = camera.k || 1;
+  el.dataset.slidL = el.style.left; el.dataset.slidT = el.style.top;
+  el.style.left = `${(parseFloat(el.style.left) || 0) + (best.x - cx) / k}px`; el.style.top = `${(parseFloat(el.style.top) || 0) + (best.y - cy) / k}px`;
+  // Only a mark still where this put it goes back (labels placed again since stand where they were put).
+  el.dataset.slid = `${el.style.left}|${el.style.top}`;
+  return true;
 }
 /** Craft spec (라벨 halo 3px, 바탕색): each line label's halo is the ground it actually stands on: the face of the innermost group drawn
  * under its middle (a region's or a tinted group's colour, over the canvas), else the canvas itself. */
@@ -3610,12 +3708,16 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'de
   const near = out([9, 13, 18, 24]), far = out([30, 36, 42, 50, 58, 66, 76, 88, 100]), farther = out([112, 126, 140, 156, 172, 190], Math.max(0, len - 20 * inv));
   // Every place along the line clear of the other lines and labels before one that gives either up (a line through a mark reads as its).
   const all = [...near, ...far, ...farther], base = (r: Rect) => hitFree(r) && offParts(r) && apart(r);
-  let spot = all.find(r => base(r) && offLabels(r) && offLines(r)) ?? all.find(r => base(r) && offLines(r)) ?? all.find(r => base(r) && offLabels(r)) ?? all.find(base) ?? null;
   // v13 (review of v12: 13 ◇ at 1280 whose target met a card: short lines between two cards, long ones running along a card): every 3px of
   // its own line (short of its head's run), then just beside it (cueBeside: 10–16px off the line, the nearer first), before a mark's target
   // may meet a card.
   let exOnce: ReturnType<typeof cueExtra> | null = null; const exOf = () => (exOnce ??= cueExtra(path, s, ow, inv, len));
-  if (!spot) { const ex = exOf(); spot = ex.along.find(r => base(r) && offLines(r)) ?? ex.along.find(base) ?? ex.beside.find(r => base(r) && offLines(r)) ?? ex.beside.find(base) ?? null; }
+  // v13 fix 1 (review of v13: lines ran through 「조건 보기」 marks 38 times at 1440, mostly in 층 and 흐름): a place no other line crosses is
+  // looked for along the whole line and just beside it before a mark gives that up.
+  let spot = all.find(r => base(r) && offLabels(r) && offLines(r)) ?? all.find(r => base(r) && offLines(r)) ?? null;
+  if (!spot) { const ex = exOf(); spot = ex.along.find(r => base(r) && offLines(r)) ?? ex.beside.find(r => base(r) && offLines(r)) ?? null; }
+  spot ??= all.find(r => base(r) && offLabels(r)) ?? all.find(base) ?? null;
+  if (!spot) { const ex = exOf(); spot = ex.along.find(base) ?? ex.beside.find(base) ?? null; }
   // With no place of its own: a condition joins the mark whose target it would meet into one 「조건 n」 mark that lists every line it stands
   // for (its tip and its keyboard name, data-also); another mark of the same kind leaving the same part stands for it as before. A
   // conditional line never reads unconditional.
@@ -3920,8 +4022,12 @@ const opening = createOpening({ space: () => $('space'), world: () => $('world')
     // Growth: each version as the record rebuilt it (map-growth versionAt; the last is the live map) and what a record retired on it.
     const versions = vs.length < 2 ? [] : vs.map(v => { const at = versionAt(p, v.n); return { n: v.n, parts: at.view.parts.map(x => ({ id: x.id, name: x.name })), rels: at.view.relations.map(r => r.id),
       retired: v.n < 2 ? [] : changeSet(p, v.n - 1, v.n).changes.filter(c => c.kind === 'retire').map(c => ({ part: c.part, name: c.name, successor: c.successor ?? null })) }; });
-    const f = ffNow?.flow ?? null;
-    return { boxes, edges, names, versions, rep: (id: string) => drawnRep(o, id), chain: f && f.chain.length ? f.chain : null, chainRels: f?.lines ?? [] };
+    // v13 fix 1 (review of v13: the opening walked the first view's chain, the drawn lines' layers, and called it the record's order): the
+    // chain is 보기's recorded order (map-forms recordedChain, the one the switcher calls a flow) and its lines the relations among its cards.
+    const chain = formInfo && formInfo.view === o.view ? formInfo.chain : null;
+    const onChain = new Set(chain?.steps.flat() ?? []);
+    const chainRels = chain ? o.view.relations.filter(r => { const a = topCard(o, r.from), b = topCard(o, r.to); return !!a && !!b && a !== b && onChain.has(a) && onChain.has(b); }).map(r => r.id) : [];
+    return { boxes, edges, names, versions, rep: (id: string) => drawnRep(o, id), chain: chain ? chain.steps : null, chainRels };
   } });
 const openingVersion = (o: Opened) => mapVersions(o.project).at(-1)?.id ?? 'none';
 function applyCamera(animate = false) {
@@ -4046,6 +4152,8 @@ function fitView(explicit: boolean, animate = false) {
  * then the frame taken again (cards never move, so the zoom stays). True when it did (the frame is applied then). */
 function pairRoute(explicit: boolean, animate: boolean): boolean {
   const want = Math.max(PAIR_PX / Math.max(camera.k, 0.05), 12);
+  // v13 fix 1: the zoom each 보기 fitted at (this map, this window), so a switch back routes its lines once.
+  if (opened && formApplies(opened)) formFitK.set(formFitKey(opened, formNow), camera.k);
   if (pairRefit || Math.abs(want - routedGap) <= 0.75) return false;
   pairGapNow = want; pairRefit = true;
   try { positionWorld(); fitView(explicit, animate); } finally { pairRefit = false; }
@@ -4313,8 +4421,17 @@ function revealRect(B: { x: number; y: number; w: number; h: number }, keepRight
  * part itself would be covered (by the pane, the top box or the tools), by the least amount; the other ends stay where the person left them. */
 function reveal(partId: string) {
   const b = lay.boxes.get(partId); if (!b) return;
-  revealRect({ x: b.x, y: b.y, w: Math.min(b.w, 420), h: Math.min(b.h, 300) });
+  // v13 fix 1 (review of v13: a hub picked by the pane's edge had its own lines' runs, and their conditions, just past the map's edge): the
+  // card with the runs its own lines take round it (within REVEAL_RUN map units of its sides; never the partners far off).
+  let x0 = b.x, x1 = b.x + Math.min(b.w, 420);
+  if (b.w <= 420) for (const g of $('world').querySelectorAll<SVGGElement>('.edge.on')) {
+    if (g.dataset.from !== partId && g.dataset.to !== partId) continue;
+    for (const p of lastRouted.get(g.dataset.key ?? '')?.pts ?? []) { if (p.x > b.x + b.w && p.x <= b.x + b.w + REVEAL_RUN) x1 = Math.max(x1, p.x + 8); if (p.x < b.x && p.x >= b.x - REVEAL_RUN) x0 = Math.min(x0, p.x - 8); }
+  }
+  revealRect({ x: x0, y: b.y, w: x1 - x0, h: Math.min(b.h, 300) });
 }
+/** v13 fix 1: how far beside a picked card its own lines' runs are kept in view (map units). */
+const REVEAL_RUN = 72;
 
 /* ---------- selection & panel ---------- */
 let pendingRecord: string | null = null;
@@ -6646,7 +6763,7 @@ function fvPop(o: Opened, v: FirstView, r: FirstViewRecord | null): HTMLElement 
     alts.length ? h('p', { class: 'fv-t' }, '기록의 다른 중심') : h('p', { class: 'fv-t fv-fine' }, '기록에서 다른 중심을 찾지 못했어요.'),
     alts.length ? h('ul', { class: 'fv-alts' }, ...alts.map(a => { const q = a.line.length > REASON_CUT ? `${a.line.slice(0, REASON_CUT - 1)}…` : a.line;
       return h('li', {}, h('button', { type: 'button', class: 'fv-alt', title: `${FIRST_LENS_NAME[a.lens]} · “${a.line}” · ${a.parts.map(name).join(' · ')}`, onclick: () => applyFirstView(a) },
-        h('strong', {}, FIRST_LENS_NAME[a.lens]), ` · '${q}'${objectJosa(a.line)} 중심으로`)); })) : null,
+        h('strong', {}, (easy() ? EASY_LENS[a.lens] : null) ?? FIRST_LENS_NAME[a.lens]), ` · '${q}'${objectJosa(a.line)} 중심으로`)); })) : null,
     // 「추천 첫 보기로」 and 「강조 해제」 stay two actions, apart.
     h('div', { class: 'fv-acts' }, (v.reason || v.emphasis.parts.length) && differs(r, viewLens, v) ? fvRecButton(v) : null, fvOn() && (r!.parts.length || r!.lines.length) ? fvOffButton() : null));
 }
@@ -6747,7 +6864,18 @@ function applyLens() {
   for (const c of lensClasses(viewLens)) sp.classList.add(c);
   // Craft spec: a lens never fades a line by an opacity (no --lo-* any more): its background takes a solid tone in styles.css.
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { const on = b.dataset.lens === viewLens; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); (b as HTMLButtonElement).disabled = !lensUsable(b.dataset.lens as LensId); });
-  applyLegendMarks(); renderFirstView();
+  applyLegendMarks(); lensCueFallback(); renderFirstView();
+}
+/** v13 fix 1 (review of v13: in nanogpt's 층 two lines, sample.py → configurator.py and bench.py → configurator.py, had their only mark, the
+ * 시작과 반복 lens's 「···」, hidden under the lens shown, and read with nothing on them): a line with no mark seen under the lens shown keeps
+ * the cue another lens placed for it (its words in its tip and hover, as under that lens). */
+function lensCueFallback() {
+  const box = $('world').querySelector<HTMLElement>('.edge-labels'); if (!box) return;
+  const cues = [...box.querySelectorAll<HTMLElement>('.edge-cue.q-detail[data-lens]')]; if (!cues.length) return;
+  cues.forEach(c => c.classList.remove('lens-any'));
+  const seen = new Set<string>();
+  for (const el of box.children as HTMLCollectionOf<HTMLElement>) { if (el.hidden || getComputedStyle(el).display === 'none') continue; for (const k of [el.dataset.key, el.dataset.cue, el.dataset.badge, el.dataset.once, ...(el.dataset.also ?? '').split(' ')]) if (k) seen.add(k); }
+  for (const c of cues) { const k = c.dataset.cue ?? c.dataset.key; if (k && !seen.has(k) && $('world').querySelector(`.edge[data-key="${CSS.escape(k)}"]`)) { c.classList.add('lens-any'); seen.add(k); } }
 }
 /** The legend's marks: the picked item's targets outlined (.lg-pick), dimmed (.lg-dim) and hidden (.lg-hide, its room kept). */
 function applyLegendMarks() {
@@ -7603,7 +7731,7 @@ function growthClearGuide(still = false, again = false) {
   // v13 merge (층's top band: six cards stayed under the rename scene's guide at 1440): what is under the guide is read the same way before
   // and after a pan; a pan that still leaves something under it, or no pan at all, is no answer (the guide goes to the pane's top).
   const hits = (dx: number, dy: number) => blocks.some(b => b.x + dx < r.x + r.w && r.x < b.x + dx + b.w && b.y + dy < r.y + r.h && r.y < b.y + dy + b.h);
-  if (!hits(0, 0)) return;
+  if (!hits(0, 0)) { if (!still) cmpEdgeTidy(cards, view, hits); return; }
   const d = coverPan(cards, view, bands, kb && kb.kind !== 'ghost' ? toScreen(kb) : null, { x: area.w / 2, y: area.h / 2 }, r, blocks);
   // v11 (F7, F8 Q6 ③: the past view keeps the camera; review of v10: the guide stood over 「집 서버 FTP 수신 위치」 in the past view at 1280):
   // where the camera must stay, anything under the guide sends it to the pane's top instead of moving the map.
@@ -7612,6 +7740,18 @@ function growthClearGuide(still = false, again = false) {
   const lose = !!d && cmpFoot > 0 && lostBy(cards, view, growthBands(fr), d[0], d[1]) > 0;
   if (d && (d[0] || d[1]) && !still && !lose && !hits(d[0], d[1])) { camera = { ...camera, x: camera.x + d[0], y: camera.y + d[1] }; applyCamera(true); return; }
   guideInPane = true; el.hidden = true; syncMapArea(); renderGrowthPane();
+}
+/** v13 fix 1 (review of v13: comparing at 1280 in the map's own frame, 분류기 and 자동 배정 stood cut by the map's bottom edge above the
+ * footer): a card that mostly reads but is cut by the bottom edge of the comparison's area comes up whole by the least pan, when that pan
+ * puts nothing under the guide and cuts no card that reads whole at the top; otherwise the camera stays. */
+function cmpEdgeTidy(cards: readonly Rect[], view: Rect, hits: (dx: number, dy: number) => boolean) {
+  if (!cmpFoot) return;
+  const bottom = view.y + view.h, cut = cards.filter(c => c.y < bottom && c.y + c.h > bottom + 0.5 && c.y + c.h - bottom <= c.h * 0.6);
+  if (!cut.length) return;
+  const dy = -(Math.max(...cut.map(c => c.y + c.h - bottom)) + 8);
+  if (hits(0, dy)) return;
+  if (cards.some(c => c.y >= view.y - 0.5 && c.y + c.h <= bottom + 0.5 && c.y + dy < view.y)) return;
+  camera = { ...camera, y: camera.y + dy }; applyCamera(true);
 }
 /** v12: the bands over the map besides the guide (the compare line, the tools, the legend chip, the past view's banner), in the camera's frame. */
 function growthBands(fr: (q: DOMRect) => Rect): Rect[] {

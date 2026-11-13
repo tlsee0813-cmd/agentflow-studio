@@ -73,10 +73,10 @@ test('V12-3 two lines of one pair running opposite ways stand pairGap apart at b
 
 test('V12-4 the page routes for the fit: PAIR_PX on screen at the zoom the map fits at', async () => {
   const a = await app(), fit = fn(a, 'fitView'), pr = fn(a, 'pairRoute'), pw = fn(a, 'positionWorld');
-  assert.match(a, /const PAIR_PX = 12\.5;/);
+  assert.match(a, /const PAIR_PX = 13\.5;/, 'v13 fix 1: a little over the 12');
   assert.match(pr, /const want = Math\.max\(PAIR_PX \/ Math\.max\(camera\.k, 0\.05\), 12\);/);
   assert.match(fit, /if \(pairRoute\(explicit, animate\)\) return;/);
-  assert.match(pw, /routeEdges\(lay\.boxes, lay\.edges, \{ quick: dragQuick, pairGap: pairGapNow \}\)/);
+  assert.match(pw, /routeEdges\(lay\.boxes, lay\.edges, \{ quick: dragQuick, pairGap: pairGapNow, pitch: formPitch\(\) \}\)/, 'v13 fix 1: a 보기 asks its own pitch');
 });
 
 test('V12-5 a line\'s label is its words whole or its relation-detail cue: never cut, never one side of an OR', async () => {
@@ -125,7 +125,7 @@ test('V12-8 one width at rest for every relation not of the view (1.15px), the v
 test('V12-9 picking a card moves the camera only when the card itself would be covered, by the least amount', async () => {
   const rv = fn(await app(), 'reveal');
   assert.doesNotMatch(rv, /ends/, 'v11 panned 157px to bring the other ends beside the pane');
-  assert.match(rv, /revealRect\(\{ x: b\.x, y: b\.y, w: Math\.min\(b\.w, 420\), h: Math\.min\(b\.h, 300\) \}\);/);
+  assert.match(rv, /revealRect\(\{ x: x0, y: b\.y, w: x1 - x0, h: Math\.min\(b\.h, 300\) \}\);/, 'v13 fix 1: the card with its own runs beside it');
 });
 
 test('V12-10 the caption over unlinked cards counts for the fit; Enter on a mark keeps the hover closed while the map redraws', async () => {

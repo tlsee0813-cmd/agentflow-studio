@@ -3961,6 +3961,8 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .edge-labels > .edge-cue.q-detail[data-lens] { display: none; }
 .space.lens-data .edge-labels > .edge-cue.q-detail[data-lens="data"], .space.lens-start .edge-labels > .edge-cue.q-detail[data-lens="start"],
 .space.lens-scenario .edge-labels > .edge-cue.q-detail[data-lens="scenario"], .space.lens-compose .edge-labels > .edge-cue.q-detail[data-lens="compose"] { display: block; }
+/* v13 fix 1: a line with no mark seen under the lens shown keeps another lens's cue for it (app.ts lensCueFallback). */
+.edge-labels > .edge-cue.q-detail[data-lens].lens-any { display: block; }
 /* v11 (F8 Q6 ①): the count of parts the later map shows that the earlier did not, with what it is and what it cannot say, in its own row of
    the compare line (13px, the body's colour, at most two lines). */
 .growth-line:has(.gl-wrap) { height: auto; min-height: 32px; padding-top: 3px; padding-bottom: 3px; }
@@ -4064,9 +4066,13 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* The switch's motion: the lines (and what reads on them) step out, the cards fly, the camera eases, the lines come back. */
 .space.form-lines-out #world :is(.edges, .edge-labels, .lone-head, .band-head, .band-line, .ghost-head, .ff-chip, .hub-chip, .form-lane) { opacity: 0; transition: opacity .12s ease; }
 .space.form-lines-in #world :is(.edges, .edge-labels, .lone-head, .band-head, .band-line, .ghost-head, .ff-chip, .hub-chip, .form-lane) { transition: opacity .22s ease; }
-#world.form-fly [data-box] { transition: transform .52s cubic-bezier(.65,0,.35,1) !important; will-change: transform; }
-#world.animate.form-cam { transition: transform .52s cubic-bezier(.65,0,.35,1); }
-@media (prefers-reduced-motion: reduce) { #world.form-fly [data-box], #world.animate.form-cam { transition: none !important; } }
+/* v13 fix 1: the switch's flight layer (app.ts setMapForm): the cards as they were seen fly to their new places, the layer's camera to the new
+   frame, both moved by the browser while the new form is drawn under them; then the map eases from that frame into its own. */
+.world.form-flight { pointer-events: none; z-index: 2; }
+.world.form-flight.flying { transition: transform .52s cubic-bezier(.65,0,.35,1); will-change: transform; }
+.world.form-flight.flying > [data-box] { transition: transform .52s cubic-bezier(.65,0,.35,1) !important; will-change: transform; }
+#world.animate.form-cam { transition: transform .32s cubic-bezier(.2,.7,.2,1); }
+@media (prefers-reduced-motion: reduce) { .world.form-flight.flying, .world.form-flight.flying > [data-box], #world.animate.form-cam { transition: none !important; } }
 
 /* ---------- v13 opening and light (spec 1, 2: opening.ts, light.ts, flight.ts) ----------
    The opening: the map's cards and lines come in from the record's versions or its recorded chain; while it plays the map's marks, the tools,
@@ -4112,6 +4118,13 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .op-tick-l { position: absolute; top: 9px; left: 50%; translate: -50% 0; font-size: 10.5px; line-height: 12px; color: var(--text-4); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .op-tick:not(:first-child):not(.now):not(:nth-last-child(2)) .op-tick-l { visibility: hidden; }
 .op-tick.now .op-tick-l { color: var(--text); font-weight: var(--fw-name); }
+/* v13 fix 1: a version passed over (more versions than the time holds) stays a small hollow tick: never read as one that was shown. */
+.op-tick.skip { width: 6px; height: 6px; margin-left: -3px; top: 7px; border-color: var(--line-strong); background: var(--surface); }
+/* v13 fix 1: the rest after a recorded chain comes in receded (the chain lit, as a pick's rest recedes) and reaches full strength as it lands. */
+#space #world > .node.op-dim, #space #world > .frame.op-dim { opacity: .42; filter: saturate(.4); }
+#space #world .edge.op-dim { opacity: .3; }
+/* v13 fix 1: while it comes into being a card comes in within CARD_IN_MS (its lines draw once it is there, inside its beat). */
+#space.op-run #world > .node, #space.op-run #world > .frame { transition-duration: .18s, .18s, .18s, .18s, .2s, .2s, .18s; }
 .op-head { position: absolute; top: 4px; left: 0; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); transition: left .3s cubic-bezier(.2,.7,.2,1); }
 .op-cap { flex: none; white-space: nowrap; font-weight: var(--fw-name); color: var(--text); font-variant-numeric: tabular-nums; }
 .op-strip.no-cap .op-cap { display: none; }

@@ -393,7 +393,7 @@ export function crossings(at: ReadonlyMap<string, Pt>, size: ReadonlyMap<string,
 export interface PlanBox { id: string; x: number; y: number; w: number; h: number }
 export interface PlanStroke { key: string; from: string; to: string }
 export interface PlanChannel { xs: number[]; ys: number[] }
-export const PLAN_TRACK = 10, PLAN_MARGIN = 16, PLAN_OUTER = 72;
+export const PLAN_TRACK = 10, PLAN_MARGIN = 28, PLAN_OUTER = 72;
 export function planChannels(boxes: readonly PlanBox[], strokes: readonly PlanStroke[], under: ReadonlySet<string> = new Set()): Map<string, PlanChannel> {
   const out = new Map<string, PlanChannel>(); if (boxes.length < 2) return out;
   const byId = new Map(boxes.map(b => [b.id, b]));

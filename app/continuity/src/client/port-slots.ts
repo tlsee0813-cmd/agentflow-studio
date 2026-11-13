@@ -19,7 +19,7 @@ export function pinSlots(y: number, n: number): number[] {
  * keeps `at` exactly. Beauty v5 (hub lanes): with gates (where each free end's line leaves the card's neighbourhood, in the ends' order)
  * and fixedGates (the pinned ends'), the run round the pins is the one that puts the fewest free ends on the wrong side of a pin for
  * where their lines go (a line held at a pin otherwise crosses every free line that passes it), then the nearest the contact point. */
-export function sideSlots(n: number, top: number, len: number, at: number, fixed: readonly number[] = [], inset = PORT_INSET, gates: readonly number[] = [], fixedGates: readonly number[] = []): number[] {
+export function sideSlots(n: number, top: number, len: number, at: number, fixed: readonly number[] = [], inset = PORT_INSET, gates: readonly number[] = [], fixedGates: readonly number[] = [], pitch = PORT_PITCH): number[] {
   if (n <= 0) return [];
   if (fixed.length) {
     // Round the pins: the free ends take slots PORT_PITCH (else PORT_FLOOR) clear of every pin and of each other, in their order: the n
@@ -55,7 +55,8 @@ export function sideSlots(n: number, top: number, len: number, at: number, fixed
   const room = len - 2 * inset;
   // PORT_PITCH apart while the side holds them (n within its capacity); over it, closer, PORT_FLOOR at the least inside the corners, then
   // over the corners' room too (4 from the ends) before closer still.
-  const gap = Math.max(4, room / (n - 1) >= PORT_FLOOR ? Math.min(PORT_PITCH, room / (n - 1)) : Math.min(PORT_FLOOR, (len - 8) / (n - 1)));
+  // v13 fix 1: pitch (PORT_PITCH unless the caller asks wider: a 보기's lines, their heads apart on screen) while the side holds it.
+  const gap = Math.max(4, room / (n - 1) >= PORT_FLOOR ? Math.min(Math.max(PORT_PITCH, pitch), room / (n - 1)) : Math.min(PORT_FLOOR, (len - 8) / (n - 1)));
   const span = (n - 1) * gap, start = span > room ? top + (len - span) / 2 : Math.min(Math.max(at - span / 2, top + inset), top + len - inset - span);
   const s2 = grid(start), g2 = Math.floor(gap * 2) / 2;
   return Array.from({ length: n }, (_, i) => s2 + i * g2);

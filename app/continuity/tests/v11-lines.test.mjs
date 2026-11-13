@@ -152,6 +152,6 @@ test('V11-10 the static focus routes its own few lines at twice the map\'s pitch
   // Taken only when no worse a drawing than the map's own pitch (crossings, detours, length): here it is.
   assert.deepEqual([...R.focusRoutes(boxes, edges)].map(([k, r]) => [k, r.d]), [...half].map(([k, r]) => [k, r.d]));
   assert.equal(R.FOCUS_ROUTE_LONGER, 1.15);
-  assert.ok(src.includes('focusRoutes(lay.boxes, set, c, { pairGap: pairGapNow })'));
+  assert.ok(src.includes('focusRoutes(lay.boxes, set, c, { pairGap: pairGapNow, pitch: formPitch() })') /* v13 fix 1: a 보기's pitch */);
   assert.match(src, /const c = folding && !selected && !scView && set\.length <= FOCUS_ROUTE_MAX \? FOCUS_ROUTE_SCALE : 1;/, 'one fixed scale: a route that followed the zoom would move the fit that reads it');
 });

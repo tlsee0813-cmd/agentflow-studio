@@ -165,11 +165,12 @@ test('V13F-9 the switch flies: the cards from where they are drawn, the camera f
   assert.match(s, /if \(reducedMotion\(\) \|\| world\.hidden\) \{[^\n]*renderSpace\('keep'\); fitView\(false\);/);
   assert.match(s, /new DOMMatrixReadOnly\(getComputedStyle\(el\)\.transform\)/, 'a flight under way starts from where the card is');
   assert.match(s, /sp\.classList\.add\('form-lines-out'\)/);
-  assert.match(s, /world\.style\.transform = `translate\(\$\{cam0\.x\}px, \$\{cam0\.y\}px\) scale\(\$\{cam0\.k\}\)`;/);
+  // v13 fix 1: the flight's layer starts where the camera stood (the map takes its place where it lands).
+  assert.match(s, /layer\.style\.transform = `translate\(\$\{cam0\.x\}px, \$\{cam0\.y\}px\) scale\(\$\{cam0\.k\}\)`;/);
   assert.match(s, /formTimers\.forEach\(t => clearTimeout\(t\)\)/, 'a new switch interrupts the last');
   assert.match(a, /!formSwitching \/\* v13 forms hook 4/, 'no second slide under the flight');
-  assert.match(c, /#world\.form-fly \[data-box\] \{ transition: transform \.52s/);
-  assert.match(c, /@media \(prefers-reduced-motion: reduce\) \{ #world\.form-fly \[data-box\], #world\.animate\.form-cam \{ transition: none !important; \} \}/);
+  assert.match(c, /\.world\.form-flight\.flying > \[data-box\] \{ transition: transform \.52s/);
+  assert.match(c, /@media \(prefers-reduced-motion: reduce\) \{ \.world\.form-flight\.flying, \.world\.form-flight\.flying > \[data-box\], #world\.animate\.form-cam \{ transition: none !important; \} \}/);
   assert.equal(F.FORM_FLY_MS, 520);
   assert.ok(F.FORM_FLY_MS >= 450 && F.FORM_FLY_MS <= 600);
   assert.match(a, /\(e\.key === 'v' \|\| e\.key === 'V'\)[^\n]*opened && !openState[^\n]*\n\s*if \(cycleMapForm\(\)\)/, 'V on the map');

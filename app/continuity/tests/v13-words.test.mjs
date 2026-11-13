@@ -48,7 +48,7 @@ test('V13C-2 a line label at 쉽게: plain words as written, a code parenthetica
 test('V13C-3 the app\'s own words at 쉽게: plainer lens and legend names, counts behind the legend chip, a part\'s mark, no leaning phrase', () => {
   assert.equal(W.EASY_LENS.start, '시작과 반복');
   assert.equal(W.EASY_LENS.state, '상태와 모름');
-  assert.equal(W.easyLegendChip('compose', ['참여자', '처리', '저장']), '구성 · 참여자 · 처리 ···');
+  assert.equal(W.easyLegendChip('compose', ['참여자', '처리', '저장']), '역할 · 참여자 · 처리 ···');
   assert.equal(W.easyLegendChip('start', ['제어 선', '촉발·관문']), '시작과 반복 · 제어 선 · 시작 신호와 관문');
   assert.equal(W.easyKind('구성 · 안쪽 6'), '구성');
   assert.equal(W.easyKind('사람 · 실행 위치 · 안쪽 2'), '사람 · 실행 위치');

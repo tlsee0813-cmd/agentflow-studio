@@ -18,8 +18,17 @@ import { easeInOut } from './flight.js';
 /* ---------- timing ---------- */
 /** From the first frame to a quiet map, at most (the versions' rebuild included; a beat never goes under BEAT_MIN_MS). */
 export const OPEN_TOTAL_MS = 4500;
-export const OPEN_START_MS = 200, BEAT_MIN_MS = 450, BEAT_MAX_MS = 600, GROWTH_MAX_MS = 3300;
+export const OPEN_START_MS = 120, BEAT_MIN_MS = 450, BEAT_MAX_MS = 600, GROWTH_MAX_MS = 3300;
 export const STEP_MS = 250, CHAIN_MAX_MS = 2200, REST_MS = 500, FADE_MS = 600, LINE_MS = 250, SETTLE_MS = 350, TYPE_MAX_MS = 600;
+/** v13 fix 1: the typing's share of the budget (the sentence types at 8 ms a character up to this; TYPE_MAX_MS stays the spec's bound). */
+export const TYPE_PLAN_MS = 450, TYPE_CHAR_MS = 8;
+/** v13 fix 1 (review of v13: lines drawn while their cards were still fading in ended in the air): a version's or a step's lines start once
+ * its cards have come in (the cards' fade), never sooner. */
+export const CARD_IN_MS = 200;
+/** v13 fix 1 (review of v13: the opening told an order the record never stated): the chain an opening walks is the one 보기 calls a flow —
+ * a recorded order (map-forms recordedChain: a scenario, the summary sentence read as 「기록이 설명한 흐름」, an ordered 첫 구조 줄) of this
+ * many steps or more on the cards drawn (map-forms FLOW_OFFER_STEPS); anything less fades in together, with no caption. */
+export const CHAIN_MIN_STEPS = 3;
 /** The settle's start: the camera this much closer, coming back to the fit. */
 export const SETTLE_FROM = 1.03;
 /** When the map's own frame shows only part of it (a large map in a small window opens on its first flow), it grows in the whole view and
@@ -53,6 +62,8 @@ export interface OpeningInput {
 export interface Ghost { box: string; part: string; name: string }
 export interface Beat {
   at: number; ms: number;
+  /** v13 fix 1: boxes and lines that come in receded on this beat (the rest after a recorded chain): they reach full strength as it lands. */
+  dim?: string[]; dimLines?: string[];
   /** Boxes seen after this beat; their shown names where a version's name differs from the live one; the outlines standing; the lines seen. */
   show: string[]; names: [string, string][]; ghosts: Ghost[]; lines: string[];
   version: number | null; caption: string | null;
@@ -107,7 +118,7 @@ export function versionStates(inp: OpeningInput): VState[] {
  * or more each, chosen by how much they change when there are more. */
 export function growthPlan(inp: OpeningInput, budget = OPEN_TOTAL_MS): OpeningPlan {
   const st = versionStates(inp), versions = st.map(s => s.n);
-  const most = Math.min(GROWTH_MAX_MS, budget - OPEN_START_MS - SETTLE_MS - TYPE_MAX_MS - 120);
+  const most = Math.min(GROWTH_MAX_MS, budget - OPEN_START_MS - SETTLE_MS - TYPE_PLAN_MS - 80);
   const changed: VState[] = []; for (const s of st) if (!changed.length || !sameState(changed.at(-1)!, s)) changed.push(s);
   const last = st.at(-1)!, lastSame = changed.at(-1) !== last;
   const room = Math.max(2, Math.floor((most - (lastSame ? LAST_TICK_MS : 0)) / BEAT_MIN_MS));
@@ -129,7 +140,7 @@ export function growthPlan(inp: OpeningInput, budget = OPEN_TOTAL_MS): OpeningPl
 export function chainPlan(inp: OpeningInput): OpeningPlan | null {
   const boxes = new Map(inp.boxes.map(b => [b.id, b]));
   const steps = (inp.chain ?? []).map(s => s.filter(id => boxes.has(id))).filter(s => s.length);
-  if (steps.length < 2) return null;
+  if (steps.length < CHAIN_MIN_STEPS) return null;
   const ms = Math.round(Math.min(STEP_MS, CHAIN_MAX_MS / steps.length));
   const beats: Beat[] = []; let at = OPEN_START_MS; const seen: string[] = [];
   for (const s of steps) {
@@ -138,7 +149,9 @@ export function chainPlan(inp: OpeningInput): OpeningPlan | null {
     beats.push({ at, ms, show: [...show], names: [], ghosts: [], lines: [], version: null, caption: CHAIN_CAPTION });
     at += ms;
   }
-  beats.push({ at, ms: REST_MS, show: inp.boxes.map(b => b.id), names: [], ghosts: [], lines: inp.edges.map(e => e.key), version: null, caption: CHAIN_CAPTION });
+  // The rest comes in together, receded (as a pick's rest recedes: the chain stays lit), and reaches full strength as the map lands.
+  const lit = withContainers(seen, boxes);
+  beats.push({ at, ms: REST_MS, show: inp.boxes.map(b => b.id), names: [], ghosts: [], lines: inp.edges.map(e => e.key), version: null, caption: CHAIN_CAPTION, dim: inp.boxes.map(b => b.id).filter(id => !lit.has(id)) });
   at += REST_MS;
   return { kind: 'chain', beats, versions: [], end: at };
 }
@@ -146,7 +159,9 @@ export function chainPlan(inp: OpeningInput): OpeningPlan | null {
 export function chainLines(plan: OpeningPlan, edges: readonly { key: string; ids: readonly string[]; from: string; to: string }[], rels: readonly string[]): OpeningPlan {
   if (plan.kind !== 'chain') return plan;
   const rs = new Set(rels), mine = edges.filter(e => e.ids.some(id => rs.has(id)));
-  return { ...plan, beats: plan.beats.map((b, i) => (i === plan.beats.length - 1 ? b : { ...b, lines: mine.filter(e => b.show.includes(e.from) && b.show.includes(e.to)).map(e => e.key) })) };
+  const steps = plan.beats.at(-2)?.show ?? [];
+  const chainKeys = new Set(mine.filter(e => steps.includes(e.from) && steps.includes(e.to)).map(e => e.key));
+  return { ...plan, beats: plan.beats.map((b, i) => (i === plan.beats.length - 1 ? { ...b, dimLines: b.lines.filter(k => !chainKeys.has(k)) } : { ...b, lines: mine.filter(e => b.show.includes(e.from) && b.show.includes(e.to)).map(e => e.key) })) };
 }
 export function fadePlan(inp: OpeningInput): OpeningPlan {
   return { kind: 'fade', beats: [{ at: OPEN_START_MS, ms: FADE_MS, show: inp.boxes.map(b => b.id), names: [], ghosts: [], lines: inp.edges.map(e => e.key), version: null, caption: null }], versions: [], end: OPEN_START_MS + FADE_MS };
@@ -158,7 +173,23 @@ export function openingPlan(inp: OpeningInput & { edges: readonly { key: string;
   return c ? chainLines(c, inp.edges, inp.chainRels) : fadePlan(inp);
 }
 /** The whole length from the first frame to a quiet map (the typing at its longest). */
-export const openingLength = (p: OpeningPlan): number => p.end + SETTLE_MS + TYPE_MAX_MS;
+export const openingLength = (p: OpeningPlan): number => p.end + SETTLE_MS + TYPE_PLAN_MS;
+/** v13 fix 1: the typing's length for a sentence of n characters (TYPE_CHAR_MS each, TYPE_PLAN_MS at most; within TYPE_MAX_MS). */
+export const typeLength = (n: number): number => Math.min(TYPE_PLAN_MS, n * TYPE_CHAR_MS);
+/** v13 fix 1 (review of v13: versions passed over still read as passed on the strip): each tick's state at a shown version — 'now', 'past'
+ * (a shown version before it), 'skip' (a version passed over: drawn hollow, never as seen), or 'ahead'. */
+export function tickState(v: number, now: number, shown: ReadonlySet<number>): 'now' | 'past' | 'skip' | 'ahead' {
+  if (v === now) return 'now';
+  if (!shown.has(v)) return 'skip';
+  return v < now ? 'past' : 'ahead';
+}
+/** v13 fix 1 (review of v13: a wheel that ended the opening also zoomed the map, a click also picked what was under it): how an input that
+ * ends the opening is taken. 'eat': it only ends it (its default and the map's own handling stopped); 'pass': it ends it and does what it
+ * does (a key with a modifier, a press outside the map's area). */
+export function skipTake(type: string, inMap: boolean, mod: boolean): 'eat' | 'pass' {
+  if (type === 'keydown') return mod ? 'pass' : 'eat';
+  return inMap ? 'eat' : 'pass';
+}
 
 /* ---------- remembering what was seen (this browser only) ---------- */
 export function readSeen(get: (k: string) => string | null): Record<string, string> {
@@ -206,7 +237,7 @@ export function createOpening(host: OpeningHost) {
   let factor = 1;
   const strip = () => document.getElementById('op-strip');
   function clearClasses(world: HTMLElement) {
-    world.querySelectorAll('.op-out, .op-in').forEach(el => el.classList.remove('op-out', 'op-in'));
+    world.querySelectorAll('.op-out, .op-in, .op-dim').forEach(el => el.classList.remove('op-out', 'op-in', 'op-dim'));
     world.querySelectorAll<SVGPathElement>('.edge-line.op-draw').forEach(p => { p.classList.remove('op-draw'); p.style.removeProperty('stroke-dasharray'); p.style.removeProperty('stroke-dashoffset'); p.style.removeProperty('transition'); p.style.removeProperty('marker-end'); p.style.removeProperty('marker-start'); });
     world.querySelectorAll('.op-ghost').forEach(el => el.remove());
   }
@@ -293,6 +324,8 @@ export function createOpening(host: OpeningHost) {
     const world = host.world(), b = plan.beats[i]!, show = new Set(b.show), lines = new Set(b.lines);
     for (const id of show) if (!prev.show.has(id)) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.remove('op-out');
     for (const id of prev.show) if (!show.has(id)) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('op-out');
+    for (const id of b.dim ?? []) world.querySelector(`[data-box="${CSS.escape(id)}"]`)?.classList.add('op-dim');
+    for (const k of b.dimLines ?? []) world.querySelector(`.edge[data-key="${CSS.escape(k)}"]`)?.classList.add('op-dim');
     // Names: the version's own where it differs from the live one, else the live one back.
     const named = new Map(b.names); for (const [el] of run!.names) { const box = el.closest<HTMLElement>('[data-box]')?.dataset.box; if (box && !named.has(box)) setName(world, box, null); }
     for (const [box, name] of named) setName(world, box, name);
@@ -302,7 +335,7 @@ export function createOpening(host: OpeningHost) {
     for (const g of b.ghosts) { const k = `${g.box}|${g.part}`; let el = prev.ghosts.get(k); if (!el) { el = ghostEl(world, g) ?? undefined; if (el) prev.ghosts.set(k, el); } if (el && el.classList.contains('around') !== show.has(g.box) || (el && !el.dataset.fit)) { el.dataset.fit = '1'; fitGhost(el, show.has(g.box)); } }
     // Lines after their cards.
     const newLines = [...lines].filter(k => !prev.lines.has(k));
-    run!.timers.push(window.setTimeout(() => { for (const k of newLines) { const g = world.querySelector<SVGGElement>(`.edge[data-key="${CSS.escape(k)}"]`); if (g) drawLine(g); } }, Math.min(220, Math.round(b.ms * 0.4))));
+    run!.timers.push(window.setTimeout(() => { for (const k of newLines) { const g = world.querySelector<SVGGElement>(`.edge[data-key="${CSS.escape(k)}"]`); if (g) drawLine(g); } }, CARD_IN_MS));
     for (const k of prev.lines) if (!lines.has(k)) world.querySelector(`.edge[data-key="${CSS.escape(k)}"]`)?.classList.add('op-out');
     prev.show = show; prev.lines = lines;
     const st = strip();
@@ -312,7 +345,8 @@ export function createOpening(host: OpeningHost) {
       if (b.version !== null && plan.versions.length) {
         const n = plan.versions.length, at = plan.versions.indexOf(b.version), head = st.querySelector<HTMLElement>('.op-head');
         if (head) head.style.left = `${n > 1 ? (at / (n - 1)) * 100 : 50}%`;
-        st.querySelectorAll<HTMLElement>('.op-tick').forEach(t => { const v = Number(t.dataset.n); t.classList.toggle('past', v <= b.version!); t.classList.toggle('now', v === b.version); });
+        const shown = new Set(plan.beats.map(x => x.version).filter((x): x is number => x !== null));
+        st.querySelectorAll<HTMLElement>('.op-tick').forEach(t => { const s = tickState(Number(t.dataset.n), b.version!, shown); t.classList.toggle('past', s === 'past' || s === 'now'); t.classList.toggle('now', s === 'now'); t.classList.toggle('skip', s === 'skip'); });
       }
     }
   }
@@ -331,9 +365,11 @@ export function createOpening(host: OpeningHost) {
       r.typing = { el: sent, nodes, texts };
     }
     host.space().classList.add('op-land'); host.space().classList.remove('op-run');
+    // The receded rest reaches full strength with the settle.
+    host.world().querySelectorAll('.op-dim').forEach(el => el.classList.remove('op-dim'));
     strip()?.classList.add('op-gone');
     const t0 = performance.now(), total = r.typing ? r.typing.texts.join('').length : 0;
-    const typeMs = Math.min(TYPE_MAX_MS, total * 12), landMs = r.over ? LAND_GLIDE_MS : SETTLE_MS;
+    const typeMs = typeLength(total), landMs = r.over ? LAND_GLIDE_MS : SETTLE_MS;
     const step = (now: number) => {
       if (!run) return;
       const t = now - t0;
@@ -346,7 +382,7 @@ export function createOpening(host: OpeningHost) {
     };
     r.raf = requestAnimationFrame(step);
   }
-  function play(key: string, version: string) {
+  function play(key: string, version: string, since?: number) {
     if (run) finish(false);
     const world = host.world(), sp = host.space();
     if (!world.querySelector(':scope > .node, :scope > .frame')) return false;
@@ -359,8 +395,27 @@ export function createOpening(host: OpeningHost) {
     void world.offsetWidth; sp.classList.remove('op-setup');
     run = { timers: [], raf: 0, off: () => {}, key, version, names: new Map(), typing: null, over: host.overview(), blend: 0 };
     factor = SETTLE_FROM; host.rewrite();
-    const t0 = performance.now();
-    const off = (() => { const h = () => finish(true); const types = ['pointerdown', 'wheel', 'keydown', 'touchstart']; for (const t of types) window.addEventListener(t, h, { capture: true, passive: true }); return () => { for (const t of types) window.removeEventListener(t, h, true); }; })();
+    // The budget counts from when the map was asked for (its own drawing took part of it), never from the stage alone.
+    const t0 = since !== undefined && since <= performance.now() ? since : performance.now();
+    const off = (() => {
+      // An input that ends it is taken whole where it would act on the map (no zoom from the wheel, no pick from the press, no key's
+      // action); a press outside the map's area (the header's controls) and a key with a modifier also do what they do.
+      let eatUntil = 0;
+      const inMap = (e: Event) => { const t = e.target as Element | null; return !!t && typeof t.closest === 'function' && !!t.closest('#viewport'); };
+      const h = (e: Event) => {
+        const ke = e as KeyboardEvent, mod = e.type === 'keydown' && (ke.ctrlKey || ke.metaKey || ke.altKey || /^F\d+$/.test(ke.key ?? ''));
+        if (e.type === 'keydown' && ['Shift', 'Control', 'Alt', 'Meta'].includes(ke.key)) { finish(true); return; }
+        if (skipTake(e.type, inMap(e), mod) === 'eat') { e.stopImmediatePropagation(); if (e.cancelable) e.preventDefault(); if (e.type !== 'keydown' && e.type !== 'wheel') eatUntil = performance.now() + 700; }
+        finish(true);
+      };
+      // The rest of the press that ended it (its release and click) is taken too, on the map only.
+      const tail = (e: Event) => { if (performance.now() < eatUntil && inMap(e)) { e.stopImmediatePropagation(); if (e.cancelable) e.preventDefault(); } };
+      const types = ['pointerdown', 'mousedown', 'wheel', 'keydown', 'touchstart'], tails = ['pointerup', 'mouseup', 'click', 'dblclick'];
+      for (const t of types) window.addEventListener(t, h, { capture: true, passive: false });
+      for (const t of tails) window.addEventListener(t, tail, { capture: true, passive: false });
+      const drop = () => { for (const t of types) window.removeEventListener(t, h, true); };
+      return () => { drop(); window.setTimeout(() => { for (const t of tails) window.removeEventListener(t, tail, true); }, 750); };
+    })();
     run.off = off;
     // The plan once the stage is on screen (rebuilding a long history's versions takes a moment), in the time left of OPEN_TOTAL_MS.
     run.raf = requestAnimationFrame(() => { run?.timers.push(window.setTimeout(() => {
@@ -385,10 +440,10 @@ export function createOpening(host: OpeningHost) {
       return factor === 1 && base === c ? c : { ...c, ...settled(base, factor, vw, vh) };
     },
     /** A map arriving fresh: plays when this version of it was not seen here (and motion is welcome). */
-    arrive(key: string, version: string): boolean {
+    arrive(key: string, version: string, since?: number): boolean {
       if (host.reduced()) return false;
       const s = host.storage(); if (s && seenNow(readSeen(s.get), key, version)) return false;
-      return play(key, version);
+      return play(key, version, since);
     },
     /** 다시 보기. */
     replay(key: string, version: string): boolean { if (host.reduced()) return false; return play(key, version); },

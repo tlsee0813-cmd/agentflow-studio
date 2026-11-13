@@ -62,7 +62,9 @@ export function plainLabel(text: string): string | null {
 
 /* ---------- the app's own words at 쉽게 ---------- */
 /** The lens buttons' names at 쉽게 (their tips keep the full names): a pair joined by 「·」 reads as two words of a list there. */
-export const EASY_LENS: Readonly<Record<string, string>> = { compose: '구성', data: '데이터', start: '시작과 반복', state: '상태와 모름', scenario: '시나리오' };
+/** v13 fix 1 (review of v13: 「구성」 named both the whole map's 보기 and this lens, and both read pressed at once): the lens that colours the
+ * cards by what part each plays is 「역할」 at 쉽게 (its tip keeps 「구성과 역할」). */
+export const EASY_LENS: Readonly<Record<string, string>> = { compose: '역할', data: '데이터', start: '시작과 반복', state: '상태와 모름', scenario: '시나리오' };
 /** The legend's family names at 쉽게. */
 export const EASY_FAMILY: Readonly<Record<string, string>> = { '촉발·관문': '시작 신호와 관문', '상태·공백': '상태와 모름', '시작·반복': '시작과 반복' };
 /** v13 merge (spec 3 × 4: 쉽게 in every 보기): the band words of 층 at 쉽게, each unit of a band's words (「저장 · 관문」) in the legend's
