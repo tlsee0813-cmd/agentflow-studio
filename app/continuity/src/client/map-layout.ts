@@ -964,12 +964,26 @@ export interface LabelSpot { key: string; x: number; y: number; w: number; h: nu
   rank?: number }
 /** Verbs that would touch (one box grown by pad): the one higher in the protected order keeps its place, then the one nearer
  * its own end; the other takes its next free place (spots may hold several per key, nearest first wins) or, with none left, is
- * left off the map. */
+ * left off the map unless the one in its way can step to another place of its own (v10). */
 export function resolveLabels<T extends LabelSpot>(spots: T[], pad = 6): { kept: T[]; dropped: string[] } {
   const kept: T[] = [], done = new Set<string>();
-  for (const s of [...spots].sort((p, q) => (p.rank ?? 0) - (q.rank ?? 0) || p.dist - q.dist)) {
-    if (done.has(s.key) || kept.some(k => s.x - pad < k.x + k.w && k.x < s.x + s.w + pad && s.y - pad < k.y + k.h && k.y < s.y + s.h + pad)) continue;
+  const touch = (s: T, k: T) => s.x - pad < k.x + k.w && k.x < s.x + s.w + pad && s.y - pad < k.y + k.h && k.y < s.y + s.h + pad;
+  const order = [...spots].sort((p, q) => (p.rank ?? 0) - (q.rank ?? 0) || p.dist - q.dist);
+  for (const s of order) {
+    if (done.has(s.key) || kept.some(k => touch(s, k))) continue;
     kept.push(s); done.add(s.key);
+  }
+  // v10 (review of v9: a condition's place beside its line took 「보고서 문자열」 off the map): a label left with no place takes one of its own
+  // whose only obstacle is one kept label that has another free place of its own: that label moves there (it stays on the map, at a
+  // place it offered), so both read. Nearest places first; a move never takes a third label off.
+  for (const key of [...new Set(order.map(s => s.key))].filter(k => !done.has(k))) {
+    for (const s of order.filter(x => x.key === key)) {
+      const hit = kept.filter(k => touch(s, k)); if (hit.length !== 1) continue;
+      const b = hit[0]!, rest = kept.filter(k => k !== b);
+      const alt = order.find(x => x.key === b.key && x !== b && !touch(x, s) && !rest.some(k => touch(x, k)));
+      if (!alt) continue;
+      kept.splice(kept.indexOf(b), 1, alt); kept.push(s); done.add(key); break;
+    }
   }
   return { kept, dropped: [...new Set(spots.map(s => s.key))].filter(k => !done.has(k)) };
 }

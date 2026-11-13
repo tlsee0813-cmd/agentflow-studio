@@ -432,7 +432,8 @@ test('FF-27 the fold never leaves a card with no line shown; the chip sits on it
   assert.equal(foldedLines(folds, new Set()).byHub.get('a').length, 6, 'N is exactly what it hides');
   assert.equal(hubFolds(['a'], lines.filter(l => !l.key.startsWith('k'))).size, 0, 'every end alone: nothing folds');
   const a = focusBlock(await app());
-  assert.match(a, /put\(chip, \(w, hh\) => chipSpots\(\[\{ x: b\.x \+ b\.w - w - m, y: b\.y \+ b\.h - hh \/ 2 \}/, 'straddling its card\'s lower edge first (where no title is)');
+  // v10 (review of v9): just off its card's edge (first-flow hubChipSpots, tested in v10-maps), never across it, a place no line runs under first.
+  assert.match(a, /put\(chip, \(w, hh\) => chipSpots\(hubChipSpots\(b, w, hh, g\), w, hh, titles\), 260 \* inv, own, r => /, 'off its card\'s lower edge first (where no title is)');
   assert.match(a, /\?\? \(own \? all\[0\] : undefined\)/, 'a chip is never left off');
   assert.match(a, /const free = \(r: Rect, own\?: Rect\) => onScreen\(r\) && /, 'a note is never placed off the window\'s sides');
 });
@@ -444,8 +445,9 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   // Review of v5 focus 3 (A2, A3) changed exactly this: each form measured where it stands for that camera (beside the title).
   // Polish 5: the sentence's forms (whole, one line) with the give and then with room above, before the sentence steps back.
   assert.match(a, /const FT_SAID = \[null, 'ft-one'\] as const;/, 'whole, then its sentence on one line');
-  // v9 (review of v8): each form by the give and then by the free height before the next (two lines before one).
-  assert.match(a, /if \(at\.whole\) for \(const form of FT_SAID\) \{\n    if \(give\(\[form\]\)\) \{ done = true; break; \}/);
+  // v9 (review of v8): each form by the give and then by the free height before the next (two lines before one); v10: first-flow
+  // sentenceRoom (its order tested in v10-maps), the free height measured per column (mapSlack).
+  assert.match(a, /const room = sentenceRoom\(FT_SAID, at\.k, least, /);
   assert.match(a, /if \(!done && at\.whole\) \{ frameView\(explicit, base\); done = give\(\['ft-under'\]\); \}/, 'stepped back only when no room shows the sentence');
   assert.ok(a.includes('if (!done && !at.whole) for (const form of FT_SAID) { frameView(explicit, base + ftBox(form, camera, null).h + 8); if (clear(form, camera.k)) { done = true; break; } }'), 'a frame on the first flow keeps the sentence the same way (first-user judge 9)');
   // Review of the growth view (verifier, the fixture map at 1280): the one-line form may also stand narrower, clear of a caption at its end.

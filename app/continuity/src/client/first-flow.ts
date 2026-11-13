@@ -504,6 +504,15 @@ export function foldedLines(folds: ReadonlyMap<string, readonly string[]>, open:
 }
 /** The chip's words: folded, how many; open, 「접기」. */
 export const foldWord = (n: number, open: boolean): string => (open ? '접기' : `다른 연결 ${n}개`);
+/** v10 (review of v9: 「다른 연결 7개」 and 「다른 연결 8개」 sat across their card's edge, by another line's head): a hub chip's places off its
+ * card b (gap units clear of its edge, never across it), nearest the card's lower right first: under it at its right and its left end, over
+ * it at its right and left end, beside its lower corners, then one row further under and over. */
+export function hubChipSpots(b: { x: number; y: number; w: number; h: number }, w: number, hh: number, gap: number): { x: number; y: number }[] {
+  const below = b.y + b.h + gap, above = b.y - hh - gap;
+  return [{ x: b.x + b.w - w, y: below }, { x: b.x, y: below }, { x: b.x + b.w - w, y: above }, { x: b.x, y: above },
+    { x: b.x + b.w + gap, y: b.y + b.h - hh }, { x: b.x - w - gap, y: b.y + b.h - hh },
+    { x: b.x + b.w - w, y: below + hh + gap }, { x: b.x, y: below + hh + gap }, { x: b.x + b.w - w, y: above - hh - gap }, { x: b.x, y: above - hh - gap }];
+}
 /** A hub chip's places (w × hh each), in order, without those over a card's title (2 units of room); when every place meets a title, all of
  * them (the chip still stands at its card). */
 export function chipSpots(spots: readonly { x: number; y: number }[], w: number, hh: number, titles: readonly { x: number; y: number; w: number; h: number }[]): { x: number; y: number }[] {
@@ -529,4 +538,31 @@ export function switcherText(f: FirstFlow, name: (id: string) => string = id => 
     what = `${shown.join(' → ')}${c.more ? ` 외 연결 ${c.more}개` : ''}`;
   }
   return `${FLOW_CONTROL}: ${what} · ${sourceText(f)}${f.candidates.length > 1 ? ` · 보기 ${f.index + 1}/${f.candidates.length}` : ''}`;
+}
+
+/** v10 (review of v9: a map's 근거 문장 shrank to 「…실행기로 나뉘고…」 once a verb's 「…고」 became a clause end): a top-line text's
+ * cut: its longest clause cut that fits, unless the longest whole-word cut that fits keeps much more of it (a clause cut holds at least
+ * keep of that cut's characters; 0: any clause cut that fits comes first); else that whole-word cut; null when nothing fits. clauses and
+ * words longest first (shared clauseCuts); fits measures one cut (a shorter cut fits wherever a longer one does). The basis line under
+ * the switcher takes CLAUSE_KEEP; the sentence 0. */
+export const CLAUSE_KEEP = 0.7;
+export function topCut(clauses: readonly string[], words: readonly string[], fits: (t: string) => boolean, keep = CLAUSE_KEEP): string | null {
+  let lo = 0, hi = words.length - 1, word: string | null = null;
+  while (lo <= hi) { const mid = (lo + hi) >> 1; if (!fits(words[mid]!)) lo = mid + 1; else { word = words[mid]!; hi = mid - 1; } }
+  const n = (t: string) => [...t.replace(/[…\s]+$/, '')].length;
+  const clause = clauses.find(c => (word === null || n(c) >= keep * n(word)) && fits(c)) ?? null;
+  return clause ?? word;
+}
+/** v10 (review of v9: at 1280 two maps kept their top sentence on one cut line while about 80px was free under the map): where a form of
+ * the top line stands clear of the map at the fit, the forms in order (its two lines before its one line): at the frame's scale k0 or a
+ * little smaller (down to least, by GIVE_STEP), then moved down within the free height under the map (slack(k), screen pixels, 8 at a
+ * time) at that scale or a little smaller (by MOVE_STEP), the largest scale and the least move first. clear(form, k, d): the form stands
+ * clear with the map at scale k moved down d. null: no form finds room so. */
+export const GIVE_STEP = 0.002, MOVE_STEP = 0.006;
+export function sentenceRoom<F>(forms: readonly F[], k0: number, least: number, clear: (form: F, k: number, d: number) => boolean, slack: (k: number) => number): { form: F; k: number; d: number } | null {
+  for (const form of forms) {
+    for (let k = k0; k >= least; k -= GIVE_STEP) if (clear(form, k, 0)) return { form, k, d: 0 };
+    for (let k = k0; k >= least; k -= MOVE_STEP) { const s = slack(k); for (let d = 8; d <= s; d += 8) if (clear(form, k, d)) return { form, k, d }; }
+  }
+  return null;
 }
