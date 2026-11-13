@@ -104,7 +104,8 @@ test('V13C-7 a ◇\'s target is its whole drawn box; a mark that grows into 「�
   const a = await app(), cue = fn(a, 'placeCue');
   assert.match(cue, /hitOf = \(r: Rect\): Rect => \(\{ x: r\.x - rim, y: r\.y \+ s \/ 2 - half, w: r\.w \+ 2 \* rim, h: 2 \* half \}\)/, 'v12 took a 24px square round the ◇ whatever the mark\'s width');
   assert.match(cue, /w: Math\.max\(s, c\.offsetWidth \* inv\)/);
-  assert.match(cue, /const ex = cueExtra\(path, s, ow, inv, len\);/);
+  assert.match(cue, /const exOf = \(\) => \(exOnce \?\?= cueExtra\(path, s, ow, inv, len\)\);/); // v13 merge: walked once, only when needed
+  assert.match(cue, /if \(!spot\) \{ const ex = exOf\(\);/);
   assert.match(cue, /if \(parts\.some\(o => touch\(hitOf\(sr\), o\)\)\) \{/);
   assert.match(cue, /same\.classList\.add\('stack-fold'\); tightCue\(same, s, parts\);/, 'no place: its 「조건 n」 folds rather than lie on a card');
   assert.match(cue, /box\.append\(el\); set\(el, spot\); tightCue\(el, s, parts\);/);

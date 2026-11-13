@@ -127,7 +127,7 @@ test('V11-6 (F7, F8 Q6 ③) the past view keeps the camera and the scale; a scen
   assert.doesNotMatch(app, /function keepInView\(/);
   assert.match(scene, /main\.kind === 'retire' \? main\.part : pastMark\(sc, id => !!opened && !!drawnRep\(opened, id\)\)\) : null/, 'any scene\'s card, not only a 승계\'s');
   assert.match(scene, /growthAside \? '원래 위치로' : '이전 부품 위치 보기'/);
-  assert.match(fn(app, 'growthClearGuide'), /if \(d && \(d\[0\] \|\| d\[1\]\) && !still && !lose\)/);
+  assert.match(fn(app, 'growthClearGuide'), /if \(d && \(d\[0\] \|\| d\[1\]\) && !still && !lose && !hits\(d\[0\], d\[1\]\)\)/);
 });
 
 test('V11-7 (review of v10) a hub chip touches its own card only, never a row further, and keeps off the legend chip and the first-view line', async () => {
