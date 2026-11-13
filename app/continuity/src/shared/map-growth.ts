@@ -15,7 +15,7 @@
  *   them (unreadRecords counts those apart).
  * - 구현 상태 (F7): only the records' structured implementation field of the same part (implementationAt), never a 구현 바뀜 answer.
  * Nothing here calls a model or changes a project. */
-import { isMapReading, ROW_REASONS, type MapReading, type Project, type Relation, type RelationKind, type RowState, type ReadingIdentityRow, type GrowthMemo, type HumanEdit, type PartImplementation, type ReadingQuote } from './types.js';
+import { isMapReading, ROW_REASONS, type MapReading, type Project, type Relation, type RelationKind, type RowState, type ReadingIdentityRow, type GrowthMemo, type HumanEdit, type PartImplementation, type ReadingQuote, type ReadingClaim } from './types.js';
 import { identityState, officialName, currentView, canonicalPart } from './map-identity.js';
 import { studioView, type StudioView, type PartView } from './studio.js';
 import { rowLedger, rowBindings, type LedgerRow } from './row-ledger.js';
@@ -222,8 +222,8 @@ export interface PartChange {
    * wrote the description anew (a plain rewrite, never a 정정). 정정: 'person' (the person marked their correction as fixing an error) or
    * 'record' (the record's own 철회 rows). */
   by?: 'reading' | 'person' | 'record'; madeAt?: string;
-  /** 정정 by the record (review of v7): the withdrawals a record wrote about the part between the two versions (철회·변경 rows read as
-   * withdrawn claims), each with what stood before, what stands now and its quote. */
+  /** 정정 by the record (review of v7; v8: partClaimWithdrawal): the withdrawals a record wrote between the two versions that take back a
+   * claim the earlier map had on this part, each with what stood before, what stands now and its quote. */
   withdrawn?: { before: string | null; text: string; quote: ReadingQuote; reading: string }[];
   /** 은퇴 (review of v7): the successor the record names when it is not on the later map (the change's successor is then null). */
   named?: string | null;
@@ -236,7 +236,11 @@ export interface ChangeSet { from: number; to: number; changes: PartChange[];
   /** How many distinct parts changed (a part in two kinds counts once here, in both kinds above). */
   parts: number;
   /** Lines in the later version not in the earlier (by ends and kind, a folded end read as its canonical part), and the reverse. */
-  added: LineKey[]; removed: LineKey[] }
+  added: LineKey[]; removed: LineKey[];
+  /** Review of v8: the record's 철회·변경 rows read between the two that withdraw no claim the earlier map had on their part (project
+   * history: never a 정정, never on a card or in the scene order), each source row once, on the part it was read on. */
+  history: HistoryRow[] }
+export interface HistoryRow { part: string; name: string; method: ReadingClaim['withdrawalMethod'] | null; before: string | null; text: string; quote: ReadingQuote; reading: string }
 const normText = (t: string) => t.replace(/\s+/g, ' ').trim();
 function normName(t: string) { return t.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase(); }
 function citeOf(p: Project, reading: string, record: string, row: string): IdentityCite | null {
@@ -277,9 +281,9 @@ export function changeSet(p: Project, a: number, b: number): ChangeSet {
     // a reading in the range, not there before), or the person's correction they marked as fixing an error. The person's plain rewrite of
     // a description is a 설명 변경 by the person, never a 정정.
     const fixed = (uy?.corrected?.id ?? null) !== (ux?.corrected?.id ?? null) && !!uy?.corrected, error = fixed && uy!.corrected!.error === true;
-    const had = new Set((ux?.claims ?? []).map(c => normText(c.text)));
-    const withdrawn = (uy?.claims ?? []).filter(c => window.has(c.reading) && claimTopic(c) === 'withdrawn' && !had.has(normText(c.text)))
-      .map(c => ({ before: c.before ?? null, text: c.text, quote: { record: c.record, quote: c.quote, ...(c.from !== undefined ? { from: c.from } : {}), ...(c.to !== undefined ? { to: c.to } : {}) } as ReadingQuote, reading: c.reading }));
+    // Review of v8 (F7): only a withdrawal of a claim the earlier map had on this very part is a 정정 (partClaimWithdrawal); the record's other
+    // 철회·변경 rows are project history, listed apart (ChangeSet.history), never a change of the part.
+    const withdrawn = windowWithdrawals(ux, uy, window).filter(c => partClaimWithdrawal(c, A.project, id, ux)).map(withdrawalOf);
     if (error || withdrawn.length) add({ kind: 'correct', part: id, name: y.name, before: error ? ux?.role ?? null : null, after: error ? uy?.role ?? null : null, by: error ? 'person' : 'record', withdrawn });
     if (fixed && !error) add({ kind: 'desc', part: id, name: y.name, before: ux?.role ?? null, after: uy?.role ?? null, by: 'person', replaced: null, target: null });
     else if (!fixed && ux?.role && uy?.role && normText(ux.role) !== normText(uy.role)) {
@@ -299,6 +303,12 @@ export function changeSet(p: Project, a: number, b: number): ChangeSet {
     add({ kind: 'retire', part: id, name: inA.get(id)!.name, successor: succ, named: succ ? null : r.successor ?? null, cite });
     if (succ) add({ kind: 'succeed', part: succ, name: inB.get(succ)!.name, predecessor: id, cite });
   }
+  // Review of v8: the record's 철회·변경 rows read between the two that are no part's 정정 (project history), each source row once.
+  const history: HistoryRow[] = [], seenRow = new Set<string>(), counted = new Set(changes.flatMap(c => (c.withdrawn ?? []).map(w => `${w.quote.record}\u0000${w.quote.quote}`)));
+  for (const [id, y] of inB) for (const c of windowWithdrawals(inA.get(id)?.reading, y.reading, window)) {
+    const key = `${c.record}\u0000${c.quote}`; if (counted.has(key) || seenRow.has(key)) continue; seenRow.add(key);
+    history.push({ part: id, name: y.name, method: c.withdrawalMethod ?? null, ...withdrawalOf(c) });
+  }
   const counts = Object.fromEntries(CHANGE_KINDS.map(k => [k, changes.filter(c => c.kind === k).length])) as Record<ChangeKind, number>;
   // Lines, by ends and kind; an earlier end that is now a folded duplicate reads as its canonical part (the same line).
   const keyOf = (from: string, to: string, kind: string) => `${from}\u0000${to}\u0000${kind}`;
@@ -307,8 +317,30 @@ export function changeSet(p: Project, a: number, b: number): ChangeSet {
   for (const r of A.view.relations) { const from = sB.folded.has(r.from) ? canonicalPart(sB, r.from) : r.from, to = sB.folded.has(r.to) ? canonicalPart(sB, r.to) : r.to; if (from !== to) linesA.set(keyOf(from, to, r.kind), { id: r.id, from: r.from, to: r.to, kind: r.kind }); }
   const added = [...linesB].filter(([k]) => !linesA.has(k)).map(([, r]) => ({ id: r.id, from: r.from, to: r.to, kind: r.kind }));
   const removed = [...linesA].filter(([k]) => !linesB.has(k)).map(([, r]) => r);
-  return { from: a, to: b, changes, counts, parts: new Set(changes.flatMap(c => [c.part, ...c.others ?? []])).size, added, removed };
+  return { from: a, to: b, changes, counts, parts: new Set(changes.flatMap(c => [c.part, ...c.others ?? []])).size, added, removed, history };
 }
+type UnderstandingOf = PartView['reading'];
+type ViewClaim = NonNullable<UnderstandingOf>['claims'][number];
+/** The withdrawal claims (철회·변경 rows) of a part read between the two versions and not there before. */
+function windowWithdrawals(ux: UnderstandingOf | undefined, uy: UnderstandingOf | undefined, window: ReadonlySet<string>): ViewClaim[] {
+  const had = new Set((ux?.claims ?? []).map(c => normText(c.text)));
+  return (uy?.claims ?? []).filter(c => window.has(c.reading) && claimTopic(c) === 'withdrawn' && !had.has(normText(c.text)));
+}
+const withdrawalOf = (c: ViewClaim) => ({ before: c.before ?? null, text: c.text, quote: { record: c.record, quote: c.quote, ...(c.from !== undefined ? { from: c.from } : {}), ...(c.to !== undefined ? { to: c.to } : {}) } as ReadingQuote, reading: c.reading });
+/** Review of v8 (ruling F7: 정정 = an explicit error or withdrawal of an earlier claim about that part): a withdrawal row is a part's 정정
+ * only when it takes back a claim the earlier map had on this very part: it says it supersedes such a claim (replaces, a claim of a
+ * reading the earlier version had on this part), or what stood before (옛 결정) is a claim or the description that part had then. A row
+ * whose 방식 is 옮김 is never a withdrawal (it moved, nothing was taken back). Anything else is the project's history. */
+export function partClaimWithdrawal(c: Pick<ViewClaim, 'before' | 'replaces' | 'withdrawalMethod'>, earlier: Pick<Project, 'readings'>, part: string, ux: UnderstandingOf | undefined): boolean {
+  if (c.withdrawalMethod === 'move' || !ux) return false;
+  const r = c.replaces; if (r && earlier.readings.some(x => isMapReading(x) && x.id === r.reading && x.parts.some(q => q.areaId === part && !!q.claims[r.index]))) return true;
+  const was = normName(c.before ?? ''); if (was.replace(/\s/g, '').length < 4) return false;
+  return [ux.role ?? '', ...ux.claims.map(k => k.text)].some(t => normName(t).includes(was));
+}
+/** The words of a withdrawal row's 방식 (C-WITHDRAW). */
+export const METHOD_WORD: Readonly<Record<NonNullable<ReadingClaim['withdrawalMethod']>, string>> = Object.freeze({ revert: '되돌림', remove: '제거', deprecate: '폐기 예정', move: '옮김', default: '기본값 바꿈', rejected: '채택 안 함', reintroduce: '다시 도입', 'doc-only': '문서로만 폐기' });
+/** The heading the pane gives the history rows (review of v8: never on a card, never in the scene order). */
+export const historyWord = (n: number): string => `기록된 철회·변경 ${n}건`;
 /** The lines a change touched directly: the added and removed lines with an end at the part (or its predecessor, for 승계). */
 export function directLines(cs: ChangeSet, c: PartChange): { added: LineKey[]; removed: LineKey[] } {
   const ends = new Set([c.part, ...(c.predecessor ? [c.predecessor] : []), ...c.others ?? []]);
@@ -373,7 +405,9 @@ export interface Unreflected { state: Exclude<RowState, 'reflected'>; reason: st
   unplaced: boolean;
   /** Review of v7: the record's own part the row is about (its C-PART row ID and the record's name for it) when no part on the map can be
    * it: the row's group is that part's. null: on the map, unknown, or about several. */
-  pending: { b: string; name: string } | null;
+  pending: { b: string; name: string;
+    /** Review of v8: the map was given that part (its part row sent) and no part can be it. false: never sent, unknown (neither claim). */
+    sure: boolean } | null;
   /** How many of the record's parts the row names (its own, its B ids): none is a row about the whole record. */
   named: number;
   /** The source line: the pasted text, [start, end) in it and its 1-based line number. */
@@ -417,8 +451,14 @@ export function unreflectedAt(p: Project, k: number): Unreflected[] {
   // A record's part row is a map part when a reading created it there, or when the record's own identity row (C-IDENT) was reflected onto
   // it (its 이 기록 부분 → that part, a folded duplicate read as its canonical part).
   const st = identityState(past);
+  // Review of v8: a live part first. A retirement's row binds to its successor when that is on the map; a part off the map (retired) is
+  // only a fallback, taken after every other binding (by name, by the shared B) found no live part for the row.
+  const offMap = new Map<string, string>();
+  for (const [k, id] of [...bound]) { const c = canonicalPart(st, id); if (onMap.has(c)) bound.set(k, c); else { bound.delete(k); offMap.set(k, c); } }
   for (const r of past.readings) if (isMapReading(r)) for (const e of r.identity ?? []) if (e.state === 'reflected' && e.part && e.areaId) {
-    const k = `${e.record}\u0000C-PART\u0000${e.part}`; if (!bound.has(k)) bound.set(k, canonicalPart(st, e.op?.kind === 'fold' && e.op.into ? e.op.into : e.areaId));
+    const k = `${e.record}\u0000C-PART\u0000${e.part}`; if (bound.has(k)) continue;
+    const to = canonicalPart(st, e.op?.kind === 'fold' && e.op.into ? e.op.into : e.op?.kind === 'retire' && e.op.successor && onMap.has(canonicalPart(st, e.op.successor)) ? e.op.successor : e.areaId);
+    if (onMap.has(to)) bound.set(k, to); else if (!offMap.has(k)) offMap.set(k, to);
   }
   const foldOf = new Map<string, V5Fold>(folds.map(f => [f.key, f])), text = new Map(past.pasted.map(x => [x.id, x.text]));
   const partNames = new Map(folds.map(f => [f.key, new Map((f.fold.rows.get('C-PART') ?? []).map(r => [r.id, (r.row.byColumn['이름'] ?? '').trim()]))]));
@@ -452,6 +492,7 @@ export function unreflectedAt(p: Project, k: number): Unreflected[] {
     if (shared.length === 1 && partNames.get(record)?.has(shared[0]!)) propose(keyOf(record, shared[0]!), id);
   }
   for (const [key, ids] of proposed) if (ids.size === 1) bound.set(key, [...ids][0]!);
+  for (const [key, id] of offMap) if (!bound.has(key)) bound.set(key, id);
   // Whether a part on the map could be a record's part row: one bound to it, one held with it, or one whose name (now, or as a reading
   // made it) is the row's name. No: the row's part is not on the map.
   const madeNames = new Map<string, string[]>(); for (const r of past.readings) if (isMapReading(r)) for (const x of r.parts) if (x.created) { const id = onMapId(x.areaId); if (id) madeNames.set(id, [...madeNames.get(id) ?? [], x.created.name]); }
@@ -482,7 +523,9 @@ export function unreflectedAt(p: Project, k: number): Unreflected[] {
     const principal = ownPart ?? ends[0] ?? (held.length === 1 ? held[0]! : null);
     // A row about one part of the record that no map part can be: that part's group (its part row says 「아직 지도에 놓이지 않음」).
     const one = !principal && !held.length && bs.length === 1 && names.has(bs[0]!) && !mayBe(x.record, bs[0]!) ? bs[0]! : null;
-    const pending = one ? { b: one, name: names.get(one) || '이름 없는 부분' } : null;
+    // Review of v8: 「아직 지도에 놓이지 않음」 is said only when the map was given that part (its part row was sent) and no part can be it;
+    // a part row never sent is unknown (neither claim).
+    const pending = one ? { b: one, name: names.get(one) || '이름 없는 부분', sure: (ledger.get(keyOf(x.record, one))?.sent ?? 0) > 0 } : null;
     // The title: a line's two ends (the map's name when the end is a part on the map, else the record's own name), a step's own name, a
     // part row's own name; any other row its words.
     const endName = (b: string | undefined) => (b ? (boundOf(b) ? onMap.get(boundOf(b)!)! : names.get(b) || '이름 없는 부분') : '모름');
@@ -494,7 +537,7 @@ export function unreflectedAt(p: Project, k: number): Unreflected[] {
     const item = ROW_ITEM_WORD[x.table] ?? V5_TABLE_DEFS.get(x.table)?.title ?? '행';
     const t = text.get(x.paste) ?? '';
     out.push({ state: x.state, reason: x.reason, words: rowReasonWords(x.state, x.reason), record: x.record, table: x.table, id: x.id, tried, item, title: title.replace(/\s+/g, ' ').trim() || '내용 없는 행',
-      parts, principal, related: parts.filter(id => id !== principal), unplaced: x.table === 'C-PART' && !!pending, pending, named: bs.length,
+      parts, principal, related: parts.filter(id => id !== principal), unplaced: x.table === 'C-PART' && !!pending?.sure, pending, named: bs.length,
       paste: x.paste, start: x.start, end: x.end, line: t.slice(0, x.start).split('\n').length });
   }
   return out.sort((a, b) => rank[a.state]! - rank[b.state]! || (a.paste < b.paste ? -1 : a.paste > b.paste ? 1 : a.start - b.start));
@@ -513,6 +556,8 @@ export function unreadRecords(p: Project): { paste: string; rows: number }[] {
 export interface ReflectGroup { key: string; part: string | null; kind: 'part' | 'unplaced' | 'several' | 'unsettled' | 'whole'; rows: Unreflected[];
   /** 'unplaced': the record's name for the part not on the map. */
   name: string | null;
+  /** 'unplaced' (review of v8): known to be off the map (some row of it says so); false: never sent, unknown. */
+  sure: boolean;
   /** 「연결 2행 · 단계 1행」: the rows by item kind, most first. */
   byItem: { item: string; n: number }[] }
 /** The groups of some rows (each row in exactly one): parts first (most rows first, then by name), then the parts not yet on the map (most
@@ -522,8 +567,8 @@ export function reflectGroups(rows: readonly Unreflected[], name: (id: string) =
   for (const x of rows) {
     const kind: ReflectGroup['kind'] = x.principal ? 'part' : x.pending ? 'unplaced' : x.parts.length > 1 ? 'several' : !x.named && !x.parts.length ? 'whole' : 'unsettled';
     const key = kind === 'part' ? `P\u0000${x.principal}` : kind === 'unplaced' ? `U\u0000${x.record}\u0000${x.pending!.b}` : kind;
-    const g = by.get(key) ?? by.set(key, { key, part: x.principal, kind, rows: [], name: kind === 'unplaced' ? x.pending!.name : null, byItem: [] }).get(key)!;
-    g.rows.push(x);
+    const g = by.get(key) ?? by.set(key, { key, part: x.principal, kind, rows: [], name: kind === 'unplaced' ? x.pending!.name : null, sure: false, byItem: [] }).get(key)!;
+    g.rows.push(x); if (x.pending?.sure) g.sure = true;
   }
   const rankK = { part: 0, unplaced: 1, several: 2, unsettled: 3, whole: 4 } as const;
   for (const g of by.values()) { const n = new Map<string, number>(); for (const x of g.rows) n.set(x.item, (n.get(x.item) ?? 0) + 1); g.byItem = [...n].map(([item, k]) => ({ item, n: k })).sort((a, b) => b.n - a.n); }

@@ -13,7 +13,7 @@
 import { h } from './plan-dom.js';
 import { josa } from '../shared/josa.js';
 import { faceSplit, facePlain, faceCounts as faceCountsOf } from './face-name.js';
-import { CHANGE_WORD, CHANGE_KINDS, SCENE_ORDER, SUMMARY_ORDER, ROW_STATE_WORD, versionLabel, type ChangeKind, type ChangeSet, type PartChange, type MapVersion, type Unreflected, type ReflectGroup } from '../shared/map-growth.js';
+import { CHANGE_WORD, CHANGE_KINDS, SCENE_ORDER, SUMMARY_ORDER, ROW_STATE_WORD, versionLabel, historyWord, type ChangeKind, type ChangeSet, type PartChange, type MapVersion, type Unreflected, type ReflectGroup } from '../shared/map-growth.js';
 
 /* ---------- names and words ---------- */
 /** A name as a sentence says it (F7; review of v7: exactly as its card's face says it, face-name.ts): a person's-words name keeps its
@@ -70,7 +70,8 @@ export function sceneKind(c: PartChange): string {
     case 'succeed': return '기록된 승계';
     case 'retire': return c.named ? '기록된 은퇴 · 대신하는 부품은 지금 지도에 없음' : '기록된 은퇴 · 대신하는 부품 없음';
     case 'correct': return c.by === 'record' ? '정정 · 기록이 적은 철회' : '정정 · 사람이 바로잡은 설명';
-    case 'impl': return c.impl?.mode === 'add' ? '구현 정보 추가' : '구현 상태 변경';
+    // Review of v8 (first user, e): the kind with its two ends.
+    case 'impl': return c.impl?.mode === 'add' ? '구현 정보 추가' : `구현 상태 변경 · ${c.before ?? '정보 없음'} → ${c.after ?? ''}`;
     case 'reimpl': return '구현 바뀜';
     case 'rename': return '이름 변경';
     case 'desc': return c.by === 'person' ? '설명 변경 · 사람이 새로 씀' : '설명 변경';
@@ -88,7 +89,9 @@ export function sceneTitle(c: PartChange, nm: Name, say: Say = n => plainName(n)
   switch (c.kind) {
     case 'succeed': return `${nm(c.predecessor!)} → ${nm(c.part)}`;
     case 'rename': return `${say(c.before ?? '')} → ${say(c.after ?? '')}`;
-    case 'reimpl': case 'impl': return `${c.before ?? '정보 없음'} → ${c.after ?? ''}`;
+    case 'reimpl': return `${c.before ?? '정보 없음'} → ${c.after ?? ''}`;
+    // Review of v8 (first user, e): the part by its name (its kind line says the two ends).
+    case 'impl': return nm(c.part);
     case 'dedupe': return `${[...(c.others ?? []).map(nm), nm(c.part)].join(' · ')} → ${nm(c.part)}`;
     default: return nm(c.part);
   }
@@ -191,8 +194,7 @@ export interface CardTab { part: string; word: string; more: number; kind: Chang
  * default; 「+N」 = how many other kinds of change the card has). A filter's current part shows the filter's word. A retired part is not on
  * the current map: it has no tab. */
 export function shownTabs(scenes: readonly Scene[], current: string | null, filter: 'new' | 'desc' | null): CardTab[] {
-  const kinds = (s: Scene) => new Set(s.changes.map(c => c.kind)).size;
-  const tabOf = (s: Scene, on: boolean, kind: ChangeKind = s.main.kind): CardTab => ({ part: s.part, word: kind === s.main.kind ? tabWord(s.main) : tabKindWord(kind), more: kinds(s) - 1, kind, on, changes: s.changes });
+  const tabOf = (s: Scene, on: boolean, kind: ChangeKind = s.main.kind): CardTab => ({ part: s.part, word: kind === s.main.kind ? tabWord(s.main) : tabKindWord(kind), more: otherKinds(s.changes), kind, on, changes: s.changes });
   const out: CardTab[] = [], cur = current ? scenes.find(s => s.part === current) : undefined;
   // The shown scene's own tab, but never a 새 tab with no filter on (F7: no 새 tab by default; its card is outlined all the same).
   if (cur && cur.main.kind !== 'retire' && (cur.main.kind !== 'new' || filter === 'new')) out.push(tabOf(cur, true, filter && cur.changes.some(c => c.kind === filter) ? filter : cur.main.kind));
@@ -203,22 +205,38 @@ export function shownTabs(scenes: readonly Scene[], current: string | null, filt
   }
   return out;
 }
+/** Review of v8 (first user, b): how many other kinds of change a card has (its tab's 「+N」 and the pane's 「이 카드의 다른 변화 N가지」). */
+export const otherKinds = (changes: readonly PartChange[]): number => Math.max(0, new Set(changes.map(c => c.kind)).size - 1);
+/** A tab's tooltip: what its word is and what 「+N」 counts (the other kinds of change on that card, by name). */
+export function tabTip(t: Pick<CardTab, 'kind' | 'more' | 'changes' | 'word'>): string {
+  const rest = [...new Set(t.changes.filter(c => c.kind !== t.kind).map(c => c.kind))].map(tabKindWord);
+  return `${t.word}${t.more ? ` · +${t.more}: 이 카드의 다른 변화 ${t.more}가지 (${rest.join(' · ')})` : ''} · 눌러서 이 변화 장면 보기`;
+}
+/** Review of v8 (first user, g): the card the past view outlines for a scene: the scene's part when that version has it, else the part it
+ * came from by identity (a 승계's predecessor, a 중복 정리's folded duplicate); null when the past has none of them. */
+export function pastMark(scene: Scene | undefined, has: (id: string) => boolean): string | null {
+  if (!scene) return null;
+  if (has(scene.part)) return scene.part;
+  for (const c of scene.changes) for (const id of [...(c.predecessor ? [c.predecessor] : []), ...c.others ?? []]) if (has(id)) return id;
+  return null;
+}
+/** Review of v8 (first user, c): the line a renamed card shows under its title while comparing. */
+export const oldNameWord = (before: string): string => `옛 이름 ${plainName(before)}`;
+/** Review of v8 (first user, i): a group of 기록 반영 상태 names its part as the map shows it: the part's own card, or the card it is drawn
+ * inside (a folded group) with the part's name after it. */
+export const heldName = (own: string, holder: string | null): string => (holder && holder !== own ? `${holder} 안의 ${own}` : own);
 export interface Rect { x: number; y: number; w: number; h: number }
 const meets = (a: Rect, b: Rect) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-/** Where each tab goes (in map units): above its card's top edge, left-aligned, else right-aligned, else one tab-height higher (stacked),
- * else beside the card's top corner (left, then right); never over a placed tab, another card or a group's head. Tabs come in priority order; one that finds no place is hidden (its part still
- * counts in the line). gap: the room between a tab and its card, in map units. */
+/** Where each tab goes (in map units), always touching its own card (review of v8, first user j: a tab never floats apart from its card):
+ * on its top edge, left-aligned, else right-aligned; else on its bottom edge (left, then right); never over a placed tab, a card or a
+ * group's head. Tabs come in priority order; one that finds no place is hidden (its part
+ * still counts in the line). gap: the room between a tab and its card, in map units. */
 export function placeTabs(tabs: readonly { part: string; w: number; h: number }[], boxes: ReadonlyMap<string, Rect>, obstacles: readonly (Rect & { id: string })[], gap: number): Map<string, Rect | null> {
   const out = new Map<string, Rect | null>(), placed: Rect[] = [];
   for (const t of tabs) {
     const b = boxes.get(t.part); if (!b) { out.set(t.part, null); continue; }
-    const tries: Rect[] = [];
-    for (const lift of [0, 1]) {
-      const y = b.y - gap - t.h - lift * (t.h + gap);
-      tries.push({ x: b.x, y, w: t.w, h: t.h }, { x: b.x + b.w - t.w, y, w: t.w, h: t.h });
-    }
-    // No room above (rows close at this zoom): beside the card's top corner, still outside its box.
-    tries.push({ x: b.x - gap - t.w, y: b.y, w: t.w, h: t.h }, { x: b.x + b.w + gap, y: b.y, w: t.w, h: t.h });
+    const at = (y: number): Rect[] => [{ x: b.x, y, w: t.w, h: t.h }, { x: b.x + b.w - t.w, y, w: t.w, h: t.h }];
+    const tries: Rect[] = [...at(b.y - gap - t.h), ...at(b.y + b.h + gap)];
     const ok = tries.find(r => !placed.some(p => meets(p, r)) && !obstacles.some(o => o.id !== t.part && meets(o, r)));
     out.set(t.part, ok ?? null); if (ok) placed.push(ok);
   }
@@ -239,6 +257,26 @@ export function leastPan(card: Rect, area: Rect, margin = 16): [number, number] 
   return [dx, dy];
 }
 
+/** Review of v8 (first user, k): the least pan (screen pixels, sideways, up or down, or both) after which no card (nor a group's head) is
+ * under the guide, keeping the scene's card readable in the area (when it is now); [0, 0] when none is under it; null when no pan within
+ * the caps clears it (the guide then goes to the pane's top for that state). Never a zoom. */
+export function guidePan(guide: Rect, cards: readonly Rect[], keep: Rect | null, area: Rect, cap: { x: number; y: number }): [number, number] | null {
+  const hit = (s: Rect, dx: number, dy: number) => s.x + dx < guide.x + guide.w && guide.x < s.x + s.w + dx && s.y + dy < guide.y + guide.h && guide.y < s.y + s.h + dy;
+  if (!cards.some(s => hit(s, 0, 0))) return [0, 0];
+  const near = cards.filter(s => s.x < guide.x + guide.w + cap.x && guide.x - cap.x < s.x + s.w && s.y < guide.y + guide.h + cap.y && guide.y - cap.y < s.y + s.h);
+  const hold = keep && readableInView(keep, area) ? keep : null;
+  const dxs = new Set([0, ...near.flatMap(s => [guide.x + guide.w - s.x + 1, guide.x - s.x - s.w - 1])].filter(d => Math.abs(d) <= cap.x));
+  const dys = new Set([0, ...near.flatMap(s => [guide.y + guide.h - s.y + 1, guide.y - s.y - s.h - 1])].filter(d => Math.abs(d) <= cap.y));
+  let best: { dx: number; dy: number; cost: number } | null = null;
+  for (const dx of dxs) for (const dy of dys) {
+    const cost = Math.abs(dx) + Math.abs(dy); if (best && cost >= best.cost) continue;
+    if (hold && !readableInView({ ...hold, x: hold.x + dx, y: hold.y + dy }, area)) continue;
+    if (near.some(s => hit(s, dx, dy))) continue;
+    best = { dx, dy, cost };
+  }
+  return best ? [best.dx, best.dy] : null;
+}
+
 /* ---------- the past view: parts that were there only then ---------- */
 /** Places for the parts of a past version the current map does not have (laid out automatically around the pinned common parts), moved
  * clear of every pinned box of their container: under the lowest box there, side by side. Only those that meet a pinned box move. Returns
@@ -257,6 +295,17 @@ export function clearPastOnly(boxes: readonly { id: string; container: string; r
   }
   return out;
 }
+
+/* ---------- notes (review of v8, first user f) ---------- */
+/** A baseline changed while comparing: said, with the changes counted again for it, and whether they came out as many as before. */
+export function baseWord(prev: number, now: number, total: number, same: boolean): string {
+  const to = versionLabel(now);
+  return `비교 기준을 ${versionLabel(prev)}에서 ${to}${josa(to, '으로/로')} 바꿨어요 · 변화 ${total}건을 ${to} 기준으로 다시 셌어요${same ? ` · ${versionLabel(prev)} 기준과 같은 결과예요` : ''}`;
+}
+/** How long a note stays (a few seconds). */
+export const TOAST_MS = 4500;
+/** The note's distance from its host's bottom edge: above every bar at the bottom (the toolbar, the compare line), 72px at least. */
+export const toastBottom = (hostBottom: number, barTops: readonly number[], gap = 10): number => Math.max(72, ...barTops.map(t => Math.ceil(hostBottom - t + gap)));
 
 /* ---------- DOM pieces ---------- */
 export const chipText = (base: number, now: number): string => `이전 방문 · ${versionLabel(base)} → ${versionLabel(now)}`;
@@ -280,9 +329,11 @@ export function historyMenu(versions: readonly MapVersion[], marks: { current: n
       h('button', { type: 'button', class: 'gh-x', 'aria-label': '지도 이력 닫기', onclick: on.close }, '×')),
     h('ol', { class: 'gh-list' }, ...rows));
 }
-export interface LineHandlers { pick: (k: SummaryKey) => void; reflect: () => void; history: () => void; exit: () => void }
+export interface LineHandlers { pick: (k: SummaryKey) => void; reflect: () => void; history: () => void; exit: () => void;
+  /** Review of v8: the record's 철회·변경 rows that are no part's change (the pane's own list). */
+  withdrawals?: () => void }
 /** The 32px compare line: the two versions, the counts, the two filters, 「대기·보류 N행」 at the right end and the way out. */
-export function compareLine(cs: ChangeSet, picked: SummaryKey | null, waiting: number | null, on: LineHandlers): HTMLElement {
+export function compareLine(cs: ChangeSet, picked: SummaryKey | 'history' | null, waiting: number | null, on: LineHandlers): HTMLElement {
   const items = summaryItems(cs);
   return h('div', { class: 'gl-row', role: 'toolbar', 'aria-label': `비교 · ${summaryText(cs)}` },
     h('button', { type: 'button', class: 'gl-pair', title: '기준 바꾸기 · 지도 이력', onclick: on.history }, `${versionLabel(cs.from)} → ${versionLabel(cs.to)}`),
@@ -290,9 +341,14 @@ export function compareLine(cs: ChangeSet, picked: SummaryKey | null, waiting: n
       h('button', { type: 'button', class: `gl-item k-${i.key}${i.filter ? ' gl-filter' : ''}${picked === i.key ? ' on' : ''}`, 'aria-pressed': String(picked === i.key), title: itemTip(i.key), onclick: () => on.pick(i.key) }, i.text)])
       : [h('span', { class: 'gl-dot', 'aria-hidden': 'true' }, '·'), h('span', { class: 'gl-none' }, NO_CHANGE)]),
     h('span', { class: 'gl-gap' }),
+    // Review of v8: the right end (the history rows, 대기·보류 and the way out) never leaves the line: it stays put while the counts give way.
+    h('span', { class: 'gl-end' },
+    cs.history.length && on.withdrawals ? h('button', { type: 'button', class: `gl-hist${picked === 'history' ? ' on' : ''}`, 'aria-pressed': String(picked === 'history'), title: `${historyWord(cs.history.length)} · 기록이 적은 철회·변경 가운데 지도의 부품 설명을 거두지 않은 것 (프로젝트 이력) · 정정이 아님 · 변화 집계와 따로 셈 · 누르면 목록`, onclick: on.withdrawals }, historyShort(cs.history.length)) : null,
     waiting !== null ? h('button', { type: 'button', class: `gl-un${waiting ? '' : ' zero'}`, title: `기록 반영 상태 · 지도 ${short(cs.to)} 기준 · 기록의 행 가운데 지도에 아직 들어가지 않은 대기·보류 행 (변화 집계와 따로 셈)`, onclick: on.reflect }, waitingWord(waiting)) : null,
-    h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 비교 전에 고른 카드와 보던 위치로 돌아가요', 'aria-label': '비교 끝내기 · 고른 카드와 위치는 비교 전대로', onclick: on.exit }, '×'));
+    h('button', { type: 'button', class: 'gl-exit', title: '비교 끝내기 · 비교 전에 고른 카드와 보던 위치로 돌아가요', 'aria-label': '비교 끝내기 · 고른 카드와 위치는 비교 전대로', onclick: on.exit }, '×')));
 }
+/** The line's short word for the history rows (the pane and the title say 「기록된 철회·변경 N건」). */
+export const historyShort = (n: number): string => `철회·변경 ${n}건`;
 const itemTip = (k: SummaryKey): string => ({ new: '기준 지도보다 새로 표시된 부품 · 새로 만들었다는 뜻이 아님 · 누르면 지도에서 밝히고 목록으로 하나씩 보기', rename: '이름이 바뀐 부품', reimpl: '같은 부품, 기록이 구현이 바뀌었다고 적음',
   impl: '기록의 구현 상태 칸이 달라진 부품 (구현 상태 변경 · 구현 정보 추가) · 가동 여부가 아님', desc: '같은 부품에 대한 새 설명이 채택되었거나 사람이 설명을 새로 쓴 부품 · 누르면 지도에서 밝히고 하나씩 보기', correct: '오류나 철회가 적힌 정정 (기록의 철회, 사람이 바로잡은 설명) · 문구를 다듬은 것은 설명 변경',
   dedupe: '지도가 만든 같은 부품 둘을 하나로 정리', merge: '기록이 합쳤다고 적은 부품', succeed: '은퇴한 부품을 대신하는 부품', retire: '지금 지도에 대신하는 부품이 없는 은퇴 부품 · 은퇴한 부품은 지금 지도에 없음', lines: '더해진 연결과 빠진 연결' } as Record<SummaryKey, string>)[k] + (k === 'new' || k === 'desc' ? '' : ' · 누르면 목록');
@@ -318,7 +374,8 @@ export function groupTitle(g: ReflectGroup, name: (id: string) => string): { tit
   const n = g.rows.length, sub = g.byItem.map(x => `${x.item} ${x.n}행`).join(' · ');
   if (g.kind === 'part') return { title: `${name(g.part!)}에 관한 미반영 기록 ${n}행`, sub, onMap: true };
   // Review of v7: a part of a record no map part can be, by the record's own name for it (its rows together).
-  if (g.kind === 'unplaced') return { title: `${g.name ? plainName(g.name) : '이름 없는 부분'}에 관한 미반영 기록 ${n}행`, sub: `${sub} · 이 부품은 아직 지도에 놓이지 않았습니다`, onMap: false };
+  // Review of v8: only when the map was given that part (never sent: unknown, neither claim).
+  if (g.kind === 'unplaced') return { title: `${g.name ? plainName(g.name) : '이름 없는 부분'}에 관한 미반영 기록 ${n}행`, sub: g.sure ? `${sub} · 이 부품은 아직 지도에 놓이지 않았습니다` : sub, onMap: false };
   return { title: g.kind === 'several' ? `여러 부품 관련 기록 ${n}행` : g.kind === 'whole' ? `특정 부품을 가리키지 않는 기록 ${n}행` : `대상 미확정 기록 ${n}행`, sub, onMap: false };
 }
 /** One row: its state, 「연결 · 보내는 → 받는」 (the item's own title), why (plain words), the other parts it is about and the source line. */
