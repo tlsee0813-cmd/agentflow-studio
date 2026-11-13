@@ -1374,6 +1374,20 @@ button:disabled { opacity: .5; cursor: default; }
 .scope-sticky { position: absolute; left: 16px; max-width: min(560px, calc(100% - 32px)); display: flex; align-items: baseline; gap: 10px; padding: 6px 12px; background: rgba(245,246,248,.94); border: 1px solid var(--line); border-radius: var(--r-pop); box-shadow: var(--shadow-sm); pointer-events: none; z-index: 2; min-width: 0; }
 .scope-sticky strong { flex: none; font-size: 14px; font-weight: var(--fw-title); letter-spacing: -.01em; }
 .scope-sticky span { min-width: 0; font-size: 12.5px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* v10: while the map's own title is not drawn, its chip carries 「기록 정보 ▾」 and the record's time (and opens the 기록 정보 under them). */
+.scope-sticky { flex-wrap: wrap; }
+.scope-sticky:not(.with-meta):not(.meta-open) .sticky-row { display: none; }
+.scope-sticky.with-meta:has(.sticky-row), .scope-sticky.meta-open { flex-direction: column; align-items: flex-start; gap: 4px; }
+.scope-sticky .sticky-row { flex-basis: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; overflow: visible; }
+.scope-sticky .sticky-toggle { pointer-events: auto; height: 22px; padding: 0 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text-3); font: inherit; font-size: 12px; line-height: 16px; cursor: pointer; }
+.scope-sticky .sticky-toggle:hover { color: var(--text); border-color: var(--line-strong); }
+.scope-sticky.tight .sticky-when { display: none; }
+.scope-sticky .sticky-when { max-width: 130px; font-size: 11.5px; line-height: 15px; white-space: normal; overflow: visible; }
+.scope-sticky.meta-open { pointer-events: auto; max-width: min(460px, calc(100% - 32px)); }
+.scope-sticky .sticky-meta { flex-basis: 100%; display: block; width: 100%; max-height: 50vh; overflow: auto; font-size: 12px; }
+.scope-sticky.meta-open { background: var(--surface); }
+.scope-sticky .sticky-meta :is(span, div, p, button) { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
+.scope-sticky .sticky-meta :is(.map-chips, .map-chips > *) { display: flex; flex-wrap: wrap; gap: 4px 8px; }
 
 /* the focused change's controls in the strip */
 .ps-focus { display: flex; align-items: center; gap: 4px 12px; padding-left: 12px; border-left: 1px solid var(--line); }
@@ -3629,6 +3643,8 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .space .edge-labels > .ff-gave { visibility: hidden; }
 .ff-fold-chip { position: absolute; z-index: 4; box-shadow: var(--shadow-sm); height: 20px; padding: 0 7px; border: 1px dashed var(--line-hover); border-radius: var(--r-sm); background: var(--surface); color: var(--text-2); font: inherit; font-size: 11.5px; line-height: 18px; font-weight: var(--fw-name); white-space: nowrap; cursor: pointer; }
 .ff-fold-chip.open { border-style: solid; }
+/* v10: a hub's chip is shown only while its card is seen (app.ts chipsSeen). */
+.ff-fold-chip.ff-alone, .world .growth-oldname.ff-alone { visibility: hidden; }
 .ff-fold-chip:hover { color: var(--text); border-color: var(--text-3); }
 .ff-fold-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
@@ -3878,7 +3894,10 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .gs-hist-k { font-size: 12px; color: var(--text-3); }
 /* Review of v8 (first user, c): a renamed card's old name, small under its title while comparing (in the kind line's place). */
 .node.card .c-oldname { display: block; font-size: 12px; line-height: 16px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.node.card .c-title:has(.c-oldname) .c-kind { display: none; }
+.node.card .c-title:has(.c-oldname:not(.cut)) .c-kind { display: none; }
+/* v10: an old name its card cannot show whole stands beside the card (app.ts placeOldNames), 12px on screen; the card's own line steps back. */
+.node.card .c-oldname.cut { display: none; }
+.world .growth-oldname { position: absolute; z-index: 5; padding: 0 4px; border-radius: 3px; background: rgba(244,245,247,.94); color: var(--text-2); font-size: 12px; line-height: 16px; white-space: nowrap; pointer-events: auto; }
 /* Review of v8 (first user, g): the past view keeps the scene's card (or its predecessor) outlined as the compare view does. */
 #space.growth-in-past .world .node.read-mark, #space.growth-in-past .world .frame.read-mark { border-color: var(--accent); box-shadow: inset calc(3px * var(--u, 1)) 0 0 var(--accent); }
 /* Review of v8 (first user, k): the guide at the pane's top when no pan clears the map's top for it. */
@@ -3891,4 +3910,4 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .gl-row .gl-end { flex: none; display: flex; align-items: center; gap: 1px; position: sticky; right: 0; background: var(--surface); }
 .gl-row .gl-item:not(.gl-filter) { padding: 0 5px; }
 .node.card .c-tag-text .c-tag-old { font-size: calc(12px * var(--u, 1)); line-height: calc(14px * var(--u, 1)); font-weight: var(--fw-meta); color: var(--text-3); }
-.space.face-tag .node.card .c-tag-text:has(.c-tag-old) .c-tag-kind { display: none; }
+.space.face-tag .node.card .c-tag-text:has(.c-tag-old:not(.cut)) .c-tag-kind { display: none; }

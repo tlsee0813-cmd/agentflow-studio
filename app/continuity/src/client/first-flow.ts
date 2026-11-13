@@ -513,11 +513,28 @@ export function hubChipSpots(b: { x: number; y: number; w: number; h: number }, 
     { x: b.x + b.w + gap, y: b.y + b.h - hh }, { x: b.x - w - gap, y: b.y + b.h - hh },
     { x: b.x + b.w - w, y: below + hh + gap }, { x: b.x, y: below + hh + gap }, { x: b.x + b.w - w, y: above - hh - gap }, { x: b.x, y: above - hh - gap }];
 }
-/** A hub chip's places (w × hh each), in order, without those over a card's title (2 units of room); when every place meets a title, all of
- * them (the chip still stands at its card). */
-export function chipSpots(spots: readonly { x: number; y: number }[], w: number, hh: number, titles: readonly { x: number; y: number; w: number; h: number }[]): { x: number; y: number }[] {
-  const clear = spots.filter(p => !titles.some(t => p.x < t.x + t.w + 2 && t.x < p.x + w + 2 && p.y < t.y + t.h + 2 && t.y < p.y + hh + 2));
-  return clear.length ? clear : [...spots];
+type Box = { x: number; y: number; w: number; h: number };
+/** A hub chip's places (w × hh each), in order, without those over a card's text (2 units of room; v10, review of v9: every text the card
+ * shows, its old name too, never only its title) and, given its card, without those that do not touch it (v10: a chip one gap under its card
+ * read as nobody's when the card was off the window); when every place meets a text, all the touching ones (the chip still stands at its
+ * card). */
+export function chipSpots(spots: readonly { x: number; y: number }[], w: number, hh: number, titles: readonly Box[], card?: Box): { x: number; y: number }[] {
+  const own = card ? spots.filter(p => touchesCard({ x: p.x, y: p.y, w, h: hh }, card)) : [...spots];
+  const clear = own.filter(p => !titles.some(t => p.x < t.x + t.w + 2 && t.x < p.x + w + 2 && p.y < t.y + t.h + 2 && t.y < p.y + hh + 2));
+  return clear.length ? clear : own.length ? own : [...spots];
+}
+/** Whether a chip touches its card: it overlaps the card or meets its edge (within 3 units: a hair off the card's text), along a side. */
+export const touchesCard = (r: Box, c: Box, eps = 3): boolean => r.x <= c.x + c.w + eps && c.x <= r.x + r.w + eps && r.y <= c.y + c.h + eps && c.y <= r.y + r.h + eps;
+/** v10 (review of v9: 「다른 연결 21개」 stood alone under the top bar, its card hidden above): whether a card is seen on screen: at least a
+ * min × min of it inside the view and under none of the covers (the top box, the bars); a chip of a card not seen is not shown. */
+export function cardSeen(card: Box, view: Box, covers: readonly Box[], min = 12): boolean {
+  const x0 = Math.max(card.x, view.x), y0 = Math.max(card.y, view.y), x1 = Math.min(card.x + card.w, view.x + view.w), y1 = Math.min(card.y + card.h, view.y + view.h);
+  if (x1 - x0 < min || y1 - y0 < min) return false;
+  const step = 3, need = Math.ceil(min / step) ** 2; let free = 0;
+  for (let y = y0 + step / 2; y < y1; y += step) for (let x = x0 + step / 2; x < x1; x += step) {
+    if (!covers.some(c => x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h) && ++free >= need) return true;
+  }
+  return false;
 }
 /** The source the switcher says: a kept choice 「선택한 보기 · …」, a scenario with its name. */
 export function sourceText(f: FirstFlow): string | null {

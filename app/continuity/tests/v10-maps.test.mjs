@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolveLabels } from '../dist/public/client/map-layout.js';
 import { labelSpots, endZones, dockSlack } from '../dist/public/client/map-labels.js';
-import { hubChipSpots, topCut, CLAUSE_KEEP, sentenceRoom } from '../dist/public/client/first-flow.js';
+import { hubChipSpots, chipSpots, topCut, CLAUSE_KEEP, sentenceRoom } from '../dist/public/client/first-flow.js';
 import { clauseCuts, KEEP_WORD } from '../dist/public/shared/studio.js';
 
 const app = () => readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
@@ -64,7 +64,10 @@ test('V10-4 a hub chip stands off its card\'s edge, under it at the right first,
     // Never across the card's border: wholly outside it, at least gap off.
     assert.ok(!meet(r, { x: card.x - gap + 0.01, y: card.y - gap + 0.01, w: card.w + 2 * gap - 0.02, h: card.h + 2 * gap - 0.02 }), JSON.stringify(p));
   }
-  return app().then(src => assert.match(fn(src, 'placeFocusMarks'), /chipSpots\(hubChipSpots\(b, w, hh, g\), w, hh, titles\)/));
+  // Merged with v10-growth: the off-edge places are kept to the ones touching the card's ring one gap out (the row-further ones go).
+  const ring = { x: card.x - gap, y: card.y - gap, w: card.w + 2 * gap, h: card.h + 2 * gap }, kept = chipSpots(spots, w, hh, [], ring);
+  assert.deepEqual(kept, spots.slice(0, 6), 'under, over and beside its card; never a row further');
+  return app().then(src => assert.match(fn(src, 'placeFocusMarks'), /chipSpots\(hubChipSpots\(b, w, hh, g\), w, hh, titles, ring\)/));
 });
 
 test('V10-5 the basis line keeps its whole-word cut when a verb\'s 「…고」 clause would keep far less', () => {

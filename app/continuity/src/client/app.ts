@@ -21,7 +21,7 @@ import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, 
 import { mapVersions, pastVersion, changeSet, directLines, unreflectedAt, unreadRecords, reflectGroups, citeLines, changeReason, visitBaseline, growthMemo, compareBase, versionLabel, targetWord, CHANGE_WORD, METHOD_WORD, historyWord, type ChangeKind, type ChangeSet, type LineKey, type IdentityCite, type Unreflected, type PartChange, type HistoryRow } from '../shared/map-growth.js';
 import { nameCode, faceCounts, faceSplit } from './face-name.js';
 import { josa } from '../shared/josa.js';
-import { placeTabs, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, reflectRow, groupTitle, tabWord, wasLabel, newTitle, changeScenes, shownTabs, sceneKind, sceneTitle, sceneSentence, sceneWhy, stepWord, guideOf, guideText, kindCount, plainName, auxName, codeText, leastPan, readableInView, guidePan, otherKinds, tabTip, pastMark, oldNameWord, heldName, kindTotal, summaryText, baseWord, TOAST_MS, toastBottom, type Scene as ChangeScene, type GuideSeg, type SummaryKey } from './growth-view.js';
+import { placeTabs, guideBlocks, toastSpot, exitWord, nowWord, sameCamera, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, reflectRow, groupTitle, tabWord, wasLabel, newTitle, changeScenes, shownTabs, sceneKind, sceneTitle, sceneSentence, sceneWhy, stepWord, guideOf, guideText, kindCount, plainName, auxName, codeText, leastPan, readableInView, guidePan, otherKinds, tabTip, pastMark, oldNameWord, heldName, kindTotal, summaryText, baseWord, TOAST_MS, toastBottom, type Scene as ChangeScene, type GuideSeg, type SummaryKey } from './growth-view.js';
 import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
@@ -63,7 +63,7 @@ import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenar
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
-import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, hubChipSpots, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
+import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, hubChipSpots, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -430,7 +430,10 @@ async function render() {
   // The development-material example opens on its reading (the material or a reading already made; never a call by itself).
   if (fresh && o.key === UI62_KEY && !part && !planView.isOpen() && !returnView.isOpen()) returnView.open();
   afterRenderOpen(o);
+  const ar = afterRender; afterRender = null; ar?.();
 }
+/** v10: what waits for the next render to finish (leaving the comparison: the camera from before it, set after the selection's render). */
+let afterRender: (() => void) | null = null;
 
 /* ---------- going inside and back out: a short move from where one came from ----------
  * In: the new scope starts at the place of the part one entered and grows to its view. Out: the view starts zoomed on the
@@ -2424,7 +2427,13 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   placeLoneHead(crossing);
   title.style.width = `${titleRect().w}px`;
   titleH = view.parts.length ? title.offsetHeight : 0; title.hidden = !titleH;
-  $('scope-sticky').replaceChildren(h('strong', {}, sp ? sp.name : o.project.name), first ? h('span', {}, first) : '');
+  // v10 (review of v9: at rest the 17-reading map's title stood under the top box, its 「기록 정보」 and time out of reach): the chip that
+  // names the map while its own title is not drawn carries them too, and opens the same 기록 정보 under it.
+  const stickyMeta = metaBtn ? [h('span', { class: 'sticky-row' }, h('button', { type: 'button', class: 'sticky-toggle', 'aria-expanded': String(metaOpen), title: metaBtn.title, onclick: () => { metaOpen = !metaOpen; renderSpace('keep'); } }, metaOpen ? '기록 정보 접기 ▴' : '기록 정보 ▾'),
+    !metaOpen && basis ? h('span', { class: 'sticky-when', title: basis.title }, basis.textContent) : null),
+    metaOpen ? h('div', { class: 'map-meta sticky-meta' }, ...[sp ? null : understoodLine(o), basisLine(o), (() => { const cs = [flowStrip(o), rulesStrip(o), sinceStrip(o), stateStrip(o), opsNoneChip(o)].filter((x): x is HTMLElement => !!x); return cs.length ? h('div', { class: 'map-chips' }, ...cs) : null; })()].filter((x): x is HTMLElement => !!x)) : null] : [];
+  const sticky = $('scope-sticky'); sticky.replaceChildren(h('strong', {}, sp ? sp.name : o.project.name), first ? h('span', {}, first) : '', ...stickyMeta.filter((x): x is HTMLElement => !!x));
+  sticky.classList.toggle('meta-open', metaOpen && !!metaBtn); sticky.setAttribute('aria-hidden', String(!metaBtn));
   lay.bounds = { ...core }; withTitle();
   // Selected lines move to a layer above the group surfaces (below the parts), so a line that crosses a group is not read as
   // ending at it.
@@ -3134,7 +3143,7 @@ function placeBadges(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) =>
     // 선택, 박자, ◷, the 「한 번」 tick): its words read in the line's tip on hover, and on the lines of a picked card.
     // Restore (spec §7 'Conditional relations'): a conditional or optional line still never reads unconditional: a tiny text-free
     // mark sits on the line itself at its badge's place (restCue), part of the line's hover, under every lens (시작·반복 too).
-    if (!on && tier !== 'near') { const cue = restCue(b, on, tier); if (cue) placeCue(box, e, cue, beside, path, offParts, apart, offLabels, r => !lineUnder(r, e.key, shown), set, cueOpens(b)); continue; }
+    if (!on && (tier !== 'near' || b.kind === 'condition')) { const cue = restCue(b, on, tier); if (cue) placeCue(box, e, cue, beside, path, offParts, apart, offLabels, r => !lineUnder(r, e.key, shown), set, cueOpens(b)); continue; }
     const el = h('span', { class: `edge-badge b-${b.kind}${on ? ' on' : ''}${beside ? ' beside' : ''}${b.unresolved ? ' unres' : ''}`, 'data-badge': e.key });
     box.append(el);
     const pts = edgePts(e.key, path), len = path.getTotalLength();
@@ -3440,7 +3449,8 @@ function applyCamera(animate = false) {
   const inv = syncZoom(camera.k);
   if ((Math.abs(inv - placedInv) / placedInv > 0.08 || tier !== placedTier) && opened && !relabel) { relabel = requestAnimationFrame(() => { relabel = 0; placedInv = inv; placeEdgeLabels(); }); }
   else if (ftHeld.length) { clearTimeout(ftRecheckAt); ftRecheckAt = window.setTimeout(ftRecheck, FT_RECHECK_MS); }
-  updateSticky();
+  updateSticky(); chipsSeen();
+  if (!$('toast').hidden) { clearTimeout(toastPlaceAt); toastPlaceAt = window.setTimeout(() => { if (!$('toast').hidden) placeToast($('toast')); }, 360); }
   if (growthCmp && growthTabK && Math.abs(camera.k - growthTabK) / growthTabK > 0.04) requestAnimationFrame(placeGrowthTabs);
   clipAtEdge();
   saveViewSoon();
@@ -3512,9 +3522,10 @@ function fitView(explicit: boolean, animate = false) {
   // height under the map (8px at a time; the title and its floor kept), before a smaller frame is tried. v9 (review of v8: at 1280 the
   // one-line sentence was cut mid-clause): the sentence's two lines by either room (the give, then the free height) before its one line.
   let done = false;
-  // v10 (review of v9: at 1280 two maps kept one cut line with 80px free under them): the free height is what sits under each column of
-  // the map (mapSlack), and the move may come with the give (a frame a little smaller frees more height under it), largest scale first
-  // (first-flow sentenceRoom).
+  // v10 (review of v9: at 1280 two maps kept one cut line with 80px free under them; at 1440 the 17-reading map's sentence stood on one cut
+  // line, the map 21px short of room for its two): the free height is what sits under each column of the map (mapSlack; in a comparison
+  // or the past view the whole row over the compare bar), and the move may come with the give (a frame a little smaller frees more height
+  // under it, its own free height with it), largest scale first, for each form before the next (first-flow sentenceRoom).
   if (at.whole) {
     const room = sentenceRoom(FT_SAID, at.k, least, (form, k, d) => { at.place(k); camera = { ...camera, y: camera.y + d }; return clear(form, k); }, k => { at.place(k); return mapSlack(); });
     if (room) { at.place(room.k); camera = { ...camera, y: camera.y + room.d }; done = true; } else at.place(at.k);
@@ -3765,6 +3776,7 @@ function drawnBounds(withTitle = true): Rect {
   return unionRect(rs) ?? lay.bounds;
 }
 function zoomAt(k: number, cx: number, cy: number, animate = false) {
+  dropNote();
   const nk = Math.min(ZOOM_MAX, Math.max(Math.min(ZOOM_MIN, camera.k), k));
   camera = { k: nk, x: cx - (cx - camera.x) * (nk / camera.k), y: cy - (cy - camera.y) * (nk / camera.k) };
   applyCamera(animate);
@@ -3921,12 +3933,19 @@ function updateSticky() {
   const fr = ft && !ft.hidden ? { x: ft.offsetLeft - v0.offsetLeft - w0.offsetLeft, y: ft.offsetTop - v0.offsetTop - w0.offsetTop, w: ft.offsetWidth, h: ft.offsetHeight } : null;
   const overCols = !!fr && fr.x < ti.x + ti.w && ti.x < fr.x + fr.w, below = overCols ? top : stripInset();
   st.style.top = `${top - 6}px`;
+  // v10: the chip carries the title's 「기록 정보 ▾」 and time only while the title stands in the window unread (under the text floor or under the
+  // top box); for a title panned out of the window it names the map alone.
+  st.classList.toggle('with-meta', t.x + t.w > 0 && t.x < vp.width && t.y + t.h > stripInset() - 8 && t.y < mapBottom() - mapBottomInset());
   st.hidden = camera.k >= TITLE_FLOOR_K && t.y >= below - 8 && t.y + 24 * camera.k <= mapBottom() - mapBottomInset() && t.x + 120 >= 0 && t.x <= vp.width - 120;
   // Map hygiene H2: the chip never covers a card (the header's path names the map all the same); it waits for room.
   if (!st.hidden) {
     const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
-    const r = { x: st.offsetLeft - 4, y: st.offsetTop - 4, w: st.offsetWidth + 8, h: st.offsetHeight + 8 };
-    st.hidden = [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k);
+    const covers = () => { const r = { x: st.offsetLeft - 4, y: st.offsetTop - 4, w: st.offsetWidth + 8, h: st.offsetHeight + 8 };
+      return [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k); };
+    // v10: a chip with the record's time that would cover a card first gives up the time (its 「기록 정보 ▾」 opens it), then waits.
+    st.classList.remove('tight');
+    st.hidden = !st.classList.contains('meta-open') && covers();
+    if (st.hidden && st.querySelector('.sticky-when')) { st.hidden = false; st.classList.add('tight'); st.hidden = covers(); }
   }
   // One title at a time: the map's own title steps back while its name is pinned, and while the top line stands over it (never read
   // through the top line's box).
@@ -4231,24 +4250,67 @@ function placeFocusMarks() {
   const { byHub } = foldedLines(ffFolds, ffOpen);
   // Review of the growth view (first-user judge 8): a chip never covers a card's title, its own card's included. The titles as drawn (map
   // units); the card's own edge first, then just under and over the card, then beside it; with no free place, the first that meets no title.
-  const titles: Rect[] = !ffFolds.size ? [] : [...world.querySelectorAll<HTMLElement>('.node[data-part]')].flatMap(card => {
-    // The name as the card shows it at this zoom: the card's own name, or its name tag's (the far face).
-    const b = lay.boxes.get(card.dataset.part!); if (!b) return [];
-    const c = card.getBoundingClientRect(), k = c.width / b.w || camera.k;
-    return [...card.querySelectorAll<HTMLElement>('.c-name, .c-tag-name')].map(el => el.getBoundingClientRect()).filter(r => r.width > 0 && r.height > 0)
-      .map(r => ({ x: b.x + (r.x - c.x) / k, y: b.y + (r.y - c.y) / k, w: r.width / k, h: r.height / k }));
-  });
+  // v10 (review of v9: 「다른 연결 21개」 covered a renamed card's 「옛 이름 …」): every text a card shows as drawn (its name, kind, old name,
+  // description: never only its title), and the old names standing beside their cards.
+  const titles: Rect[] = !ffFolds.size ? [] : [...cardTexts(world), ...oldNameRects(world)];
+  taken.push(...oldNameRects(world));
+  // v10: nor over a change's tab (placed first: the scene's tab is what is read).
+  for (const el of world.querySelectorAll<HTMLElement>('.growth-tab:not([hidden])')) taken.push({ x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0, w: el.offsetWidth, h: el.offsetHeight });
   for (const [id] of ffFolds) {
     const b = lay.boxes.get(id), open = ffOpen.has(id), n = byHub.get(id)?.length ?? 0; if (!b || (!open && !n)) continue;
     const own = taken.find(r => r.x === b.x && r.y === b.y && r.w === b.w) ?? { x: b.x, y: b.y, w: b.w, h: b.h };
     const chip = h('button', { type: 'button', class: `ff-fold-chip${open ? ' open' : ''}`, 'data-hub': id, 'aria-expanded': String(open),
       title: open ? '먼저 볼 연결 밖의 연결을 다시 접어요' : `이 카드의 먼저 볼 연결 밖 연결 ${n}개를 접어 두었어요 · 눌러서 제자리에 펼치기`,
       onclick: (e: Event) => { e.stopPropagation(); toggleHub(id); } }, foldWord(n, open));
-    const g = 4 * inv;
+    const g = 4 * inv, ring = { x: b.x - g, y: b.y - g, w: b.w + 2 * g, h: b.h + 2 * g };
     // v10 (review of v9: 「다른 연결 7개」 straddled its card's edge beside a blue head): just off the card's edge, never on it, a place no
-    // line runs under first (hubChipSpots), clear of every head.
-    put(chip, (w, hh) => chipSpots(hubChipSpots(b, w, hh, g), w, hh, titles), 260 * inv, own, r => ![...lastRouted.values()].some(o => shownNow.has(o.key) && polylineHitsRect(o.pts, r, 2)));
+    // line runs under first (hubChipSpots), clear of every head. v10 growth (review of v9: one stood a row apart, under the top bar, its card
+    // hidden above): every place touches its card, here the ring one gap off its edge (the places a row further under or over go).
+    put(chip, (w, hh) => chipSpots(hubChipSpots(b, w, hh, g), w, hh, titles, ring), 260 * inv, own, r => ![...lastRouted.values()].some(o => shownNow.has(o.key) && polylineHitsRect(o.pts, r, 2)));
   }
+  chipsSeen();
+}
+/** v10: the texts the cards show as drawn now (map units), each cut to its card (a text clipped by its card is not shown past it). */
+function cardTexts(world: HTMLElement): Rect[] {
+  return [...world.querySelectorAll<HTMLElement>('.node[data-part]')].flatMap(card => {
+    const b = lay.boxes.get(card.dataset.part!); if (!b) return [];
+    const c = card.getBoundingClientRect(), k = c.width / b.w || camera.k, out: Rect[] = [], tw = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    for (let n = tw.nextNode(); n; n = tw.nextNode()) {
+      if (!n.textContent?.trim()) continue;
+      const rg = document.createRange(); rg.selectNodeContents(n);
+      for (const r of rg.getClientRects()) {
+        const x0 = Math.max(r.left, c.left), y0 = Math.max(r.top, c.top), x1 = Math.min(r.right, c.right), y1 = Math.min(r.bottom, c.bottom);
+        if (x1 - x0 > 0.5 && y1 - y0 > 0.5) out.push({ x: b.x + (x0 - c.x) / k, y: b.y + (y0 - c.y) / k, w: (x1 - x0) / k, h: (y1 - y0) / k });
+      }
+    }
+    return out;
+  });
+}
+/** The old names standing beside their cards (map units at their drawn size). */
+const oldNameRects = (world: HTMLElement): Rect[] => { const inv = labelInv(); return [...world.querySelectorAll<HTMLElement>('.growth-oldname')].map(el => ({ x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0, w: el.offsetWidth * inv, h: el.offsetHeight * inv })); };
+/** v10 (review of v9: 「다른 연결 N개」 floated alone under the top bar): a hub's chip (and an old name beside its card) shows only while its
+ * card is seen (inside the window and not under the top box or the bars at the bottom) and it is under none of them nor the title chip. */
+let seenFrame = 0;
+function chipsSeen() {
+  if (seenFrame) return;
+  seenFrame = requestAnimationFrame(() => {
+    seenFrame = 0;
+    const world = $('world'), vp = $('viewport').getBoundingClientRect(), box = (q: DOMRect) => ({ x: q.left, y: q.top, w: q.width, h: q.height });
+    const covers = ['#focus-top', '#growth-line', '#growth-past', '#space > .controls'].map(q => document.querySelector<HTMLElement>(q)).filter((e): e is HTMLElement => !!e && !e.hidden && e.offsetWidth > 0).map(e => box(e.getBoundingClientRect()));
+    // A chip or an old name under the title chip reads as part of nothing either.
+    const st = document.getElementById('scope-sticky'), over = [...covers, ...(st && !st.hidden && st.offsetWidth ? [box(st.getBoundingClientRect())] : [])], inv = labelInv();
+    const under = (r: { x: number; y: number; w: number; h: number }) => over.some(c => r.x < c.x + c.w && c.x < r.x + r.w && r.y < c.y + c.h && c.y < r.y + r.h);
+    // The card where the camera puts it (never its place mid-animation): its drawn box through the camera, in the window's frame.
+    const ox = vp.left + world.offsetLeft, oy = vp.top + world.offsetTop;
+    for (const chip of world.querySelectorAll<HTMLElement>('.ff-fold-chip, .growth-oldname')) {
+      const id = chip.dataset.hub ?? chip.dataset.part ?? '', card = world.querySelector<HTMLElement>(`.node[data-part="${CSS.escape(id)}"], .frame[data-part="${CSS.escape(id)}"]`);
+      const s = card ? toScreen({ x: card.offsetLeft, y: card.offsetTop, w: card.offsetWidth, h: card.offsetHeight }) : null;
+      const c = toScreen({ x: parseFloat(chip.style.left) || 0, y: parseFloat(chip.style.top) || 0, w: chip.offsetWidth * inv, h: chip.offsetHeight * inv });
+      chip.classList.toggle('ff-alone', !s || !cardSeen({ x: ox + s.x, y: oy + s.y, w: s.w, h: s.h }, box(vp), covers) || under({ x: ox + c.x, y: oy + c.y, w: c.w, h: c.h })
+        // Cut by the window's side, as a line label is (clipAtEdge).
+        || ox + c.x < vp.left - 1 || ox + c.x + c.w > vp.right + 1);
+    }
+  });
 }
 /** The top line: the record's first sentence (hover: whole, said to be the record's summary, with its record and line; pressed: the
  * source), the switcher, and the sentence the picked lines stand on when it is not the top one. */
@@ -6686,16 +6748,19 @@ function renderGrowthEntry() {
  * a range entered for a part opens on that part's scene; a range seen in this session comes back as it was left; a new one opens on its
  * first scene (on the current map: never the past one by itself; the camera moves only when that card is out of sight). */
 function growthCompare(from: number, focus: string | null = null) {
+  // v10: the note of a changed baseline is said once the scene stands (opening the scene drops any earlier note).
+  const say: { f: (() => void) | null } = { f: null };
+  try {
   const o = liveOpened(), to = growthCount(); if (!o || from < 1 || from >= to) return;
   if (growthPast) growthLeavePast(false);
   if (growthCmp) rememberRange(growthCmp);
   const saved = growthCmp?.saved ?? { lens: viewLens, selected, camera: { ...camera }, scope };
   const cs = changeSet(o.project, from, to), memo = growthRanges.get(rangeKey(o.key, from, to));
   // Review of v8 (first user, f): a note about leaving never stays over an open comparison.
-  if (toastText === EXIT_HINT || toastText === NOW_HINT) dropToast();
+  dropNote();
   const was = growthCmp ?? (lastCmp?.key === o.key ? lastCmp : null);
   growthCmp = { key: o.key, from, to, cs, proj: o.project, scenes: changeScenes(cs), picked: null, scene: null, pane: null, un: null, unread: null, rejOpen: false, saved };
-  lastCmp = growthCmp; announceBase(was, growthCmp);
+  lastCmp = growthCmp; const cmpNow = growthCmp; say.f = () => announceBase(was, cmpNow);
   growthMenuOpen = false;
   if ($('lens').classList.contains('growth-read')) hideLens();
   readMarks = []; applyReadMarks();
@@ -6715,6 +6780,7 @@ function growthCompare(from: number, focus: string | null = null) {
     return;
   }
   if (c.scenes[0]) growthScene(c.scenes[0].part);
+  } finally { say.f?.(); }
 }
 /** Review of v8: the comparison seen last on this map (its baseline is what a new baseline is said against). */
 let lastCmp: GrowthCmp | null = null;
@@ -6723,7 +6789,7 @@ let lastCmp: GrowthCmp | null = null;
 function announceBase(was: { from: number; cs: ChangeSet } | null, c: GrowthCmp) {
   if (!was || was.from === c.from) return;
   const same = kindTotal(was.cs) === kindTotal(c.cs) && summaryText(was.cs).split(' · ').slice(1).join() === summaryText(c.cs).split(' · ').slice(1).join();
-  toast(baseWord(was.from, c.from, kindTotal(c.cs), same));
+  note(baseWord(was.from, c.from, kindTotal(c.cs), same));
 }
 /** Ends the comparison: the lens, the selection and the camera come back as they were before it (the range is remembered for the session). */
 function growthExit() {
@@ -6734,14 +6800,21 @@ function growthExit() {
   renderSpace('keep');
   if (!o || c.key !== o.key) return;
   if (viewLens !== c.saved.lens) setLens(c.saved.lens);
-  const back = () => { camera = { ...c.saved.camera }; applyCamera(true); };
-  if (selected !== c.saved.selected || scope !== c.saved.scope) { go(o.key, c.saved.selected, c.saved.scope); window.setTimeout(back, 80); } else back();
-  // Review of v8 (first user, f): said only when the comparison really closed (nothing of it left on screen).
-  if (!growthCmp && $('growth-line').hidden) toast(EXIT_HINT);
+  // v10 (review of v9: at 1280 the map came back at 60% top left, the note saying 「보던 위치로 돌아왔어요」): the camera from before the
+  // comparison is set once the selection's render is done (never before it), and the note says only what is so after it.
+  const want = { ...c.saved.camera }, sel = c.saved.selected;
+  const back = () => {
+    camera = { ...want }; applyCamera(true);
+    // Review of v8 (first user, f): said only when the comparison really closed (nothing of it left on screen).
+    requestAnimationFrame(() => { if (!growthCmp && $('growth-line').hidden) note(exitWord(sameCamera(camera, want), !!sel && selected === sel)); });
+  };
+  if (selected !== c.saved.selected || scope !== c.saved.scope) {
+    afterRender = back; go(o.key, c.saved.selected, c.saved.scope);
+    window.setTimeout(() => { if (afterRender === back) { afterRender = null; back(); } }, 1200);
+  } else back();
 }
-/** Review of v7 (first user, i): what leaving the comparison and coming back from a past version keep, said once in a small note. */
-const EXIT_HINT = '비교를 끝냈어요 · 비교 전에 고른 카드와 보던 위치로 돌아왔어요';
-const NOW_HINT = '현재 지도로 돌아왔어요 · 고른 카드와 화면 위치는 그대로예요';
+/** Review of v7 (first user, i): what leaving the comparison and coming back from a past version keep is said once in a small note; v10: only
+ * what is so (growth-view exitWord, nowWord). */
 /** The parts marked on the map now: a filter's parts (each outlined; the current one is also its tab), else the scene's part (and the
  * duplicates a 중복 정리 folded). */
 function sceneMarks(c: GrowthCmp): string[] {
@@ -6753,6 +6826,7 @@ function sceneMarks(c: GrowthCmp): string[] {
  * opens its list, or its scene when it has one; picked again, it lets go. */
 function growthPick(k: SummaryKey) {
   const c = growthCmp; if (!c) return;
+  dropNote();
   const was = c.picked; c.picked = was === k ? null : k;
   if (!c.picked) { c.pane = c.scene ? 'scene' : null; readMarks = sceneMarks(c); if (c.pane) growthOpenPane('scene'); else { if ($('lens').classList.contains('growth-read')) hideLens(); drawGrowth(); applyReadMarks(); } return; }
   if (k === 'new' || k === 'desc') { const list = filterParts(c, k); if (list.length) growthScene(list.includes(c.scene ?? '') ? c.scene! : list[0]!); return; }
@@ -6766,6 +6840,7 @@ function growthPick(k: SummaryKey) {
  * least move into the map's area beside the pane; never a zoom, never a fit). */
 function growthScene(part: string, kind: ChangeKind | null = null) {
   const c = growthCmp, o = opened; if (!c || !o) return;
+  dropNote();
   const f = growthFilter(c); if (f && !filterParts(c, f).includes(part)) c.picked = null;
   if (c.picked && !growthFilter(c)) c.picked = null;
   // Review of v7 (first user, h): a scene entered for a kind (a summary item, a list's row, a guide clause) shows that change first.
@@ -6784,8 +6859,15 @@ function growthClearGuide() {
   const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
   const r = { x: el.offsetLeft - ox - 8, y: el.offsetTop - oy - 8, w: el.offsetWidth + 16, h: el.offsetHeight + 16 };
   const cards = [...lay.boxes.values()].filter(b => b.kind !== 'ghost').map(b => toScreen(b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
+  // v10 (review of v9: 「사건 때」 under the guide at 1280): no label, badge, chip, tab, note or line end under it either.
+  const sr = $('space').getBoundingClientRect(), fr = (q: DOMRect): Rect => ({ x: q.left - sr.left - ox, y: q.top - sr.top - oy, w: q.width, h: q.height });
+  const marks = [...w.querySelectorAll<HTMLElement>('.edge-labels > *, .ff-note, .ff-fold-chip, .growth-tab, .growth-oldname')].filter(e => {
+    if (e.hidden || e.classList.contains('edge-cut') || e.classList.contains('ff-alone')) return false;
+    const cs = getComputedStyle(e); return cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity) > 0;
+  }).map(e => e.getBoundingClientRect()).filter(q => q.width > 0 && q.height > 0).map(fr);
+  const drawn = shownLines(), routes = [...lastRouted.values()].filter(x => drawn.has(x.key) && x.pts.length > 1).map(x => x.pts.map(q => ({ x: camera.x + q.x * camera.k, y: camera.y + q.y * camera.k })));
   const o = opened, rep = o && c.scene ? drawnRep(o, c.scene) : null, kb = rep ? lay.boxes.get(rep) : undefined, area = mapArea();
-  const d = guidePan(r, cards, kb && kb.kind !== 'ghost' ? toScreen(kb) : null, area, { x: area.w / 2, y: area.h / 2 });
+  const d = guidePan(r, guideBlocks(cards, marks, routes), kb && kb.kind !== 'ghost' ? toScreen(kb) : null, area, { x: area.w / 2, y: area.h / 2 });
   if (d && (d[0] || d[1])) { camera = { ...camera, x: camera.x + d[0], y: camera.y + d[1] }; applyCamera(true); return; }
   if (d) return;
   guideInPane = true; el.hidden = true; syncMapArea(); renderGrowthPane();
@@ -6808,11 +6890,12 @@ function growthStep(d: number) {
 }
 function growthOpenPane(pane: GrowthCmp['pane']) {
   const c = growthCmp, o = opened; if (!c || !o) return;
+  dropNote();
   c.pane = pane;
   if (selected) { go(o.key); return; } // select(null) draws the pane (renderGrowthPane)
   renderGrowthPane(); drawGrowth(); applyReadMarks();
 }
-function closeGrowthPane() { const c = growthCmp; if (c) { c.pane = null; c.scene = null; c.picked = null; } readMarks = []; hideLens(); guideBack(); drawGrowth(); applyReadMarks(); }
+function closeGrowthPane() { dropNote(); const c = growthCmp; if (c) { c.pane = null; c.scene = null; c.picked = null; } readMarks = []; hideLens(); guideBack(); drawGrowth(); applyReadMarks(); }
 /** The guide back at the map's top (no pane holds it). */
 function guideBack() { if (!guideInPane) return; guideInPane = false; document.querySelector('#lens .gg-pane')?.remove(); renderFocusTop(); syncMapArea(); }
 const KIND_REL: Record<RelationKind, string> = { flow: '흐름', needs: '필요로 함', shares: '함께 씀', related: '관련' };
@@ -6929,7 +7012,7 @@ function growthSceneEl(c: GrowthCmp, part: string): HTMLElement[] {
         dates,
         h('div', { class: 'gs-ctl', role: 'group', 'aria-label': '변화 장면 조작' },
           btn('gs-past', '이전 모습', () => growthView(c.from), { pressed: inPast, title: `${versionLabel(c.from)}을 같은 자리·같은 화면으로 보기` }),
-          btn('gs-now', '현재 모습', () => growthLeavePast(), { pressed: !growthPast, title: `${versionLabel(c.to)} · 지금 지도 · 고른 카드와 화면 위치는 그대로` }),
+          btn('gs-now', '현재 모습', () => growthLeavePast(), { pressed: !growthPast, title: `${versionLabel(c.to)} · 지금 지도 · 이전 모습을 보기 전의 화면 위치로` }),
           btn('gs-prev', '이전 변화', () => growthStep(-1), { disabled: i <= 0 }),
           btn('gs-next', '다음 변화', () => growthStep(1), { disabled: i < 0 || i >= list.length - 1 }),
           btn('gs-quote', '원문', () => { if (qt) showQuote(qt.record, qt.quote, qt.from); }, { disabled: !qt, title: qt ? '이 변화를 적은 기록의 원문 보기' : '사람이 고친 설명이라 기록 원문이 없음' }),
@@ -7028,6 +7111,9 @@ function growthView(n: number) {
   const live = liveOpened(); if (!live || n < 1 || n >= growthCount()) return;
   const pins = growthPast?.pins ?? pinsOfLayout(), pv = pastVersion(live.project, n);
   const past: Opened = { ...live, project: pv.project, view: plainMapView(pv.project), past: n };
+  // v10 (review of v9): the camera before the past view, set again exactly when coming back.
+  if (!growthPast) { pastCam = { ...camera }; pastSel = selected; }
+  dropNote();
   growthPast = { n, live, pins, extra: {}, applied: pv.applied, undated: pv.undated };
   growthMenuOpen = false; growthAside = null;
   if (selected && !past.view.parts.some(x => x.id === selected)) select(null);
@@ -7035,9 +7121,14 @@ function growthView(n: number) {
   if ($('lens').classList.contains('growth-read') && growthCmp && growthCmp.pane !== 'scene') { growthCmp.pane = null; hideLens(); }
   opened = past;
   renderSpace('keep');
+  // v10 (review of v9: at 1280 the scene's predecessor stayed off screen until 「이전 부품 위치 보기」): the card the past view outlines (the
+  // scene's part, else the part it came from) is brought into sight first (the least pan), before the scene's pane is drawn.
+  const c = growthCmp, sc = c?.scene ? c.scenes.find(x => x.part === c.scene) : undefined, mark = sc ? pastMark(sc, id => !!drawnRep(past, id)) : null;
+  if (mark) growthReveal(mark); else keepInView();
   if (growthCmp?.pane === 'scene') renderGrowthPane();
-  keepInView();
 }
+/** v10: the camera and the picked card before the past view (null: not in it). */
+let pastCam: { x: number; y: number; k: number } | null = null, pastSel: string | null = null;
 /** Review of v7 (first user, i): switching between a past version and the current one keeps the card being looked at (the scene's, else
  * the selected one) readable beside the pane: the least pan, only when it is out of sight (the same camera otherwise). */
 function keepInView() {
@@ -7046,10 +7137,13 @@ function keepInView() {
 }
 function growthLeavePast(redraw = true) {
   const g = growthPast; if (!g) return;
-  if (growthAside) { camera = { ...growthAside }; growthAside = null; }
+  growthAside = null;
+  // v10 (review of v9): back to the zoom and place from before the past view, exactly.
+  const back = pastCam; pastCam = null;
+  if (back) camera = { ...back };
   growthPast = null; opened = g.live;
   if (selected && !g.live.view.parts.some(x => x.id === selected)) select(null);
-  if (redraw) { renderSpace('keep'); if (growthCmp?.pane) renderGrowthPane(); keepInView(); }
+  if (redraw) { renderSpace('keep'); if (growthCmp?.pane) renderGrowthPane(); if (back) applyCamera(); else keepInView(); }
 }
 /** The line, the banner, the tabs and the lit lines, after every redraw. */
 function drawGrowth() {
@@ -7066,7 +7160,7 @@ function drawGrowth() {
   else line.replaceChildren();
   line.hidden = !on;
   const banner = $('growth-past'); sp.classList.toggle('growth-in-past', !!growthPast);
-  if (growthPast) banner.replaceChildren(pastBanner(growthPast.n, growthPast.applied, growthPast.undated, () => { growthLeavePast(); toast(NOW_HINT); }));
+  if (growthPast) banner.replaceChildren(pastBanner(growthPast.n, growthPast.applied, growthPast.undated, () => { const was = pastCam && { ...pastCam }, sel = pastSel; growthLeavePast(); note(nowWord(!!was && sameCamera(camera, was), !!sel && selected === sel)); }));
   else banner.replaceChildren();
   banner.hidden = !growthPast;
   drawGrowthMarks(); syncLineMode(); placeDock();
@@ -7118,16 +7212,56 @@ function drawGrowthMarks() {
 }
 /** Tabs above their cards in map units sized for the zoom (20px on screen), never over each other, another card or a group's head. */
 function placeGrowthTabs() {
-  const world = $('world'), els = [...world.querySelectorAll<HTMLElement>('.growth-tab')]; growthTabK = camera.k; if (!els.length) return;
+  const world = $('world'); growthTabK = camera.k;
+  // v10 (review of v9: at 1440 the 「옛 이름 …」 was clipped by its 29px card): an old name its card cannot show whole stands beside the card;
+  // then the tabs; the hubs' chips are then placed again around both (a scene's tab before a chip).
+  placeOldNames(); placeTabsNow(world);
+  if (world.querySelector('.ff-fold-chip')) placeFocusMarks();
+}
+function placeTabsNow(world: HTMLElement) {
+  const els = [...world.querySelectorAll<HTMLElement>('.growth-tab')]; if (!els.length) return;
   const boxes = new Map([...lay.boxes.values()].filter(b => b.kind !== 'ghost').map(b => [b.id, { x: b.x, y: b.y, w: b.w, h: b.h }]));
   const obstacles = [...lay.boxes.values()].map(b => ({ id: b.id, x: b.x, y: b.y, w: b.w, h: b.kind === 'frame' ? b.head : b.h }));
   const t = titleH ? titleRect() : null; if (t) obstacles.push({ id: '', ...t });
   // The captions on the map (the system boundary, the participants, 「이은 선 없음」) are never covered either.
   for (const r of bandRects) obstacles.push({ id: '', ...r });
   for (const el of world.querySelectorAll<HTMLElement>('.lone-head, .band-head')) obstacles.push({ id: '', x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+  // v10: nor an old name.
+  const inv = labelInv();
+  for (const el of world.querySelectorAll<HTMLElement>('.growth-oldname')) obstacles.push({ id: '', x: parseFloat(el.style.left) || 0, y: parseFloat(el.style.top) || 0, w: el.offsetWidth * inv, h: el.offsetHeight * inv });
   for (const e of els) e.hidden = false;
-  const places = placeTabs(els.map(e => ({ part: e.dataset.part!, w: e.offsetWidth, h: e.offsetHeight })), boxes, obstacles, 3 / camera.k);
+  // v10 (review of v9: 「승계 +1」 in the gap between two cards read as the other card's): on its own card's edge, every other card 8px off.
+  const places = placeTabs(els.map(e => ({ part: e.dataset.part!, w: e.offsetWidth, h: e.offsetHeight })), boxes, obstacles, 0, 8 / camera.k);
   for (const e of els) { const r = places.get(e.dataset.part!); e.hidden = !r; if (r) { e.style.left = `${r.x}px`; e.style.top = `${r.y}px`; } }
+}
+
+/** v10: the old names a card cannot show whole (cut by its box, or by its own ellipsis) stand under the card (else over it, else beside it),
+ * touching it, at 12px on screen, off the other cards, heads and labels; the card's own line steps back. Returns whether any stands. */
+function placeOldNames(): boolean {
+  const world = $('world'), o = opened;
+  world.querySelectorAll('.growth-oldname').forEach(e => e.remove());
+  world.querySelectorAll('.c-oldname.cut').forEach(e => e.classList.remove('cut'));
+  if (!growthCmp || growthPast || !o) return false;
+  const inv = labelInv(), meet = (a: Rect, b: Rect) => a.x < b.x + b.w + 2 && b.x < a.x + a.w + 2 && a.y < b.y + b.h + 2 && b.y < a.y + a.h + 2;
+  const taken: Rect[] = [...lay.boxes.values()].filter(b => b.kind !== 'ghost').map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : { x: b.x, y: b.y, w: b.w, h: b.h }));
+  taken.push(...shownMarkRects(world).map(m => m.r), ...bandRects); if (titleH) taken.push(titleRect());
+  let any = false;
+  for (const card of world.querySelectorAll<HTMLElement>('.node[data-part]')) {
+    const spans = [...card.querySelectorAll<HTMLElement>('.c-oldname')]; if (!spans.length) continue;
+    const c = card.getBoundingClientRect(), shown = spans.find(x => x.getClientRects().length && x.getBoundingClientRect().width > 0);
+    const r = shown?.getBoundingClientRect();
+    if (shown && r && r.bottom <= c.bottom + 0.5 && r.right <= c.right + 0.5 && shown.scrollWidth <= shown.clientWidth + 1) continue;
+    const b = lay.boxes.get(card.dataset.part!); if (!b) continue;
+    spans.forEach(x => x.classList.add('cut'));
+    const el = h('div', { class: 'growth-oldname', 'data-part': card.dataset.part!, title: spans[0]!.title }, spans[0]!.textContent ?? '');
+    el.style.transform = `scale(${inv})`; el.style.transformOrigin = '0 0'; world.append(el);
+    const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, own = { x: b.x, y: b.y, w: b.w, h: b.h };
+    const tries = [{ x: b.x, y: b.y + b.h }, { x: b.x + b.w - w, y: b.y + b.h }, { x: b.x, y: b.y - hh }, { x: b.x + b.w, y: b.y + b.h - hh }, { x: b.x - w, y: b.y + b.h - hh }].map(q => ({ ...q, w, h: hh }));
+    const at = tries.find(t => !taken.some(x => !(x.x === own.x && x.y === own.y && x.w === own.w) && meet(x, t))) ?? tries[0]!;
+    el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at); any = true;
+  }
+  if (any) chipsSeen();
+  return any;
 }
 
 /* ---------- coming back: the return reading in the pane ---------- */
@@ -8194,19 +8328,30 @@ function askCopy(label: string, text: string, cls: string, title: string = RECOR
   return b;
 }
 function toast(text: string, action?: { label: string; run: () => void }) {
-  const t = $('toast'), key = opened?.key ?? null; clearTimeout(toastTimer); t.replaceChildren(); toastKey = key; toastText = text;
+  const t = $('toast'), key = opened?.key ?? null; clearTimeout(toastTimer); t.replaceChildren(); toastKey = key; toastText = text; growthNoteOn = false;
   put(t, h('span', {}, text), action ? h('button', { type: 'button', class: 'link-button', onclick: () => { t.hidden = true; if (opened?.key === key) action.run(); } }, action.label) : null,
     h('button', { type: 'button', class: 'toast-close', 'aria-label': '닫기', onclick: () => dropToast() }, '×'));
   // Review of v8 (first user, f): gone by itself in a few seconds, and never over the map's toolbar or the compare line (above them).
   t.hidden = false; placeToast(t); toastTimer = window.setTimeout(() => { t.hidden = true; toastText = null; }, TOAST_MS);
 }
-function dropToast() { clearTimeout(toastTimer); $('toast').hidden = true; toastKey = null; toastText = null; }
+function dropToast() { clearTimeout(toastTimer); $('toast').hidden = true; toastKey = null; toastText = null; growthNoteOn = false; }
+/** v10 (review of v9): a note of the growing map (a changed baseline, leaving the comparison or the past view) goes on the next action (a
+ * scene, a filter, a list or pane opened, a zoom) as well as by itself. */
+let growthNoteOn = false, toastPlaceAt = 0;
+function note(text: string) { toast(text); growthNoteOn = true; }
+function dropNote() { if (growthNoteOn) dropToast(); }
 /** The text the toast shows now (null: none). */
 let toastText: string | null = null;
 function placeToast(t: HTMLElement) {
   const host = t.offsetParent as HTMLElement | null; if (!host) return;
   const tops = ['#space > .controls', '#growth-line', '#growth-past', '#first-view', '#line-key'].map(q => document.querySelector<HTMLElement>(q)).filter((e): e is HTMLElement => !!e && !e.hidden && e.offsetHeight > 0).map(e => e.getBoundingClientRect().top);
-  t.style.bottom = `${toastBottom(host.getBoundingClientRect().bottom, tops)}px`;
+  t.style.bottom = `${toastBottom(host.getBoundingClientRect().bottom, tops)}px`; t.style.left = '';
+  // v10 (review of v9: 「현재 지도로 돌아왔어요」 covered the GitHub Actions card at 1440): along its row, then a row higher, where it covers no card.
+  if (!opened || t.hidden) return;
+  const hr = host.getBoundingClientRect(), r = t.getBoundingClientRect(), vp = $('viewport').getBoundingClientRect();
+  const cards = [...document.querySelectorAll<HTMLElement>('#world .node, #world .ghost')].map(e => e.getBoundingClientRect()).filter(q => q.width > 0).map(q => ({ x: q.left - hr.left, y: q.top - hr.top, w: q.width, h: q.height }));
+  const s = toastSpot({ w: r.width, h: r.height }, { x: vp.left - hr.left, y: vp.top - hr.top + topInset(), w: vp.width, h: vp.height }, r.top - hr.top, cards);
+  t.style.left = `${s.x + r.width / 2}px`; t.style.bottom = `${hr.height - s.y - r.height}px`;
 }
 /** Explicit only: resets the places in this view (the scope and its open frames); one undo. */
 function arrange() {
@@ -8372,7 +8517,7 @@ function bindCanvas() {
   $('zoom-in').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k * 1.2, x, y, true); });
   $('zoom-out').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(camera.k / 1.2, x, y, true); });
   $('zoom-level').addEventListener('click', () => { mapMoved = true; const [x, y] = center(); zoomAt(1, x, y, true); });
-  $('zoom-fit').addEventListener('click', () => { mapMoved = true; fitView(true, true); if (syncLegendFold()) fitView(true, true); });
+  $('zoom-fit').addEventListener('click', () => { mapMoved = true; dropNote(); fitView(true, true); if (syncLegendFold()) fitView(true, true); });
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId, true)));
   bindLegendKeys();
   // S10: the first view's popovers close with Esc or a press outside the guide line.

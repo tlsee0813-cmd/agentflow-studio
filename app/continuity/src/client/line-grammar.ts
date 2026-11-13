@@ -269,8 +269,10 @@ export function badgeForms(b: LineBadge, on: boolean, tier: ZoomTier | null = nu
  * round fixes 2), but a line with a condition or a 선택 mark never reads unconditional: it carries a tiny text-free mark on the line
  * itself (◇ a condition, a dashed ring 선택), its words in the line's tip. null: the pill is drawn (가까이, or the line is picked) or
  * the line has no such cue (a cadence word is no condition: it may rest unsaid, the 시작·반복 lens and the tip say it). */
+// v10 (review of v9: a lone 「조건」 pill at 104% took the place of a line's label): a condition at rest is its ◇ (with its open cue) at every
+// tier, 가까이 too: the bare word 「조건」 said nothing its ◇ does not, and a folded condition always reads as on the plain map.
 export function restCue(b: Pick<LineBadge, 'kind'>, on: boolean, tier: ZoomTier | null): 'condition' | 'optional' | null {
-  if (on || tier === 'near') return null;
+  if (on || (tier === 'near' && b.kind !== 'condition')) return null;
   return b.kind === 'condition' || b.kind === 'optional' ? b.kind : null;
 }
 /** The rest cue mark's size on screen (px), at every zoom. */

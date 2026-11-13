@@ -138,8 +138,9 @@ test('V9-4c a renamed card says its old name small under its title while compari
   assert.match(marks, /if \(!growthPast\) for \(const x of c\.cs\.changes\) if \(x\.kind === 'rename' && x\.before\) \{/);
   assert.match(marks, /\[\['\.c-title', 'c-oldname'\], \['\.c-tag-text', 'c-oldname c-tag-old'\]\]/);
   assert.match(marks, /world\.querySelectorAll\('\.c-oldname'\)\.forEach\(e => e\.remove\(\)\);/);
-  assert.match(css, /\.node\.card \.c-title:has\(\.c-oldname\) \.c-kind \{ display: none; \}/);
-  assert.match(css, /\.space\.face-tag \.node\.card \.c-tag-text:has\(\.c-tag-old\) \.c-tag-kind \{ display: none; \}/, 'over the tag face\'s own kind line');
+  // v10: unless the card cannot show it whole (it then stands beside the card: growth-v10 V10-1).
+  assert.match(css, /\.node\.card \.c-title:has\(\.c-oldname:not\(\.cut\)\) \.c-kind \{ display: none; \}/);
+  assert.match(css, /\.space\.face-tag \.node\.card \.c-tag-text:has\(\.c-tag-old:not\(\.cut\)\) \.c-tag-kind \{ display: none; \}/, 'over the tag face\'s own kind line');
 });
 
 test('V9-4d every count on the compare line that opens a scene or a list reads as a button, as the two filters do', async () => {
@@ -160,11 +161,11 @@ test('V9-4e the 구현 상태 scene names its kind with both ends and says 「�
 
 test('V9-4f 「비교를 끝냈어요」 only once the comparison really closed; a baseline change is said with the numbers counted again; notes go by themselves in a few seconds, above the tools', async () => {
   const app = await read('src/client/app.ts');
-  assert.match(fn(app, 'growthExit'), /if \(!growthCmp && \$\('growth-line'\)\.hidden\) toast\(EXIT_HINT\);/);
+  assert.match(fn(app, 'growthExit'), /if \(!growthCmp && \$\('growth-line'\)\.hidden\) note\(exitWord\(/);
   const cmp = fn(app, 'growthCompare');
-  assert.match(cmp, /if \(toastText === EXIT_HINT \|\| toastText === NOW_HINT\) dropToast\(\);/);
-  assert.match(cmp, /lastCmp = growthCmp; announceBase\(was, growthCmp\);/);
-  assert.match(fn(app, 'announceBase'), /toast\(baseWord\(was\.from, c\.from, kindTotal\(c\.cs\), same\)\);/);
+  assert.match(cmp, /\n {2}dropNote\(\);\n/);
+  assert.match(cmp, /lastCmp = growthCmp; const cmpNow = growthCmp; say\.f = \(\) => announceBase\(was, cmpNow\);/);
+  assert.match(fn(app, 'announceBase'), /note\(baseWord\(was\.from, c\.from, kindTotal\(c\.cs\), same\)\);/);
   assert.equal(V.baseWord(4, 5, 36, true), '비교 기준을 지도 v04에서 지도 v05로 바꿨어요 · 변화 36건을 지도 v05 기준으로 다시 셌어요 · 지도 v04 기준과 같은 결과예요');
   assert.equal(V.baseWord(5, 4, 30, false), '비교 기준을 지도 v05에서 지도 v04로 바꿨어요 · 변화 30건을 지도 v04 기준으로 다시 셌어요');
   assert.ok(V.TOAST_MS >= 3000 && V.TOAST_MS <= 5000);
