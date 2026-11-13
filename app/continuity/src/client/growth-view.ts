@@ -586,3 +586,10 @@ export function reflectRow(x: Unreflected, name: (id: string) => string | null, 
 }
 /** F8 Q6 ②: the scene's two map buttons, 「기준 지도 · v04」 and 「비교 지도 · v17」, under 「기록을 반영한 두 지도 비교」 (the same at 1280). */
 export const mapWord = (which: '기준' | '비교', n: number): string => `${which} 지도 · ${short(n)}`;
+
+/* ---------- v13 (review of v12: the compare line and the tools covered cards) ---------- */
+/** How many cards that read whole in the view and clear of every band now would not after a pan of (dx, dy): the cards a move would lose. */
+export function lostBy(cards: readonly Rect[], view: Rect, bands: readonly Rect[], dx: number, dy: number): number {
+  const ok = (c: Rect) => readableInView(c, view) && !bands.some(b => meets(b, c));
+  return cards.filter(c => ok(c) && !ok({ ...c, x: c.x + dx, y: c.y + dy })).length;
+}

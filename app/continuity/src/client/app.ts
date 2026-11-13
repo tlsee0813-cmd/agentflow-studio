@@ -21,7 +21,7 @@ import type { Channel, ClaimTopic, ReadingQuote, ReadingRelation, RelationMode, 
 import { mapVersions, pastVersion, changeSet, directLines, unreflectedAt, unreadRecords, reflectGroups, citeLines, changeReason, visitBaseline, growthMemo, compareBase, versionLabel, targetWord, CHANGE_WORD, METHOD_WORD, historyWord, type ChangeKind, type ChangeSet, type LineKey, type IdentityCite, type Unreflected, type PartChange, type HistoryRow } from '../shared/map-growth.js';
 import { nameCode, faceCounts, faceSplit } from './face-name.js';
 import { josa } from '../shared/josa.js';
-import { placeTabs, guideBlocks, toastSpot, exitWord, nowWord, sameCamera, restoreCamera, restoreHeld, followWord, followKind, FOLLOW_NO_OPS, sceneGuide, screenGuide, LINES_NOTE, coverPan, coveredBy, litByScene, linesHint, LINES_LIGHT, LINES_UNLIGHT, GUIDE_LOADING, SUMMARY_FOLD, NEW_LIST, NEW_NOTE, mapWord, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, reflectRow, groupTitle, tabWord, wasLabel, newTitle, changeScenes, shownTabs, sceneKind, sceneTitle, sceneSentence, sceneWhy, stepWord, guideOf, guideText, kindCount, plainName, auxName, codeText, leastPan, readableInView, guidePan, otherKinds, tabTip, pastMark, oldNameWord, heldName, kindTotal, summaryText, baseWord, TOAST_MS, toastBottom, type Scene as ChangeScene, type GuideSeg, type SummaryKey } from './growth-view.js';
+import { placeTabs, guideBlocks, toastSpot, exitWord, nowWord, sameCamera, restoreCamera, restoreHeld, followWord, followKind, FOLLOW_NO_OPS, sceneGuide, screenGuide, LINES_NOTE, coverPan, coveredBy, lostBy, litByScene, linesHint, LINES_LIGHT, LINES_UNLIGHT, GUIDE_LOADING, SUMMARY_FOLD, NEW_LIST, NEW_NOTE, mapWord, clearPastOnly, chipText as growthChipText, historyMenu, compareLine, pastBanner, reflectRow, groupTitle, tabWord, wasLabel, newTitle, changeScenes, shownTabs, sceneKind, sceneTitle, sceneSentence, sceneWhy, stepWord, guideOf, guideText, kindCount, plainName, auxName, codeText, leastPan, readableInView, guidePan, otherKinds, tabTip, pastMark, oldNameWord, heldName, kindTotal, summaryText, baseWord, TOAST_MS, toastBottom, type Scene as ChangeScene, type GuideSeg, type SummaryKey } from './growth-view.js';
 import { TOPIC_LABEL, TOPIC_HINT, EVIDENCE_LABEL, EVIDENCE_HINT, STATE_WORD, MODE_LABEL, TYPE_LABEL, FAMILY_OF, CHANNEL_LABEL, claimEvidence, claimWhen, claimsByTopic, claimTopic } from '../shared/claim-topic.js';
 import { recordTitle } from './digest-source.js';
 import { createMapRun, sendLine, JOB_NOTE, type MapRunState } from './map-run.js';
@@ -39,6 +39,9 @@ import { RUNTIME, runtimeStorage } from './runtime.js';
 import { $, h, put, svg, chevron, ago, fullTime, inspectorWidth, setInspectorWidth, codeGate, codeNote, syncCodeGates } from './plan-dom.js';
 import { routeEdges, focusRoutes, FOCUS_ROUTE_SCALE, samplePath, mixPath, openCorridors, applyStrips, stripShift, type Routed, type Strip } from './map-route.js';
 import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomTier } from './card-budget.js';
+// v13 (C-words-regressions): a mark's further places, the word level, the compare footer.
+import { cueSpots } from './mark-room.js';
+import { readWords, writeWords, plainLabel, hasCode, easyLegendChip, easyKind, partMark, leansBack, EASY_LENS, WORDS_TIP, type WordLevel } from './word-level.js';
 import { CARD_H, CARD_H_TALL, CARD_H_TALLER, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { cardFace, cutsWord, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
@@ -132,6 +135,8 @@ const kv = runtimeStorage({
   getItem: k => { try { return storage ? storage.getItem(k) : memoryStorage.get(k) ?? null; } catch { return null; } },
   setItem: (k, v) => { if (storage) storage.setItem(k, v); else memoryStorage.set(k, v); }
 });
+/** V13-C HOOK (word level): the map's word level, 쉽게 or 자세히 (word-level.ts; kept on this browser). */
+let words: WordLevel = readWords(kv);
 
 /* Answers: kept apart from the project (own key), so the saved project format is never touched. Examples stay in memory. */
 const ANSWERS_KEY = 'agentflow.studio.answers.1';
@@ -1236,10 +1241,15 @@ function fitKindLines() {
 const tagKindW = (s: string) => tagMeasure(s, TAG.kind, 520) * 1.03 + 1;
 function fitTagKind(el: HTMLElement, width: number, room: number) {
   const kd = el.querySelector<HTMLElement>('.c-tag-kind'); if (!kd || kd.dataset.kind === undefined) return;
-  const kind = kd.dataset.kind, pre = kd.dataset.pre ?? '', rows = Math.max(1, Math.min(ROLE_LINES, Math.floor((room + 0.5) / TAG.kindLh)));
+  // V13-C HOOK (word level): at 쉽게 the line says what the part does (its role whole, else a phrase of its own words), a person or an
+  // outside system marked first; its kind words read in the card's hover and the pane (and at 자세히 here, as before).
+  const ez = easy(), mark = ez ? kd.dataset.pmark ?? '' : '', role = ez ? kd.dataset.role ?? '' : '', life = kd.dataset.pre ?? '';
+  const kind = ez ? easyKind(kd.dataset.kind) : kd.dataset.kind, pre = [mark, life].filter(Boolean).join(' · '), rows = Math.max(1, Math.min(ROLE_LINES, Math.floor((room + 0.5) / TAG.kindLh)));
   const n = (s: string) => { const l = wrapWords(pre ? `${pre} · ${s}` : s, width, tagKindW); return l && l.length <= rows ? l.length : 0; };
-  const k = kindShort(kind, kd.dataset.fam || null, x => n(x) > 0), shown = k.text, lines = shown ? n(shown) : 1, how = k.how;
-  kd.replaceChildren(...(pre ? [pre, ...(shown ? [h('span', { class: 'c-tag-sep' }, ' · ')] : [])] : []), shown);
+  const byRole = role ? [role, ...rolePhrases(role).filter(x => !leansBack(x))].filter(x => !hasCode(x)).find(x => n(x) > 0) : undefined;
+  const k = byRole ? { text: byRole, how: 'role' } : mark ? { text: '', how: 'none' } : kindShort(kind, kd.dataset.fam || null, x => n(x) > 0), shown = k.text, lines = shown ? n(shown) : 1, how = k.how;
+  const preEls = [...(mark ? [h('span', { class: 'c-tag-mark' }, mark)] : []), ...(mark && life ? [h('span', { class: 'c-tag-sep' }, ' · ')] : []), ...(life ? [life] : [])];
+  kd.replaceChildren(...(pre ? [...preEls, ...(shown ? [h('span', { class: 'c-tag-sep' }, ' · ')] : [])] : []), shown);
   kd.classList.toggle('tk2', lines > 1); kd.classList.toggle('tk-empty', !shown && !pre); kd.dataset.fit = how;
 }
 /** The 「프로그램」 chip (line-view): a value the program carried over from the record, never the model's answer; the style of 명시/해석. */
@@ -1733,7 +1743,8 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
   const head = h('div', { class: 'c-head' }, tile,
     h('span', { class: 'c-title' }, h('span', { class: 'node-name c-name', ...(fn.ident ? { 'data-ident': fn.ident } : {}) }, ...faceNameNodes(fn.name, nl, nameRoomOf(p.childIds.length > 0, !!dot || !!r.loop, !!dot && shownDisplay().evidence))),
       // v12: the kind word that only repeats 미정's chip beside it (「미정: 대상 범위 불명확」 twice) is said once, by the chip.
-      h('span', { class: 'c-kind' }, t.undecided && t.kind === t.undecided ? null : h('span', { class: `c-kind-word${t.family === 'neutral' && !grp ? ' unknown' : ''}${grp ? ' grp-word' : ''}`, 'data-whole': t.kind, 'data-fam': t.familyWord ?? '' }, t.kind),
+      // V13-C HOOK (word level): a person's or an outside system's mark, shown at 쉽게 in the kind word's place (styles.css .words-easy).
+      h('span', { class: 'c-kind' }, partMark(r.typeRead?.type) ? h('span', { class: 'c-pmark' }, partMark(r.typeRead?.type)) : null, t.undecided && t.kind === t.undecided ? null : h('span', { class: `c-kind-word${t.family === 'neutral' && !grp ? ' unknown' : ''}${grp ? ' grp-word' : ''}`, 'data-whole': t.kind, 'data-fam': t.familyWord ?? '' }, t.kind),
         life ? h('span', { class: 'c-life', 'data-tip': `생애 · 기록의 상태 단어 (${s?.quote ? `“${s.quote.quote}”` : '원문 줄 없음'})` }, life) : null,
         // S9: the policy word stays whole on a narrow card; only its successor (' → update') gives way (styles.css .c-life-to).
         maint ? h('span', { class: 'c-life c-maint', 'data-tip': `유지 방침${maint.includes(' → ') ? ` · 후속 ${maint.split(' → ').slice(1).join(' → ')}` : ''} · 기록의 상태 표 (${maintQuote ? `“${maintQuote}”` : '원문 줄 없음'})` }, maint.split(' → ')[0]!) : null,
@@ -1785,7 +1796,7 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
       ? h('button', { type: 'button', class: 'c-go entry-open', 'data-tip': `안으로 · 내부 상세${stepWord}\n${words.join(' · ')}`, 'aria-label': `${p.name} 내부 상세 열기${stepWord}`, onclick: () => openAction(p.id) }, goGlyph()) : null;
   // The far view's name tag (A3): the same box drawn as the kind icon and the name at a fixed screen size (fitCards writes its lines).
   const tagIcon = h('span', { class: `c-tag-icon g-${t.family}`, 'aria-hidden': 'true' }); tagIcon.innerHTML = glyphSvg(t.glyph);
-  const tag = h('div', { class: 'c-tag', 'aria-hidden': 'true' }, tagIcon, h('span', { class: 'c-tag-text' }, h('span', { class: 'c-tag-name' }, fn.name), h('span', { class: 'c-tag-kind', 'data-kind': t.kind, 'data-fam': t.familyWord ?? '', 'data-pre': life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? '' }, life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? null, life || maint || t.undecided ? h('span', { class: 'c-tag-sep' }, ' · ') : null, t.kind)));
+  const tag = h('div', { class: 'c-tag', 'aria-hidden': 'true' }, tagIcon, h('span', { class: 'c-tag-text' }, h('span', { class: 'c-tag-name' }, fn.name), h('span', { class: 'c-tag-kind', 'data-kind': t.kind, 'data-fam': t.familyWord ?? '', 'data-role': t.role ?? '', 'data-pmark': partMark(r.typeRead?.type) ?? '', 'data-pre': life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? '' }, life ?? (maint ? maint.split(' → ')[0]! : null) ?? t.undecided ?? null, life || maint || t.undecided ? h('span', { class: 'c-tag-sep' }, ' · ') : null, t.kind)));
   const mark = t.container ? 'loop' : dot ? 'dot' : r.loop ? 'loop' : '';
   const el = h('div', { class: `node ${face} card typed f-${t.family} k-${r.typeRead?.type ?? 'neutral'}${grp ? ` grp gx-${grp.axis ?? 'none'}` : ''}${t.structural ? ' structural' : ''}${t.well ? ' has-well' : ''}${t.container ? ' container' : ''}${r.loop ? ' has-loop' : ''}${life ? ' life' : ''}${maint ? ' maint' : ''}${kids ? ' has-kids' : ''}${dot ? ' has-dot' : ''}${go ? ' has-go' : ''}${hs.total > CARD_H ? ' tall' : ''}${hs.total > CARD_H_TALL && !kids && !t.well ? ' taller' : ''} ${extra.cls}`, style: `--nl:${nl}`,
     'data-mark': mark, 'data-life': life || maint ? '1' : '',
@@ -2639,7 +2650,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     first ? h('p', { class: 'map-purpose' }, h('span', {}, first), more ? h('button', { type: 'button', class: 'map-more', title: '설명 전체와 출처', onclick: () => openScopeReading() }, '설명 전체') : null) : null,
     // Review of v5 focus 3 (A3): the record's time and version stay in sight at rest, under 「기록 정보 ▾」 (the whole line in its tip and,
     // opened, under it).
-    metaBtn, !metaOpen && basis ? h('span', { class: 'map-when', title: basis.title }, basis.textContent) : null, meta.length ? h('div', { class: 'map-meta' }, ...meta) : null, scenarioStrip(o),
+    metaBtn, !metaOpen && basis ? h('span', { class: 'map-when', title: basis.title }, ...[...basis.childNodes].map(x => x.cloneNode(true))) /* V13-C HOOK (word level): its parts, so 쉽게 hides the time and version */ : null, meta.length ? h('div', { class: 'map-meta' }, ...meta) : null, scenarioStrip(o),
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
@@ -2650,7 +2661,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // v10 (review of v9: at rest the 17-reading map's title stood under the top box, its 「기록 정보」 and time out of reach): the chip that
   // names the map while its own title is not drawn carries them too, and opens the same 기록 정보 under it.
   const stickyMeta = metaBtn ? [h('span', { class: 'sticky-row' }, h('button', { type: 'button', class: 'sticky-toggle', 'aria-expanded': String(metaOpen), title: metaBtn.title, onclick: () => { metaOpen = !metaOpen; renderSpace('keep'); } }, metaOpen ? '기록 정보 접기 ▴' : '기록 정보 ▾'),
-    !metaOpen && basis ? h('span', { class: 'sticky-when', title: basis.title }, basis.textContent) : null),
+    !metaOpen && basis ? h('span', { class: 'sticky-when', title: basis.title }, ...[...basis.childNodes].map(x => x.cloneNode(true))) : null),
     metaOpen ? h('div', { class: 'map-meta sticky-meta' }, ...[sp ? null : understoodLine(o), basisLine(o), (() => { const cs = [flowStrip(o), rulesStrip(o), sinceStrip(o), stateStrip(o), opsNoneChip(o)].filter((x): x is HTMLElement => !!x); return cs.length ? h('div', { class: 'map-chips' }, ...cs) : null; })()].filter((x): x is HTMLElement => !!x)) : null] : [];
   const sticky = $('scope-sticky'); sticky.replaceChildren(h('strong', {}, sp ? sp.name : o.project.name), first ? h('span', {}, first) : '', ...stickyMeta.filter((x): x is HTMLElement => !!x));
   sticky.classList.toggle('meta-open', metaOpen && !!metaBtn); sticky.setAttribute('aria-hidden', String(!metaBtn));
@@ -2704,7 +2715,8 @@ function placeLoneHead(crossing?: Map<string, { all: number }>) {
   world.querySelector('.lone-head')?.remove();
   if (!loneIds.length || loneIds.length === own.length) return;
   // A placement, not a group of the record: the caption says what the parts share (no line), in the band captions' quiet style.
-  const el = h('div', { class: 'lone-head', 'aria-hidden': 'true' }, `이은 선 없음 · ${loneIds.length}`);
+  // V13-C HOOK (word level): its count in its own span (쉽게 leaves it out: the cards under it are the count).
+  const el = h('div', { class: 'lone-head', 'aria-hidden': 'true' }, '이은 선 없음', h('span', { class: 'lone-n' }, ` · ${loneIds.length}`));
   world.append(el); moveLoneHead();
 }
 /** Beauty v4 (P2): the system boundary and the participants' caption, at the parts they name, never a zone or a column.
@@ -3191,6 +3203,20 @@ function keepPlanFit(el: HTMLElement, text: string, lines: number, less = 0, wor
   const room = (el.clientWidth - less) * (lines > 1 ? lines - 0.1 * (lines - 1) : 1) - ctx.measureText('…').width, w = (t: string) => ctx.measureText(t).width;
   return room > 0 && planCutNeeded(text, room, w, KEEP_WORD) ? clipKeepPlan(text, room, w, words, KEEP_WORD) : text;
 }
+/* ---------- V13-C HOOK (word level): spec item 4, 「쉽게 · 자세히」 (word-level.ts) ----------
+ * The level is one class on the space (words-easy / words-detail): the card faces' kind words, the ports' marks, the counts and the code in
+ * the top box's basis hide by styles.css; the labels and the tags are placed again for it (their words are measured). */
+function easy(): boolean { return words === 'easy'; }
+function syncWords() {
+  const sp = document.getElementById('space'); sp?.classList.toggle('words-easy', easy()); sp?.classList.toggle('words-detail', !easy());
+  document.querySelectorAll<HTMLElement>('.words-seg [data-words]').forEach(b => { const on = b.dataset.words === words; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); b.title = WORDS_TIP[b.dataset.words === 'detail' ? 'detail' : 'easy']; });
+  document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { b.dataset.short ??= b.textContent ?? ''; b.textContent = easy() ? EASY_LENS[b.dataset.lens ?? ''] ?? b.dataset.short : b.dataset.short; });
+}
+function setWords(w: WordLevel) {
+  if (w === words) return;
+  words = w; writeWords(kv, w); syncWords(); tagAt = { k: 0, n: 0 };
+  if (opened) { renderLegend(); renderSpace('keep'); }
+}
 function placeLineLabels() {
   const world = $('world'), o = opened; if (!o) return;
   let box = world.querySelector<HTMLElement>('.edge-labels');
@@ -3287,13 +3313,14 @@ function placeLineLabels() {
     const on = g.classList.contains('on'), fan = on && (fans.get(selKey(e)) ?? 0) > 1;
     if (on && seenSel.has(selKey(e))) continue;
     // A line carrying a format artifact's fields reads as its type chip where one of its forms finds room; else as its verb.
-    const tp = fan ? undefined : lineTypes.get(e.key);
+    const tp = fan || easy() ? undefined : lineTypes.get(e.key); // V13-C HOOK (word level): a type chip's field names are code
     if (tp) { const at = placeTypeChip(box, e, tp, edgePts(e.key, path), 'long', r => clear(r) && !lineUnder(r, e.key, shown), on);
       if (at) { blocks.push(at); if (on) seenSel.add(selKey(e)); continue; } }
-    const verb = `${wordOf(e)}${!fan ? countOf(e) : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
+    // V13-C HOOK (word level): at 쉽게 the verb in plain words (a code verb gives way to its kind's word; its words in the line's tip).
+    const verb = easy() ? `${plainLabel(wordOf(e)) ?? (REL_LABEL[e.kind] ?? e.kind)}${edgeRevised(e) ? REVISED_EDGE : ''}` : `${wordOf(e)}${!fan ? countOf(e) : ''}${edgeRevised(e) ? REVISED_EDGE : ''}`;
     // The selection's line says what it hands over (the head of its note) where its runs have room; the verb alone otherwise.
     // (Not when the line's own label already says the same words, as a payload often does.)
-    const head = on && !fan && e.notes.length === 1 && !plannedNote(e.notes[0]!) ? noteHead(e.notes[0]!) : '', said = head === wordOf(e) ? '' : head;
+    const head0 = on && !fan && e.notes.length === 1 && !plannedNote(e.notes[0]!) ? noteHead(e.notes[0]!) : '', head = easy() && head0 ? plainLabel(head0) ?? '' : head0, said = head === wordOf(e) ? '' : head;
     const label = h('span', { class: `edge-label k-${e.kind}${on ? ' on' : ''}${edgeRevised(e) ? ' revised' : ''}`, 'data-key': e.key });
     box.append(label); fillLabel(label, verb);
     const inv = lineInv(), pts = edgePts(e.key, path), len = path.getTotalLength(), prefer = fan ? (e.to === selected ? 'end' : 'start') : 'long';
@@ -3405,7 +3432,9 @@ function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Se
       // v12 (review of v11: 「보고서 → pdf…」, 「doc_path…」, 「질의·researcher…」): what a line sends or what starts it too is said whole (as
       // short as a condition's words may be) or not at all: a line whose words found no place keeps its relation-detail cue (detailCues).
       const forms: [string, boolean][] = [];
-      const whole = cond ? condLabelWords(full) : /…|\.{3}/.test(full) || [...full].length > COND_LABEL_CHARS ? null : full;
+      // V13-C HOOK (word level): at 쉽게 the plain words of the label only (none: the condition's ◇ or the line's ··· stays; data-full keeps all).
+      const easyFull = easy() ? plainLabel(full) : full;
+      const whole = easyFull === null ? null : cond ? condLabelWords(easyFull) : /…|\.{3}/.test(easyFull) || [...easyFull].length > COND_LABEL_CHARS ? null : easyFull;
       if (whole) forms.push([whole, true]);
       forms.forEach(([c, loose], fi) => {
         const text = c; if (!(cond ? fillLabel(el, text) : fillWhole(el, text))) return;
@@ -3545,6 +3574,17 @@ const CUE_OPEN_PX = 7;
 /** v12: the target a mark is pressed by (screen px, styles.css .edge-cue::after), kept clear of the cards and of every other mark's. */
 const CUE_HIT = 24;
 /** Whether a line's rest cue has words to open: a condition the record put in words (never the bare 「조건」 nor COND_UNSAID). */
+/** v13 (review of v12: a ◇ in a gap narrower than its target pressed for the card beside it): a mark whose target would still meet a card
+ * (no place on or beside its line had room) keeps a target only as wide as the room round it (styles.css --hit), so a press on the card
+ * is the card's; a mark with room keeps CUE_HIT. */
+function tightCue(el: HTMLElement, s: number, parts: readonly Rect[]) {
+  const inv = labelInv(), x = parseFloat(el.style.left), y = parseFloat(el.style.top), w = Math.max(s, el.offsetWidth * inv); if (!Number.isFinite(x)) return;
+  const room = Math.min(...parts.map(o => Math.max(o.x - (x + w), x - (o.x + o.w), o.y - (y + s), y - (o.y + o.h))));
+  const want = (CUE_HIT / 2) * inv - s / 2; if (!(room < want)) { el.style.removeProperty('--hit'); delete el.dataset.tight; return; }
+  el.dataset.tight = '1'; el.style.setProperty('--hit', `${-Math.max(0, Math.floor((room / inv - 0.5) * 2) / 2)}px`);
+}
+/** v13: the further places a mark may take on and beside its own line (mark-room cueSpots), as screen-sized rects in map units. */
+const cueExtra = (path: SVGPathElement, s: number, ow: number, inv: number, len: number) => cueSpots(d => path.getPointAtLength(Math.max(0, Math.min(len, d))), len, inv, s, ow);
 const cueOpens = (b: LineBadge): boolean => b.kind === 'condition' && b.words.some(w => !!w && w !== '조건' && w !== COND_UNSAID);
 function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'detail', beside: boolean, path: SVGPathElement,
   offParts: (r: Rect) => boolean, apart: (r: Rect) => boolean, offLabels: (r: Rect) => boolean, offLines: (r: Rect) => boolean, set: (el: HTMLElement, r: Rect) => void, open = false) {
@@ -3558,10 +3598,12 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'de
   // v12 (review of v11: nanogpt's losses ◇ 7px from the W&B ◇ opened the wrong condition; four sat under cards): each mark keeps its own
   // CUE_HIT × CUE_HIT target (styles.css ::after) clear of every card and of every other mark's target. Its centre at least half a
   // target from the card it leaves, then along its own line (past its middle when it must, never onto its head's last run).
-  const half = (CUE_HIT / 2) * inv, hitOf = (r: Rect): Rect => ({ x: r.x + s / 2 - half, y: r.y + s / 2 - half, w: 2 * half, h: 2 * half });
+  // v13 (review of v12: an open ◇ or a 「조건 n」 mark is wider than its ◇, and its target with it): the target is the mark's whole drawn box
+  // (its width w) and CUE_HIT / 2 - 4 round it, as styles.css .edge-cue::after draws it; a plain ◇ keeps its CUE_HIT square.
+  const half = (CUE_HIT / 2) * inv, rim = half - (s / 2), hitOf = (r: Rect): Rect => ({ x: r.x - rim, y: r.y + s / 2 - half, w: r.w + 2 * rim, h: 2 * half });
   const parts: Rect[] = [...lay.boxes.values()].map(b => (b.kind === 'frame' ? { x: b.x, y: b.y, w: b.w, h: b.head } : b));
   const touch = (r: Rect, o: Rect) => r.x < o.x + o.w && o.x < r.x + r.w && r.y < o.y + o.h && o.y < r.y + r.h;
-  const others = [...box.querySelectorAll<HTMLElement>('.edge-cue')].map(c => ({ c, r: hitOf({ x: parseFloat(c.style.left), y: parseFloat(c.style.top), w: s, h: s }) })).filter(o => Number.isFinite(o.r.x));
+  const others = [...box.querySelectorAll<HTMLElement>('.edge-cue')].map(c => ({ c, r: hitOf({ x: parseFloat(c.style.left), y: parseFloat(c.style.top), w: Math.max(s, c.offsetWidth * inv), h: s }) })).filter(o => Number.isFinite(o.r.x));
   // Nor within 4px of a line's head (v12 review: 「조건 보기」 marks stood on heads).
   const g4 = 4 * inv, heads = headZones(shownLines()), offHeads = (r: Rect) => !heads.some(o => touch({ x: r.x - g4, y: r.y - g4, w: r.w + 2 * g4, h: r.h + 2 * g4 }, o));
   const hitFree = (r: Rect) => { const t = hitOf(r); return !parts.some(o => touch(t, o)) && !others.some(o => touch(t, o.r)) && offHeads(r); };
@@ -3569,6 +3611,10 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'de
   // Every place along the line clear of the other lines and labels before one that gives either up (a line through a mark reads as its).
   const all = [...near, ...far, ...farther], base = (r: Rect) => hitFree(r) && offParts(r) && apart(r);
   let spot = all.find(r => base(r) && offLabels(r) && offLines(r)) ?? all.find(r => base(r) && offLines(r)) ?? all.find(r => base(r) && offLabels(r)) ?? all.find(base) ?? null;
+  // v13 (review of v12: 13 ◇ at 1280 whose target met a card: short lines between two cards, long ones running along a card): every 3px of
+  // its own line (short of its head's run), then just beside it (cueBeside: 10–16px off the line, the nearer first), before a mark's target
+  // may meet a card.
+  if (!spot) { const ex = cueExtra(path, s, ow, inv, len); spot = ex.along.find(r => base(r) && offLines(r)) ?? ex.along.find(base) ?? ex.beside.find(r => base(r) && offLines(r)) ?? ex.beside.find(base) ?? null; }
   // With no place of its own: a condition joins the mark whose target it would meet into one 「조건 n」 mark that lists every line it stands
   // for (its tip and its keyboard name, data-also); another mark of the same kind leaving the same part stands for it as before. A
   // conditional line never reads unconditional.
@@ -3584,18 +3630,33 @@ function placeCue(box: HTMLElement, e: Edge, cue: 'condition' | 'optional' | 'de
         same.classList.add('q-stack'); same.querySelector('.cue-n')?.remove();
         same.append(h('span', { class: 'cue-n', 'aria-hidden': 'true' }, `조건 ${n}`));
         same.setAttribute('aria-label', `조건 있는 관계 ${n}개`);
+        // v13: the mark grew by its 「조건 n」: when its target now meets a card, it moves along (or just beside) its own line to a place whose
+        // target is clear of every card and every other mark.
+        const sr = { x: parseFloat(same.style.left), y: parseFloat(same.style.top), w: same.offsetWidth * inv, h: s };
+        if (parts.some(o => touch(hitOf(sr), o))) {
+          const sp = $('world').querySelector<SVGPathElement>(`.edge[data-key="${CSS.escape(same.dataset.cue ?? '')}"] .edge-line`);
+          if (sp) {
+            const sl = sp.getTotalLength(), ex = cueSpots(d => sp.getPointAtLength(Math.max(0, Math.min(sl, d))), sl, inv, s, sr.w);
+            const rest = others.filter(o => o.c !== same), ok = (r: Rect) => { const t = hitOf(r); return !parts.some(o => touch(t, o)) && !rest.some(o => touch(t, o.r)) && offHeads(r); };
+            const to = ex.along.find(ok) ?? ex.beside.find(ok); if (to) { same.style.left = `${to.x}px`; same.style.top = `${to.y}px`; } else {
+              // No place along or beside its line: the mark folds its 「조건 n」 (its n in its name and tip, as at 쉽게) rather than lie on a card.
+              same.classList.add('stack-fold'); tightCue(same, s, parts);
+            }
+          }
+        }
       } else if (open && !same.querySelector('.cue-open')) { same.classList.add('q-open'); same.append(h('span', { class: 'cue-open', 'aria-hidden': 'true' })); }
       return;
     }
   }
   // Beauty v4: a short line squeezed between two cards (no place off them) still carries its mark, at its port: never bare.
-  spot ??= [...near, ...far, ...farther].find(r => hitFree(r) && offParts(r)) ?? [...near, ...far].find(offParts) ?? near[0] ?? (len > 0 ? at(path.getPointAtLength(Math.min(len / 2, (6 + CUE_PX / 2) * inv))) : null);
+  const ex2 = cueExtra(path, s, ow, inv, len);
+  spot ??= [...near, ...far, ...farther, ...ex2.along, ...ex2.beside].find(r => hitFree(r) && offParts(r)) ?? [...near, ...far].find(offParts) ?? near[0] ?? (len > 0 ? at(path.getPointAtLength(Math.min(len / 2, (6 + CUE_PX / 2) * inv))) : null);
   if (!spot) return;
   // Review of v7 (first user, j): the folded condition's ◇ shows that it opens (「조건 보기」 beside it on hover and keyboard focus); a
   // condition whose words are not on the map also keeps its open cue (three small dots) at rest (v8 maps).
   const el = h('span', { class: `edge-cue q-${cue}${beside ? ' beside' : ''}${open ? ' q-open' : ''}`, 'data-cue': e.key, role: 'img', 'aria-label': cue === 'condition' ? '조건 있는 관계' : cue === 'detail' ? '관계 보기' : '선택 관계' },
     open ? h('span', { class: 'cue-open', 'aria-hidden': 'true' }) : null, h('span', { class: 'cue-word', 'aria-hidden': 'true' }, cue === 'condition' ? '조건 보기' : cue === 'detail' ? '관계 보기' : '선택 보기'));
-  box.append(el); set(el, spot);
+  box.append(el); set(el, spot); tightCue(el, s, parts);
 }
 /** F8 Q3/Q4: the relation-detail cue: each drawn line whose label had no room (.label-hidden) and that carries no cue or badge of its own
  * (a ◇ already opens it) gets three small dots on it near the port it leaves, off the cards, the labels and the other lines where it can
@@ -3690,6 +3751,7 @@ function relationConds(project: Project): Map<string, string> {
 /** How many relations a stroke holds, after its label: ' 3' when they hand over one thing (or name none); nothing when the label
  * already names them ('a · b +1', line-grammar multiWord). */
 function countOf(e: Edge): string {
+  if (easy()) return ''; // V13-C HOOK (word level): a line's count reads in its tip and the pane at 쉽게
   return e.ids.length < 2 || lineMulti.has(e.key) ? '' : ` ${e.ids.length}`;
 }
 /** A line's type chip (map spec 2.4, 타입 칩 = 산출물 이름): the artifact's name and up to three of its fields, one cell each, '+N'
@@ -3743,7 +3805,7 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     // A type chip (map-reading.13) takes its widest form that has a place; with none it gives way to the plain label.
     let label: HTMLElement | null = null, mine: (Rect & { beside?: true })[] = [];
     // short (the middle tier): the plain label cut to LABEL_SHORT characters, its whole words in its tip; no type chip.
-    const tp = short ? undefined : lineTypes.get(e.key);
+    const tp = short || easy() ? undefined : lineTypes.get(e.key); // V13-C HOOK (word level)
     if (tp) { const chip = typeChipEl(e, tp); box.append(chip);
       for (const form of typeChipForms(tp.name, tp.fields)) { fillTypeChip(chip, form); mine = spotsFor(chip); if (mine.length) break; }
       if (mine.length) label = chip; else chip.remove(); }
@@ -3752,7 +3814,8 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     // v12 (review of v11: 「Promise 이행 또는」 kept one side of an OR): the middle tier says a label only whole (LABEL_SHORT characters at
     // most, 「기동 · 」 left off when that makes it short enough); a longer one keeps its line's relation-detail cue, never a cut.
     const shortWord = (w: string) => { if (w.length <= LABEL_SHORT) return w; const rest = w.replace(/^기동\s*·\s*/, ''); return rest !== w && rest.length <= LABEL_SHORT ? rest : ''; };
-    if (!label) { const word = restWord(e), cutWord = short ? shortWord(word) : word;
+    // V13-C HOOK (word level): at 쉽게 a label in plain words only (none left: the line's ··· cue keeps its words).
+    if (!label) { const word0 = restWord(e), word = easy() ? plainLabel(word0) ?? '' : word0, cutWord = short ? shortWord(word) : word;
       // Polish round fixes 2: a label that does not fit in whole words is left to the line's tip (no 「기동 · 명령 torch…」).
       if (!cutWord) { hidden.push(g); continue; }
       label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}${short ? ' brief' : ''}${cutWord !== word && cutWord === word.replace(/^기동\s*·\s*/, '') ? ' whole' : ''}`, 'data-key': e.key }); box.append(label); if (!fillWhole(label, cutWord)) { label.remove(); hidden.push(g); continue; } mine = spotsFor(label); }
@@ -4329,7 +4392,9 @@ const stripInset = () => { const strip = $('plan-strip'); return strip.hidden ? 
 const topInset = () => stripInset() + ftH() + (!$('plan-strip').hidden && !$('scope-sticky').hidden ? $('scope-sticky').offsetHeight + 8 : 0);
 function mapArea(): Rect { const vp = $('viewport').getBoundingClientRect(), top = topInset(); return { x: 16, y: top, w: vp.width - 32, h: mapBottom() - top - mapBottomInset() }; }
 function hideLens() { const l = $('lens'); l.hidden = true; l.replaceChildren(); l.classList.remove('compare', 'scope-read', 'railed', 'scenario-read', 'growth-read'); readingFor = []; syncMapArea(); }
-const mapBottomInset = () => BOTTOM + legendInset() + ($('space').classList.contains('growth-cmp') ? ($('growth-line').offsetHeight || 32) + 8 : $('space').classList.contains('growth-in-past') ? 40 : 0);
+// V13-C HOOK (compare footer): with the footer the map's viewport already ends above the compare line and the tools (its height, cmpFoot).
+let cmpFoot = 0;
+const mapBottomInset = () => cmpFoot ? 16 : BOTTOM + legendInset() + ($('space').classList.contains('growth-cmp') ? ($('growth-line').offsetHeight || 32) + 8 : $('space').classList.contains('growth-in-past') ? 40 : 0);
 const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
 /** The map's viewport: below the plan's strip when it is open, left of the pane when it is open. Camera coordinates stay
  * relative to the space, so neither moves anything already drawn. */
@@ -4349,8 +4414,9 @@ function syncMapArea() {
   $('space').classList.toggle('sheet-read', reading);
   $('space').style.setProperty('--plan-w', `${pane}px`);
   vp.style.right = pane + 'px';
+  syncCmpFooter(); // V13-C HOOK (compare footer)
   const top = $('plan-strip').hidden ? 0 : topInset();
-  vp.style.top = top + 'px'; vp.style.bottom = '0px';
+  vp.style.top = top + 'px'; vp.style.bottom = `${cmpFoot}px`; // V13-C HOOK (compare footer)
   world.style.top = -top + 'px'; vp.style.backgroundPosition = camera.x + 'px ' + (camera.y - top) + 'px';
   placeDock(); updateSticky(); clipAtEdge();
 }
@@ -4713,7 +4779,7 @@ function placeFocusMarks() {
     el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at); if (own) chipRects.push(at);
     if (gave) for (const m of marks) if (!condMark(m.el) && meets(at, m.r)) m.el.classList.add('ff-gave');
   };
-  const note = (cls: string, label: string, text: string | null, tip: string) => h('div', { class: `ff-note ${cls}`, role: 'note', title: tip }, h('span', { class: 'ff-note-label' }, label), text ? h('span', { class: 'ff-note-text' }, text) : null);
+  const note = (cls: string, label: string, text: string | null, tip: string) => h('div', { class: `ff-note ${cls}`, role: 'note', title: tip }, h('span', { class: 'ff-note-label' }, label), text ? h('span', { class: 'ff-note-text' }, easy() && hasCode(text) ? '···' : text) : null); // V13-C HOOK (word level): code in the tip at 쉽게
   const a = f.start ? boxOf(f.start.part) : null, z = f.end ? boxOf(f.end.part) : null;
   // Only what the record says: a C-ENTRY row's start, a scenario's recorded start and end (never a first or last named part's).
   const startWord = f.rule === 'entry' ? FLOW_SOURCE.entry : '시나리오 시작';
@@ -4883,7 +4949,7 @@ function renderFocusTop() {
     // The sentence the lines stand on, when it is not the top one (one line in plain words, whole as written in its hover; nothing plain
     // left: in the hover only). A scenario's lines stand on that scenario record, never on the map record's sentence above.
     if (c.text && shownSentence(c.text) !== s?.shown && said) {
-      basis = h('p', { class: 'ft-basis', title: `${FLOW_CONTROL}의 근거 문장 · ${c.source}\n${said}` }, h('span', { class: 'ft-basis-l' }, '근거 문장'), h('span', { class: 'ft-basis-t', 'data-text': said }, said));
+      basis = h('p', { class: `ft-basis${hasCode(said) ? ' code' : ''}`, title: `${FLOW_CONTROL}의 근거 문장 · ${c.source}\n${said}` }, h('span', { class: 'ft-basis-l' }, '근거 문장'), h('span', { class: 'ft-basis-t', 'data-text': said }, said));
     } else if (c.rule === 'scenario') {
       basis = h('p', { class: `ft-basis${scBasis ? '' : ' none'}`, title: `${FLOW_CONTROL}의 근거 · ${sourceText(f)}\n${scBasis ?? SCENARIO_NO_BASIS}` }, h('span', { class: 'ft-basis-l' }, '시나리오 기록'), h('span', { class: 'ft-basis-t', 'data-text': scBasis ?? SCENARIO_NO_BASIS }, scBasis ?? SCENARIO_NO_BASIS));
     }
@@ -6832,7 +6898,7 @@ function renderLegend() {
     key.classList.add('folded');
     // Review: what a missing dot means is reachable from the folded chip too.
     key.replaceChildren(h('button', { type: 'button', class: 'lg-chip', 'aria-expanded': 'false', title: `범례 펼치기 · ${def.name}${head ? ` · ${head}` : ''}\n${legendChip(viewLens, legendNow)}${fade ? `\n${fade.tip}` : ''}\n${DOT_LEGEND}`, onclick: () => setLegendOpen(true) },
-      h('span', { class: 'lg-chip-text' }, legendChip(viewLens, legendNow)), h('span', { class: 'lg-chip-short' }, '범례'), head ? h('span', { class: 'lg-chip-state' }, head) : null, fadeEl(true), h('span', { class: 'lg-chip-v', 'aria-hidden': 'true' }, '▴')));
+      h('span', { class: 'lg-chip-text' }, easy() ? easyLegendChip(viewLens, legendNow.map(i => i.label)) : legendChip(viewLens, legendNow)), h('span', { class: 'lg-chip-short' }, '범례'), head ? h('span', { class: 'lg-chip-state' }, head) : null, fadeEl(true), h('span', { class: 'lg-chip-v', 'aria-hidden': 'true' }, '▴')));
     key.hidden = false; placeDock(); return;
   }
   key.classList.remove('folded');
@@ -6886,7 +6952,9 @@ function basisLine(o: Opened): HTMLElement | null {
   const version = (last.basisVersion ?? '미상').replace(/\b([0-9a-f]{7})[0-9a-f]{9,}\b/g, '$1');
   // Polish round (spec-cards-v2 §1): the line reads only what changes between maps (the basis time and the target version); the
   // words every map says alike (작성 보고, 운영: 보고된 상태) and the whole version stay in its tip.
-  return h('p', { class: 'map-basis', title: full }, `설계 근거 · ${last.basisAt ?? '작성 시각 미상'} · 판본 ${version}`);
+  // V13-C HOOK (word level): at 쉽게 the day alone (its time and target version stay in the tip and in 자세히).
+  const at = last.basisAt ?? '작성 시각 미상', day = /^\d{4}-\d{2}-\d{2}/.exec(at)?.[0] ?? at;
+  return h('p', { class: 'map-basis', title: full }, `설계 근거 · ${day}`, h('span', { class: 'mb-more' }, `${at.slice(day.length)} · 판본 ${version}`));
 }
 /** The AI sessions behind a part in the full reading: the ones whose records the map quotes for it, and the ones that took it over
  * by a handover. */
@@ -7368,6 +7436,8 @@ function renderGrowthEntry() {
 function growthCompare(from: number, focus: string | null = null) {
   // v10: the note of a changed baseline is said once the scene stands (opening the scene drops any earlier note).
   const say: { f: (() => void) | null } = { f: null };
+  // V13-C HOOK (compare footer): opened on the whole map, the comparison keeps it whole above its footer.
+  const whole = !growthCmp && !growthPast && wholeInView();
   try {
   const o = liveOpened(), to = growthCount(); if (!o || from < 1 || from >= to) return;
   if (growthPast) growthLeavePast(false);
@@ -7395,10 +7465,12 @@ function growthCompare(from: number, focus: string | null = null) {
     Object.assign(c, { picked: memo.picked, scene: memo.scene, sceneKind: memo.sceneKind ?? null }); camera = { ...memo.camera }; applyCamera();
     readMarks = sceneMarks(c);
     if (memo.pane) growthOpenPane(memo.pane); else { drawGrowth(); applyReadMarks(); }
+    // V13-C HOOK (compare footer): the remembered camera (from another window size, perhaps) is checked against the guide like a new scene's.
+    growthClearGuide();
     return;
   }
   if (c.scenes[0]) growthScene(c.scenes[0].part);
-  } finally { say.f?.(); }
+  } finally { cmpWholeFit(whole); say.f?.(); }
 }
 /** Review of v8: the comparison seen last on this map (its baseline is what a new baseline is said against). */
 let lastCmp: GrowthCmp | null = null;
@@ -7424,13 +7496,16 @@ function growthExit() {
   const before = c.saved;
   const back = () => {
     const vp = $('viewport'), area = { w: vp.clientWidth, h: vp.clientHeight }, r = restoreCamera(before.camera, before.area ?? area, area);
+    // V13-C HOOK (compare footer): a comparison that framed the whole map smaller comes back by a longer move; what it came to is read once
+    // that move has settled (CMP_ZOOM_SETTLE_MS more).
+    const zoomed = Math.abs(camera.k - r.camera.k) / Math.max(r.camera.k, 1e-6) > 0.01;
     camera = { ...r.camera }; applyCamera(true);
     const anchor = { x: (area.w / 2 - r.camera.x) / r.camera.k, y: (area.h / 2 - r.camera.y) / r.camera.k };
     // Review of v8 (first user, f): said only when the comparison really closed (nothing of it left on screen).
     // v12 (first user of v11, 4): what one sees is measured too: with the area the size it was, every card where it stood (1px).
     window.setTimeout(() => { if (!growthCmp && $('growth-line').hidden && opened?.key === c.key) {
       const moved = r.kind === 'exact' ? cardsMoved(before.cards ?? {}) : 0, kind = restoreHeld(r.camera, camera, anchor) && moved <= 1 ? r.kind : 'failed';
-      $('space').dataset.restore = kind; $('space').dataset.restoreCards = String(moved); note(exitWord(kind)); } }, RESTORE_SETTLE_MS);
+      $('space').dataset.restore = kind; $('space').dataset.restoreCards = String(moved); note(exitWord(kind)); } }, RESTORE_SETTLE_MS + (zoomed ? CMP_ZOOM_SETTLE_MS : 0));
   };
   if (selected !== c.saved.selected || scope !== c.saved.scope) {
     afterRender = back; go(o.key, c.saved.selected, c.saved.scope);
@@ -7523,7 +7598,10 @@ function growthClearGuide(still = false) {
   const d = coverPan(cards, view, bands, kb && kb.kind !== 'ghost' ? toScreen(kb) : null, { x: area.w / 2, y: area.h / 2 }, r, blocks);
   // v11 (F7, F8 Q6 ③: the past view keeps the camera; review of v10: the guide stood over 「집 서버 FTP 수신 위치」 in the past view at 1280):
   // where the camera must stay, anything under the guide sends it to the pane's top instead of moving the map.
-  if (d && (d[0] || d[1]) && !still) { camera = { ...camera, x: camera.x + d[0], y: camera.y + d[1] }; applyCamera(true); return; }
+  // V13-C HOOK (compare footer): with the footer, a pan that takes a card that reads whole now off the map's area (under its edge) is no
+  // answer either: the guide goes to the pane's top instead.
+  const lose = !!d && cmpFoot > 0 && lostBy(cards, view, growthBands(fr), d[0], d[1]) > 0;
+  if (d && (d[0] || d[1]) && !still && !lose) { camera = { ...camera, x: camera.x + d[0], y: camera.y + d[1] }; applyCamera(true); return; }
   if (d && !d[0] && !d[1]) return;
   guideInPane = true; el.hidden = true; syncMapArea(); renderGrowthPane();
 }
@@ -7878,6 +7956,74 @@ function growthLeavePast(redraw = true) {
   pastMoved = redraw && cardsWere ? cardsMoved(cardsWere) : 0; $('space').dataset.backCards = String(pastMoved);
 }
 /** The line, the banner, the tabs and the lit lines, after every redraw. */
+/* ---------- V13-C HOOK (compare footer): v13 (review of v12: in the comparison the compare line and the tools covered 6 cards at 1440, more
+ * at 1280) ---------- While comparing (and in the past view) the compare line, its banner and the tools stand in a footer under the map: the
+ * map's viewport ends above them (as it ends at the pane), so no card is ever drawn under them; a comparison opened on the whole map keeps the
+ * whole map in sight in the smaller area (cmpWholeFit). Leaving gives the viewport back (the camera comes back as saved). */
+function syncCmpFooter() {
+  const sp = $('space'), on = !!growthCmp && (sp.classList.contains('growth-cmp') || sp.classList.contains('growth-in-past'));
+  let foot = 0;
+  if (on) {
+    const sb = sp.getBoundingClientRect().bottom, tops = ['#space > .controls', '#growth-line', '#growth-past'].map(q => document.querySelector<HTMLElement>(q))
+      .filter((e): e is HTMLElement => !!e && !e.hidden && e.offsetHeight > 0).map(e => e.getBoundingClientRect().top);
+    if (tops.length) foot = Math.max(0, Math.round(sb - Math.min(...tops) + CMP_FOOT_GAP));
+  }
+  $('viewport').style.bottom = `${foot}px`;
+  if (foot === cmpFoot) return;
+  cmpFoot = foot; sp.classList.toggle('cmp-foot', !!foot); sp.style.setProperty('--cmp-foot', `${foot}px`);
+}
+/** The room between the map's bottom edge and the footer's highest band (screen px). */
+const CMP_FOOT_GAP = 6;
+/** The least share of its zoom a comparison opened on the whole map may frame it at (the name tags measured for that zoom stay whole). */
+const CMP_FIT_MIN = 0.9, CMP_FIT_STEPS = 10;
+/** How much longer the way back from a comparison framed smaller settles before it is read (the zoom's move is longer). */
+const CMP_ZOOM_SETTLE_MS = 220;
+/** Whether every drawn card reads whole inside the map's viewport now (the whole map is in sight). */
+function wholeInView(): boolean {
+  // The camera's frame is the space's (toScreen); the viewport sits in it at its offset.
+  const vp = $('viewport'), ox = vp.offsetLeft, oy = vp.offsetTop, w = vp.clientWidth, hh = vp.clientHeight;
+  return [...lay.boxes.values()].filter(b => b.kind !== 'ghost').every(b => { const r = toScreen(b); return r.x >= ox - 0.5 && r.y >= oy - 0.5 && r.x + r.w <= ox + w + 0.5 && r.y + r.h <= oy + hh + 0.5; });
+}
+/** A comparison opened on the whole map: when a card in the viewport's width no longer stands whole between what is over the map's top (the
+ * guide, the title chip) and the footer, the least change that brings every such card there: a move up or down at the same zoom; else the
+ * guide at the pane's top (as when no pan clears it) and the same zoom; else a zoom a little smaller (at most 1 - CMP_FIT_MIN) that cuts no
+ * name tag that was whole; else the camera stays (the footer still keeps every card off the compare line and the tools). */
+function cmpWholeFit(whole: boolean) {
+  if (!whole || !growthCmp || growthPast) return;
+  syncCmpFooter();
+  const vp = $('viewport'), sr = $('space').getBoundingClientRect(), ox = vp.offsetLeft, oy = vp.offsetTop, w = vp.clientWidth, hh = vp.clientHeight;
+  const guide = $('focus-top'), guideOn = !guide.hidden && guide.offsetHeight > 0 && guide.classList.contains('growth-guide');
+  const rectOf = (e: HTMLElement): Rect => { const q = e.getBoundingClientRect(); return { x: q.left - sr.left - 2, y: q.top - sr.top - 2, w: q.width + 4, h: q.height + 4 }; };
+  const sticky = document.getElementById('scope-sticky'), chip = sticky && !sticky.hidden && sticky.offsetHeight > 0 ? [rectOf(sticky)] : [];
+  const cards = [...lay.boxes.values()].filter(b => b.kind !== 'ghost'), L = ox + 16, T = oy + 4, R = ox + w - 16, Bt = oy + hh - 12;
+  if (!cards.length || R - L < 80 || Bt - T < 80) return;
+  const meet = (r: Rect, o: Rect) => r.x < o.x + o.w && o.x < r.x + r.w && r.y < o.y + o.h && o.y < r.y + r.h;
+  // Up and down only: the pane takes the map's right side as it did before (its cards behind it, as at any pane), so the map keeps its left
+  // edge where it stands and only the cards in the viewport's width count.
+  const fits = (c: typeof camera, over: Rect[]) => cards.every(b => { const r = { x: c.x + b.x * c.k, y: c.y + b.y * c.k, w: b.w * c.k, h: b.h * c.k };
+    return r.x >= R || (r.y >= T - 0.5 && r.y + r.h <= Bt + 0.5 && !over.some(o => meet(r, o))); });
+  const withGuide = guideOn ? [rectOf(guide), ...chip] : chip;
+  if (fits(camera, withGuide)) return;
+  const was = { ...camera }, left = camera.x + Math.min(...cards.map(b => b.x)) * camera.k, cut0 = $('world').querySelectorAll('.node.tag-cut').length;
+  /** The height nearest the optical middle (42% of the free height above) at zoom k where the cards fit, or null. */
+  const at = (k: number, over: Rect[]): typeof camera | null => {
+    const x = left - Math.min(...cards.map(b => b.x)) * k, seen = cards.filter(b => x + b.x * k < R); if (!seen.length) return null;
+    const y0 = Math.min(...seen.map(b => b.y)), y1 = Math.max(...seen.map(b => b.y + b.h)); if ((y1 - y0) * k > Bt - T) return null;
+    const lo = T - y0 * k, hi = Bt - y1 * k, mid = T + (Bt - T - (y1 - y0) * k) * 0.42 - y0 * k;
+    let best: number | null = null;
+    for (let y = hi; y >= lo - 0.01; y -= 2) if (fits({ k, x, y }, over) && (best === null || Math.abs(y - mid) < Math.abs(best - mid))) best = y;
+    return best === null ? null : { k, x, y: best };
+  };
+  const same = at(was.k, withGuide);
+  if (same) { camera = same; applyCamera(); return; }
+  if (guideOn) { const free = at(was.k, chip); if (free) { guideInPane = true; guide.hidden = true; syncMapArea(); renderGrowthPane(); camera = free; applyCamera(); return; } }
+  for (let i = 1; i <= CMP_FIT_STEPS; i++) {
+    const c = at(was.k * (1 - (1 - CMP_FIT_MIN) * i / CMP_FIT_STEPS), withGuide); if (!c) continue;
+    camera = c; applyCamera(); fitCards();
+    if ($('world').querySelectorAll('.node.tag-cut').length <= cut0) return;
+  }
+  camera = was; applyCamera(); fitCards();
+}
 function drawGrowth() {
   const live = liveOpened(), sp = $('space');
   if (growthCmp && (!live || growthCmp.key !== live.key)) growthCmp = null;
@@ -7900,6 +8046,7 @@ function drawGrowth() {
   else banner.replaceChildren();
   banner.hidden = !growthPast;
   drawGrowthMarks(); syncLineMode(); placeDock();
+  syncCmpFooter(); // V13-C HOOK (compare footer)
   // Review of v8 (first user, f): a note shown keeps above the bars that just moved (the compare line in, the tools up).
   if (!$('toast').hidden) placeToast($('toast'));
 }
@@ -9327,6 +9474,9 @@ function bindCanvas() {
   $('zoom-fit').addEventListener('click', () => { mapMoved = true; dropNote(); fitView(true, true); if (syncLegendFold()) fitView(true, true); });
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => b.addEventListener('click', () => setLens(b.dataset.lens as LensId, true)));
   bindLegendKeys();
+  // V13-C HOOK (word level): the 「쉽게 · 자세히」 switch.
+  document.querySelectorAll<HTMLElement>('.words-seg [data-words]').forEach(b => b.addEventListener('click', () => setWords(b.dataset.words === 'detail' ? 'detail' : 'easy')));
+  syncWords();
   // S10: the first view's popovers close with Esc or a press outside the guide line.
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && fvMenu) { e.preventDefault(); e.stopImmediatePropagation(); fvMenu = null; renderFirstView(); document.querySelector<HTMLElement>('#first-view .fv-b')?.focus(); } }, true);
   document.addEventListener('pointerdown', e => { if (fvMenu && !(e.target as HTMLElement).closest?.('#first-view, .lens-seg')) { fvMenu = null; renderFirstView(); } }, true);

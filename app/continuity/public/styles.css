@@ -4138,3 +4138,41 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
   #space #world .edge, #space #world > .node :is(.c-name, .node-name, .c-role, .c-row, .c-val, .c-cline, .c-ops, .c-kind, .c-tag-name, .node-note, .node-meta, .meta-text) { transition: none; }
   #space.lt-enter.lt-from .lt-ghosts, #space.lt-enter #world .edge.on .edge-line { animation: none; }
 }
+
+/* ---------- v13 C (words and regressions) ---------- */
+/* V13-C compare footer (review of v12: the compare line and the tools covered cards): while comparing, the map's viewport ends above the
+ * footer, so the fade that let the map pass under the tools is no longer needed; a short fade keeps a card the edge cuts from reading as
+ * a sliced box. */
+.space.cmp-foot > .viewport { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 12px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 12px), transparent); }
+
+/* V13-C word level (spec item 4): 「쉽게 · 자세히」. 자세히 is the v12 map exactly; 쉽게 moves the technical words behind the cues that are
+ * already there (the card's hover and pane, a line's ◇ and ···), never off the record. */
+/* The switch sits in the header beside the reading modes (a reading preference of the whole app, kept on this browser): one segmented pair. */
+.words-seg { display: inline-flex; align-items: center; gap: 2px; height: 30px; padding: 2px; background: var(--chip); border: 1px solid var(--chip-line); border-radius: var(--r-pop); }
+.words-seg button { height: 24px; padding: 0 10px; border: 0; border-radius: var(--r-md); background: none; font-size: 12.5px; font-weight: var(--fw-name); color: var(--text-3); white-space: nowrap; }
+.words-seg button:hover { color: var(--text); }
+.words-seg button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(16,24,40,.08), 0 0 0 1px rgba(16,24,40,.05); }
+/* A person's or an outside system's mark: shown at 쉽게 in the kind word's place (자세히 keeps the kind word). */
+.c-pmark { display: none; }
+.space.words-easy .node.card .c-pmark { display: inline-block; margin-right: 4px; padding: 0 5px; border: 1px solid var(--line-strong, var(--line)); border-radius: 999px; font-size: 11.5px; line-height: 15px; font-weight: 600; color: var(--text-2); }
+.space.words-easy .node.card .c-kind-word, .space.words-easy .node.card .c-filed { display: none; }
+.space.words-easy:not(.show-ops):not(.lens-state) .node.card .c-kind:not(:has(.c-pmark, .c-life, .c-maint, .c-undecided)) { display: none; }
+.c-tag-mark { font-weight: 650; color: var(--text-2); }
+/* The model's port marks on a card's side: their names read in the hover and the pane. */
+.space.words-easy .node.card .c-contract.pins { display: none; }
+/* Counts: a line's 「관계 N개」 becomes its ··· (its relations in the line's hover); a 「조건 n」 mark its ◇ (the n in its hover and name). */
+.space.words-easy .edge-labels > .edge-count { font-size: 0 !important; padding: 0 3px; }
+.space.words-easy .edge-labels > .edge-count::after { content: '···'; font-size: 11px; line-height: 14px; letter-spacing: 1px; }
+.space.words-easy .edge-cue.q-stack .cue-n, .edge-cue.q-stack.stack-fold .cue-n { display: none; }
+.space.words-easy .edge-labels > .edge-cue.q-stack, .edge-labels > .edge-cue.q-stack.stack-fold { width: 15px; padding-left: 0; }
+.space.words-easy .edge-cue.q-stack .cue-open, .edge-cue.q-stack.stack-fold .cue-open { display: block; }
+/* The top box: its count (「표시 n/N」) and a basis sentence written in code step back to their tips; the basis keeps its word and ···. */
+.space.words-easy #focus-top .ft-count, .space.words-easy #focus-top .ft-count + .ft-dot { display: none; }
+.space.words-easy #focus-top .ft-basis.code .ft-basis-t { display: none; }
+.space.words-easy #focus-top .ft-basis.code .ft-basis-l::after { content: ' ···'; }
+/* The map's basis line: the day at 쉽게 (its time and version in its tip). */
+.space.words-easy :is(.map-basis, .map-when, .sticky-when) .mb-more { display: none; }
+/* V13-C a ◇ in a gap narrower than its target: its target as wide as the room round it (app.ts tightCue), never over the card beside it. */
+.edge-labels > .edge-cue[data-tight]::after { inset: var(--hit, -8px) !important; }
+/* V13-C 「이은 선 없음」 over the unlinked cards: its count at 자세히 only (the cards under it are seen). */
+.space.words-easy .lone-head .lone-n { display: none; }

@@ -71,7 +71,7 @@ test('P5-3 a cut never loses a plan word: the notes\' 48 characters, the top sen
   const a = await app();
   // v12 (review of v11: 「hyperfine <command>... (」): a note's words whole or the note says its kind alone (its words in its hover): never
   // cut, so never a plan word lost.
-  assert.match(a, /h\('span', \{ class: 'ff-note-text' \}, text\)/, 'a note\'s words whole');
+  assert.match(a, /h\('span', \{ class: 'ff-note-text' \}, easy\(\) && hasCode\(text\) \? '···' : text\)/, 'a note\'s words whole (v13 C: code in its tip at 쉽게)');
   assert.match(a, /if \(nt\) \{ const t0 = nt\.textContent \?\? ''; if \(!fillLabel\(nt, t0\) \|\| nt\.textContent !== t0 \|\| nt\.scrollHeight > nt\.clientHeight \+ 1 \|\| nt\.scrollWidth > nt\.clientWidth \+ 1\) nt\.remove\(\); \}/);
   assert.doesNotMatch(a, /text\.length > 48 \? `\$\{text\.slice\(0, 47\)\}…`/, 'never the plain 47-character cut');
   assert.match(a, /function keepPlanFit\(el: HTMLElement, text: string, lines: number, less = 0, words = false\): string/);

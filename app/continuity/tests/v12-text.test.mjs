@@ -65,14 +65,15 @@ test('V12-5 the overview tag and the card\'s kind line fit by whole units (kindS
   const a = await app();
   const tag = fn(a, 'fitTagKind');
   assert.match(tag, /kindShort\(kind, kd\.dataset\.fam \|\| null,/);
+  assert.match(tag, /const kind = ez \? easyKind\(kd\.dataset\.kind\) : kd\.dataset\.kind/, 'v13 C: 자세히 keeps the v12 kind line');
   assert.doesNotMatch(tag, /ROLE_MORE/, 'the tag never says 「역할 전문 보기」 in place of words');
-  assert.match(a, /'data-kind': t\.kind, 'data-fam': t\.familyWord \?\? ''/);
+  assert.match(a, /'data-kind': t\.kind, 'data-fam': t\.familyWord \?\? '', 'data-role'/);
   const kl = fn(a, 'fitKindLines');
   assert.match(kl, /if \(to\) \{ to\.classList\.add\('kw-off'\); if \(!over\(\)\) continue; \}/, 'the successor gives way first, whole');
   assert.match(kl, /kindShort\(whole, word\.dataset\.fam \|\| null,/);
   assert.match(kl, /word\.dataset\.tip = `종류 · \$\{whole\}`/, 'a shortened kind word keeps its whole in its tip');
   assert.match(fn(a, 'fitCards'), /if \(face === 'card'\) fitKindLines\(\);/);
-  assert.match(a, /h\('span', \{ class: 'c-kind' \}, t\.undecided && t\.kind === t\.undecided \? null :/);
+  assert.match(a, /h\('span', \{ class: 'c-kind' \}, partMark\(r\.typeRead\?\.type\) \? h\('span', \{ class: 'c-pmark' \}, partMark\(r\.typeRead\?\.type\)\) : null, t\.undecided && t\.kind === t\.undecided \? null :/);
   assert.match(a, /'data-tip': `유지 방침\$\{maint\.includes\(' → '\) \? ` · 후속 /, 'the policy chip\'s tip keeps the successor');
   assert.match(await css(), /\.node\.card \.c-kind \.kw-off \{ display: none; \}/);
 });

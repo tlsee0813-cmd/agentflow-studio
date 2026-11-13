@@ -112,10 +112,10 @@ test('V11-5 (F8 Q6 ⑤) leaving restores the panels, then the camera, exactly (0
   assert.equal(V.restoreHeld(saved, { ...saved, x: saved.x + 1.5 }, anchor), false, 'past 1px');
   assert.deepEqual(V.RESTORE_WORD, { exact: '비교 전 배율과 위치로 돌아왔어요.', center: '비교 전 배율과 중심을 유지했어요.', failed: '지도로 돌아왔어요. 비교 전 위치는 복원하지 못했어요.' });
   const app = await read('src/client/app.ts'), ex = fn(app, 'growthExit');
-  assert.match(ex, /r = restoreCamera\(before\.camera, before\.area \?\? area, area\);\n {4}camera = \{ \.\.\.r\.camera \}; applyCamera\(true\);/);
+  assert.match(ex, /r = restoreCamera\(before\.camera, before\.area \?\? area, area\);\n[\s\S]{0,400}\n {4}camera = \{ \.\.\.r\.camera \}; applyCamera\(true\);/);
   // v12 (first user of v11, 4): the cards' places on screen are measured too (growth-v12 V12-4).
   assert.match(ex, /kind = restoreHeld\(r\.camera, camera, anchor\) && moved <= 1 \? r\.kind : 'failed';/);
-  assert.match(ex, /\}, RESTORE_SETTLE_MS\);/, 'said once the camera has settled');
+  assert.match(ex, /\}, RESTORE_SETTLE_MS \+ \(zoomed \? CMP_ZOOM_SETTLE_MS : 0\)\);/, 'said once the camera has settled (v13 C: longer after a comparison framed smaller)');
   assert.match(fn(app, 'growthCompare'), /area: \{ w: \$\('viewport'\)\.clientWidth, h: \$\('viewport'\)\.clientHeight \}, cards: cardsOnScreen\(\) \};/);
   assert.doesNotMatch(ex, /fitView/);
 });
@@ -127,7 +127,7 @@ test('V11-6 (F7, F8 Q6 ③) the past view keeps the camera and the scale; a scen
   assert.doesNotMatch(app, /function keepInView\(/);
   assert.match(scene, /main\.kind === 'retire' \? main\.part : pastMark\(sc, id => !!opened && !!drawnRep\(opened, id\)\)\) : null/, 'any scene\'s card, not only a 승계\'s');
   assert.match(scene, /growthAside \? '원래 위치로' : '이전 부품 위치 보기'/);
-  assert.match(fn(app, 'growthClearGuide'), /if \(d && \(d\[0\] \|\| d\[1\]\) && !still\)/);
+  assert.match(fn(app, 'growthClearGuide'), /if \(d && \(d\[0\] \|\| d\[1\]\) && !still && !lose\)/);
 });
 
 test('V11-7 (review of v10) a hub chip touches its own card only, never a row further, and keeps off the legend chip and the first-view line', async () => {

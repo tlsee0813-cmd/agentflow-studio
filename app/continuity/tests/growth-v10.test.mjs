@@ -65,7 +65,7 @@ test('V10-3 a growth note goes on the next action and never covers a card', asyn
   assert.match(fn(app, 'growthView'), /dropNote\(\);/);
   assert.match(app, /\$\('zoom-fit'\)\.addEventListener\('click', \(\) => \{ mapMoved = true; dropNote\(\);/);
   // The changed baseline's note is said once the scene stands (opening it drops an earlier note, never this one).
-  assert.match(fn(app, 'growthCompare'), /say\.f = \(\) => announceBase\(was, cmpNow\);[\s\S]*\n {2}\} finally \{ say\.f\?\.\(\); \}\n\}/);
+  assert.match(fn(app, 'growthCompare'), /say\.f = \(\) => announceBase\(was, cmpNow\);[\s\S]*\n {2}\} finally \{ cmpWholeFit\(whole\); say\.f\?\.\(\); \}\n\}/);
   assert.match(fn(app, 'announceBase'), /note\(baseWord\(/);
   assert.match(fn(app, 'placeToast'), /toastSpot\(\{ w: r\.width, h: r\.height \}/);
 });
@@ -139,7 +139,7 @@ test('V10-8 the shown scene\'s card always has its tab, a 새 scene\'s too, on e
 test('V10-9 while the map\'s own title is not drawn, its chip carries 「기록 정보 ▾」 and the record\'s time, and opens them', async () => {
   const app = await read('src/client/app.ts'), css = await read('public/styles.css');
   assert.match(app, /h\('button', \{ type: 'button', class: 'sticky-toggle', 'aria-expanded': String\(metaOpen\)/);
-  assert.match(app, /!metaOpen && basis \? h\('span', \{ class: 'sticky-when', title: basis\.title \}, basis\.textContent\) : null/);
+  assert.match(app, /!metaOpen && basis \? h\('span', \{ class: 'sticky-when', title: basis\.title \}, \.\.\.\[\.\.\.basis\.childNodes\]\.map\(x => x\.cloneNode\(true\)\)\) : null/);
   assert.match(fn(app, 'updateSticky'), /st\.classList\.toggle\('with-meta', /);
   assert.match(fn(app, 'updateSticky'), /if \(st\.hidden && st\.querySelector\('\.sticky-when'\)\) \{ st\.hidden = false; st\.classList\.add\('tight'\); st\.hidden = covers\(\); \}/);
   assert.ok(css.includes('.scope-sticky .sticky-toggle { pointer-events: auto;'));
