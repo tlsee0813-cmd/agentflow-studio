@@ -45,7 +45,7 @@ test('V10-2 a hub chip touches its own card, and shows only while that card is s
   assert.equal(F.cardSeen({ x: 300, y: 140, w: 134, h: 48 }, view, [top]), true, 'its lower part shows');
   const app = await read('src/client/app.ts'), css = await read('public/styles.css');
   // Merged with v10-maps: the places stand one gap off the card's edge (never across it), so touching is to that ring.
-  assert.match(fn(app, 'placeFocusMarks'), /const g = 4 \* inv, ring = \{ x: b\.x - g, y: b\.y - g, w: b\.w \+ 2 \* g, h: b\.h \+ 2 \* g \};[\s\S]*w, hh, titles, ring\), 260 \* inv, own, /);
+  assert.match(fn(app, 'placeFocusMarks'), /const g = 4 \* inv, ring = \{ x: b\.x - g, y: b\.y - g, w: b\.w \+ 2 \* g, h: b\.h \+ 2 \* g \};[\s\S]*w, hh, titles, ring, screenCovers\), 260 \* inv, own, /);
   assert.match(fn(app, 'chipsSeen'), /chip\.classList\.toggle\('ff-alone', !s \|\| !cardSeen\(/);
   assert.match(fn(app, 'applyCamera'), /updateSticky\(\); chipsSeen\(\);/);
   assert.ok(css.includes('.ff-fold-chip.ff-alone, .world .growth-oldname.ff-alone { visibility: hidden; }'));
@@ -106,31 +106,31 @@ test('V10-6 a folded condition reads as its ◇ with its open cue at every zoom,
 });
 
 test('V10-7 the past view keeps the scene\'s part (or the part it came from) on screen; coming back and leaving restore the camera exactly; a note says only what is so', async () => {
-  assert.equal(V.exitWord(true, false), '비교를 끝냈어요 · 비교 전에 보던 위치로 돌아왔어요');
-  assert.equal(V.exitWord(true, true), '비교를 끝냈어요 · 비교 전에 고른 카드와 보던 위치로 돌아왔어요');
-  assert.equal(V.exitWord(false, false), '비교를 끝냈어요');
-  assert.equal(V.nowWord(true, false), '현재 지도로 돌아왔어요 · 화면 위치는 이전 모습을 보기 전 그대로예요');
-  assert.equal(V.nowWord(false, false), '현재 지도로 돌아왔어요');
+  // v11 (F8 Q6 ⑤, ②): the three restore words; the way back names its map, never 「현재」 (growth-v11 V11-5, V11-2).
+  assert.equal(V.exitWord('exact'), '비교 전 배율과 위치로 돌아왔어요.');
+  assert.equal(V.nowWord(true, false, '비교 지도 · v17'), '비교 지도 · v17로 돌아왔어요 · 배율과 위치는 기준 지도를 보기 전 그대로예요');
+  assert.equal(V.nowWord(false, false, '비교 지도 · v17'), '비교 지도 · v17로 돌아왔어요');
   assert.equal(V.sameCamera({ x: 1, y: 2, k: 0.3 }, { x: 1.2, y: 2, k: 0.3 }), true);
   assert.equal(V.sameCamera({ x: 1, y: 2, k: 0.3 }, { x: 1, y: 2, k: 0.6 }), false);
   const app = await read('src/client/app.ts');
   const gv = fn(app, 'growthView');
   assert.match(gv, /if \(!growthPast\) \{ pastCam = \{ \.\.\.camera \}; pastSel = selected; \}/);
-  assert.match(gv, /mark = sc \? pastMark\(sc, id => !!drawnRep\(past, id\)\) : null;\n {2}if \(mark\) growthReveal\(mark\); else keepInView\(\);\n {2}if \(growthCmp\?\.pane === 'scene'\) renderGrowthPane\(\);/);
+  // v11 (F8 Q6 ③, review of v10: a 384px pan at 1280 60%): the past view never moves the camera by itself (growth-v11 V11-6).
+  assert.doesNotMatch(gv, /growthReveal|keepInView/);
   assert.match(fn(app, 'growthLeavePast'), /const back = pastCam; pastCam = null;\n {2}if \(back\) camera = \{ \.\.\.back \};/);
   const ex = fn(app, 'growthExit');
   assert.match(ex, /afterRender = back; go\(o\.key, c\.saved\.selected, c\.saved\.scope\);/);
-  assert.match(ex, /note\(exitWord\(sameCamera\(camera, want\), !!sel && selected === sel\)\)/);
+  assert.match(ex, /note\(exitWord\(kind\)\)/);
   assert.doesNotMatch(app, /window\.setTimeout\(back, 80\)/);
   assert.match(fn(app, 'render'), /const ar = afterRender; afterRender = null; ar\?\.\(\);/);
-  assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); note\(nowWord\(!!was && sameCamera\(camera, was\), !!sel && selected === sel\)\);/);
+  assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); note\(nowWord\(!!was && sameCamera\(camera, was\), !!sel && selected === sel, backWord\)\);/);
 });
 
 test('V10-8 the shown scene\'s card always has its tab, a 새 scene\'s too, on every map', () => {
   const q = fixtureProject(growthFixture('track-a')), cs = G.changeSet(q, 4, 9), scenes = V.changeScenes(cs);
   const fresh = scenes.find(s => s.main.kind === 'new'); assert.ok(fresh);
   const tabs = V.shownTabs(scenes, fresh.part, null);
-  assert.deepEqual([tabs[0].part, tabs[0].on, tabs[0].word], [fresh.part, true, '새로 표시']);
+  assert.deepEqual([tabs[0].part, tabs[0].on, tabs[0].word], [fresh.part, true, '지도 표시 추가']);
   assert.equal(V.shownTabs(scenes, null, null).some(t => t.kind === 'new'), false, 'the quieter tabs still leave 새 out');
 });
 

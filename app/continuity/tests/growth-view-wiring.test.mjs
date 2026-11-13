@@ -44,7 +44,7 @@ test('GROWTH-W2 the baseline: read when the map opens, kept for the visit, writt
 test('GROWTH-W3 a past version is read-only and drawn where the current map is: no save, drag, arrange, new part or reading lands on it', async () => {
   const app = await read('src/client/app.ts');
   assert.match(app.slice(app.indexOf('interface Opened {'), app.indexOf('interface Answer')), /\n  past\?: number \}/);
-  assert.match(fn(app, 'commit'), /if \(o\.past\) return '지난 지도 버전을 보는 중에는 바꿀 수 없어요\. 현재로 돌아와 주세요\.';/);
+  assert.match(fn(app, 'commit'), /if \(o\.past\) return '지난 지도 버전을 보는 중에는 바꿀 수 없어요\. 아래 줄의 버튼으로 비교 지도나 마지막 지도 버전에 돌아와 주세요.';/);
   assert.match(app, /if \(handle && o && !o\.past\) \{/);
   assert.match(fn(app, 'arrange'), /if \(!o \|\| o\.past\) return;/);
   assert.match(app, /\$\('add-part'\)\.hidden = o\.kind !== 'saved' \|\| !!o\.past;/);
@@ -64,16 +64,18 @@ test('GROWTH-W3 a past version is read-only and drawn where the current map is: 
 test('GROWTH-W4 compare: tabs only while comparing, lit parts by the read-marks highlight, the exit restores lens, selection and camera', async () => {
   const app = await read('src/client/app.ts');
   const cmp = fn(app, 'growthCompare');
-  assert.match(cmp, /const saved = growthCmp\?\.saved \?\? \{ lens: viewLens, selected, camera: \{ \.\.\.camera \}, scope \};/);
+  assert.match(cmp, /const saved = growthCmp\?\.saved \?\? \{ lens: viewLens, selected, camera: \{ \.\.\.camera \}, scope, area: /);
   const exit = fn(app, 'growthExit');
   assert.match(exit, /if \(viewLens !== c\.saved\.lens\) setLens\(c\.saved\.lens\);/);
-  assert.match(exit, /const want = \{ \.\.\.c\.saved\.camera \}, sel = c\.saved\.selected;/); assert.match(exit, /camera = \{ \.\.\.want \}; applyCamera\(true\);/);
+  // v11 (F8 Q6 ⑤): the camera from just before the comparison, by restoreCamera (growth-v11 V11-5).
+  assert.match(exit, /const before = c\.saved;/); assert.match(exit, /camera = \{ \.\.\.r\.camera \}; applyCamera\(true\);/);
   assert.match(exit, /go\(o\.key, c\.saved\.selected, c\.saved\.scope\)/);
   assert.match(fn(app, 'growthPick'), /if \(k === 'new' \|\| k === 'desc'\) \{ const list = filterParts\(c, k\);/, 'the two filters step through their parts');
   assert.match(fn(app, 'drawGrowthMarks'), /shownTabs\(c\.scenes, c\.scene, growthFilter\(c\)\)/, 'at most three tabs; 새 and 설명 only as a filter\'s');
   assert.match(fn(app, 'renderSpace'), /applyLens\(\);\n  drawGrowth\(\);/);
   assert.match(app, /if \(growthCmp && growthTabK && Math\.abs\(camera\.k - growthTabK\) \/ growthTabK > 0\.04\) requestAnimationFrame\(placeGrowthTabs\);/);
-  assert.match(app, /const mapBottomInset = \(\) => BOTTOM \+ legendInset\(\) \+ \(\$\('space'\)\.classList\.contains\('growth-cmp'\) \|\| \$\('space'\)\.classList\.contains\('growth-in-past'\) \? 40 : 0\);/);
+  // v11 (F8 Q6 ①): the compare line's own height (its second row with the count of parts the later map shows).
+  assert.match(app, /const mapBottomInset = \(\) => BOTTOM \+ legendInset\(\) \+ \(\$\('space'\)\.classList\.contains\('growth-cmp'\) \? \(\$\('growth-line'\)\.offsetHeight \|\| 32\) \+ 8 :/);
   // Removed lines are drawn on the earlier version's own drawing only; a retired part has no tab on the current map.
   const lit = fn(app, 'growthLit');
   assert.match(lit, /if \(growthPast\.n !== c\.from\) return null;/);
@@ -88,7 +90,7 @@ test('GROWTH-W5 the scene says only what the record says: its row, 바뀐 때 an
   assert.match(fn(app, 'changeQuote'), /t\.text\.slice\(x\.cite\.place\.from, x\.cite\.place\.to\)/, '원문 is the row as written');
   assert.ok(scene.includes("wasLabel(corr ? 'correct' : desc ? 'desc' : null"), "the earlier description says which took it over: a correction or a description update");
   assert.ok(scene.includes("x.kind === 'new' ? newTitle(x, c.from)"), "a part the person added never reads 처음 읽힘");
-  assert.match(scene, /'빠진 연결은 지금 지도에 그리지 않음 · 남은 부품끼리 잇지 않음 · 바뀐 연결이 모두 이 변화 때문이라는 뜻은 아님'/);
+  assert.match(scene, /'빠진 연결은 비교 지도에 그리지 않음 · 남은 부품끼리 잇지 않음 · 바뀐 연결이 모두 이 변화 때문이라는 뜻은 아님'/);
   assert.doesNotMatch(app.slice(app.indexOf('/* ---------- the growing map'), app.indexOf('/* ---------- coming back')), /합침|'통합'/, 'a fold the map made is 중복 정리');
 });
 
@@ -121,10 +123,11 @@ test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes bac
   assert.doesNotMatch(own, /fitView\(|setInterval|autoplay/, 'never fitted, never played by itself');
   // The scene's controls and its 1/N.
   const scene = fn(app, 'growthSceneEl');
-  for (const w of ["'이전 모습'", "'현재 모습'", "'이전 변화'", "'다음 변화'", "'원문'", "'이전 부품 위치 보기'", "'원래 위치로'"]) assert.ok(scene.includes(w), w);
+  // v11 (F8 Q6 ②): 「기준 지도 · v04」 and 「비교 지도 · v17」 under 「기록을 반영한 두 지도 비교」 (growth-v11 V11-2).
+  for (const w of ["mapWord('기준', c.from)", "mapWord('비교', c.to)", "'기록을 반영한 두 지도 비교'", "'이전 변화'", "'다음 변화'", "'원문'", "'이전 부품 위치 보기'", "'원래 위치로'"]) assert.ok(scene.includes(w), w);
   assert.match(scene, /stepWord\(f, Math\.max\(0, i\), list\.length\)/);
   // The guide in the top box's place, only while comparing (review of v8: or at the pane's top when no pan clears the map's top for it).
-  assert.match(fn(app, 'renderFocusTop'), /if \(gc\) \{ el\.replaceChildren\(\.\.\.growthGuideEls\(gc\)\); el\.hidden = guideInPane; syncFocusTop\(\); return; \}/);
+  assert.match(fn(app, 'renderFocusTop'), /if \(gc\) \{ delete el\.dataset\.guide; syncGuide\(\); el\.hidden = guideInPane; syncFocusTop\(\); return; \}/);
   assert.match(fn(app, 'growthGuideEls'), /guideOf\(c\.cs, c\.scenes, sceneName, sceneSay\)/);
   // 대기·보류 at the line's end: the waiting and held rows only.
   assert.match(fn(app, 'drawGrowth'), /growthUnreflected\(\)\?\.filter\(x => x\.state !== 'rejected'\)\.length/);

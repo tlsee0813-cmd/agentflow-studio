@@ -124,8 +124,8 @@ test('V8-6 a row\'s cells keep S3, H2, K8s and E2E; only the record\'s own row I
 test('V8-7 a retirement whose recorded successor is off the map keeps it: 「대신하는 부품은 지금 지도에 없습니다」', () => {
   const p = workshop({ error: true }), cs = G.changeSet(p, 4, 5), r = cs.changes.find(c => c.kind === 'retire');
   assert.equal(r.part, 'tmp'); assert.equal(r.successor, null); assert.equal(r.named, 'tim');
-  assert.equal(V.sceneSentence(r, namesOf(p, 4, 5)), '‘임시 도구’가 은퇴했다는 기록이 반영됐습니다. 대신하는 부품은 지금 지도에 없습니다.');
-  assert.equal(V.sceneKind(r), '기록된 은퇴 · 대신하는 부품은 지금 지도에 없음');
+  assert.equal(V.sceneSentence(r, namesOf(p, 4, 5)), '‘임시 도구’가 은퇴했다는 기록이 반영됐습니다. 대신하는 부품은 비교 지도에 없습니다.');
+  assert.equal(V.sceneKind(r), '기록된 은퇴 · 대신하는 부품은 비교 지도에 없음');
   assert.ok(V.changeScenes(cs).some(s => s.part === 'tmp'), 'still its own scene (no 승계 holds it)');
 });
 
@@ -171,7 +171,7 @@ test('V8-10 first user (a, b, c, d, e): the scene count says why it differs from
   assert.equal(V.sceneWhy(cs, scenes), `장면은 부품마다 하나 · 변화 ${V.kindTotal(cs)}건이 부품 ${scenes.length}개에 있어 한 부품의 여러 변화는 한 장면에 함께 보임`);
   assert.equal(V.sceneWhy({ ...cs, changes: [], counts: Object.fromEntries(Object.keys(cs.counts).map(k => [k, 0])) }, []), null);
   assert.match(fn(await read('src/client/app.ts'), 'growthSceneEl'), /const sceneWhyLine = f \? null : sceneWhy\(c\.cs, c\.scenes\);/);
-  assert.equal(V.tabKindWord('new'), '새로 표시'); assert.equal(V.tabWord(cs.changes.find(c => c.kind === 'new')), '새로 표시');
+  assert.equal(V.tabKindWord('new'), '지도 표시 추가'); assert.equal(V.tabWord(cs.changes.find(c => c.kind === 'new')), '지도 표시 추가');
   const wat = cs.changes.find(c => c.kind === 'new' && c.part === 'wat');
   assert.equal(V.newTitle(wat, 1), '지도 v02에서 처음 표시됨');
   for (const k of ['waiting:transient', 'waiting:budget', 'rejected:unplaced', 'rejected:revision']) assert.doesNotMatch(G.ROW_REASON_WORDS[k], /보냈지만|보냄|보내지 않음/, k);
@@ -182,7 +182,8 @@ test('V8-10 first user (a, b, c, d, e): the scene count says why it differs from
 test('V8-11 first user (f, g, h): a description\'s change shows 이전 설명 / 지금 설명 first, then 구현 상태 and 바뀐 직접 연결, and says what each date means; the pill offers instead of 「안 됨」; 「이름 1」 opens its scene on the rename', async () => {
   const app = await read('src/client/app.ts'), scene = fn(app, 'growthSceneEl');
   assert.ok(scene.indexOf('pair,') < scene.indexOf("h('dl', { class: 'gs-dl' },\n          h('dt', {}, '시점')"), 'the two descriptions before 시점');
-  assert.match(scene, /`이전 설명 · \$\{versionLabel\(c\.from\)\}`/); assert.match(scene, /`지금 설명 · \$\{versionLabel\(c\.to\)\}`/);
+  // v11 (F8 Q6 ②): the two maps by what they are, never 「지금」.
+  assert.match(scene, /`기준 지도의 설명 · \$\{versionLabel\(c\.from\)\}`/); assert.match(scene, /`비교 지도의 설명 · \$\{versionLabel\(c\.to\)\}`/);
   assert.match(scene, /\.\.\.\(descFirst \? \[implEl, linesEl, flistEl, alsoEl, wdEl, citesEl, descEl, histEl\] :/);
   assert.match(scene, /시점은 기록이 적은 바뀐 때 · \$\{tw\}\$\{josa\(tw, '은\/는'\)\} 그 기록이 다룬 대상의/, '기록 대상 판본은 · 기록 대상 날짜는');
   const sync = await read('src/client/auto-sync.ts');
@@ -195,9 +196,10 @@ test('V8-12 first user (i, j): leaving says what stayed and past/current keeps t
   const app = await read('src/client/app.ts'), css = await read('public/styles.css');
   // v10: what it says is only what is so (growth-view exitWord, nowWord; growth-v10 V10-7).
   assert.match(fn(app, 'growthExit'), /note\(exitWord\(/);
-  assert.equal(V.exitWord(true, true), '비교를 끝냈어요 · 비교 전에 고른 카드와 보던 위치로 돌아왔어요');
+  assert.equal(V.exitWord('center'), '비교 전 배율과 중심을 유지했어요.');
   assert.match(fn(app, 'drawGrowth'), /growthLeavePast\(\); note\(nowWord\(/);
-  assert.match(fn(app, 'growthView'), /keepInView\(\);/); assert.match(fn(app, 'growthLeavePast'), /else keepInView\(\);/);
+  // v11 (F8 Q6 ③): the same camera between the two maps; a card out of sight has 「이전 부품 위치 보기」 instead (growth-v11 V11-6).
+  assert.doesNotMatch(fn(app, 'growthView'), /keepInView|growthReveal/); assert.doesNotMatch(fn(app, 'growthLeavePast'), /keepInView/);
   assert.match(fn(app, 'placeCue'), /h\('span', \{ class: 'cue-word', 'aria-hidden': 'true' \}, cue === 'condition' \? '조건 보기' : cue === 'detail' \? '관계 보기' : '선택 보기'\)/); // F8: and a relation-detail cue says 관계 보기
   assert.match(css, /\.edge-cue:is\(:hover, :focus-visible, \.near\) \.cue-word \{ display: block; \}/);
   assert.match(fn(app, 'clipAtEdge'), /el\.classList\.toggle\('edge-cut'/);

@@ -161,7 +161,7 @@ test('V9-4e the 구현 상태 scene names its kind with both ends and says 「�
 
 test('V9-4f 「비교를 끝냈어요」 only once the comparison really closed; a baseline change is said with the numbers counted again; notes go by themselves in a few seconds, above the tools', async () => {
   const app = await read('src/client/app.ts');
-  assert.match(fn(app, 'growthExit'), /if \(!growthCmp && \$\('growth-line'\)\.hidden\) note\(exitWord\(/);
+  assert.match(fn(app, 'growthExit'), /if \(!growthCmp && \$\('growth-line'\)\.hidden && opened\?\.key === c\.key\) \{ const kind = restoreHeld\(/);
   const cmp = fn(app, 'growthCompare');
   assert.match(cmp, /\n {2}dropNote\(\);\n/);
   assert.match(cmp, /lastCmp = growthCmp; const cmpNow = growthCmp; say\.f = \(\) => announceBase\(was, cmpNow\);/);

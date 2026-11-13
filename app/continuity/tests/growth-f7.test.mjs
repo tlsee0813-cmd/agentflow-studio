@@ -83,7 +83,7 @@ test('F7-2 먼저 보여주는 순서: 정정 > 승계 > 후계 없는 은퇴 > 
   assert.deepEqual(scenes.find(s => s.part === 'srt').changes.map(c => c.kind), ['impl', 'dedupe']);
   const words = [...scenes.flatMap(s => s.changes.map(V.sceneKind)), V.stepWord(null, 0, 3), V.stepWord('desc', 0, 9), V.stepWord('new', 4, 23)];
   for (const w of words) assert.doesNotMatch(w, /중요|핵심|주요|우선/);
-  assert.deepEqual(words.slice(-3), ['변화 장면 1/3', '설명 변경 1/9', '지도에 새로 표시 5/23']);
+  assert.deepEqual(words.slice(-3), ['변화 장면 1/3', '설명 변경 1/9', '지도 표시 추가 5/23']);
 });
 
 test('F7-3 a scene says the change as the ledger has it: 「기록된 승계」, 「옛 타이머 → 새 감시기」, one sentence, no evaluation, cause or made-up time', () => {
@@ -94,15 +94,15 @@ test('F7-3 a scene says the change as the ledger has it: 「기록된 승계」,
   const r = G.changeSet(p, 4, 5).changes.find(c => c.kind === 'retire');
   assert.equal(V.sceneSentence(r, namesOf(p, 4, 5)), '‘임시 도구’가 은퇴했다는 기록이 반영됐습니다. 대신하는 부품은 기록에 없습니다.');
   assert.equal(V.sceneSentence(cs.changes.find(c => c.kind === 'rename'), nm), '‘저장소’의 이름이 ‘기록 저장소’로 바뀌었다는 기록이 반영됐습니다.');
-  assert.equal(V.sceneSentence(cs.changes.find(c => c.kind === 'new'), nm), '‘새 감시기’가 지도에 새로 표시됐습니다.');
+  assert.equal(V.sceneSentence(cs.changes.find(c => c.kind === 'new'), nm), '‘새 감시기’의 표시가 지도에 추가됐습니다.');
   for (const c of [...cs.changes, ...G.changeSet(p, 4, 5).changes]) for (const t of [V.sceneSentence(c, nm), V.sceneKind(c), V.sceneTitle(c, nm)]) for (const b of V.GUIDE_BANNED) assert.ok(!t.includes(b), `${b} in ${t}`);
-  assert.ok(V.GUIDE_BANNED.includes('개발됐') && V.GUIDE_BANNED.includes('안정적') && V.GUIDE_BANNED.includes('이를 위해') && V.GUIDE_BANNED.includes('핵심'));
+  assert.ok(V.GUIDE_BANNED.includes('개발됐습니다') && V.GUIDE_BANNED.includes('안정적') && V.GUIDE_BANNED.includes('이를 위해') && V.GUIDE_BANNED.includes('핵심'));
 });
 
 test('F7-4 the guide: 「지도 변화 · v01 → v03」 and at most two sentences made only of the change ledger, every count and name traced back, every fact a way in', () => {
   const p = workshop(), cs = G.changeSet(p, 1, 3), scenes = V.changeScenes(cs), nm = namesOf(p, 1, 3), g = V.guideOf(cs, scenes, nm);
   assert.equal(g.head, '지도 변화 · v01 → v03');
-  assert.equal(V.guideText(g), '‘옛 타이머’를 ‘새 감시기’가 대신한다는 기록이 반영됐습니다. 구현 상태 기록이 달라진 부품 1개, 구현이 바뀐 부품 1개와 지도에 새로 표시된 부품 1개가 있습니다.');
+  assert.equal(V.guideText(g), '‘옛 타이머’를 ‘새 감시기’가 대신한다는 기록이 반영됐습니다. 구현 상태 기록이 달라진 부품 1개, 구현이 바뀐 부품 1개와 v01에 없던 부품 표시 1개가 있습니다.');
   assert.ok(g.sentences.length <= 2);
   const facts = g.sentences.flat().filter(x => x.fact);
   for (const x of facts) {

@@ -64,14 +64,13 @@ test('V10-4 a hub chip stands off its card\'s edge, under it at the right first,
     // Never across the card's border: wholly outside it, at least gap off.
     assert.ok(!meet(r, { x: card.x - gap + 0.01, y: card.y - gap + 0.01, w: card.w + 2 * gap - 0.02, h: card.h + 2 * gap - 0.02 }), JSON.stringify(p));
   }
-  // Merged with v10-growth: the places touching the card's ring one gap out are tried first, the row-further ones after them (the page takes
-  // one of those only when every touching place has a line under it).
+  // Merged with v10-growth; v11 (review of v10: a chip stood 28px under its card): only the places touching the card's ring one gap out.
   const ring = { x: card.x - gap, y: card.y - gap, w: card.w + 2 * gap, h: card.h + 2 * gap };
   assert.deepEqual(chipSpots(spots, w, hh, [], ring), spots.slice(0, 6), 'under, over and beside its card touch it; a row further does not');
-  assert.deepEqual(hubChipOrder(spots, w, hh, [], ring), spots, 'touching first, then a row further');
+  assert.deepEqual(hubChipOrder(spots, w, hh, [], ring), spots.slice(0, 6), 'touching only, never a row further');
   const text = { x: card.x + card.w - 40, y: card.y + card.h + gap, w: 30, h: 10 }, order = hubChipOrder(spots, w, hh, [text], ring);
-  assert.ok(!order.includes(spots[0]) && order.indexOf(spots[1]) < order.indexOf(spots[6]), 'a place over a text goes; the touching ones stay first');
-  return app().then(src => assert.match(fn(src, 'placeFocusMarks'), /hubChipOrder\(hubChipSpots\(b, w, hh, g\), w, hh, titles, ring\), 260 \* inv, own, r => /));
+  assert.ok(!order.includes(spots[0]) && !order.includes(spots[6]) && order[0] === spots[1], 'a place over a text goes; only touching ones stay');
+  return app().then(src => assert.match(fn(src, 'placeFocusMarks'), /hubChipOrder\(hubChipSpots\(b, w, hh, g\), w, hh, titles, ring, screenCovers\), 260 \* inv, own, r => /));
 });
 
 test('V10-5 the basis line keeps its whole-word cut when a verb\'s 「…고」 clause would keep far less', () => {
