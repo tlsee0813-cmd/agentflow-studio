@@ -137,10 +137,12 @@ test('GROWTH-W8 the first screen keeps the map\'s own title and its sentence: a 
   const app = await read('src/client/app.ts'), fit = fn(app, 'fitView');
   assert.match(fit, /if \(s && s\.x < 16\) camera = \{ \.\.\.camera, x: camera\.x \+ \(16 - s\.x\) \};/, 'the title in sight whole');
   assert.doesNotMatch(fit, /out <= whole \? -out : whole/, 'never pushed out at the left');
-  assert.match(fit, /const r = ftBox\('ft-one', camera, inkAt\(camera\.k\)\)/, 'in conflict: the title kept and the sentence on one line');
+  // v11 (ruling F8 Q2): never on one line: in conflict the title is kept and the map moves down under the whole box.
+  assert.match(fit, /const r = ftBox\(null, camera, inkAt\(camera\.k\)\)/, 'in conflict: the title kept and the box whole');
   // v10: the room at the same scale first, then with the give, is first-flow sentenceRoom's order (v10-maps V10-7).
   assert.match(fit, /sentenceRoom\(FT_SAID, at\.k, least, \(form, k, d\) => \{ at\.place\(k\); camera = \{ \.\.\.camera, y: camera\.y \+ d \}; return clear\(form, k\); \}, k => \{ at\.place\(k\); return mapSlack\(\); \}\)/, 'room at the same scale first');
   assert.match(fit, /\(at\.k >= TITLE_FLOOR_K && a2\.k < TITLE_FLOOR_K\)\) break;/, 'a smaller frame never drops the title');
   // Merge v7: polish 5 moved the forms from syncFocusTop to placeFocusTop.
-  assert.match(fn(app, 'placeFocusTop'), /for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/);
+  // v11 (ruling F8 Q2): no narrower one-line form; under the map the sentence steps back and the way to the whole summary stays.
+  assert.match(fn(app, 'placeFocusTop'), /if \(!covers\(\)\) return;[\s\S]*el\.classList\.add\('ft-under'\); ftPlace\(el, camera, ink\);/);
 });

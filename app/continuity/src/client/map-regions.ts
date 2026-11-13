@@ -105,3 +105,35 @@ export function filedUnder(v: StudioView, id: string): string | null {
   const byId = new Map(v.parts.map(p => [p.id, p])), parent = byId.get(id)?.parentId;
   return parent && groupAxis(v, parent) === 'lifecycle' ? byId.get(parent)!.name : null;
 }
+
+/* ---------- two heads of one kind (ruling F8 Q5) ----------
+ * Where the map would draw the same kind head (「참여자」) over two or more sets of cards, each set's head says what the record says about
+ * that set and nothing else: the name of a recorded group holding the whole set leads, the kind small beside it; else a recorded place
+ * holding it, 「참여자 · 〈place〉」; else, when the record keeps the set as a group of its own with no name, the kind and 「구성원: 〈names〉」;
+ * a set the record says nothing of keeps the plain kind, and plain heads that still repeat are taken off the map (the sets were only split by
+ * the layout: the kind reads once in the legend). Cards and boundaries never change; no word the record does not have. */
+/** A group the record writes as a C-GROUP row whose parent is a label (no part of its own): its name as written, what kind of group (its
+ * 묶음 뜻: 참여자 · 실행 위치 · another), and its members as parts. */
+export interface RecordedSet { name: string; axis: 'participants' | 'place' | 'other'; members: readonly string[] }
+export type KindHeadCase = 'named' | 'place' | 'members' | 'plain';
+export interface KindHead { text: string; small: string | null; how: KindHeadCase }
+/** A row reference standing for a name (「B21」): no name to show. */
+const ROW_REF = /^\s*[A-Z]{1,3}\d{1,3}\s*$/;
+export function kindHeads(sets: readonly (readonly string[])[], recorded: readonly RecordedSet[], word: string, nameOf: (id: string) => string): { heads: (KindHead | null)[]; legend: boolean } {
+  if (sets.length < 2) return { heads: sets.map(() => ({ text: word, small: null, how: 'plain' as const })), legend: false };
+  const holds = (g: RecordedSet, set: readonly string[]) => set.length > 0 && set.every(id => g.members.includes(id));
+  const heads: KindHead[] = sets.map(set => {
+    const named = recorded.find(g => g.axis !== 'place' && g.name.trim() && !ROW_REF.test(g.name) && holds(g, set));
+    if (named) return { text: named.name.trim(), small: word, how: 'named' };
+    const place = recorded.find(g => g.axis === 'place' && g.name.trim() && !ROW_REF.test(g.name) && holds(g, set));
+    if (place) return { text: `${word} · ${place.name.trim()}`, small: null, how: 'place' };
+    const own = recorded.find(g => holds(g, set) && !sets.some(o => o !== set && o.some(id => g.members.includes(id))));
+    if (own) return { text: word, small: `구성원: ${set.map(nameOf).join(', ')}`, how: 'members' };
+    return { text: word, small: null, how: 'plain' };
+  });
+  // The same words twice tell nothing apart: those heads leave the map and the kind reads once in the legend.
+  const key = (x: KindHead) => `${x.text}\u0000${x.small ?? ''}`, count = new Map<string, number>();
+  for (const x of heads) count.set(key(x), (count.get(key(x)) ?? 0) + 1);
+  const out = heads.map(x => (count.get(key(x))! > 1 ? null : x));
+  return { heads: out, legend: out.some(x => x === null) };
+}

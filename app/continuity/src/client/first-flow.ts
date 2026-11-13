@@ -136,7 +136,9 @@ export const shownSentence = (s: string): string => s.replace(new RegExp(CITES.s
  * C-SUMMARY body lines and where they stand): the first sentence, whole (cites kept, for the hover), the one shown, the second
  * sentence (the core flow), and the record and line it comes from. null when no record has one (then nothing is shown: never the
  * model's summary, never the person's brief). */
-export interface SummarySource { record: string; first: string; shown: string; flow: string | null; quote: string; from: number }
+export interface SummarySource { record: string; first: string; shown: string; flow: string | null; quote: string; from: number;
+  /** Ruling F8 Q2: every sentence of that C-SUMMARY body, in order (the first included), as written: the top box's choice and its 「요약 전문」. */
+  sentences: string[] }
 /** Polish 5 (ruling F6 Q1): records in paste order, the one the map describes now last: a record about a later target time (its 기준 시점,
  * map-reading pastedTargets) stands after one about an earlier time whatever order they were pasted in (a backlog record pasted late never
  * speaks for the map). Polish 6: a total order. A record with no date is about a time not known, so it never outranks a dated one: the
@@ -153,9 +155,40 @@ export function summarySource(records: readonly { id: string; target?: string | 
     const r = ordered[i]!, lines = r.body.map(b => b.text.trim()).filter(Boolean); if (!lines.length) continue;
     const ss = summarySentences(lines.join('\n')), first = ss[0]; if (!first) continue;
     const line = r.body.find(b => b.text.trim()) ?? r.body[0]!;
-    return { record: r.id, first, shown: shownSentence(first), flow: ss[1] ?? null, quote: line.text.trim(), from: line.from };
+    return { record: r.id, first, shown: shownSentence(first), flow: ss[1] ?? null, quote: line.text.trim(), from: line.from, sentences: ss };
   }
   return null;
+}
+/* ---------- the top box's introduction (ruling F8 Q2) ---------- */
+/** How the top box says the record's summary: its first sentence whole ('whole'), another whole sentence of the same summary that reads on
+ * its own ('part', said 「요약 일부 · 전문 보기」), or nothing (folded to 「요약 전문 보기」; a miss: no sentence of the record introduces the
+ * map). index: the sentence shown (-1: none). */
+export type IntroKind = 'whole' | 'part' | 'fold';
+export interface TopIntro { kind: IntroKind; text: string | null; index: number }
+/** The top box's words for each case: the way to the whole summary, always in the box. */
+export const INTRO_FULL = '요약 전문 보기', INTRO_PART = '요약 일부 · 전문 보기';
+/** A sentence that ends as a sentence ends: a full stop (or ! ?) or a closing ending (다 · 요 · 함 · 됨 · 음 · 임), after any closing quote or
+ * bracket. 「…조사하고」, 「…엔진이며」, 「…도구이며…」 do not: a clause that runs on is never an introduction (and is never finished for it). */
+export function endsWhole(s: string): boolean {
+  const t = s.trim();
+  if (/(?:…|\.\.\.)$/.test(t)) return false;
+  const u = t.replace(/["'”’」』)）\]]+$/, '');
+  return /[.。!?！？]$/.test(u) || /(?:다|요|함|됨|음|임)$/.test(u);
+}
+/** A sentence that leans on the one before it (「그리고 …」, 「이때 …」, 「이를 …」): it never stands alone for the summary. */
+const LEANS = /^(?:그리고|그러나|그런데|그래서|그러면|그러므로|하지만|다만|단|또한|또|따라서|이때|이 때|이후|이어|이어서|이를|이것|이것은|이는|이 중|그중|그 중|그것|그는|이로써|반면|한편|게다가|즉|예를 들어|특히)(?=[\s,，]|$)/;
+/** Ruling F8 Q2: the top box's introduction. sentences: the summary's sentences as the box shows them (null: nothing plain left in one);
+ * fits: whether a text stands whole in the box (at most three lines, the box within its height). The first sentence whole when it fits;
+ * else the first later sentence that fits, ends as a sentence and leans on none before it; else folded. The words are never cut, finished
+ * or rewritten: a shown sentence is a sentence of the record, whole. */
+export function topIntro(sentences: readonly (string | null)[], fits: (t: string) => boolean): TopIntro {
+  const first = sentences[0];
+  if (first && endsWhole(first) && fits(first)) return { kind: 'whole', text: first, index: 0 };
+  for (let i = 1; i < sentences.length; i++) {
+    const s = sentences[i]; if (!s || !endsWhole(s) || LEANS.test(s.trim())) continue;
+    if (fits(s)) return { kind: 'part', text: s, index: i };
+  }
+  return { kind: 'fold', text: null, index: -1 };
 }
 /** The 「첫 구조 줄」 value as its lines: split at its own numbering (① ②, 「1) 2)」) or, without one, at a spaced slash or a semicolon
  * (「data/{dataset}/」 is no split). */

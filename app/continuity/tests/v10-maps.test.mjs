@@ -124,5 +124,6 @@ test('V10-8 the page uses those decisions: the fit plans the sentence with sente
   assert.match(fn(src, 'fitView'), /sentenceRoom\(FT_SAID, at\.k, least, /);
   assert.match(fn(src, 'mapSlack'), /return dockSlack\(content, obstacles, mapBottom\(\), 8\);/);
   assert.match(fn(src, 'clauseFit'), /topCut\(clauses, words, c => \{ t\.textContent = c; return !over\(\); \}, most \? CLAUSE_KEEP : 0\)/);
-  assert.match(fn(src, 'syncFocusTop'), /clauseFit\(basis \?\? t, t, t\.dataset\.text \?\? '', !!basis\)/);
+  // v11 (ruling F8 Q2): only the basis line is cut so (the top sentence is chosen whole, v11-text).
+  assert.match(fn(src, 'syncFocusTop'), /clauseFit\(basis \?\? t, t, t\.dataset\.text \?\? '', true\)/);
 });

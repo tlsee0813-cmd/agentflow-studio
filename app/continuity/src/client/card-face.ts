@@ -75,10 +75,66 @@ export function opsSaid(word: string | null, when: string | null, grade: Grade |
  * PLAN_WORD), wherever it sits in the first sentence: a sentence whose plan word a plain cut to ROLE_LINE_WIDTH would leave out is cut by
  * studio clipKeepPlan (its clause, else the word with the word next to it); one whose plan word fits in that head is shown whole. */
 export const ROLE_LINE_WIDTH = 15;
+/** A description's first sentence, whole (ruling F8 Q5: the card's role, drawn by roleFit), or null for none. */
+export function firstSentence(text: string | null | undefined): string | null {
+  const t = (text ?? '').replace(/\s+/g, ' ').trim(); if (!t) return null;
+  const m = /^(.+?[.!?。])(?=\s|$)/.exec(t); return m ? m[1]! : t;
+}
 export function roleLine(text: string | null | undefined): string | null {
   const t = (text ?? '').replace(/\s+/g, ' ').trim(); if (!t) return null;
   const m = /^(.+?[.!?。])(?=\s|$)/.exec(t), first = m ? m[1]! : t;
   return planCutNeeded(first, ROLE_LINE_WIDTH, textWidth, KEEP_WORD) ? clipKeepPlan(first, ROLE_LINE_WIDTH, textWidth, false, KEEP_WORD) : first;
+}
+
+/* ---------- the role on the card (ruling F8 Q5) ----------
+ * The card's 「하는 일」 at 13px on 18px lines in the card's 192px body, one line or two (the card's height says which, decided before the
+ * map is laid out: 80 with one line, 104 with two); lines break between words only (never inside a noun or an identifier). Words two lines
+ * do not hold: a short role phrase of the same words that reads on its own (a closing clause, or one of the phrases a 「·」 lists), never
+ * one whose dropped words held a plan, a negation or a condition; else the way to the whole: 「역할 전문 보기」. Never an ending changed,
+ * never words added. The same rule serves the name tag's second line at the overview (its own type and the rows its box gives). */
+export const ROLE_PX = 13, ROLE_LH = 18, ROLE_BODY = 192, ROLE_LINES = 2, ROLE_MORE = '역할 전문 보기';
+export interface RoleFit { text: string; lines: number; kind: 'whole' | 'phrase' | 'fold' }
+/** A text's lines at width w, broken between words only (greedy); null when one word alone is wider than a line. */
+export function wrapWords(text: string, w: number, measure: (s: string) => number): string[] | null {
+  const words = text.trim().split(/\s+/).filter(Boolean), out: string[] = [];
+  for (const word of words) {
+    if (measure(word) > w + 0.5) return null;
+    const last = out.at(-1), joined = last === undefined ? word : `${last} ${word}`;
+    if (last !== undefined && measure(joined) <= w + 0.5) out[out.length - 1] = joined; else out.push(word);
+  }
+  return out;
+}
+/** Words a shorter phrase may never drop: a plan or a stopped use (KEEP_WORD), a negation, a condition or a guess. */
+const ROLE_KEEPS = new RegExp(`${KEEP_WORD.source}|않|없|못|아니|(?:으|하|이|되|있)?면(?=[\\s,]|$)|때|경우|조건|만\\s|추정|모름|불명확|미상`);
+/** An action noun closing a role word (「목록 생성」, 「요청 분배」, 「파일 쓰기」): what makes a closing run a role phrase. */
+const ACTION = /(?:생성|분배|실행|정리|처리|관리|갱신|검사|해석|결정|직렬화|전달|저장|수신|송신|배정|접수|감시|기록|조정|출력|변환|검증|병합|호출|등록|배포|빌드|계산|추출|수집|선택|표시|보관|제공|발행|구독|분석|게시|교체|감지|적재|예약|열람|조회|편집|작성|제출|승인|배달|복구|백업|정렬|측정|보고|판정|차단|인증|기|하기)$/;
+/** A word that only relates the words before it (「인스턴스 사이」, 「유형별」, 「작업 중」): a phrase never starts on it. */
+const RELATES = /(?:사이|간|별|중|용|적|위|아래|안|밖|전|후|및|등)$/;
+/** The shorter phrases of a role, longest first: for a sentence, each closing clause (after 「고 · 며 · 면서 · 하여 · 해서」 or a comma: it
+ * ends as the sentence does, three words or more: its object with its action); for a role word, each closing run of two words or more
+ * that ends on an action noun (「벤치마크 명령 목록 생성」 → 「명령 목록 생성」, 「HTTP·WS 요청 분배」 → 「요청 분배」). Never one that breaks
+ * a list (no 「·」 in it, nothing dropped right after 「와 · 과 · 및 · ,」) or starts on a word that only relates (「사이 변경 신호」). */
+export function rolePhrases(text: string): string[] {
+  const t = text.trim(), out: string[] = [];
+  const sentence = /[.。]$|(?:다|요|함|됨|음|임)$/.test(t);
+  // A role phrase says what the part does: never a clause that only denies, doubts or adds (「흐름을 멈추지 않는다」, 「대상 범위는
+  // 불명확하다」, 「구 보고서 경로도 처리한다」).
+  const aside = (s: string) => /않|없|못|아니|불명확|모르|모름|추정|미상/.test(s) || /\S도\s/.test(s);
+  const tail = (at: number) => {
+    const head = t.slice(0, at).trim(), rest = t.slice(at).trim(), words = rest.split(/\s+/);
+    if (words.length < (sentence ? 3 : 2) || ROLE_KEEPS.test(head) || aside(rest) || /(?:와|과|및|[·,，]|또는|이나)$/.test(head)) return;
+    if (!sentence && (rest.includes('·') || RELATES.test(words[0]!) || !ACTION.test(words.at(-1)!))) return;
+    out.push(rest);
+  };
+  for (const m of t.matchAll(sentence ? /(?:고|며|면서|하여|해서)\s+|[,，]\s*/g : /\s+/g)) tail(m.index! + m[0].length);
+  return [...new Set(out)].filter(x => x !== t).sort((a, b) => b.length - a.length);
+}
+/** Ruling F8 Q5: the role as the card shows it in at most `lines` lines of width w (measure: the type it is drawn in). */
+export function roleFit(text: string, w: number, lines: number, measure: (s: string) => number): RoleFit {
+  const t = text.replace(/\s+/g, ' ').trim(), n = (s: string) => { const l = wrapWords(s, w, measure); return l && l.length <= lines ? l.length : 0; };
+  const whole = n(t); if (whole) return { text: t, lines: whole, kind: 'whole' };
+  for (const p of rolePhrases(t)) { const k = n(p); if (k) return { text: p, lines: k, kind: 'phrase' }; }
+  return { text: ROLE_MORE, lines: 1, kind: 'fold' };
 }
 
 /* ---------- counted 「외 N」 ---------- */
