@@ -204,6 +204,9 @@ export interface CardTemplate {
   /** Ruling F8 Q5: the role as the card draws it (card-face roleFit at 13px in the 192px body, one line or two), measured once before the
    * map is laid out: its lines give the card its height. Absent: one line. */
   roleFit?: { text: string; lines: number; kind: 'whole' | 'phrase' | 'fold' } | null;
+  /** v12: the record's own family word (C-PART 표현군: 「처리」, 「저장」) when the kind line says the record's role word: the words a line
+   * too narrow for the role word shows whole instead (the overview tag, the card's kind line); null otherwise. */
+  familyWord?: string | null;
 }
 
 /** The most kind rows a card holds (the blank slot included), the most pins a side holds. */
@@ -337,6 +340,7 @@ export function cardTemplate(f: CardFacts): CardTemplate {
     kind: group ? groupKind(f.type, group.word, kids) : role && !f.type ? role : chip && !f.type ? chip : kindLabel(f.type, recorded || f.steps.length, !!f.loop),
     rows: mr ? [mr, ...kindRows(f, { blanks: false })] : kindRows(f, { blanks: false }), contract: shownContract(f), innerLine, well, signs: !!f.signs,
     structural: !group && structuralOf(f.type, f.steps.length, !!f.loop), group, undecided: chip, container,
+    familyWord: !group && role && !f.type ? RECORD_FAMILY_WORD[fam!.family!] ?? null : null,
     role: f.role?.trim() ? f.role.trim() : null, foot: !!f.foot || !!f.signs, blanks: kindRows(f).filter(r => r.blank).map(r => r.label) };
 }
 /** Cards v2 §1: the contract's value rows (받는 것 · 내는 것 · 필드) only behind the display setting 「받는·내는 것 행」; pins (the

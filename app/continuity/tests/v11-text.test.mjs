@@ -68,7 +68,7 @@ test('V11-6 the top box: the sentence chosen whole for its width (no clause cut,
   const place = fn(a, 'placeFocusTop');
   assert.ok(!place.includes("'ft-one'") && !place.includes('FT_CAPS'), 'never one line, never narrower');
   assert.ok(!a.includes('FT_CAPS_TWO') && !a.includes("ftBox('ft-one'"));
-  assert.match(a, /const FT_SAID = \[null\] as const;/);
+  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis'\] as const;/, 'v12: the whole sentence, with its basis line and then without it');
 });
 
 test('V11-7 the way to the whole summary is always in the box, a button (click and keyboard) that opens every sentence of it', async () => {
@@ -94,9 +94,12 @@ test('V11-9 one line, else two (the card 104), else a phrase that keeps object a
   // A closing clause with its object and action, from the same words (never an ending changed, never a word added).
   const long = '입력 묶음과 설정 값을 받아 규칙을 확인하고 정리된 목록 파일을 만든다.';
   const r = face.roleFit(long, 12, 2, chars);
-  assert.equal(r.kind, 'phrase'); assert.equal(r.text, '정리된 목록 파일을 만든다.'); assert.ok(long.endsWith(r.text));
+  // v12: the longest closing run that fits (after 「…받아」 too), its object and action kept.
+  assert.equal(r.kind, 'phrase'); assert.equal(r.text, '규칙을 확인하고 정리된 목록 파일을 만든다.'); assert.ok(long.endsWith(r.text));
   // A clause that only denies, doubts or adds is no role phrase; a plan or condition in the dropped words keeps the phrase out.
-  assert.equal(face.roleFit('입력 묶음과 설정 값을 받아 규칙을 확인하고 흐름을 멈추지 않는다.', 12, 2, chars).kind, 'fold');
+  // v12: a run that opens on an action keeps a later negation whole with it; a run that only denies is still never a phrase.
+  assert.equal(face.roleFit('입력 묶음과 설정 값을 받아 규칙을 확인하고 흐름을 멈추지 않는다.', 12, 2, chars).text, '규칙을 확인하고 흐름을 멈추지 않는다.');
+  assert.ok(!face.rolePhrases('입력 묶음과 설정 값을 받아 규칙을 확인하고 흐름을 멈추지 않는다.').includes('흐름을 멈추지 않는다.'));
   assert.equal(face.roleFit('설정이 있으면 입력 묶음과 설정 값을 받고 정리된 목록 파일을 만든다.', 12, 2, chars).kind, 'fold');
   assert.equal(face.roleFit('나중에 바꿀 예정이며 입력 묶음과 설정 값을 받고 정리된 목록 파일을 만든다.', 12, 2, chars).text, face.ROLE_MORE);
   assert.equal(face.ROLE_MORE, '역할 전문 보기');
@@ -125,7 +128,8 @@ test('V11-12 the card draws its role as measured, the overview tag never cuts it
   const a = await app();
   assert.match(a, /const t = withRoleFit\(cardTemplate\(cardFactsOf\(o, p, r, said\)\)\); tpls\?\.set\(id, t\);/, 'measured once, before layout');
   assert.match(a, /roleFit\(t\.role, ROLE_BODY, ROLE_LINES, roleMeasure\)/);
-  assert.match(fn(a, 'fitTagKind'), /for \(const p of rolePhrases\(kind\)\)/);
+  // v12: through card-face kindShort (whole, a phrase, leading units, the family word; never 「역할 전문 보기」 in place of words).
+  assert.match(fn(a, 'fitTagKind'), /kindShort\(kind, kd\.dataset\.fam \|\| null,/);
   // Fitted again for the zoom the fit settles on (a line fitted 2% larger ran past its box at 1280): within 0.5%.
   assert.match(fn(a, 'fitCards'), /Math\.abs\(k - tagAt\.k\) \/ Math\.max\(tagAt\.k, 0\.01\) < 0\.005 &&/);
   assert.match(a, /kd\.classList\.toggle\('tk-empty', !shown && !pre\)/, 'no empty second line');
