@@ -4035,3 +4035,35 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .line-key.lg-short .lg-chip-short { display: inline; }
 .line-key.lg-short :is(.lg-chip-text, .lg-chip-fade) { display: none; }
 .line-key.lg-short .lg-chip { gap: 4px; padding: 0 8px; }
+
+/* v13 forms (spec 3): 「보기: 흐름 · 층 · 구성」 beside the map's name in the header (always in sight, never over the map). */
+.map-forms { display: flex; align-items: center; gap: 2px; width: max-content; font-size: 12.5px; line-height: 16px; }
+.map-forms .vf-word { margin-right: 6px; color: var(--text-3); font-weight: var(--fw-meta); white-space: nowrap; }
+.map-forms .vf-form { height: 26px; padding: 0 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text-2); font: inherit; font-weight: var(--fw-name); white-space: nowrap; cursor: pointer; transition: color .12s, background .12s, border-color .12s; }
+.map-forms .vf-form:hover:not(:disabled) { color: var(--text); border-color: var(--line-strong); }
+.map-forms .vf-form.on { color: var(--accent-strong); background: var(--accent-soft); border-color: var(--accent-line); }
+.map-forms .vf-form:disabled { color: var(--text-4); background: transparent; border-style: dashed; cursor: default; }
+.map-forms .vf-form:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.map-forms-host { flex: none; display: flex; align-items: center; margin-left: 4px; padding-left: 12px; border-left: 1px solid var(--line); height: 22px; }
+.map-forms-host .map-forms { margin: 0; font-size: 12.5px; line-height: 16px; }
+.map-forms-host .map-forms .vf-form { height: 26px; padding: 0 9px; }
+/* A form's lanes behind the cards: 층's bands (the family's own pale ground, its words on the left), 흐름's build lane. */
+.form-lane { position: absolute; pointer-events: none; border-radius: 16px; }
+.form-lane.band { background: var(--fam-lane, var(--fam-neutral-strip)); box-shadow: inset 0 0 0 1px var(--fam-lane-edge, rgba(17,24,39,.05)); }
+.form-lane.b-participant { --fam-lane: var(--fam-participant-strip); --fam-lane-ink: var(--fam-participant-ink); }
+.form-lane.b-trigger { --fam-lane: var(--fam-trigger-strip); --fam-lane-ink: var(--fam-trigger-ink); }
+.form-lane.b-process { --fam-lane: var(--fam-process-strip); --fam-lane-ink: var(--fam-process-ink); }
+.form-lane.b-store { --fam-lane: var(--fam-store-strip); --fam-lane-ink: var(--fam-store-ink); }
+.form-lane.b-external, .form-lane.b-undecided { --fam-lane: var(--surface-2); --fam-lane-ink: var(--text-3); }
+.form-lane.build { border: 1px dashed var(--line-strong); background: transparent; }
+/* The lane's words keep their screen size (12px, the line labels' scale), one word a line, in the label room at the band's left. */
+.form-lane-word { position: absolute; left: 14px; top: 12px; display: block; max-width: 116px; transform: scale(var(--linv, var(--inv, 1))); transform-origin: 0 0; font-size: 12px; line-height: 15px; font-weight: 600; color: var(--fam-lane-ink, var(--text-3)); white-space: pre-line; word-break: keep-all; pointer-events: auto; }
+.form-lane-n { display: block; font-weight: 500; color: var(--text-3); }
+.form-lane.build .form-lane-word { top: auto; bottom: calc(100% + 6px); left: 0; max-width: none; white-space: nowrap; color: var(--text-3); transform-origin: 0 100%; }
+.form-lane.build .form-lane-n { display: inline; }
+/* The switch's motion: the lines (and what reads on them) step out, the cards fly, the camera eases, the lines come back. */
+.space.form-lines-out #world :is(.edges, .edge-labels, .lone-head, .band-head, .band-line, .ghost-head, .ff-chip, .hub-chip, .form-lane) { opacity: 0; transition: opacity .12s ease; }
+.space.form-lines-in #world :is(.edges, .edge-labels, .lone-head, .band-head, .band-line, .ghost-head, .ff-chip, .hub-chip, .form-lane) { transition: opacity .22s ease; }
+#world.form-fly [data-box] { transition: transform .52s cubic-bezier(.65,0,.35,1) !important; will-change: transform; }
+#world.animate.form-cam { transition: transform .52s cubic-bezier(.65,0,.35,1); }
+@media (prefers-reduced-motion: reduce) { #world.form-fly [data-box], #world.animate.form-cam { transition: none !important; } }

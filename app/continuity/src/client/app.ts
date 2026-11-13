@@ -63,7 +63,9 @@ import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenar
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
-import { firstFlow, startCard, focusFold, shownWord, FOCUS_ONLY_WORD, ALL_RELATIONS_WORD, foldWord, chipSpots, hubChipSpots, hubChipOrder, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, topIntro, switcherForms, INTRO_FULL, INTRO_PART, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FocusFold, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
+// v13 forms hook 0: the whole map's 보기 (흐름 · 층 · 구성).
+import { MAP_FORMS, MAP_FORM_WORD, FORM_SWITCH_WORD, formChoice, formShown, nextMapForm, recordedChain, flowPlace, layersPlace, planChannels, FORM_LINES_OUT_MS, FORM_FLY_MS, FORM_LINES_IN_MS, LAYER_LABEL_ROOM, type MapForm, type FormCard, type FormLine, type FormChain, type FormChoice, type FormPlace } from './map-forms.js';
+import { flowCandidates, FLOW_RULES, firstFlow, startCard, focusFold, shownWord, FOCUS_ONLY_WORD, ALL_RELATIONS_WORD, foldWord, chipSpots, hubChipSpots, hubChipOrder, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, topIntro, switcherForms, INTRO_FULL, INTRO_PART, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FocusFold, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -596,6 +598,7 @@ function setBar(o: Opened | null) {
     else if (o.kind !== 'saved') crumbs.push(h('span', { class: 'tag', title: o.kind === 'example' ? 'Codex·Claude에서 전달받았다고 가정하고 쓴 예제 기록이에요. 저장되지 않아요.' : '' }, o.kind === 'example' ? '예제' : '읽기 전용'));
   }
   $('crumbs').replaceChildren(...crumbs);
+  if (!o || scope) $('map-forms-host').hidden = true; // v13 forms hook 5: the 보기 switcher is the whole map's (drawFormLanes fills it)
   // Scope: up one level of the composition (not the same as going back).
   const sp = o ? partOf(o, scope) : null, bar = $('scope-bar');
   bar.hidden = !sp;
@@ -867,7 +870,154 @@ const relayout = (o: Opened) => {
   const fix = clearPastOnly([...lay.boxes.values()], pinned);
   if (Object.keys(fix).length) { for (const [c, m] of Object.entries(fix)) gp.extra[c] = { ...gp.extra[c], ...m }; relayoutOnce(o); }
 };
-const relayoutOnce = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o)); lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
+const relayoutOnce = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o)); formRelayout(o, held, tpls) /* v13 forms hook 1 */; lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
+/* ===== v13 forms (spec 3): the whole map's 보기 — 흐름 · 층 · 구성 (map-forms.ts places the cards; the layout, the router and every
+ * floor rule of the map stay as they are). Only the whole map (no scope) and the current version (never the past view) take a form; the
+ * person's choice is kept per map (localStorage, the record's choice while there is none); a card the person moves in a form stays where
+ * it was put for this tab in that form (자동 배치 lets go). The switch morphs: the lines step out, every card flies from where it is drawn
+ * to its new place (FORM_FLY_MS, eased, from where it is even mid-flight), the camera eases to the new fit, the lines come back routed
+ * on the new places. prefers-reduced-motion: no motion. Hook points in this file: 'v13 forms hook N'. ===== */
+let formNow: MapForm = 'compose', formPlace: FormPlace | null = null, formSwitching = false;
+let formInfo: { key: string; view: StudioView; choice: FormChoice; chain: FormChain | null } | null = null;
+const formDrags = new Map<string, Record<string, Point>>();
+const formStoreKey = (o: Opened) => `agentflow.mapForm.${o.key}`;
+function keptMapForm(o: Opened): MapForm | null { try { const v = localStorage.getItem(formStoreKey(o)); return v && (MAP_FORMS as readonly string[]).includes(v) ? v as MapForm : null; } catch { return null; } }
+function keepMapForm(o: Opened, f: MapForm) { try { localStorage.setItem(formStoreKey(o), f); } catch { /* the choice holds for this tab */ } }
+const formApplies = (o: Opened) => scope === null && !o.past && o.view.parts.length > 0;
+/** The top card a part is drawn on (null: not drawn). */
+const topCard = (o: Opened, id: string): string | null => { const r = drawnRep(o, id); let b = r ? lay.boxes.get(r) : undefined; for (let g = 0; b && b.container !== ROOT && g < 64; g++) b = lay.boxes.get(b.container); return b && b.container === ROOT ? b.id : null; };
+/** The record's main order on the top cards (map-forms recordedChain over every 먼저 볼 연결 candidate, read as the first view reads them). */
+function formChainOf(o: Opened): FormChain | null {
+  const was = ffSrc; ffSrc = summaryOf(o);
+  try { const inp = focusInput(o); return recordedChain(FLOW_RULES.flatMap(r => flowCandidates(r, inp)), id => topCard(o, id), FLOW_SOURCE.ordered); }
+  catch { return null; } finally { ffSrc = was; }
+}
+function formRelayout(o: Opened, held: Positions, tpls: Map<string, CardTemplate>) {
+  formPlace = null;
+  if (!formApplies(o)) { formNow = 'compose'; if (scope === null && !o.past) formInfo = null; return; }
+  const top = [...lay.boxes.values()].filter(b => b.container === ROOT && b.kind !== 'ghost');
+  const cards: FormCard[] = top.map(b => { const p = partOf(o, b.id), r = p?.reading; return { id: b.id, name: p?.name ?? '', w: b.w, h: b.h, anchor: b.kind === 'frame' ? b.head / 2 : b.contact ?? b.h / 2, family: r?.familyRead?.family ?? null, type: r?.typeRead?.type ?? null, ...(lay.bands.shelf.includes(b.id) ? { shelf: true } : {}) }; });
+  const key = `${o.key}|${top.map(b => `${b.id}:${b.w}x${b.h}`).join(',')}`;
+  if (!formInfo || formInfo.key !== key || formInfo.view !== o.view) { const chain = formChainOf(o); formInfo = { key, view: o.view, choice: formChoice(cards, chain), chain }; }
+  formNow = formShown(formInfo.choice, keptMapForm(o));
+  if (formNow === 'compose' || (formNow === 'flow' && !formInfo.chain)) { formNow = 'compose'; return; }
+  const ids = new Set(top.map(b => b.id)), seen = new Set<string>(), lines: FormLine[] = [];
+  for (const r of o.view.relations) {
+    const a = topCard(o, r.from), b = topCard(o, r.to); if (!a || !b || a === b || !ids.has(a) || !ids.has(b)) continue;
+    const directed = r.kind !== 'shares' && r.kind !== 'related', k = `${a}|${b}|${directed}`; if (seen.has(k)) continue; seen.add(k); lines.push({ from: a, to: b, directed });
+  }
+  const place = formNow === 'flow' ? flowPlace(cards, lines, formInfo.chain!, mapAspect()) : layersPlace(cards, lines, new Map(top.map(b => [b.id, { x: b.x, y: b.y }])), mapAspect());
+  const moved = formDrags.get(`${o.key}|${formNow}`) ?? {}, pos: Positions = { ...held, [ROOT]: {} };
+  for (const b of top) { const p = place.at.get(b.id); if (p) pos[ROOT]![b.id] = moved[b.id] ?? { x: Math.round(p.x - (b.x - b.rel.x)), y: Math.round(p.y - (b.y - b.rel.y)) }; }
+  lay = layoutScope(o.view, scope, isExpanded(o), pos, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o));
+  // The 구성 map's layers, blocks, roles and reserved routes describe its own places, not these.
+  lay.channels = new Map(); lay.layers = []; lay.blocks = new Map(); lay.roles = new Map();
+  formPlace = place;
+  // The bounds keep the lanes' grounds, the band words' room and the build lane's caption above it.
+  const r = formLaneRects().flatMap((x, i) => (!x ? [] : formPlace!.lanes[i]!.kind === 'build' ? [{ ...x, y: x.y - 30, h: x.h + 30 }] : [x]));
+  if (r.length) lay.bounds = unionRect([lay.bounds, ...r]) ?? lay.bounds;
+}
+/** The lanes' rectangles as drawn now, from their cards (a moved card takes its lane's edge with it): every band as wide as all of them
+ * together (one ground per family, its words in the label room on the left), the build lane round its own cards with its caption above. */
+function formLaneRects(): ({ x: number; y: number; w: number; h: number } | null)[] {
+  if (!formPlace) return [];
+  const own = formPlace.lanes.map(l => laneBox(l.ids)), bands = own.filter((r, i): r is NonNullable<typeof r> => !!r && formPlace!.lanes[i]!.kind === 'band');
+  const x0 = Math.min(...bands.map(r => r.x)), x1 = Math.max(...bands.map(r => r.x + r.w));
+  return formPlace.lanes.map((l, i) => { const r = own[i]; if (!r) return null; return l.kind === 'band' ? { x: x0 - LAYER_LABEL_ROOM, y: r.y - 14, w: x1 - x0 + LAYER_LABEL_ROOM + 14, h: r.h + 28 } : { x: r.x - 14, y: r.y - 14, w: r.w + 28, h: r.h + 28 }; });
+}
+const laneBox = (ids: readonly string[]) => unionRect(ids.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b));
+/** A form's reserved routes (map-forms planChannels) for the strokes between its top cards, as the layered map reserves its own; 흐름's
+ * way back runs under its row. A stroke with faces of its own (a control line's top and bottom) keeps them. */
+function formFaces(list: Edge[]): Edge[] {
+  if (!formPlace || !list.length) return list;
+  const top = [...lay.boxes.values()].filter(b => b.container === ROOT && b.kind !== 'ghost');
+  const back = new Set(formPlace.back.map(x => `${x.from}|${x.to}`));
+  const plan = planChannels(top, list.filter(e => !e.faces).map(e => ({ key: e.key, from: e.from, to: e.to })), new Set(list.filter(e => back.has(`${e.from}|${e.to}`)).map(e => e.key)));
+  return list.map(e => { const c = plan.get(e.key); return c ? { ...e, hint: c } : e; });
+}
+/** The lanes drawn behind the cards: each band's quiet ground with its family words on the left (층), the build lane's caption (흐름). */
+function drawFormLanes() {
+  const world = $('world'); world.querySelectorAll('.form-lane').forEach(x => x.remove());
+  $('space').dataset.form = formPlace ? formNow : 'compose';
+  // The switcher by the map's name in the header (always in sight, never over the map): the whole map's forms only.
+  const o = opened, sw = o ? formSwitchEl(o) : null, host = $('map-forms-host'); host.hidden = !sw; host.replaceChildren(...(sw ? [sw] : []));
+  if (!formPlace) return;
+  const first = world.firstChild;
+  for (const l of formPlace.lanes) {
+    const el = h('div', { class: `form-lane ${l.kind}${l.band ? ` b-${l.band}` : ''}`, 'data-lane': l.band ?? l.kind, 'aria-hidden': 'true' },
+      h('span', { class: 'form-lane-word', title: l.kind === 'band' ? `${l.text} · 기록이 정한 표현군 · 부품 ${l.count}` : `${l.text} · 기록이 빌드·배포·게시로 말한 부품 ${l.count}` }, l.kind === 'band' ? l.text.split(' · ').join('\n') : l.text, h('span', { class: 'form-lane-n' }, l.kind === 'band' ? `${l.count}개` : ` · ${l.count}`)));
+    world.insertBefore(el, first);
+  }
+  placeFormLanes();
+}
+function placeFormLanes() {
+  if (!formPlace) return;
+  const els = [...$('world').querySelectorAll<HTMLElement>('.form-lane')], rects = formLaneRects();
+  els.forEach((el, i) => { const r = rects[i]; el.hidden = !r; if (!r) return; el.style.left = `${r.x}px`; el.style.top = `${r.y}px`; el.style.width = `${r.w}px`; el.style.height = `${r.h}px`; });
+}
+/** The switcher (「보기: 흐름 · 층 · 구성」): the forms the record offers, the one shown pressed; a form not offered stays in sight, disabled,
+ * its tip saying why. The group's tip says why the record chose its form. */
+function formSwitchEl(o: Opened): HTMLElement | null {
+  const c = formInfo?.choice; if (!c || !formApplies(o)) return null;
+  const kept = keptMapForm(o), why = `기록이 고른 보기: ${MAP_FORM_WORD[c.auto]} · ${c.why}`;
+  return h('div', { class: 'map-forms', role: 'group', 'aria-label': `${FORM_SWITCH_WORD} · 지금 ${MAP_FORM_WORD[formNow]}`, title: `${why}${kept && kept !== c.auto ? `\n지금은 고른 보기: ${MAP_FORM_WORD[formNow]}` : ''}\nV 키로 바꾸기` },
+    h('span', { class: 'vf-word' }, FORM_SWITCH_WORD),
+    ...MAP_FORMS.map(f => {
+      const ok = c.offered.includes(f), on = f === formNow;
+      const tip = !ok ? c.not[f] ?? '' : f === c.auto ? why : `${MAP_FORM_WORD[f]}${josa(MAP_FORM_WORD[f], '으로/로')} 보기${f === 'compose' ? ' · 연결을 따라 층층이 놓은 지도' : f === 'flow' ? ` · 기록에 이어진 흐름 ${c.steps}단계를 한 줄로` : ` · 기록된 표현군 ${c.families.length}가지를 띠로`}`;
+      return h('button', { type: 'button', class: `vf-form${on ? ' on' : ''}${f === c.auto ? ' auto' : ''}`, 'data-form': f, 'aria-pressed': String(on), disabled: !ok, title: tip, onclick: () => setMapForm(f) }, MAP_FORM_WORD[f]);
+    }));
+}
+let formTimers: number[] = [];
+/** Shows form `next` (the person's choice, kept for the map). */
+function setMapForm(next: MapForm) {
+  const o = opened; if (!o || !formInfo || !formApplies(o) || !formInfo.choice.offered.includes(next)) return;
+  keepMapForm(o, next); if (next === formNow) return;
+  formTimers.forEach(t => clearTimeout(t)); formTimers = [];
+  const world = $('world'), sp = $('space');
+  if (reducedMotion() || world.hidden) { sp.classList.remove('form-lines-out', 'form-lines-in'); world.classList.remove('form-fly'); renderSpace('keep'); fitView(false); if (selected) select(selected); return; }
+  // Where each box is drawn now (a flight under way included), in map units.
+  const from = new Map<string, Point>();
+  world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => { let tx = 0, ty = 0; try { const m = new DOMMatrixReadOnly(getComputedStyle(el).transform); tx = m.m41; ty = m.m42; } catch { /* none */ } from.set(el.dataset.box!, { x: parseFloat(el.style.left) + tx, y: parseFloat(el.style.top) + ty }); });
+  sp.classList.remove('form-lines-in'); sp.classList.add('form-lines-out');
+  const fly = () => {
+    if (opened !== o) return;
+    world.classList.remove('form-fly'); const cam0 = { ...camera };
+    formSwitching = true; try { renderSpace('keep'); } finally { formSwitching = false; }
+    const moved: HTMLElement[] = [];
+    world.querySelectorAll<HTMLElement>('[data-box]').forEach(el => {
+      const a = from.get(el.dataset.box!); if (!a) return;
+      const dx = a.x - parseFloat(el.style.left), dy = a.y - parseFloat(el.style.top); if (Math.abs(dx) + Math.abs(dy) < 0.5) return;
+      el.style.transform = `translate(${dx}px, ${dy}px)`; moved.push(el);
+    });
+    // The new fit is found at once (it reads the page), then the camera is set back where it stood and eased to it with the cards: one
+    // flight from the picture that was seen (a fit that animates by itself would start from the frame its own reads committed).
+    fitView(false);
+    if (selected) select(selected);
+    const to = world.style.transform;
+    world.classList.remove('animate'); world.style.transform = `translate(${cam0.x}px, ${cam0.y}px) scale(${cam0.k})`;
+    void world.offsetWidth; // the old places and the old camera take hold before the flight starts
+    world.classList.add('animate', 'form-fly', 'form-cam'); world.style.transform = to;
+    for (const el of moved) el.style.transform = '';
+    formTimers.push(window.setTimeout(() => { world.classList.remove('form-fly', 'form-cam', 'animate'); sp.classList.remove('form-lines-out'); sp.classList.add('form-lines-in'); }, FORM_FLY_MS));
+    formTimers.push(window.setTimeout(() => sp.classList.remove('form-lines-in'), FORM_FLY_MS + FORM_LINES_IN_MS));
+  };
+  formTimers.push(window.setTimeout(fly, FORM_LINES_OUT_MS));
+}
+/** V on the map: the next form offered. */
+function cycleMapForm(): boolean { const o = opened; if (!o || !formInfo || !formApplies(o)) return false; const next = nextMapForm(formNow, formInfo.choice.offered); if (next === formNow) return false; setMapForm(next); return true; }
+/** A card the person drags in a form: its place for this tab in that form (never the 구성 map's stored places). */
+const formDragTarget = (o: Opened, container: string): Positions | null => (formPlace && container === ROOT ? { [ROOT]: (formDrags.get(`${o.key}|${formNow}`) ?? formDrags.set(`${o.key}|${formNow}`, {}).get(`${o.key}|${formNow}`)!) } : null);
+/** 자동 배치 in a form: the places the person gave cards in it let go. True when it handled the press. */
+function formArrange(o: Opened): boolean {
+  if (!formPlace) return false;
+  const k = `${o.key}|${formNow}`, had = Object.keys(formDrags.get(k) ?? {}).length > 0;
+  if (!had) { toast('이미 자동 배치 상태예요.'); return true; }
+  const before = formDrags.get(k)!; formDrags.delete(k); renderSpace('keep'); fitView(false, true); if (selected) select(selected);
+  toast('이 보기를 자동 정렬했어요.', { label: '되돌리기', run: () => { formDrags.set(k, before); if (opened === o) { renderSpace('keep'); if (selected) select(selected); } } });
+  return true;
+}
+/* ===== end v13 forms ===== */
 /** Beauty v2 B3: where the routed lines still crowd, strips open across the map (map-route openCorridors), for the lines drawn at rest
  * (a busy map's summary lines, else each line). Positions only.
  * Beauty v2 review (H1, H4): the strips belong to the automatic arrangement, never to the person's places. They are found on the
@@ -880,7 +1030,7 @@ const restSet = (o: Opened, L: ScopeLayout) => (L.edges.length > 6 ? sumLines(o,
 function openRoom(o: Opened, held: Positions) {
   // Beauty v3 (C.5): a scope laid out in layers has its room from the layering itself (every gap laneRoom of its tracks, every row gap
   // of its lines); no strip is opened on the path at rest.
-  if (lay.channels.size) { $('world').dataset.strips = '0'; return; }
+  if (lay.channels.size || formPlace /* v13 forms hook 2: a form's places are its own */) { $('world').dataset.strips = '0'; return; }
   delete $('world').dataset.strips;
   const level = scope ?? ROOT, mine = new Set(Object.keys(held[level] ?? {})), view = `${o.key}|${level}`;
   const tops = [...lay.boxes.values()].filter(b => !lay.boxes.has(b.container)).sort((p, q) => (p.id < q.id ? -1 : 1));
@@ -925,6 +1075,7 @@ function lineGrain(o: Opened): (id: string, kind: RelationView['kind']) => strin
  * ends and the grain of its first relation that runs its way. Beauty v5 (hub lanes): every stroke, not only the first of a key (the
  * grain holds the head, so two strokes meet one key only when the drawn set joins them: a summary stroke holding both ways). */
 function withHints(o: Opened, list: Edge[]): Edge[] {
+  list = formFaces(list); // v13 forms hook 3: a form's own reserved routes (흐름's way back under its row)
   if (!lay.channels.size) return list;
   const grain = lineGrain(o), kinds = new Map(o.view.relations.map(r => [r.id, r.kind]));
   return list.map(e => {
@@ -2334,7 +2485,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   relayout(o);
   const world = $('world'), view = o.view;
   // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
-  const was = cameraMode === 'keep' && !world.hidden && performance.now() - lastFresh > 600 ? beforeRedraw(world) : null;
+  const was = cameraMode === 'keep' && !formSwitching /* v13 forms hook 4: the switch flies its own way */ && !world.hidden && performance.now() - lastFresh > 600 ? beforeRedraw(world) : null;
   if (cameraMode !== 'keep') lastFresh = performance.now();
   world.replaceChildren();
   const edges = svg('svg', { class: 'edges', width: '1', height: '1', 'aria-hidden': 'true' });
@@ -2482,6 +2633,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
     outside.length ? h('div', { class: 'scope-rels', role: 'list', 'aria-label': '이 범위의 바깥 관계' }, ...relationGroups(outside, '범위').map(g => h('p', { class: 'scope-rel', role: 'listitem' },
       h('span', { class: 'sr-verb' }, g.label), ...g.list.map(x => h('button', { type: 'button', class: 'sr-part', title: `${partPath(o.view, x.far).map(q => q.name).join(' › ')}${x.r.note ? `\n${x.r.note}` : ''}`, 'data-far': x.far, onclick: (e: Event) => { follow(x.far, x.r, e); go(o.key, x.far, null); } }, partOf(o, x.far)?.name ?? '부분'))))) : null);
   world.append(title);
+  drawFormLanes(); // v13 forms hook 6
   placeLoneHead(crossing);
   title.style.width = `${titleRect().w}px`;
   titleH = view.parts.length ? title.offsetHeight : 0; title.hidden = !titleH;
@@ -2538,6 +2690,7 @@ function placeLoneHead(crossing?: Map<string, { all: number }>) {
   const world = $('world'), here = scope ?? ROOT, touched = new Set(lay.edges.flatMap(e => [e.from, e.to]));
   const banded = new Set(Object.values(lay.bands).flat()), own = [...lay.boxes.values()].filter(b => b.container === here && b.kind !== 'ghost' && !banded.has(b.id));
   loneIds = crossing ? own.filter(b => !touched.has(b.id) && !(crossing.get(b.id)?.all)).map(b => b.id) : loneIds;
+  if (formPlace && formNow === 'layers') loneIds = []; // v13 forms hook 7: in 층 an unlinked card stands at its band's end, no block to caption
   world.querySelector('.lone-head')?.remove();
   if (!loneIds.length || loneIds.length === own.length) return;
   // A placement, not a group of the record: the caption says what the parts share (no line), in the band captions' quiet style.
@@ -2702,7 +2855,7 @@ function afterRedraw(world: HTMLElement, was: Redraw) {
 /** Geometry only (also during a drag): boxes and edge paths from the current layout. */
 function positionWorld() {
   const world = $('world');
-  moveLoneHead();
+  moveLoneHead(); placeFormLanes(); // v13 forms hook 8
   // Heads of the outside partners' runs follow their layout (it can change while a part is dragged).
   const heads = new Map(lay.heads.map(x => [x.key, x]));
   world.querySelectorAll<HTMLElement>('.ghost-head').forEach(el => {
@@ -8954,6 +9107,7 @@ function placeToast(t: HTMLElement) {
 /** Explicit only: resets the places in this view (the scope and its open frames); one undo. */
 function arrange() {
   const o = opened; if (!o || o.past) return;
+  if (formArrange(o)) return; // v13 forms hook 10
   const pos = positionsOf(o), containers = [scope ?? ROOT, ...[...lay.boxes.values()].filter(b => b.kind === 'frame').map(b => b.id)];
   const before = structuredClone(pos), had = containers.some(c => pos[c] && Object.keys(pos[c]!).length);
   if (!had) { toast('이미 자동 배치 상태예요.'); return; }
@@ -9072,7 +9226,7 @@ function bindCanvas() {
       if (drag.mode === 'part') { if (openState?.mode === 'short') closeOpen(false); document.querySelector(`[data-box="${CSS.escape(drag.id)}"]`)?.classList.add('dragging'); holdPlaces(opened!, drag.container); }
     }
     if (drag.mode === 'pan') { mapMoved = true; camera = { ...camera, x: drag.cx + dx, y: drag.cy + dy }; applyCamera(); return; }
-    const o = opened!; const pos = positionsOf(o);
+    const o = opened!; const pos = formDragTarget(o, drag.container) ?? positionsOf(o); // v13 forms hook 9
     (pos[drag.container] ??= {})[drag.id] = { x: Math.round(drag.start.x + dx / camera.k), y: Math.round(drag.start.y + dy / camera.k) };
     dragQuick = true; relayout(o); positionWorld();
   });
@@ -9160,6 +9314,10 @@ function bindCanvas() {
     // 보기틀 (spec forms v1): V shows the detail view's next form that can be drawn (목록 · 노선 · 상태 전이); never inside a field or the pane.
     if ((e.key === 'v' || e.key === 'V') && !e.altKey && !e.ctrlKey && !e.metaKey && openState?.mode === 'detail' && detailForm && !(e.target as HTMLElement).closest('#lens, #panel, [contenteditable]')) {
       const next = nextForm(detailForm.form, detailForm.offer); if (next !== detailForm.form) { e.preventDefault(); setDetailForm(next); } return;
+    }
+    // v13 forms hook 11: on the whole map (nothing opened), V shows the next 보기 the record offers (흐름 · 층 · 구성).
+    if ((e.key === 'v' || e.key === 'V') && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && opened && !openState && !$('space').hidden && !$('space').classList.contains('sheet-read') && !(e.target as HTMLElement).closest('#lens, #panel, [contenteditable]')) {
+      if (cycleMapForm()) { e.preventDefault(); return; }
     }
     // The detail view's other two moves: 이전 읽기 위치 (Alt+←) and 상위 구성 (Alt+↑); 닫기 is Escape, below.
     if (e.altKey && openState?.mode === 'detail' && (e.key === 'ArrowLeft' || e.key === 'ArrowUp')) { e.preventDefault(); if (e.key === 'ArrowLeft') goBackPlace(); else goUp(); return; }
