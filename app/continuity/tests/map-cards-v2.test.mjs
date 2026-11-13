@@ -260,7 +260,8 @@ test('CARD-10 polish round (spec-cards-v2 §1): 포트 대응 미기록, 유지 
   assert.ok(body(src, 'opsLineEl').includes('운영 기록 없음 · 이 부분의 가동·멈춤을 말한 기록이 없음'), 'the map\'s pane states it');
   // The map head's basis line: the time and the version only; the rest in its tip.
   const basis = body(src, 'basisLine');
-  assert.ok(basis.includes('`설계 근거 · ${last.basisAt ?? \'작성 시각 미상\'} · 판본 ${version}`') && basis.includes('운영: 보고된 상태 (기록 없음은 제공된 자료 기준)'));
+  // v13 C: the day, then its time and the version in their own span (쉽게 leaves them to the tip).
+  assert.ok(basis.includes('`설계 근거 · ${day}`, h(\'span\', { class: \'mb-more\' }, `${at.slice(day.length)} · 판본 ${version}`)') && basis.includes('운영: 보고된 상태 (기록 없음은 제공된 자료 기준)'));
 });
 
 test('CARD-11 polish round fixes 1: the 상태·공백 lens marks recorded states and keeps 「운영 기록 없음」 off the cards; framed ways in with their words; no ghost outline; ⤢ alone takes no foot; a short first screen', () => {

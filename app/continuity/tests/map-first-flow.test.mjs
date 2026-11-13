@@ -263,7 +263,7 @@ test('FF-16 the basis sentence shows under the switcher when it is not the top o
   const app = await readFile(new URL('../src/client/app.ts', import.meta.url), 'utf8');
   const whole = app.slice(app.indexOf('/* ---------- the first screen\'s focus (beauty v5'), app.indexOf('/* ---------- the scenario on the map'));
   assert.match(whole, /if \(c\.text && shownSentence\(c\.text\) !== s\?\.shown && said\)/, 'the basis shows only when it differs from the top sentence and has plain words');
-  assert.match(whole, /class: 'ft-basis', title: `\$\{FLOW_CONTROL\}의 근거 문장/, 'whole in its hover');
+  assert.match(whole, /class: `ft-basis\$\{hasCode\(said\) \? ' code' : ''\}`, title: `\$\{FLOW_CONTROL\}의 근거 문장/, 'whole in its hover (v13 C: marked when written in code)');
   assert.match(app, /ffRest = ffLit\(\)/, 'the accent heads only at rest');
   assert.match(whole, /const ffLit = \(\) => ffActive\(\) && !selected && !planView\.isOpen\(\) && !ffLensPicked/);
   assert.match(app, /setLens\(b\.dataset\.lens as LensId, true\)/, 'a lens the person picks steps the lines back');
@@ -495,7 +495,7 @@ test('FF-31 the map\'s title and its 기록 정보 stay in sight at rest: the to
   assert.match(a, /const left = Math\.round\(t\.x \+ t\.w \+ 24\)/, 'beside the title\'s ink, never over it');
   assert.match(a, /if \(scene\.boxes\.some\(hit\) \|\| \(ink && hit\(ink\)\)\) return true;/, 'the title itself is never under the line');
   assert.match(a, /const underTop = overCols && !!fr && fr\.y < ti\.y \+ ti\.h && ti\.y < fr\.y \+ fr\.h;/, 'the title steps back only where the line truly stands over its ink');
-  assert.match(a, /metaBtn, !metaOpen && basis \? h\('span', \{ class: 'map-when', title: basis\.title \}, basis\.textContent\) : null/, 'the record\'s time and version at rest');
+  assert.match(a, /metaBtn, !metaOpen && basis \? h\('span', \{ class: 'map-when', title: basis\.title \}, \.\.\.\[\.\.\.basis\.childNodes\]\.map\(x => x\.cloneNode\(true\)\)\)/, 'the record\'s time and version at rest (v13 C: its parts)');
   const css = await cssNoComments();
   assert.match(css, /\.map-when \{[^}]*font-size: var\(--t-kind, 12px\);[^}]*pointer-events: auto;/);
 });

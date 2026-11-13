@@ -62,11 +62,12 @@ test('V12-3 two lines of one pair running opposite ways stand pairGap apart at b
   assert.ok(apart(wide, 'a') >= 25.5 && apart(wide, 'b') >= 25.5, `v11 kept a port pitch (12, 6px at a half-size fit): ${apart(wide, 'a')} / ${apart(wide, 'b')}`);
   // Inside the cards' corners (8 from each end of the side).
   for (const k of ['ab', 'ba']) for (const p of [wide.get(k).pts[0], wide.get(k).pts.at(-1)]) assert.ok(p.y >= 8 - 0.01 && p.y <= 72 + 0.01, JSON.stringify(p));
-  // A side with no room for the whole gap takes as much as it has (a 40-high card: 24 of room).
+  // A side with no room for the whole gap takes as much as it has (a 40-high card: 24 inside its corners; v13 C: 34 once the run may reach
+  // PAIR_INSET from them).
   const small = new Map([['a', box('a', 0, 0, 40)], ['b', box('b', 400, 0, 40)]]);
   const s2 = R.routeEdges(small, edges.slice(0, 2), { pairGap: 40 });
   const d = Math.abs(s2.get('ab').pts[0].y - s2.get('ba').pts.at(-1).y);
-  assert.ok(d >= 12 && d <= 24.01, String(d));
+  assert.ok(d >= 24 - 0.01 && d <= 40 - 2 * R.PAIR_INSET + 0.01, String(d));
   // The page asks for 12.5 screen pixels at the fit's zoom, and routes again once the fit knows it.
 });
 

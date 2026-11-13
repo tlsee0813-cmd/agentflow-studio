@@ -70,7 +70,7 @@ test('V11-3 a condition label is the record\'s words whole, at most 24 character
 test('V11-4 the page says a condition whole or folds it to its ◇: no cut forms, and the branch note only when whole and short', async () => {
   const a = await app(), fit = fn(a, 'placeFitLabels'), marks = fn(a, 'placeFocusMarks');
   assert.ok(!fit.includes('condCuts(base)'), 'v10a tried every shorter cut of a condition');
-  assert.match(fit, /const whole = cond \? condLabelWords\(full\) : /);
+  assert.match(fit, /const whole = easyFull === null \? null : cond \? condLabelWords\(easyFull\) : /);
   assert.match(fit, /condLabelFits\(\{ widthPx: el\.offsetWidth \* s, heightPx: el\.offsetHeight \* s, fontPx: parseFloat\(cs\.fontSize\) \* s/);
   assert.match(fit, /if \(el\.textContent !== text \|\|/, 'a label the page would cut is no label');
   assert.match(marks, /if \(br && pts && pts\.length > 1 && condLabelWords\(br\.text\)\) \{/, 'the 갈림 note never carries a cut condition');

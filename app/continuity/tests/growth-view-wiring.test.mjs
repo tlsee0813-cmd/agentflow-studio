@@ -76,7 +76,7 @@ test('GROWTH-W4 compare: tabs only while comparing, lit parts by the read-marks 
   assert.match(fn(app, 'renderSpace'), /applyLens\(\);\n  drawGrowth\(\);/);
   assert.match(app, /if \(growthCmp && growthTabK && Math\.abs\(camera\.k - growthTabK\) \/ growthTabK > 0\.04\) requestAnimationFrame\(placeGrowthTabs\);/);
   // v11 (F8 Q6 ①): the compare line's own height (its second row with the count of parts the later map shows).
-  assert.match(app, /const mapBottomInset = \(\) => BOTTOM \+ legendInset\(\) \+ \(\$\('space'\)\.classList\.contains\('growth-cmp'\) \? \(\$\('growth-line'\)\.offsetHeight \|\| 32\) \+ 8 :/);
+  assert.match(app, /const mapBottomInset = \(\) => cmpFoot \? 16 : BOTTOM \+ legendInset\(\) \+ \(\$\('space'\)\.classList\.contains\('growth-cmp'\) \? \(\$\('growth-line'\)\.offsetHeight \|\| 32\) \+ 8 :/);
   // Removed lines are drawn on the earlier version's own drawing only; a retired part has no tab on the current map.
   const lit = fn(app, 'growthLit');
   assert.match(lit, /if \(growthPast\.n !== c\.from\) return null;/);

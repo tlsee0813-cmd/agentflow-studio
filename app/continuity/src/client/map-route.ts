@@ -101,6 +101,28 @@ export function pinOf(box: Box, e: Edge, end: 'a' | 'b'): number | undefined {
  * step a stair, and no straight run long enough for its verb). One end's port moves to the other's height when that height
  * lies on its side, passes no other port of that side (the order that keeps lines from crossing at the part holds) and the
  * straight run between them crosses no box. The spine's steps go first, then the smallest steps. */
+/** v13: how near a side's corners a run of ends may stand when a pair running opposite ways needs the room (map units). */
+export const PAIR_INSET = 3;
+/** v13: how close the side's other ends may close up for a pair's gap (map units; PORT_FLOOR elsewhere): never two on one point. */
+export const PAIR_SQUEEZE = 6.5;
+/** v13 (review of v12): the gaps (top to bottom, the first 0) of a side's ends when some must widen to `need` (a pair's two ends pairGap
+ * apart): the widened gaps whole when the side holds them; else the side's other gaps close toward PAIR_SQUEEZE (never wider than they were) and the
+ * run may reach PAIR_INSET from the corners; only past that do the widened ones take less, sharing what is left. null: nothing to widen. */
+export function pairSpread(gaps: readonly number[], need: readonly number[], len: number, inset: number): number[] | null {
+  const wide = need.map((g, i) => i > 0 && g > gaps[i]! + 0.01), extra = need.reduce((a, b) => a + b, 0) - gaps.reduce((a, b) => a + b, 0);
+  if (extra <= 0.01 || !wide.some(Boolean)) return null;
+  const sum = (f: (i: number) => number) => need.reduce((a, _, i) => a + (i ? f(i) : 0), 0);
+  const want = sum(i => (wide[i] ? need[i]! : 0)), cur = sum(i => (wide[i] ? 0 : gaps[i]!)), least = sum(i => (wide[i] ? 0 : Math.min(gaps[i]!, PAIR_SQUEEZE)));
+  const full = len - 2 * inset, most = len - 2 * Math.min(inset, PAIR_INSET);
+  if (want + cur <= full + 0.01) return need.map((g, i) => (i ? (wide[i] ? g : gaps[i]!) : 0));
+  if (want + least <= most + 0.01) {
+    // The others close only as much as the widened gaps need (within the corners' room first, then into it).
+    const room = Math.max(full, Math.min(most, want + least)) - want, a = cur - least > 0.01 ? Math.max(0, Math.min(1, (room - least) / (cur - least))) : 1;
+    return need.map((g, i) => (i ? (wide[i] ? g : Math.min(gaps[i]!, PAIR_SQUEEZE) + (gaps[i]! - Math.min(gaps[i]!, PAIR_SQUEEZE)) * a) : 0));
+  }
+  const base = sum(i => (wide[i] ? gaps[i]! : 0)), f = want - base > 0.01 ? Math.max(0, Math.min(1, (most - least - base) / (want - base))) : 0;
+  return need.map((g, i) => (i ? (wide[i] ? gaps[i]! + (g - gaps[i]!) * f : Math.min(gaps[i]!, PAIR_SQUEEZE)) : 0));
+}
 function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<string, { a: PortFace; b: PortFace }> = new Map(), pairGap = 0): Map<string, { a?: number; b?: number }> {
   type End = { key: string; end: 'a' | 'b'; far: number; d: number };
   const out = new Map<string, { a?: number; b?: number }>(), at = new Map<string, End[]>(), sides = new Map<string, { a: string; b: string; e: Edge }>();
@@ -216,10 +238,14 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
         const d = need.slice(i + 1, j + 1).reduce((a, b) => a + b, 0); if (d >= pairGap) continue;
         const add = (pairGap - d) / (j - i); for (let q = i + 1; q <= j; q++) need[q] = need[q]! + add;
       }
-      const used = gaps.reduce((a, b) => a + b, 0), extra = need.reduce((a, b) => a + b, 0) - used, room = len - 2 * inset - used;
-      if (extra <= 0.01 || room <= 0.5) continue;
-      const f = Math.min(1, room / extra), fin = need.map((g, i) => gaps[i]! + (g - gaps[i]!) * f), span = fin.reduce((a, b) => a + b, 0);
-      const start = Math.min(Math.max((ys[0]!.y + ys[ys.length - 1]!.y) / 2 - span / 2, box.y + inset), box.y + len - inset - span);
+      const used = gaps.reduce((a, b) => a + b, 0), extra = need.reduce((a, b) => a + b, 0) - used;
+      if (extra <= 0.01) continue;
+      // v13 (review of v12: 14 pairs 4–11px apart at 1280, each on a side whose other ends filled it a pitch apart): a crowded side gives the
+      // pair its gap first: the side's other gaps close to PAIR_SQUEEZE and the run may reach PAIR_INSET from the corners, before the pair
+      // takes less than pairGap (and only what is left then).
+      const fin = pairSpread(gaps, need, len, inset); if (!fin) continue;
+      const span = fin.reduce((a, b) => a + b, 0), ins = Math.min(inset, Math.max(PAIR_INSET, (len - span) / 2));
+      const start = Math.min(Math.max((ys[0]!.y + ys[ys.length - 1]!.y) / 2 - span / 2, box.y + ins), box.y + len - ins - span);
       let y = start; ys.forEach((p, i) => { y += i ? fin[i]! : 0; put(p.key, p.end, Math.round(y * 2) / 2); });
     }
   }
