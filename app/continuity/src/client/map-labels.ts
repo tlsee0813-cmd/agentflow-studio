@@ -84,6 +84,31 @@ export function besideSpots(pts: Point[], w: number, h: number, gap: number, pre
   }
   return out;
 }
+/** v10 (review of v9: labels sat on arrowheads): the room a line's end marks take, in map units at zoom k: a head of headPx screen pixels
+ * at its last point (back along its last run, as wide as it is long), a start mark of startPx at its first point (0: none drawn), each
+ * with 3px more on every side, so a label set clear of it never touches it. */
+export function endZones(pts: Point[], headPx: number, startPx: number, k: number): Rect[] {
+  const out: Rect[] = [], n = pts.length; if (n < 2) return out;
+  const zone = (tip: Point, prev: Point, px: number) => {
+    const s = px / k, m = 3 / k, dx = Math.sign(tip.x - prev.x), dy = Math.sign(tip.y - prev.y);
+    // The mark runs back from the tip along the run (its own length) and half its width to each side.
+    const x0 = dx ? Math.min(tip.x, tip.x - dx * s) : tip.x - s / 2, y0 = dy ? Math.min(tip.y, tip.y - dy * s) : tip.y - s / 2;
+    out.push({ x: x0 - m, y: y0 - m, w: s + 2 * m, h: s + 2 * m });
+  };
+  if (headPx > 0) zone(pts[n - 1]!, pts[n - 2]!, headPx);
+  if (startPx > 0) zone(pts[0]!, pts[1]!, startPx);
+  return out;
+}
+/** v10 (review of v9: at 1280 two maps kept a one-line top sentence with 80px free under them): how far the map may move down (screen
+ * pixels) before anything of it (content: its cards, lines, labels and title as drawn) comes within gap of what sits at the window's
+ * bottom over it (obstacles: the tools, the first view's line, the legend chip; each only over the columns it covers) or of the window's
+ * bottom itself; never below 0. */
+export function dockSlack(content: readonly Rect[], obstacles: readonly Rect[], bottom: number, gap = 8): number {
+  if (!content.length) return 0;
+  let room = bottom - gap - Math.max(...content.map(c => c.y + c.h));
+  for (const o of obstacles) for (const c of content) if (c.x < o.x + o.w && o.x < c.x + c.w) room = Math.min(room, o.y - gap - (c.y + c.h));
+  return Math.max(0, room);
+}
 /** Whether a polyline passes through a rectangle grown by margin on every side. */
 export function polylineHitsRect(pts: Point[], r: Rect, margin = 2): boolean {
   const x0 = r.x - margin, y0 = r.y - margin, x1 = r.x + r.w + margin, y1 = r.y + r.h + margin;

@@ -104,7 +104,7 @@ test('GROWTH-W6 the person\'s name and note go through the log; the comparison f
   assert.doesNotMatch(un, /정리된 거절/);
   const view = await read('src/client/growth-view.ts');
   assert.doesNotMatch(view, /unread/, 'no row of a record not read yet');
-  assert.ok(fn(app, 'placeFocusMarks').includes('put(chip, (w, hh) => chipSpots(['), 'a hub chip\'s places leave out every card title');
+  assert.ok(fn(app, 'placeFocusMarks').includes('put(chip, (w, hh) => chipSpots(hubChipSpots('), 'a hub chip\'s places leave out every card title');
 });
 
 test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes back as it was left, a part entered for comes first; the camera moves only for a card out of sight, never fits', async () => {
@@ -138,7 +138,8 @@ test('GROWTH-W8 the first screen keeps the map\'s own title and its sentence: a 
   assert.match(fit, /if \(s && s\.x < 16\) camera = \{ \.\.\.camera, x: camera\.x \+ \(16 - s\.x\) \};/, 'the title in sight whole');
   assert.doesNotMatch(fit, /out <= whole \? -out : whole/, 'never pushed out at the left');
   assert.match(fit, /const r = ftBox\('ft-one', camera, inkAt\(camera\.k\)\)/, 'in conflict: the title kept and the sentence on one line');
-  assert.match(fit, /for \(let d = 8; d <= slack && !done; d \+= 8\)/, 'room at the same scale first');
+  // v10: the room at the same scale first, then with the give, is first-flow sentenceRoom's order (v10-maps V10-7).
+  assert.match(fit, /sentenceRoom\(FT_SAID, at\.k, least, \(form, k, d\) => \{ at\.place\(k\); camera = \{ \.\.\.camera, y: camera\.y \+ d \}; return clear\(form, k\); \}, k => \{ at\.place\(k\); return mapSlack\(\); \}\)/, 'room at the same scale first');
   assert.match(fit, /\(at\.k >= TITLE_FLOOR_K && a2\.k < TITLE_FLOOR_K\)\) break;/, 'a smaller frame never drops the title');
   // Merge v7: polish 5 moved the forms from syncFocusTop to placeFocusTop.
   assert.match(fn(app, 'placeFocusTop'), /for \(const cap of FT_CAPS\) \{ ftCap = cap; ftPlace\(el, camera, ink\); ftCap = null; if \(!covers\(\)\) return; \}/);

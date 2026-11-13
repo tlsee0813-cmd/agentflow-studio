@@ -97,7 +97,8 @@ test('P5-5/6 the sentence shows before it steps back; the fit is the same whatev
   assert.match(a, /el\.classList\.remove\(\.\.\.FT_FORMS\); el\.style\.left = ''; el\.style\.maxWidth = ''; ftFull = el\.offsetHeight; ftPlace\(el, camera, ink\);/, 'the whole height measured at the left, never as placed before');
   // Merge v7: the growth view's room at the same scale made fitView longer; the whole function is read.
   const fit = a.slice(a.indexOf('function fitView('), a.indexOf('\n}\n', a.indexOf('function fitView(')));
-  assert.ok(fit.indexOf('give([form])') > 0 && fit.indexOf('give([form])') < fit.indexOf("give(['ft-under'])") && fit.indexOf('for (let d = 8; d <= most && !done; d += 8)') < fit.indexOf("give(['ft-under'])"), 'room above for the sentence comes before stepping it back');
+  // v10: the sentence's forms with the give and the free height are first-flow sentenceRoom's.
+  assert.ok(fit.indexOf('sentenceRoom(FT_SAID') > 0 && fit.indexOf('sentenceRoom(FT_SAID') < fit.indexOf("give(['ft-under'])") && fit.indexOf('for (let d = 8; d <= most && !done; d += 8)') < fit.indexOf("give(['ft-under'])"), 'room above for the sentence comes before stepping it back');
 });
 
 test('P5-7 code in a label reads as quoted code: a monospace chip, words kept as words, cut only between tokens', async () => {

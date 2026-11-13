@@ -36,8 +36,9 @@ test('V8-2 the fit labels use those forms, with a last pass over other lines, an
   assert.match(fit, /if \(cond && labelParts\(s\)\.some\(p => p\.code\)\) \{ const f = condForms\(s, fold\); return n >= 14 \? f\.long : f\.short; \}/);
   assert.doesNotMatch(fit, /FIT_CODE_MAX \? s : null/, 'no fold at every zoom');
   assert.match(place, /const fold = tier === 'dots', passes: \[number, boolean\]\[\] = cond \? \[\[14, false\], \[8, false\], \[8, true\]\] : \[\[14, false\], \[8, false\]\];/);
-  assert.match(place, /ok = loose \? loosely : free;/, 'the last pass keeps off cards, heads, the title and labels, not off other lines');
-  assert.match(place, /const free = \(r: Rect\) => clear\(r\) && inMap\(r\) && !lineUnder\(r, e\.key, drawn\), loosely = \(r: Rect\) => clear\(r\) && inMap\(r\);/, 'never past the map\'s drawn extent');
+  // v10 (review of v9: lines ran through a label's text): the last pass keeps off other lines as well (its ◇ with its cue otherwise).
+  assert.match(place, /ok = free;/, 'the last pass keeps off cards, heads, the title, labels and other lines');
+  assert.match(place, /const free = \(r: Rect\) => clear\(r\) && inMap\(r\) && !lineUnder\(r, e\.key, drawn\);/, 'never past the map\'s drawn extent');
   assert.match(place, /said0 = unquoteLabel\(words \?\? restWord\(e\)\)/);
 });
 
@@ -86,7 +87,8 @@ test('V8-6 a sentence the box cannot hold is cut at a clause boundary, else at a
   assert.ok([...p.clauses, ...p.words].every(c => c.includes('계획')), 'only cuts that keep the plan word');
   const a = await app(), sync = fn(a, 'syncFocusTop');
   assert.ok(sync.indexOf('clauseFit(basis ?? t, t, t.dataset.text ??') > 0 && sync.indexOf('clauseFit(') < sync.indexOf('keepPlanFit(basis'), 'before the plan-word cut');
-  assert.match(fn(a, 'clauseFit'), /for \(const c of clauses\) \{ t\.textContent = c; if \(!over\(\)\) return c; \}/);
+  // v10: the choice between a clause cut and a whole-word cut is first-flow topCut (v10-maps V10-5).
+  assert.match(fn(a, 'clauseFit'), /const best = topCut\(clauses, words, c => \{ t\.textContent = c; return !over\(\); \}, most \? CLAUSE_KEEP : 0\);/);
   // The fit measures each form with the whole words, never with the cut a placed form shows (a cut sentence measured one line short).
   const box = fn(a, 'ftBox');
   assert.ok(box.indexOf("for (const [t] of cut) t.textContent = t.dataset.text ?? '';") < box.indexOf('const out = {') && box.indexOf('for (const [t, c] of cut) t.textContent = c;') > box.indexOf('const out = {'));

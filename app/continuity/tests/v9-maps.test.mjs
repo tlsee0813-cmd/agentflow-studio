@@ -162,7 +162,8 @@ test('V9-9 a one-line sentence is cut at a clause boundary or a whole word; its 
   assert.ok(top.indexOf('for (const cap of FT_CAPS_TWO)') > 0 && top.indexOf('for (const cap of FT_CAPS_TWO)') < top.indexOf("el.classList.add('ft-one');"), 'two lines, narrower, before one line');
   const fit = fn(a, 'fitView');
   assert.match(fit, /form === 'ft-one' \? FT_CAPS : \[null, \.\.\.FT_CAPS_TWO\]/);
-  assert.match(fit, /if \(at\.whole\) for \(const form of FT_SAID\) \{\n    if \(give\(\[form\]\)\) \{ done = true; break; \}/, 'each form by the give and the free height before the next');
+  // v10: each form by the give and the free height before the next is first-flow sentenceRoom's order (v10-maps V10-7).
+  assert.match(fit, /const room = sentenceRoom\(FT_SAID, at\.k, least, /, 'each form by the give and the free height before the next');
   assert.doesNotMatch(fit, /for \(const form of FT_SAID\) if \(clear\(form, camera\.k\)\) \{ done = true; break; \} \}\n    if \(!done\) camera = \{ \.\.\.camera, y: y0 \};/, 'v8: one line at the first free step, before two lines at the next');
   assert.match(fn(a, 'syncFocusTop'), /keepPlanFit\(t, t\.dataset\.text \?\? '', el\.classList\.contains\('ft-one'\) \? 1 : 2, 0, true\)/);
 });

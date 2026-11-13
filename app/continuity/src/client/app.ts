@@ -44,12 +44,12 @@ import { glyphSvg } from './card-glyphs.js';
 import { cardFace, cutsWord, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
-import { labelSpots, polylineHitsRect, portSpots, besideSpots } from './map-labels.js';
+import { labelSpots, polylineHitsRect, portSpots, besideSpots, endZones, dockSlack } from './map-labels.js';
 import { lineOffer, stepLine, stateOffer, stateGraph, statesElsewhere, formStep, formLoop, chooseForm, formUsable, nextForm, readForm, writeForm, formKeyOf, shortRef,
   FORM_IDS, FORM_WORD, COND_TAG, onLine, noRefWord, NO_REF_TIP, LINE_RULE, LINE_CAPTION, STATE_CAPTION, STATE_TERMINAL, type FormId, type FormOffer, type FormStep, type FormLoop, type FormEntry, type FormState, type Station, type StepLine } from './view-forms.js';
 import { firstView, firstViewStep, headQuote, recordOf, readFirstView, writeFirstView, lensChosen, keepExisting, differs, FIRST_VIEW_KEY, FIRST_LENS_NAME, REASON_CUT, objectJosa, type FirstView, type FirstViewInput, type FirstViewRecord, type FvFocus } from './first-view.js';
 import { isContainer, makeRoom, foldText, nestedText, branchText, type Well, type WellRow } from './container-view.js';
-import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, markPx, markResize, labelParts, tokenCut, cutCount, codeToken, condForms, unquoteLabel, monoTitle, joinsRun, condCuts, type Head, type LineBadge } from './line-grammar.js';
+import { lineStyle, lineBadge, badgeForms, quietTip, conditionWords, conditionTip, isRelativeRef, overflowMark, variantWord, COUNT_RE, restLabels, restLabelShown, shortLabel, wholeWords, labelPx, BADGE_GLYPH, restCue, CUE_PX, COND_UNSAID, labelRank, mergeByChannel, multiWord, relationSig, sigKey, portFaces, markPx, markResize, labelParts, tokenCut, cutCount, codeToken, condForms, unquoteLabel, monoTitle, joinsRun, condCuts, HEAD_PX, type Head, type LineBadge } from './line-grammar.js';
 import { stateMark } from './view-lens.js';
 import { LENSES, DEFAULT_LENS, NO_FILTER, LENS_KEY, lensDef, lensClasses, legendItems, legendApply, legendHead, legendMarks, legendChip, lensOffTopic, lensLineFg, lensFadeNote, lensKey, readLensRecord, writeLensRecord, type LensId, type LensPart, type LensLine, type LegendItem, type LegendState, type LegendAction, type Sample } from './view-lens.js';
 import { ladderWords, portModeWord, conditionPlain, plainBlank, plainScope, anchorPlain, enforcePlain, designProgramLine, unplacedPlain, loopLinePlain, loopTree, showLoopRows, loopRowPlain, variantPlain,
@@ -63,7 +63,7 @@ import { CHAT_REPORT_ASK, RECORD_ASK_EXPLAIN, deltaReportAsk, reflectAsk, scenar
 import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
-import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, switcherText, sourceText, summarySource, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
+import { firstFlow, startCard, hubFolds, foldedLines, foldWord, chipSpots, hubChipSpots, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
 import { createPlanView } from './plan-view.js';
@@ -2726,6 +2726,18 @@ function lineUnder(r: Rect, key: string, shown: Set<string>): boolean {
   for (const o of lastRouted.values()) if (o.key !== key && shown.has(o.key) && polylineHitsRect(o.pts, r, 2)) return true;
   return false;
 }
+/** v10 (review of v9: 「◇ 구독마다…」 and re-placed conditions sat on arrowheads): the room each drawn line's end marks take (its head, and a
+ * start mark other than the dot shown only on hover), in map units at this zoom (map-labels endZones); no label, badge, cue or chip is
+ * set there. */
+function headZones(shown: Set<string>): Rect[] {
+  const out: Rect[] = [];
+  $('world').querySelectorAll<SVGGElement>('.edge').forEach(g => {
+    const key = g.dataset.key!, r = lastRouted.get(key); if (!r || r.pts.length < 2 || !shown.has(key) || g.classList.contains('hit') || g.classList.contains('stub')) return;
+    const head = g.dataset.head as Head | undefined, start = g.dataset.start as Head | undefined;
+    out.push(...endZones(r.pts, head && head !== 'none' ? HEAD_PX[head] : 0, start && start !== 'none' && start !== 'dot' ? HEAD_PX[start] : 0, camera.k || 1));
+  });
+  return out;
+}
 /** Chips keep a readable size at low zoom: scaled up by --inv (applyCamera), so their measured size is scaled here too. */
 const labelInv = () => parseFloat($('space').style.getPropertyValue('--inv')) || 1;
 /** Line labels (and type chips) follow the zoom a little (line-grammar labelPx: 11–14px on screen), by --linv: their scale. */
@@ -2892,6 +2904,8 @@ function placeLineLabels() {
   if (titleH) blocks.push(titleRect());
   if (shortRect) blocks.push(shortRect); // an open short expansion reads where it is: no verb or count is set under it
   blocks.push(...bandRects); // nor over the boundary's or the participants' caption
+  // v10 (review of v9): nor on a line's head or start mark (its own line's included).
+  blocks.push(...headZones(shownLines()));
   // v8 (review of v7): nor under the top line (its whole form as the camera stands): a label there is hidden by it, and would take the
   // sentence's place at the fit.
   const ftr = ftReserve(); if (ftr) blocks.push(ftr);
@@ -3055,12 +3069,13 @@ function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Se
       if (same) same.keys.push(e.key); else { groups.set(gk, { el, keys: [e.key], cond, full }); box.append(el); els.push(el); }
       // v8: never past the map's drawn extent (the fit frames that extent: a label beyond it opened half off the window).
       const pts = edgePts(e.key, path), inMap = (r: Rect) => r.x >= B.x && r.y >= B.y && r.x + r.w <= B.x + B.w && r.y + r.h <= B.y + B.h;
-      const free = (r: Rect) => clear(r) && inMap(r) && !lineUnder(r, e.key, drawn), loosely = (r: Rect) => clear(r) && inMap(r);
+      const free = (r: Rect) => clear(r) && inMap(r) && !lineUnder(r, e.key, drawn);
       // Measured as drawn: a fit label of a lens not on now is display:none (styles.css), and a hidden label measures 0 × 0.
       el.style.display = 'block';
       // v8 (review of v7: a condition never vanishes): a condition has a last pass, its short form (else its long one, else its whole
-      // words) over other lines if it must (its halo keeps it readable), never over a card, a head, the title or another label; only at
-      // the far zoom does one written as long code fold to its ◇.
+      // words) at any place along its line; only at the far zoom does one written as long code fold to its ◇. v10 (review of v9: lines
+      // ran through 「(losses['val'] < …」 and 「report_type != …」): no pass sets a label over another line; a condition with no place
+      // clear of every other stroke keeps its ◇ with its open cue (words in its hover and on its keyboard focus).
       const fold = tier === 'dots', passes: [number, boolean][] = cond ? [[14, false], [8, false], [8, true]] : [[14, false], [8, false]];
       const base = full.replace(/[….]+$/, ''), forms: [string, boolean][] = [];
       for (const [n, loose] of passes) { const c = fitCut(base, n, cond, fold) ?? (loose ? fitCut(base, 14, cond, fold) ?? (fold ? null : base) : null); if (c !== null) forms.push([c, loose]); }
@@ -3072,7 +3087,7 @@ function placeFitLabels(box: HTMLElement, clear: (r: Rect) => boolean, drawn: Se
       if (cond && !fold && last) for (const c of condCuts(base)) if (c.length < last.length && !/[(（[][^)）\]]*$/.test(c) && !forms.some(([t]) => t === c)) forms.push([c, true]);
       forms.forEach(([c, loose], fi) => {
         const text = `${c}${base !== full && !c.endsWith('…') ? '…' : ''}`; if (!fillLabel(el, text)) return;
-        const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, ok = loose ? loosely : free;
+        const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, ok = free;
         // Along a level or upright run (the short form may sit closer to a bend, 6px), then beside an end of its line: a condition
         // beside the end it branches from first, any other beside the end it points to first (portSpots), before the line goes
         // unlabelled.
@@ -3497,12 +3512,12 @@ function fitView(explicit: boolean, animate = false) {
   // height under the map (8px at a time; the title and its floor kept), before a smaller frame is tried. v9 (review of v8: at 1280 the
   // one-line sentence was cut mid-clause): the sentence's two lines by either room (the give, then the free height) before its one line.
   let done = false;
-  if (at.whole) for (const form of FT_SAID) {
-    if (give([form])) { done = true; break; }
-    at.place(at.k); const y0 = camera.y, B = drawnBounds(), slack = mapBottom() - mapBottomInset() - (camera.y + (B.y + B.h) * camera.k);
-    for (let d = 8; d <= slack && !done; d += 8) { camera = { ...camera, y: y0 + d }; if (clear(form, camera.k)) done = true; }
-    if (done) break;
-    camera = { ...camera, y: y0 };
+  // v10 (review of v9: at 1280 two maps kept one cut line with 80px free under them): the free height is what sits under each column of
+  // the map (mapSlack), and the move may come with the give (a frame a little smaller frees more height under it), largest scale first
+  // (first-flow sentenceRoom).
+  if (at.whole) {
+    const room = sentenceRoom(FT_SAID, at.k, least, (form, k, d) => { at.place(k); camera = { ...camera, y: camera.y + d }; return clear(form, k); }, k => { at.place(k); return mapSlack(); });
+    if (room) { at.place(room.k); camera = { ...camera, y: camera.y + room.d }; done = true; } else at.place(at.k);
   }
   const most = at.whole && !done ? ftBox(null, camera, null).h + 8 : 0;
   for (let d = 8; d <= most && !done; d += 8) {
@@ -3525,6 +3540,21 @@ function fitView(explicit: boolean, animate = false) {
   if (!done && at.whole) { frameView(explicit, base); done = give(['ft-under']); }
   if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
   applyCamera(animate);
+}
+/** How far the map may move down as the camera stands (screen pixels): v10 (review of v9: at 1280 the top sentence stayed on one cut line
+ * with 80px free under the map) measured against what sits at the bottom over each column of the map (map-labels dockSlack: the tools,
+ * the first view's line, the legend chip) rather than the dock's whole row; the growth views keep their whole-row room. */
+function mapSlack(): number {
+  const B = drawnBounds(), k = camera.k;
+  if ($('space').classList.contains('growth-cmp') || $('space').classList.contains('growth-in-past')) return mapBottom() - mapBottomInset() - (camera.y + (B.y + B.h) * k);
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop, sr = $('space').getBoundingClientRect();
+  const at = (r: Rect): Rect => ({ x: ox + camera.x + r.x * k, y: oy + camera.y + r.y * k, w: r.w * k, h: r.h * k });
+  const scene = ftScene(), inv = Math.min(1 / 0.3, Math.max(0.625, 1 / k)), linv = Math.max(12, labelPx(k)) / (12 * k), ink = titleInk();
+  const content: Rect[] = [...[...lay.boxes.values()].map(at), ...scene.routes.flatMap(pts => pts.slice(1).map((p, i) => at({ x: Math.min(p.x, pts[i]!.x), y: Math.min(p.y, pts[i]!.y), w: Math.abs(p.x - pts[i]!.x), h: Math.abs(p.y - pts[i]!.y) }))),
+    ...scene.marks.map(m => { const s = m.line ? linv : inv; return at({ x: m.x, y: m.y, w: m.w * s, h: m.h * s }); }), ...(ink ? [at(ink)] : [])];
+  const obstacles = [$('space').querySelector<HTMLElement>(':scope > .controls'), document.getElementById('first-view'), document.getElementById('line-key')]
+    .filter((el): el is HTMLElement => !!el && !el.hidden && !!el.offsetWidth).map(el => { const r = el.getBoundingClientRect(); return { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height }; });
+  return dockSlack(content, obstacles, mapBottom(), 8);
 }
 /** What the top line must never stand over, besides the drawn lines and the labels (ftScene): the cards (and ghosts) and the lanes'
  * captions (map units). */
@@ -4150,6 +4180,8 @@ function placeFocusMarks() {
   // v8 (review of v7: a map at 1440 opened without its sentence: the 갈림 note took the top line's place first and moved on the
   // refit): the top line's place (its whole form, as the camera stands now) is kept before any note is placed.
   const ftr = ftReserve(); if (ftr) taken.push(ftr);
+  // v10 (review of v9): nor on a line's head or start mark.
+  const shownNow = shownLines(); taken.push(...headZones(shownNow));
   // Polish 5: nor over a label, badge, count or port mark shown on the map, nor a lane's caption (a note keeps its next place; a card's
   // own chip with no free place makes the labels under it give way, their words in their line's hover).
   const marks = shownMarkRects(world);
@@ -4158,7 +4190,7 @@ function placeFocusMarks() {
   const vpw = $('viewport').clientWidth, onScreen = (r: Rect) => camera.x + r.x * camera.k >= 4 && camera.x + (r.x + r.w) * camera.k <= vpw - 4;
   const free = (r: Rect, own?: Rect) => onScreen(r) && !taken.some(b => b !== own && r.x < b.x + b.w + 2 && b.x < r.x + r.w + 2 && r.y < b.y + b.h + 2 && b.y < r.y + r.h + 2);
   // A note is no wider than the card it stands at (its words wrap to two lines), so it fits the room between the rows.
-  const put = (el: HTMLElement, spots: (w: number, hh: number) => { x: number; y: number }[], maxW = 260 * inv, own?: Rect) => {
+  const put = (el: HTMLElement, spots: (w: number, hh: number) => { x: number; y: number }[], maxW = 260 * inv, own?: Rect, clean?: (r: Rect) => boolean) => {
     el.style.transform = `scale(${inv})`; el.style.transformOrigin = '0 0'; el.style.maxWidth = `${Math.max(120, maxW / inv)}px`; world.append(el);
     // Polish 5: its words with any code as a code chip, and its two lines never losing a plan word.
     const nt = el.querySelector<HTMLElement>('.ff-note-text');
@@ -4167,7 +4199,9 @@ function placeFocusMarks() {
       // own 「...」: 「hyperfine <command> … …」), keeping a plan word the text holds; the whole words stay in the note's hover.
       for (let n = cutCount(t1) - 1; n >= 1 && nt.scrollHeight > nt.clientHeight + 1; n--) { const c = tokenCut(t1, n); if (c && (!KEEP_WORD.test(t1) || KEEP_WORD.test(c))) fillLabel(nt, c, t1); } }
     // A card's own chip (own given) is never left off: with no free spot it takes its first one, on its card's edge.
-    const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, all = spots(w, hh).map(p => ({ ...p, w, h: hh })), at = all.find(r => free(r, own)) ?? (own ? all[0] : undefined);
+    const w = el.offsetWidth * inv, hh = el.offsetHeight * inv, all = spots(w, hh).map(p => ({ ...p, w, h: hh }));
+    // v10: a place no line runs under first (clean), when the caller asks for one.
+    const at = (clean ? all.find(r => free(r, own) && clean(r)) : undefined) ?? all.find(r => free(r, own)) ?? (own ? all[0] : undefined);
     if (!at) { el.remove(); return; }
     const gave = !free(at, own);
     el.style.left = `${at.x}px`; el.style.top = `${at.y}px`; taken.push(at);
@@ -4192,8 +4226,8 @@ function placeFocusMarks() {
     put(note('ff-branch', '갈림', br.text, `갈림 · 조건: ${br.text}`), (w, hh) => [...along.flatMap(p => [{ x: p.x + 10, y: p.y + 8 }, { x: p.x + 10, y: p.y - hh - 8 }, { x: p.x - w - 10, y: p.y + 8 }, { x: p.x - w - 10, y: p.y - hh - 8 }]),
       ...(zb ? [{ x: zb.x, y: zb.y - hh - 6 }, { x: zb.x, y: zb.y + zb.h + 6 }, { x: zb.x + zb.w - w, y: zb.y - hh - 6 }, { x: zb.x + zb.w - w, y: zb.y + zb.h + 6 }] : [])]);
   }
-  // The hubs' chips, on the card's own edge (straddling its lower border at the right, else its upper border, else the lower left), so
-  // a chip always reads as the card's and never floats on a line between other cards: N is exactly the lines it hides.
+  // The hubs' chips, just off the card's own edge (under it at the right first; v10: never across the edge), so a chip always reads as the
+  // card's and never floats on a line between other cards: N is exactly the lines it hides.
   const { byHub } = foldedLines(ffFolds, ffOpen);
   // Review of the growth view (first-user judge 8): a chip never covers a card's title, its own card's included. The titles as drawn (map
   // units); the card's own edge first, then just under and over the card, then beside it; with no free place, the first that meets no title.
@@ -4210,9 +4244,10 @@ function placeFocusMarks() {
     const chip = h('button', { type: 'button', class: `ff-fold-chip${open ? ' open' : ''}`, 'data-hub': id, 'aria-expanded': String(open),
       title: open ? '먼저 볼 연결 밖의 연결을 다시 접어요' : `이 카드의 먼저 볼 연결 밖 연결 ${n}개를 접어 두었어요 · 눌러서 제자리에 펼치기`,
       onclick: (e: Event) => { e.stopPropagation(); toggleHub(id); } }, foldWord(n, open));
-    const m = 10 * inv, g = 4 * inv;
-    put(chip, (w, hh) => chipSpots([{ x: b.x + b.w - w - m, y: b.y + b.h - hh / 2 }, { x: b.x + b.w - w - m, y: b.y - hh / 2 }, { x: b.x + m, y: b.y + b.h - hh / 2 },
-      { x: b.x + b.w - w, y: b.y + b.h + g }, { x: b.x, y: b.y + b.h + g }, { x: b.x + b.w - w, y: b.y - hh - g }, { x: b.x + b.w + g, y: b.y + b.h - hh }, { x: b.x - w - g, y: b.y + b.h - hh }], w, hh, titles), 260 * inv, own);
+    const g = 4 * inv;
+    // v10 (review of v9: 「다른 연결 7개」 straddled its card's edge beside a blue head): just off the card's edge, never on it, a place no
+    // line runs under first (hubChipSpots), clear of every head.
+    put(chip, (w, hh) => chipSpots(hubChipSpots(b, w, hh, g), w, hh, titles), 260 * inv, own, r => ![...lastRouted.values()].some(o => shownNow.has(o.key) && polylineHitsRect(o.pts, r, 2)));
   }
 }
 /** The top line: the record's first sentence (hover: whole, said to be the record's summary, with its record and line; pressed: the
@@ -4282,22 +4317,20 @@ function syncFocusTop() {
     const basis = t.classList.contains('ft-basis-t') ? t.parentElement : null, lead = basis?.querySelector<HTMLElement>('.ft-basis-l');
     // v8 (review of v7: 「… README에…」, 「… 운영자는 CLI·웹…」): words that run past the box are cut at a clause boundary that fits (else at a
     // whole word), keeping a plan word, never by the box's own clamp or ellipsis; with no such cut, keepPlanFit's.
-    const at = clauseFit(basis ?? t, t, t.dataset.text ?? ''); if (at !== null) { t.textContent = at; continue; }
+    const at = clauseFit(basis ?? t, t, t.dataset.text ?? '', !!basis); if (at !== null) { t.textContent = at; continue; }
     // v9: the head before the plan word's clause ends on a whole word (clipKeepPlan words).
     t.textContent = basis ? keepPlanFit(basis, t.dataset.text ?? '', 1, (lead?.offsetWidth ?? 0) + 6, true) : keepPlanFit(t, t.dataset.text ?? '', el.classList.contains('ft-one') ? 1 : 2, 0, true);
   }
 }
 /** The words of a top-line text as its box shows them (box: the sentence's clamp, or the basis line's ellipsis): whole when they fit, else
  * the longest clause cut that fits (shared clauseCuts), else the longest whole-word cut that fits; null when none fits (the text is left
- * whole for the caller). */
-function clauseFit(box: HTMLElement, t: HTMLElement, text: string): string | null {
+ * whole for the caller). v10: the basis line (most) takes its clause cut only when the whole-word cut keeps not far more (first-flow
+ * topCut); the sentence keeps the clause first (v9: never cut mid-clause). */
+function clauseFit(box: HTMLElement, t: HTMLElement, text: string, most = false): string | null {
   const over = () => box.scrollHeight > box.clientHeight + 1 || box.scrollWidth > box.clientWidth + 1;
   t.textContent = text; if (!over()) return text;
   const { clauses, words } = clauseCuts(text, KEEP_WORD);
-  for (const c of clauses) { t.textContent = c; if (!over()) return c; }
-  // The whole words, longest first: a shorter cut fits wherever a longer one does, so a binary search finds the longest that fits.
-  let lo = 0, hi = words.length - 1, best: string | null = null;
-  while (lo <= hi) { const mid = (lo + hi) >> 1; t.textContent = words[mid]!; if (over()) lo = mid + 1; else { best = words[mid]!; hi = mid - 1; } }
+  const best = topCut(clauses, words, c => { t.textContent = c; return !over(); }, most ? CLAUSE_KEEP : 0);
   t.textContent = text;
   return best;
 }
