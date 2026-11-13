@@ -45,7 +45,7 @@ test('V10-2 a hub chip touches its own card, and shows only while that card is s
   assert.equal(F.cardSeen({ x: 300, y: 140, w: 134, h: 48 }, view, [top]), true, 'its lower part shows');
   const app = await read('src/client/app.ts'), css = await read('public/styles.css');
   // Merged with v10-maps: the places stand one gap off the card's edge (never across it), so touching is to that ring.
-  assert.match(fn(app, 'placeFocusMarks'), /const g = 4 \* inv, ring = \{ x: b\.x - g, y: b\.y - g, w: b\.w \+ 2 \* g, h: b\.h \+ 2 \* g \};[\s\S]*w, hh, titles, ring, screenCovers\), 260 \* inv, own, /);
+  assert.match(fn(app, 'placeFocusMarks'), /const g = 4 \* inv, ring = \{ x: b\.x - g, y: b\.y - g, w: b\.w \+ 2 \* g, h: b\.h \+ 2 \* g \};[\s\S]*w, hh, titles, ring, screenCovers\), \.\.\.corners\(w, hh\)\], 260 \* inv, own, /);
   assert.match(fn(app, 'chipsSeen'), /chip\.classList\.toggle\('ff-alone', !s \|\| !cardSeen\(/);
   assert.match(fn(app, 'applyCamera'), /updateSticky\(\); chipsSeen\(\);/);
   assert.ok(css.includes('.ff-fold-chip.ff-alone, .world .growth-oldname.ff-alone { visibility: hidden; }'));

@@ -650,9 +650,12 @@ export interface FocusFold {
   /** Unique relations drawn (n) and in the view (N). */
   shown: number; total: number;
 }
-/** The static focus's fold: every line outside the view is folded, unless it touches a focus card the person opened. */
-export function focusFold(cards: readonly string[], lines: readonly FoldLine[], open: ReadonlySet<string> = new Set()): FocusFold {
-  const focus = new Set(cards), opens = (l: FoldLine) => (focus.has(l.from) && open.has(l.from)) || (focus.has(l.to) && open.has(l.to));
+/** The static focus's fold: every line outside the view is folded, unless it touches a focus card the person opened. v12 (every): the
+ * focus view the person chose (「먼저 볼 연결만」) gives every card with folded direct relations its own count and chip, a focus card or not
+ * (v11 left hubs off the view with no line and no cue: no card may look unconnected when it has relations); any card's chip opens its
+ * lines in place. */
+export function focusFold(cards: readonly string[], lines: readonly FoldLine[], open: ReadonlySet<string> = new Set(), every = false): FocusFold {
+  const focus = every ? new Set([...cards, ...lines.flatMap(l => [l.from, l.to])]) : new Set(cards), opens = (l: FoldLine) => (focus.has(l.from) && open.has(l.from)) || (focus.has(l.to) && open.has(l.to));
   const hide = new Set(lines.filter(l => !l.flow && !opens(l)).map(l => l.key));
   const ids = (ls: readonly FoldLine[]) => new Set(ls.flatMap(l => l.ids));
   const all = ids(lines), seen = ids(lines.filter(l => !hide.has(l.key)));
@@ -668,5 +671,8 @@ export function focusFold(cards: readonly string[], lines: readonly FoldLine[], 
 /** The global count and its control: 「표시 n/N」, 「전체 관계 N개 보기」 (N unique relations). */
 export const shownWord = (n: number, total: number): string => `표시 ${n}/${total}`;
 export const allWord = (total: number): string => `전체 관계 ${total}개 보기`;
+/** v12 (blind judges preferred every relation drawn, 14 of 16 map votes): the opening view draws every relation with 「먼저 볼 연결」 over
+ * them; the static focus is a choice beside the count (「먼저 볼 연결만」 / 「전체 관계」), per map, never restored after a reload. */
+export const FOCUS_ONLY_WORD = '먼저 볼 연결만', ALL_RELATIONS_WORD = '전체 관계';
 /** A recorded set past FOCUS_FG_MAX lines: said as such, shown whole. */
 export const recordedSetWord = (n: number): string => `기록된 연결 ${n}개`;

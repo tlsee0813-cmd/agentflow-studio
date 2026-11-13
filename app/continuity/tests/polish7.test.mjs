@@ -86,7 +86,7 @@ test('P7-6 a condition written as code reads as written on the first screen, or 
   // v8 (V8-1, V8-2): whole up to FIT_CODE_MAX, else cut between units (never 「iter_num %…」); folded to its ◇ only at the far zoom.
   assert.match(fit, /if \(cond && labelParts\(s\)\.some\(p => p\.code\)\) \{ const f = condForms\(s, fold\); return n >= 14 \? f\.long : f\.short; \}/);
   // F8 Q4: a condition is never cut: its record words whole when short, else its ◇ (which pointer and keyboard open).
-  assert.ok(a.includes('const whole = cond ? condLabelWords(full) : null;'), 'the fit labels say a condition whole or not at all');
+  assert.ok(a.includes('const whole = cond ? condLabelWords(full) : '), 'the fit labels say a condition whole or not at all');
   const fa = fn(a, 'foldAccess');
   assert.match(fa, /box\.removeAttribute\('aria-hidden'\);/);
   assert.match(fa, /el\.classList\.contains\('edge-cue'\) \|\| el\.classList\.contains\('b-condition'\)/, 'a condition\'s cue and badge');
@@ -94,6 +94,6 @@ test('P7-6 a condition written as code reads as written on the first screen, or 
   assert.match(fa, /el\.tabIndex = 0; el\.setAttribute\('role', 'button'\); el\.setAttribute\('aria-label', `\$\{words\} · 눌러서 이 선 고르기`\);/);
   assert.ok(a.includes('function placeEdgeLabels() { placeLineLabels(); dropRowIds(); foldAccess();'), 'after every placement');
   assert.match(a, /if \(x && \(x\.kind !== 'line' \|\| fold\) && !quiet\(x\)\) enter\(x, fold\);/, 'focus opens the line\'s tip (dismissed by Esc, kept while pointed at: the hover machine)');
-  assert.match(a, /const k = lineHit\(t\), edge = k \? edgeOf\(k\) : null; if \(edge\) \{ e\.preventDefault\(\); hoverStop\(\); pickLine\(edge\); \}/, 'Enter or Space picks the line, as a click does');
+  assert.match(a, /const k = lineHit\(t\), edge = k \? edgeOf\(k\) : null; if \(edge\) \{ e\.preventDefault\(\); hoverStop\(HOVER_ENTER_HOLD\); pickLine\(edge\);/, 'Enter or Space picks the line, as a click does');
   assert.match(await css(), /\.edge-labels > \[role="button"\]:focus-visible \{ outline: 2px solid var\(--accent\);/);
 });

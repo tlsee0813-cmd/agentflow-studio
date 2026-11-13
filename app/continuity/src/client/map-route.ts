@@ -101,7 +101,7 @@ export function pinOf(box: Box, e: Edge, end: 'a' | 'b'): number | undefined {
  * step a stair, and no straight run long enough for its verb). One end's port moves to the other's height when that height
  * lies on its side, passes no other port of that side (the order that keeps lines from crossing at the part holds) and the
  * straight run between them crosses no box. The spine's steps go first, then the smallest steps. */
-function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<string, { a: PortFace; b: PortFace }> = new Map()): Map<string, { a?: number; b?: number }> {
+function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<string, { a: PortFace; b: PortFace }> = new Map(), pairGap = 0): Map<string, { a?: number; b?: number }> {
   type End = { key: string; end: 'a' | 'b'; far: number; d: number };
   const out = new Map<string, { a?: number; b?: number }>(), at = new Map<string, End[]>(), sides = new Map<string, { a: string; b: string; e: Edge }>();
   for (const e of edges) {
@@ -185,7 +185,48 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
     if (!drop) for (const m of planned) put(m.key, m.p.end, m.y);
     slots.forEach((y, i) => put(list[i]!.key, list[i]!.end, y));
   }
-  const within = (o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = boxes.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
+  // v12 (review of v11: umami 분배 계층 ↔ PostgreSQL, gpt-researcher 백엔드 ↔ WebSocketManager, axios 요청 조정 ↔ 상태 판정: two lines of one
+  // pair running opposite ways stood a port pitch apart, 6 screen pixels at the fit, and read as one line with two heads): the two ends of
+  // such a pair on one side stand pairGap apart (the caller's: 12 screen pixels at the fit), the side's other ends kept in their order and
+  // spacing and the run kept inside its corners (as much of the gap as the side has room for). A side with an end tied to a pin keeps its
+  // ports. Each end's twin is kept so the straightening below and the nudging never bring the two back together.
+  const twin = new Map<string, { key: string; end: 'a' | 'b' }>();
+  if (pairGap > PORT_PITCH) {
+    const byPair = new Map<string, Edge[]>();
+    for (const { e } of sides.values()) { const k = `${e.from}\u0000${e.to}`; (byPair.get(k) ?? byPair.set(k, []).get(k)!).push(e); }
+    for (const { a: sa, b: sb, e } of sides.values()) for (const r of byPair.get(`${e.to}\u0000${e.from}`) ?? []) {
+      const s2 = sides.get(r.key)!, pe = out.get(e.key), pr = out.get(r.key); if (s2.b !== sa || s2.a !== sb) continue;
+      if (pe?.a === undefined || pe.b === undefined || pr?.a === undefined || pr.b === undefined) continue;
+      if (!twin.has(`${e.key}|a`)) twin.set(`${e.key}|a`, { key: r.key, end: 'b' });
+      if (!twin.has(`${e.key}|b`)) twin.set(`${e.key}|b`, { key: r.key, end: 'a' });
+    }
+    const ends = new Map<string, { key: string; end: 'a' | 'b' }[]>();
+    for (const { a: sa, b: sb, e } of sides.values()) {
+      const p = out.get(e.key);
+      if (p?.a !== undefined) (ends.get(sa) ?? ends.set(sa, []).get(sa)!).push({ key: e.key, end: 'a' });
+      if (p?.b !== undefined) (ends.get(sb) ?? ends.set(sb, []).get(sb)!).push({ key: e.key, end: 'b' });
+    }
+    for (const [k, list] of ends) {
+      if (!list.some(x => twin.has(`${x.key}|${x.end}`)) || list.some(x => pinned.has(`${x.key}|${x.end}`))) continue;
+      const box = boxes.get(k.split('|')[0]!)!, len = box.kind === 'frame' ? box.head : box.h, inset = box.kind === 'frame' ? FRAME_INSET : PORT_INSET;
+      const ys = list.map(x => ({ ...x, y: out.get(x.key)![x.end]! })).sort((p, q) => p.y - q.y || (p.key < q.key ? -1 : p.key > q.key ? 1 : 0));
+      const gaps = ys.map((p, i) => (i ? p.y - ys[i - 1]!.y : 0)), need = [...gaps];
+      for (let i = 0; i < ys.length; i++) for (let j = i + 1; j < ys.length; j++) {
+        const t = twin.get(`${ys[i]!.key}|${ys[i]!.end}`); if (!t || t.key !== ys[j]!.key || t.end !== ys[j]!.end) continue;
+        const d = need.slice(i + 1, j + 1).reduce((a, b) => a + b, 0); if (d >= pairGap) continue;
+        const add = (pairGap - d) / (j - i); for (let q = i + 1; q <= j; q++) need[q] = need[q]! + add;
+      }
+      const used = gaps.reduce((a, b) => a + b, 0), extra = need.reduce((a, b) => a + b, 0) - used, room = len - 2 * inset - used;
+      if (extra <= 0.01 || room <= 0.5) continue;
+      const f = Math.min(1, room / extra), fin = need.map((g, i) => gaps[i]! + (g - gaps[i]!) * f), span = fin.reduce((a, b) => a + b, 0);
+      const start = Math.min(Math.max((ys[0]!.y + ys[ys.length - 1]!.y) / 2 - span / 2, box.y + inset), box.y + len - inset - span);
+      let y = start; ys.forEach((p, i) => { y += i ? fin[i]! : 0; put(p.key, p.end, Math.round(y * 2) / 2); });
+    }
+  }
+  /** Moving an end to `to` keeps it at least as far from its twin as pairGap (or as it already stands, when the side had no room). */
+  const twinOk = (key: string, end: 'a' | 'b', to: number) => { const t = twin.get(`${key}|${end}`), ty = t ? out.get(t.key)?.[t.end] : undefined, from = out.get(key)?.[end];
+    return ty === undefined || from === undefined || Math.abs(ty - to) >= Math.min(pairGap, Math.abs(ty - from)) - 0.01; };
+  const within =(o: Box, f: Box) => { for (let c = o.container, g = 0; c && g < 64; c = boxes.get(c)?.container ?? '', g++) if (c === f.id) return true; return false; };
   // The boxes a straight run between a and b must not cross (as edgePath reckons them): every box but the two ends, the groups
   // around them and the inside of a group end; the heads of the groups around them do count.
   const straightFree = (a: Box, b: Box, y: number) => {
@@ -217,7 +258,7 @@ function assignPorts(boxes: Map<string, Box>, edges: Edge[], faced: ReadonlyMap<
     // The end on the quieter side moves first (a lone line's port is free to move); else the line's target.
     const tries: ['a' | 'b', string, number, number][] = [['b', sb, yb, ya], ['a', sa, ya, yb]];
     if ((at.get(sa)?.length ?? 0) < (at.get(sb)?.length ?? 0)) tries.reverse();
-    const hit = tries.find(([end, k, from, to]) => !pinned.has(`${e.key}|${end}`) && canMove(k, e.key, from, to) && straightFree(A, B, to) && !acrossLanes(e.key, A, B, to));
+    const hit = tries.find(([end, k, from, to]) => !pinned.has(`${e.key}|${end}`) && canMove(k, e.key, from, to) && twinOk(e.key, end, to) && straightFree(A, B, to) && !acrossLanes(e.key, A, B, to));
     if (hit) port[hit[0]] = hit[3];
   }
   return out;
@@ -420,6 +461,9 @@ export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[]): M
 }
 
 type FaceTie = [string, 'a' | 'b', string, 'a' | 'b'];
+/** quick: the plain shapes (a drag). pairGap (v12): how far apart, in map units, the two ends of a pair of lines running opposite ways
+ * between the same two cards stand on a side (the caller's 12 screen pixels at the fit; at most the side's room). */
+export interface RouteOpts { quick?: boolean; pairGap?: number }
 /** Every crossing among a drawn set's routes. */
 const allCrossings = (out: ReadonlyMap<string, Routed>): number => { const rs = [...out.values()]; let n = 0; for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) n += crossCount(rs[i]!.pts, rs[j]!.pts); return n; };
 /** Every line of one drawn set (the map's lines, or its summary lines), routed together. Beauty v5 lanes review 2: two face lines between
@@ -429,7 +473,7 @@ const allCrossings = (out: ReadonlyMap<string, Routed>): number => { const rs = 
  * Beauty v5 lanes review 3: the searches are kept through one call (the boxes stay put), so a set routed again searches only the lines
  * whose ends moved (the swapped pair, and any line whose side port moved with it); the rest of a try is the port spread and the nudging.
  * At most FACE_TIE_TRIES ties are tried (a face-heavy map tried every crossing pair, each a whole routing: up to 3 times the time). */
-export function routeEdges(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: boolean } = {}): Map<string, Routed> {
+export function routeEdges(boxes: Map<string, Box>, edgesIn: Edge[], opts: RouteOpts = {}): Map<string, Routed> {
   const ties: FaceTie[] = [], memo: Searched = { face: new Map(), line: new Map(), ports: new Map() };
   let out = routeSet(boxes, edgesIn, opts, [], memo, ties);
   if (opts.quick || !ties.length) return out;
@@ -457,7 +501,7 @@ export const routeOnce = (boxes: Map<string, Box>, edges: Edge[]): Map<string, R
  * every face line on its face (ports0) and the face ports from them (fx, copied before a swap), and the side ports by the face lines kept. */
 type SidePorts = Map<string, { a?: number; b?: number }>;
 interface Searched { face: Map<string, Route | null>; line: Map<string, { r: Route; lane: boolean }>; ports: Map<string, SidePorts>; edges?: Edge[]; ports0?: SidePorts; fx?: SidePorts }
-function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: boolean }, flips: readonly FaceTie[], memo: Searched, ties?: FaceTie[]): Map<string, Routed> {
+function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: RouteOpts, flips: readonly FaceTie[], memo: Searched, ties?: FaceTie[]): Map<string, Routed> {
   // Beauty v3 (D): ends over a side's budget take the top or bottom face toward a partner that really lies above or below.
   const edges = memo.edges ??= (() => {
     const over = opts.quick ? new Map<string, { a?: PortFace; b?: PortFace }>() : faceOverflow(boxes, edgesIn);
@@ -489,7 +533,7 @@ function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: bool
     if (!opts.quick) memo.face.set(k, kept);
     return kept;
   };
-  const ports0 = memo.ports0 ??= cands.length ? assignPorts(boxes, edges, new Map([...faceKept, ...candFaces])) : new Map();
+  const ports0 = memo.ports0 ??= cands.length ? assignPorts(boxes, edges, new Map([...faceKept, ...candFaces]), opts.pairGap ?? 0) : new Map();
   // The face ports, ordered by where the lines' other ends stand (ports0: their side ports with every face line on its face).
   const fx0 = memo.fx ??= cands.length ? facePorts(boxes, edges, ports0) : new Map(), fx = flips.length ? new Map([...fx0].map(([k, v]) => [k, { ...v }])) : fx0;
   for (const [ki, ei, kj, ej] of flips) { const pi = fx.get(ki), pj = fx.get(kj), xi = pi?.[ei], xj = pj?.[ej]; if (pi && pj && xi !== undefined && xj !== undefined) { pi[ei] = xj; pj[ej] = xi; } }
@@ -506,7 +550,7 @@ function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: bool
       if (bi === bj && (ei === 'a' ? ci.fa : ci.fb) === (ej === 'a' ? cj.fa : cj.fb)) ties?.push([ci.e.key, ei, cj.e.key, ej]);
     }
   }
-  const kept = [...faceKept.keys()].join('\u0000'), ports = memo.ports.get(kept) ?? memo.ports.set(kept, assignPorts(boxes, edges, faceKept)).get(kept)!;
+  const kept = [...faceKept.keys()].join('\u0000'), ports = memo.ports.get(kept) ?? memo.ports.set(kept, assignPorts(boxes, edges, faceKept, opts.pairGap ?? 0)).get(kept)!;
   const out = new Map<string, Routed>(), lanes = new Set<string>();
   if (cands.some(c => !faceRoutes.has(c.e.key))) for (const c of cands) {
     if (!faceRoutes.has(c.e.key)) continue;
@@ -548,6 +592,8 @@ function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: bool
   };
   // Beauty v2 B2: where a run at a port may move: along its own side, inside the side's corners, PORT_MIN clear of the other line
   // ends on that side (the side's order kept).
+  // v12: two lines of one pair running opposite ways keep their ends pairGap apart while their runs at the ports are nudged.
+  const opposite = new Set<string>(); if ((opts.pairGap ?? 0) > PORT_PITCH) for (const e of edges) for (const r of edges) if (e.from === r.to && e.to === r.from) opposite.add(`${e.key}|${r.key}`);
   const portFree = (s: Seg, at: number, vertical: boolean): boolean => {
     if (opts.quick) return false;
     const e = edges.find(x => x.key === s.key), first = s.i === 0, box = e ? boxes.get(first ? e.from : e.to) : undefined; if (!e || !box) return false;
@@ -558,7 +604,8 @@ function routeSet(boxes: Map<string, Box>, edgesIn: Edge[], opts: { quick?: bool
       const sameSide = vertical ? Math.abs(q.y - p.y) < 0.6 && q.x >= box.x && q.x <= box.x + box.w : Math.abs(q.x - p.x) < 0.6 && q.y >= box.y && q.y <= box.y + box.h;
       if (!sameSide) continue;
       const v = vertical ? q.x : q.y;
-      if (Math.abs(v - at) < PORT_MIN || (v - along) * (v - at) < 0) return false;
+      const least = opposite.has(`${s.key}|${r.key}`) ? Math.max(PORT_MIN, Math.min(opts.pairGap ?? 0, Math.abs(v - along)) - 0.01) : PORT_MIN;
+      if (Math.abs(v - at) < least || (v - along) * (v - at) < 0) return false;
     }
     return true;
   };
@@ -723,21 +770,21 @@ export function mixPath(from: Point[], to: Point[], t: number): string {
 /** The scale the focus lines are routed at: one fixed scale (never the camera's: a route that followed the zoom would move the fit that
  * reads it), so their pitches are twice the map's, about 12–14 screen pixels at a fit of 0.5–0.6. */
 export const FOCUS_ROUTE_SCALE = 0.5;
-export function routeAtScale(boxes: Map<string, Box>, edges: Edge[], c: number, opts: { quick?: boolean } = {}): Map<string, Routed> {
+export function routeAtScale(boxes: Map<string, Box>, edges: Edge[], c: number, opts: RouteOpts = {}): Map<string, Routed> {
   if (!(c > 0) || c >= 0.999) return routeEdges(boxes, edges, opts);
   const s = (v: number) => v * c, u = (v: number) => v / c;
   const sb = new Map([...boxes].map(([id, b]) => [id, { ...b, x: s(b.x), y: s(b.y), w: s(b.w), h: s(b.h), head: s(b.head),
     ...(b.contact !== undefined ? { contact: s(b.contact) } : {}), ...(b.ear !== undefined ? { ear: s(b.ear) } : {}),
     ...(b.pins ? { pins: Object.fromEntries(Object.entries(b.pins).map(([k, v]) => [k, s(v)])) } : {}) } as Box]));
-  const out = routeEdges(sb, edges, opts);
+  const out = routeEdges(sb, edges, { ...opts, ...(opts.pairGap ? { pairGap: opts.pairGap * c } : {}) });
   return new Map([...out].map(([k, r]) => { const pts = r.pts.map(p => ({ x: u(p.x), y: u(p.y) })); return [k, { ...r, pts, mx: u(r.mx), my: u(r.my), d: rounded(pts) }]; }));
 }
 /** The focus lines' routes: at FOCUS_ROUTE_SCALE when that is no worse a drawing than the map's own pitch (no more crossings, no more
  * detours, at most FOCUS_ROUTE_LONGER times the length: a wider pitch that sends a line round the map is no gain); else the map's own. */
 export const FOCUS_ROUTE_LONGER = 1.15;
-export function focusRoutes(boxes: Map<string, Box>, edges: Edge[], c: number = FOCUS_ROUTE_SCALE): Map<string, Routed> {
-  const own = routeEdges(boxes, edges); if (!(c > 0) || c >= 0.999) return own;
-  const wide = routeAtScale(boxes, edges, c);
+export function focusRoutes(boxes: Map<string, Box>, edges: Edge[], c: number = FOCUS_ROUTE_SCALE, opts: RouteOpts = {}): Map<string, Routed> {
+  const own = routeEdges(boxes, edges, opts); if (!(c > 0) || c >= 0.999) return own;
+  const wide = routeAtScale(boxes, edges, c, opts);
   const len = (m: Map<string, Routed>) => [...m.values()].reduce((a, r) => a + r.pts.reduce((s, p, i) => (i ? s + Math.abs(p.x - r.pts[i - 1]!.x) + Math.abs(p.y - r.pts[i - 1]!.y) : 0), 0), 0);
   const detours = (m: Map<string, Routed>) => [...m.values()].filter(r => r.detour).length;
   return allCrossings(wide) <= allCrossings(own) && detours(wide) <= detours(own) && len(wide) <= FOCUS_ROUTE_LONGER * len(own) ? wide : own;
