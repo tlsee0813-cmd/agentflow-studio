@@ -65,7 +65,7 @@ test('F7-1 구현 상태: only the structured implementation field of the same p
   assert.equal(V.sceneKind(c), '구현 정보 추가');
   assert.equal(V.sceneSentence(c, nm), '‘정리기’에 구현 정보 ‘구현됨’이 더해졌습니다. 구현됨은 가동 중이라는 뜻이 아닙니다.');
   const ch = G.changeSet(p, 1, 3).changes.find(x => x.kind === 'impl');
-  assert.equal(V.sceneKind(ch), '구현 상태 변경');
+  assert.equal(V.sceneKind(ch), '구현 상태 변경 · 미구현 → 구현됨');
   assert.equal(V.sceneSentence(ch, namesOf(p, 1, 3)), '‘수집기’의 구현 상태가 ‘미구현’에서 ‘구현됨’으로 기록됐습니다.');
   assert.equal(G.CHANGE_WORD.impl, '구현 상태'); assert.equal(G.CHANGE_WORD.reimpl, '구현 바뀜');
 });

@@ -123,8 +123,8 @@ test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes bac
   const scene = fn(app, 'growthSceneEl');
   for (const w of ["'이전 모습'", "'현재 모습'", "'이전 변화'", "'다음 변화'", "'원문'", "'이전 부품 위치 보기'", "'원래 위치로'"]) assert.ok(scene.includes(w), w);
   assert.match(scene, /stepWord\(f, Math\.max\(0, i\), list\.length\)/);
-  // The guide in the top box's place, only while comparing.
-  assert.match(fn(app, 'renderFocusTop'), /if \(gc\) \{ el\.replaceChildren\(\.\.\.growthGuideEls\(gc\)\); el\.hidden = false; syncFocusTop\(\); return; \}/);
+  // The guide in the top box's place, only while comparing (review of v8: or at the pane's top when no pan clears the map's top for it).
+  assert.match(fn(app, 'renderFocusTop'), /if \(gc\) \{ el\.replaceChildren\(\.\.\.growthGuideEls\(gc\)\); el\.hidden = guideInPane; syncFocusTop\(\); return; \}/);
   assert.match(fn(app, 'growthGuideEls'), /guideOf\(c\.cs, c\.scenes, sceneName, sceneSay\)/);
   // 대기·보류 at the line's end: the waiting and held rows only.
   assert.match(fn(app, 'drawGrowth'), /growthUnreflected\(\)\?\.filter\(x => x\.state !== 'rejected'\)\.length/);

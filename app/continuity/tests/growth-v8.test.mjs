@@ -52,10 +52,10 @@ test('V8-1 the guide is never stepped back or cut to one line: the box stays who
   assert.match(rule, /-webkit-line-clamp: none;/); assert.match(rule, /overflow: visible;/);
   // Entering compare zoomed in: the guide stays whole and the camera pans the cards clear of it (first user, k).
   assert.match(fn(app, 'growthScene'), /growthReveal\(part\);\n  growthClearGuide\(\);/);
+  // Review of v8: a pan sideways or up and down (guidePan, V9-K), never a zoom; else the guide goes to the pane's top.
   const clear = fn(app, 'growthClearGuide');
-  assert.match(clear, /camera = \{ \.\.\.camera, y: camera\.y \+ d \}; applyCamera\(true\);/, 'a vertical pan, never a zoom');
-  assert.ok(clear.includes('const under = (d: number) => cols.filter(s => !(s.y + d >= r.y + r.h || s.y + s.h + d <= r.y)).length;'), 'cards under it after the pan, one brought down from above included');
-  assert.ok(clear.includes('.sort((a, b) => a.n - b.n || Math.abs(a.x) - Math.abs(b.x))[0];') && clear.includes('if (!best || best.n >= now) return;'), 'the fewest under it, then the least pan');
+  assert.match(clear, /camera = \{ \.\.\.camera, x: camera\.x \+ d\[0\], y: camera\.y \+ d\[1\] \}; applyCamera\(true\);/, 'a pan, never a zoom');
+  assert.match(clear, /guideInPane = true; el\.hidden = true; syncMapArea\(\); renderGrowthPane\(\);/);
 });
 
 test('V8-2 기록 반영 상태: a record\'s part row is a map part by its name or by the one B its reflected rows share; 「아직 지도에 놓이지 않음」 only when no map part can be it; a row about one such part is in that part\'s group', () => {
@@ -96,7 +96,7 @@ test('V8-4 every name the growth view says is the card face\'s: one helper for s
   const view = await read('src/client/growth-view.ts'), app = await read('src/client/app.ts');
   assert.match(view, /import \{ faceSplit, facePlain, faceCounts as faceCountsOf \} from '\.\/face-name\.js';/);
   assert.match(fn(app, 'faceName'), /faceSplit\(x\.name, counts\)/, 'the card face goes by the same helper');
-  assert.match(fn(app, 'growthReflectEl'), /name = \(id: string\) => sceneName\(id\)/, 'group titles');
+  assert.match(fn(app, 'growthReflectEl'), /return heldName\(sceneName\(id\), rep && rep !== id \? sceneName\(rep\) : null\);/, 'group titles (review of v8: the folded card it is drawn in)');
   assert.match(fn(app, 'growthListEl'), /sceneTitle\(x, sceneName, sceneSay\)/, 'lists');
   assert.match(fn(app, 'growthSceneEl'), /h\('h2', \{ id: 'lens-title' \}, sceneTitle\(main, sceneName, sceneSay\)\)/, 'scene titles');
   // A rename's before and after are names as text: said as the face says them.
@@ -146,8 +146,9 @@ test('V8-9 정정 is an error or a withdrawal said so: the record\'s 철회 rows
   p = workshop({ error: true }); cs = G.changeSet(p, 1, 5);
   assert.deepEqual(cs.changes.filter(c => c.kind === 'correct').map(c => [c.part, c.by]), [['col', 'person']]);
   assert.equal(cs.changes.some(c => c.kind === 'desc' && c.part === 'col'), false);
-  // The record's own 철회 row.
+  // The record's own 철회 row, taking back a claim the map had on that part (review of v8: only that is a 정정).
   p = workshop(null);
+  p.readings[0].parts.find(x => x.areaId === 'sto').claims.push({ kind: 'describes', text: '고른 것을 옛 압축 저장으로 둔다', record: 'N1', quote: '| 저장소 | 옛 압축 저장 |', about: null, replaces: null });
   p.readings.push(reading(6, [said('sto', null, { claims: [{ kind: 'describes', text: '옛 압축 저장을 철회했다', record: 'N1', quote: '| 철회 | 옛 압축 |', about: null, replaces: null, topic: 'withdrawn', before: '옛 압축 저장' }] })]));
   cs = G.changeSet(p, 5, 6);
   const w = cs.changes.find(c => c.kind === 'correct');
@@ -181,7 +182,7 @@ test('V8-11 first user (f, g, h): a description\'s change shows 이전 설명 / 
   const app = await read('src/client/app.ts'), scene = fn(app, 'growthSceneEl');
   assert.ok(scene.indexOf('pair,') < scene.indexOf("h('dl', { class: 'gs-dl' },\n          h('dt', {}, '시점')"), 'the two descriptions before 시점');
   assert.match(scene, /`이전 설명 · \$\{versionLabel\(c\.from\)\}`/); assert.match(scene, /`지금 설명 · \$\{versionLabel\(c\.to\)\}`/);
-  assert.match(scene, /\.\.\.\(descFirst \? \[implEl, linesEl, flistEl, alsoEl, wdEl, citesEl, descEl\] :/);
+  assert.match(scene, /\.\.\.\(descFirst \? \[implEl, linesEl, flistEl, alsoEl, wdEl, citesEl, descEl, histEl\] :/);
   assert.match(scene, /시점은 기록이 적은 바뀐 때 · \$\{tw\}\$\{josa\(tw, '은\/는'\)\} 그 기록이 다룬 대상의/, '기록 대상 판본은 · 기록 대상 날짜는');
   const sync = await read('src/client/auto-sync.ts');
   assert.doesNotMatch(sync, /' 안 됨'/); assert.match(sync, /' 켜기'/);

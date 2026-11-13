@@ -230,8 +230,10 @@ test('GROWTH-10 기록 반영 상태 on the anonymised growth map: the rows read
   assert.ok(first.every(x => read1.has(x.paste)));
   const cs = G.changeSet(p, 4, 9);
   assert.ok(cs.counts.new > 0 && cs.added.length > 0);
-  // Review of v7: the records' own 철회 rows between the two are 정정.
-  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 정정 \d+ · 연결 \+\d+ · 지도에 새로 표시 \d+개$/);
+  // Review of v8: the records' 철회·변경 rows between the two withdraw no claim the map had on their parts (one is an 옮김): project
+  // history, never a 정정, listed apart.
+  assert.match(V.summaryText(cs), /^지도 v04 → 지도 v09 · 연결 \+\d+ · 지도에 새로 표시 \d+개$/);
+  assert.ok(cs.history.length > 0); assert.equal(cs.counts.correct, 0);
 });
 
 test('GROWTH-11 the line and the tabs: nonzero items in the scene order, the two filters at its end, at most three tabs, no 새 or 설명 tab by default, no two tabs meet', () => {
