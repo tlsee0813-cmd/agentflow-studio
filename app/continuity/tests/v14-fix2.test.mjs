@@ -157,3 +157,15 @@ test('V14F2-15 the landed map is looked at again for cards under the tools once 
   assert.match(a, /landed: \(\) => \{ applyCamera\(\); requestAnimationFrame\(refitUnderBox\); window\.setTimeout\(clipAtEdge, LANDED_CLIP_MS\); \}/);
   assert.match(a, /const LANDED_CLIP_MS = 700;/);
 });
+
+test('V14F2-16 in the clear state the main flow\'s labels at the overview go before every lens\'s fit labels (which keep off them)', async () => {
+  const pl = fn(await app(), 'placeLineLabels');
+  assert.match(pl, /const litFirst = restLabels\(tier\) === 'counts' && \$\('space'\)\.classList\.contains\('cl-on'\)/);
+  assert.ok(pl.indexOf('placeRestLabels(box, litFirst, clear);') < pl.indexOf('const fit = face === \'tag\' ? placeFitLabels('), 'the lit labels first');
+  assert.match(pl, /blocks\.push\(\{ x, y, w: l\.offsetWidth \* inv, h: l\.offsetHeight \* inv \}\);/);
+  assert.match(pl, /if \(litNow\.length && !litFirst\.length\) \{ placeRestLabels\(box, litNow, clear\);/);
+});
+
+test('V14F2-17 a lit line\'s cut words never end on an arrow, a comma or a colon pointing at what was cut', async () => {
+  assert.ok(fn(await app(), 'litWords').includes(String.raw`.replace(/[\s·,:;→>-]+$/u, '')`));
+});

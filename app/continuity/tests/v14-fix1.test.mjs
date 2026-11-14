@@ -123,7 +123,7 @@ test('V14F1-6 the page marks a gloss tag (no tag-cut), with its dotted underline
 test('V14F1-7 the main flow lit at rest says its relations at every tier, over quiet lines if it must, in whole words', async () => {
   const a = await app(), pl = fn(a, 'placeLineLabels'), pr = fn(a, 'placeRestLabels');
   // The overview (counts) keeps counts and conditions, and now the lit flow's labels first.
-  assert.match(pl, /if \(mode === 'counts'\) \{\n[\s\S]*?const litNow = ffShown\(\) && ffActive\(\) && !selected \? \[\.\.\.world\.querySelectorAll<SVGGElement>\('\.edge\.ff-flow'\)\][\s\S]*?if \(litNow\.length\) \{ placeRestLabels\(box, litNow, clear\);/);
+  assert.match(pl, /if \(mode === 'counts'\) \{\n[\s\S]*?const litNow = ffShown\(\) && ffActive\(\) && !selected \? \[\.\.\.world\.querySelectorAll<SVGGElement>\('\.edge\.ff-flow'\)\][\s\S]*?if \(litNow\.length && !litFirst\.length\) \{ placeRestLabels\(box, litNow, clear\);/); // v14 fix 2: unless placed first (clear state)
   // A lit line's label may stand over quiet lines (never a card, a head, the title or another label).
   assert.match(pr, /const litRest = g\.classList\.contains\('ff-flow'\) && \$\('space'\)\.classList\.contains\('cl-on'\) && !selected;/);
   assert.match(pr, /free = \(r: Rect\) => clear\(r\) && !lineUnder\(r, e\.key, litRest \? litShown : shown\);/);

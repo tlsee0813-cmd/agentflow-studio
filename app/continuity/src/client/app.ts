@@ -3673,6 +3673,15 @@ function placeLineLabels() {
     // Beauty v3 (E): at the name-tag view the lens's foreground lines say their condition, else what they send or what starts them.
     // Every lens's set is placed now (a lens switch re-places nothing); the labels, counts and marks set for every lens read under a
     // lens only where they keep off that lens's fit labels (giveWay): 구성, with no fit labels, keeps all of them.
+    // v14 fix 2 (nanogpt at 1440 자세히: the lit lines said nothing where 쉽게 placed their words: every lens's fit labels, placed first, took
+    // their places): in the clear state the main flow's labels at the overview tier go before the lenses' (theirs keep off them).
+    const litFirst = restLabels(tier) === 'counts' && $('space').classList.contains('cl-on') && ffShown() && ffActive() && !selected
+      ? [...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit')) : [];
+    if (litFirst.length) {
+      placeRestLabels(box, litFirst, clear);
+      const inv = labelInv();
+      for (const l of box.querySelectorAll<HTMLElement>('.edge-label')) { l.classList.add('lit-first'); const x = parseFloat(l.style.left), y = parseFloat(l.style.top); if (Number.isFinite(x)) blocks.push({ x, y, w: l.offsetWidth * inv, h: l.offsetHeight * inv }); }
+    }
     const fit = face === 'tag' ? placeFitLabels(box, clear, drawn, restLabels(tier) === 'counts') : new Map<string, FitSet>();
     const giveWay = (sel: string) => box.querySelectorAll<HTMLElement>(sel).forEach(c => {
       const k = c.dataset.key ?? c.dataset.cue ?? '', inv = labelInv(), r = { x: parseFloat(c.style.left), y: parseFloat(c.style.top), w: c.offsetWidth * inv, h: c.offsetHeight * inv };
@@ -3693,7 +3702,7 @@ function placeLineLabels() {
       // v14 fix 1 (spec 1; verify of v14: umami's four lit lines and dagu's two landed with no word): the main flow lit at rest says its
       // relations at every tier: its lines' labels go first (a label with no room keeps its line's hover), the counts keep off them.
       const litNow = ffShown() && ffActive() && !selected ? [...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit')) : [];
-      if (litNow.length) { placeRestLabels(box, litNow, clear); if (fit.size) giveWay('.edge-label:not(.fit)'); }
+      if (litNow.length && !litFirst.length) { placeRestLabels(box, litNow, clear); if (fit.size) giveWay('.edge-label:not(.fit)'); }
       const inv = labelInv(), labelled = new Set<string>(), labRects: Rect[] = [];
       for (const l of box.querySelectorAll<HTMLElement>('.edge-label:not(.fit)')) { if (l.dataset.key) labelled.add(l.dataset.key); const x = parseFloat(l.style.left), y = parseFloat(l.style.top); if (Number.isFinite(x)) labRects.push({ x, y, w: l.offsetWidth * inv, h: l.offsetHeight * inv }); }
       placeCounts(box, r => clear(r) && !labRects.some(o => r.x < o.x + o.w + 3 && o.x < r.x + r.w + 3 && r.y < o.y + o.h + 3 && o.y < r.y + r.h + 3), blocks, false, drawn, true, labelled);
@@ -4218,7 +4227,8 @@ const REST_PAD = 8;
  * (line-grammar wholeWords, LABEL_SHORT characters at most), never a 「…」, and nothing when they would keep one side of an OR (v11:
  * 「Promise 이행 또는」) or less than four characters (a label that says nothing goes to the line's hover). */
 function litWords(t: string): string {
-  const head = t.replace(/\s*[^\s·]*…$/u, '').replace(/[\s·]+$/u, '');
+  // v14 fix 2 (hyperfine at 자세히: 「ArgMatches →」): nor an arrow, a comma or a colon pointing at what was cut.
+  const head = t.replace(/\s*[^\s·]*…$/u, '').replace(/[\s·,:;→>-]+$/u, '');
   if (!head || /(?:^|\s)(?:또는|혹은|or)(?:\s|$)|\|/i.test(head)) return '';
   const w = wholeWords(head);
   return w.length >= 4 && !w.includes('…') ? w : '';
