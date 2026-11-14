@@ -4096,7 +4096,7 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 #space.op-run #edge-tip { display: none; }
 /* v13 fix 2 (first look at v13: while the sentence typed in, the top box showed its 먼저 볼 연결 row under an empty line, as if broken): the
    box's other rows come in once the sentence is written. */
-#space.op-land #focus-top > :not(.ft-sentence) { opacity: 0; }
+#space.op-land #focus-top > :not(.ft-sentence), #space.op-land:not(.op-type) #focus-top { opacity: 0; }
 #focus-top > :not(.ft-sentence) { transition: opacity .25s ease; }
 #space.op-land #world > :not(.node):not(.frame):not(.edges):not(.map-title):not(.op-ghost):not(.form-lane),
 #space.op-land > .controls, #space.op-land #line-key, #space.op-land #focus-top, #space.op-land #growth-line, #space.op-land #recent, #space.op-land #scope-sticky { transition: opacity .3s ease; }

@@ -132,5 +132,8 @@ test('V13X2-8 a 보기 the record does not offer stays in sight and says why whe
   assert.match(fn(a, 'formSwitchEl'), /'aria-disabled': String\(!ok\), title: tip, onclick: \(\) => \(ok \? setMapForm\(f\) : toast\(tip\)\)/);
   assert.doesNotMatch(fn(a, 'formSwitchEl'), /disabled: !ok/);
   assert.match(c, /\.map-forms \.vf-form:disabled, \.map-forms \.vf-form\.off \{ color: var\(--text-4\); background: transparent; border-style: dashed; cursor: help; \}/);
-  assert.match(c, /#space\.op-land #focus-top > :not\(\.ft-sentence\) \{ opacity: 0; \}/);
+  assert.match(c, /#space\.op-land #focus-top > :not\(\.ft-sentence\), #space\.op-land:not\(\.op-type\) #focus-top \{ opacity: 0; \}/);
+  const op = await readFile(new URL('../src/client/opening.ts', import.meta.url), 'utf8');
+  assert.match(op, /if \(t > landMs\) host\.space\(\)\.classList\.add\('op-type'\);/);
+  assert.match(op, /host\.space\(\)\.classList\.remove\('op-run', 'op-land', 'op-type'\);/);
 });

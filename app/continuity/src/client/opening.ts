@@ -256,7 +256,7 @@ export function createOpening(host: OpeningHost) {
     for (const t of r.timers) clearTimeout(t); cancelAnimationFrame(r.raf); r.off();
     restoreNames(); restoreTyping();
     const world = host.world(); clearClasses(world);
-    host.space().classList.remove('op-run', 'op-land');
+    host.space().classList.remove('op-run', 'op-land', 'op-type');
     strip()?.remove();
     run = null; factor = 1; host.rewrite();
     if (mark) { const s = host.storage(); if (s) markSeen(s.get, s.set, r.key, r.version); }
@@ -376,6 +376,8 @@ export function createOpening(host: OpeningHost) {
       // The settle (1.03 → 1), and from the whole view into the map's frame when it grew in the whole view.
       factor = 1 + (SETTLE_FROM - 1) * (1 - easeOut(t / landMs)); run.blend = easeInOut(Math.min(1, t / landMs)); host.rewrite();
       const ty = run.typing;
+      // v13 fix 2 (first look at v13: an empty top box stood over the landed map until its sentence began): the box comes in as it types.
+      if (t > landMs) host.space().classList.add('op-type');
       if (ty && t > landMs) { const n = Math.round(((t - landMs) / Math.max(1, typeMs)) * total); typedTexts(ty.texts, n).forEach((s, i) => { ty.nodes[i]!.data = s; }); }
       if (t >= landMs + typeMs) { finish(true); return; }
       run.raf = requestAnimationFrame(step);
