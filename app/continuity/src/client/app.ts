@@ -4288,7 +4288,8 @@ function fitView(explicit: boolean, animate = false) {
   // Ruling F8 Q2: the box as it is (its sentence whole, up to three lines): never narrower, never one line; the map makes the room.
   const clear = (form: string | null, k: number) => !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k));
   // A frame that shows the map's own title never gives it up for the top line's room (the give stops at the title's floor).
-  const least = Math.max(at.k - FT_GIVE, at.k >= TITLE_FLOOR_K ? TITLE_FLOOR_K : 0) - 1e-9;
+  // V14-A HOOK (whole names, spec 2): nor under FIRST_FIT_MIN, where a tag stops holding two lines of a name (unless the frame is already under it).
+  const least = Math.max(at.k - FT_GIVE, at.k >= TITLE_FLOOR_K ? TITLE_FLOOR_K : 0, Math.min(at.k, FIRST_FIT_MIN)) - 1e-9;
   const give = (forms: readonly (string | null)[]) => { for (const form of forms) for (let k = at.k; k >= least; k -= 0.002) { at.place(k); if (clear(form, k)) return true; } return false; };
   // The polish branch's rule (polish 5; first-user judge 9 on the growth map at 1280): the record's sentence shows on every map: whole, else
   // on one line, each with the give; else the least room above the map (8px at a time) where one of them stands clear beside the title; only
@@ -4341,7 +4342,9 @@ function focusOverDock() {
   const f = openFocus(); if (!f) return;
   const dock = mapBottom() - mapBottomInset() - 8, fs = toScreen(f); if (fs.y + fs.h <= dock) return;
   const topY = topInset() + 4, ink = titleInk(), t0 = Math.min(ink ? ink.y : f.y, f.y), k0 = camera.k;
-  const kFit = Math.min(k0, (dock - topY) / Math.max(1, f.y + f.h - t0)); if (kFit < k0 * FOCUS_SHRINK) return;
+  // V14-A HOOK (the clear state, spec 1): when the title and the flow cannot stand together, the flow is the view (it is what the map lights
+  // at rest): the least pan up that brings it over the tools, its top under the top line's row; the title chip names the map.
+  const kFit = Math.min(k0, (dock - topY) / Math.max(1, f.y + f.h - t0)); if (kFit < k0 * FOCUS_SHRINK) { camera = { ...camera, y: Math.max(topY - f.y * k0, Math.min(camera.y, dock - (f.y + f.h) * k0)) }; return; }
   // Among the frames that keep the title under the top line's row and the flow above the tools (the largest zoom first, then the least pan
   // up), the one with the fewest cards cut by the tools' row (down to FOCUS_SETTLE of that zoom): the map's own rows meet the tools' edge
   // between cards where they can.

@@ -4211,6 +4211,7 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* The marks that stay on the quiet lines (a condition's ◇ and words, a badge) keep their words at 4.5:1 or more: never the half opacity the
    v12 focus gave them (a 「조건 2」 badge read 2.6:1). */
 #space.cl-on #world .edge-labels > :not(.ff-keep):not(.edge-cue):not(.edge-label):not(.near):not(:hover) { opacity: 1; }
+#space.cl-on #world .edge-labels > .edge-cue.cue-bg.q-stack { opacity: 1; }
 /* The caption under the switcher: what is lit, and the other strength one press away (shown at rest only). */
 .focus-top .ft-clear { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; margin: 0; font-size: 12.5px; line-height: 20px; color: var(--text-2); }
 .focus-top .ft-clear-t { min-width: 0; }

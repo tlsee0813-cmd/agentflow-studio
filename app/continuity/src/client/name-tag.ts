@@ -124,7 +124,10 @@ export function fitTag(name: string, w: number, lines: number, measure: (s: stri
   for (const ext of [false, true]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(nm, scaled(s), ext); if (ls) return { lines: ls, full: true, ...at(s) }; }
   const trim = (t: string) => t.replace(/[\s·/,，、_:;.-]+$/u, '');
   const words = nameWords(nm);
-  for (const s of steps(WORD_MIN_PX)) for (let k = words.length - 1; k >= 1; k--) { const head = trim(words.slice(0, k).join('')); if (!head) continue; const ls = whole(`${head}…`, scaled(s)); if (ls) return { lines: ls, full: false, ...at(s) }; }
+  // The most whole words first, each at the largest type that holds it (「프로젝트 전환…」 a little smaller before 「프로젝트…」); never a
+  // bracket left open (「REST API…」, never 「REST API (Django…」): the words before a bracket are the name's own short form.
+  const open = (t: string) => (t.match(/[([{]/g) ?? []).length > (t.match(/[)\]}]/g) ?? []).length;
+  for (let k = words.length - 1; k >= 1; k--) { const head = trim(words.slice(0, k).join('')); if (!head || open(head)) continue; for (const s of steps(WORD_MIN_PX)) { const ls = whole(`${head}…`, scaled(s)); if (ls) return { lines: ls, full: false, ...at(s) }; } }
   const first = trim(words[0] ?? nm), more = words.length > 1;
   // In the side room too: with its 「…」 (the cue that the rest of the name is in the hover) before the bare word.
   if (slack > 0) for (const t of more ? [`${first}…`, first] : [first]) for (const s of steps(WORD_MIN_PX)) if (whole(t, scaled(s), true, w + slack)) return { lines: whole(t, scaled(s), true, w + slack)!, full: !more, tight: true, ...at(s) };

@@ -45,6 +45,11 @@ test('V14A-1 a tag never cuts a name at its start or inside a word: whole, whole
   const tight = T.fitTag('tinypoemsampler', 80, 1, measure, 12.5, 6);
   assert.equal(tight.tight, true); assert.deepEqual(tight.lines, ['tinypoemsampler']);
   assert.match(fn(await app(), 'fitCards'), /slack: Math\.max\(0, w - 4 - room\.width\)/);
+  // The most whole words first, a little smaller before fewer; never a bracket left open (the words before it are the name's short form).
+  const br = T.fitTag('작업 큐·실행기(Granary Q worker + Relayer)', 90, 2, measure, 12.5);
+  assert.equal(br.lines.join(''), '작업 큐·실행기…', br.lines.join('|'));
+  const two = T.fitTag('프로젝트 전환(RFC 003)', 72, 1, measure, 12.5);
+  assert.equal(two.lines.join(''), '프로젝트 전환…', `${two.lines.join('|')} ${two.scale}`); assert.ok(two.scale < 1 && two.scale * 12.5 >= T.WORD_MIN_PX - 1e-9);
   // Nothing whole fits: 「⋯」 alone (the name in the card's hover and keyboard name).
   assert.deepEqual(T.fitTag('GrainStore', 20, 1, measure, 12.5), { lines: ['⋯'], full: false, none: true });
   // Whatever the room: what stands before 「…」 ends where a word of the name ends, and nothing starts with 「…」.
@@ -86,6 +91,10 @@ test('V14A-3 the first view never lands under FIRST_FIT_MIN: a map too large ope
   assert.match(fit, /  if \(!at\.whole\) focusOverDock\(\);\n  if \(!explicit\) sidesClear\(\);[^\n]*\n  if \(pairRoute\(explicit, animate\)\) return;/);
   assert.match(sc, /if \(!vpw \|\| !cutAt\(camera\.x, k0\)\) return;/, 'a frame with no cut is left as it is');
   assert.match(sc, /for \(let k = k0; k >= Math\.min\(k0, FIRST_FIT_MIN\) - 1e-9; k -= 0\.005\)/);
+  // The top line's give never takes a frame under FIRST_FIT_MIN (dagu-sized maps at 1280×720 went to 34%).
+  assert.match(fit, /const least = Math\.max\(at\.k - FT_GIVE, at\.k >= TITLE_FLOOR_K \? TITLE_FLOOR_K : 0, Math\.min\(at\.k, FIRST_FIT_MIN\)\) - 1e-9;/);
+  // Spec 1: when the title and the flow cannot stand together over the tools, the flow is the view (it stood under the tools at 1280×720).
+  assert.match(fn(a, 'focusOverDock'), /if \(kFit < k0 \* FOCUS_SHRINK\) \{ camera = \{ \.\.\.camera, y: Math\.max\(topY - f\.y \* k0, Math\.min\(camera\.y, dock - \(f\.y \+ f\.h\) \* k0\)\) \}; return; \}/);
 });
 
 /* ---------- spec 1: the clear state ---------- */
@@ -137,6 +146,7 @@ test('V14A-6 the quiet rest: cards whole at 4.5:1 or more, lines thin at a third
   assert.match(v14, /#space\.cl-on #world \.edge-labels > :is\(\.edge-label:not\(\.fit-cond\), \.edge-count\):not\(\.ff-keep\):not\(\.near\):not\(:hover\):not\(:focus-visible\) \{ visibility: hidden; \}/, 'a condition\'s words stay');
   assert.doesNotMatch(v14, /cl-on[^{]*\{[^}]*display: none/, 'nothing of the rest folded or hidden');
   assert.match(v14, /#space\.cl-on #world \.edge-labels > :not\(\.ff-keep\):not\(\.edge-cue\):not\(\.edge-label\):not\(\.near\):not\(:hover\) \{ opacity: 1; \}/, 'a badge on a quiet line keeps its words at 4.5:1 (v12 gave it .6)');
+  assert.match(v14, /#space\.cl-on #world \.edge-labels > \.edge-cue\.cue-bg\.q-stack \{ opacity: 1; \}/, 'a condition count (「조건 2」 at 자세히) never at half opacity (2.6:1)');
   assert.match(v14, /#space:not\(\.ff-rest\) \.focus-top \.ft-clear \{ display: none; \}/, 'a pick lights its own neighbourhood instead');
 });
 

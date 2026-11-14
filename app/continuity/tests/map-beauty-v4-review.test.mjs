@@ -26,7 +26,9 @@ test('V4R-1 relations of one pair whose condition, optional mark or timing diffe
 test('V4R-2 port marks: full ink under 구성, half ink only behind a lens foreground, never fainter', () => {
   assert.match(app, /const bgLines = fgEnds\.size \? new Set/);
   const rules = [...css.matchAll(/\.edge-cue\.cue-bg[^{]*\{\s*opacity:\s*([\d.]+)/g)].map(m => Number(m[1]));
-  assert.deepEqual(rules, [0.5], 'one rule steps a background mark back, to half ink');
+  // v14 A (spec 1): the clear state brings a condition count's words back to full ink (V14A-6); still one rule steps a mark back, never fainter.
+  assert.deepEqual(rules.filter(x => x < 1), [0.5], 'one rule steps a background mark back, to half ink');
+  assert.ok(rules.every(x => x >= 0.5));
   assert.ok(!/\.edge-cue\.cue-bg:not\(\.near\):not\(:hover\) \{ opacity/.test(css), 'no older rule left under it');
 });
 

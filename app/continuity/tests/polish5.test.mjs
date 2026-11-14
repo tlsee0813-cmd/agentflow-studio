@@ -97,7 +97,8 @@ test('P5-5/6 the sentence shows before it steps back; the fit is the same whatev
   assert.match(a, /placedInv = syncZoom\(at\.k, true\); placeEdgeLabels\(\);/, 'labels placed at the frame\'s own zoom, the tier and face fresh');
   assert.match(a, /function syncZoom\(k: number, fresh = false\): number \{/);
   assert.match(a, /tier = zoomTier\(k, fresh \? null : tier\);/); assert.match(a, /face = cardFace\(k, fresh \? null : face\);/);
-  assert.match(a, /const least = Math\.max\(at\.k - FT_GIVE, at\.k >= TITLE_FLOOR_K \? TITLE_FLOOR_K : 0\) - 1e-9;/, 'the give stops at the title\'s floor');
+  // v14 A (spec 2): and at FIRST_FIT_MIN, where a tag stops holding two lines of a name (V14A-3).
+  assert.match(a, /const least = Math\.max\(at\.k - FT_GIVE, at\.k >= TITLE_FLOOR_K \? TITLE_FLOOR_K : 0, Math\.min\(at\.k, FIRST_FIT_MIN\)\) - 1e-9;/, 'the give stops at the title\'s floor');
   assert.match(a, /el\.classList\.remove\(\.\.\.FT_FORMS\); el\.style\.left = ''; el\.style\.maxWidth = ''; ftFull = el\.offsetHeight; ftPlace\(el, camera, ink\);/, 'the whole height measured at the left, never as placed before');
   // Merge v7: the growth view's room at the same scale made fitView longer; the whole function is read.
   const fit = a.slice(a.indexOf('function fitView('), a.indexOf('\n}\n', a.indexOf('function fitView(')));

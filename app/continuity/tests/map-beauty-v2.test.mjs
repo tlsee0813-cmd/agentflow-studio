@@ -35,7 +35,7 @@ test('BV2-2 a tag fits its name in its lines, cut at the end with 「…」, bro
   assert.ok(two.full && two.lines[0].startsWith('메인테이너') && !two.lines[0].endsWith('(Y'), two.lines.join('|'));
   const cut = fitTag('보관소를 읽어 조건을 확인하고 주문을 요청하는 감시 루프', 70, 2, measure);
   assert.equal(cut.lines.length, 2); assert.equal(cut.full, false); assert.ok(cut.lines[1].endsWith('…'));
-  for (const l of cut.lines) assert.ok(measure(l) <= 70, l);
+  for (const l of cut.lines) assert.ok(measure(l) * (cut.scale ?? 1) <= 70, l); // v14 A: at the type it is drawn at
   // Beauty v2 review (M4): an identifier breaks where its words meet, never inside one: 'ReadWrite|Proxy·압축 |워커' (three lines where the
   // old character break made two with 'ReadWriteProx|y').
   assert.equal(linesNeeded('ReadWriteProxy·압축 워커', 90, measure), 3);
