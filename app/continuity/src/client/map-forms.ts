@@ -142,6 +142,8 @@ export interface FormPlace {
   row: string[];
   /** The cards with no recorded relation at all (흐름 keeps them in a block of their own). */
   lone: string[];
+  /** 흐름: people and outside systems whose relations never reach the row or what stands by it (kept apart under the row). */
+  apart?: string[];
 }
 
 const BUILD_TYPE = new Set(['automation']);
@@ -187,7 +189,7 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
     while (grow) { grow = false; for (const id of near) if (!reach.has(id) && [...adj.all.get(id)!.keys()].some(n => build.has(n) || reach.has(n))) { reach.add(id); grow = true; } }
     for (const id of reach) build.add(id);
   }
-  const ends = rest.filter(id => linked(id) && !build.has(id) && isEnd(id));
+  const endsAll = rest.filter(id => linked(id) && !build.has(id) && isEnd(id));
   const side = rest.filter(id => linked(id) && !build.has(id) && !isEnd(id));
   // Each side card stands by the step it has the most recorded relations with; a card with none to the row by the step most of its
   // placed neighbours stand by (repeated until nothing changes).
@@ -202,7 +204,11 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
   for (let round = 0; round < 6; round++) { let changed = false; for (const id of side) if (!stepAt.has(id)) { const s = vote(id); if (s !== null) { stepAt.set(id, s); changed = true; } } if (!changed) break; }
   // A side card whose relations reach only people or outside systems stands by the step those meet (else the row's first).
   const endStep = new Map<string, number>();
-  for (const id of ends) { const s = vote(id); if (s !== null) endStep.set(id, s); }
+  for (const id of endsAll) { const s = vote(id); if (s !== null) endStep.set(id, s); }
+  // v13 fix 2 (review: a maintainer whose one recorded relation is with a contributor stood at the row's start, level with its steps, and
+  // the row read 「… → 메인테이너 → train.py → …」): people and outside systems that meet neither the row nor what stands by it are not at
+  // its ends; they stand apart under the row, together (their own relations between them).
+  const ends = endsAll.filter(id => endStep.has(id)), apart = endsAll.filter(id => !endStep.has(id));
   for (const id of side) if (!stepAt.has(id)) { const ns = [...(adj.all.get(id)?.keys() ?? [])].map(n => endStep.get(n)).filter((x): x is number => x !== undefined); stepAt.set(id, ns.length ? Math.round(ns.reduce((a, b) => a + b, 0) / ns.length) : 0); }
   // One grid of cells (column, row; row 0 is the flow's row, negative rows above it, positive under it), so every line has corridors of its
   // own between the columns and the rows (planChannels): the steps in columns 0…n-1 on row 0, a step's alternatives in its column on the
@@ -241,20 +247,28 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
   const usedC = [...cell.values()].map(x => x.c), minC = Math.min(0, ...usedC), maxC = Math.max(steps.length - 1, ...usedC);
   const mid = (steps.length - 1) / 2, left: string[] = [], right: string[] = [];
   for (const id of ends) { const s = endStep.get(id); (s === undefined || s <= mid ? left : right).push(id); }
+  // Level with the row only a card with a recorded relation to the step at that end, in the column next to it (one card): anything else
+  // there would read as one more step. The rest take the rows over and under it.
   const endCols = (ids: string[], toLeft: boolean) => {
-    const sorted = [...ids].sort((a, b) => (endStep.get(a) ?? 0) - (endStep.get(b) ?? 0) || cards.findIndex(c => c.id === a) - cards.findIndex(c => c.id === b));
+    const edge = new Set(steps[toLeft ? 0 : steps.length - 1] ?? []), meetsEdge = (id: string) => [...(adj.all.get(id)?.keys() ?? [])].some(n => edge.has(n));
+    const sorted = [...ids].sort((a, b) => Number(meetsEdge(b)) - Number(meetsEdge(a)) || (endStep.get(a) ?? 0) - (endStep.get(b) ?? 0) || cards.findIndex(c => c.id === a) - cards.findIndex(c => c.id === b));
     const per = Math.min(5, Math.max(3, Math.ceil(sorted.length / Math.max(1, Math.ceil(sorted.length / 5)))));
-    sorted.forEach((id, i) => put(id, toLeft ? minC - 1 - Math.floor(i / per) : maxC + 1 + Math.floor(i / per), ring(i % per)));
+    const off = [-1, 1, -2, 2, -3];
+    let col = 0, slot = 0, slots = sorted.length && meetsEdge(sorted[0]!) ? [0, ...off] : off;
+    for (const id of sorted) {
+      if (slot >= per) { col++; slot = 0; slots = off; }
+      put(id, toLeft ? minC - 1 - col : maxC + 1 + col, slots[slot++]!);
+    }
   };
   endCols(left, true); endCols(right, false);
   // The build lane under everything, in the order its own recorded relations run (sources first), wrapped to the map's columns; then the
   // cards with no recorded relation (the map's 「이은 선 없음」 caption reads over them); then the shelf.
   const cs = [...cell.values()], c0 = Math.min(...cs.map(x => x.c)), c1 = Math.max(...cs.map(x => x.c)), per = Math.max(3, c1 - c0 + 1);
   let nextRow = Math.max(0, ...cs.map(x => x.r)) + 1;
-  const laneRows = new Map<number, 'build' | 'lone' | 'shelf'>();
-  const putRows = (ids: string[], kind: 'build' | 'lone' | 'shelf') => { if (!ids.length) return; ids.forEach((id, i) => { const r = nextRow + Math.floor(i / per); laneRows.set(r, kind); put(id, c0 + (i % per), r); }); nextRow += Math.ceil(ids.length / per); };
+  const laneRows = new Map<number, 'build' | 'apart' | 'lone' | 'shelf'>();
+  const putRows = (ids: string[], kind: 'build' | 'apart' | 'lone' | 'shelf') => { if (!ids.length) return; ids.forEach((id, i) => { const r = nextRow + Math.floor(i / per); laneRows.set(r, kind); put(id, c0 + (i % per), r); }); nextRow += Math.ceil(ids.length / per); };
   const buildIds = topoOrder([...build], adj, cards.map(c => c.id));
-  putRows(buildIds, 'build'); putRows(lone, 'lone'); putRows(shelf, 'shelf');
+  putRows(buildIds, 'build'); putRows(topoOrder(apart, adj, cards.map(c => c.id)), 'apart'); putRows(lone, 'lone'); putRows(shelf, 'shelf');
   // Heights: each row's cards with their contact points on one line; the gap under the flow's row keeps room for the way back, a lane
   // stands apart from what is over it.
   const rowsUsed = [...new Set([...cell.values()].map(x => x.r))].sort((a, b) => a - b), rowY = new Map<number, number>(), rowLv = new Map<number, { a: number; h: number }>();
@@ -272,7 +286,7 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
     lanes.push({ kind: 'build', text: BUILD_LANE_WORD, rect: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, count: buildIds.length, ids: buildIds });
   }
   void aspect;
-  return { at, lanes, back, row: steps.flat(), lone };
+  return { at, lanes, back, row: steps.flat(), lone, apart };
 }
 /** Cards in the order their recorded directed relations run among themselves (sources first; a cycle broken at the earliest card in the
  * given order), ties in the given order. */

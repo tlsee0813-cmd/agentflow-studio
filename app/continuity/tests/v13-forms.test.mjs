@@ -146,7 +146,7 @@ test('V13F-7 V cycles the offered forms only; a kept choice holds while the reco
 
 test('V13F-8 the page: the form places the whole map\'s top cards through the same layout and router, beside the map\'s name in the header', async () => {
   const a = await app(), h = await html();
-  assert.match(a, /lay = layoutScope\([^\n]*\); formRelayout\(o, held, tpls\) \/\* v13 forms hook 1 \*\//);
+  assert.match(a, /lay = baseLayout\(o, held, tpls\); formRelayout\(o, held, tpls\) \/\* v13 forms hook 1 \*\//);
   assert.match(fn(a, 'formRelayout'), /const formApplies|formApplies\(o\)/);
   assert.match(a, /const formApplies = \(o: Opened\) => scope === null && !o\.past && o\.view\.parts\.length > 0;/, 'the whole map of the current version only');
   assert.match(fn(a, 'withHints'), /list = formFaces\(list\);/);
@@ -154,7 +154,7 @@ test('V13F-8 the page: the form places the whole map\'s top cards through the sa
   assert.match(fn(a, 'openRoom'), /lay\.channels\.size \|\| formPlace/);
   assert.match(h, /<div id="map-forms-host" class="map-forms-host" hidden><\/div>/);
   const sw = fn(a, 'formSwitchEl');
-  assert.match(sw, /disabled: !ok, title: tip/, 'a form not offered stays in sight, disabled, saying why');
+  assert.match(sw, /'aria-disabled': String\(!ok\), title: tip, onclick: \(\) => \(ok \? setMapForm\(f\) : toast\(tip\)\)/,'a form not offered stays in sight, disabled, saying why when pressed');
   assert.match(sw, /'aria-pressed': String\(on\)/);
   assert.match(a, /agentflow\.mapForm\.\$\{o\.key\}/);
   assert.match(fn(a, 'keptMapForm'), /try \{ const v = localStorage\.getItem/);

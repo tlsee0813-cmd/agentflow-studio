@@ -543,8 +543,20 @@ export function faceOverflow(boxes: Map<string, Box>, edges: readonly Edge[], pa
     // it go to the face toward their partners as on any other full side.
     // Only where the routing parts pairs (pairGap) and the side holds an end of one: elsewhere the plan round the pins stays as it was.
     const paired = pairGap > PORT_PITCH && list.some(x => ways.has(`${x.other.id}\u0000${x.me.id}`) && ways.has(`${x.me.id}\u0000${x.other.id}`));
-    const n = Math.max(list.length + (paired ? tied.get(sk) ?? 0 : 0) - sideBudget(me), cands.filter(x => x.laid).length); if (n <= 0) continue;
-    for (const x of cands.slice(0, n)) out.set(x.key, { ...out.get(x.key), [x.end]: face(x)! });
+    const n = Math.max(list.length + (paired ? tied.get(sk) ?? 0 : 0) - sideBudget(me), cands.filter(x => x.laid).length);
+    const pick = cands.slice(0, Math.max(0, n));
+    // v13 fix 2 (review of v13: a hub's side held ten ends, four pairs running opposite ways among them, and its pairs stood 6–10 screen px
+    // apart): where the side parts pairs, its budget counts each pair's gap; the ends toward a partner past its top or bottom go there (a
+    // pair's ends first, together) until what stays fits the side at its pitch with every pair pairGap apart.
+    if (paired) {
+      const pairOf = (x: End, ys: readonly End[]) => ys.some(y => y !== x && y.other.id === x.other.id && y.end !== x.end);
+      const span = (ys: readonly End[]) => Math.max(0, ys.length - 1) * PORT_PITCH + (ys.filter(y => pairOf(y, ys)).length / 2) * Math.max(0, pairGap - PORT_PITCH);
+      const room = me.h - 2 * PAIR_INSET - (tied.get(sk) ?? 0) * PORT_PITCH;
+      const rest = cands.filter(x => !pick.includes(x)).sort((p, q) => Number(pairOf(q, list)) - Number(pairOf(p, list)));
+      while (rest.length && span(list.filter(x => !pick.includes(x))) > room) pick.push(rest.shift()!);
+    }
+    if (!pick.length) continue;
+    for (const x of pick) out.set(x.key, { ...out.get(x.key), [x.end]: face(x)! });
   }
   return out;
 }

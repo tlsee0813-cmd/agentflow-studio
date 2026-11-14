@@ -445,6 +445,8 @@ export function createOpening(host: OpeningHost) {
       const s = host.storage(); if (s && seenNow(readSeen(s.get), key, version)) return false;
       return play(key, version, since);
     },
+    /** Whether arrive would play now (not reduced, this version not seen here). */
+    willPlay(key: string, version: string): boolean { if (host.reduced()) return false; const s = host.storage(); return !(s && seenNow(readSeen(s.get), key, version)); },
     /** 다시 보기. */
     replay(key: string, version: string): boolean { if (host.reduced()) return false; return play(key, version); },
     /** Any redraw or move away ends it at once. */

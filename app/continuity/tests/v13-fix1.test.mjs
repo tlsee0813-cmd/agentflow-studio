@@ -114,7 +114,7 @@ test('V13X-9 in a 보기 a side\'s ends stand a head apart on screen while the s
   assert.ok(crowd.every((y, i) => !i || y - crowd[i - 1] <= 12 + 1e-9), 'a crowded side spreads as before');
   const a = await app();
   assert.match(a, /const formPitch = \(\): number \| undefined => \(formPlace \? pairGapNow \* \(FORM_PORT_PX \/ PAIR_PX\) : undefined\);/);
-  assert.match(a, /routeEdges\(lay\.boxes, lay\.edges, \{ quick: dragQuick, pairGap: pairGapNow, pitch: formPitch\(\) \}\)/);
+  assert.match(a, /routeKept\(lay\.boxes, lay\.edges, \{ quick: dragQuick, pairGap: pairGapNow, pitch: formPitch\(\) \}\)/);
 });
 
 test('V13X-10 a condition\'s mark the map\'s edge would cut slides along its own line into view before it steps back', async () => {
@@ -141,7 +141,7 @@ test('V13X-12 the switch flies at once in a layer of its own; the new form is dr
   assert.match(l, /f\.layer\.remove\(\);/); assert.match(l, /world\.classList\.add\('animate', 'form-cam'\); writeCamera\(camera\);/);
   assert.match(await css(), /\.world\.form-flight\.flying > \[data-box\] \{ transition: transform \.52s/);
   assert.match(fn(a, 'pairRoute'), /formFitK\.set\(formFitKey\(opened, formNow\), \{ x: camera\.x, y: camera\.y, k: camera\.k \}\)/, 'a switch back flies to its frame and routes its lines once');
-  assert.match(fly, /const cam1 = formFitK\.get\(formFitKey\(o, next\)\) \?\? \{/);
+  assert.match(fly, /const fitted = formFitK\.get\(formFitKey\(o, next\)\);\n\s+const cam1 = fitted \?\? \{/);
 });
 
 test('V13X-13 쉽게 names the lens 「역할」 (「구성」 is the whole map\'s 보기); a tag line that only repeats the name is left off', async () => {

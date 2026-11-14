@@ -76,7 +76,7 @@ test('V12-4 the page routes for the fit: PAIR_PX on screen at the zoom the map f
   assert.match(a, /const PAIR_PX = 13\.5;/, 'v13 fix 1: a little over the 12');
   assert.match(pr, /const want = Math\.max\(PAIR_PX \/ Math\.max\(camera\.k, 0\.05\), 12\);/);
   assert.match(fit, /if \(pairRoute\(explicit, animate\)\) return;/);
-  assert.match(pw, /routeEdges\(lay\.boxes, lay\.edges, \{ quick: dragQuick, pairGap: pairGapNow, pitch: formPitch\(\) \}\)/, 'v13 fix 1: a 보기 asks its own pitch');
+  assert.match(pw, /routeKept\(lay\.boxes, lay\.edges, \{ quick: dragQuick, pairGap: pairGapNow, pitch: formPitch\(\) \}\)/, 'v13 fix 1: a 보기 asks its own pitch (v13 fix 2: kept by its input)');
 });
 
 test('V12-5 a line\'s label is its words whole or its relation-detail cue: never cut, never one side of an OR', async () => {

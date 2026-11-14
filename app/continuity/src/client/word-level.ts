@@ -38,8 +38,16 @@ export function codeToken(t: string): boolean {
   return /[(){}[\]`'"$@#\\/=<>!&|;*]/.test(t) || /_/.test(t) || /\.[A-Za-z0-9]/.test(t) || /^[a-z]+[A-Z]/.test(t) || /[A-Za-z]\d|\d[A-Za-z]/.test(t)
     || /^-{1,2}[A-Za-z]/.test(t) || /^[A-Z]{5,}$/.test(t) || /[A-Za-z]-[A-Za-z]/.test(t)
     // v13 merge (umami's 흐름 showed 「build·build:docker 때」 at 쉽게): a script or a key named with a colon inside it (「build:docker」).
-    || /[A-Za-z]:[A-Za-z0-9]|[0-9]:[A-Za-z]/.test(t);
+    || /[A-Za-z]:[A-Za-z0-9]|[0-9]:[A-Za-z]/.test(t)
+    // v13 fix 2 (review of v13: 「Bind·BindFunc 처리기 등록」, 「결과 dict의 report」, 「요청 인터셉터 fulfilled 입력」 and 「initialized 전에만 등록」
+    // read at 쉽게): a joined name whose later part is a code word (「BindFunc」, 「StateManager」; never a product's name: 「GitHub」,
+    // 「PostgreSQL」), a state flag written as a past form (「fulfilled」, 「initialized」), and a value's type in code (「dict」, 「kwargs」).
+    || CODE_HUMP.test(t) || /^[a-z]{4,}ed$/.test(t) || CODE_TYPE.test(t);
 }
+/** A later part of a joined name that makes it an identifier in code. */
+const CODE_HUMP = /^[A-Z][a-z0-9]*(?:[A-Z][a-z0-9]*)*(?:Func|Fn|Handler|Manager|Service|Factory|Provider|Controller|Context|Callback|Listener|Request|Response|Options|Config|Proxy|Impl|Builder|Store|State|Error|Event|Hook|Util|Utils|Helper|Loader|Parser|Runner|Worker)$/;
+/** A value's type or a short name written as in code. */
+const CODE_TYPE = /^(?:dict|list|tuple|str|int|bool|float|obj|args|kwargs|ctx|cfg|env|req|res|err|fn|cb|msg|json|yaml|ptr|enum|struct|bytes|nil|null|undefined|true|false)$/;
 /** Whether a text holds code (an operator, a code run) or a record row ID. */
 export function hasCode(text: string): boolean {
   if (OPERATOR.test(text) || ROW_ID.test(text)) return true;

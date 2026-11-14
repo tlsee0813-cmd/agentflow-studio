@@ -447,7 +447,12 @@ async function render() {
   afterRenderOpen(o);
   const ar = afterRender; afterRender = null; ar?.();
   // v13 hook (opening.ts): a map opened fresh on its own view (no part, no inside, no past version, no reading over it) comes into being.
-  if (fresh && !part && !scope && !o.past && !planView.isOpen() && !returnView.isOpen() && o.view.parts.length) opening.arrive(o.key, openingVersion(o), askedAt);
+  if (fresh && !part && !scope && !o.past && !planView.isOpen() && !returnView.isOpen() && o.view.parts.length) {
+    // v13 fix 2 (review of v13: shapez's opening landed 7.5px under its fit, a camera kept from an earlier visit; 「맞춤」 then moved the map):
+    // an opening lands on the map's own fit, so a map that comes into being is framed by the fit, not by a camera kept from before.
+    if (opening.willPlay(o.key, openingVersion(o))) fitView(false);
+    opening.arrive(o.key, openingVersion(o), askedAt);
+  }
 }
 /** v10: what waits for the next render to finish (leaving the comparison: the camera from before it, set after the selection's render). */
 let afterRender: (() => void) | null = null;
@@ -885,7 +890,20 @@ const relayout = (o: Opened) => {
   const fix = clearPastOnly([...lay.boxes.values()], pinned);
   if (Object.keys(fix).length) { for (const [c, m] of Object.entries(fix)) gp.extra[c] = { ...gp.extra[c], ...m }; relayoutOnce(o); }
 };
-const relayoutOnce = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = layoutScope(o.view, scope, isExpanded(o), held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o)); formRelayout(o, held, tpls) /* v13 forms hook 1 */; lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
+const relayoutOnce = (o: Opened) => { const tpls = new Map<string, CardTemplate>(), held = heldPositions(o); lay = baseLayout(o, held, tpls); formRelayout(o, held, tpls) /* v13 forms hook 1 */; lay.edges = grammarEdges(o, lay.edges); cardTpls = tpls; openRoom(o, held); core = { ...lay.bounds }; withTitle(); };
+/** v13 fix 2: the 구성 layout a 보기 is placed from, kept from the last layout (a switch changes only the form: the same arrangement comes out,
+ * so a switch lays out its new form alone). Anything the layout reads that differs (the view, the scope, the folds, the held places, the
+ * window's shape, the word level, a plan's rows) lays it out again. */
+let baseKept: { stamp: string; view: StudioView; lay: ScopeLayout; tpls: [string, CardTemplate][] } | null = null;
+function baseLayout(o: Opened, held: Positions, tpls: Map<string, CardTemplate>): ScopeLayout {
+  const ex = isExpanded(o), stamp = JSON.stringify([o.key, scope, [...tempExpand], [...previewExpand], [...expandState], [...budgetFolded(o)], held, mapAspect(), words, !!planRows, !!o.past]);
+  if (formSwitching && !planRows && baseKept && baseKept.view === o.view && baseKept.stamp === stamp) {
+    try { const L = structuredClone(baseKept.lay); for (const [k, v] of baseKept.tpls) tpls.set(k, v); return L; } catch { /* laid out below */ }
+  }
+  const L = layoutScope(o.view, scope, ex, held, measureName, planRows ?? undefined, mapAspect(), typedRoom(o, tpls), lineGrain(o));
+  try { baseKept = !planRows && formApplies(o) ? { stamp, view: o.view, lay: structuredClone(L), tpls: [...tpls] } : null; } catch { baseKept = null; }
+  return L;
+}
 /* ===== v13 forms (spec 3): the whole map's 보기 — 흐름 · 층 · 구성 (map-forms.ts places the cards; the layout, the router and every
  * floor rule of the map stay as they are). Only the whole map (no scope) and the current version (never the past view) take a form; the
  * person's choice is kept per map (localStorage, the record's choice while there is none); a card the person moves in a form stays where
@@ -893,6 +911,8 @@ const relayoutOnce = (o: Opened) => { const tpls = new Map<string, CardTemplate>
  * to its new place (FORM_FLY_MS, eased, from where it is even mid-flight), the camera eases to the new fit, the lines come back routed
  * on the new places. prefers-reduced-motion: no motion. Hook points in this file: 'v13 forms hook N'. ===== */
 let formNow: MapForm = 'compose', formPlace: FormPlace | null = null, formSwitching = false;
+/** v13 fix 2: the layout a switch laid out as its cards took off (its redraw draws it; any other layout in between drops it). */
+let formLaid: ScopeLayout | null = null;
 let formInfo: { key: string; view: StudioView; choice: FormChoice; chain: FormChain | null } | null = null;
 const formDrags = new Map<string, Record<string, Point>>();
 const formStoreKey = (o: Opened) => `agentflow.mapForm.${o.key}`;
@@ -980,7 +1000,9 @@ function formSwitchEl(o: Opened): HTMLElement | null {
     ...MAP_FORMS.map(f => {
       const ok = c.offered.includes(f), on = f === formNow;
       const tip = !ok ? c.not[f] ?? '' : f === c.auto ? why : `${MAP_FORM_WORD[f]}${josa(MAP_FORM_WORD[f], '으로/로')} 보기${f === 'compose' ? ' · 연결을 따라 층층이 놓은 지도' : f === 'flow' ? ` · 기록에 이어진 흐름 ${c.steps}단계를 한 줄로` : ` · 기록된 표현군 ${c.families.length}가지를 띠로`}`;
-      return h('button', { type: 'button', class: `vf-form${on ? ' on' : ''}${f === c.auto ? ' auto' : ''}`, 'data-form': f, 'aria-pressed': String(on), disabled: !ok, title: tip, onclick: () => setMapForm(f) }, MAP_FORM_WORD[f]);
+      // v13 fix 2 (first look at v13: a grey 흐름 with no word on why): a form the record does not offer stays in sight and says why when
+      // pressed (its tip says it too); it never switches.
+      return h('button', { type: 'button', class: `vf-form${on ? ' on' : ''}${f === c.auto ? ' auto' : ''}${ok ? '' : ' off'}`, 'data-form': f, 'aria-pressed': String(on), 'aria-disabled': String(!ok), title: tip, onclick: () => (ok ? setMapForm(f) : toast(tip)) }, MAP_FORM_WORD[f]);
     }));
 }
 let formTimers: number[] = [];
@@ -1007,13 +1029,19 @@ function setMapForm(next: MapForm) {
     const els = [...world.querySelectorAll<HTMLElement>(':scope > [data-box], :scope > .form-lane')];
     const from = new Map<HTMLElement, Point>();
     for (const el of els) { let tx = 0, ty = 0; try { const m = new DOMMatrixReadOnly(getComputedStyle(el).transform); tx = m.m41; ty = m.m42; } catch { /* none */ } from.set(el, { x: parseFloat(el.style.left) + tx, y: parseFloat(el.style.top) + ty }); }
+    // v13 fix 2: the form shown now, its bounds and the frame it fitted at (the new frame is estimated from them).
+    const B0 = { ...lay.bounds }, fit0 = formFitK.get(formFitKey(o, formNow));
     // The new places (the layout alone: quick), and a first frame round them.
     formSwitching = true; try { relayout(o); } finally { formSwitching = false; }
     const to = new Map<string, Point>(); for (const b of lay.boxes.values()) to.set(b.id, { x: b.x, y: b.y });
     const v = $('viewport'), vw = v.clientWidth, vh = v.clientHeight, B = lay.bounds, top = topInset();
-    const k1 = Math.max(0.05, Math.min(cam0.k * 1.6, (vw - 2 * SAFE_SIDE) / Math.max(1, B.w), (vh - top - BOTTOM) / Math.max(1, B.h)));
+    const room = (R: { w: number; h: number }) => Math.min((vw - 2 * SAFE_SIDE) / Math.max(1, R.w), (vh - top - BOTTOM) / Math.max(1, R.h));
+    // The old form's fit scaled by how much more or less room the new bounds take (the top line's and the title's share stay alike), else
+    // the window's room round the new bounds.
+    const k1 = Math.max(0.05, fit0 ? fit0.k * room(B) / room(B0) : Math.min(cam0.k * 1.6, room(B)));
     // The frame this 보기 fitted at before in this window when there is one (the flight lands where the map will stand), else round the cards.
-    const cam1 = formFitK.get(formFitKey(o, next)) ?? { x: (vw - B.w * k1) / 2 - B.x * k1, y: top + (vh - top - BOTTOM - B.h * k1) / 2 - B.y * k1, k: k1 };
+    const fitted = formFitK.get(formFitKey(o, next));
+    const cam1 = fitted ?? { x: (vw - B.w * k1) / 2 - B.x * k1, y: top + (vh - top - BOTTOM - B.h * k1) / 2 - B.y * k1, k: k1 };
     const layer = h('div', { class: 'world form-flight', 'aria-hidden': 'true' });
     layer.style.cssText = world.style.cssText; layer.style.transform = `translate(${cam0.x}px, ${cam0.y}px) scale(${cam0.k})`;
     for (const el of els) { const a = from.get(el)!; el.style.transform = ''; el.style.left = `${a.x}px`; el.style.top = `${a.y}px`; if (!el.dataset.box) el.style.opacity = '0'; layer.append(el); }
@@ -1023,17 +1051,40 @@ function setMapForm(next: MapForm) {
     for (const el of els) { const id = el.dataset.box, a = from.get(el)!, b = id ? to.get(id) : undefined; if (b) el.style.transform = `translate(${b.x - a.x}px, ${b.y - a.y}px)`; else el.style.opacity = '0'; }
     layer.style.transform = `translate(${cam1.x}px, ${cam1.y}px) scale(${cam1.k})`;
     formFlight = { layer, cam1 };
+    // v13 fix 2: the new form's lines (the map's, its summary's, the set shown at rest) routed in the worker while the cards fly, for the
+    // gap of the frame they fly to; the redraw then draws this layout (formLaid) and finds its routes kept.
+    formLaid = lay;
+    // Without a frame this 보기 fitted at before, the fit's zoom is not known yet (the top line's room can take a little): the lines are
+    // routed for a zoom a little under the estimate, their pairs a little wider apart than the fit asks (never narrower), so the fit keeps them.
+    const gap = Math.max(PAIR_PX / Math.max(fitted ? cam1.k : cam1.k * FORM_ROUTE_UNDER, 0.05), 12), ahead = { pairGap: gap, pitch: formPlace ? gap * (FORM_PORT_PX / PAIR_PX) : undefined };
+    const sumsAhead = lay.edges.length > 6 ? sumLines(o, summaryEdges(lay.boxes, lay.edges)) : [];
+    // The set shown at rest as drawFocus will make it: the summary beside the lines drawn one by one (their keys are the same in every form).
+    const keepAhead = !selected && shownKeep ? new Set(shownKeep) : null;
+    const sumsKeep = keepAhead?.size ? sumLines(o, restSummary(lay.boxes, lay.edges, e => keepAhead.has(e.key)), new Set(sumsAhead.filter(x => x.both).map(x => x.key))) : sumsAhead;
+    const shownAhead = shownPlan && !selected ? shownPlan.keys.map((k, i) => (shownPlan!.from[i] === 'rest' ? sumsAhead : shownPlan!.from[i] === 'sums' ? sumsKeep : lay.edges).find(e => e.key === k)) : [];
+    const routed = routeAhead([{ boxes: lay.boxes, edges: lay.edges, opts: ahead, c: 1 }, { boxes: lay.boxes, edges: sumsAhead, opts: ahead, c: 1 },
+      ...(shownPlan && shownAhead.length && shownAhead.every(e => !!e) ? [{ boxes: lay.boxes, edges: shownAhead as Edge[], opts: ahead, c: shownPlan.c }] : [])]);
+    let landed = false, ready = false;
     // The new form drawn under the landed cards (its lines routed for the frame the flight flew to, so the fit seldom routes them twice),
     // then the map takes the layer's place. Nothing heavy runs while the cards fly.
-    formTimers.push(window.setTimeout(() => {
-      if (opened !== o || formFlight?.layer !== layer) return;
-      pairGapNow = Math.max(PAIR_PX / Math.max(cam1.k, 0.05), 12);
+    const land = () => {
+      if (!landed || !ready || opened !== o || formFlight?.layer !== layer) return;
+      pairGapNow = gap;
       formSwitching = true; try { renderSpace('keep'); } finally { formSwitching = false; }
       world.style.visibility = 'hidden';
-      fitView(false);
-      if (selected) select(selected);
-      landFormFlight();
-    }, FORM_FLY_MS + 20));
+      // The fit in a task of its own (the redraw and the fit were one long frame).
+      formTimers.push(window.setTimeout(() => {
+        if (opened !== o || formFlight?.layer !== layer) return;
+        if (!ftShown()) placeEdgeLabels();
+        formLanding = true; try { fitView(false); } finally { formLanding = false; }
+        if (selected) select(selected);
+        landFormFlight();
+      }, 0));
+    };
+    void routed.then(() => { ready = true; land(); });
+    // The worker's lines are waited for a little past the landing at most (then the page routes what is missing itself).
+    formTimers.push(window.setTimeout(() => { landed = true; land(); }, FORM_FLY_MS + 20));
+    formTimers.push(window.setTimeout(() => { ready = true; land(); }, FORM_FLY_MS + 420));
   };
   formTimers.push(window.setTimeout(fly, FORM_LINES_OUT_MS));
 }
@@ -1061,6 +1112,9 @@ function landFormFlight() {
   formTimers.push(window.setTimeout(() => { world.classList.remove('animate', 'form-cam'); }, FORM_SETTLE_MS));
   formTimers.push(window.setTimeout(() => sp.classList.remove('form-lines-in'), FORM_LINES_IN_MS + 40));
 }
+/** v13 fix 2: a switch with no fit of its 보기 known routes for this share of the estimated zoom; formLanding: the switch's fit is running. */
+const FORM_ROUTE_UNDER = 0.94;
+let formLanding = false;
 /** The camera's ease from the flight's frame into the map's own (ms; styles: #world.animate.form-cam). */
 const FORM_SETTLE_MS = 320;
 /** V on the map: the next form offered. */
@@ -2555,7 +2609,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // the map opened before left its zoom on the page, and the new view was laid out and measured at that zoom. A new view is laid out at
   // one fixed zoom, whatever came before it (the camera is set right after: restored or fitted).
   if (cameraMode !== 'keep') { camera = { x: 0, y: 0, k: 1 }; $('world').style.transform = 'translate(0px, 0px) scale(1)'; syncZoom(1, true); }
-  relayout(o);
+  // v13 fix 2: a 보기 switch laid the new form out as its cards took off (fly); its redraw draws that layout, not a second one.
+  if (!(formSwitching && formLaid === lay && formLaid.boxes.size)) relayout(o);
+  formLaid = null;
   const world = $('world'), view = o.view;
   // Same view, new structure (a fold, a new part, 자동 배치): where every box and line was, so each slides to its new place.
   const was = cameraMode === 'keep' && !formSwitching /* v13 forms hook 4: the switch flies its own way */ && !world.hidden && performance.now() - lastFresh > 600 ? beforeRedraw(world) : null;
@@ -2724,7 +2780,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   world.insertBefore(top, world.querySelector('.node, .ghost'));
   world.querySelectorAll('.edge.inner').forEach(g => top.append(g));
   if (was) morphFrom = was.lines;
-  positionWorld();
+  rendering = true; try { positionWorld(); } finally { rendering = false; }
   morphFrom = null;
   if (was) afterRedraw(world, was);
   drawScenario();
@@ -2744,7 +2800,7 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   // A camera saved in a window of another size (a quarter or more each way) is not restored: the map is fitted here instead.
   const kept = cameraMode === 'restore' ? cameras.get(camKey(o, scope)) : undefined, saved = kept && sameWindow(kept.win) ? kept : undefined;
   if (cameraMode === 'keep') applyCamera();
-  else if (saved) { camera = { ...saved }; applyCamera(); }
+  else if (saved) { camera = { ...saved }; routeForZoom(); applyCamera(); }
   else fitView(false);
   // The legend opens unless it would cover a card here (then it starts as its chip, and the fit keeps cards clear of the chip).
   if (cameraMode !== 'keep' && syncLegendFold() && !saved) fitView(false);
@@ -2948,7 +3004,7 @@ function positionWorld() {
   // The lines of each drawn set routed together (ports and nudging among themselves); while a part is dragged, their plain
   // shapes, so they follow the hand continuously; after the drop, the full routes, each morphing from the shape it had.
   // v12: the two lines of a pair running opposite ways stand PAIR_PX apart on screen at the fit (pairGapNow, fitView).
-  const routed = new Map([...routeEdges(lay.boxes, lay.edges, { quick: dragQuick, pairGap: pairGapNow, pitch: formPitch() }), ...routeEdges(lay.boxes, sums, { quick: dragQuick, pairGap: pairGapNow, pitch: formPitch() })]);
+  const routed = new Map([...routeKept(lay.boxes, lay.edges, { quick: dragQuick, pairGap: pairGapNow, pitch: formPitch() }), ...routeKept(lay.boxes, sums, { quick: dragQuick, pairGap: pairGapNow, pitch: formPitch() })]);
   routedGap = pairGapNow;
   lastRouted = restRouted = routed; shownKey = '';
   placeBands(routed);
@@ -2966,10 +3022,59 @@ function positionWorld() {
     let len = 99; try { len = g.querySelector<SVGPathElement>('.edge-line')?.getTotalLength() ?? 99; } catch { /* not rendered */ }
     g.classList.toggle('stub', len < 14);
   });
+  // v13 fix 2: a 보기 switch's redraw routes the lines shown and places the labels once, in drawFocus right after (they were done twice).
+  if (formSwitching && rendering) return;
   routeShown();
   placeScenarioHeads();
   placeEdgeLabels();
 }
+/* ===== v13 fix 2 (review of v13: a 보기 switch stood still 0.4–0.7 s after the cards landed, the lines gone, while the new form was routed
+ * on the page's thread): a set of lines routed once is kept by its exact input (the boxes, the set, the gap and pitch, the focus scale),
+ * and a switch has the new form's sets routed in a worker (route-worker.ts) while its cards fly, so the redraw that follows finds them
+ * kept. The same router runs on the same input: the lines are the ones the page would have routed. ===== */
+const ROUTE_KEEP_MAX = 24;
+const routeMemo = new Map<string, Map<string, Routed>>();
+const routeSig = (boxes: ReadonlyMap<string, Box>, edges: readonly Edge[], opts: { pairGap?: number; pitch?: number | undefined }, c: number): string =>
+  JSON.stringify([c, opts.pairGap ?? 0, opts.pitch ?? 0, [...boxes.values()], edges]);
+function keepRoutes(sig: string, r: Map<string, Routed>) {
+  routeMemo.delete(sig); routeMemo.set(sig, r);
+  while (routeMemo.size > ROUTE_KEEP_MAX) routeMemo.delete(routeMemo.keys().next().value!);
+}
+/** routeEdges (c 1) or focusRoutes (c under 1), from what was kept when the same input was routed before. */
+function routeKept(boxes: Map<string, Box>, edges: Edge[], opts: { quick?: boolean; pairGap?: number; pitch?: number | undefined }, c = 1): Map<string, Routed> {
+  const run = () => (c < 1 ? focusRoutes(boxes, edges, c, opts) : routeEdges(boxes, edges, opts));
+  if (opts.quick || !edges.length) return run();
+  const sig = routeSig(boxes, edges, opts, c), had = routeMemo.get(sig);
+  if (had) { keepRoutes(sig, had); return had; }
+  const r = run(); keepRoutes(sig, r); return r;
+}
+let routeWorker: Worker | null | undefined, routeJobId = 0;
+const routeWaits = new Map<number, () => void>();
+/** Has the sets routed in the worker (each kept when it comes back); resolves when they are (or at once when no worker runs). */
+function routeAhead(jobs: { boxes: Map<string, Box>; edges: Edge[]; opts: { pairGap?: number; pitch?: number | undefined }; c: number }[]): Promise<void> {
+  const todo = jobs.filter(j => j.edges.length).map(j => ({ sig: routeSig(j.boxes, j.edges, j.opts, j.c), boxes: [...j.boxes], edges: j.edges, opts: j.opts, c: j.c })).filter(j => !routeMemo.has(j.sig));
+  if (!todo.length) return Promise.resolve();
+  if (routeWorker === undefined) {
+    try {
+      routeWorker = new Worker(new URL('./route-worker.js', import.meta.url), { type: 'module' });
+      routeWorker.onmessage = (e: MessageEvent<{ id: number; out: { sig: string; routes: [string, Routed][] }[] }>) => {
+        for (const x of e.data.out) keepRoutes(x.sig, new Map(x.routes));
+        routeWaits.get(e.data.id)?.(); routeWaits.delete(e.data.id);
+      };
+      routeWorker.onerror = () => { routeWorker = null; routeWaits.forEach(f => f()); routeWaits.clear(); };
+    } catch { routeWorker = null; }
+  }
+  if (!routeWorker) return Promise.resolve();
+  const id = ++routeJobId;
+  return new Promise(res => { routeWaits.set(id, res); try { routeWorker!.postMessage({ id, jobs: todo }); } catch { routeWaits.delete(id); res(); } });
+}
+/** The set the shown lines were last routed as (routeShown): its keys and focus scale, so a switch can have the same set routed ahead. */
+let shownPlan: { keys: string[]; from: ('rest' | 'sums' | 'edges')[]; c: number } | null = null;
+/** The lines drawFocus last drew one by one at rest (their summary holds the rest): a switch builds the same summary ahead. */
+let shownKeep: string[] | null = null;
+/** renderSpace is drawing (positionWorld leaves the shown lines and the labels to drawFocus during a switch's redraw). */
+let rendering = false;
+/* ===== end v13 fix 2 ===== */
 /** Beauty v2 review (H3): the lines drawn beside a selection on a busy map (its own lines one by one, the summary of the rest, a
  * store's path, a change's context, a scenario's path) were routed in two sets that never made room for each other, so a selected
  * part's line could run a pixel from a summary line. They are routed together whenever that drawn set changes (ports and nudging
@@ -3011,8 +3116,8 @@ function routeShown() {
   const c = folding && !selected && !scView && set.length <= FOCUS_ROUTE_MAX ? FOCUS_ROUTE_SCALE : 1;
   const key = `${c}|${set.map(e => `${alias.get(e.key) ?? e.key}:${e.ids.length}`).join('|')}`;
   if (key === shownKey) return;
-  shownKey = key;
-  const own = set.length ? new Map([...(c < 1 ? focusRoutes(lay.boxes, set, c, { pairGap: pairGapNow, pitch: formPitch() }) : routeEdges(lay.boxes, set, { pairGap: pairGapNow, pitch: formPitch() }))].map(([k, r]) => { const d = alias.get(k) ?? k; return [d, d === k ? r : { ...r, key: d }] as [string, Routed]; })) : null;
+  shownKey = key; shownPlan = set.length ? { keys: set.map(e => e.key), from: set.map(e => (!e.key.startsWith('sum:') ? 'edges' : sums !== restSums && restSums.includes(e) && !sums.includes(e) ? 'rest' : 'sums')), c } : null;
+  const own = set.length ? new Map([...routeKept(lay.boxes, set, { pairGap: pairGapNow, pitch: formPitch() }, c)].map(([k, r]) => { const d = alias.get(k) ?? k; return [d, d === k ? r : { ...r, key: d }] as [string, Routed]; })) : null;
   lastRouted = own ? new Map([...restRouted, ...own]) : restRouted;
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const r = lastRouted.get(g.dataset.key!), line = g.querySelector('.edge-line'); if (!r || !line || line.getAttribute('d') === r.d) return;
@@ -4143,11 +4248,32 @@ function fitView(explicit: boolean, animate = false) {
   }
   if (!done && at.whole) { frameView(explicit, base); done = give(['ft-under']); }
   if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
+  if (!at.whole) focusOverDock();
   if (pairRoute(explicit, animate)) return;
   // v12 (review of v11: at 1280 chips placed for the frame's first zoom overlapped once the frame gave a little more room): the labels and
   // chips placed again at the zoom the frame settled on.
   if (Math.abs(camera.k - at.k) > 0.002) { placedInv = syncZoom(camera.k, true); placeEdgeLabels(); }
   applyCamera(animate);
+}
+/** v13 fix 2 (review of v13: the growth map at 1280 opened in 층 on its first flow with that flow's last card, 자동 배정, under the legend chip
+ * and the tools): a frame on the first flow keeps the flow's cards above the tools' row. The least pan up that does it while the map's own
+ * title stays under the top line's row; else the title and the flow framed together a little smaller (down to FOCUS_SHRINK of the zoom). */
+const FOCUS_SHRINK = 0.8;
+function focusOverDock() {
+  const f = openFocus(); if (!f) return;
+  const dock = mapBottom() - mapBottomInset() - 8, fs = toScreen(f); if (fs.y + fs.h <= dock) return;
+  const topY = topInset() + 4, ink = titleInk(), t0 = Math.min(ink ? ink.y : f.y, f.y), s0 = camera.y + t0 * camera.k;
+  const dy = dock - (fs.y + fs.h);
+  if (s0 + dy >= topY) { camera = { ...camera, y: camera.y + dy }; return; }
+  const span = (f.y + f.h - t0) * camera.k, room = dock - topY; if (room <= 0) return;
+  const k = camera.k * room / span; if (k < camera.k * FOCUS_SHRINK) return;
+  const cx = fs.x + fs.w / 2, mx = f.x + f.w / 2;
+  camera = { k, x: cx - mx * k, y: topY - t0 * k };
+  // Across: the map in the middle when it fits the window's width at this zoom, else round the flow with no empty margin at either side.
+  const B = drawnBounds(), vw = $('viewport').clientWidth;
+  camera = { ...camera, x: B.w * k <= vw - 2 * SAFE_SIDE ? (vw - B.w * k) / 2 - B.x * k : Math.min(SAFE_SIDE - B.x * k, Math.max(vw - SAFE_SIDE - (B.x + B.w) * k, camera.x)) };
+  // The title's left edge stays in the window (as the first flow's frame keeps it).
+  const ti = ink ? toScreen(ink) : null; if (ti && ti.x < 16) camera = { ...camera, x: camera.x + (16 - ti.x) };
 }
 /** v12: the lines routed for the fit's zoom (their pairs PAIR_PX apart on screen): routed again once when the zoom asks for another gap,
  * then the frame taken again (cards never move, so the zoom stays). True when it did (the frame is applied then). */
@@ -4156,9 +4282,18 @@ function pairRoute(explicit: boolean, animate: boolean): boolean {
   // v13 fix 1: the zoom each 보기 fitted at (this map, this window), so a switch back routes its lines once.
   if (opened && formApplies(opened)) formFitK.set(formFitKey(opened, formNow), { x: camera.x, y: camera.y, k: camera.k });
   if (pairRefit || Math.abs(want - routedGap) <= 0.75) return false;
+  // v13 fix 2: a switch's lines routed a little wider apart than its fit asks are kept (FORM_ROUTE_UNDER): never under the 12px.
+  if (formLanding && routedGap >= want - 0.75 && routedGap <= want / FORM_ROUTE_UNDER + 0.75) return false;
   pairGapNow = want; pairRefit = true;
   try { positionWorld(); fitView(explicit, animate); } finally { pairRefit = false; }
   return true;
+}
+/** v13 fix 2 (review of v13: a map opened on the camera kept from an earlier visit drew its lines routed for whatever zoom came before, the
+ * pairs 3–11px apart): the lines routed for the zoom the map is framed at when it is not fitted (a camera kept for this map and window). */
+function routeForZoom() {
+  const want = Math.max(PAIR_PX / Math.max(camera.k, 0.05), 12);
+  if (Math.abs(want - routedGap) <= 0.75) return;
+  pairGapNow = want; positionWorld();
 }
 /** How far the map may move down as the camera stands (screen pixels): v10 (review of v9: at 1280 the top sentence stayed on one cut line
  * with 80px free under the map) measured against what sits at the bottom over each column of the map (map-labels dockSlack: the tools,
@@ -4762,10 +4897,12 @@ function drawFocus() {
   // relations not drawn on their own (as beside a selection or a scenario's path).
   if (o && !selected) {
     const keep = new Set([...world.querySelectorAll<SVGGElement>('.edge.sc-path, .edge.ff-flow, .edge.ff-ctx')].map(g => g.dataset.key!));
+    shownKeep = [...keep];
     sums = keep.size ? sumLines(o, restSummary(lay.boxes, lay.edges, e => keep.has(e.key)), new Set(restSums.filter(x => x.both).map(x => x.key))) : restSums;
     world.querySelectorAll<SVGGElement>('.edge.sum').forEach(el => { const e = edgeOf(el.dataset.key); el.classList.toggle('hit', !e); el.classList.toggle('agg', !!e?.agg); });
   }
-  syncLineMode(); markLines(); foldHubs(); routeShown(); placeEdgeLabels(); renderFocusTop();
+  // v13 fix 2: a 보기 switch's redraw leaves the labels to the fit that follows it (they were placed twice for one frame).
+  syncLineMode(); markLines(); foldHubs(); routeShown(); if (!formSwitching) placeEdgeLabels(); renderFocusTop();
 }
 /** A lens the person picks keeps its foreground: the picked lines step back to the context weight (their accent heads too). */
 function focusLensPicked() {

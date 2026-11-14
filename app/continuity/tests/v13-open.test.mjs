@@ -196,7 +196,7 @@ test('V13-9 receded words stay at 4.5:1 or more (a pick\'s rest, a hover\'s rest
 
 test('V13-10 the wiring: the opening on a fresh map, a redraw ends it, 다시 보기 in the tools, the light in markSelection, the camera through the motion', async () => {
   const a = await app(), r = fn(a, 'render'), rs = fn(a, 'renderSpace'), ms = fn(a, 'markSelection'), cam = fn(a, 'applyCamera'), canvas = fn(a, 'bindCanvas');
-  assert.match(r, /if \(fresh && !part && !scope && !o\.past && !planView\.isOpen\(\) && !returnView\.isOpen\(\) && o\.view\.parts\.length\) opening\.arrive\(o\.key, openingVersion\(o\), askedAt\);/, 'v13 fix 1: counted from the ask');
+  assert.match(r, /if \(fresh && !part && !scope && !o\.past && !planView\.isOpen\(\) && !returnView\.isOpen\(\) && o\.view\.parts\.length\) \{[^}]*opening\.arrive\(o\.key, openingVersion\(o\), askedAt\);/, 'v13 fix 1: counted from the ask');
   assert.match(rs, /opening\.skip\(\); opening\.offer\(!scope && !o\.past && !growthCmp && !growthPast && o\.view\.parts\.length > 0\);/);
   assert.ok(rs.indexOf('opening.skip()') < rs.indexOf('fitView(false)'), 'before the fit measures the tools');
   assert.match(ms, /light\.before\(\$\('world'\), me\);/); assert.match(ms, /light\.after\(\$\('world'\), me, \$\('space'\)\.classList\.contains\('sel-fold'\)\);/);

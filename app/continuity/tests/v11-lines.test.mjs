@@ -120,7 +120,7 @@ test('V11-8 a new view is laid out at one zoom whatever map came before (the sam
   const a = await app(), rs = fn(a, 'renderSpace');
   const at = rs.indexOf("if (cameraMode !== 'keep') { camera = { x: 0, y: 0, k: 1 };"), lay = rs.indexOf('relayout(o);');
   assert.ok(at > 0 && at < lay, 'v10a laid out a new map at the zoom the map before left on the page');
-  assert.match(rs, /syncZoom\(1, true\); \}\n  relayout\(o\);/);
+  assert.match(rs, /syncZoom\(1, true\); \}\n(?:  \/\/[^\n]*\n)*  if \(!\(formSwitching && formLaid === lay && formLaid\.boxes\.size\)\) relayout\(o\);/);
 });
 
 test('V11-9 the legend names the condition mark (「◇ 조건 보기」) and counts the lines that carry one', () => {
@@ -152,6 +152,6 @@ test('V11-10 the static focus routes its own few lines at twice the map\'s pitch
   // Taken only when no worse a drawing than the map's own pitch (crossings, detours, length): here it is.
   assert.deepEqual([...R.focusRoutes(boxes, edges)].map(([k, r]) => [k, r.d]), [...half].map(([k, r]) => [k, r.d]));
   assert.equal(R.FOCUS_ROUTE_LONGER, 1.15);
-  assert.ok(src.includes('focusRoutes(lay.boxes, set, c, { pairGap: pairGapNow, pitch: formPitch() })') /* v13 fix 1: a 보기's pitch */);
+  assert.ok(src.includes('routeKept(lay.boxes, set, { pairGap: pairGapNow, pitch: formPitch() }, c)') && src.includes('const run = () => (c < 1 ? focusRoutes(boxes, edges, c, opts) : routeEdges(boxes, edges, opts));') /* v13 fix 1: a 보기's pitch; v13 fix 2: kept by its input */);
   assert.match(src, /const c = folding && !selected && !scView && set\.length <= FOCUS_ROUTE_MAX \? FOCUS_ROUTE_SCALE : 1;/, 'one fixed scale: a route that followed the zoom would move the fit that reads it');
 });
