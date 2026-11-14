@@ -47,7 +47,7 @@ import { shapeFactsOf } from './map-regions.js'; // v14 B
 import { setPlainLevel, easyWordOf, detailNote, plainLead, entryLead, EASY_FORM_WORD, EASY_FORM_SWITCH, EASY_FORM_TIP } from './plain-words.js'; // v14 B
 import { CARD_H, CARD_H_TALL, CARD_H_TALLER, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
-import { cardFace, cutsWord, fitTag, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
+import { cardFace, cutsWord, fitTag, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, WHOLE_MIN_PX, type CardFace } from './name-tag.js';
 import { placeExpansion, actionSections, opensInto, pushPlace, readOpenState, writeOpenState, groupBody, loopLine, stateVarLine, UNSAID, OPEN_MAP, SHORT_W, type OpenState, type ReadPlace, type ActionStep } from './expansion.js';
 import { detailChain, detailSigns, stepConsumers, unmappedMark, decisionStep, conditionPlacement, conditionLines, conditionOfQuote, elseBlanked, stepFace, linkFace, stepPorts, stepCounts, EXIT_BLANK, CONDITION_BLANK, CONDITION_UNPLACED, PROGRAM_STEP_HINT, PROGRAM_PORT_LABEL, PROGRAM_PORT_HINT, type ChainLink, type OutLine, type DecisionStep, type DecisionExit, type PlacedCondition } from './steps-view.js';
 import { labelSpots, polylineHitsRect, portSpots, besideSpots, midSpots, endZones, dockSlack } from './map-labels.js';
@@ -1449,12 +1449,22 @@ function fitCards() {
     // kind then reads in the card's hover and pane), when that keeps it whole.
     const lh = x.compact ? TAG_COMPACT.nameLh : TAG.nameLh, rows = Math.min(TAG.maxLines, Math.floor((x.boxH - 2 * (x.compact ? TAG_COMPACT.padY : TAG.padY) + 0.5) / lh));
     if (!f.full && rows > f.lines.length && rows > x.lines) { const g = fitTag(x.name, x.width, rows, x.measure, x.px, x.slack); if (g.full) f = g; }
+    // v14 fix 2 (nanogpt at 780: 「Hugging Face datasets…」 where its whole name takes three lines of a box with room for two at the tag's
+    // type): a smaller type (down to WHOLE_MIN_PX) gives the box another line; the name whole on it, its lines as close as its type.
+    let lhScale = 1;
+    for (let s = 0.92; !f.full && s * x.px >= WHOLE_MIN_PX - 1e-9; s -= 0.04) {
+      const more = Math.min(TAG.maxLines, Math.floor((x.boxH - 2 * (x.compact ? TAG_COMPACT.padY : TAG.padY) + 0.5) / (lh * s)));
+      if (more <= Math.max(rows, f.lines.length)) continue;
+      const g = fitTag(x.name, x.width / s, more, x.measure, x.px, x.slack / s);
+      if (g.full && (g.scale ?? 1) * s * x.px >= WHOLE_MIN_PX - 1e-9) { f = { ...g, scale: (g.scale ?? 1) * s }; lhScale = s; }
+    }
+    tn.style.setProperty('line-height', lhScale < 1 ? `calc(${(lh * lhScale).toFixed(2)}px * var(--u, 1))` : ''); if (lhScale === 1) tn.style.removeProperty('line-height');
     tn.replaceChildren(...tagLineNodes(f.lines, x.width, x.measure === compactW ? TAG_COMPACT.name : TAG.name));
     // V14-A HOOK (whole names, spec 2): a name kept whole at a smaller type (name-tag fitTag), or none of it fitting (「⋯」, its name in the hover).
     if (f.scale && f.scale < 1) tn.style.setProperty('font-size', `calc(${(x.px * f.scale).toFixed(2)}px * var(--u, 1))`); else tn.style.removeProperty('font-size');
     x.el.classList.toggle('tag-none', !!f.none); x.el.classList.toggle('tag-tight', !!f.tight);
     x.el.dataset.tagK = k.toFixed(3); x.el.classList.toggle('tag-cut', !f.full && !f.gloss); x.el.classList.toggle('tag-gloss', !!f.gloss); // v14 fix 1
-    const left = x.boxH - 2 * (x.compact ? TAG_COMPACT.padY : TAG.padY) - f.lines.length * (x.compact ? TAG_COMPACT.nameLh : TAG.nameLh);
+    const left = x.boxH - 2 * (x.compact ? TAG_COMPACT.padY : TAG.padY) - f.lines.length * lh * lhScale;
     // A name shortened (its words before a bracket, its first words) reads alone: no role beside it (spec 2; a person's or an outside system's
     // mark stays, the shape's word); no kind line with no row left.
     if (left < TAG.kindLh - 0.5) x.el.classList.remove('tag-kind');

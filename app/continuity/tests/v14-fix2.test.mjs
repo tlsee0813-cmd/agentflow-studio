@@ -169,3 +169,11 @@ test('V14F2-16 in the clear state the main flow\'s labels at the overview go bef
 test('V14F2-17 a lit line\'s cut words never end on an arrow, a comma or a colon pointing at what was cut', async () => {
   assert.ok(fn(await app(), 'litWords').includes(String.raw`.replace(/[\s·,:;→>-]+$/u, '')`));
 });
+
+test('V14F2-18 a name a box holds whole only on one more line takes a smaller type (never under WHOLE_MIN_PX), its lines as close as its type', async () => {
+  const fc = fn(await app(), 'fitCards');
+  assert.match(fc, /for \(let s = 0\.92; !f\.full && s \* x\.px >= WHOLE_MIN_PX - 1e-9; s -= 0\.04\) \{/);
+  assert.match(fc, /const g = fitTag\(x\.name, x\.width \/ s, more, x\.measure, x\.px, x\.slack \/ s\);/);
+  assert.match(fc, /if \(g\.full && \(g\.scale \?\? 1\) \* s \* x\.px >= WHOLE_MIN_PX - 1e-9\) \{ f = \{ \.\.\.g, scale: \(g\.scale \?\? 1\) \* s \}; lhScale = s; \}/);
+  assert.match(fc, /const left = x\.boxH - 2 \* \(x\.compact \? TAG_COMPACT\.padY : TAG\.padY\) - f\.lines\.length \* lh \* lhScale;/);
+});
