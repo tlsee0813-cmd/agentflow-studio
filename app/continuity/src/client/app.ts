@@ -3433,6 +3433,7 @@ function clipAtEdge() {
     const dock = [document.querySelector<HTMLElement>('#space > .controls'), document.getElementById('first-view'), document.getElementById('line-key')]
       .filter((e): e is HTMLElement => !!e && !e.hidden && !!e.offsetWidth && !(e.id === 'line-key' && !e.classList.contains('folded'))).map(e => e.getBoundingClientRect());
     const sr = [sr0, fr0, ...dock].filter((x): x is DOMRect => !!x);
+    offCue(); // v14 fix 2: the cue placed again once what stands at the bottom settled (the legend chip grows after the first frame)
     // v14 fix 2: a card wholly under the fade's end is not drawn there (the mask hides it) and is no card under the tools either: it steps out
     // (dock-hid, as a label under them does); the off-screen cue counts it.
     { const fe = vp.top + $('viewport').clientHeight - dockHeight() + FADE_END_PX;
@@ -4482,7 +4483,7 @@ function offCue() {
   const rows = [...new Set(docked.map(r => Math.round(r.y)))].sort((a, b) => a - b);
   for (const y of rows) {
     const inRow = docked.filter(r => r.y < y + 12 && r.y + r.h > y + 12), right = Math.max(...inRow.map(r => r.x + r.w)), hh = Math.max(...inRow.map(r => r.h));
-    if (right + 8 + cw <= sp.clientWidth - SAFE_SIDE) { cue.style.left = `${Math.round(right + 8)}px`; cue.style.top = `${Math.round(y + (hh - ch) / 2)}px`; cue.style.bottom = ''; cue.classList.add('in-row'); return; }
+    if (right + 8 + cw <= sp.clientWidth - SAFE_SIDE) { cue.style.left = `${Math.round(sp.clientWidth - SAFE_SIDE - cw)}px`; /* at the row's right end: a chip beside it that grows later keeps its room */ cue.style.top = `${Math.round(y + (hh - ch) / 2)}px`; cue.style.bottom = ''; cue.classList.add('in-row'); return; }
   }
   cue.classList.remove('in-row'); cue.style.left = ''; cue.style.top = '';
   cue.style.bottom = `${Math.round(sp.clientHeight - mapBottom() + dockHeight() + FADE_END_PX + 2)}px`;

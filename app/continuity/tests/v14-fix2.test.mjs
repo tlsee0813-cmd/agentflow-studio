@@ -184,3 +184,9 @@ test('V14F2-19 a frame that kept the sentence keeps it after the sides\' and the
   assert.match(fv, /if \(saidBefore && !FT_SAID\.some\(form => clear\(form, camera\.k\)\)\) \{/);
   assert.match(fv, /for \(let d = 4; d <= SAID_DROP && !ok; d \+= 4\) \{ camera = \{ \.\.\.c0, y: c0\.y \+ d \}; ok = FT_SAID\.some\(form => clear\(form, camera\.k\)\); \}\n    if \(!ok\) camera = saidCam;/);
 });
+
+test('V14F2-20 the off-screen cue stands at its row\'s right end and is placed again once the bottom settles', async () => {
+  const a = await app();
+  assert.match(fn(a, 'offCue'), /cue\.style\.left = `\$\{Math\.round\(sp\.clientWidth - SAFE_SIDE - cw\)\}px`;/);
+  assert.match(fn(a, 'clipAtEdge'), /offCue\(\); \/\/ v14 fix 2: the cue placed again/);
+});
