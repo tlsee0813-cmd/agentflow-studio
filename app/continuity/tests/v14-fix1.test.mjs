@@ -81,6 +81,8 @@ test('V14F1-4 the title chip never stands over a lane\'s words; the top box like
   assert.match(ce, /const sr = \[sr0, fr0, \.\.\.dock\]\.filter\(\(x\): x is DOMRect => !!x\);/);
   assert.match(ce, /lw\.classList\.toggle\('lane-cut', q\.width > 0 && dock\.some\(/);
   assert.match(await css(), /\.form-lane \.form-lane-word\.lane-cut \{ visibility: hidden; \}/);
+  // And again where a 보기 switch's camera settles.
+  assert.match(fn(a, 'landFormFlight'), /world\.classList\.remove\('animate', 'form-cam'\); clipAtEdge\(\); \}, FORM_SETTLE_MS\)/);
 });
 
 test('V14F1-5 a name never breaks where an identifier\'s capitals meet while anything else keeps it; a name ending in a bracket reads its own words whole (gloss), the side room before that', () => {
@@ -96,6 +98,9 @@ test('V14F1-5 a name never breaks where an identifier\'s capitals meet while any
   // Only when nothing else gives the name, a break where a lower-case run meets a capitalised word (never 「⋯」 for 「WebSocketManager·run_agent」).
   const ws = T.fitTag('WebSocketManager·run_agent', 72, 3, measure, 12.5);
   assert.notEqual(ws.lines[0], '⋯'); assert.equal(ws.full, true); assert.match(ws.lines.join('|'), /^WebSocket\|Manager·/);
+  // Narrower still: the first of two names joined by 「·」, whole, as its gloss (at 1280 and 780 it read 「⋯」).
+  const ws2 = T.fitTag('WebSocketManager·run_agent', 60, 2, measure, 12.5);
+  assert.deepEqual(ws2.lines, ['WebSocket', 'Manager']); assert.equal(ws2.gloss, true);
   // The bracket's words are the name's gloss: its own words whole, no 「…」 (the card's hover has the rest; the tag's dotted underline says so).
   assert.equal(T.glossHead('정기 일정(alpha_q 일정표)'), '정기 일정');
   assert.equal(T.glossHead('보관 그릇(외부, 선택)'), '보관 그릇');

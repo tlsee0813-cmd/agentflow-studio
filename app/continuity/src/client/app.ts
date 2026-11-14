@@ -1239,7 +1239,8 @@ function landFormFlight() {
   void world.offsetWidth;
   world.classList.add('animate', 'form-cam'); writeCamera(camera);
   sp.classList.remove('form-lines-out'); sp.classList.add('form-lines-in');
-  formTimers.push(window.setTimeout(() => { world.classList.remove('animate', 'form-cam'); }, FORM_SETTLE_MS));
+  // v14 fix 1: the marks and lane words under the bars looked at again where the camera settled (clipAtEdge).
+  formTimers.push(window.setTimeout(() => { world.classList.remove('animate', 'form-cam'); clipAtEdge(); }, FORM_SETTLE_MS));
   formTimers.push(window.setTimeout(() => sp.classList.remove('form-lines-in'), FORM_LINES_IN_MS + 40));
 }
 /** v13 fix 2: a switch with no fit of its 보기 known routes for this share of the estimated zoom; formLanding: the switch's fit is running. */

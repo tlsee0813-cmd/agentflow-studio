@@ -146,6 +146,9 @@ export function fitTag(name: string, w: number, lines: number, measure: (s: stri
   if (more) for (const s of steps(WORD_MIN_PX)) if (scaled(s)(first) <= w + 0.01) return { lines: [first], full: false, ...at(s) };
   // v14 fix 1: the whole name broken where an identifier's words meet (camel), in the side room too, before 「⋯」.
   for (const ww of slack > 0 ? [w, w + slack] : [w]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(nm, scaled(s), 'camel', ww); if (ls) return { lines: ls, full: true, ...(ww > w ? { tight: true } : {}), ...at(s) }; }
+  // A name of two joined by 「·」 (「WebSocketManager·run_agent」): its first whole, as its gloss (the rest in the hover, the dotted underline).
+  const lead = nm.split('·')[0]!.trim();
+  if (lead && lead !== nm) for (const ww of slack > 0 ? [w, w + slack] : [w]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(lead, scaled(s), 'camel', ww); if (ls) return { lines: ls, full: false, gloss: true, ...(ww > w ? { tight: true } : {}), ...at(s) }; }
   return { lines: ['⋯'], full: false, none: true };
 }
 /** v14 fix 1: a name's own words before the bracket that ends it (「정기 일정(django_q Schedule)」 → 「정기 일정」); null when no bracket ends
