@@ -138,3 +138,14 @@ test('V13X2-8 a 보기 the record does not offer stays in sight and says why whe
   assert.match(op, /if \(t > landMs\) host\.space\(\)\.classList\.add\('op-type'\);/);
   assert.match(op, /host\.space\(\)\.classList\.remove\('op-run', 'op-land', 'op-type'\);/);
 });
+
+test('V13X2-9 a line morph under way never lands over a route drawn after it, and nothing morphs under reduced motion (a switch there drew the old form's gap)', async () => {
+  const a = await app(), pw = fn(a, 'positionWorld'), rs = fn(a, 'routeShown');
+  assert.match(pw, /const prior = morphing.get(g); if (prior) { cancelAnimationFrame(prior); morphing.delete(g); }
+s+g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
+s+if (from && from !== r.d && !reducedMotion()) morphEdge(g, from, r.d);/);
+  assert.match(rs, /if (!r || !line) return;
+s+const prior = morphing.get(g); if (prior) { cancelAnimationFrame(prior); morphing.delete(g); }[^
+]*
+s+if (line.getAttribute('d') === r.d) return;/);
+});

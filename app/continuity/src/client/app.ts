@@ -3012,8 +3012,11 @@ function positionWorld() {
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
     const r = routed.get(g.dataset.key!); if (!r) return;
     const from = morphFrom?.get(g.dataset.key!) ?? null;
+    // v13 fix 2 (review of v13: a 보기 switch under reduced motion drew its lines at the gap of the form before, 9 screen px apart): a morph
+    // still under way never lands on a route drawn after it, and nothing morphs under reduced motion.
+    const prior = morphing.get(g); if (prior) { cancelAnimationFrame(prior); morphing.delete(g); }
     g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
-    if (from && from !== r.d) morphEdge(g, from, r.d);
+    if (from && from !== r.d && !reducedMotion()) morphEdge(g, from, r.d);
     g.classList.toggle('detour', !!r.detour);
     // A line that crosses nothing it does not belong to reads above the group surfaces, so its run inside the groups of its own
     // ends is seen up to its part; one that has to cross another box stays under them.
@@ -3128,7 +3131,9 @@ function routeShown() {
   const own = set.length ? new Map([...routeKept(lay.boxes, set, { pairGap: pairGapNow, pitch: formPitch() }, c)].map(([k, r]) => { const d = alias.get(k) ?? k; return [d, d === k ? r : { ...r, key: d }] as [string, Routed]; })) : null;
   lastRouted = own ? new Map([...restRouted, ...own]) : restRouted;
   world.querySelectorAll<SVGGElement>('.edge').forEach(g => {
-    const r = lastRouted.get(g.dataset.key!), line = g.querySelector('.edge-line'); if (!r || !line || line.getAttribute('d') === r.d) return;
+    const r = lastRouted.get(g.dataset.key!), line = g.querySelector('.edge-line'); if (!r || !line) return;
+    const prior = morphing.get(g); if (prior) { cancelAnimationFrame(prior); morphing.delete(g); } // v13 fix 2: a morph under way never lands over it
+    if (line.getAttribute('d') === r.d) return;
     g.querySelectorAll('path').forEach(x => x.setAttribute('d', r.d));
     g.classList.toggle('detour', !!r.detour); g.classList.toggle('clear', r.clear); layerEdge(g);
   });
