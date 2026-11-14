@@ -22,9 +22,9 @@ const edges = [{ key: 'e1', ids: ['r1'], from: 'mixer', to: 'oven' }, { key: 'e2
 const drawn = new Set(boxes.map(b => b.id));
 const base = { boxes, edges, rep: id => (drawn.has(id) ? id : null), names: new Map(), versions: [] };
 
-test('V13X-1 the opening walks only an order 보기 calls a flow (three steps or more); two steps fade in together with no caption', async () => {
+test('V13X-1 the opening walks only an order 보기 calls a flow (three steps or more); two steps are no recorded order (v14: they grow in the record\'s order)', async () => {
   const two = O.openingPlan({ ...base, chain: [['mixer'], ['oven']], chainRels: ['r1'] });
-  assert.equal(two.kind, 'fade'); assert.equal(two.beats[0].caption, null);
+  assert.equal(two.kind, 'order'); assert.ok(two.beats.every(b => b.caption !== O.CHAIN_CAPTION));
   assert.equal(O.CHAIN_MIN_STEPS, 3);
   const three = O.openingPlan({ ...base, chain: [['mixer'], ['oven'], ['shelf']], chainRels: ['r1', 'r2'] });
   assert.equal(three.kind, 'chain');

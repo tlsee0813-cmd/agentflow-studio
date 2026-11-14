@@ -84,6 +84,7 @@ import { REL_LABEL, relationGroups, relLabel, dirMark, dirTitle, insideEnds } fr
 import { createMotion, releaseSpeed } from './flight.js';
 import { createLight } from './light.js';
 import { createOpening } from './opening.js';
+import { clearCaption, clearOn, quietCount, readStrong, allStrongFor, keepStrong } from './clear-rest.js';
 import { versionAt } from '../shared/map-growth.js';
 const light = createLight();
 
@@ -1291,7 +1292,7 @@ function fitCards() {
   if (Math.abs(k - tagAt.k) / Math.max(tagAt.k, 0.01) < 0.005 && tagAt.n === cards.length && cards.every(el => el.dataset.tagK)) return;
   tagAt = { k, n: cards.length };
   const nameW = (s: string) => tagMeasure(s, TAG.name), compactW = (s: string) => tagMeasure(s, TAG_COMPACT.name);
-  const items: { id: string; name: string; width: number; lines: number; el: HTMLElement; measure: (s: string) => number; boxH: number; compact: boolean }[] = [];
+  const items: { id: string; name: string; width: number; lines: number; el: HTMLElement; measure: (s: string) => number; px: number; slack: number; boxH: number; compact: boolean }[] = [];
   for (const el of cards) {
     const name = el.querySelector('.c-name')?.textContent ?? '', w = (parseFloat(el.style.width) || el.offsetWidth) * k, hgt = (parseFloat(el.style.height) || el.offsetHeight) * k;
     // A group or a loop container keeps its own (taller) box. Beauty v2 review (visual 2): its tag takes the whole box and reads in its
@@ -1299,7 +1300,7 @@ function fitCards() {
     const own = el.classList.contains('has-well') || el.classList.contains('grp');
     const room = tagRoom(w, own ? hgt : Math.min(hgt, (el.classList.contains('taller') ? CARD_H_TALLER : el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), (x, px) => linesNeeded(name, x, px === TAG.name ? nameW : compactW), el.dataset.life === '1', (x, px) => cutsWord(name, x, px === TAG.name ? nameW : compactW));
     el.classList.toggle('tag-noicon', !room.icon); el.classList.toggle('tag-kind', room.kind); el.classList.toggle('tag-compact', room.compact);
-    items.push({ id: el.dataset.part ?? '', name, width: room.width, lines: room.lines, el, measure: room.compact ? compactW : nameW,
+    items.push({ id: el.dataset.part ?? '', name, width: room.width, lines: room.lines, el, measure: room.compact ? compactW : nameW, px: room.compact ? TAG_COMPACT.name : TAG.name, slack: Math.max(0, w - 4 - room.width),
       boxH: own ? hgt : Math.min(hgt, (el.classList.contains('taller') ? CARD_H_TALLER : el.classList.contains('tall') ? CARD_H_TALL : CARD_H) * k), compact: room.compact });
   }
   const fitted = fitTags(items, nameW);
@@ -1307,6 +1308,9 @@ function fitCards() {
     const f = fitted.get(x.id); if (!f) continue;
     const tn = x.el.querySelector<HTMLElement>('.c-tag-name'); if (!tn) continue;
     tn.replaceChildren(...tagLineNodes(f.lines, x.width, x.measure === compactW ? TAG_COMPACT.name : TAG.name));
+    // V14-A HOOK (whole names, spec 2): a name kept whole at a smaller type (name-tag fitTag), or none of it fitting (「⋯」, its name in the hover).
+    if (f.scale && f.scale < 1) tn.style.setProperty('font-size', `calc(${(x.px * f.scale).toFixed(2)}px * var(--u, 1))`); else tn.style.removeProperty('font-size');
+    x.el.classList.toggle('tag-none', !!f.none); x.el.classList.toggle('tag-tight', !!f.tight);
     x.el.dataset.tagK = k.toFixed(3); x.el.classList.toggle('tag-cut', !f.full);
     fitTagKind(x.el, x.width, x.boxH - 2 * (x.compact ? TAG_COMPACT.padY : TAG.padY) - f.lines.length * (x.compact ? TAG_COMPACT.nameLh : TAG.nameLh));
   }
@@ -3182,6 +3186,9 @@ function syncLineMode() {
   // flow is drawn the same way at rest.
   sp.classList.toggle('sel-sum', (!!selected || !!scView || ff || gl) && !planView.isOpen() && restSums.length > 0);
   sp.classList.toggle('ff-rest', ff && !selected && !planView.isOpen());
+  // V14-A HOOK (the clear state, spec 1): the main flow lit at rest, the rest quiet, unless the person chose 모두 진하게 for this project.
+  // The growth views keep their own marks (a comparison, a past version): no clear state there.
+  sp.classList.toggle('cl-on', clearOn(ff && !selected && !planView.isOpen() && !ffLensPicked && !scView && !growthCmp && !growthPast && !!ffShown(), allStrong()));
   // Many lines on one view: those that go round other parts step back (see .dense-lines); a summary line never does.
   sp.classList.toggle('dense-lines', lay.edges.length >= 12);
 }
@@ -4085,6 +4092,58 @@ const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6, FIT_MIN = 0.2;
 const FIRST_FIT_MIN = 0.36;
 /** Below this zoom the map's 26px title would read under 10px (map hygiene H3): the title chip says the name instead. */
 const TITLE_FLOOR_K = 10 / 26;
+/** v14 A (spec 2): the zoom and pan across for a first view on its focus wider than the window: the largest zoom from k down to
+ * FIRST_FIT_MIN at which the window's sides fall between the cards (each card wholly in the window or wholly out of it), the focus inside
+ * the safe width and the map's edges no further in than it; null when no such frame exists (the pan the fit chose stays). */
+function sideFrame(k: number, B: Rect, f: Rect, left: number, w: number): { k: number; x: number } | null {
+  const vpw = $('viewport').clientWidth, boxes = [...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost' || b.kind === 'frame');
+  for (let kk = k; kk >= FIRST_FIT_MIN - 1e-9; kk -= 0.005) {
+    // The map's whole width in the window at this zoom: centred across (no side can cut a card).
+    if (B.w * kk <= w) return { k: kk, x: left + (w - B.w * kk) / 2 - B.x * kk };
+    const lo = Math.max(left + w - (B.x + B.w) * kk, left - f.x * kk), hi = Math.min(left - B.x * kk, left + w - (f.x + f.w) * kk); if (lo > hi) continue;
+    const mid = left + w / 2 - (f.x + f.w / 2) * kk;
+    let best: number | null = null;
+    for (let x = lo; x <= hi + 1e-6; x += 2) {
+      const ok = boxes.every(b => { const a = x + b.x * kk, z = a + b.w * kk; return z <= 0 || a >= vpw || (a >= 0 && z <= vpw); });
+      if (ok && (best === null || Math.abs(x - mid) < Math.abs(best - mid))) best = x;
+    }
+    if (best !== null) return { k: kk, x: best };
+  }
+  return null;
+}
+/** v14 A (spec 2): the pan that brings the map's own title into the window is taken only while the first view's focus stays wholly in the
+ * window with it (on a window narrower than both, the focus is the view; the title chip names the map). */
+function titlePanKeeps(dx: number): boolean {
+  const f = openFocus(); if (!f) return true;
+  const fs = toScreen(f), vw = $('viewport').clientWidth;
+  return fs.x + dx >= 0 && fs.x + fs.w + dx <= vw;
+}
+/** v14 A (spec 2): after the fit's last pans (the title, the focus over the tools), a first view whose window side still cuts a card pans
+ * across the least to where none does (the focus kept in the window, the map's edges no further in than the safe side), else zooms out a
+ * little for it (down to FIRST_FIT_MIN, the focus's place across and the map's top kept). A frame with no cut is left as it is. */
+function sidesClear() {
+  const vpw = $('viewport').clientWidth, k0 = camera.k, boxes = [...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost' || b.kind === 'frame');
+  const cutAt = (x: number, k: number) => boxes.some(b => { const a = x + b.x * k, z = a + b.w * k; return !(z <= 0 || a >= vpw || (a >= 0 && z <= vpw)); });
+  if (!vpw || !cutAt(camera.x, k0)) return;
+  const f = openFocus(), B = drawnBounds(), top = camera.y + B.y * k0, cx = f ? f.x + f.w / 2 : B.x + B.w / 2, cxS = camera.x + cx * k0;
+  for (let k = k0; k >= Math.min(k0, FIRST_FIT_MIN) - 1e-9; k -= 0.005) {
+    let best: number | null = B.w * k <= vpw - 2 * SAFE_SIDE ? (vpw - B.w * k) / 2 - B.x * k : null;
+    const x0 = cxS - cx * k, fits = !!f && f.w * k <= vpw;
+    for (let d = 0; best === null && d <= vpw; d += 2) for (const x of d ? [x0 + d, x0 - d] : [x0]) {
+      if (fits && (x + f!.x * k < 0 || x + (f!.x + f!.w) * k > vpw)) continue;
+      if (x > SAFE_SIDE - B.x * k + 1 || x + (B.x + B.w) * k < vpw - SAFE_SIDE - 1) continue;
+      if (!cutAt(x, k)) { best = x; break; }
+    }
+    if (best !== null) { camera = { k, x: best, y: top - B.y * k }; return; }
+  }
+}
+/** v14 A (spec 2): the first view's zoom. v13 fitted a map larger than its window whole down to FIT_MIN when its focus did not fit at
+ * OPEN_MIN (a large map in a 780px window: 30%, its names cut at their start or end); now the focus framed at the largest zoom it fits at, never under
+ * FIRST_FIT_MIN, where every tag holds two lines of a name. 전체 보기 (explicit) still shows the whole map at any zoom. */
+function landK(explicit: boolean, fit: number, k: number, f: Rect | null, w: number, hgt: number): number {
+  if (explicit || !f || fit >= FIRST_FIT_MIN || k >= FIRST_FIT_MIN) return k;
+  return Math.max(FIRST_FIT_MIN, Math.min(OPEN_MIN, w / Math.max(1, f.w + 16), hgt / Math.max(1, f.h + 16)));
+}
 /** The chip scale the verbs were last placed at, and the frame that re-places them after a zoom. */
 let placedInv = 1, relabel = 0;
 /** v9 (review of v8): the places (map units) the top line alone kept a label from when the labels were last placed, at most FT_HELD_MAX
@@ -4146,7 +4205,12 @@ const opening = createOpening({ space: () => $('space'), world: () => $('world')
     const chain = formInfo && formInfo.view === o.view ? formInfo.chain : null;
     const onChain = new Set(chain?.steps.flat() ?? []);
     const chainRels = chain ? o.view.relations.filter(r => { const a = topCard(o, r.from), b = topCard(o, r.to); return !!a && !!b && a !== b && onChain.has(a) && onChain.has(b); }).map(r => r.id) : [];
-    return { boxes, edges, names, versions, rep: (id: string) => drawnRep(o, id), chain: chain ? chain.steps : null, chainRels };
+    // V14-A HOOK (one opening, spec 4): the record's order of the drawn boxes, the main flow lit at rest (its cards in its lines' direction)
+    // and whether the landed map is the clear state (the rest comes in quiet as it stays).
+    const order = [...new Set(o.view.parts.map(p => drawnRep(o, p.id)).filter((x): x is string => !!x))];
+    const lit = ffShown(), flow = lit && ffActive() && !ffLensPicked ? lit.chain : null;
+    const flowLines = [...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].map(g => g.dataset.key!).filter(Boolean);
+    return { boxes, edges, names, versions, rep: (id: string) => drawnRep(o, id), chain: chain ? chain.steps : null, chainRels, order, flow, flowLines, quiet: $('space').classList.contains('cl-on') };
   } });
 const openingVersion = (o: Opened) => mapVersions(o.project).at(-1)?.id ?? 'none';
 function applyCamera(animate = false) {
@@ -4255,13 +4319,14 @@ function fitView(explicit: boolean, animate = false) {
   // line, and when neither stands clear there the map moves down under the one-line form (the title kept, the sentence on one line).
   if (!at.whole) {
     const ti = inkAt(camera.k), s = ti ? toScreen(ti) : null;
-    if (s && s.x < 16) camera = { ...camera, x: camera.x + (16 - s.x) };
+    if (s && s.x < 16 && titlePanKeeps(16 - s.x)) camera = { ...camera, x: camera.x + (16 - s.x) }; // V14-A HOOK: never at the focus's cost
     done = FT_SAID.some(form => clear(form, camera.k));
     if (!done) { const r = ftBox(null, camera, inkAt(camera.k)), top = toScreen(drawnBounds()).y, need = r.y + r.h + 8 - top; if (need > 0) camera = { ...camera, y: camera.y + need }; done = true; }
   }
   if (!done && at.whole) { frameView(explicit, base); done = give(['ft-under']); }
   if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
   if (!at.whole) focusOverDock();
+  if (!explicit) sidesClear(); // V14-A HOOK (whole names, spec 2): no card cut by the window's side
   if (pairRoute(explicit, animate)) return;
   // v12 (review of v11: at 1280 chips placed for the frame's first zoom overlapped once the frame gave a little more room): the labels and
   // chips placed again at the zoom the frame settled on.
@@ -4294,7 +4359,7 @@ function focusOverDock() {
   const B = drawnBounds(), vw = $('viewport').clientWidth;
   camera = { ...camera, x: B.w * k <= vw - 2 * SAFE_SIDE ? (vw - B.w * k) / 2 - B.x * k : Math.min(SAFE_SIDE - B.x * k, Math.max(vw - SAFE_SIDE - (B.x + B.w) * k, camera.x)) };
   // The title's left edge stays in the window (as the first flow's frame keeps it).
-  const ti = ink ? toScreen(ink) : null; if (ti && ti.x < 16) camera = { ...camera, x: camera.x + (16 - ti.x) };
+  const ti = ink ? toScreen(ink) : null; if (ti && ti.x < 16 && titlePanKeeps(16 - ti.x)) camera = { ...camera, x: camera.x + (16 - ti.x) }; // V14-A HOOK
 }
 /** v12: the lines routed for the fit's zoom (their pairs PAIR_PX apart on screen): routed again once when the zoom asks for another gap,
  * then the frame taken again (cards never move, so the zoom stays). True when it did (the frame is applied then). */
@@ -4460,7 +4525,10 @@ function frameView(explicit: boolean, base: number): Framed {
   // Map hygiene H2: the first view opens on its focus (the first view's emphasis, else the main flow) at the opening scale when that
   // focus fits inside the safe area there; a focus too large for it opens the whole map at its fit instead.
   const f = explicit ? null : openFocus();
-  const k = explicit || fit >= FIRST_FIT_MIN || (f && fit < OPEN_MIN && (f.w * OPEN_MIN > w || f.h * OPEN_MIN > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
+  const k0 = explicit || fit >= FIRST_FIT_MIN || (f && fit < OPEN_MIN && (f.w * OPEN_MIN > w || f.h * OPEN_MIN > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
+  // V14-A HOOK (whole names, spec 2): a first view never lands where its name tags cannot hold a name whole (under FIRST_FIT_MIN): a map too
+  // large for that opens on its focus at the largest zoom that frames the focus (OPEN_MIN at most, FIRST_FIT_MIN at least).
+  const k = landK(explicit, fit, k0, f, w, hgt), onFocus = !explicit && !!f && k > fit + 1e-6;
   // The whole view sits in the middle of the free area, both ways: the title and the parts together. A reading pane opened
   // later pans the map by the least amount that keeps the selected part in view (reveal), so no room is kept for it here.
   const place = (k: number) => {
@@ -4473,13 +4541,16 @@ function frameView(explicit: boolean, base: number): Framed {
   place(k);
   // Polish round fixes 1: a map that does not fit at the opening scale opens on what the first view points at (its emphasised parts,
   // else the main flow), centred where it can be, never past the map's own edges; not on its top-left corner and title.
-  if (f && k >= OPEN_MIN && (B.w * k > w || B.h * k > hgt)) {
+  if (f && (k >= OPEN_MIN || onFocus) && (B.w * k > w || B.h * k > hgt)) {
     // camera offset along one axis: c mid-room, clamped so the map's edges [lo, lo + size] stay at the safe area's.
-    const along = (lo: number, size: number, start: number, room: number, c: number) => Math.min(start - lo * k, Math.max(start + room - (lo + size) * k, start + room / 2 - c * k));
-    camera = { k, x: B.w * k <= w ? camera.x : along(B.x, B.w, left, w, f.x + f.w / 2),
-      y: B.h * k <= hgt ? camera.y : along(B.y, B.h, top, hgt, f.h * k > hgt ? f.y + (hgt / 2) / k : f.y + f.h / 2) };
+    // V14-A HOOK (whole names, spec 2): on a window narrower than the map the frame's sides fall between the cards' columns (no name cut by
+    // the window's edge), at the largest zoom down to FIRST_FIT_MIN that allows it.
+    const sd = onFocus ? sideFrame(k, B, f, left, w) : null, kk = sd?.k ?? k; if (sd) place(kk);
+    const along = (lo: number, size: number, start: number, room: number, c: number) => Math.min(start - lo * kk, Math.max(start + room - (lo + size) * kk, start + room / 2 - c * kk));
+    camera = { k: kk, x: sd ? sd.x : B.w * kk <= w ? camera.x : along(B.x, B.w, left, w, f.x + f.w / 2),
+      y: B.h * kk <= hgt ? camera.y : along(B.y, B.h, top, hgt, f.h * kk > hgt ? f.y + (hgt / 2) / kk : f.y + f.h / 2) };
     clearChrome(f, B, { left, top, w, hgt });
-    return { k, whole: false, place };
+    return { k: kk, whole: false, place };
   }
   return { k, whole: true, place };
 }
@@ -4975,6 +5046,33 @@ function chooseOnly(on: boolean) {
   ffOpen = new Set(); shownKey = ''; drawFocus();
   document.querySelector<HTMLElement>(`#focus-top ${on ? '.ft-only' : '.ft-all'}`)?.focus({ preventScroll: true });
 }
+/* ---------- v14 A (spec 1): the clear state's caption and its one-press choice (clear-rest.ts) ---------- */
+/** The projects whose person chose 모두 진하게 in this page when the browser keeps nothing. */
+const strongHere = new Set<string>();
+const strongStore = () => { try { const ls = window.localStorage; return { get: (k: string) => ls.getItem(k), set: (k: string, v: string) => ls.setItem(k, v) }; } catch { return null; } };
+function allStrong(): boolean {
+  const o = opened; if (!o) return false;
+  const st = strongStore(); return strongHere.has(o.key) || (!!st && allStrongFor(readStrong(st.get), o.key));
+}
+/** 「모두 진하게」 or 「주 흐름만 진하게」 pressed: the strengths change in place (nothing moves, nothing is laid out again). */
+function chooseStrong(on: boolean) {
+  const o = opened; if (!o) return;
+  if (on) strongHere.add(o.key); else strongHere.delete(o.key);
+  const st = strongStore(); if (st) keepStrong(st.get, st.set, o.key, on);
+  syncLineMode(); renderFocusTop();
+  document.querySelector<HTMLElement>('#focus-top .ft-clear-b')?.focus({ preventScroll: true });
+}
+/** The caption under the switcher while a main flow is drawn at rest: what is lit and how many relations are quiet, with the other strength
+ * one press away. */
+function clearRow(f: FirstFlow | null): HTMLElement | null {
+  const sp = $('space'), c = f?.flow; if (!c || scView || growthCmp || growthPast || !sp.classList.contains('ff-rest') || ffLensPicked || !ffActive()) return null;
+  const on = sp.classList.contains('cl-on'), world = $('world');
+  const lines = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => !g.classList.contains('hit') && !g.classList.contains('stub') && getComputedStyle(g).display !== 'none')
+    .map(g => ({ ids: edgeOf(g.dataset.key)?.ids ?? [], lit: g.classList.contains('ff-flow') || g.classList.contains('ff-ctx') }));
+  const cap = clearCaption(on, quietCount(lines), c.rule);
+  return h('p', { class: `ft-clear${on ? ' on' : ''}`, title: cap.tip }, h('span', { class: 'ft-clear-t' }, cap.text),
+    h('button', { type: 'button', class: 'ft-b ft-clear-b', 'aria-pressed': String(!on), title: cap.tip, onclick: () => chooseStrong(on) }, cap.button));
+}
 /** A hub's chip pressed: its other lines in place, or folded again (nothing else moves). */
 function toggleHub(id: string) {
   if (ffOpen.has(id)) ffOpen.delete(id); else ffOpen.add(id);
@@ -5244,7 +5342,7 @@ function renderFocusTop() {
   // v12: the basis line's words (its head and its whole text, as its hover says them) for the summary panel.
   const bt = basis?.querySelector<HTMLElement>('.ft-basis-t');
   ftBasisSaid = basis && bt ? { head: (basis.getAttribute('title') ?? '').split('\n')[0]!, text: bt.dataset.text ?? '' } : null;
-  el.replaceChildren(...[sentence, row, basis, fullPanel()].filter((x): x is HTMLElement => !!x));
+  el.replaceChildren(...[sentence, row, clearRow(f), basis, fullPanel()].filter((x): x is HTMLElement => !!x)); // V14-A HOOK (clearRow)
   el.hidden = !el.childElementCount; syncFocusTop();
 }
 /** Ruling F8 Q2: the summary's sentences as the box shows them (null: nothing plain left in one), whether its whole text is open, for

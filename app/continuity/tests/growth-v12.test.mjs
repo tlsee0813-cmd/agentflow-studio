@@ -145,13 +145,17 @@ test('V12-7 (first user of v11, 7) 「···」 has its word: 「··· 관계 �
 test('V12-8 (first user of v11, 8: 「문서 소비…」, a first word cut at its middle) a tag name is cut between whole units only, the plain map\'s rule', () => {
   const measure = s => [...s].reduce((n, c) => n + (/[ㄱ-힝]/.test(c) ? 12 : c === '…' ? 9 : 7), 0);
   assert.deepEqual(fitTag('문서 소비기(Consumer)', 60, 1, measure).lines, ['문서…']);
-  assert.deepEqual(fitTag('Rasterkit 래스터 파서', 56, 2, measure).lines, ['…래스터', '파서']);
-  assert.deepEqual(fitTag('자동 배정(매칭·inbox 태그)', 80, 2, measure).lines, ['자동 배정', '(매칭…']);
+  // v14 A (spec 2): never 「…래스터」 (a name's start left out): its first word whole at a smaller type with 「…」 (V14A-1).
+  assert.ok(!fitTag('Rasterkit 래스터 파서', 56, 2, measure).lines.join('').startsWith('…'));
+  // v14 A (spec 2): whole at a smaller type before any cut.
+  { const f = fitTag('자동 배정(매칭·inbox 태그)', 80, 2, measure); assert.ok(f.full && f.scale < 1, f.lines.join('|')); }
   // Whatever is cut, what stands before 「…」 ends where a word of the name ends (never 「소비…」 of 「소비기」).
   const names = ['문서 소비기(Consumer)', 'Rasterkit 래스터 파서', '집 서버 FTP 수신 위치', '로그인·인증 관문', '정기 일정(task_q Schedule)', '로컬 데이터베이스'];
   for (const name of names) for (const w of [40, 56, 70, 90]) for (const n of [1, 2]) {
     const f = fitTag(name, w, n, measure), t = f.lines.join(''), bare = s => s.replace(/\s+/g, '');
-    if (!t.includes('…')) { assert.equal(bare(t), bare(name)); continue; }
+    // v14 A (spec 2): 「⋯」 when no whole word fits; a first word whole at a smaller type when its 「…」 cannot fit beside it.
+    if (f.none) { assert.equal(t, '⋯'); continue; }
+    if (!t.includes('…')) { if (f.full) assert.equal(bare(t), bare(name)); else assert.ok(bare(name).startsWith(bare(t)) && /^[^\s·]+$/.test(t)); continue; }
     const [head, tail] = t.split('…').map(bare);
     // The place in the name where the shown start ends, and where the shown end begins: each at a unit's edge (a space, 「·」, a bracket, a
     // separator, or where an identifier's words meet).

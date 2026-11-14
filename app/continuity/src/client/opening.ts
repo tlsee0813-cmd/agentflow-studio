@@ -8,6 +8,10 @@
  *   the time holds, some are passed over, never blended. The strip at the bottom says which version is shown.
  * - One version: the recorded main flow (먼저 볼 연결's chain) appears step by step in its own order, then everything else at once.
  *   With no recorded chain, everything fades in together.
+ * - v14 A (spec 4, one opening for all): every map grows from cards, never a whole-map fade that reads as loading: from the first card of
+ *   the recorded order (map-forms recordedChain), else of the main flow 먼저 볼 연결 lights (its cards in its lines' own direction), else
+ *   from the cards in the record's order; the rest then comes in by the record's order in a few quick beats. The skip hint shows on every
+ *   opening for its first SKIP_HINT_MS. While the landed map is the clear state (clear-rest), the rest comes in quiet as it will stay.
  * - Landing: the camera settles to the fit (1.03 → 1), the summary sentence types in, and the map is quiet.
  * Any key, press, wheel or touch ends it at once; reduced motion never plays it. Seen versions are remembered per project in this browser
  * (try/catch: without storage it plays each time a map is opened fresh). 「다시 보기」 in the tools plays it again.
@@ -39,6 +43,13 @@ export const LAST_TICK_MS = 260;
 /** The outline around a successor that is already drawn: the earlier part it will take over from. */
 export const GHOST_WORD = '이어받기 전 · ';
 export const CHAIN_CAPTION = '기록이 말한 흐름 순서';
+/** v14 A (spec 4): the captions of the two other ways a map grows, the skip hint and how long it shows. */
+export const FLOW_CAPTION = '주 흐름부터 · 선의 방향대로', ORDER_CAPTION = '기록에 적힌 부품 순서대로';
+export const SKIP_HINT = '아무 키나 누르면 바로 보기', SKIP_HINT_MS = 1500;
+/** v14 A: the rest after a chain or a flow comes in by the record's order in at most REST_BEATS beats of REST_STEP_MS (REST_MS in all, as
+ * v13's one beat); a map with neither grows in the record's order in at most ORDER_BEATS beats within ORDER_MAX_MS, ORDER_STEP_MIN_MS each
+ * at least. */
+export const REST_BEATS = 4, REST_STEP_MS = 125, ORDER_BEATS = 8, ORDER_MAX_MS = 1800, ORDER_STEP_MIN_MS = 150;
 export const REPLAY_WORD = '다시 보기', REPLAY_TIP = '지도가 기록에서 생겨나는 모습을 다시 보기 (아무 키나 누르면 끝)';
 export const versionCaption = (n: number, parts: number, unplaced: number): string => `기록을 읽은 판 v${n} · 부품 ${parts}${unplaced ? ` · 지금 지도에 자리가 없는 부품 ${unplaced}` : ''}`;
 export const SEEN_KEY = 'af.opening.seen.v1';
@@ -58,6 +69,10 @@ export interface OpeningInput {
   versions: readonly OpeningVersion[];
   /** The recorded chain's steps as drawn boxes (null: none), and its relations. */
   chain: readonly (readonly string[])[] | null; chainRels: readonly string[];
+  /** v14 A: the drawn boxes in the record's order (its parts' order; absent: the boxes' own order), the main flow's cards as layers in its
+   * lines' own direction (null: none) and its lines' keys, and whether the landed map is the clear state (the rest then comes in quiet as
+   * it stays, never receded and brought up). */
+  order?: readonly string[]; flow?: readonly (readonly string[])[] | null; flowLines?: readonly string[]; quiet?: boolean;
 }
 export interface Ghost { box: string; part: string; name: string }
 export interface Beat {
@@ -68,7 +83,7 @@ export interface Beat {
   show: string[]; names: [string, string][]; ghosts: Ghost[]; lines: string[];
   version: number | null; caption: string | null;
 }
-export interface OpeningPlan { kind: 'growth' | 'chain' | 'fade'; beats: Beat[]; versions: number[]; end: number }
+export interface OpeningPlan { kind: 'growth' | 'chain' | 'flow' | 'order' | 'fade'; beats: Beat[]; versions: number[]; end: number }
 
 const norm = (t: string) => t.normalize('NFKC').replace(/\s+/g, ' ').trim().toLowerCase();
 /** A box with every container it sits in (a frame is seen with anything inside it). */
@@ -149,28 +164,87 @@ export function chainPlan(inp: OpeningInput): OpeningPlan | null {
     beats.push({ at, ms, show: [...show], names: [], ghosts: [], lines: [], version: null, caption: CHAIN_CAPTION });
     at += ms;
   }
-  // The rest comes in together, receded (as a pick's rest recedes: the chain stays lit), and reaches full strength as the map lands.
+  // The rest comes in receded (as a pick's rest recedes: the chain stays lit) and reaches full strength as it lands; v14: by the record's
+  // order in a few quick beats (restBeats), and quiet as it stays when the landed map is the clear state.
   const lit = withContainers(seen, boxes);
-  beats.push({ at, ms: REST_MS, show: inp.boxes.map(b => b.id), names: [], ghosts: [], lines: inp.edges.map(e => e.key), version: null, caption: CHAIN_CAPTION, dim: inp.boxes.map(b => b.id).filter(id => !lit.has(id)) });
-  at += REST_MS;
+  at = restBeats(inp, beats, at, lit, CHAIN_CAPTION);
   return { kind: 'chain', beats, versions: [], end: at };
 }
+/** v14 A: the drawn boxes in the record's order (any other after them, in their own order). */
+export function recordOrder(inp: Pick<OpeningInput, 'boxes' | 'order'>): string[] {
+  const ids = inp.boxes.map(b => b.id), known = new Set(ids), out: string[] = [], put = new Set<string>();
+  for (const id of [...(inp.order ?? []), ...ids]) if (known.has(id) && !put.has(id)) { put.add(id); out.push(id); }
+  return out;
+}
+/** v14 A: the lines whose two ends are seen. */
+const linesAmong = (inp: OpeningInput, show: ReadonlySet<string>): string[] => inp.edges.filter(e => (!e.from || show.has(e.from)) && (!e.to || show.has(e.to))).map(e => e.key);
+/** v14 A: the rest after the lit cards, by the record's order, in at most REST_BEATS beats (REST_STEP_MS each), each line once both its ends
+ * are there; the last beat is the live map whole. Receded (dim) unless the landed map is the clear state. Returns the time after them. */
+function restBeats(inp: OpeningInput, beats: Beat[], at0: number, lit: ReadonlySet<string>, caption: string): number {
+  const boxes = new Map(inp.boxes.map(b => [b.id, b])), rest = recordOrder(inp).filter(id => !lit.has(id));
+  const n = Math.max(1, Math.min(REST_BEATS, rest.length)), size = Math.max(1, Math.ceil(rest.length / n));
+  let at = at0; const seen = new Set(lit);
+  for (let i = 0; i < n; i++) {
+    for (const id of rest.slice(i * size, (i + 1) * size)) seen.add(id);
+    const last = i === n - 1, show = last ? new Set(inp.boxes.map(b => b.id)) : withContainers(seen, boxes);
+    beats.push({ at, ms: REST_STEP_MS, show: [...show], names: [], ghosts: [], lines: last ? inp.edges.map(e => e.key) : linesAmong(inp, show), version: null, caption,
+      dim: inp.quiet ? [] : [...show].filter(id => !lit.has(id)) });
+    at += REST_STEP_MS;
+  }
+  return at;
+}
+/** v14 A (spec 4): one version with no recorded order but a main flow that 먼저 볼 연결 lights: its cards layer by layer in its lines' own
+ * direction (STEP_MS each, CHAIN_MAX_MS at most), its lines once both ends are there, then the rest by the record's order. */
+export function flowPlan(inp: OpeningInput): OpeningPlan | null {
+  const boxes = new Map(inp.boxes.map(b => [b.id, b]));
+  const steps = (inp.flow ?? []).map(s => s.filter(id => boxes.has(id))).filter(s => s.length);
+  if (!steps.length || steps.flat().length < 2) return null;
+  const mine = new Set(inp.flowLines ?? []), ms = Math.round(Math.min(STEP_MS, CHAIN_MAX_MS / steps.length));
+  const beats: Beat[] = []; let at = OPEN_START_MS; const seen: string[] = [];
+  for (const st of steps) {
+    seen.push(...st);
+    const show = withContainers(seen, boxes);
+    beats.push({ at, ms, show: [...show], names: [], ghosts: [], lines: linesAmong(inp, show).filter(k => mine.has(k)), version: null, caption: FLOW_CAPTION });
+    at += ms;
+  }
+  at = restBeats(inp, beats, at, withContainers(seen, boxes), FLOW_CAPTION);
+  for (const b of beats) if (b.dim) b.dimLines = inp.quiet ? [] : b.lines.filter(k => !mine.has(k));
+  return { kind: 'flow', beats, versions: [], end: at };
+}
+/** v14 A (spec 4): no recorded order and no main flow: the cards in the record's order, a few at a beat (at most ORDER_BEATS beats within
+ * ORDER_MAX_MS), each line once both its ends are there; nothing receded (the map lands at normal strength). */
+export function orderPlan(inp: OpeningInput): OpeningPlan | null {
+  const boxes = new Map(inp.boxes.map(b => [b.id, b])), ids = recordOrder(inp); if (!ids.length) return null;
+  const n = Math.min(ORDER_BEATS, ids.length), size = Math.ceil(ids.length / n), ms = Math.round(Math.max(ORDER_STEP_MIN_MS, Math.min(STEP_MS, ORDER_MAX_MS / n)));
+  const beats: Beat[] = []; let at = OPEN_START_MS; const seen = new Set<string>();
+  for (let i = 0; i * size < ids.length; i++) {
+    for (const id of ids.slice(i * size, (i + 1) * size)) seen.add(id);
+    const last = (i + 1) * size >= ids.length, show = last ? new Set(inp.boxes.map(b => b.id)) : withContainers(seen, boxes);
+    beats.push({ at, ms, show: [...show], names: [], ghosts: [], lines: last ? inp.edges.map(e => e.key) : linesAmong(inp, show), version: null, caption: ORDER_CAPTION });
+    at += ms;
+  }
+  return { kind: 'order', beats, versions: [], end: at };
+}
 /** The chain's lines seen at each step: a chain line once both of its drawn ends are there (filled in by the engine from the line's ends). */
-export function chainLines(plan: OpeningPlan, edges: readonly { key: string; ids: readonly string[]; from: string; to: string }[], rels: readonly string[]): OpeningPlan {
+export function chainLines(plan: OpeningPlan, edges: readonly { key: string; ids: readonly string[]; from: string; to: string }[], rels: readonly string[], quiet = false): OpeningPlan {
   if (plan.kind !== 'chain') return plan;
   const rs = new Set(rels), mine = edges.filter(e => e.ids.some(id => rs.has(id)));
-  const steps = plan.beats.at(-2)?.show ?? [];
+  // v14 A: the chain's own steps are the beats before the rest's (those carry dim); the rest's beats keep every line among what is seen.
+  const nSteps = plan.beats.findIndex(b => b.dim !== undefined), stepEnd = nSteps < 0 ? plan.beats.length - 1 : nSteps;
+  const steps = plan.beats[stepEnd - 1]?.show ?? [];
   const chainKeys = new Set(mine.filter(e => steps.includes(e.from) && steps.includes(e.to)).map(e => e.key));
-  return { ...plan, beats: plan.beats.map((b, i) => (i === plan.beats.length - 1 ? { ...b, dimLines: b.lines.filter(k => !chainKeys.has(k)) } : { ...b, lines: mine.filter(e => b.show.includes(e.from) && b.show.includes(e.to)).map(e => e.key) })) };
+  return { ...plan, beats: plan.beats.map((b, i) => (i < stepEnd ? { ...b, lines: mine.filter(e => b.show.includes(e.from) && b.show.includes(e.to)).map(e => e.key) }
+    : { ...b, dimLines: quiet ? [] : b.lines.filter(k => !chainKeys.has(k)) })) };
 }
 export function fadePlan(inp: OpeningInput): OpeningPlan {
   return { kind: 'fade', beats: [{ at: OPEN_START_MS, ms: FADE_MS, show: inp.boxes.map(b => b.id), names: [], ghosts: [], lines: inp.edges.map(e => e.key), version: null, caption: null }], versions: [], end: OPEN_START_MS + FADE_MS };
 }
-/** Which opening a map gets: growth with two versions or more, else its recorded chain, else the fade. */
+/** Which opening a map gets: growth with two versions or more, else its recorded chain, else (v14) its main flow, else the record's order;
+ * the fade only when there is nothing to grow from. */
 export function openingPlan(inp: OpeningInput & { edges: readonly { key: string; ids: readonly string[]; from: string; to: string }[] }, budget = OPEN_TOTAL_MS): OpeningPlan {
   if (inp.versions.length >= 2) return growthPlan(inp, budget);
   const c = chainPlan(inp);
-  return c ? chainLines(c, inp.edges, inp.chainRels) : fadePlan(inp);
+  return c ? chainLines(c, inp.edges, inp.chainRels, !!inp.quiet) : flowPlan(inp) ?? orderPlan(inp) ?? fadePlan(inp);
 }
 /** The whole length from the first frame to a quiet map (the typing at its longest). */
 export const openingLength = (p: OpeningPlan): number => p.end + SETTLE_MS + TYPE_PLAN_MS;
@@ -317,7 +391,9 @@ export function createOpening(host: OpeningHost) {
       const head = document.createElement('span'); head.className = 'op-head'; track.append(head); el.append(track);
     }
     const cap = document.createElement('span'); cap.className = 'op-cap'; el.append(cap);
-    const skip = document.createElement('span'); skip.className = 'op-skip'; skip.textContent = '아무 키나 누르면 끝'; el.append(skip);
+    const skip = document.createElement('span'); skip.className = 'op-skip'; skip.textContent = SKIP_HINT; el.append(skip);
+    // v14 A (spec 4): the hint on every opening, for its first SKIP_HINT_MS (then it fades; the caption stays).
+    run?.timers.push(window.setTimeout(() => skip.classList.add('op-skip-gone'), SKIP_HINT_MS));
     host.space().append(el); return el;
   }
   function beatAt(plan: OpeningPlan, i: number, prev: { show: Set<string>; lines: Set<string>; ghosts: Map<string, HTMLElement> }) {
@@ -427,7 +503,7 @@ export function createOpening(host: OpeningHost) {
       try { inp = host.input(); if (!inp || !inp.boxes.length) throw new Error('EMPTY'); plan = openingPlan(inp, OPEN_TOTAL_MS - (performance.now() - t0) - (run.over ? LAND_GLIDE_MS - SETTLE_MS : 0)); } catch { finish(true); return; }
       const spent = performance.now() - t0, shift = -Math.min(OPEN_START_MS, spent);
       // The strip says what is shown (a version, the recorded chain); the plain fade has nothing to say.
-      if (plan.kind !== 'fade') buildStrip(plan);
+      buildStrip(plan); // v14 A (spec 4): every opening says what it shows and how to skip it
       const prev = { show: new Set<string>(), lines: new Set<string>(), ghosts: new Map<string, HTMLElement>() };
       plan.beats.forEach((b, i) => run!.timers.push(window.setTimeout(() => { if (run) beatAt(plan, i, prev); }, Math.max(0, b.at + shift))));
       run.timers.push(window.setTimeout(() => land(), Math.max(0, plan.end + shift) + 120));

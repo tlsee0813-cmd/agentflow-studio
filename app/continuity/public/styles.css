@@ -4198,3 +4198,29 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* v13 merge (spec 1 × 3: the opening in the record's 보기): a form's lanes are the stage the cards come into (층's bands with their words, 흐름's
  * build lane), drawn from the start; only their counts, which are the last version's, wait for the landing. */
 #space.op-run #world > .form-lane .form-lane-n { visibility: hidden; }
+
+/* ---------- v14 A (landing, names, opening) ---------- */
+/* Spec 1, the clear state (clear-rest.ts): at rest the main flow 먼저 볼 연결 lights and its cards stay as they are; every other card is
+   whole and readable but quiet (its colour and edge step back, its words keep their colours: 4.5:1 or more), every other line thin at
+   about a third of its strength, its verb label and count left to its hover (a condition's words and ◇ stay). Nothing is folded or hidden:
+   a hover brings its neighbourhood up (.near, .near-end), a pick lights its own (lt-sel). */
+#space.cl-on:not(.lt-sel) #world > .node:not(.ff-card):not(.ff-start):not(.selected):not(.related):not(.near-end):not(.near-self):not(.cited):not(.sc-visit):not(.since-hit):not(:hover):not(:focus-visible) { filter: saturate(.5); background-color: color-mix(in srgb, var(--surface) 45%, var(--bg)); border-color: var(--hair-2); box-shadow: none; }
+#space.cl-on #world .edge:not(.ff-flow):not(.ff-ctx):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.growth-lit):not(.growth-gone-line) { --bw: 1; }
+#space.cl-on #world .edge:not(.ff-flow):not(.ff-ctx):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.growth-lit):not(.growth-gone-line) .edge-line { opacity: .35; }
+#space.cl-on #world .edge-labels > :is(.edge-label:not(.fit-cond), .edge-count):not(.ff-keep):not(.near):not(:hover):not(:focus-visible) { visibility: hidden; }
+/* The marks that stay on the quiet lines (a condition's ◇ and words, a badge) keep their words at 4.5:1 or more: never the half opacity the
+   v12 focus gave them (a 「조건 2」 badge read 2.6:1). */
+#space.cl-on #world .edge-labels > :not(.ff-keep):not(.edge-cue):not(.edge-label):not(.near):not(:hover) { opacity: 1; }
+/* The caption under the switcher: what is lit, and the other strength one press away (shown at rest only). */
+.focus-top .ft-clear { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 8px; margin: 0; font-size: 12.5px; line-height: 20px; color: var(--text-2); }
+.focus-top .ft-clear-t { min-width: 0; }
+.focus-top .ft-clear.on .ft-clear-t::before { content: ''; display: inline-block; width: 14px; height: 0; margin: 0 6px 3px 0; border-top: 1px solid var(--edge-spine); opacity: .45; vertical-align: middle; }
+#space:not(.ff-rest) .focus-top .ft-clear { display: none; }
+/* Spec 2 (whole names): a tag that holds none of its name whole shows 「⋯」 (its name in the card's hover and keyboard name). */
+.space.face-tag .node.card.tag-none .c-tag-name { color: var(--text-3); letter-spacing: .05em; }
+/* Spec 4 (one opening): the skip hint for the opening's first 1.5 s, then it fades. */
+.op-skip { transition: opacity .3s ease; }
+.op-skip.op-skip-gone { opacity: 0; }
+/* Spec 2: a first word that needs the tag's side room takes it (2px each side, no icon): whole, never cut. */
+.space.face-tag .node.card.tag-tight > .c-tag { padding-left: calc(2px * var(--u, 1)); padding-right: calc(2px * var(--u, 1)); }
+.space.face-tag .node.card.tag-tight .c-tag-icon { display: none; }

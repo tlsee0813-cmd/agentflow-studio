@@ -31,7 +31,8 @@ test('BV2-1 the face: the card from 0.9 (its name 13.5px or more, its lines spac
 test('BV2-2 a tag fits its name in its lines, cut at the end with 「…」, broken at separators, spaces and before a bracket', () => {
   assert.deepEqual(fitTag('워커', 80, 2, measure), { lines: ['워커'], full: true });
   const two = fitTag('메인테이너(Yota Hamada)', 80, 2, measure);
-  assert.equal(two.lines[0], '메인테이너', 'the bracket starts a line; the word before it is never split');
+  // v14 A (spec 2): whole at a smaller type rather than cut; the word before the bracket is never split (「메인테이너(Y|ota」).
+  assert.ok(two.full && two.lines[0].startsWith('메인테이너') && !two.lines[0].endsWith('(Y'), two.lines.join('|'));
   const cut = fitTag('보관소를 읽어 조건을 확인하고 주문을 요청하는 감시 루프', 70, 2, measure);
   assert.equal(cut.lines.length, 2); assert.equal(cut.full, false); assert.ok(cut.lines[1].endsWith('…'));
   for (const l of cut.lines) assert.ok(measure(l) <= 70, l);
@@ -40,21 +41,22 @@ test('BV2-2 a tag fits its name in its lines, cut at the end with 「…」, bro
   assert.equal(linesNeeded('ReadWriteProxy·압축 워커', 90, measure), 3);
   assert.deepEqual(fitTag('GPTResearcher', 80, 2, measure).lines, ['GPT', 'Researcher']);
   assert.deepEqual(fitTag('WebSocketManager·run_agent', 90, 3, measure).lines, ['WebSocket', 'Manager·run_', 'agent']);
-  // v12 (first user of v11, 8: a first word cut at its middle): never cut inside a word: a first word wider than a line is left out whole, the rest after 「…」;
-  // a name of that one word alone keeps its start (nothing whole can stand for it). Hangul still breaks between syllables (growth-v12 V12-8).
+  // v14 A (spec 2): never cut at its start or inside a word (v12 drew 「…데이터」 and 「tinyshak…」): a first word wider than a line stays whole
+  // at a smaller type (down to WORD_MIN_PX), else 「⋯」 alone; the name in the card's hover and keyboard name (V14A-1).
   const long = fitTag('tinyshakespeare 데이터', 70, 2, measure);
-  assert.deepEqual(long.lines, ['…데이터']); assert.equal(long.full, false);
-  assert.deepEqual(fitTag('tinyshakespeare', 70, 2, measure).lines, ['tinyshak…']);
+  assert.ok(!long.lines.join('').startsWith('…') && !/tinyshak…/.test(long.lines.join('')), long.lines.join('|'));
+  assert.ok(['tinyshakespeare', '⋯'].includes(fitTag('tinyshakespeare', 70, 2, measure).lines[0]));
   assert.ok(fitTag('가나다라마바사아자차', 60, 2, measure).lines.every(l => measure(l) <= 60));
   // The last line reads the rest of the name as written (no space put where it had a separator).
   assert.deepEqual(fitTag('CancelToken·signal·abort·timeout', 95, 2, measure).lines, ['CancelToken·', 'signal·abort…']);
 });
 
-test('BV2-3 identifiable: names that would read alike keep the part that tells them apart', () => {
+test('BV2-3 identifiable: names that would read alike keep the part that tells them apart (v14: never by a middle cut, V14A-2)', () => {
   const a = 'Hugging Face datasets openwebtext(외부)', b = 'Hugging Face transformers GPT-2 가중치(외부)';
   assert.equal(distinguishing(a, [b]), 'Hugging…datasets openwebtext(외부)');
   const out = fitTags([{ id: 'a', name: a, width: 90, lines: 1 }, { id: 'b', name: b, width: 90, lines: 1 }], measure);
-  assert.notEqual(out.get('a').lines.join(''), out.get('b').lines.join(''));
+  // v14 A (spec 2): a tag is never cut in its middle to tell two apart; each starts as its name starts (the whole in its hover).
+  for (const [k, n] of [['a', a], ['b', b]]) assert.ok(n.replace(/\s+/g, '').startsWith(out.get(k).lines.join('').replace(/…$/, '').replace(/\s+/g, '')));
   // Names that differ early are left as they are; the same name twice stays alike (nothing tells them apart).
   assert.equal(distinguishing('viewer 사용자', ['manager 사용자']), 'viewer 사용자');
   const same = fitTags([{ id: 'x', name: '같은 이름의 아주 긴 부분', width: 40, lines: 1 }, { id: 'y', name: '같은 이름의 아주 긴 부분', width: 40, lines: 1 }], measure);
