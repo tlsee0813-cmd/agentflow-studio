@@ -4266,17 +4266,25 @@ function fitView(explicit: boolean, animate = false) {
 /** v13 fix 2 (review of v13: the growth map at 1280 opened in 층 on its first flow with that flow's last card, 자동 배정, under the legend chip
  * and the tools): a frame on the first flow keeps the flow's cards above the tools' row. The least pan up that does it while the map's own
  * title stays under the top line's row; else the title and the flow framed together a little smaller (down to FOCUS_SHRINK of the zoom). */
-const FOCUS_SHRINK = 0.8;
+const FOCUS_SHRINK = 0.8, FOCUS_SETTLE = 0.9;
 function focusOverDock() {
   const f = openFocus(); if (!f) return;
   const dock = mapBottom() - mapBottomInset() - 8, fs = toScreen(f); if (fs.y + fs.h <= dock) return;
-  const topY = topInset() + 4, ink = titleInk(), t0 = Math.min(ink ? ink.y : f.y, f.y), s0 = camera.y + t0 * camera.k;
-  const dy = dock - (fs.y + fs.h);
-  if (s0 + dy >= topY) { camera = { ...camera, y: camera.y + dy }; return; }
-  const span = (f.y + f.h - t0) * camera.k, room = dock - topY; if (room <= 0) return;
-  const k = camera.k * room / span; if (k < camera.k * FOCUS_SHRINK) return;
-  const cx = fs.x + fs.w / 2, mx = f.x + f.w / 2;
-  camera = { k, x: cx - mx * k, y: topY - t0 * k };
+  const topY = topInset() + 4, ink = titleInk(), t0 = Math.min(ink ? ink.y : f.y, f.y), k0 = camera.k;
+  const kFit = Math.min(k0, (dock - topY) / Math.max(1, f.y + f.h - t0)); if (kFit < k0 * FOCUS_SHRINK) return;
+  // Among the frames that keep the title under the top line's row and the flow above the tools (the largest zoom first, then the least pan
+  // up), the one with the fewest cards cut by the tools' row (down to FOCUS_SETTLE of that zoom): the map's own rows meet the tools' edge
+  // between cards where they can.
+  const bottom = mapBottom(), zone = bottom - mapBottomInset(), cards = [...lay.boxes.values()].filter(x => x.kind === 'node');
+  const cut = (k: number, y: number) => cards.reduce((n, x) => { const t = y + x.y * k, hh = x.h * k, cov = Math.min(t + hh, bottom) - Math.max(t, zone); return n + (t < bottom && cov / hh >= 0.15 ? 1 : 0); }, 0);
+  let best: { n: number; k: number; y: number } | null = null;
+  for (let k = kFit; k >= Math.max(k0 * FOCUS_SHRINK, kFit * FOCUS_SETTLE) - 1e-9 && best?.n !== 0; k -= 0.004) {
+    const lo = topY - t0 * k, hi = dock - (f.y + f.h) * k; if (lo > hi + 0.5) continue;
+    for (let y = hi; y >= lo - 0.5; y -= 4) { const yy = Math.max(lo, y), n = cut(k, yy); if (!best || n < best.n) best = { n, k, y: yy }; if (!n) break; }
+  }
+  if (!best) return;
+  const k = best.k, cx = fs.x + fs.w / 2, mx = f.x + f.w / 2;
+  camera = { k, x: cx - mx * k, y: best.y };
   // Across: the map in the middle when it fits the window's width at this zoom, else round the flow with no empty margin at either side.
   const B = drawnBounds(), vw = $('viewport').clientWidth;
   camera = { ...camera, x: B.w * k <= vw - 2 * SAFE_SIDE ? (vw - B.w * k) / 2 - B.x * k : Math.min(SAFE_SIDE - B.x * k, Math.max(vw - SAFE_SIDE - (B.x + B.w) * k, camera.x)) };
