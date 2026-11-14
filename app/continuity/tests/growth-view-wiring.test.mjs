@@ -141,7 +141,8 @@ test('GROWTH-W7 F7: a new range opens on its first scene, a range seen comes bac
 
 test('GROWTH-W8 the first screen keeps the map\'s own title and its sentence: a frame on the first flow pans the title in, a whole frame finds room at its own scale, the one-line top box may stand narrower', async () => {
   const app = await read('src/client/app.ts'), fit = fn(app, 'fitView');
-  assert.match(fit, /if \(s && s\.x < 16\) camera = \{ \.\.\.camera, x: camera\.x \+ \(16 - s\.x\) \};/, 'the title in sight whole');
+  // v14 A (spec 2): only while the first view's focus stays in the window with it (V14A-3).
+  assert.match(fit, /if \(s && s\.x < 16 && titlePanKeeps\(16 - s\.x\)\) camera = \{ \.\.\.camera, x: camera\.x \+ \(16 - s\.x\) \};/, 'the title in sight whole');
   assert.doesNotMatch(fit, /out <= whole \? -out : whole/, 'never pushed out at the left');
   // v11 (ruling F8 Q2): never on one line: in conflict the title is kept and the map moves down under the whole box.
   assert.match(fit, /const r = ftBox\(null, camera, inkAt\(camera\.k\)\)/, 'in conflict: the title kept and the box whole');

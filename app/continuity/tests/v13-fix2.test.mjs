@@ -122,7 +122,7 @@ test('V13X2-7 a frame on the first flow keeps the flow\'s cards above the tools:
   assert.match(fn(a, 'fitView'), /if \(!done\) frameView\(explicit, base \+ ftBox\('ft-under', camera, null\)\.h \+ 8\);\n\s+if \(!at\.whole\) focusOverDock\(\);/);
   const f = fn(a, 'focusOverDock');
   assert.match(f, /const dock = mapBottom\(\) - mapBottomInset\(\) - 8, fs = toScreen\(f\); if \(fs\.y \+ fs\.h <= dock\) return;/);
-  assert.match(f, /const kFit = Math\.min\(k0, \(dock - topY\) \/ Math\.max\(1, f\.y \+ f\.h - t0\)\); if \(kFit < k0 \* FOCUS_SHRINK\) return;/);
+  assert.match(f, /const kFit = Math\.min\(k0, \(dock - topY\) \/ Math\.max\(1, f\.y \+ f\.h - t0\)\); if \(kFit < k0 \* FOCUS_SHRINK\) \{ camera = /, 'v14 A (spec 1): else the flow is the view (V14A-3)');
   assert.match(f, /const lo = topY - t0 \* k, hi = dock - \(f\.y \+ f\.h\) \* k; if \(lo > hi \+ 0\.5\) continue;/, 'the title under the top line\'s row, the flow above the tools');
   assert.match(f, /if \(!best \|\| n < best\.n\) best = \{ n, k, y: yy \};/, 'the fewest cards cut by the tools\' row');
   assert.match(f, /B\.w \* k <= vw - 2 \* SAFE_SIDE \? \(vw - B\.w \* k\) \/ 2 - B\.x \* k :/);

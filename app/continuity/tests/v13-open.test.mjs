@@ -78,16 +78,17 @@ test('V13-3 one version: the recorded chain step by step (0.25 s each, 2.2 s at 
   const inp = { ...growthInput, versions: [], chain: [['mixer'], ['oven'], ['shelf']], chainRels: ['r1', 'r2'] };
   const plan = O.openingPlan(inp);
   assert.equal(plan.kind, 'chain');
-  assert.deepEqual(plan.beats.map(b => b.caption), Array(4).fill(O.CHAIN_CAPTION));
+  // v14 A (spec 4): the rest after the chain comes in by the record's order in a few beats (V14A-8), so the beats are the 3 steps and more.
+  assert.ok(plan.beats.length >= 4 && plan.beats.every(b => b.caption === O.CHAIN_CAPTION));
   assert.deepEqual(new Set(plan.beats[0].show), new Set(['mixer', 'kitchen']), 'a step with the frame it sits in');
   assert.deepEqual(plan.beats[0].lines, []); assert.deepEqual(plan.beats[1].lines, ['e1']); assert.deepEqual(new Set(plan.beats[2].lines), new Set(['e1', 'e2']));
-  assert.deepEqual(new Set(plan.beats[3].show), drawn, 'then every other part and relation together');
-  assert.equal(plan.beats[3].ms, O.REST_MS);
-  for (const b of plan.beats.slice(0, -1)) assert.equal(b.ms, O.STEP_MS);
+  assert.deepEqual(new Set(plan.beats.at(-1).show), drawn, 'then every other part and relation');
+  assert.ok(plan.beats.slice(3).reduce((s, b) => s + b.ms, 0) <= O.REST_MS, 'the rest within v13\'s REST_MS');
+  for (const b of plan.beats.slice(0, 3)) assert.equal(b.ms, O.STEP_MS);
   const long = O.openingPlan({ ...inp, chain: Array.from({ length: 12 }, (_, i) => [['mixer', 'oven', 'shelf', 'till', 'courier', 'kitchen'][i % 6]]) });
-  assert.ok(long.beats.slice(0, -1).reduce((s, b) => s + b.ms, 0) <= O.CHAIN_MAX_MS);
-  // No recorded chain (or a chain of one step): everything fades in together, no caption.
-  for (const chain of [null, [['mixer']]]) { const f = O.openingPlan({ ...inp, chain }); assert.equal(f.kind, 'fade'); assert.equal(f.beats.length, 1); assert.equal(f.beats[0].caption, null); assert.equal(f.beats[0].ms, O.FADE_MS); }
+  assert.ok(long.beats.filter(b => !b.dim).reduce((s, b) => s + b.ms, 0) <= O.CHAIN_MAX_MS);
+  // No recorded chain (or a chain of one step): v14 A (spec 4) never fades the whole map in at once: it grows in the record's order.
+  for (const chain of [null, [['mixer']]]) { const f = O.openingPlan({ ...inp, chain }); assert.equal(f.kind, 'order'); assert.ok(f.beats.length > 1); assert.equal(f.beats[0].caption, O.ORDER_CAPTION); }
 });
 
 test('V13-4 the opening is remembered per project and version (a storage that fails plays it again), types and settles', () => {

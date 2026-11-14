@@ -49,8 +49,10 @@ export function tagRoom(w: number, h: number, need: (width: number, px: number) 
 /** The pieces a name breaks into on a tag: after its separators (card-family nameBreaks), at its spaces (the space kept with the
  * piece before it), before an opening bracket (「메인테이너|(Yota Hamada)」, never 「메인테이너(Y|ota」) and, beauty v2 review M4, where
  * the words of an identifier meet (「GPT|Researcher」, 「WebSocket|Manager」): never inside a word. */
-function pieces(name: string): string[] {
-  return nameBreaks(name).flatMap(p => p.split(/(?<=\s)(?=\S)|(?<=\S)(?=[([{])|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z]{2})/)).filter(Boolean);
+function pieces(name: string, ext = false): string[] {
+  const ps = nameBreaks(name).flatMap(p => p.split(/(?<=\s)(?=\S)|(?<=\S)(?=[([{])|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z]{2})/)).filter(Boolean);
+  // v14 A (spec 2), only when nothing else keeps the name whole: a file name may also break before its extension (「presetloader|.py」).
+  return ext ? ps.flatMap(p => p.split(/(?<=[A-Za-z0-9_])(?=\.[A-Za-z0-9]{1,4}(?:\s|$))/)).filter(Boolean) : ps;
 }
 /** Hangul breaks between its syllables (Korean is set that way); a Latin word, an identifier or a number never breaks inside. */
 const HANGUL = /[ㄱ-ㆎ가-힣]/;
@@ -69,10 +71,10 @@ function wrap(name: string, w: number, measure: (s: string) => number): string[]
   return wrapAt(name, w, measure).map(l => l.text);
 }
 /** wrap, each line with the offset in the name where it starts (so the rest of a name is read from the name itself, as written). */
-function wrapAt(name: string, w: number, measure: (s: string) => number): { text: string; start: number }[] {
+function wrapAt(name: string, w: number, measure: (s: string) => number, ext = false): { text: string; start: number }[] {
   const out: { text: string; start: number }[] = []; let cur = '', start = 0, at = 0;
   const push = (text: string) => { out.push({ text: text.trimEnd(), start }); };
-  for (const p of pieces(name)) {
+  for (const p of pieces(name, ext)) {
     if (measure((cur + p).trimEnd()) <= w) { cur += p; at += p.length; continue; }
     if (cur) { push(cur); cur = ''; start = at; }
     if (measure(p.trimEnd()) <= w) { cur = p; at += p.length; continue; }
@@ -88,57 +90,65 @@ function cutEnd(s: string, w: number, measure: (s: string) => number): string {
   while (n > 0 && measure(`${cs.slice(0, n).join('').trimEnd()}…`) > w) n--;
   return `${cs.slice(0, Math.max(n, 1)).join('').trimEnd()}…`;
 }
-/** A name in at most `lines` lines of width w. v12 (first user of v11, 8: 「문서 소비…」 and a parser's name cut inside its first word at 1280): what does not fit is left out
- * in whole units only, the way the plain map shortens a label (line-grammar cutUnits: never inside a word, a Hangul word included): its
- * first whole units with 「…」 after them; when not even its first unit fits, 「…」 and its last whole units; only a name of one word wider
- * than every line keeps that word's start with 「…」. full: nothing was left out. */
-export function fitTag(name: string, w: number, lines: number, measure: (s: string) => number): { lines: string[]; full: boolean } {
-  const nm = name.trim(), n = Math.max(1, lines), all = wrapAt(nm, w, measure).map(l => l.text);
-  const bare = (t: string) => t.replace(/\s+/g, '');
-  // Laid out whole: every line within w, nothing cut by wrap (it cuts a word wider than a line) and every line starting where a unit starts
-  // (a Hangul word is not broken between its syllables either).
-  const whole = (t: string): string[] | null => {
-    const at = wrapAt(t, w, measure), ls = at.map(l => l.text), starts = new Set<number>(); let o = 0; for (const p of pieces(t)) { starts.add(o); o += p.length; }
-    return ls.length <= n && bare(ls.join('')) === bare(t) && ls.every(l => measure(l) <= w + 0.01) && at.every(l => starts.has(l.start)) ? ls : null;
-  };
-  const fit = whole(nm); if (fit) return { lines: fit, full: true };
-  // The units after a cut: a tail never starts inside a bracket it does not open (「…Ellis)」 is left out).
-  const trim = (t: string) => t.replace(/[\s·/,_:;.-]+$/u, '').replace(/^[\s·/,_:;.-]+/u, '');
-  const closeTail = (t: string) => { let x = t; while ((x.match(/[)\]}]/g) ?? []).length > (x.match(/[([{]/g) ?? []).length) { const i = Math.min(...[')', ']', '}'].map(c => x.indexOf(c)).filter(j => j >= 0)); x = trim(x.slice(i + 1)); } return x; };
-  const units = pieces(nm);
-  for (let k = units.length - 1; k >= 1; k--) { const head = trim(units.slice(0, k).join('')); if (!head) continue; const ls = whole(`${head}…`); if (ls) return { lines: ls, full: false }; }
-  for (let k = 1; k < units.length; k++) { const tail = closeTail(trim(units.slice(k).join(''))); if (!tail) continue; const ls = whole(`…${tail}`); if (ls) return { lines: ls, full: false }; }
-  // One word wider than every line: its start, cut at its end (nothing whole can stand for it).
-  if (all.length <= n) return { lines: all, full: !all.some(l => l.endsWith('…')) };
-  const at = wrapAt(nm, w, measure);
-  return { lines: [...all.slice(0, n - 1), cutEnd(nm.slice(at[n - 1]!.start).trim(), w, measure)], full: false };
+/* ---------- v14 A (spec 2): whole names at every width ---------- */
+/** The least a tag's type goes to (screen px) to keep a name whole rather than cut it: a whole name (the smaller face), and a first whole
+ * word standing for a name that does not fit (the page's text floor, map hygiene H3: nothing on the map reads under 10px). */
+export const WHOLE_MIN_PX = 10, WORD_MIN_PX = 10;
+/** A tag's text: its lines, whether the name is there whole, and the share of the tag's type it is drawn at (1 when absent). tight: it
+ * takes the tag's side room too (its padding down to 2px, no icon). none: not even one whole word fits; the tag shows 「⋯」 alone (its
+ * name in the card's hover and keyboard name). */
+export interface TagFit { lines: string[]; full: boolean; scale?: number; tight?: boolean; none?: boolean }
+/** The words of a name for leaving its end out: split at its spaces, after 「·」 「/」 「,」 and before an opening bracket. Never where an
+ * identifier's words meet (「Flash|House」 is one word), never inside a hyphenated, dotted or snake_case word, never between the syllables of a
+ * Hangul word: what stands before 「…」 is always whole words of the name. */
+export function nameWords(name: string): string[] {
+  return name.trim().split(/(?<=\s)(?=\S)|(?<=[·/,，、])(?=\S)|(?<=\S)(?=[([{])/).filter(Boolean);
 }
-/** The part of a name that tells it from others that start alike: its first word (at most 8 characters) and 「…」, then the name from
- * where it first differs from them (back to that word's start): 「Hugging…datasets openwebtext」 beside 「Hugging…GPT-2 가중치」. */
+/** A name in at most `lines` lines of width w, never cut at its start or inside a word (v14 spec 2; v12 had 「…래스터」 and a long word cut at its end):
+ * 1. whole at the tag's type, then at a smaller type down to WHOLE_MIN_PX (the smaller face), a file name broken before its extension
+ * only when nothing else keeps it whole; 2. its first whole words with 「…」 after them (the full name in the card's hover and keyboard
+ * name), at the tag's type, then smaller down to WORD_MIN_PX; 3. its first word alone, whole, in the tag's side room too (slack: the width
+ * its padding and icon give back, tight); 4. 「⋯」. px: the type the measure measures at. */
+export function fitTag(name: string, w: number, lines: number, measure: (s: string) => number, px: number = TAG.name, slack = 0): TagFit {
+  const nm = name.trim(), n = Math.max(1, lines);
+  const bare = (t: string) => t.replace(/\s+/g, '');
+  // Laid out whole: every line within w, nothing cut by wrap and every line starting where a piece starts (a Hangul word is never broken
+  // between its syllables either).
+  const whole = (t: string, m: (s: string) => number, ext = false, ww = w): string[] | null => {
+    const at = wrapAt(t, ww, m, ext), ls = at.map(l => l.text), starts = new Set<number>(); let o = 0; for (const p of pieces(t, ext)) { starts.add(o); o += p.length; }
+    return ls.length <= n && bare(ls.join('')) === bare(t) && ls.every(l => m(l) <= ww + 0.01) && at.every(l => starts.has(l.start)) ? ls : null;
+  };
+  const scaled = (s: number) => (t: string) => measure(t) * s;
+  const steps = (least: number) => { const out: number[] = [1]; for (let s = 0.96; s * px >= least - 1e-9; s -= 0.04) out.push(Math.round(s * 100) / 100); return out; };
+  const at = (s: number) => (s < 1 ? { scale: s } : {});
+  for (const ext of [false, true]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(nm, scaled(s), ext); if (ls) return { lines: ls, full: true, ...at(s) }; }
+  const trim = (t: string) => t.replace(/[\s·/,，、_:;.-]+$/u, '');
+  const words = nameWords(nm);
+  // The most whole words first, each at the largest type that holds it (「프로젝트 전환…」 a little smaller before 「프로젝트…」); never a
+  // bracket left open (「REST API…」, never 「REST API (Django…」): the words before a bracket are the name's own short form.
+  const open = (t: string) => (t.match(/[([{]/g) ?? []).length > (t.match(/[)\]}]/g) ?? []).length;
+  for (let k = words.length - 1; k >= 1; k--) { const head = trim(words.slice(0, k).join('')); if (!head || open(head)) continue; for (const s of steps(WORD_MIN_PX)) { const ls = whole(`${head}…`, scaled(s)); if (ls) return { lines: ls, full: false, ...at(s) }; } }
+  const first = trim(words[0] ?? nm), more = words.length > 1;
+  // In the side room too: with its 「…」 (the cue that the rest of the name is in the hover) before the bare word.
+  if (slack > 0) for (const t of more ? [`${first}…`, first] : [first]) for (const s of steps(WORD_MIN_PX)) if (whole(t, scaled(s), true, w + slack)) return { lines: whole(t, scaled(s), true, w + slack)!, full: !more, tight: true, ...at(s) };
+  if (more) for (const s of steps(WORD_MIN_PX)) if (scaled(s)(first) <= w + 0.01) return { lines: [first], full: false, ...at(s) };
+  return { lines: ['⋯'], full: false, none: true };
+}
+/** v12's way of telling alike names apart (a name with its middle left out): kept for what reads it, never drawn on a tag since v14 (it
+ * cut a name in its middle). */
 export function distinguishing(name: string, others: readonly string[]): string {
   const cs = [...name];
   let p = 0;
   for (const o of others) { const os = [...o]; let i = 0; while (i < cs.length && i < os.length && cs[i] === os[i]) i++; p = Math.max(p, i); }
   if (p < 4) return name;
-  // Back to the start of the word the difference falls in.
   while (p > 0 && !/[\s·/._\-:,(]/.test(cs[p - 1]!)) p--;
   const first = (name.match(/^[^\s·/._\-:,(]+/)?.[0] ?? name).slice(0, 8);
   return p <= first.length ? name : `${first}…${cs.slice(p).join('')}`;
 }
-/** The tags' texts for a set of names at their rooms, each identifiable: parts whose cut names would read the same keep their
- * distinguishing part instead (distinguishing); a pair still alike after that (the same name twice) is left as it is. */
-export function fitTags(items: readonly { id: string; name: string; width: number; lines: number; measure?: (s: string) => number }[], measure: (s: string) => number): Map<string, { lines: string[]; full: boolean }> {
-  const out = new Map<string, { lines: string[]; full: boolean }>(), m = (x: (typeof items)[number]) => x.measure ?? measure;
-  for (const x of items) out.set(x.id, fitTag(x.name, x.width, x.lines, m(x)));
-  const by = new Map<string, (typeof items)[number][]>();
-  for (const x of items) { const k = out.get(x.id)!.lines.join('\n'); by.set(k, [...(by.get(k) ?? []), x]); }
-  for (const xs of by.values()) {
-    if (xs.length < 2 || new Set(xs.map(x => x.name)).size < 2) continue;
-    for (const x of xs) {
-      if (out.get(x.id)!.full) continue;
-      const f = fitTag(distinguishing(x.name, xs.filter(y => y.name !== x.name).map(y => y.name)), x.width, x.lines, m(x));
-      out.set(x.id, { lines: f.lines, full: false });
-    }
-  }
+/** The tags' texts for a set of names at their rooms. v14: each name whole where it can be, else its first whole words (fitTag); two cut
+ * names that read alike stay alike (the full name of each in its card's hover and keyboard name): never a middle cut to tell them apart. */
+export function fitTags(items: readonly { id: string; name: string; width: number; lines: number; measure?: (s: string) => number; px?: number; slack?: number }[], measure: (s: string) => number): Map<string, TagFit> {
+  const out = new Map<string, TagFit>();
+  for (const x of items) out.set(x.id, fitTag(x.name, x.width, x.lines, x.measure ?? measure, x.px ?? TAG.name, x.slack ?? 0));
   return out;
 }
