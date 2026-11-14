@@ -4265,3 +4265,12 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* Spec 2: a first word that needs the tag's side room takes it (2px each side, no icon): whole, never cut. */
 .space.face-tag .node.card.tag-tight > .c-tag { padding-left: calc(2px * var(--u, 1)); padding-right: calc(2px * var(--u, 1)); }
 .space.face-tag .node.card.tag-tight .c-tag-icon { display: none; }
+
+/* ---------- v14 merged (B's shapes × A's quiet state and name tags) ---------- */
+/* The card shapes hold on every typed card (the typed cards' own rule, .space .node.card:is(.f-…), set 10px and a solid edge over B's
+   shapes) and at every zoom: a person's card round at the ends, an outside system's dashed edge kept at least about 1px on screen. */
+.space .node.card.pk-person { border-radius: 24px; }
+.space .node.card.pk-outside { border-style: dashed; border-width: max(1px, calc(1px * min(var(--u, 1), 2.4))); border-radius: 10px; }
+.space .node.card.pk-outside.selected { border-style: solid; }
+/* In the quiet state an outside card keeps its dashed edge seen (its colour steps back with the others, never to the page's own tone). */
+#space.cl-on:not(.lt-sel) #world > .node:not(.ff-card):not(.ff-start):not(.selected):not(.related):not(.near-end):not(.near-self):not(.cited):not(.sc-visit):not(.since-hit):not(:hover):not(:focus-visible).pk-outside { border-color: var(--text-4); }

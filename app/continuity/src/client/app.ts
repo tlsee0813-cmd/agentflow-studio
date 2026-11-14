@@ -4596,7 +4596,7 @@ function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
   const keep = sent ? { text: sent.textContent, hidden: sent.hidden, kind: sent.dataset.kind, data: sent.dataset.text, title: sent.getAttribute('title'), btn: btn?.textContent ?? null } : null;
   el.classList.remove(...FT_FORMS); ftPlace(el, cam, ink); fitSwitch(el);
   if (sent) { ftIntro(el, sent); ftPlace(el, cam, ink); fitSwitch(el); }
-  if (form) el.classList.add(form);
+  if (form) el.classList.add(...form.split(' '));
   const out = { x: el.offsetLeft - ox - 6, y: el.offsetTop - oy - 6, w: el.offsetWidth + 12, h: el.offsetHeight + 12 };
   el.classList.remove(...FT_FORMS); el.classList.add(...was); el.style.left = left; el.style.maxWidth = maxW;
   for (const [t, c] of cut) t.textContent = c;
@@ -4608,9 +4608,12 @@ function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
 }
 /** The top line's shorter forms: v12 (review of v11, a map at 1280: the sentence stepped back while the cut basis line stayed) its basis line put aside
  * first (the 「요약 전문 보기」 panel keeps it), then its sentence stepped back with it (ruling F8 Q2: never on one line). */
-const FT_FORMS = ['ft-nobasis', 'ft-under'];
-/** Polish 5: the forms that say the record's sentence (ruling F8 Q2: whole only; v12: with its basis line, then without it). */
-const FT_SAID = [null, 'ft-nobasis'] as const;
+const FT_FORMS = ['ft-nobasis', 'ft-nocover', 'ft-under'];
+/** Polish 5: the forms that say the record's sentence (ruling F8 Q2: whole only; v12: with its basis line, then without it). v14 merge: then
+ * without the coverage line too (v14 B's 「기록이 다룬 범위」 and the shapes' legend give way, their cue on the switcher's row), so the fit makes
+ * room for the sentence before it lets the sentence step back (v14 A's caption row and B's coverage line made the box taller: umami at 1440
+ * lost its sentence while both lines stayed). */
+const FT_SAID = [null, 'ft-nobasis', 'ft-nobasis ft-nocover'] as const;
 /** The whole view in the free area under `base` (the top inset without the top line): sets the camera and says its scale, whether it
  * framed the whole map (no pan onto a focus), and how to set the same frame at a smaller scale. */
 type Framed = { k: number; whole: boolean; place: (k: number) => void };
@@ -5523,7 +5526,10 @@ function ftIntro(el: HTMLElement, sent: HTMLElement): string {
   const under = el.classList.contains('ft-under'); if (under) el.classList.remove('ft-under');
   sent.hidden = false;
   const lh = parseFloat(getComputedStyle(sent).lineHeight) || 22;
-  const fits = (t: string) => { sent.textContent = t; return sent.offsetHeight <= lh * FT_LINES + 1 && el.offsetHeight <= FT_MAX_H; };
+  // v14 merge: the rows v14 added under the switcher (A's 「진하게: …」 caption, B's coverage line and shapes' legend) come on top of the box's
+  // budget: never at the sentence's cost (with both, umami at 1440 had no room left for one line of its sentence and showed none).
+  const added = [...el.querySelectorAll<HTMLElement>(':scope > .ft-clear, :scope > .ft-cover')].reduce((n, e) => n + (e.offsetHeight ? e.offsetHeight + 2 : 0), 0);
+  const fits = (t: string) => { sent.textContent = t; return sent.offsetHeight <= lh * FT_LINES + 1 && el.offsetHeight <= FT_MAX_H + added; };
   const it = topIntro(ftSaid, fits), s = ffSrc;
   sent.textContent = it.text ?? ''; sent.hidden = !it.text; sent.dataset.kind = it.kind; sent.dataset.text = it.text ?? '';
   if (it.text) sent.title = `${it.text}\n${it.index ? `출처: 기록 요약의 ${it.index + 1}번째 문장` : '출처: 기록 요약의 첫 문장'}${s ? ` · ${s.label}` : ''}`; else sent.removeAttribute('title');
