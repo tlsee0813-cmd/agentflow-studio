@@ -52,7 +52,8 @@ test('V13X2-2 a hub\'s side that cannot hold its pairs pairGap apart sends ends 
 
 test('V13X2-3 a map opened on a camera kept from before routes its lines for that zoom (its pairs PAIR_PX apart there)', async () => {
   const a = await app();
-  assert.match(a, /else if \(saved\) \{ camera = \{ \.\.\.saved \}; routeForZoom\(\); applyCamera\(\); \}/);
+  // v14 fix 1: the camera alone (its window and fit words stay with the kept one), still a fit when the fit set it.
+  assert.match(a, /else if \(saved\) \{ camera = \{ x: saved\.x, y: saved\.y, k: saved\.k \}; fitCam = saved\.fit \? \{ \.\.\.camera \} : null; routeForZoom\(\); applyCamera\(\); \}/);
   const f = fn(a, 'routeForZoom');
   assert.match(f, /const want = Math\.max\(PAIR_PX \/ Math\.max\(camera\.k, 0\.05\), 12\);/);
   assert.match(f, /if \(Math\.abs\(want - routedGap\) <= 0\.75\) return;\n\s+pairGapNow = want; positionWorld\(\);/);
@@ -119,7 +120,7 @@ test('V13X2-6 an opening lands on the map\'s own fit (never on a camera kept fro
 
 test('V13X2-7 a frame on the first flow keeps the flow\'s cards above the tools: a pan, else the title and the flow a little smaller; across, no empty margin', async () => {
   const a = await app();
-  assert.match(fn(a, 'fitView'), /if \(!done\) frameView\(explicit, base \+ ftBox\('ft-under', camera, null\)\.h \+ 8\);\n\s+if \(!at\.whole\) focusOverDock\(\);/);
+  assert.match(fn(a, 'fitView'), /if \(!done\) frameView\(explicit, base \+ ftBox\('ft-under', camera, null\)\.h \+ 8\);\n\s+if \(!at\.whole && !above\) focusOverDock\(\);/); // v14 fix 1: unless the box's room above the map was found (V14F1-2)
   const f = fn(a, 'focusOverDock');
   assert.match(f, /const dock = mapBottom\(\) - mapBottomInset\(\) - 8, fs = toScreen\(f\); if \(fs\.y \+ fs\.h <= dock\) return;/);
   assert.match(f, /const kFit = Math\.min\(k0, \(dock - topY\) \/ Math\.max\(1, f\.y \+ f\.h - t0\)\); if \(kFit < k0 \* FOCUS_SHRINK\) \{ camera = /, 'v14 A (spec 1): else the flow is the view (V14A-3)');

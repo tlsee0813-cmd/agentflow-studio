@@ -100,7 +100,7 @@ test('V14B-5 the record\'s choice: the lane is no part of the program it counts;
   assert.match(F.formChoice(withLane, { ...head, rule: 'summary' }).why, /부품 12개 중 4개/, 'the lane\'s cards are not counted');
 });
 
-test('V14B-6 the main flow: a build or plumbing candidate gives way to a runtime one; among runtime ones the record\'s order stands', () => {
+test('V14B-6 the main flow: a build or plumbing candidate gives way to a runtime one, a runtime one to one from a person who uses the product', () => {
   const f = { lane: new Set(['rel']), log: id => id === 'log', start: id => id === 'cli' };
   assert.equal(S.pathRank([['rel'], ['x']], f), 0);
   assert.equal(S.pathRank([['srv'], ['ws', 'log']], f), 1);
@@ -108,7 +108,9 @@ test('V14B-6 the main flow: a build or plumbing candidate gives way to a runtime
   assert.equal(S.pathRank([['cli'], ['core']], f), 3);
   const r = x => x.r;
   assert.deepEqual(S.preferRuntime([[{ r: 1 }], [{ r: 2 }, { r: 3 }]], r), [1, 1], 'plumbing first: the highest later one');
-  assert.deepEqual(S.preferRuntime([[{ r: 2 }], [{ r: 3 }]], r), [0, 0], 'a runtime path keeps its rule\'s place');
+  // v14 fix 1 (verify of v14: shapez kept its save path lit over the record's start at the person who plays): a path from a user goes first.
+  assert.deepEqual(S.preferRuntime([[{ r: 2 }], [{ r: 3 }]], r), [1, 0], 'a path from a person who uses the product goes ahead of a runtime path');
+  assert.deepEqual(S.preferRuntime([[{ r: 2 }], [{ r: 2 }]], r), [0, 0], 'among runtime paths the record\'s order of rules stands');
   assert.deepEqual(S.preferRuntime([[{ r: 0 }], [{ r: 0 }]], r), [0, 0]);
   // On the first view's own candidates: the plumbing 첫 구조 줄 gives way to the recorded start a person hands to.
   const parts = ['서버', '소켓', '기록 파일', '명령줄', '조사기'].map(n => ({ id: n, name: n, status: 'none', childIds: [], parentId: null }));
@@ -154,7 +156,8 @@ test('V14B-8 the compose map (구성): the whole map\'s lane in rows under the p
 test('V14B-9 the page: each card says what it is by shape and mark, the lane and the coverage are drawn in every form', async () => {
   const a = await app(), c = await css();
   assert.match(a, /return shapeCard\(o, p, el\) \/\* v14 B hook 6 \*\//);
-  assert.match(fn(a, 'shapeCard'), /pk-\$\{k === 'user' \|\| k === 'crew' \? 'person' : k === 'outside' \? 'outside' : 'part'\}/);
+  // v14 fix 1: the shape from map-shape cardShape (a release bot that is no person is dashed, V14F1-11).
+  assert.match(fn(a, 'shapeCard'), /pk-\$\{cardShapeOf\(o, p\.id, k\)\}/);
   assert.match(c, /\.node\.card\.pk-person \{ border-radius: 24px; \}/);
   assert.match(c, /\.node\.card\.pk-outside \{ border-style: dashed;/);
   assert.match(fn(a, 'shownLanes'), /lay\.lane/, '구성 draws its lane too');

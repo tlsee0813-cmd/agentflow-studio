@@ -47,10 +47,14 @@ export function tagRoom(w: number, h: number, need: (width: number, px: number) 
 }
 
 /** The pieces a name breaks into on a tag: after its separators (card-family nameBreaks), at its spaces (the space kept with the
- * piece before it), before an opening bracket (「메인테이너|(Yota Hamada)」, never 「메인테이너(Y|ota」) and, beauty v2 review M4, where
- * the words of an identifier meet (「GPT|Researcher」, 「WebSocket|Manager」): never inside a word. */
-function pieces(name: string, ext = false): string[] {
-  const ps = nameBreaks(name).flatMap(p => p.split(/(?<=\s)(?=\S)|(?<=\S)(?=[([{])|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z]{2})/)).filter(Boolean);
+ * piece before it) and before an opening bracket (「메인테이너|(Yota Hamada)」, never 「메인테이너(Y|ota」): never inside a word. v14 fix 1
+ * (verify of v14: 「Postgre|SQL」, 「GPT|Researcher」, 「런처(Pocket|Base)」 at rest): an identifier is one word, never broken where its
+ * capitals meet (beauty v2 review M4 broke it there). */
+function pieces(name: string, ext: boolean | 'camel' = false): string[] {
+  const ps0 = nameBreaks(name).flatMap(p => p.split(/(?<=\s)(?=\S)|(?<=\S)(?=[([{])/)).filter(Boolean);
+  // v14 fix 1: only as the last way to a whole name (camel; 「WebSocketManager·run_agent」 kept none of it at 43% without it), an identifier may
+  // break where a lower-case run meets a capitalised word (「WebSocket|Manager」), never inside a run of capitals (「PostgreSQL」, 「GPTResearcher」).
+  const ps = ext === 'camel' ? ps0.flatMap(p => p.split(/(?<=[a-z]{2})(?=[A-Z][a-z]{2})/)).filter(Boolean) : ps0;
   // v14 A (spec 2), only when nothing else keeps the name whole: a file name may also break before its extension (「presetloader|.py」).
   return ext ? ps.flatMap(p => p.split(/(?<=[A-Za-z0-9_])(?=\.[A-Za-z0-9]{1,4}(?:\s|$))/)).filter(Boolean) : ps;
 }
@@ -71,7 +75,7 @@ function wrap(name: string, w: number, measure: (s: string) => number): string[]
   return wrapAt(name, w, measure).map(l => l.text);
 }
 /** wrap, each line with the offset in the name where it starts (so the rest of a name is read from the name itself, as written). */
-function wrapAt(name: string, w: number, measure: (s: string) => number, ext = false): { text: string; start: number }[] {
+function wrapAt(name: string, w: number, measure: (s: string) => number, ext: boolean | 'camel' = false): { text: string; start: number }[] {
   const out: { text: string; start: number }[] = []; let cur = '', start = 0, at = 0;
   const push = (text: string) => { out.push({ text: text.trimEnd(), start }); };
   for (const p of pieces(name, ext)) {
@@ -97,7 +101,7 @@ export const WHOLE_MIN_PX = 10, WORD_MIN_PX = 10;
 /** A tag's text: its lines, whether the name is there whole, and the share of the tag's type it is drawn at (1 when absent). tight: it
  * takes the tag's side room too (its padding down to 2px, no icon). none: not even one whole word fits; the tag shows 「⋯」 alone (its
  * name in the card's hover and keyboard name). */
-export interface TagFit { lines: string[]; full: boolean; scale?: number; tight?: boolean; none?: boolean }
+export interface TagFit { lines: string[]; full: boolean; scale?: number; tight?: boolean; none?: boolean; gloss?: boolean }
 /** The words of a name for leaving its end out: split at its spaces, after 「·」 「/」 「,」 and before an opening bracket. Never where an
  * identifier's words meet (「Flash|House」 is one word), never inside a hyphenated, dotted or snake_case word, never between the syllables of a
  * Hangul word: what stands before 「…」 is always whole words of the name. */
@@ -114,7 +118,7 @@ export function fitTag(name: string, w: number, lines: number, measure: (s: stri
   const bare = (t: string) => t.replace(/\s+/g, '');
   // Laid out whole: every line within w, nothing cut by wrap and every line starting where a piece starts (a Hangul word is never broken
   // between its syllables either).
-  const whole = (t: string, m: (s: string) => number, ext = false, ww = w): string[] | null => {
+  const whole = (t: string, m: (s: string) => number, ext: boolean | 'camel' = false, ww = w): string[] | null => {
     const at = wrapAt(t, ww, m, ext), ls = at.map(l => l.text), starts = new Set<number>(); let o = 0; for (const p of pieces(t, ext)) { starts.add(o); o += p.length; }
     return ls.length <= n && bare(ls.join('')) === bare(t) && ls.every(l => m(l) <= ww + 0.01) && at.every(l => starts.has(l.start)) ? ls : null;
   };
@@ -122,6 +126,14 @@ export function fitTag(name: string, w: number, lines: number, measure: (s: stri
   const steps = (least: number) => { const out: number[] = [1]; for (let s = 0.96; s * px >= least - 1e-9; s -= 0.04) out.push(Math.round(s * 100) / 100); return out; };
   const at = (s: number) => (s < 1 ? { scale: s } : {});
   for (const ext of [false, true]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(nm, scaled(s), ext); if (ls) return { lines: ls, full: true, ...at(s) }; }
+  // v14 fix 1: the whole name in the tag's side room too (its padding down to 2px, no icon) before any part of it alone: an identifier that
+  // was broken where its capitals meet (「ReadWrite|Proxy·압축 워커」) now reads whole there.
+  if (slack > 0) for (const ext of [false, true]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(nm, scaled(s), ext, w + slack); if (ls) return { lines: ls, full: true, tight: true, ...at(s) }; }
+  // v14 fix 1 (verify of v14: 「작업 큐·실행기…」, 「REST API…」, 「프로젝트 전환…」 at rest): a name that ends in a bracket (「정기 일정(django_q
+  // Schedule)」, 「Weights & Biases(외부, 선택)」) reads as its own words before it, whole, with no 「…」: the bracket is the name's gloss, read in
+  // the card's hover and keyboard name; the tag's dotted underline (gloss) says there is more, as a code name in brackets reads under the pane's title.
+  const g = glossHead(nm);
+  if (g) for (const ww of slack > 0 ? [w, w + slack] : [w]) for (const ext of [false, true]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(g, scaled(s), ext, ww); if (ls) return { lines: ls, full: false, gloss: true, ...(ww > w ? { tight: true } : {}), ...at(s) }; }
   const trim = (t: string) => t.replace(/[\s·/,，、_:;.-]+$/u, '');
   const words = nameWords(nm);
   // The most whole words first, each at the largest type that holds it (「프로젝트 전환…」 a little smaller before 「프로젝트…」); never a
@@ -132,7 +144,16 @@ export function fitTag(name: string, w: number, lines: number, measure: (s: stri
   // In the side room too: with its 「…」 (the cue that the rest of the name is in the hover) before the bare word.
   if (slack > 0) for (const t of more ? [`${first}…`, first] : [first]) for (const s of steps(WORD_MIN_PX)) if (whole(t, scaled(s), true, w + slack)) return { lines: whole(t, scaled(s), true, w + slack)!, full: !more, tight: true, ...at(s) };
   if (more) for (const s of steps(WORD_MIN_PX)) if (scaled(s)(first) <= w + 0.01) return { lines: [first], full: false, ...at(s) };
+  // v14 fix 1: the whole name broken where an identifier's words meet (camel), in the side room too, before 「⋯」.
+  for (const ww of slack > 0 ? [w, w + slack] : [w]) for (const s of steps(WHOLE_MIN_PX)) { const ls = whole(nm, scaled(s), 'camel', ww); if (ls) return { lines: ls, full: true, ...(ww > w ? { tight: true } : {}), ...at(s) }; }
   return { lines: ['⋯'], full: false, none: true };
+}
+/** v14 fix 1: a name's own words before the bracket that ends it (「정기 일정(django_q Schedule)」 → 「정기 일정」); null when no bracket ends
+ * the name, or nothing of its own (no letter or digit, or a bracket left open) stands before it. */
+export function glossHead(name: string): string | null {
+  const m = /^(.*?\S)\s*[(（][^()（）]*[)）]\s*$/.exec(name.trim()); if (!m) return null;
+  const head = m[1]!.trim(), opens = (head.match(/[([{（]/g) ?? []).length, closes = (head.match(/[)\]}）]/g) ?? []).length;
+  return opens === closes && /[\p{L}\p{N}]/u.test(head) ? head : null;
 }
 /** v12's way of telling alike names apart (a name with its middle left out): kept for what reads it, never drawn on a tag since v14 (it
  * cut a name in its middle). */

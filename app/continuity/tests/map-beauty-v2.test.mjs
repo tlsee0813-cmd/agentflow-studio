@@ -36,11 +36,11 @@ test('BV2-2 a tag fits its name in its lines, cut at the end with 「…」, bro
   const cut = fitTag('보관소를 읽어 조건을 확인하고 주문을 요청하는 감시 루프', 70, 2, measure);
   assert.equal(cut.lines.length, 2); assert.equal(cut.full, false); assert.ok(cut.lines[1].endsWith('…'));
   for (const l of cut.lines) assert.ok(measure(l) * (cut.scale ?? 1) <= 70, l); // v14 A: at the type it is drawn at
-  // Beauty v2 review (M4): an identifier breaks where its words meet, never inside one: 'ReadWrite|Proxy·압축 |워커' (three lines where the
-  // old character break made two with 'ReadWriteProx|y').
-  assert.equal(linesNeeded('ReadWriteProxy·압축 워커', 90, measure), 3);
-  assert.deepEqual(fitTag('GPTResearcher', 80, 2, measure).lines, ['GPT', 'Researcher']);
-  assert.deepEqual(fitTag('WebSocketManager·run_agent', 90, 3, measure).lines, ['WebSocket', 'Manager·run_', 'agent']);
+  // Beauty v2 review (M4) broke an identifier where its words meet; v14 fix 1 (verify of v14: 「Postgre|SQL」, 「GPT|Researcher」 at rest): never
+  // inside an identifier: whole at a smaller type, its line breaks only after a separator (V14F1-5).
+  assert.equal(linesNeeded('ReadWriteProxy·압축 워커', 120, measure), 2);
+  assert.deepEqual(fitTag('GPTResearcher', 80, 2, measure).lines, ['GPTResearcher']);
+  for (const n of [1, 2, 3]) assert.ok(!/WebSocket\|Manager|Manager·run_\|agent/.test(fitTag('WebSocketManager·run_agent', 90, n, measure).lines.join('|')));
   // v14 A (spec 2): never cut at its start or inside a word (v12 drew 「…데이터」 and 「tinyshak…」): a first word wider than a line stays whole
   // at a smaller type (down to WORD_MIN_PX), else 「⋯」 alone; the name in the card's hover and keyboard name (V14A-1).
   const long = fitTag('tinyshakespeare 데이터', 70, 2, measure);

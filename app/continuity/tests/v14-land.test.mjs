@@ -45,11 +45,12 @@ test('V14A-1 a tag never cuts a name at its start or inside a word: whole, whole
   const tight = T.fitTag('tinypoemsampler', 80, 1, measure, 12.5, 6);
   assert.equal(tight.tight, true); assert.deepEqual(tight.lines, ['tinypoemsampler']);
   assert.match(fn(await app(), 'fitCards'), /slack: Math\.max\(0, w - 4 - room\.width\)/);
-  // The most whole words first, a little smaller before fewer; never a bracket left open (the words before it are the name's short form).
+  // Never a bracket left open: the words before the bracket that ends a name are its short form; v14 fix 1: read whole as the name's own
+  // words with no 「…」 (gloss: the bracket in the hover, the tag's dotted underline says so), a little smaller before fewer words.
   const br = T.fitTag('작업 큐·실행기(Granary Q worker + Relayer)', 90, 2, measure, 12.5);
-  assert.equal(br.lines.join(''), '작업 큐·실행기…', br.lines.join('|'));
+  assert.equal(br.lines.join(''), '작업 큐·실행기', br.lines.join('|')); assert.equal(br.gloss, true);
   const two = T.fitTag('프로젝트 전환(RFC 003)', 72, 1, measure, 12.5);
-  assert.equal(two.lines.join(''), '프로젝트 전환…', `${two.lines.join('|')} ${two.scale}`); assert.ok(two.scale < 1 && two.scale * 12.5 >= T.WORD_MIN_PX - 1e-9);
+  assert.equal(two.lines.join(''), '프로젝트 전환', `${two.lines.join('|')} ${two.scale}`); assert.ok(two.gloss && two.scale < 1 && two.scale * 12.5 >= T.WHOLE_MIN_PX - 1e-9);
   // Nothing whole fits: 「⋯」 alone (the name in the card's hover and keyboard name).
   assert.deepEqual(T.fitTag('GrainStore', 20, 1, measure, 12.5), { lines: ['⋯'], full: false, none: true });
   // Whatever the room: what stands before 「…」 ends where a word of the name ends, and nothing starts with 「…」.
@@ -85,10 +86,10 @@ test('V14A-3 the first view never lands under FIRST_FIT_MIN: a map too large ope
   assert.match(sf, /for \(let kk = k; kk >= FIRST_FIT_MIN - 1e-9; kk -= 0\.005\)/);
   assert.match(sf, /return z <= 0 \|\| a >= vpw \|\| \(a >= 0 && z <= vpw\);/, 'each card wholly in the window or wholly out of it');
   assert.match(tp, /return fs\.x \+ dx >= 0 && fs\.x \+ fs\.w \+ dx <= vw;/);
-  assert.equal((a.match(/titlePanKeeps\(16 - (?:s|ti)\.x\)/g) ?? []).length, 2, 'both title pans ask first');
+  assert.equal((a.match(/titlePanKeeps\(16 - (?:s|ti)\.x\)/g) ?? []).length, 3, 'every title pan asks first (v14 fix 1: with the box\'s room above the map too)');
   // After the fit's last pans (the title, the focus over the tools): a side that still cuts a card pans or zooms out a little (never 전체 보기's).
   const fit = fn(a, 'fitView'), sc = fn(a, 'sidesClear');
-  assert.match(fit, /  if \(!at\.whole\) focusOverDock\(\);\n  if \(!explicit\) sidesClear\(\);[^\n]*\n  if \(pairRoute\(explicit, animate\)\) return;/);
+  assert.match(fit, /  if \(!at\.whole && !above\) focusOverDock\(\);\n  if \(!explicit\) sidesClear\(\);[^\n]*\n  if \(pairRoute\(explicit, animate\)\) return;/);
   assert.match(sc, /if \(!vpw \|\| !cutAt\(camera\.x, k0\)\) return;/, 'a frame with no cut is left as it is');
   assert.match(sc, /for \(let k = k0; k >= Math\.min\(k0, FIRST_FIT_MIN\) - 1e-9; k -= 0\.005\)/);
   // The top line's give never takes a frame under FIRST_FIT_MIN (dagu-sized maps at 1280×720 went to 34%).

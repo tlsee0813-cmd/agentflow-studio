@@ -4282,3 +4282,16 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 .space .node.card.pk-outside.selected { border-style: solid; }
 /* In the quiet state an outside card keeps its dashed edge seen (its colour steps back with the others, never to the page's own tone). */
 #space.cl-on:not(.lt-sel) #world > .node:not(.ff-card):not(.ff-start):not(.selected):not(.related):not(.near-end):not(.near-self):not(.cited):not(.sc-visit):not(.since-hit):not(:hover):not(:focus-visible).pk-outside { border-color: var(--text-4); }
+
+/* ---------- v14 fix 1 ---------- */
+/* The map fades out up to the top of what stands at the bottom (placeDock sets --dock-h: the tools, and the guide line and the legend chip
+   when they went above them), never drawn under it: at 780 the chip and the guide line stood over the map's last row. */
+.space:not(.cmp-foot) > .viewport { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--dock-h, 58px) - 30px), transparent calc(100% - var(--dock-h, 58px) + 6px)); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--dock-h, 58px) - 30px), transparent calc(100% - var(--dock-h, 58px) + 6px)); }
+/* A name tag that reads its name's own words before the bracket that ends it (name-tag fitTag gloss): a dotted underline says the rest of
+   the name is in the card's hover and keyboard name. */
+.space.face-tag .node.card.tag-gloss .c-tag-name { text-decoration: underline dotted; text-decoration-color: var(--text-3); text-underline-offset: 2px; }
+/* The opening: a line comes in after its cards have begun to (first look at v14: thick line pieces with no card at their ends in the middle
+   frames of hyperfine, pocketbase and umami): its fade waits 0.16s, so it ends with the cards' 0.3s. No motion under reduced motion. */
+#space.op-run #world .edge:not(.op-out) { transition: opacity .18s ease .16s; }
+/* A lane's words under the tools or the pills at the bottom (clipAtEdge lane-cut) step back; the lane's tip keeps them. */
+.form-lane .form-lane-word.lane-cut { visibility: hidden; }

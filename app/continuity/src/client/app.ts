@@ -42,7 +42,7 @@ import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomT
 // v13 (C-words-regressions): a mark's further places, the word level, the compare footer.
 import { cueSpots, pathWalk } from './mark-room.js';
 import { readWords, writeWords, plainLabel, hasCode, easyLegendChip, easyKind, partMark, leansBack, easyBand, EASY_LENS, WORDS_TIP, type WordLevel } from './word-level.js';
-import { shapeKind, kindMark, laneIds, pathRank, roleGroups, coverageOf, LOG_NAME, USER_WORD, KIND_LEGEND, COVERAGE_WORD, type ShapeKind } from './map-shape.js'; // v14 B
+import { shapeKind, kindMark, cardShape, laneIds, pathRank, roleGroups, coverageOf, LOG_NAME, USER_WORD, KIND_LEGEND, COVERAGE_WORD, type ShapeKind } from './map-shape.js'; // v14 B
 import { shapeFactsOf } from './map-regions.js'; // v14 B
 import { setPlainLevel, easyWordOf, detailNote, plainLead, EASY_FORM_WORD, EASY_FORM_SWITCH, EASY_FORM_TIP } from './plain-words.js'; // v14 B
 import { CARD_H, CARD_H_TALL, CARD_H_TALLER, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
@@ -206,10 +206,20 @@ function savePositions(o: Opened) { if (o.kind === 'saved') writeEntryPositions(
 /* Scope = the part whose inside is shown (null = whole project). Each scope keeps its own camera for the way back. */
 let scope: string | null = null;
 let lay: ScopeLayout = { boxes: new Map(), edges: [], heads: [], bounds: { x: 0, y: 0, w: 0, h: 0 }, spine: [], bands: { outside: [], boundary: [], shelf: [] }, channels: new Map(), layers: [], blocks: new Map(), roles: new Map() };
-const cameras = new Map<string, { x: number; y: number; k: number; win?: [number, number] }>();
+const cameras = new Map<string, { x: number; y: number; k: number; win?: [number, number]; fit?: true }>();
 const winSize = (): [number, number] => [window.innerWidth, window.innerHeight];
-/** Whether a camera saved in a window of that size still fits this one: both sides within a quarter. An unknown size is taken. */
-const sameWindow = (win?: [number, number]) => !win || (Math.abs(win[0] - window.innerWidth) <= window.innerWidth / 4 && Math.abs(win[1] - window.innerHeight) <= window.innerHeight / 4);
+/** Whether a camera saved in a window of that size still fits this one: both sides within a quarter. An unknown size is taken.
+ * v14 fix 1 (verify of v14: hyperfine fitted at 1440×900 and opened again at 1280×720 kept the 1440 frame, its build lane under the tools
+ * and two cards cut at the right edge): a camera the fit set and nobody moved (fit) is the fit of its own window only: another window fits
+ * the map again. A frame the person chose keeps the quarter. */
+const sameWindow = (win?: [number, number], fit?: boolean) => !win || (fit ? Math.abs(win[0] - window.innerWidth) <= FIT_WIN_PX && Math.abs(win[1] - window.innerHeight) <= FIT_WIN_PX
+  : Math.abs(win[0] - window.innerWidth) <= window.innerWidth / 4 && Math.abs(win[1] - window.innerHeight) <= window.innerHeight / 4);
+const FIT_WIN_PX = 2;
+/** v14 fix 1: the camera the last fit set (a camera that still equals it is kept as a fit). */
+let fitCam: { x: number; y: number; k: number } | null = null;
+const isFitCam = () => !!fitCam && Math.abs(fitCam.x - camera.x) < 0.5 && Math.abs(fitCam.y - camera.y) < 0.5 && Math.abs(fitCam.k - camera.k) < 1e-4;
+/** The camera kept for the way back and the next visit: where it stands, its window, and whether the fit set it. */
+const keptCamera = () => ({ ...camera, win: winSize(), ...(isFitCam() ? { fit: true as const } : {}) });
 const expandState = new Map<string, boolean>();
 const camKey = (o: Opened, s: string | null) => `${o.key}|${s ?? ''}`;
 /* Folds and per-scope cameras outlive a reload: own record per opened map (a saved project by its workspace entry, like its
@@ -224,17 +234,17 @@ function loadView(o: Opened) {
   for (const [k, open] of Object.entries(v.folds)) { const id = liveId(o, k); if (partOf(o, id)) expandState.set(`${o.key}|${id}`, open); }
   for (const [k, c] of Object.entries(v.cameras)) {
     const id = k ? liveId(o, k) : null; if (id && !partOf(o, id)?.childIds.length) continue;
-    if (!cameras.has(camKey(o, id))) cameras.set(camKey(o, id), { x: c.x, y: c.y, k: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.scale)), ...(c.win ? { win: c.win } : {}) });
+    if (!cameras.has(camKey(o, id))) cameras.set(camKey(o, id), { x: c.x, y: c.y, k: Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, c.scale)), ...(c.win ? { win: c.win } : {}), ...(c.fit ? { fit: true as const } : {}) });
   }
 }
 let viewTimer = 0, viewFor: Opened | null = null;
 function saveViewSoon() { const o = opened; if (!o) return; if (viewFor && viewFor !== o) flushView(); viewFor = o; clearTimeout(viewTimer); viewTimer = window.setTimeout(flushView, 400); }
 function flushView() {
   clearTimeout(viewTimer); const o = viewFor; viewFor = null; if (!o) return;
-  if (opened === o) cameras.set(camKey(o, scope), { ...camera, win: winSize() });
+  if (opened === o) cameras.set(camKey(o, scope), keptCamera());
   const prefix = `${o.key}|`, folds: Record<string, boolean> = {}, cams: Record<string, SavedCamera> = {};
   for (const [k, v] of expandState) if (k.startsWith(prefix)) folds[stableId(o, k.slice(prefix.length))] = v;
-  for (const [k, c] of cameras) if (k.startsWith(prefix)) { const sc = k.slice(prefix.length); cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k, ...(c.win ? { win: c.win } : {}) }; }
+  for (const [k, c] of cameras) if (k.startsWith(prefix)) { const sc = k.slice(prefix.length); cams[sc ? stableId(o, sc) : ''] = { x: c.x, y: c.y, scale: c.k, ...(c.win ? { win: c.win } : {}), ...(c.fit ? { fit: true } : {}) }; }
   const gm = growthMemoOf(o);
   writeViewState(kv, viewKeyOf(o), { folds, cameras: cams, ...(gm ? { growth: gm } : {}) });
 }
@@ -382,7 +392,7 @@ async function render() {
   // The wide reading belongs to the place it was opened from: another address closes it, restoring nothing.
   wide.drop();
   const r = route();
-  if (!r.key) { opening.skip(); opening.offer(false); quoteBack = null; if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() }); flushView(); growthCmp = null; growthPast = null; growthMenuOpen = false; planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; openState = null; backStack = []; hideDetail(); renderHome(); autoSync.render(); return; }
+  if (!r.key) { opening.skip(); opening.offer(false); quoteBack = null; if (opened) cameras.set(camKey(opened, scope), keptCamera()); flushView(); growthCmp = null; growthPast = null; growthMenuOpen = false; planView.close(false); if (toastKey) dropToast(); forgetVisits(); opened = null; selected = null; scope = null; openState = null; backStack = []; hideDetail(); renderHome(); autoSync.render(); return; }
   const next = projectFor(r.key);
   if (!next) { go(null); return; }
   const fresh = opened?.key !== next.key;
@@ -402,7 +412,7 @@ async function render() {
   const idOf = (x: string | null) => (x ? next.alias?.toId.get(x) ?? x : null), routeScope = idOf(r.scope), routePart = idOf(r.part);
   const nextScope = routeScope && next.view.parts.some(p => p.id === routeScope && p.childIds.length) ? routeScope : null;
   if (fresh || nextScope !== scope) {
-    if (opened) cameras.set(camKey(opened, scope), { ...camera, win: winSize() });
+    if (opened) cameras.set(camKey(opened, scope), keptCamera());
     if (fresh) { flushView(); scenes = []; growthCmp = null; growthPast = null; growthMenuOpen = false; }
     else if (backing || (back && scenes.at(-1)?.scope === back.from.scope)) scenes.pop();
     else scenes.push({ scope, selected });
@@ -981,10 +991,12 @@ function shapeRank(o: Opened) {
 const kindOfPart = (o: Opened, id: string): ShapeKind => { const p = partOf(o, id); return p ? shapeKind(shapeFactsOf(p)) : 'part'; };
 /** The card's mark at 쉽게 and in its name tag (map-shape kindMark): 사람 · 자동 봇 · 외부 시스템 · 외부 코드. */
 const kindMarkOf = (o: Opened, id: string): string | null => { const p = partOf(o, id); return p ? kindMark(shapeFactsOf(p)) : null; };
+/** v14 fix 1: a card's shape (map-shape cardShape) from its facts. */
+const cardShapeOf = (o: Opened, id: string, k: ShapeKind): 'person' | 'outside' | 'part' => { const p = partOf(o, id); return p ? cardShape(shapeFactsOf(p)) : k === 'user' || k === 'crew' ? 'person' : k === 'outside' ? 'outside' : 'part'; };
 /** v14 B hook 6: a card's shape class and its mark when the type word gives none (the record's role word or name does). */
 function shapeCard(o: Opened, p: PartView, el: HTMLElement): HTMLElement {
   const k = kindOfPart(o, p.id), mark = kindMarkOf(o, p.id);
-  el.classList.add(`pk-${k === 'user' || k === 'crew' ? 'person' : k === 'outside' ? 'outside' : 'part'}`);
+  el.classList.add(`pk-${cardShapeOf(o, p.id, k)}`); // v14 fix 1: a release bot that is no person is dashed (map-shape cardShape)
   if (mark) {
     const kind = el.querySelector('.c-head .c-kind'), pm = kind?.querySelector('.c-pmark');
     if (pm) pm.textContent = mark; else kind?.prepend(h('span', { class: 'c-pmark' }, mark));
@@ -1022,7 +1034,7 @@ function shapeTitleEls(o: Opened): HTMLElement[] {
   if (scope) return [];
   const read = new Set(o.project.readings.filter(isMapReading).flatMap(r => r.records.map(x => x.id)));
   const cov = coverageOf(o.project.pasted.filter(r => read.has(r.id)).map(r => r.text));
-  const kinds = new Set([...shapeOf(o).kinds.values()].map(k => (k === 'user' || k === 'crew' ? 'person' : k === 'outside' ? 'outside' : 'part')));
+  const kinds = new Set([...shapeOf(o).kinds.entries()].map(([id, k]) => cardShapeOf(o, id, k))); // v14 fix 1
   const legend = KIND_LEGEND.filter(x => kinds.has(x.kind));
   return ([
     cov ? h('p', { class: 'map-cover', title: `기록이 읽은 범위: ${cov.read}${cov.unread ? `\n기록이 못 읽은 범위: ${cov.unread}` : ''}\n지도는 기록이 읽은 것만 그려요` }, cov.shown) : null,
@@ -1400,6 +1412,7 @@ const tagMeasure = (() => {
 })();
 function fitCards() {
   fitFrame = 0;
+  fitBasisLines(); // v14 fix 1
   const k = camera.k, cards = [...document.querySelectorAll<HTMLElement>('#world .node.card')];
   if (face === 'card') fitKindLines();
   if (face !== 'tag') return;
@@ -1427,8 +1440,19 @@ function fitCards() {
     // V14-A HOOK (whole names, spec 2): a name kept whole at a smaller type (name-tag fitTag), or none of it fitting (「⋯」, its name in the hover).
     if (f.scale && f.scale < 1) tn.style.setProperty('font-size', `calc(${(x.px * f.scale).toFixed(2)}px * var(--u, 1))`); else tn.style.removeProperty('font-size');
     x.el.classList.toggle('tag-none', !!f.none); x.el.classList.toggle('tag-tight', !!f.tight);
-    x.el.dataset.tagK = k.toFixed(3); x.el.classList.toggle('tag-cut', !f.full);
+    x.el.dataset.tagK = k.toFixed(3); x.el.classList.toggle('tag-cut', !f.full && !f.gloss); x.el.classList.toggle('tag-gloss', !!f.gloss); // v14 fix 1
     fitTagKind(x.el, x.width, x.boxH - 2 * (x.compact ? TAG_COMPACT.padY : TAG.padY) - f.lines.length * (x.compact ? TAG_COMPACT.nameLh : TAG.nameLh));
+  }
+}
+/** v14 fix 1 (verify of v14: the map title's basis line read 「…· 판본 m…」 at 1280): a basis line its title's width would cut gives up its
+ * version first, then its time (each whole in the line's tip and the 기록 정보), never a 「…」 inside them. */
+function fitBasisLines() {
+  for (const el of document.querySelectorAll<HTMLElement>('#world .map-basis, #scope-sticky .map-basis')) {
+    const more = el.querySelector<HTMLElement>('.mb-more'); if (!more || !el.offsetWidth) continue;
+    const full = (more.dataset.full ??= more.textContent ?? ''); more.textContent = full;
+    const over = () => el.scrollWidth > el.clientWidth + 1;
+    if (!over()) continue;
+    more.textContent = full.split(' · 판본 ')[0] ?? ''; if (over()) more.textContent = '';
   }
 }
 /** v12 (whole units): the card's kind line (its kind or role word, a lifecycle or policy chip and its successor, 미정's chip, the ops
@@ -2920,9 +2944,9 @@ function renderSpace(cameraMode: 'fit' | 'restore' | 'keep' = 'fit', planOverlay
   renderMapEntry();
   renderRecent();
   // A camera saved in a window of another size (a quarter or more each way) is not restored: the map is fitted here instead.
-  const kept = cameraMode === 'restore' ? cameras.get(camKey(o, scope)) : undefined, saved = kept && sameWindow(kept.win) ? kept : undefined;
+  const kept = cameraMode === 'restore' ? cameras.get(camKey(o, scope)) : undefined, saved = kept && sameWindow(kept.win, kept.fit) ? kept : undefined;
   if (cameraMode === 'keep') applyCamera();
-  else if (saved) { camera = { ...saved }; routeForZoom(); applyCamera(); }
+  else if (saved) { camera = { x: saved.x, y: saved.y, k: saved.k }; fitCam = saved.fit ? { ...camera } : null; routeForZoom(); applyCamera(); }
   else fitView(false);
   // The legend opens unless it would cover a card here (then it starts as its chip, and the fit keeps cards clear of the chip).
   if (cameraMode !== 'keep' && syncLegendFold() && !saved) fitView(false);
@@ -3368,18 +3392,27 @@ function clipAtEdge() {
     const vp = $('viewport').getBoundingClientRect(); if (!vp.width) return;
     // v11 (review of v10: 「스캔 PDF」 read faintly through the title chip at 1280): a label under the title chip is not drawn either (its words
     // stay in its line's hover, as a cut label's do).
-    const st = document.getElementById('scope-sticky'), sr = st && !st.hidden && st.offsetWidth ? st.getBoundingClientRect() : null;
+    const st = document.getElementById('scope-sticky'), sr0 = st && !st.hidden && st.offsetWidth ? st.getBoundingClientRect() : null;
+    // v14 fix 1 (verify of v14: 「◇ 조건 보기」 under the top box at 1440 and 780 in 자세히 층): the top box too, as the title chip.
+    const fb = document.getElementById('focus-top'), fr0 = fb && !fb.hidden && fb.offsetWidth ? fb.getBoundingClientRect() : null;
+    // v14 fix 1 (review of v14 fix 1 at 780: 「그 훅에 처리기가 있을 때」, 「◇ 조건 보기」 and the lanes' words under the tools and the pills): what stands at
+    // the bottom too (the map fades out there): a condition slides clear along its line, any other mark steps back to its hover; a lane's
+    // words under it step back (lane-cut: the lane's tip keeps them).
+    const dock = [document.querySelector<HTMLElement>('#space > .controls'), document.getElementById('first-view'), document.getElementById('line-key')]
+      .filter((e): e is HTMLElement => !!e && !e.hidden && !!e.offsetWidth && !(e.id === 'line-key' && !e.classList.contains('folded'))).map(e => e.getBoundingClientRect());
+    const sr = [sr0, fr0, ...dock].filter((x): x is DOMRect => !!x);
+    for (const lw of $('world').querySelectorAll<HTMLElement>(':scope > .form-lane .form-lane-word')) { lw.classList.remove('lane-cut'); const q = lw.getBoundingClientRect(); lw.classList.toggle('lane-cut', q.width > 0 && dock.some(d => q.left < d.right && d.left < q.right && q.top < d.bottom && d.top < q.bottom)); }
     const world = $('world');
     // v13 fix 1: a condition's mark slid along its line back to its own place first (each measure starts from where the labels placed it).
     for (const el of world.querySelectorAll<HTMLElement>('.edge-labels > [data-slid]')) { if (el.dataset.slid === `${el.style.left}|${el.style.top}`) { el.style.left = el.dataset.slidL ?? el.style.left; el.style.top = el.dataset.slidT ?? el.style.top; } delete el.dataset.slid; delete el.dataset.slidL; delete el.dataset.slidT; }
     let cardRects: DOMRect[] | null = null, markRects: DOMRect[] | null = null;
     for (const el of world.querySelectorAll<HTMLElement>('.edge-labels > *')) {
       const text = el.classList.contains('edge-label') || el.classList.contains('edge-badge');
-      if (!text && !el.classList.contains('edge-cut') && !sr) continue;
+      if (!text && !el.classList.contains('edge-cut') && !sr.length) continue;
       el.classList.remove('edge-cut'); const r = el.getBoundingClientRect(); if (!r.width) continue;
       // Every mark of the label layer (a label, a badge, a cue) under the title chip; labels and badges also where the window's side cuts them.
       const cut = (text && ((r.left < vp.right && r.right > vp.right + 1) || (r.right > vp.left && r.left < vp.left - 1)))
-        || (!!sr && r.left < sr.right && sr.left < r.right && r.top < sr.bottom && sr.top < r.bottom);
+        || sr.some(q => r.left < q.right && q.left < r.right && r.top < q.bottom && q.top < r.bottom);
       // v13 fix 1 (review of v13: a picked hub's condition 「조건」 at the pane's edge stepped back and its line read with no condition): a
       // condition's mark the edge would cut moves along its own line to the nearest spot wholly in view, on no card and no other mark; only
       // where its line has none does it step back (its words in the line's hover).
@@ -3399,7 +3432,7 @@ function clipAtEdge() {
 }
 /** v13 fix 1: moves a condition's mark (screen rect r) along its own drawn line to the nearest spot wholly inside the viewport (and clear of the
  * title chip), on no card and over no other mark; true when it moved. Its own place is kept in data-slid-l/-t (clipAtEdge puts it back first). */
-function slideMark(el: HTMLElement, r: DOMRect, vp: DOMRect, sr: DOMRect | null, cards: () => DOMRect[], marks: () => DOMRect[]): boolean {
+function slideMark(el: HTMLElement, r: DOMRect, vp: DOMRect, sr: readonly DOMRect[], cards: () => DOMRect[], marks: () => DOMRect[]): boolean {
   const key = el.dataset.badge || el.dataset.cue || el.dataset.key; if (!key) return false;
   const p = $('world').querySelector<SVGPathElement>(`.edge[data-key="${CSS.escape(key)}"] .edge-line`); if (!p) return false;
   let len = 0, m: DOMMatrix | null = null; try { len = p.getTotalLength(); m = p.getScreenCTM(); } catch { return false; }
@@ -3412,7 +3445,7 @@ function slideMark(el: HTMLElement, r: DOMRect, vp: DOMRect, sr: DOMRect | null,
     const q = p.getPointAtLength((len * i) / steps), x = q.x * m.a + q.y * m.c + m.e, y = q.x * m.b + q.y * m.d + m.f;
     const box = { l: x - w / 2, t: y - hgt / 2, r: x + w / 2, b: y + hgt / 2 };
     if (box.l < vp.left + M || box.r > vp.right - M || box.t < vp.top + M || box.b > vp.bottom - M) continue;
-    if (sr && hits(box, sr)) continue;
+    if (sr.some(q => hits(box, q))) continue;
     const d = Math.hypot(x - cx, y - cy); if (best && d >= best.d) continue;
     if (cards().some(c => hits(box, c)) || marks().some(c => hits(box, c))) continue;
     best = { x, y, d };
@@ -3630,7 +3663,16 @@ function placeLineLabels() {
     const mode = restLabels(tier);
     placedTier = tier;
     // A line's count gives way, under a lens, to that lens's label of it (styles.css: data-fit).
-    if (mode === 'counts') { placeCounts(box, clear, blocks, false, drawn, true); giveWay('.edge-count'); return; }
+    if (mode === 'counts') {
+      // v14 fix 1 (spec 1; verify of v14: umami's four lit lines and dagu's two landed with no word): the main flow lit at rest says its
+      // relations at every tier: its lines' labels go first (a label with no room keeps its line's hover), the counts keep off them.
+      const litNow = ffShown() && ffActive() && !selected ? [...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit')) : [];
+      if (litNow.length) { placeRestLabels(box, litNow, clear); if (fit.size) giveWay('.edge-label:not(.fit)'); }
+      const inv = labelInv(), labelled = new Set<string>(), labRects: Rect[] = [];
+      for (const l of box.querySelectorAll<HTMLElement>('.edge-label:not(.fit)')) { if (l.dataset.key) labelled.add(l.dataset.key); const x = parseFloat(l.style.left), y = parseFloat(l.style.top); if (Number.isFinite(x)) labRects.push({ x, y, w: l.offsetWidth * inv, h: l.offsetHeight * inv }); }
+      placeCounts(box, r => clear(r) && !labRects.some(o => r.x < o.x + o.w + 3 && o.x < r.x + r.w + 3 && r.y < o.y + o.h + 3 && o.y < r.y + r.h + 3), blocks, false, drawn, true, labelled);
+      giveWay('.edge-count'); return;
+    }
     const rest = [...world.querySelectorAll<SVGGElement>('.edge')].filter(g => drawn.has(g.dataset.key!) && !g.classList.contains('hit'))
       .filter(g => restLabelShown(mode, { spine: g.classList.contains('spine'), path: g.classList.contains('sc-path') })).filter(g => {
         const e = edgeOf(g.dataset.key); if (!e) return false;
@@ -4146,11 +4188,24 @@ function pickLine(e: Edge) {
  * the other takes its next place; a label with none left is hidden until its line is selected (.label-hidden, still hovered
  * for its meaning), counted in the map's data-labels-hidden. Fonts never shrink to make room. */
 const REST_PAD = 8;
+/** v14 fix 1: the words a lit line's label says when its own were cut (「createSession·saveEvent·saveS…」): its units before the cut one
+ * (line-grammar wholeWords, LABEL_SHORT characters at most), never a 「…」, and nothing when they would keep one side of an OR (v11:
+ * 「Promise 이행 또는」) or less than four characters (a label that says nothing goes to the line's hover). */
+function litWords(t: string): string {
+  const head = t.replace(/\s*[^\s·]*…$/u, '').replace(/[\s·]+$/u, '');
+  if (!head || /(?:^|\s)(?:또는|혹은|or)(?:\s|$)|\|/i.test(head)) return '';
+  const w = wholeWords(head);
+  return w.length >= 4 && !w.includes('…') ? w : '';
+}
 function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect) => boolean, short = false) {
   const spots: (LabelSpot & { el: HTMLElement })[] = [], hidden: SVGGElement[] = [], shown = shownLines(), inv = lineInv();
+  const litShown = new Set([...$('world').querySelectorAll<SVGGElement>('.edge.ff-flow')].map(x => x.dataset.key!).filter(k => shown.has(k)));
   for (const g of lines) {
     const e = edgeOf(g.dataset.key), path = g.querySelector<SVGPathElement>('.edge-line'); if (!e || !path) continue;
-    const pts = edgePts(e.key, path), free = (r: Rect) => clear(r) && !lineUnder(r, e.key, shown);
+    // v14 fix 1 (spec 1): a line of the main flow lit at rest may say its relation over the quiet lines (a third of their strength, the label on
+    // its halo), never over a card, a head, the title or another label: on a busy map it found no place clear of every line.
+    const litRest = g.classList.contains('ff-flow') && $('space').classList.contains('cl-on') && !selected;
+    const pts = edgePts(e.key, path), free = (r: Rect) => clear(r) && !lineUnder(r, e.key, litRest ? litShown : shown);
     // Map hygiene H4: a place on a level run outranks, across all labels, a place beside a vertical run or beside the end port, so a
     // verb reads along its line and never floats beside a bundle of verticals with no clear owner while a level place is free.
     const spotsFor = (el: HTMLElement) => { const w = el.offsetWidth * inv, hh = el.offsetHeight * inv;
@@ -4168,7 +4223,10 @@ function placeRestLabels(box: HTMLElement, lines: SVGGElement[], clear: (r: Rect
     // most, 「기동 · 」 left off when that makes it short enough); a longer one keeps its line's relation-detail cue, never a cut.
     const shortWord = (w: string) => { if (w.length <= LABEL_SHORT) return w; const rest = w.replace(/^기동\s*·\s*/, ''); return rest !== w && rest.length <= LABEL_SHORT ? rest : ''; };
     // V13-C HOOK (word level): at 쉽게 a label in plain words only (none left: the line's ··· cue keeps its words).
-    if (!label) { const word0 = restWord(e), word = easy() ? plainLabel(word0) ?? '' : word0, cutWord = short ? shortWord(word) : word;
+    if (!label) { const word0 = restWord(e), word = easy() ? plainLabel(word0) ?? '' : word0, cut0 = short ? shortWord(word) : word;
+      // v14 fix 1 (spec 1; verify of v14: umami's lit lines said nothing, their words already cut by wordOf 「createSession·saveEvent·saveS…」):
+      // a lit line's words that are cut say their first whole units instead (litWords: never one side of an OR, never a 「…」).
+      const cutWord = litRest && cut0.includes('…') ? litWords(cut0) : cut0;
       // Polish round fixes 2: a label that does not fit in whole words is left to the line's tip (no 「기동 · 명령 torch…」).
       if (!cutWord) { hidden.push(g); continue; }
       label = h('span', { class: `edge-label k-${e.kind}${edgeRevised(e) ? ' revised' : ''}${short ? ' brief' : ''}${cutWord !== word && cutWord === word.replace(/^기동\s*·\s*/, '') ? ' whole' : ''}`, 'data-key': e.key }); box.append(label); if (!fillWhole(label, cutWord)) { label.remove(); hidden.push(g); continue; } mine = spotsFor(label); }
@@ -4213,6 +4271,8 @@ const ZOOM_MIN = 0.4, ZOOM_MAX = 1.6, OPEN_MIN = 0.6, FIT_MIN = 0.2;
 /** Beauty v2 (A4): the first view is the whole map (its fit) wherever its name tags still read there: a box of 224 × 80 at this scale
  * holds two lines of an identifiable name (name-tag TAG). Further out the first view opens on its focus at OPEN_MIN, as before. */
 const FIRST_FIT_MIN = 0.36;
+/** v14 fix 1: the zoom a first view opens on its focus at when the whole map does not fit at FIRST_FIT_MIN (OPEN_MIN before). */
+const FOCUS_OPEN_K = 0.45;
 /** Below this zoom the map's 26px title would read under 10px (map hygiene H3): the title chip says the name instead. */
 const TITLE_FLOOR_K = 10 / 26;
 /** v14 A (spec 2): the zoom and pan across for a first view on its focus wider than the window: the largest zoom from k down to
@@ -4224,7 +4284,9 @@ function sideFrame(k: number, B: Rect, f: Rect, left: number, w: number): { k: n
     // The map's whole width in the window at this zoom: centred across (no side can cut a card).
     if (B.w * kk <= w) return { k: kk, x: left + (w - B.w * kk) / 2 - B.x * kk };
     const lo = Math.max(left + w - (B.x + B.w) * kk, left - f.x * kk), hi = Math.min(left - B.x * kk, left + w - (f.x + f.w) * kk); if (lo > hi) continue;
-    const mid = left + w / 2 - (f.x + f.w / 2) * kk;
+    // v14 fix 1 (verify of v14: shapez's 흐름 at 780 stood centred on its lit line, the row's start column 플레이어 and the outside systems off the
+    // left edge, 「◇ CLA 적용」 cut at x=0): 흐름 reads from its row's start, so its frame is as near the map's left edge as the flow allows.
+    const mid = formPlace && formNow === 'flow' ? left - B.x * kk : left + w / 2 - (f.x + f.w / 2) * kk;
     let best: number | null = null;
     for (let x = lo; x <= hi + 1e-6; x += 2) {
       const ok = boxes.every(b => { const a = x + b.x * kk, z = a + b.w * kk; return z <= 0 || a >= vpw || (a >= 0 && z <= vpw); });
@@ -4304,7 +4366,7 @@ const writeCamera = (c0: { x: number; y: number; k: number }) => {
 const motion = createMotion({ write: writeCamera, reduced: () => reducedMotion(), size: () => { const v = $('viewport'); return { w: v.clientWidth, h: v.clientHeight }; },
   land: () => { const s = motion.shown(); if (s) camera = s; applyCamera(); } });
 /* ---------- v13 hook (opening.ts, spec 1): a map opened fresh comes into being from its record ---------- */
-const opening = createOpening({ space: () => $('space'), world: () => $('world'), rewrite: () => writeCamera(camera), reduced: () => reducedMotion(), landed: () => applyCamera(),
+const opening = createOpening({ space: () => $('space'), world: () => $('world'), rewrite: () => writeCamera(camera), reduced: () => reducedMotion(), landed: () => { applyCamera(); requestAnimationFrame(refitUnderBox); }, // v14 fix 1
   // The whole map while it comes into being when its frame shows only part of it (the tools and the top box step aside then; the strip keeps
   // its row at the bottom).
   overview: () => {
@@ -4335,6 +4397,20 @@ const opening = createOpening({ space: () => $('space'), world: () => $('world')
     const flowLines = [...world.querySelectorAll<SVGGElement>('.edge.ff-flow')].map(g => g.dataset.key!).filter(Boolean);
     return { boxes, edges, names, versions, rep: (id: string) => drawnRep(o, id), chain: chain ? chain.steps : null, chainRels, order, flow, flowLines, quiet: $('space').classList.contains('cl-on') };
   } });
+/** v14 fix 1 (review at 780: hyperfine in 자세히 층 landed with its top row under the top box): the fit ran while the opening played, before the
+ * box's rest rows (the 「진하게: …」 caption) were there. Whenever the box grows (a ResizeObserver, from the first landing on), a map still framed
+ * by the fit is fitted again when the box as it now stands covers anything of the map: once per frame the fit set (never a loop). */
+let refitFrom = '', boxWatch: ResizeObserver | null = null, boxWatchAt = 0;
+function refitUnderBox() {
+  const el = document.getElementById('focus-top'), o = opened;
+  if (el && !boxWatch && typeof ResizeObserver !== 'undefined') { boxWatch = new ResizeObserver(() => { clearTimeout(boxWatchAt); boxWatchAt = window.setTimeout(refitUnderBox, 120); }); boxWatch.observe(el); }
+  if (!o || !el || !ftShown() || !isFitCam() || opening.running() || formFlight || formSwitching || el.classList.contains('growth-guide')) return;
+  const sig = `${o.key}|${camera.x.toFixed(1)}|${camera.y.toFixed(1)}|${camera.k.toFixed(4)}|${el.offsetHeight}`; if (sig === refitFrom) return;
+  const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop, k = camera.k;
+  const box = { x: el.offsetLeft - ox - 4, y: el.offsetTop - oy - 4, w: el.offsetWidth + 8, h: el.offsetHeight + 8 };
+  if (!ftCovers(box, camera, ftScene(), k >= TITLE_FLOOR_K ? titleInk() : null)) return;
+  refitFrom = sig; fitView(false);
+}
 const openingVersion = (o: Opened) => mapVersions(o.project).at(-1)?.id ?? 'none';
 function applyCamera(animate = false) {
   const world = $('world');
@@ -4400,7 +4476,7 @@ function fitView(explicit: boolean, animate = false) {
   // FT_GIVE) where nothing does; else where nothing stands under its short form (the sentence steps back, the switcher stays); else the
   // room of that short form above the map. Review of v5 focus 3 (A2, A3): 「anything」 is a card, a lane caption, a drawn line's route, a
   // label on the map or the map's own title, and the top line stands beside that title while the title is in its rows (ftPlace).
-  if (!ftShown()) { frameView(explicit, topInset() - ftH()); if (pairRoute(explicit, animate)) return; applyCamera(animate); return; }
+  if (!ftShown()) { frameView(explicit, topInset() - ftH()); if (pairRoute(explicit, animate)) return; fitCam = { ...camera }; applyCamera(animate); return; }
   const base = topInset() - ftH(), at = frameView(explicit, base);
   // Polish 5: the map read as drawn at the frame's own zoom, never as the map or zoom before left it (its labels placed for that zoom,
   // the tier and the card face without their hysteresis): the same map in the same window always fits the same (dagu at 1280 fitted
@@ -4438,30 +4514,78 @@ function fitView(explicit: boolean, animate = false) {
   }
   // A frame that cannot hold the whole map (it opens on the first flow) keeps the same order: the room of the sentence's own form above the
   // map (whole, then one line) before the sentence steps back (first-user judge 9: the growth map at 1280 lost its sentence here).
+  // v14 fix 1 (verify of v14: paperless at 1280 landed in 구성 on its flow with no sentence: the pan that brings the flow over the tools took
+  // back the room the box had above the map): a frame on the flow first looks for the box's whole room above the cards under it, at the
+  // largest zoom down to FIRST_FIT_MIN where the flow still ends over the tools; only without one the frame keeps the flow's own pan.
+  let above = false;
+  if (!done && !at.whole && !explicit) { above = sentenceAbove(clear, inkAt); done = above; }
   if (!done && !at.whole) for (const form of FT_SAID) { frameView(explicit, base + ftBox(form, camera, null).h + 8); if (clear(form, camera.k)) { done = true; break; } }
   // A frame on the first flow keeps the map's own title in sight whole, with its 「기록 정보」 (review of the growth view: the sideways pan
   // pushed it out at 1280): the least pan that shows it. The top line then stands beside it (ftPlace); its sentence is shown whole or on one
   // line, and when neither stands clear there the map moves down under the one-line form (the title kept, the sentence on one line).
-  if (!at.whole) {
+  if (!at.whole && !above) {
     const ti = inkAt(camera.k), s = ti ? toScreen(ti) : null;
     if (s && s.x < 16 && titlePanKeeps(16 - s.x)) camera = { ...camera, x: camera.x + (16 - s.x) }; // V14-A HOOK: never at the focus's cost
     done = FT_SAID.some(form => clear(form, camera.k));
     if (!done) { const r = ftBox(null, camera, inkAt(camera.k)), top = toScreen(drawnBounds()).y, need = r.y + r.h + 8 - top; if (need > 0) camera = { ...camera, y: camera.y + need }; done = true; }
   }
+  // v14 fix 1 (review at 780: pocketbase's whole map at 37% had no room for its sentence and opened on its flow at the stepped-back box's
+  // room, with no sentence): the frame on the flow with the box's whole room above the map, before the sentence steps back.
+  if (!done && at.whole && !explicit) {
+    const a3 = frameView(explicit, base + ftBox(null, camera, null).h + 8);
+    if (a3.whole) done = FT_SAID.some(form => clear(form, camera.k)); else { above = sentenceAbove(clear, inkAt); done = above; }
+    if (!done) frameView(explicit, base);
+  }
   if (!done && at.whole) { frameView(explicit, base); done = give(['ft-under']); }
   if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
-  if (!at.whole) focusOverDock();
+  if (!at.whole && !above) focusOverDock();
   if (!explicit) sidesClear(); // V14-A HOOK (whole names, spec 2): no card cut by the window's side
   if (pairRoute(explicit, animate)) return;
   // v12 (review of v11: at 1280 chips placed for the frame's first zoom overlapped once the frame gave a little more room): the labels and
   // chips placed again at the zoom the frame settled on.
   if (Math.abs(camera.k - at.k) > 0.002) { placedInv = syncZoom(camera.k, true); placeEdgeLabels(); }
+  fitCam = { ...camera }; // v14 fix 1
   applyCamera(animate);
 }
 /** v13 fix 2 (review of v13: the growth map at 1280 opened in 층 on its first flow with that flow's last card, 자동 배정, under the legend chip
  * and the tools): a frame on the first flow keeps the flow's cards above the tools' row. The least pan up that does it while the map's own
  * title stays under the top line's row; else the title and the flow framed together a little smaller (down to FOCUS_SHRINK of the zoom). */
 const FOCUS_SHRINK = 0.8, FOCUS_SETTLE = 0.9;
+/** v14 fix 1: a frame on the first flow with the top box's whole room above the map: for each zoom from the frame's own down to FIRST_FIT_MIN
+ * (0.01 at a time), across round the flow (the map's edges no further in than the safe sides), each form that says the sentence (FT_SAID),
+ * the map moved down until every card, caption and route under the box's width starts under it; the first where the flow still ends over the
+ * tools and the box stands clear (clear) is taken. False, the camera as it was, when none is. */
+const SENTENCE_STEP = 0.01;
+function sentenceAbove(clear: (form: string | null, k: number) => boolean, inkAt: (k: number) => Rect | null): boolean {
+  const f = openFocus(); if (!f) return false;
+  const cam0 = { ...camera }, vw = $('viewport').clientWidth, dock = mapBottom() - mapBottomInset() - 8, B = drawnBounds();
+  const items: Rect[] = [...[...lay.boxes.values()].filter(b => b.kind === 'node' || b.kind === 'ghost' || b.kind === 'frame'), ...bandRects];
+  const routes = [...lastRouted.values()].map(r => r.pts).filter(p => p.length > 1);
+  for (let k = cam0.k; k >= FIRST_FIT_MIN - 1e-9; k -= SENTENCE_STEP) {
+    const free = B.w * k <= vw - 2 * SAFE_SIDE, x = free ? (vw - B.w * k) / 2 - B.x * k : Math.min(SAFE_SIDE - B.x * k, Math.max(vw - SAFE_SIDE - (B.x + B.w) * k, vw / 2 - (f.x + f.w / 2) * k));
+    for (const form of FT_SAID) {
+      // The box's place follows the map's own title (beside it while the title is in its rows), so the room is measured again where the map
+      // moved to, until it stands still (three times at most).
+      let y = cam0.y, still = false;
+      for (let pass = 0; pass < 3 && !still; pass++) {
+        camera = { k, x, y };
+        const ink = inkAt(k), r = ftBox(form, camera, ink); if (!ftBoxSaid) break;
+        const x0 = (r.x - x) / k, x1 = (r.x + r.w - x) / k;
+        const tops = [...items.filter(b => b.x < x1 && b.x + b.w > x0).map(b => b.y), ...routes.flatMap(p => p.filter(q => q.x > x0 && q.x < x1).map(q => q.y)), ...(ink && ink.x < x1 && ink.x + ink.w > x0 ? [ink.y] : [])];
+        if (!tops.length) break;
+        const ny = r.y + r.h + 6 - Math.min(...tops) * k; still = Math.abs(ny - y) < 1; y = ny;
+      }
+      if (!still || y + (f.y + f.h) * k > dock) continue;
+      camera = { k, x, y };
+      // The map's own title whole in the window when the pan that shows it keeps the flow in view and the box clear (else the chip names it).
+      const ti = inkAt(k), s = ti ? toScreen(ti) : null;
+      if (s && s.x < 16 && s.x + s.w > 0 && titlePanKeeps(16 - s.x)) { const was = camera; camera = { ...camera, x: camera.x + (16 - s.x) }; if (!clear(form, k)) camera = was; }
+      return true;
+    }
+  }
+  camera = cam0;
+  return false;
+}
 function focusOverDock() {
   const f = openFocus(); if (!f) return;
   const dock = mapBottom() - mapBottomInset() - 8, fs = toScreen(f); if (fs.y + fs.h <= dock) return;
@@ -4521,6 +4645,9 @@ function mapSlack(): number {
     ...scene.marks.map(m => { const s = m.line ? linv : inv; return at({ x: m.x, y: m.y, w: m.w * s, h: m.h * s }); }), ...(ink ? [at(ink)] : [])];
   const obstacles = [$('space').querySelector<HTMLElement>(':scope > .controls'), document.getElementById('first-view'), document.getElementById('line-key')]
     .filter((el): el is HTMLElement => !!el && !el.hidden && !!el.offsetWidth).map(el => { const r = el.getBoundingClientRect(); return { x: r.left - sr.left, y: r.top - sr.top, w: r.width, h: r.height }; });
+  // v14 fix 1: the map fades out across the whole width up to the top of what stands at the bottom (styles: --dock-h), so no column moves
+  // under that line (nanogpt at 780 moved its build lane into the fade beside the tools).
+  obstacles.push({ x: -1e6, y: mapBottom() - dockHeight(), w: 2e6, h: dockHeight() });
   return dockSlack(content, obstacles, mapBottom(), 8);
 }
 /** What the top line must never stand over, besides the drawn lines and the labels (ftScene): the cards (and ghosts) and the lanes'
@@ -4601,6 +4728,13 @@ function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
   const left = Math.round(t.x + t.w + 24), room = $('space').clientWidth - (parseFloat(getComputedStyle($('space')).getPropertyValue('--plan-w')) || 0) - left - 16;
   if (room < 320) return;
   el.style.left = `${left}px`; el.style.maxWidth = `${Math.min(860, room)}px`;
+  // v14 fix 1 (review at 780: nanogpt landed with its box beside the map's title, too narrow for any whole sentence of its summary, and no
+  // sentence at all): beside the title only where the box holds one there; else it stays at the window's left (the fit makes the room under it).
+  const sent = el.hidden || el.classList.contains('growth-guide') ? null : el.querySelector<HTMLElement>('.ft-sentence');
+  if (!sent || !ftSaid.some(Boolean)) return;
+  ftIntro(el, sent);
+  if (!sent.hidden && sent.textContent) return;
+  el.style.left = ''; el.style.maxWidth = ''; ftIntro(el, sent);
 }
 /** The top line's box in the camera's frame (the viewport's) in one form (null: whole; ft-under: its sentence stepped back), placed for
  * that camera, with a 6px margin; the line is left as it was. Ruling F8 Q2: its sentence chosen for the width it has there (ftIntro). */
@@ -4621,6 +4755,9 @@ function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
   if (form) { el.classList.add(...form.split(' ')); if (form.includes('ft-nocover')) fitSwitch(el); } // v14 merge: the cue's row fitted again
   const out = { x: el.offsetLeft - ox - 6, y: el.offsetTop - oy - 6, w: el.offsetWidth + 12, h: el.offsetHeight + 12 };
   el.classList.remove(...FT_FORMS); el.classList.add(...was); el.style.left = left; el.style.maxWidth = maxW;
+  // v14 fix 1 (review at 780: hyperfine's 1/6 row wrapped under its 「기록이 다룬 범위」 cue, 22px taller than the fit measured): the switcher's words
+  // fitted again to the form put back (the last form measured left its own words there).
+  fitSwitch(el);
   for (const [t, c] of cut) t.textContent = c;
   if (sent && keep) {
     sent.textContent = keep.text; sent.hidden = keep.hidden; if (keep.kind !== undefined) sent.dataset.kind = keep.kind; if (keep.data !== undefined) sent.dataset.text = keep.data;
@@ -4658,8 +4795,12 @@ function frameView(explicit: boolean, base: number): Framed {
   const hgt = room(top);
   // Map hygiene H2: the first view opens on its focus (the first view's emphasis, else the main flow) at the opening scale when that
   // focus fits inside the safe area there; a focus too large for it opens the whole map at its fit instead.
-  const f = explicit ? null : openFocus();
-  const k0 = explicit || fit >= FIRST_FIT_MIN || (f && fit < OPEN_MIN && (f.w * OPEN_MIN > w || f.h * OPEN_MIN > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(OPEN_MIN, fit);
+  // v14 fix 1 (verify of v14: shapez's 흐름 at 780 framed its lit line with the row's start column off the left edge): 흐름 reads from its row's
+  // start, so its first view keeps the map's left edge with the flow (the zoom that frames both, never under FIRST_FIT_MIN).
+  const f0 = explicit ? null : openFocus(), f = f0 && formPlace && formNow === 'flow' && f0.x > B.x ? { ...f0, x: B.x, w: f0.x + f0.w - B.x } : f0;
+  // v14 fix 1 (first look at v14: 「dagu, paperless, pocketbase는 60%로 확대돼 잘립니다」): a map too large for its whole view opens on its focus at
+  // FOCUS_OPEN_K (every name whole there, as from FIRST_FIT_MIN), not OPEN_MIN: more of the map stands round the flow.
+  const k0 = explicit || fit >= FIRST_FIT_MIN || (f && fit < FOCUS_OPEN_K && (f.w * FOCUS_OPEN_K > w || f.h * FOCUS_OPEN_K > hgt)) ? Math.max(FIT_MIN, fit) : Math.max(FOCUS_OPEN_K, fit);
   // V14-A HOOK (whole names, spec 2): a first view never lands where its name tags cannot hold a name whole (under FIRST_FIT_MIN): a map too
   // large for that opens on its focus at the largest zoom that frames the focus (OPEN_MIN at most, FIRST_FIT_MIN at least).
   const k = landK(explicit, fit, k0, f, w, hgt), onFocus = !explicit && !!f && k > fit + 1e-6;
@@ -4681,7 +4822,9 @@ function frameView(explicit: boolean, base: number): Framed {
     // the window's edge), at the largest zoom down to FIRST_FIT_MIN that allows it.
     const sd = onFocus ? sideFrame(k, B, f, left, w) : null, kk = sd?.k ?? k; if (sd) place(kk);
     const along = (lo: number, size: number, start: number, room: number, c: number) => Math.min(start - lo * kk, Math.max(start + room - (lo + size) * kk, start + room / 2 - c * kk));
-    camera = { k: kk, x: sd ? sd.x : B.w * kk <= w ? camera.x : along(B.x, B.w, left, w, f.x + f.w / 2),
+    // v14 fix 1: 흐름 from its row's start (the map's left edge at the safe side) while its flow stays in the window.
+    const rowStart = formPlace && formNow === 'flow' ? Math.min(left - B.x * kk, left + w - (f.x + f.w) * kk) : null;
+    camera = { k: kk, x: sd ? sd.x : B.w * kk <= w ? camera.x : rowStart !== null ? rowStart : along(B.x, B.w, left, w, f.x + f.w / 2),
       y: B.h * kk <= hgt ? camera.y : along(B.y, B.h, top, hgt, f.h * kk > hgt ? f.y + (hgt / 2) / kk : f.y + f.h / 2) };
     clearChrome(f, B, { left, top, w, hgt });
     return { k: kk, whole: false, place };
@@ -4931,8 +5074,10 @@ function updateSticky() {
   // Map hygiene H2: the chip never covers a card (the header's path names the map all the same); it waits for room.
   if (!st.hidden) {
     const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft + camera.x, oy = v.offsetTop + w.offsetTop + camera.y, k = camera.k;
-    const covers = () => { const r = { x: st.offsetLeft - 4, y: st.offsetTop - 4, w: st.offsetWidth + 8, h: st.offsetHeight + 8 };
-      return [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k); };
+    // v14 fix 1 (verify of v14: in 자세히 층 the chip stood over the bands' words 「처리 8개」, 「참여 n개」): nor a lane's words.
+    const covers = () => { const r = { x: st.offsetLeft - 4, y: st.offsetTop - 4, w: st.offsetWidth + 8, h: st.offsetHeight + 8 }, sq = st.getBoundingClientRect();
+      return [...lay.boxes.values()].some(b => (b.kind === 'node' || b.kind === 'ghost') && ox + b.x * k < r.x + r.w && r.x < ox + (b.x + b.w) * k && oy + b.y * k < r.y + r.h && r.y < oy + (b.y + b.h) * k)
+        || [...$('world').querySelectorAll<HTMLElement>(':scope > .form-lane:not([hidden]) .form-lane-word')].some(el => { const q = el.getBoundingClientRect(); return q.width > 0 && q.left < sq.right + 4 && sq.left - 4 < q.right && q.top < sq.bottom + 4 && sq.top - 4 < q.bottom; }); };
     // v10: a chip with the record's time that would cover a card first gives up the time (its 「기록 정보 ▾」 opens it), then waits.
     st.classList.remove('tight');
     st.hidden = !st.classList.contains('meta-open') && covers();
@@ -5587,6 +5732,9 @@ function syncFocusTop() {
     // v9: the head before the plan word's clause ends on a whole word (clipKeepPlan words).
     if (basis) t.textContent = keepPlanFit(basis, t.dataset.text ?? '', 1, (lead?.offsetWidth ?? 0) + 6, true);
   }
+  // v14 fix 1 (verify of v14: 「◇ 조건 보기」 half under the box's last row once the box took its final form): the marks are looked at again
+  // under the box as it now stands (clipAtEdge: a condition slides clear along its line, any other mark steps back to its hover).
+  clipAtEdge();
 }
 /** The words of a top-line text as its box shows them (box: the sentence's clamp, or the basis line's ellipsis): whole when they fit, else
  * the longest clause cut that fits (shared clauseCuts), else the longest whole-word cut that fits; null when none fits (the text is left
@@ -7395,11 +7543,15 @@ function syncLegendFold(): boolean {
   renderLegend();
   return was !== legendOpenNow;
 }
+/** v14 fix 1: how far up from the map's bottom what stands at the bottom reaches (placeDock's --dock-h; the tools' row before it is set). */
+const dockHeight = () => parseFloat($('space').style.getPropertyValue('--dock-h')) || 58;
 /** The room what sits above the dock keeps under the map (a fit keeps cards clear of it): the first view's guide line and the folded
  * legend chip when they could not sit beside the dock (placeDock); none for the open legend (it was opened over the map). */
 const legendInset = () => {
   const k = document.getElementById('line-key'), fv = document.getElementById('first-view');
-  return (fv && !fv.hidden && fv.classList.contains('fv-above') ? fv.offsetHeight + 8 : 0) + (k && !k.hidden && k.classList.contains('folded') && !k.dataset.docked ? k.offsetHeight + 8 : 0);
+  const fvH = fv && !fv.hidden && fv.classList.contains('fv-above') ? fv.offsetHeight + 8 : 0, kH = k && !k.hidden && k.classList.contains('folded') && !k.dataset.docked ? k.offsetHeight + 8 : 0;
+  // v14 fix 1: the chip beside the guide line on its row above the tools takes no row of its own.
+  return k?.dataset.beside ? Math.max(fvH, kH) : fvH + kH;
 };
 /** The dock's row (map hygiene H2, H9): the tools keep one width; the first view's guide line and the legend sit beside them on the
  * same row while there is room left of the reading pane, else above the tools, stacked. Never a camera move. */
@@ -7428,8 +7580,19 @@ function placeDock() {
   }
   if (keyOn) {
     if (docked.has(key!)) { key!.dataset.docked = '1'; key!.style.left = `${at.get(key!)}px`; key!.style.bottom = key!.classList.contains('folded') ? `${base + (row - key!.offsetHeight) / 2}px` : `${base}px`; }
-    else { delete key!.dataset.docked; key!.style.left = ''; key!.style.bottom = `${above}px`; }
+    else {
+      delete key!.dataset.docked; key!.style.left = ''; key!.style.bottom = `${above}px`; delete key!.dataset.beside;
+      // v14 fix 1 (verify of v14 at 780: the legend chip and the guide line stood stacked over the tools, 「저장소 검사·정리 워크플로」 and
+      // 「Dagu Console」 under them): a folded chip goes beside the guide line on its row above the tools while both fit there (one row, not two).
+      const fvW = fvOn && !docked.has(fv!) ? fv!.offsetWidth : 0;
+      if (fvW && key!.classList.contains('folded') && ctl.offsetLeft + fvW + 8 + key!.offsetWidth <= limit) {
+        key!.dataset.beside = '1'; key!.style.left = `${ctl.offsetLeft + fvW + 8}px`; key!.style.bottom = `${base + row + 8 + (fv!.offsetHeight - key!.offsetHeight) / 2}px`;
+      }
+    }
   }
+  // v14 fix 1: the map fades out up to the top of what stands at the bottom (the tools, and what went above them), never under it.
+  { const sb = space.getBoundingClientRect().bottom, tops = [ctl, fvOn ? fv : null, keyOn && !key!.dataset.docked && key!.classList.contains('folded') ? key : null].filter((e): e is HTMLElement => !!e && !!e.offsetWidth).map(e => e.getBoundingClientRect().top);
+    if (tops.length) space.style.setProperty('--dock-h', `${Math.max(0, Math.round(sb - Math.min(...tops)))}px`); }
   // The map fades out along the whole bottom edge, under the dock's row and beside it alike (styles: .viewport mask), so no card
   // reads as covered by the tools and none is drawn full strength beside them.
 }

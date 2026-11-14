@@ -168,7 +168,7 @@ export interface ViewState { folds: Record<string, boolean>; cameras: Record<str
 export interface GrowthMemo { seen: number; at: string; base: number | null; pick: number | null }
 /** A camera as saved: where and how large, and the window (inner width × height) it was saved in, when known; a window that
  * differs by a quarter or more fits the map instead of restoring it (a view saved small in a narrow window stays no fit elsewhere). */
-export interface SavedCamera { x: number; y: number; scale: number; win?: [number, number] }
+export interface SavedCamera { x: number; y: number; scale: number; win?: [number, number]; fit?: boolean }
 export interface Containment { version:'containment.1'; parents:Record<string,string>; revisions:Record<string,number> }
 /** understanding (AREA17): derived descriptions per area ID, kept apart from Area.note (the user's words). */
 export interface Space { brief: Brief | null; areas: Area[]; relations: Relation[]; draftTarget: DraftTarget | null; layout: Layout; understanding: Record<string, AreaUnderstanding>; containment:Containment }

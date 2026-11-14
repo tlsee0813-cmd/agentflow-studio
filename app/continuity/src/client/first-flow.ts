@@ -509,7 +509,7 @@ export function firstFlow(inp: FlowInput): FirstFlow {
   if (k && k.rule === 'all') { const f = firstRule(); return { rule: 'all', kept: true, candidates: f?.cs ?? [], index: -1, flow: null }; }
   if (k && k.rule !== 'all') { const rule: FlowRule = k.rule, cs = flowCandidates(rule, inp), i = cs.findIndex(c => c.key === k.key); if (i >= 0) return { rule, kept: true, candidates: cs, index: i, flow: cs[i]! }; }
   if (inp.rank) {
-    const rank = inp.rank, lists = FLOW_RULES.map(r => flowCandidates(r, inp)), pick = preferRuntime(lists, rank); if (!pick) return none;
+    const rank = inp.rank, lists = FLOW_RULES.map(r => flowCandidates(r, inp)), pick = preferRuntime(lists, rank, c => c.chain.length); if (!pick) return none; // v14 fix 1: a path from a user overtakes only with as long a run of drawn lines
     const chosen = lists[pick[0]]![pick[1]]!, cs = demoteLow(lists[pick[0]]!, rank);
     return { rule: FLOW_RULES[pick[0]]!, kept: false, candidates: cs, index: cs.indexOf(chosen), flow: chosen };
   }

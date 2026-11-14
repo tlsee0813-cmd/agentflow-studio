@@ -144,7 +144,10 @@ test('V12-7 (first user of v11, 7) 「···」 has its word: 「··· 관계 �
 
 test('V12-8 (first user of v11, 8: 「문서 소비…」, a first word cut at its middle) a tag name is cut between whole units only, the plain map\'s rule', () => {
   const measure = s => [...s].reduce((n, c) => n + (/[ㄱ-힝]/.test(c) ? 12 : c === '…' ? 9 : 7), 0);
-  assert.deepEqual(fitTag('문서 소비기(Consumer)', 60, 1, measure).lines, ['문서…']);
+  // v14 fix 1: the words before the bracket that ends the name read whole as its own (gloss), no 「…」 (V14F1-5).
+  assert.deepEqual(fitTag('문서 소비기(Consumer)', 60, 1, measure).lines, ['문서 소비기']);
+  assert.equal(fitTag('문서 소비기(Consumer)', 60, 1, measure).gloss, true);
+  assert.deepEqual(fitTag('문서 소비기 묶음 처리 단계', 60, 1, measure).lines, ['문서…'], 'with no bracket, whole words then 「…」');
   // v14 A (spec 2): never 「…래스터」 (a name's start left out): its first word whole at a smaller type with 「…」 (V14A-1).
   assert.ok(!fitTag('Rasterkit 래스터 파서', 56, 2, measure).lines.join('').startsWith('…'));
   // v14 A (spec 2): whole at a smaller type before any cut.
@@ -155,7 +158,8 @@ test('V12-8 (first user of v11, 8: 「문서 소비…」, a first word cut at i
     const f = fitTag(name, w, n, measure), t = f.lines.join(''), bare = s => s.replace(/\s+/g, '');
     // v14 A (spec 2): 「⋯」 when no whole word fits; a first word whole at a smaller type when its 「…」 cannot fit beside it.
     if (f.none) { assert.equal(t, '⋯'); continue; }
-    if (!t.includes('…')) { if (f.full) assert.equal(bare(t), bare(name)); else assert.ok(bare(name).startsWith(bare(t)) && /^[^\s·]+$/.test(t)); continue; }
+    // v14 fix 1: a gloss is the name's own words before the bracket that ends it, whole.
+    if (!t.includes('…')) { if (f.full) assert.equal(bare(t), bare(name)); else if (f.gloss) assert.equal(bare(t), bare(name.replace(/\s*\([^()]*\)$/, ''))); else assert.ok(bare(name).startsWith(bare(t)) && /^[^\s·]+$/.test(t)); continue; }
     const [head, tail] = t.split('…').map(bare);
     // The place in the name where the shown start ends, and where the shown end begins: each at a unit's edge (a space, 「·」, a bracket, a
     // separator, or where an identifier's words meet).

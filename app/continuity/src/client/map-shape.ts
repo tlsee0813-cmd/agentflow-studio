@@ -8,8 +8,9 @@
  *   「만들고 배포하는 길」.
  * - The main flow chosen for display (pathRank): a recorded candidate is ranked by what its cards are, never by importance: one that runs
  *   through the build lane ranks lowest, one whose later cards are logs or progress output next (plumbing), then a runtime path, and a
- *   runtime path that starts at a person who uses the product (or a card such a person hands to) highest. The rank only moves a candidate
- *   ahead of one of a lower rank: among runtime paths the record's own order of rules stands.
+ *   runtime path that starts at a person who uses the product (or a card such a person hands to) highest. A build or plumbing
+ *   candidate gives way to any runtime one; among runtime ones (v14 fix 1) the longest run of drawn lines goes first, then the higher
+ *   rank; among equals the record's own order of rules stands (preferRuntime).
  * - A recorded group of user roles (roleGroups): a C-GROUP row whose 묶음 뜻 is 참여자 and whose name says roles or permissions
  *   (「builtin 인증 사람 역할」), with its members as written (row IDs).
  * - The record's coverage (coverageOf): its 「읽은 범위」 and 「못 읽은 범위」 head rows, said in plain words (each unit of the 읽은 범위 with
@@ -57,10 +58,18 @@ export function kindMark(c: ShapeFacts): string | null {
   if (k === 'user') return '사람';
   return codeLike(c) && c.type !== 'external' ? '외부 코드' : '외부 시스템';
 }
+/** v14 fix 1 (verify of v14: dagu's 「GitHub Actions」, paperless's 「Travis CI」 and gpt-researcher's 「CI·봇」 were round, under 「사람」): the
+ * card's shape. A person (who uses or makes the product) is round; a bot of the release that is no person by its type word is a service
+ * outside the program, dashed like any outside system (its mark still says 자동 봇); an outside system dashed; a program part square. */
+export function cardShape(c: ShapeFacts): 'person' | 'outside' | 'part' {
+  const k = shapeKind(c);
+  if (k === 'crew') return botLike(c) && !(c.type && PEOPLE_TYPES.has(c.type)) ? 'outside' : 'person';
+  return k === 'user' ? 'person' : k === 'outside' ? 'outside' : 'part';
+}
 /** The one-line legend at 쉽게: the three shapes and what they stand for. */
 export const KIND_LEGEND: readonly { kind: 'person' | 'outside' | 'part'; word: string; tip: string }[] = Object.freeze([
-  { kind: 'person', word: '사람', tip: '둥근 카드 · 이 프로그램을 쓰거나 만드는 사람(과 봇)' },
-  { kind: 'outside', word: '외부 시스템', tip: '점선 카드 · 프로그램 밖의 서비스·라이브러리·다른 사람의 코드' },
+  { kind: 'person', word: '사람', tip: '둥근 카드 · 이 프로그램을 쓰거나 만드는 사람' },
+  { kind: 'outside', word: '외부 시스템', tip: '점선 카드 · 프로그램 밖의 서비스·자동 봇·라이브러리·다른 사람의 코드' },
   { kind: 'part', word: '프로그램 부분', tip: '각진 카드 · 이 프로그램 안의 부분' },
 ]);
 
@@ -100,14 +109,16 @@ export function pathRank(steps: readonly (readonly string[])[], f: RankFacts): n
   if (cards.slice(steps[0]?.length ?? 1).some(f.log)) return 1;
   return (steps[0] ?? []).some(f.start) ? 3 : 2;
 }
-/** The candidate shown first among lists in the record's order of rules (each list in its own order): the first one, unless it ranks 0 or
- * 1 and a later one ranks higher (then the highest, the earliest among equals). Returns [list index, item index]. */
-export function preferRuntime<T>(lists: readonly (readonly T[])[], rank: (x: T) => number): [number, number] | null {
-  let first: [number, number] | null = null, best: [number, number] | null = null, bestR = -1;
-  lists.forEach((l, i) => l.forEach((x, j) => { const r = rank(x); if (!first) first = [i, j]; if (r > bestR) { bestR = r; best = [i, j]; } }));
-  if (!first) return null;
-  const [fi, fj] = first as [number, number]; const fr = rank(lists[fi]![fj]!);
-  return fr <= 1 && bestR > fr ? best : first;
+/** The candidate shown first among lists in the record's order of rules (each list in its own order), the earliest among equals. v14 fix 1
+ * (verify of v14: nanogpt and paperless lit one line each, hyperfine and gpt-researcher a fan; first look: 「주 흐름이 토막이나 별 모양」): a
+ * build or plumbing candidate (0, 1) gives way to any runtime one; among runtime ones the longest run of drawn lines in their own direction
+ * (size: a chain of three steps reads more of what the program does than one line or a fan out of one card) goes first, then one from a
+ * person who uses the product (3) before another (2). Without size the rank alone decides. Returns [list index, item index]. */
+export function preferRuntime<T>(lists: readonly (readonly T[])[], rank: (x: T) => number, size?: (x: T) => number): [number, number] | null {
+  let best: [number, number] | null = null, bestS = -Infinity;
+  const score = (x: T) => { const r = rank(x); return r <= 1 ? r : 100 + (size ? size(x) : 0) * 10 + r; };
+  lists.forEach((l, i) => l.forEach((x, j) => { const s = score(x); if (s > bestS) { bestS = s; best = [i, j]; } }));
+  return best;
 }
 /** A list with the candidates of rank 0 and 1 after the others (each group in its own order). */
 export function demoteLow<T>(list: readonly T[], rank: (x: T) => number): T[] {

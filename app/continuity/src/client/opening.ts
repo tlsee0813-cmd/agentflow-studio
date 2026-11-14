@@ -239,12 +239,15 @@ export function chainLines(plan: OpeningPlan, edges: readonly { key: string; ids
 export function fadePlan(inp: OpeningInput): OpeningPlan {
   return { kind: 'fade', beats: [{ at: OPEN_START_MS, ms: FADE_MS, show: inp.boxes.map(b => b.id), names: [], ghosts: [], lines: inp.edges.map(e => e.key), version: null, caption: null }], versions: [], end: OPEN_START_MS + FADE_MS };
 }
-/** Which opening a map gets: growth with two versions or more, else its recorded chain, else (v14) its main flow, else the record's order;
+/** Which opening a map gets: growth with two versions or more, else (v14 fix 1) the main flow lit at rest, else its recorded chain, else the record's order;
  * the fade only when there is nothing to grow from. */
 export function openingPlan(inp: OpeningInput & { edges: readonly { key: string; ids: readonly string[]; from: string; to: string }[] }, budget = OPEN_TOTAL_MS): OpeningPlan {
   if (inp.versions.length >= 2) return growthPlan(inp, budget);
+  // v14 fix 1 (verify of v14: nanogpt grew from train.py, shapez from Application and umami from 방문자 브라우저 while each landed with another
+  // flow lit): the main flow the landing lights grows first; a recorded chain only when nothing is lit at rest.
+  const f = flowPlan(inp); if (f) return f;
   const c = chainPlan(inp);
-  return c ? chainLines(c, inp.edges, inp.chainRels, !!inp.quiet) : flowPlan(inp) ?? orderPlan(inp) ?? fadePlan(inp);
+  return c ? chainLines(c, inp.edges, inp.chainRels, !!inp.quiet) : orderPlan(inp) ?? fadePlan(inp);
 }
 /** The whole length from the first frame to a quiet map (the typing at its longest). */
 export const openingLength = (p: OpeningPlan): number => p.end + SETTLE_MS + TYPE_PLAN_MS;

@@ -176,7 +176,8 @@ test('V11-11 (review of v10: 「옛 이름」 at 11.8px at the 1280 fit) an old 
 
 test('V11-12 (review of v10) no label reads through the title chip (looked at again where a moving camera stops); a title the window\'s side cuts steps back', async () => {
   const app = await read('src/client/app.ts');
-  assert.match(fn(app, 'clipAtEdge'), /const st = document\.getElementById\('scope-sticky'\), sr = st && !st\.hidden && st\.offsetWidth \? st\.getBoundingClientRect\(\) : null;/);
+  // v14 fix 1: the top box with the chip (V14F1-4).
+  assert.match(fn(app, 'clipAtEdge'), /const st = document\.getElementById\('scope-sticky'\), sr0 = st && !st\.hidden && st\.offsetWidth \? st\.getBoundingClientRect\(\) : null;/);
   assert.match(fn(app, 'applyCamera'), /clearTimeout\(clipLate\); if \(animate\) clipLate = window\.setTimeout\(clipAtEdge, CAMERA_MOVE_MS\);/);
   assert.match(fn(app, 'updateSticky'), /const cutSide = ti\.x < -1 \|\| ti\.x \+ ti\.w > vp\.width \+ 1;/);
   assert.match(fn(app, 'updateSticky'), /classList\.toggle\('pinned', !st\.hidden \|\| underTop \|\| cutSide\)/);
