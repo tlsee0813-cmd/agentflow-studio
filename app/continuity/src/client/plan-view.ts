@@ -16,6 +16,7 @@ import { emptyBundle, loadBundle, saveBundle, setAside, planFile, readPlanFile, 
 import { pinOnEdit, screenContext, resolveRef, authoringStale, legacyRecord, type Authoring, type ContextRef } from '../shared/authoring-context.js';
 import { requestResults, type WideOpen } from './request-results.js';
 import { correctRequestMatch } from '../shared/request-return.js';
+import { easyWordOf } from './plain-words.js'; // v14 B: the pane is named as its control is
 import { readingParts, type ReadingPart } from '../shared/request-reading.js';
 
 export interface PlanOpened { key: string; kind: 'example' | 'saved' | 'legacy'; project: Project; view: StudioView; alias: { toId: Map<string, string> } | null }
@@ -658,12 +659,12 @@ export function createPlanView(host: PlanHost) {
     const strip = $('plan-strip'), st = s!, p = plan();
     strip.hidden = false;
     const close = h('button', { type: 'button', class: 'close ps-close', 'aria-label': '변경 구상 닫기', title: '변경 구상 닫기 (Esc) · 초안은 남아요', onclick: () => closePlan() }, '×');
-    if (!p) { strip.replaceChildren(); put(strip, h('div', { class: 'ps-head' }, h('span', { class: 'ps-kicker' }, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'ps-intent' }, '오른쪽에 바꾸고 싶은 모습을 적어 주세요')), close); return; }
+    if (!p) { strip.replaceChildren(); put(strip, h('div', { class: 'ps-head' }, h('span', { class: 'ps-kicker' }, easyWordOf('변경 구상')), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'ps-intent' }, '오른쪽에 바꾸고 싶은 모습을 적어 주세요')), close); return; }
     const by = st.bundle.by, basis = by?.kind === 'example' ? '작성된 예제 분석' : by?.kind === 'ai' ? `AI 분석 · ${ago(by.at)}` : '분석';
     const focusId = st.focus?.kind === 'item' ? st.focus.id : null;
     const conds = p.analysis.preserve.length + p.analysis.unknowns.length;
     strip.replaceChildren(); put(strip,
-      h('div', { class: 'ps-head' }, h('span', { class: 'ps-kicker', title: by?.kind === 'ai' ? `${by.model} · ${fullTime(by.at)}` : '' }, '변경 구상', h('small', {}, basis)),
+      h('div', { class: 'ps-head' }, h('span', { class: 'ps-kicker', title: by?.kind === 'ai' ? `${by.model} · ${fullTime(by.at)}` : '' }, easyWordOf('변경 구상'), h('small', {}, basis)),
         h('button', { type: 'button', class: 'ps-intent', title: `${p.intent}\n\n넓게 비교에서 문장·근거·요청을 다뤄요`, onclick: () => openWork() }, p.intent)),
       h('p', { class: 'ps-find', title: p.analysis.summary }, h('span', { class: 'ps-find-k' }, '분석이 찾은 것'), firstSentence(p.analysis.summary)),
       h('div', { class: 'ps-row' },
@@ -817,7 +818,7 @@ export function createPlanView(host: PlanHost) {
     const panel = $('plan-panel'), prev = panel.classList.contains('work') ? null : panel.querySelector('.pp-body'), keep = prev?.scrollTop ?? 0, st = s!;
     panel.hidden = false; panel.classList.remove('work');
     const head = h('header', { class: 'panel-head pp-head' },
-      h('div', { class: 'panel-path' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null),
+      h('div', { class: 'panel-path' }, h('span', {}, easyWordOf('변경 구상')), st.example ? h('span', { class: 'tag' }, '예제') : null),
       h('h2', { id: 'plan-title', tabindex: '-1' }, '새 변경안'),
       h('p', { class: 'pp-basis' }, '적은 문장으로 같은 지도에서 달라질 곳을 살펴봐요.'),
       h('div', { class: 'head-tools' }, h('button', { type: 'button', class: 'close', 'aria-label': '변경 구상 닫고 현재 지도로', title: '닫기 (Esc) · 초안은 남아요', onclick: () => close() }, '×')));
@@ -852,7 +853,7 @@ export function createPlanView(host: PlanHost) {
     const heading = !item ? '제안된 변경 없음' : by?.kind === 'example' && st.key === CONVERTER_KEY && p.intent === CONVERTER_INTENT ? CONVERTER_HEADING : `변경안 · ${p.analysis.items.length}가지 변화`;
     const lead = firstSentence(p.analysis.summary), more = p.analysis.summary.trim().slice(lead.length).trim();
     const head = h('header', { class: 'pw-head' },
-      h('p', { class: 'pw-kick' }, h('span', {}, '변경 구상'), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'pw-origin', title: by?.kind === 'ai' ? `${fullTime(by.at)} · ${p.basis}` : p.basis }, origin)),
+      h('p', { class: 'pw-kick' }, h('span', {}, easyWordOf('변경 구상')), st.example ? h('span', { class: 'tag' }, '예제') : null, h('span', { class: 'pw-origin', title: by?.kind === 'ai' ? `${fullTime(by.at)} · ${p.basis}` : p.basis }, origin)),
       h('div', { class: 'pw-title-row' }, h('h2', { id: 'plan-title', class: 'pw-title', tabindex: '-1' }, heading),
         writing ? null : h('button', { type: 'button', class: 'link-button quiet pw-said-btn', 'aria-expanded': String(sentenceOpen), 'aria-controls': 'pw-said', onclick: () => { sentenceOpen = !sentenceOpen; render(); } }, sentenceOpen ? '적은 문장 접기' : '적은 문장 펼쳐 읽기')),
       // The person's whole sentence, on request (it is also what the editor holds).

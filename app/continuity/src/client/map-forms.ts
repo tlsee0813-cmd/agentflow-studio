@@ -16,6 +16,7 @@
  * Nothing here invents an order, a group or an importance: the row is the record's own sentence order, the bands are the record's own
  * families, and above/below only says which way a recorded relation runs. Pure and deterministic: no DOM. */
 import { statesOrder } from './first-flow.js';
+import type { ShapeKind } from './map-shape.js';
 
 export type MapForm = 'flow' | 'layers' | 'compose';
 export const MAP_FORMS: readonly MapForm[] = ['flow', 'layers', 'compose'];
@@ -34,7 +35,10 @@ export const LAYERS_OFFER_FAMILIES = 3, LAYERS_AUTO_CARDS = 12;
  * · trigger · gate, or null) and type word, its name, and whether it is on the 실행 위치 미기록 shelf (kept under everything). */
 export interface FormCard { id: string; name: string; w: number; h: number; family: string | null; type: string | null; shelf?: boolean;
   /** From the card's top, where its side lines meet it (a typed card's contact point; else its middle): a row's cards keep it level. */
-  anchor?: number }
+  anchor?: number;
+  /** v14 (spec 3): what the card is to a reader (map-shape shapeKind; a part when absent), whether it stands in the build and release
+   * lane (map-shape laneIds), and the recorded group of user roles it belongs to (map-shape roleGroups; its name). */
+  kind?: ShapeKind; lane?: boolean; group?: string | null }
 /** A recorded relation lifted to two top cards: directed for data, control and reference lines, not for shares and related. */
 export interface FormLine { from: string; to: string; directed: boolean }
 /** A candidate order as the first view reads it (first-flow FlowCandidate's fields used here). */
@@ -53,7 +57,9 @@ export function statesAnOrder(c: Pick<OrderCandidate, 'rule' | 'source' | 'text'
 /** The record's main order on the cards drawn (rep: the top card a part is drawn on, null when it is not drawn): of the candidates that
  * state an order, the one with the most steps on the cards drawn, then the most drawn lines, then the record's order. A card named twice
  * stands at its first step; a step left with no card drawn is dropped (its neighbours stay in the record's order). null: none. */
-export function recordedChain(cands: readonly OrderCandidate[], rep: (id: string) => string | null, orderedWord: string): FormChain | null {
+export function recordedChain(cands: readonly OrderCandidate[], rep: (id: string) => string | null, orderedWord: string, rank?: ((c: OrderCandidate) => number) | null): FormChain | null {
+  // v14 (spec 3): with a rank (map-shape pathRank), an order through the build lane or into logs is read only when no runtime order is.
+  if (rank) { const run = cands.filter(c => statesAnOrder(c, orderedWord) && rank(c) > 1); const got = run.length ? recordedChain(run, rep, orderedWord) : null; if (got) return got; }
   let best: FormChain | null = null, bestLines = -1;
   for (const c of cands) {
     if (!statesAnOrder(c, orderedWord)) continue;
@@ -80,7 +86,10 @@ export function familyKey(c: Pick<FormCard, 'family' | 'type'>): string | null {
   return c.type ? TYPE_FAMILY[c.type] ?? null : null;
 }
 /** A card's band: an outside system (type word 외부 system, of the 참여 family or none) is 외부; a gate stands with the stores (저장·관문). */
-export function bandOf(c: Pick<FormCard, 'family' | 'type'>): BandId {
+export function bandOf(c: Pick<FormCard, 'family' | 'type'> & { kind?: ShapeKind }): BandId {
+  // v14: an outside system or someone else's code stands with the outside systems, a person with the 참여 band.
+  if (c.kind === 'outside') return 'external';
+  if (c.kind === 'user' || c.kind === 'crew') return 'participant';
   const f = familyKey(c);
   if (c.type === 'external' && (!f || f === 'participant')) return 'external';
   if (f === 'gate' || f === 'store') return 'store';
@@ -93,9 +102,9 @@ export function bandWord(band: BandId, cards: readonly Pick<FormCard, 'family' |
   return ws.map(w => FAMILY_WORD[w]).join(' · ');
 }
 /** The recorded families on the cards (each band but 미정, a gate and a store counted apart). */
-export function familiesOn(cards: readonly Pick<FormCard, 'family' | 'type' | 'shelf'>[]): string[] {
+export function familiesOn(cards: readonly (Pick<FormCard, 'family' | 'type' | 'shelf'> & { lane?: boolean; kind?: ShapeKind })[]): string[] {
   const out = new Set<string>();
-  for (const c of cards) { if (c.shelf) continue; const b = bandOf(c); if (b === 'undecided') continue; out.add(b === 'store' ? (familyKey(c) === 'gate' ? 'gate' : 'store') : b); }
+  for (const c of cards) { if (c.shelf || c.lane) continue; const b = bandOf(c); if (b === 'undecided') continue; out.add(b === 'store' ? (familyKey(c) === 'gate' ? 'gate' : 'store') : b); }
   return BAND_ORDER.flatMap(b => (b === 'store' ? ['store', 'gate'] : [b])).filter(f => out.has(f));
 }
 
@@ -103,7 +112,8 @@ export function familiesOn(cards: readonly Pick<FormCard, 'family' | 'type' | 's
 export interface FormChoice { offered: MapForm[]; auto: MapForm; why: string; not: Partial<Record<MapForm, string>>; steps: number; families: string[] }
 /** Which forms the record offers and which it chooses (see the head of this file), with the reason in plain words. */
 export function formChoice(cards: readonly FormCard[], chain: FormChain | null): FormChoice {
-  const live = cards.filter(c => !c.shelf), n = live.length, steps = chain?.steps.length ?? 0;
+  // v14: the build and release lane is no part of what the record says the program is (its cards stand apart in every form).
+  const live = cards.filter(c => !c.shelf && !c.lane), n = live.length, steps = chain?.steps.length ?? 0;
   const covered = chain ? new Set(chain.steps.flat()).size : 0, fams = familiesOn(live), famWords = fams.map(f => FAMILY_WORD[f]).join('·');
   const offered: MapForm[] = [], not: Partial<Record<MapForm, string>> = {};
   if (steps >= FLOW_OFFER_STEPS) offered.push('flow');
@@ -112,11 +122,14 @@ export function formChoice(cards: readonly FormCard[], chain: FormChain | null):
   else not.layers = fams.length ? `기록된 표현군이 ${fams.length}가지(${famWords})뿐이라 층으로 나누지 않아요 (3가지부터)` : '기록된 표현군이 없어 층으로 나누지 않아요';
   offered.push('compose');
   let auto: MapForm = 'compose', why: string;
-  if (steps >= FLOW_AUTO_STEPS && n && covered / n >= FLOW_COVER) { auto = 'flow'; why = `기록에 이어진 흐름 ${steps}단계가 부품 ${n}개 중 ${covered}개를 지나서 흐름으로 보여 줍니다`; }
+  // v14 (spec 3): only the record's own account of the whole (its summary's core flow, a scenario) lays the map out as one path by
+  // itself; one 「첫 구조 줄」 line (one responsibility of several) is offered, never chosen.
+  const whole = !!chain && chain.rule !== 'head', partNote = chain && !whole && steps >= FLOW_OFFER_STEPS ? ` · 첫 구조 줄 하나가 말한 순서 ${steps}단계는 흐름에서 볼 수 있어요` : '';
+  if (steps >= FLOW_AUTO_STEPS && whole && n && covered / n >= FLOW_COVER) { auto = 'flow'; why = `기록에 이어진 흐름 ${steps}단계가 부품 ${n}개 중 ${covered}개를 지나서 흐름으로 보여 줍니다`; }
   else if (fams.length >= LAYERS_OFFER_FAMILIES && n >= LAYERS_AUTO_CARDS) {
     auto = 'layers';
-    why = `기록된 표현군이 ${fams.length}가지(${famWords})라 층으로 보여 줍니다${steps >= FLOW_OFFER_STEPS ? ` · 이어진 흐름 ${steps}단계는 흐름에서 볼 수 있어요` : ''}`;
-  } else why = n < LAYERS_AUTO_CARDS && fams.length >= LAYERS_OFFER_FAMILIES ? `부품이 ${n}개로 적어 구성으로 보여 줍니다` : '기록이 흐름도 층도 정하지 않아 구성으로 보여 줍니다';
+    why = `기록된 표현군이 ${fams.length}가지(${famWords})라 층으로 보여 줍니다${partNote || (steps >= FLOW_OFFER_STEPS ? ` · 이어진 흐름 ${steps}단계는 흐름에서 볼 수 있어요` : '')}`;
+  } else why = (n < LAYERS_AUTO_CARDS && fams.length >= LAYERS_OFFER_FAMILIES ? `부품이 ${n}개로 적어 구성으로 보여 줍니다` : '기록이 흐름도 층도 정하지 않아 구성으로 보여 줍니다') + partNote;
   return { offered, auto, why, not, steps, families: fams };
 }
 /** The form shown: the person's kept choice while the record still offers it, else the record's. */
@@ -131,7 +144,7 @@ export function nextMapForm(now: MapForm, offered: readonly MapForm[]): MapForm 
 export interface Pt { x: number; y: number }
 export interface FormRect { x: number; y: number; w: number; h: number }
 /** A caption the form draws (a band's, the build lane's): its words, the rectangle it labels (in map units), and its kind. */
-export interface FormLane { kind: 'band' | 'build'; band?: BandId; text: string; rect: FormRect; count: number; ids: string[] }
+export interface FormLane { kind: 'band' | 'build' | 'group'; band?: BandId; text: string; rect: FormRect; count: number; ids: string[] }
 export interface FormPlace {
   /** Each card's top-left corner. */
   at: Map<string, Pt>;
@@ -152,6 +165,8 @@ export const BUILD_NAME = /빌드|build|\bCI\b|CI[·/ ]|CI$|\bCD\b|CICD|릴리�
 export const buildLike = (c: Pick<FormCard, 'name' | 'type'>): boolean => (!!c.type && BUILD_TYPE.has(c.type)) || BUILD_NAME.test(c.name);
 
 /** 흐름 gaps (map units): between the row's steps, the row and the rows beside it, cards side by side, the build lane. */
+/** v14: more room over the first lane under the row when a recorded group's caption reads under its outline. */
+export const FLOW_GROUP_ROOM = 64;
 export const FLOW_STEP_GAP = 128, FLOW_TIER_GAP = 88, FLOW_STACK_GAP = 28, FLOW_LANE_GAP = 112, FLOW_BACK_ROOM = 34;
 
 interface Adj { out: Map<string, Map<string, number>>; inn: Map<string, Map<string, number>>; all: Map<string, Map<string, number>> }
@@ -175,12 +190,13 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
   const rowSet = new Set(stepOf.keys()), shelf = cards.filter(c => c.shelf).map(c => c.id);
   const rest = cards.filter(c => !c.shelf && !rowSet.has(c.id)).map(c => c.id);
   const linked = (id: string) => (adj.all.get(id)?.size ?? 0) > 0;
-  const lone = rest.filter(id => !linked(id));
+  const lone = rest.filter(id => !linked(id) && !byId.get(id)!.lane);
   const band = (id: string) => bandOf(byId.get(id)!), isEnd = (id: string) => band(id) === 'participant' || band(id) === 'external';
   // The build lane: a card of the build kind or name; then the cards whose every relation stays among the lane and themselves, one at
   // least meeting the lane (a maintainer who only runs the release, a contributor who only meets that maintainer, the registry it
   // publishes to; people and outside systems only): the largest such set (cards that break the rule leave it until none does).
-  const build = new Set(rest.filter(id => linked(id) && buildLike(byId.get(id)!)));
+  // v14 (spec 3): the caller's lane (map-shape laneIds: the build kind or name, maintainers, contributors and bots) always stands there.
+  const build = new Set(rest.filter(id => byId.get(id)!.lane || (linked(id) && buildLike(byId.get(id)!))));
   if (build.size) {
     const near = new Set(rest.filter(id => linked(id) && !build.has(id) && isEnd(id)));
     for (let changed = true; changed;) { changed = false; for (const id of [...near]) { const ns = [...adj.all.get(id)!.keys()]; if (!ns.every(n => build.has(n) || near.has(n))) { near.delete(id); changed = true; } } }
@@ -246,18 +262,22 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
   // row's first half, the right for the rest; each column takes the rows next to the row first (0, −1, 1, …), five at most.
   const usedC = [...cell.values()].map(x => x.c), minC = Math.min(0, ...usedC), maxC = Math.max(steps.length - 1, ...usedC);
   const mid = (steps.length - 1) / 2, left: string[] = [], right: string[] = [];
-  for (const id of ends) { const s = endStep.get(id); (s === undefined || s <= mid ? left : right).push(id); }
+  // v14 (spec 3): a person who uses the product stands at the row's start, whatever step it meets.
+  for (const id of ends) { const s = endStep.get(id); (byId.get(id)!.kind === 'user' || s === undefined || s <= mid ? left : right).push(id); }
   // Level with the row only a card with a recorded relation to the step at that end, in the column next to it (one card): anything else
   // there would read as one more step. The rest take the rows over and under it.
   const endCols = (ids: string[], toLeft: boolean) => {
     const edge = new Set(steps[toLeft ? 0 : steps.length - 1] ?? []), meetsEdge = (id: string) => [...(adj.all.get(id)?.keys() ?? [])].some(n => edge.has(n));
-    const sorted = [...ids].sort((a, b) => Number(meetsEdge(b)) - Number(meetsEdge(a)) || (endStep.get(a) ?? 0) - (endStep.get(b) ?? 0) || cards.findIndex(c => c.id === a) - cards.findIndex(c => c.id === b));
+    const sorted = togetherByGroup([...ids].sort((a, b) => Number(meetsEdge(b)) - Number(meetsEdge(a)) || (endStep.get(a) ?? 0) - (endStep.get(b) ?? 0) || cards.findIndex(c => c.id === a) - cards.findIndex(c => c.id === b)), byId);
     const per = Math.min(5, Math.max(3, Math.ceil(sorted.length / Math.max(1, Math.ceil(sorted.length / 5)))));
     const off = [-1, 1, -2, 2, -3];
     let col = 0, slot = 0, slots = sorted.length && meetsEdge(sorted[0]!) ? [0, ...off] : off;
+    // v14: a recorded group of user roles takes a column (or more) of its own: no other card stands among its members.
+    let was: string | null | undefined;
     for (const id of sorted) {
-      if (slot >= per) { col++; slot = 0; slots = off; }
-      put(id, toLeft ? minC - 1 - col : maxC + 1 + col, slots[slot++]!);
+      const g = byId.get(id)!.group ?? null;
+      if (slot >= (g ? off.length : per) || (slot > 0 && was !== undefined && g !== was && (g || was))) { col++; slot = 0; slots = off; }
+      put(id, toLeft ? minC - 1 - col : maxC + 1 + col, slots[slot++]!); was = g;
     }
   };
   endCols(left, true); endCols(right, false);
@@ -276,7 +296,7 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
   const backRoom = back.length ? FLOW_BACK_ROOM + 10 * (back.length - 1) : 0;
   let y = 0;
   rowsUsed.forEach((r, i) => {
-    if (i) { const prev = rowsUsed[i - 1]!, lane = laneRows.get(r), was = laneRows.get(prev); y += lane && lane !== was ? FLOW_LANE_GAP : FLOW_TIER_GAP + (prev === 0 ? backRoom : 0); }
+    if (i) { const prev = rowsUsed[i - 1]!, lane = laneRows.get(r), was = laneRows.get(prev); y += lane && lane !== was ? FLOW_LANE_GAP + (!was && cards.some(c => c.group && cell.has(c.id)) ? FLOW_GROUP_ROOM : 0) : FLOW_TIER_GAP + (prev === 0 ? backRoom : 0); }
     rowY.set(r, y); y += rowLv.get(r)!.h;
   });
   for (const [id, x] of cell) { const c = byId.get(id)!, lv = rowLv.get(x.r)!; at.set(id, { x: colX(x.c) + (cw - c.w) / 2, y: rowY.get(x.r)! + lv.a - anchorOf(c) }); }
@@ -286,8 +306,30 @@ export function flowPlace(cards: readonly FormCard[], lines: readonly FormLine[]
     lanes.push({ kind: 'build', text: BUILD_LANE_WORD, rect: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, count: buildIds.length, ids: buildIds });
   }
   void aspect;
+  lanes.push(...groupLanes(cards, at));
   return { at, lanes, back, row: steps.flat(), lone, apart };
 }
+/** v14 (spec 3): ids in their order with the members of one recorded group of user roles brought together at its first member's place. */
+export function togetherByGroup(ids: readonly string[], byId: ReadonlyMap<string, Pick<FormCard, 'group'>>): string[] {
+  const out: string[] = [], done = new Set<string>();
+  for (const id of ids) {
+    if (done.has(id)) continue;
+    const g = byId.get(id)?.group;
+    for (const x of g ? ids.filter(y => byId.get(y)?.group === g) : [id]) { out.push(x); done.add(x); }
+  }
+  return out;
+}
+/** v14 (spec 3): a caption round each recorded group of user roles whose members were placed (its name as written, its count). */
+function groupLanes(cards: readonly FormCard[], at: ReadonlyMap<string, Pt>): FormLane[] {
+  const groups = new Map<string, FormCard[]>();
+  for (const c of cards) if (c.group && at.has(c.id)) (groups.get(c.group) ?? groups.set(c.group, []).get(c.group)!).push(c);
+  return [...groups].filter(([, cs]) => cs.length >= 2).map(([name, cs]) => {
+    const x0 = Math.min(...cs.map(c => at.get(c.id)!.x)), y0 = Math.min(...cs.map(c => at.get(c.id)!.y)), x1 = Math.max(...cs.map(c => at.get(c.id)!.x + c.w)), y1 = Math.max(...cs.map(c => at.get(c.id)!.y + c.h));
+    return { kind: 'group' as const, text: name, rect: { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }, count: cs.length, ids: cs.map(c => c.id) };
+  }).filter(l => cards.every(c => l.ids.includes(c.id) || !at.has(c.id) || !meets(l.rect, { ...at.get(c.id)!, w: c.w, h: c.h })));
+}
+/** Whether two rectangles overlap (a group's outline never takes in a card that is not its member: then it is not drawn). */
+const meets = (a: FormRect, b: FormRect): boolean => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 /** Cards in the order their recorded directed relations run among themselves (sources first; a cycle broken at the earliest card in the
  * given order), ties in the given order. */
 function topoOrder(ids: string[], adj: Adj, given: readonly string[]): string[] {
@@ -305,11 +347,14 @@ function topoOrder(ids: string[], adj: Adj, given: readonly string[]): string[] 
 
 /** 층 gaps (map units): cards side by side, rows within a band, between bands, and the label room left of the bands. */
 export const LAYER_GAP_X = 96, LAYER_ROW_GAP = 64, LAYER_BAND_GAP = 104, LAYER_LABEL_ROOM = 150;
+/** v14: the room over the build and release lane under the bands (its caption). */
+export const LAYER_LANE_ROOM = 150;
 /** 층's placement (see the head of this file). hint: each card's place in the 구성 map (the order a band starts from, so a card keeps its
  * left-to-right neighbours where the record allows); aspect: the window's width over height. */
 export function layersPlace(cards: readonly FormCard[], lines: readonly FormLine[], hint: ReadonlyMap<string, Pt> = new Map(), aspect = 1.8): FormPlace {
   const byId = new Map(cards.map(c => [c.id, c])), adj = adjacency(lines.filter(l => byId.has(l.from) && byId.has(l.to)));
-  const live = cards.filter(c => !c.shelf), shelf = cards.filter(c => c.shelf).map(c => c.id);
+  // v14 (spec 3): the build and release lane stands under the bands, apart (its own caption), never in a family's band.
+  const live = cards.filter(c => !c.shelf && !c.lane), shelf = cards.filter(c => c.shelf).map(c => c.id), laneCards = cards.filter(c => !c.shelf && c.lane);
   const bands = BAND_ORDER.map(b => ({ b, ids: live.filter(c => bandOf(c) === b).map(c => c.id) })).filter(x => x.ids.length);
   const bandIx = new Map<string, number>(); bands.forEach((x, i) => x.ids.forEach(id => bandIx.set(id, i)));
   const linked = (id: string) => (adj.all.get(id)?.size ?? 0) > 0;
@@ -331,8 +376,8 @@ export function layersPlace(cards: readonly FormCard[], lines: readonly FormLine
       x.ids.forEach((id, i) => posOf.set(id, (i + 0.5) / x.ids.length));
     }
   }
-  // A card with no relation goes to its band's end (its order says nothing).
-  for (const x of bands) x.ids = [...x.ids.filter(linked), ...x.ids.filter(id => !linked(id))];
+  // A card with no relation goes to its band's end (its order says nothing); a recorded group of user roles stays together (v14).
+  for (const x of bands) x.ids = togetherByGroup([...x.ids.filter(linked), ...x.ids.filter(id => !linked(id))], byId);
   // The wrap: the most cards a row takes, chosen so the whole block is closest to the window's shape.
   const cw = Math.max(...live.map(c => c.w), 1), maxBand = Math.max(...bands.map(x => x.ids.length), 1);
   const bandRows = (ids: string[], per: number): string[][] => {
@@ -379,7 +424,22 @@ export function layersPlace(cards: readonly FormCard[], lines: readonly FormLine
     lanes.push({ kind: 'band', band: bands[bi]!.b, text: bandWord(bands[bi]!.b, ids.map(id => byId.get(id)!)), rect: { x: 0, y: top, w: widest, h: y - top }, count: ids.length, ids: [...ids] });
     y += LAYER_BAND_GAP;
   });
+  // v14: the lane's cards in rows of the bands' columns, in the order their own relations run, its caption above it.
+  if (laneCards.length) {
+    y += LAYER_LANE_ROOM - LAYER_BAND_GAP;
+    const ids = topoOrder(laneCards.map(c => c.id), adj, cards.map(c => c.id)), per = Math.max(3, cols), top = y;
+    for (let k = 0; k < ids.length; k += per) {
+      const row = ids.slice(k, k + per), lv = levelRow(row.map(id => byId.get(id)!)), off = Math.max(0, Math.floor((cols - row.length) / 2));
+      row.forEach((id, i) => { const c = byId.get(id)!; at.set(id, { x: (off + i) * pitch + (cw - c.w) / 2, y: y + lv.a - anchorOf(c) }); });
+      y += lv.h + LAYER_ROW_GAP;
+    }
+    const rs = ids.map(id => ({ ...at.get(id)!, w: byId.get(id)!.w, h: byId.get(id)!.h }));
+    const x0 = Math.min(...rs.map(r => r.x)), x1 = Math.max(...rs.map(r => r.x + r.w));
+    lanes.push({ kind: 'build', text: BUILD_LANE_WORD, rect: { x: x0, y: top, w: x1 - x0, h: y - LAYER_ROW_GAP - top }, count: ids.length, ids });
+    y += LAYER_BAND_GAP - LAYER_ROW_GAP;
+  }
   if (shelf.length) { let x = 0; for (const id of shelf) { at.set(id, { x, y }); x += byId.get(id)!.w + LAYER_GAP_X; } }
+  lanes.push(...groupLanes(live, at));
   return { at, lanes, back: [], row: [], lone: live.filter(c => !linked(c.id)).map(c => c.id) };
 }
 

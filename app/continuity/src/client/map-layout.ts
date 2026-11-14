@@ -7,7 +7,7 @@
  *   unit (a card with the same two lines); inside a region parts are compact rows, and a long run of siblings with few links
  *   among them reads as a list. Heights follow the lines a part really needs (two-line names, a state line); text never shrinks. */
 import type { StudioView, RelationView } from '../shared/studio.js';
-import { bandsOf, type Band } from './map-regions.js';
+import { bandsOf, laneOfScope, type Band } from './map-regions.js';
 import { layered, type LNode, type LEdge, type LKind, type LResult, type Channel } from './layered.js';
 export type { Channel } from './layered.js';
 
@@ -31,6 +31,8 @@ export const LIST_GAP = 18, LIST_ROW_GAP = 2;
 export const FRAME_GUTTER = 40;
 /** Above the 실행 위치 미기록 shelf (map-regions bandsOf, map design v3 2.2): its caption's room. */
 export const SHELF_GAP = 64;
+/** v14: between the program and the build and release lane under it (room for the lane's caption). */
+export const LANE_GAP_TOP = 96;
 /** Beauty v3 (F.3): the layout's target aspect is the window's, quantised so a small resize never lays the map out again. */
 export const ASPECTS = [1.4, 1.6, 1.8, 2.0, 2.4] as const;
 export const quantAspect = (a: number): number => ASPECTS.reduce((b, x) => (Math.abs(x - a) < Math.abs(b - a) - 1e-9 ? x : b), ASPECTS[0]);
@@ -113,7 +115,10 @@ export interface ScopeLayout { boxes: Map<string, Box>; edges: Edge[]; heads: Gh
   layers: string[][];
   /** Beauty v4 (P2): each laid part's connected block, and the layout roles the record gives the scope's parts (a participant: the
    * 참여자 band or the record's family 참여; an external system: the boundary band or the type 외부 시스템). */
-  blocks: Map<string, number>; roles: Map<string, 'outside' | 'external'> }
+  blocks: Map<string, number>; roles: Map<string, 'outside' | 'external'>;
+  /** v14 (spec 3): the whole map's build and release lane (map-shape laneIds), in rows under everything but the shelf, in the order its own
+   * relations run; absent or empty when the map has none (or the scope is a part's inside). */
+  lane?: string[] }
 
 interface Measure { w: number; h: number; ox: number; oy: number; head: number; contact?: number; pins?: Record<string, number>; ear?: number }
 export const ghostId = (id: string) => `ghost:${id}`;
@@ -271,12 +276,16 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   // Automatic arrangement of siblings: layered placement over the relations lifted to the siblings (beauty v3, layered.ts).
   const bandOf = new Map<string, Band>();
   let scopeLaid: LResult | null = null; const scopeRoles = new Map<string, 'outside' | 'external'>();
+  let laneIds: string[] = [];
   const autoArrange = (container: string | null, sizes: Map<string, Measure>): Map<string, Point> => {
     // The scope's own outside roles, external systems and lifecycle groups keep to their bands (map-regions): the middle is
     // arranged without them, then they are set beside and under it. A list keeps its own order whole.
     const band = container === scope && !listOf(container) ? bandsOf(v, kidsOf(container)) : new Map<string, Band>();
     for (const [i, b] of band) bandOf.set(i, b);
-    const ids = kidsOf(container).filter(i => band.get(i) !== 'shelf'), set = new Set(ids);
+    // v14 (spec 3): the whole map's build and release lane is arranged apart from the program, under it (placeBands).
+    const lane = scope === null && container === null && !listOf(container) ? laneOfScope(v, kidsOf(container).filter(i => band.get(i) !== 'shelf')) : [];
+    if (lane.length) laneIds = lane;
+    const ids = kidsOf(container).filter(i => band.get(i) !== 'shelf' && !lane.includes(i)), set = new Set(ids);
     const lift = (id: string) => { let cur = byId.get(id), guard = 0; while (cur && !set.has(cur.id) && guard++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
     if (listOf(container)) {
       // A list keeps its own order in columns. Rows linked outward sit in the last column and rows linked from outside in the
@@ -394,13 +403,26 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
         x += w + (inFrame ? GAP : WRAP_GAP);
       });
     }
-    if (band.size) placeBands(band, at, sizes);
+    if (band.size || lane.length) placeBands(band, at, sizes, lane);
     return at;
   };
   /** The 실행 위치 미기록 shelf (map design v3 2.2): the lifecycle groups in a row under everything, in the scope's order. Beauty v3 (B):
    * the 참여자 band and the system boundary are no longer columns of their own; their parts sit next to what they link to. */
-  const placeBands = (band: Map<string, Band>, at: Map<string, Point>, sizes: Map<string, Measure>) => {
+  const placeBands = (band: Map<string, Band>, at: Map<string, Point>, sizes: Map<string, Measure>, lane: readonly string[] = []) => {
     const box = (i: string) => { const p = at.get(i)!, z = sizes.get(i)!; return { x: p.x + z.ox, y: p.y + z.oy, w: z.w, h: z.h }; };
+    const placed = () => [...at.keys()].map(box);
+    // v14 (spec 3): the build and release lane in rows under the program (as wide as it, one grid cell per card), then the shelf.
+    if (lane.length) {
+      const all = placed(), bottom = all.length ? Math.max(...all.map(b => b.y + b.h)) : 0, left = all.length ? Math.min(...all.map(b => b.x)) : 0;
+      const width = all.length ? Math.max(...all.map(b => b.x + b.w)) - left : 0, cell = Math.max(...lane.map(i => sizes.get(i)!.w));
+      const per = Math.max(3, Math.floor((width + COL_GAP) / (cell + COL_GAP)));
+      let y = bottom + LANE_GAP_TOP;
+      for (let k = 0; k < lane.length; k += per) {
+        const row = lane.slice(k, k + per); let x = left;
+        for (const i of row) { const z = sizes.get(i)!; at.set(i, { x: x + (cell - z.w) / 2 - z.ox, y: y - z.oy }); x += cell + COL_GAP; }
+        y += Math.max(...row.map(i => sizes.get(i)!.h)) + ROW_GAP * 2;
+      }
+    }
     const shelf = kidsOf(scope).filter(i => band.get(i) === 'shelf'); if (!shelf.length) return;
     const all = [...at.keys()].map(box), bottom = all.length ? Math.max(...all.map(b => b.y + b.h)) : 0, left = all.length ? Math.min(...all.map(b => b.x)) : 0;
     let x = left; for (const i of shelf) { const z = sizes.get(i)!; at.set(i, { x: x - z.ox, y: bottom + SHELF_GAP - z.oy }); x += z.w + WRAP_GAP; }
@@ -578,7 +600,7 @@ export function layoutScope(v: StudioView, scope: string | null, expanded: (id: 
   const own = scope ?? ROOT, autoAt = autoMemo.get(own), placed = pos[own] ?? {};
   const moved = (id: string | undefined) => { const s = id ? placed[id] : undefined, a = id ? autoAt?.get(id) : undefined; return !!s && (!a || Math.abs(s.x - a.x) > 0.5 || Math.abs(s.y - a.y) > 0.5); };
   const channels = new Map([...((scopeLaid as LResult | null)?.channels ?? new Map<string, Channel>())].filter(([k]) => { const [a, b] = k.split('|'); return !moved(a) && !moved(b); }));
-  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands, channels, layers: (scopeLaid as LResult | null)?.order ?? [], blocks: (scopeLaid as LResult | null)?.block ?? new Map(), roles: scopeRoles };
+  return { boxes, edges: [...edges.values()], heads, bounds: { x: bx, y: by, w: bx2 - bx, h: by2 - by }, spine, bands, channels, layers: (scopeLaid as LResult | null)?.order ?? [], blocks: (scopeLaid as LResult | null)?.block ?? new Map(), roles: scopeRoles, lane: laneIds.filter(i => boxes.has(i)) };
 }
 
 /** Where a column of outside partners goes (the parts it meets: near): beside them on the free side nearest to them (outgoing to

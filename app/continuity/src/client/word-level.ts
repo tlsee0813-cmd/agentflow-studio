@@ -77,7 +77,7 @@ export const EASY_LENS: Readonly<Record<string, string>> = { compose: '역할', 
 export const EASY_FAMILY: Readonly<Record<string, string>> = { '촉발·관문': '시작 신호와 관문', '상태·공백': '상태와 모름', '시작·반복': '시작과 반복' };
 /** v13 merge (spec 3 × 4: 쉽게 in every 보기): the band words of 층 at 쉽게, each unit of a band's words (「저장 · 관문」) in the legend's
  * plain words (「촉발」 → 「시작 신호」, as 「촉발·관문」 reads 「시작 신호와 관문」 there); the record's family words stay in the band's tip. */
-export const EASY_BAND: Readonly<Record<string, string>> = { '촉발': '시작 신호' };
+export const EASY_BAND: Readonly<Record<string, string>> = { '촉발': '시작 신호', '참여': '사람', '외부': '외부 시스템', '미정': '종류 미정' };
 export function easyBand(text: string): string { return text.split(' · ').map(u => EASY_BAND[u] ?? u).join(' · '); }
 /** The legend chip at 쉽게: the lens and what it shows, the counts behind the chip (it opens the legend with them): 「구성 · 참여자 · 처리 ···」. */
 export function easyLegendChip(lens: string, labels: readonly string[], max = 2): string {
