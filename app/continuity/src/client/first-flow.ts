@@ -25,6 +25,7 @@ import { v5Folds } from '../shared/record-excerpt.js';
 import { rowLedger, rowBindings } from '../shared/row-ledger.js';
 import { identityState, canonicalPart, partAliases } from '../shared/map-identity.js';
 import type { FoldRow } from '../shared/record-table.js';
+import { preferRuntime, demoteLow } from './map-shape.js';
 
 export type FlowRule = 'scenario' | 'summary' | 'head' | 'entry';
 export const FLOW_RULES: readonly FlowRule[] = ['scenario', 'summary', 'head', 'entry'];
@@ -68,6 +69,10 @@ export interface FlowInput {
   /** The card a part is drawn on now (a part inside a folded group is drawn on its group; null: not drawn): the switcher names the drawn
    * cards and never a line drawn inside one card. Each part is its own card when absent. */
   rep?: ((id: string) => string | null) | null;
+  /** v14 (spec 3, map-shape pathRank): a candidate's rank by what its cards are (0 build and release, 1 logs and progress output, 2 a
+   * runtime path, 3 one from a person who uses the product). With it, a build or plumbing candidate gives way to a higher one of any
+   * rule (preferRuntime) and goes after the others of its own rule; without it the rules' order alone decides. */
+  rank?: ((c: FlowCandidate) => number) | null;
 }
 export interface FlowNote { part: string; text: string | null }
 export interface FlowCandidate {
@@ -503,6 +508,11 @@ export function firstFlow(inp: FlowInput): FirstFlow {
   const firstRule = (): { rule: FlowRule; cs: FlowCandidate[] } | null => { for (const r of FLOW_RULES) { const cs = flowCandidates(r, inp); if (cs.length) return { rule: r, cs }; } return null; };
   if (k && k.rule === 'all') { const f = firstRule(); return { rule: 'all', kept: true, candidates: f?.cs ?? [], index: -1, flow: null }; }
   if (k && k.rule !== 'all') { const rule: FlowRule = k.rule, cs = flowCandidates(rule, inp), i = cs.findIndex(c => c.key === k.key); if (i >= 0) return { rule, kept: true, candidates: cs, index: i, flow: cs[i]! }; }
+  if (inp.rank) {
+    const rank = inp.rank, lists = FLOW_RULES.map(r => flowCandidates(r, inp)), pick = preferRuntime(lists, rank); if (!pick) return none;
+    const chosen = lists[pick[0]]![pick[1]]!, cs = demoteLow(lists[pick[0]]!, rank);
+    return { rule: FLOW_RULES[pick[0]]!, kept: false, candidates: cs, index: cs.indexOf(chosen), flow: chosen };
+  }
   const f = firstRule(); if (!f) return none;
   return { rule: f.rule, kept: false, candidates: f.cs, index: 0, flow: f.cs[0]! };
 }

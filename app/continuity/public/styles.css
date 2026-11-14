@@ -4198,3 +4198,43 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* v13 merge (spec 1 × 3: the opening in the record's 보기): a form's lanes are the stage the cards come into (층's bands with their words, 흐름's
  * build lane), drawn from the start; only their counts, which are the last version's, wait for the landing. */
 #space.op-run #world > .form-lane .form-lane-n { visibility: hidden; }
+/* v14 B (spec 3 and 5): people, outside systems and program parts read apart by shape and mark (never by colour alone): a person's card is
+ * round at the ends, an outside system's or someone else's code is drawn with a dashed edge, a part of the program keeps its square edge;
+ * at 쉽게 each carries its mark (사람 · 자동 봇 · 외부 시스템 · 외부 코드) and the title says the three in one line. */
+.node.card.pk-person { border-radius: 24px; }
+.node.card.pk-outside { border-style: dashed; border-color: var(--line-strong, rgba(17,24,39,.32)); border-radius: 10px; }
+.node.card.pk-outside.selected { border-style: solid; }
+.map-kinds .mk { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.map-kinds .mk i { display: inline-block; width: 18px; height: 11px; border: 1.5px solid var(--text-3); background: var(--surface); }
+.map-kinds .mk-person i { border-radius: 6px; }
+.map-kinds .mk-outside i { border-style: dashed; border-radius: 2px; }
+.map-kinds .mk-part i { border-radius: 1px; }
+/* v14 B: a recorded group of user roles: a quiet outline round its members, its name above it (as the build lane's caption). */
+.form-lane.group { border: 1px solid var(--line-strong, rgba(17,24,39,.2)); border-radius: 18px; background: transparent; }
+.form-lane.group .form-lane-word { top: calc(100% + 6px); bottom: auto; left: 0; max-width: none; white-space: nowrap; color: var(--text-2); transform-origin: 0 0; }
+/* v14 B (spec 5 at every width): the bar never cuts the project's name or lays a control over another; what does not fit beside the path
+ * and the 보기 방식 goes to a second row (the map takes the rest of the window). */
+.app { grid-template-rows: auto 1fr; }
+.bar { flex-wrap: wrap; min-height: 3.25rem; row-gap: 6px; padding-top: 10px; padding-bottom: 10px; }
+.bar > .context { flex: 1 0 auto; max-width: 100%; }
+.bar > .context > .crumbs { flex: none; }
+/* v14 B: the brand's words give way first on a map (its mark stays and keeps its name in its label), so the path, the 보기 방식 and the
+ * controls stand on one row at 1440 px; narrower, the controls take the second row. */
+@media (max-width: 1560px) { .bar:has(#modebar:not([hidden])) .brand-name { display: none; } }
+@media (max-width: 1420px) {
+  .bar:has(#modebar:not([hidden])) > .context { flex: 1 0 calc(100% - 44px); }
+  .bar:has(#modebar:not([hidden])) > .modebar { order: 3; }
+  .bar:has(#modebar:not([hidden])) > :is(#sync-pill, #ai-pill) { order: 4; }
+}
+/* v14 B: the top box's last line: what the record covered (its words in the tip) and, at 쉽게, the three card shapes. */
+.focus-top .ft-cover { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.focus-top .ft-cover .map-cover { margin: 0; pointer-events: auto; cursor: help; word-break: keep-all; }
+.focus-top .ft-cover .map-kinds { display: none; margin: 0; gap: 12px; flex-wrap: wrap; pointer-events: auto; }
+.space.words-easy .focus-top .ft-cover .map-kinds { display: inline-flex; }
+.space:not(.words-easy) .form-lane.group .form-lane-n { display: inline; }
+/* v14 B: when the top box would cover the map, the coverage line gives way before the sentence; its cue stays on the switcher's row. */
+.focus-top .ft-cover-cue { display: none; pointer-events: auto; cursor: help; color: var(--text-3); text-decoration: underline dotted; text-underline-offset: 3px; white-space: nowrap; }
+.focus-top.ft-nocover .ft-cover-cue { display: inline; }
+.focus-top.ft-nocover .ft-cover { display: none; }
+/* v14 B: a band's words stay in the band's label room at every zoom (they wrap between words there instead of reaching a card). */
+.form-lane.band .form-lane-word { max-width: calc(122px / var(--linv, var(--inv, 1))); }

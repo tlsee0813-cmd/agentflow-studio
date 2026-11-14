@@ -15,6 +15,7 @@
  *   nothing is banded when it would leave the middle empty. */
 import type { StudioView, PartView } from '../shared/studio.js';
 import { isMapReading, type PartType, type Project, type ReadingPart } from '../shared/types.js';
+import { laneIds, type LaneCard } from './map-shape.js';
 
 export type GroupAxis = 'participants' | 'boundary' | 'lifecycle' | 'composition' | null;
 export type Band = 'outside' | 'boundary' | 'shelf';
@@ -136,4 +137,32 @@ export function kindHeads(sets: readonly (readonly string[])[], recorded: readon
   for (const x of heads) count.set(key(x), (count.get(key(x)) ?? 0) + 1);
   const out = heads.map(x => (count.get(key(x))! > 1 ? null : x));
   return { heads: out, legend: out.some(x => x === null) };
+}
+
+/* ---------- v14 (spec 3): the build and release lane of the whole map ---------- */
+/** The scope's direct parts (ids) that stand in the build and release lane (map-shape laneIds over the record's names, type words,
+ * families and role words, with the relations lifted to these parts), in the order their own recorded relations run (sources first,
+ * ties in the scope's order). Empty when the lane would hold every part (nothing left to put it under). */
+export function laneOfScope(v: StudioView, ids: readonly string[]): string[] {
+  const byId = new Map(v.parts.map(p => [p.id, p])), set = new Set(ids);
+  const lift = (id: string) => { let cur = byId.get(id), g = 0; while (cur && !set.has(cur.id) && g++ < 64) cur = cur.parentId ? byId.get(cur.parentId) : undefined; return cur && set.has(cur.id) ? cur.id : null; };
+  const lines: { from: string; to: string }[] = [];
+  for (const r of v.relations) { const a = lift(r.from), b = lift(r.to); if (a && b && a !== b) lines.push({ from: a, to: b }); }
+  const cards = ids.flatMap(id => { const p = byId.get(id); return p ? [shapeFactsOf(p)] : []; });
+  const lane = laneIds(cards, lines); if (!lane.size || lane.size >= ids.length) return [];
+  // Sources first along the lane's own relations (a cycle broken at the earliest in the scope's order).
+  const rank = new Map(ids.map((id, i) => [id, i])), indeg = new Map([...lane].map(id => [id, 0]));
+  for (const l of lines) if (lane.has(l.from) && lane.has(l.to)) indeg.set(l.to, indeg.get(l.to)! + 1);
+  const out: string[] = [], left = new Set(lane);
+  while (left.size) {
+    const pick = [...left].filter(id => indeg.get(id) === 0).sort((a, b) => rank.get(a)! - rank.get(b)!)[0] ?? [...left].sort((a, b) => rank.get(a)! - rank.get(b)!)[0]!;
+    out.push(pick); left.delete(pick);
+    for (const l of lines) if (l.from === pick && left.has(l.to)) indeg.set(l.to, indeg.get(l.to)! - 1);
+  }
+  return out;
+}
+/** A part's facts as map-shape reads them (its name, its recorded type word, family and the role word beside the family). */
+export function shapeFactsOf(p: PartView): LaneCard {
+  const r = p.reading;
+  return { id: p.id, name: p.name, type: r?.typeRead?.type ?? null, family: r?.familyRead?.family ?? null, familyRole: r?.familyRead?.role ?? null };
 }

@@ -64,7 +64,7 @@ test('bandsOf: outside roles left, external systems right, lifecycle groups on t
 test('layout: a participant sits just before what it starts, an external system in its block’s last column; the shelf under everything', () => {
   const v = view([
     ['u', '사용자', null, reading('person')], ['run', '실행기', null, reading('compute')], ['out', '결과 파일', null, reading('store')],
-    ['bot', 'dependabot', null, reading('external')], ['L', '폐기', null, null], ['l1', '옛 수집기', 'L', reading('collector', 'retired')],
+    ['bot', '알림 서비스', null, reading('external')] /* v14 B: a bot of the release stands in the release lane (V14B-2), so the outside system here is a service */, ['L', '폐기', null, null], ['l1', '옛 수집기', 'L', reading('collector', 'retired')],
   ], [['u', 'run'], ['run', 'out'], ['run', 'bot']]);
   const L = layoutScope(v, null, () => true, {}), box = id => L.boxes.get(id);
   assert.deepEqual(L.bands, { outside: ['u'], boundary: ['bot'], shelf: ['L'] });

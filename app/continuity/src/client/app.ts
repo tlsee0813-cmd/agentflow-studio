@@ -42,6 +42,9 @@ import { zoomLevel, zoomTier, tierText, entryParts, type EntryCounts, type ZoomT
 // v13 (C-words-regressions): a mark's further places, the word level, the compare footer.
 import { cueSpots, pathWalk } from './mark-room.js';
 import { readWords, writeWords, plainLabel, hasCode, easyLegendChip, easyKind, partMark, leansBack, easyBand, EASY_LENS, WORDS_TIP, type WordLevel } from './word-level.js';
+import { shapeKind, kindMark, laneIds, pathRank, roleGroups, coverageOf, LOG_NAME, USER_WORD, KIND_LEGEND, COVERAGE_WORD, type ShapeKind } from './map-shape.js'; // v14 B
+import { shapeFactsOf } from './map-regions.js'; // v14 B
+import { setPlainLevel, easyWordOf, detailNote, plainLead, EASY_FORM_WORD, EASY_FORM_SWITCH, EASY_FORM_TIP } from './plain-words.js'; // v14 B
 import { CARD_H, CARD_H_TALL, CARD_H_TALLER, cardTemplate, cardHeights, contractOf, groupTip, groupKind, lifecycleOf, maintenanceOf, kindLabel, structuralOf, paneFamily, nameBreaks, nameRoomOf, FAMILY_WORD, NAME_ROOM, TOGGLE_W, UNLINKED_TIP, type CardFacts, type CardTemplate } from './card-family.js';
 import { glyphSvg } from './card-glyphs.js';
 import { cardFace, cutsWord, fitTags, linesNeeded, tagRoom, TAG, TAG_COMPACT, type CardFace } from './name-tag.js';
@@ -67,7 +70,7 @@ import { recordAskNodes, continuationNode, pageNode } from './record-asks.js';
 import { currentView } from '../shared/map-identity.js';
 import { splitRecordChunks, readRecordTables, cellTexts } from '../shared/record-table.js';
 // v13 forms hook 0: the whole map's 보기 (흐름 · 층 · 구성).
-import { MAP_FORMS, MAP_FORM_WORD, FORM_SWITCH_WORD, formChoice, formShown, nextMapForm, recordedChain, flowPlace, layersPlace, planChannels, FORM_LINES_OUT_MS, FORM_FLY_MS, FORM_LINES_IN_MS, LAYER_LABEL_ROOM, type MapForm, type FormCard, type FormLine, type FormChain, type FormChoice, type FormPlace } from './map-forms.js';
+import { MAP_FORMS, MAP_FORM_WORD, FORM_SWITCH_WORD, formChoice, formShown, nextMapForm, recordedChain, flowPlace, layersPlace, planChannels, FORM_LINES_OUT_MS, FORM_FLY_MS, FORM_LINES_IN_MS, LAYER_LABEL_ROOM, BUILD_LANE_WORD, type FormLane, type MapForm, type FormCard, type FormLine, type FormChain, type FormChoice, type FormPlace } from './map-forms.js';
 import { flowCandidates, FLOW_RULES, firstFlow, startCard, focusFold, shownWord, FOCUS_ONLY_WORD, ALL_RELATIONS_WORD, foldWord, chipSpots, hubChipSpots, hubChipOrder, cardSeen, topCut, CLAUSE_KEEP, sentenceRoom, switcherText, sourceText, summarySource, topIntro, switcherForms, INTRO_FULL, INTRO_PART, byTarget, shownSentence, headLines, recordWords, scenarioBasis, SCENARIO_NO_BASIS, FLOW_CONTROL, FLOW_SOURCE, type FirstFlow, type FocusFold, type FlowCandidate, type FlowChoice, type FlowInput, type RecordWord, type SummarySource } from './first-flow.js';
 import { modelLabel } from '../shared/model-label.js';
 import { CONVERTER_KEY, buildConverterProject, converterKeys } from './plan-source.js';
@@ -648,6 +651,7 @@ function setBar(o: Opened | null) {
   ret.title = reading ? '돌아와 읽기 닫기 (Esc)' : '무엇이 달라졌는지 자료로 읽어요';
   entry.title = planning ? '변경 구상 닫기 (Esc) · 초안은 남아요' : '현재 지도 위에서 바꿀 모습을 시험해요';
   document.title = o ? `${o.project.name} · AgentFlow Studio` : 'AgentFlow Studio';
+  plainHeader(); // v14 B hook 8
 }
 
 /* ---------- home: back to the programs one is making ----------
@@ -924,14 +928,100 @@ const topCard = (o: Opened, id: string): string | null => { const r = drawnRep(o
 /** The record's main order on the top cards (map-forms recordedChain over every 먼저 볼 연결 candidate, read as the first view reads them). */
 function formChainOf(o: Opened): FormChain | null {
   const was = ffSrc; ffSrc = summaryOf(o);
-  try { const inp = focusInput(o); return recordedChain(FLOW_RULES.flatMap(r => flowCandidates(r, inp)), id => topCard(o, id), FLOW_SOURCE.ordered); }
+  try { const inp = focusInput(o); return recordedChain(FLOW_RULES.flatMap(r => flowCandidates(r, inp)), id => topCard(o, id), FLOW_SOURCE.ordered, c => pathRank(c.steps.map(s => [...new Set(s.map(id => topCard(o, id)).filter((x): x is string => !!x))]).filter(s => s.length), shapeRank(o)) /* v14 B hook 2 */); }
   catch { return null; } finally { ffSrc = was; }
+}
+/* ===== v14 B (spec 3 and 5): the map's shape read from the record's facts (map-shape.ts): what each card is to a reader (a person who
+ * uses the product, a person or bot who builds and releases it, an outside system, a part of the program), the build and release lane, the
+ * recorded groups of user roles, the rank of a main-flow candidate, and the record's coverage. Hook points in this file: 'v14 B hook N'. */
+let shapeMemo: { lay: ScopeLayout; view: StudioView; kinds: Map<string, ShapeKind>; lane: Set<string>; groups: Map<string, string>; lines: { from: string; to: string }[] } | null = null;
+/** The whole map's top cards as map-shape reads them (memoized per layout). */
+function shapeOf(o: Opened) {
+  if (shapeMemo && shapeMemo.lay === lay && shapeMemo.view === o.view) return shapeMemo;
+  const top = [...lay.boxes.values()].filter(b => b.container === ROOT && b.kind !== 'ghost'), ids = new Set(top.map(b => b.id));
+  const kinds = new Map<string, ShapeKind>(), facts = top.flatMap(b => { const p = partOf(o, b.id); return p ? [shapeFactsOf(p)] : []; });
+  for (const f of facts) kinds.set(f.id, shapeKind(f));
+  const lines: { from: string; to: string }[] = [];
+  for (const r of o.view.relations) { const a = topCard(o, r.from), b = topCard(o, r.to); if (a && b && a !== b && ids.has(a) && ids.has(b)) lines.push({ from: a, to: b }); }
+  // The lane only for the whole map (a part's inside is its own scope).
+  const lane = scope === null ? laneIds(facts, lines) : new Set<string>();
+  if (lane.size >= facts.length) lane.clear();
+  shapeMemo = { lay, view: o.view, kinds, lane, groups: roleGroupsOf(o, ids), lines };
+  return shapeMemo;
+}
+/** The recorded groups of user roles (map-shape roleGroups over the newest record that writes one), by member card: its name. */
+function roleGroupsOf(o: Opened, ids: ReadonlySet<string>): Map<string, string> {
+  const out = new Map<string, string>(), refOf = new Map<string, string>();
+  for (const r of o.project.readings.filter(isMapReading)) for (const p of r.parts) if (p.recordRef) refOf.set(p.recordRef, p.areaId);
+  for (const rec of [...o.project.pasted].reverse()) {
+    const gs = roleGroups(rec.text); if (!gs.length) continue;
+    for (const g of gs) { const members = g.members.map(m => refOf.get(m)).filter((x): x is string => !!x && ids.has(x)); if (members.length >= 2) for (const m of members) out.set(m, g.name); }
+    break;
+  }
+  return out;
+}
+/** A candidate's rank facts (map-shape pathRank) on the top cards drawn now. */
+function shapeRank(o: Opened) {
+  const s = shapeOf(o), name = (id: string) => partOf(o, id)?.name ?? '';
+  const starter = (id: string) => { const k = s.kinds.get(id); return k === 'user' || (k === 'outside' && USER_WORD.test(name(id))); };
+  return { lane: s.lane, log: (id: string) => LOG_NAME.test(name(id)), start: (id: string) => starter(id) || s.lines.some(l => l.to === id && starter(l.from)) };
+}
+/** What a part is to a reader (its own facts; a part inside a group is read on its own). */
+const kindOfPart = (o: Opened, id: string): ShapeKind => { const p = partOf(o, id); return p ? shapeKind(shapeFactsOf(p)) : 'part'; };
+/** The card's mark at 쉽게 and in its name tag (map-shape kindMark): 사람 · 자동 봇 · 외부 시스템 · 외부 코드. */
+const kindMarkOf = (o: Opened, id: string): string | null => { const p = partOf(o, id); return p ? kindMark(shapeFactsOf(p)) : null; };
+/** v14 B hook 6: a card's shape class and its mark when the type word gives none (the record's role word or name does). */
+function shapeCard(o: Opened, p: PartView, el: HTMLElement): HTMLElement {
+  const k = kindOfPart(o, p.id), mark = kindMarkOf(o, p.id);
+  el.classList.add(`pk-${k === 'user' || k === 'crew' ? 'person' : k === 'outside' ? 'outside' : 'part'}`);
+  if (mark) {
+    const kind = el.querySelector('.c-head .c-kind'), pm = kind?.querySelector('.c-pmark');
+    if (pm) pm.textContent = mark; else kind?.prepend(h('span', { class: 'c-pmark' }, mark));
+    el.querySelector<HTMLElement>('.c-tag-kind')?.setAttribute('data-pmark', mark);
+  }
+  return el;
+}
+/** v14 B hook 7: a person's or an outside system's card the record gave no type word takes that kind's glyph. */
+function shapeGlyph(o: Opened, p: PartView, t: CardTemplate): CardTemplate {
+  if (t.glyph !== 'neutral') return t;
+  const k = kindOfPart(o, p.id);
+  return k === 'user' || (k === 'crew' && !/봇|bot|CI|actions/i.test(p.name)) ? { ...t, glyph: 'person' } : k === 'outside' || k === 'crew' ? { ...t, glyph: k === 'crew' ? 'automation' : 'external' } : t;
+}
+/** v14 B hook 5: the top box's quiet last line: the record's coverage (「기록이 다룬 범위: …」, its 읽은 범위 and 못 읽은 범위 whole in the
+ * tip) and, at 쉽게, the one-line legend of the three shapes (screen-sized, as the box is). */
+function shapeTopLine(o: Opened, row: HTMLElement | null): HTMLElement | null {
+  const els = shapeTitleEls(o); if (!els.length) return null;
+  // Its cue on the switcher's row while the line gives way (ft-nocover): the same words in its tip.
+  const said = els.map(e => e.getAttribute('title') ? `${e.textContent}\n${e.getAttribute('title')}` : `카드 모양: ${[...e.querySelectorAll('.mk')].map(m => `${m.textContent} (${m.getAttribute('title')})`).join(' · ')}`).join('\n');
+  row?.append(h('span', { class: 'ft-cover-cue', title: said }, COVERAGE_WORD));
+  return h('div', { class: 'ft-cover' }, ...els);
+}
+/** v14 B hook 11: when the top box would cover the map, its coverage line gives way (with the basis line) before the sentence steps
+ * back; its words stay on the switcher's row as 「기록이 다룬 범위」 with the whole line in its tip. True when that was enough. */
+function shapeYield(el: HTMLElement, covers: () => boolean): boolean {
+  if (!el.querySelector('.ft-cover') || !el.querySelector('.ft-cover-cue')) return false;
+  const basis = !!el.querySelector('.ft-basis');
+  el.classList.add('ft-nocover'); if (basis) el.classList.add('ft-nobasis');
+  if (!covers()) return true;
+  el.classList.remove('ft-nocover', 'ft-nobasis'); return false;
+}
+function shapeTitleEls(o: Opened): HTMLElement[] {
+  if (scope) return [];
+  const read = new Set(o.project.readings.filter(isMapReading).flatMap(r => r.records.map(x => x.id)));
+  const cov = coverageOf(o.project.pasted.filter(r => read.has(r.id)).map(r => r.text));
+  const kinds = new Set([...shapeOf(o).kinds.values()].map(k => (k === 'user' || k === 'crew' ? 'person' : k === 'outside' ? 'outside' : 'part')));
+  const legend = KIND_LEGEND.filter(x => kinds.has(x.kind));
+  return ([
+    cov ? h('p', { class: 'map-cover', title: `기록이 읽은 범위: ${cov.read}${cov.unread ? `\n기록이 못 읽은 범위: ${cov.unread}` : ''}\n지도는 기록이 읽은 것만 그려요` }, cov.shown) : null,
+    legend.length > 1 ? h('p', { class: 'map-kinds', 'aria-label': `카드 모양 · ${legend.map(x => x.word).join(' · ')}` }, ...legend.map(x => h('span', { class: `mk mk-${x.kind}`, title: x.tip }, h('i', { 'aria-hidden': 'true' }), x.word))) : null,
+  ] as (HTMLElement | null)[]).filter((x): x is HTMLElement => !!x);
 }
 function formRelayout(o: Opened, held: Positions, tpls: Map<string, CardTemplate>) {
   formPlace = null;
   if (!formApplies(o)) { formNow = 'compose'; if (scope === null && !o.past) formInfo = null; return; }
   const top = [...lay.boxes.values()].filter(b => b.container === ROOT && b.kind !== 'ghost');
-  const cards: FormCard[] = top.map(b => { const p = partOf(o, b.id), r = p?.reading; return { id: b.id, name: p?.name ?? '', w: b.w, h: b.h, anchor: b.kind === 'frame' ? b.head / 2 : b.contact ?? b.h / 2, family: r?.familyRead?.family ?? null, type: r?.typeRead?.type ?? null, ...(lay.bands.shelf.includes(b.id) ? { shelf: true } : {}) }; });
+  const sh = shapeOf(o); // v14 B hook 1: each card's kind, the lane and the recorded groups of user roles
+  const cards: FormCard[] = top.map(b => { const p = partOf(o, b.id), r = p?.reading; return { id: b.id, name: p?.name ?? '', w: b.w, h: b.h, anchor: b.kind === 'frame' ? b.head / 2 : b.contact ?? b.h / 2, family: r?.familyRead?.family ?? null, type: r?.typeRead?.type ?? null, ...(lay.bands.shelf.includes(b.id) ? { shelf: true } : {}), kind: sh.kinds.get(b.id) ?? 'part', lane: sh.lane.has(b.id), group: sh.groups.get(b.id) ?? null }; });
   const key = `${o.key}|${top.map(b => `${b.id}:${b.w}x${b.h}`).join(',')}`;
   if (!formInfo || formInfo.key !== key || formInfo.view !== o.view) { const chain = formChainOf(o); formInfo = { key, view: o.view, choice: formChoice(cards, chain), chain }; }
   formNow = formShown(formInfo.choice, keptMapForm(o));
@@ -949,17 +1039,28 @@ function formRelayout(o: Opened, held: Positions, tpls: Map<string, CardTemplate
   lay.channels = new Map(); lay.layers = []; lay.blocks = new Map(); lay.roles = new Map();
   formPlace = place;
   // The bounds keep the lanes' grounds, the band words' room and the build lane's caption above it.
-  const r = formLaneRects().flatMap((x, i) => (!x ? [] : formPlace!.lanes[i]!.kind === 'build' ? [{ ...x, y: x.y - 30, h: x.h + 30 }] : [x]));
+  const r = formLaneRects().flatMap((x, i) => (!x ? [] : formPlace!.lanes[i]!.kind === 'build' ? [{ ...x, y: x.y - 30, h: x.h + 30 }] : formPlace!.lanes[i]!.kind === 'group' ? [{ ...x, h: x.h + 30 }] : [x]));
   if (r.length) lay.bounds = unionRect([lay.bounds, ...r]) ?? lay.bounds;
 }
 /** The lanes' rectangles as drawn now, from their cards (a moved card takes its lane's edge with it): every band as wide as all of them
  * together (one ground per family, its words in the label room on the left), the build lane round its own cards with its caption above. */
 function formLaneRects(): ({ x: number; y: number; w: number; h: number } | null)[] {
-  if (!formPlace) return [];
-  const own = formPlace.lanes.map(l => laneBox(l.ids)), bands = own.filter((r, i): r is NonNullable<typeof r> => !!r && formPlace!.lanes[i]!.kind === 'band');
+  const list = shownLanes(); // v14 B hook 4: 구성's build lane too
+  if (!list.length) return [];
+  const own = list.map(l => laneBox(l.ids)), bands = own.filter((r, i): r is NonNullable<typeof r> => !!r && list[i]!.kind === 'band');
   const x0 = Math.min(...bands.map(r => r.x)), x1 = Math.max(...bands.map(r => r.x + r.w));
-  return formPlace.lanes.map((l, i) => { const r = own[i]; if (!r) return null; return l.kind === 'band' ? { x: x0 - LAYER_LABEL_ROOM, y: r.y - 14, w: x1 - x0 + LAYER_LABEL_ROOM + 14, h: r.h + 28 } : { x: r.x - 14, y: r.y - 14, w: r.w + 28, h: r.h + 28 }; });
+  return list.map((l, i) => { const r = own[i]; if (!r) return null; return l.kind === 'band' ? { x: x0 - LAYER_LABEL_ROOM, y: r.y - 14, w: x1 - x0 + LAYER_LABEL_ROOM + 14, h: r.h + 28 } : { x: r.x - 14, y: r.y - 14, w: r.w + 28, h: r.h + 28 }; });
 }
+/** v14 B hook 4: the lanes drawn now: a form's, or under 구성 (the whole map) its build and release lane (map-layout lane). */
+function shownLanes(): FormLane[] {
+  if (formPlace) return formPlace.lanes;
+  const ids = scope === null && opened && !opened.past ? lay.lane ?? [] : [];
+  return ids.length ? [{ kind: 'build', text: BUILD_LANE_WORD, rect: { x: 0, y: 0, w: 0, h: 0 }, count: ids.length, ids: [...ids] }] : [];
+}
+/** v14 B: a lane's caption tip (what the lane holds, in the record's words). */
+const laneTip = (l: FormLane): string => l.kind === 'band' ? `${l.text} · 기록이 정한 표현군 · 부품 ${l.count}`
+  : l.kind === 'group' ? `${l.text} · 기록이 한 무리로 적은 사용자 역할 ${l.count}개`
+  : `${l.text} · 기록이 빌드·배포·게시로 말한 부품과 그것을 맡은 사람·봇 ${l.count} · 프로그램이 도는 길과 따로 아래에 둬요`;
 const laneBox = (ids: readonly string[]) => unionRect(ids.map(id => lay.boxes.get(id)).filter((b): b is Box => !!b));
 /** A form's reserved routes (map-forms planChannels) for the strokes between its top cards, as the layered map reserves its own; 흐름's
  * way back runs under its row. A stroke with faces of its own (a control line's top and bottom) keeps them. */
@@ -977,17 +1078,18 @@ function drawFormLanes() {
   // The switcher by the map's name in the header (always in sight, never over the map): the whole map's forms only.
   const o = opened, sw = o ? formSwitchEl(o) : null, host = $('map-forms-host'); host.hidden = !sw; host.replaceChildren(...(sw ? [sw] : []));
   if (sw && routeWorker === undefined) window.setTimeout(warmRoutes, ROUTE_WARM_MS); // v13 fix 2
-  if (!formPlace) return;
+  const lanes = shownLanes(); // v14 B hook 4
+  if (!lanes.length) return;
   const first = world.firstChild;
-  for (const l of formPlace.lanes) {
+  for (const l of lanes) {
     const el = h('div', { class: `form-lane ${l.kind}${l.band ? ` b-${l.band}` : ''}`, 'data-lane': l.band ?? l.kind, 'aria-hidden': 'true' },
-      h('span', { class: 'form-lane-word', title: l.kind === 'band' ? `${l.text} · 기록이 정한 표현군 · 부품 ${l.count}` : `${l.text} · 기록이 빌드·배포·게시로 말한 부품 ${l.count}` }, l.kind === 'band' ? (easy() ? easyBand(l.text) : l.text).split(' · ').join('\n') /* v13 merge: 쉽게's band words */ : l.text, h('span', { class: 'form-lane-n' }, l.kind === 'band' ? `${l.count}개` : ` · ${l.count}`)));
+      h('span', { class: 'form-lane-word', title: l.kind === 'band' ? `${l.text} · 기록이 정한 표현군 · 부품 ${l.count}` : laneTip(l) }, l.kind === 'band' ? (easy() ? easyBand(l.text) : l.text).split(' · ').join('\n') /* v13 merge: 쉽게's band words */ : l.text, h('span', { class: 'form-lane-n' }, l.kind === 'band' ? `${l.count}개` : ` · ${l.count}`)));
     world.insertBefore(el, first);
   }
   placeFormLanes();
 }
 function placeFormLanes() {
-  if (!formPlace) return;
+  if (!shownLanes().length) return;
   const els = [...$('world').querySelectorAll<HTMLElement>('.form-lane')], rects = formLaneRects();
   els.forEach((el, i) => { const r = rects[i]; el.hidden = !r; if (!r) return; el.style.left = `${r.x}px`; el.style.top = `${r.y}px`; el.style.width = `${r.w}px`; el.style.height = `${r.h}px`; });
 }
@@ -997,13 +1099,15 @@ function formSwitchEl(o: Opened): HTMLElement | null {
   const c = formInfo?.choice; if (!c || !formApplies(o)) return null;
   const kept = keptMapForm(o), why = `기록이 고른 보기: ${MAP_FORM_WORD[c.auto]} · ${c.why}`;
   return h('div', { class: 'map-forms', role: 'group', 'aria-label': `${FORM_SWITCH_WORD} · 지금 ${MAP_FORM_WORD[formNow]}`, title: `${why}${kept && kept !== c.auto ? `\n지금은 고른 보기: ${MAP_FORM_WORD[formNow]}` : ''}\nV 키로 바꾸기` },
-    h('span', { class: 'vf-word' }, FORM_SWITCH_WORD),
+    h('span', { class: 'vf-word' }, easy() ? EASY_FORM_SWITCH : FORM_SWITCH_WORD) /* v14 B hook 9 */,
     ...MAP_FORMS.map(f => {
       const ok = c.offered.includes(f), on = f === formNow;
-      const tip = !ok ? c.not[f] ?? '' : f === c.auto ? why : `${MAP_FORM_WORD[f]}${josa(MAP_FORM_WORD[f], '으로/로')} 보기${f === 'compose' ? ' · 연결을 따라 층층이 놓은 지도' : f === 'flow' ? ` · 기록에 이어진 흐름 ${c.steps}단계를 한 줄로` : ` · 기록된 표현군 ${c.families.length}가지를 띠로`}`;
+      const tip0 = !ok ? c.not[f] ?? '' : f === c.auto ? why : `${MAP_FORM_WORD[f]}${josa(MAP_FORM_WORD[f], '으로/로')} 보기${f === 'compose' ? ' · 연결을 따라 층층이 놓은 지도' : f === 'flow' ? ` · 기록에 이어진 흐름 ${c.steps}단계를 한 줄로` : ` · 기록된 표현군 ${c.families.length}가지를 띠로`}`;
+      // v14 B hook 9: at 쉽게 the tip opens with what the 보기 does in plain words and ends with its 자세히 name.
+      const tip = easy() ? `${EASY_FORM_WORD[f]} · ${EASY_FORM_TIP[f]}\n${tip0}\n자세히 보기의 이름: ${MAP_FORM_WORD[f]}` : tip0;
       // v13 fix 2 (first look at v13: a grey 흐름 with no word on why): a form the record does not offer stays in sight and says why when
       // pressed (its tip says it too); it never switches.
-      return h('button', { type: 'button', class: `vf-form${on ? ' on' : ''}${f === c.auto ? ' auto' : ''}${ok ? '' : ' off'}`, 'data-form': f, 'aria-pressed': String(on), 'aria-disabled': String(!ok), title: tip, onclick: () => (ok ? setMapForm(f) : toast(tip)) }, MAP_FORM_WORD[f]);
+      return h('button', { type: 'button', class: `vf-form${on ? ' on' : ''}${f === c.auto ? ' auto' : ''}${ok ? '' : ' off'}`, 'data-form': f, 'aria-pressed': String(on), 'aria-disabled': String(!ok), title: tip, onclick: () => (ok ? setMapForm(f) : toast(tip)) }, easy() ? EASY_FORM_WORD[f] : MAP_FORM_WORD[f]);
     }));
 }
 let formTimers: number[] = [];
@@ -1741,6 +1845,7 @@ function typedRoom(o: Opened, tpls?: Map<string, CardTemplate>): (id: string, fa
   return (id, face) => {
     const p = partOf(o, id), r = p?.reading; if (!p || !r || face === 'item') return 0;
     const t = withRoleFit(cardTemplate(cardFactsOf(o, p, r, said))); tpls?.set(id, t);
+    tpls?.set(id, shapeGlyph(o, p, t)); // v14 B hook 7
     const pm = (r.portMap ?? []).filter(m => m.program !== true);
     const dotted = !!cardDot(r);
     return { nameRoom: nameRoomOf(p.childIds.length > 0, dotted || !!r.loop, dotted && shownDisplay().evidence), shape: (nl, planned) => {
@@ -1911,7 +2016,7 @@ ${t.well ? '눌러서 단계 접기 · 펼치기 전 배치 그대로' : '눌러
   head, role, rows, contract, well, go ? h('span', { class: 'c-go-at' }, go) : null, tag);
   // One hover surface (cards v2 §2): a native title left inside the card (the well's, a chip's) reads through the map's own tip.
   el.querySelectorAll<HTMLElement>('[title]').forEach(x => { x.dataset.tip = x.title; x.removeAttribute('title'); });
-  return el;
+  return shapeCard(o, p, el) /* v14 B hook 6 */;
 }
 
 /* ---------- 동작 열기 (map spec 4): one action, a scale the app decides, three moves back ----------
@@ -3425,6 +3530,7 @@ function keepPlanFit(el: HTMLElement, text: string, lines: number, less = 0, wor
  * the top box's basis hide by styles.css; the labels and the tags are placed again for it (their words are measured). */
 function easy(): boolean { return words === 'easy'; }
 function syncWords() {
+  setPlainLevel(words); plainHeader(); // v14 B hook 8
   const sp = document.getElementById('space'); sp?.classList.toggle('words-easy', easy()); sp?.classList.toggle('words-detail', !easy());
   document.querySelectorAll<HTMLElement>('.words-seg [data-words]').forEach(b => { const on = b.dataset.words === words; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); b.title = WORDS_TIP[b.dataset.words === 'detail' ? 'detail' : 'easy']; });
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { b.dataset.short ??= b.textContent ?? ''; b.textContent = easy() ? EASY_LENS[b.dataset.lens ?? ''] ?? b.dataset.short : b.dataset.short; });
@@ -4878,7 +4984,9 @@ function focusInput(o: Opened): FlowInput {
   // A candidate needs a line drawn in this view (a relation inside a folded group is drawn on its group's line, which holds it).
   const drawn = new Set(lay.edges.flatMap(e => e.ids));
   return { parts, lines, loops: base.loops ?? [], scenarios, summaryFlow: ffSrc?.flow ?? null, headLines: headLines(value), kept: fvRec?.flow ?? null, drawn,
-    words: ffWords(o, ffSrc?.record ?? hq?.record ?? null), plain: labelPlain, rep: id => drawnRep(o, id) };
+    words: ffWords(o, ffSrc?.record ?? hq?.record ?? null), plain: labelPlain, rep: id => drawnRep(o, id),
+    // v14 B hook 3: a build or plumbing candidate gives way to a runtime one (map-shape pathRank on the top cards drawn now).
+    rank: scope === null ? (rk => (c: FlowCandidate) => pathRank(c.steps.map(s => [...new Set(s.map(id => topCard(o, id)).filter((x): x is string => !!x))]).filter(s => s.length), rk))(shapeRank(o)) : null };
 }
 /** The picked lines' marks on the lines drawn now, the summary of the rest without them, the folds, the notes, the labels and the top line. */
 function drawFocus() {
@@ -5244,8 +5352,46 @@ function renderFocusTop() {
   // v12: the basis line's words (its head and its whole text, as its hover says them) for the summary panel.
   const bt = basis?.querySelector<HTMLElement>('.ft-basis-t');
   ftBasisSaid = basis && bt ? { head: (basis.getAttribute('title') ?? '').split('\n')[0]!, text: bt.dataset.text ?? '' } : null;
-  el.replaceChildren(...[sentence, row, basis, fullPanel()].filter((x): x is HTMLElement => !!x));
+  plainTop([row, basis]); // v14 B hook 10
+  el.replaceChildren(...[sentence, row, basis, shapeTopLine(o, row) /* v14 B hook 5 */, fullPanel()].filter((x): x is HTMLElement => !!x));
   el.hidden = !el.childElementCount; syncFocusTop();
+}
+/** v14 B hook 8: the header's controls in the words of the level now (쉽게: 그동안 바뀐 것 · 바꿀 계획 · 다음 AI에게 넘길 글), each tip
+ * naming its 자세히 word too. */
+function plainHeader() {
+  const set = (id: string, word: string) => {
+    const b = document.getElementById(id); if (!b) return;
+    const base = b.title.replace(/\n자세히 보기의 이름: .*$/, ''), note = detailNote(word); b.title = note ? `${base}\n${note}` : base;
+    return b;
+  };
+  const ret = set('return-entry', '돌아와 읽기'); if (ret) ret.textContent = easyWordOf('돌아와 읽기');
+  const plan = set('plan-entry', '변경 구상'); if (plan) plan.textContent = easyWordOf('변경 구상');
+  const ho = set('handover-open', '인수인계 문서');
+  if (ho) {
+    const text = [...ho.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent?.trim()), word = ho.querySelector<HTMLElement>('.handover-word');
+    if (text) text.textContent = easy() ? easyWordOf('인수인계') : '인수인계';
+    if (word) word.textContent = easy() ? '' : ' 문서';
+  }
+}
+/** v14 B hook 10: the top box's controls in the words of the level now (쉽게: 「주 흐름: …」, 「주 흐름만」 · 「모든 연결」, 「이 요약의 근거」); the
+ * switcher's shorter forms too (fitSwitch picks among them), each tip naming the 자세히 word. */
+function plainTop(els: readonly (HTMLElement | null)[]) {
+  if (!easy()) return;
+  const all = (t: string) => plainLead(t, FLOW_CONTROL).replace(new RegExp(`(^|: )${FLOW_SOURCE.all}$`), `$1${easyWordOf(FLOW_SOURCE.all)}`);
+  for (const el of els) {
+    if (!el) continue;
+    el.querySelectorAll<HTMLElement>('.ft-name').forEach(n => {
+      n.textContent = all(n.textContent ?? '');
+      if (n.dataset.forms) { try { n.dataset.forms = JSON.stringify((JSON.parse(n.dataset.forms) as string[]).map(all)); } catch { /* the forms stay */ } }
+      if (n.title) n.title = `${n.title}\n${detailNote(FLOW_CONTROL)}`;
+    });
+    el.querySelectorAll<HTMLElement>('.ft-only, .ft-all, .ft-back').forEach(b => {
+      const t = b.textContent ?? '', w = t === FOCUS_ONLY_WORD || t === ALL_RELATIONS_WORD ? t : FLOW_CONTROL;
+      b.textContent = t === w ? easyWordOf(w) : plainLead(t, w);
+      const tip = b.getAttribute('title') ?? b.dataset.tip; if (tip !== undefined && tip !== null) b.setAttribute(b.hasAttribute('title') ? 'title' : 'data-tip', `${tip}\n${detailNote(w)}`);
+    });
+    el.querySelectorAll<HTMLElement>('.ft-basis-l').forEach(l => { if (l.textContent === '근거 문장') l.textContent = easyWordOf('근거 문장'); });
+  }
 }
 /** Ruling F8 Q2: the summary's sentences as the box shows them (null: nothing plain left in one), whether its whole text is open, for
  * which map. */
@@ -5329,6 +5475,7 @@ function placeFocusTop(el: HTMLElement) {
   if (el.hidden) { ftFull = 0; el.style.left = ''; el.style.maxWidth = ''; return; }
   const ink = camera.k >= TITLE_FLOOR_K ? titleInk() : null;
   // Polish 5: its whole height measured at the window's left (never as the camera or the map before placed it), then placed.
+  el.classList.remove('ft-nocover'); // v14 B hook 11
   el.classList.remove(...FT_FORMS); el.style.left = ''; el.style.maxWidth = ''; ftFull = el.offsetHeight; ftPlace(el, camera, ink);
   const s = el.querySelector<HTMLElement>('.ft-sentence'); if (!s) return;
   const v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop, scene = ftScene();
@@ -5342,6 +5489,7 @@ function placeFocusTop(el: HTMLElement) {
   if (!covers()) return;
   // v12: the basis line gives way before the sentence (the sentence never steps back while a cut basis line stays).
   if (el.querySelector('.ft-basis')) { el.classList.add('ft-nobasis'); ftPlace(el, camera, ink); if (!covers()) return; el.classList.remove('ft-nobasis'); }
+  if (shapeYield(el, () => { ftPlace(el, camera, ink); return covers(); })) return; // v14 B hook 11
   // Ruling F8 Q2: never a narrower or one-line sentence (the fit gives the map's room to the whole box instead, fitView); when the person
   // has moved the map under it, the sentence steps back and the way to the whole summary stays in the box.
   el.classList.add('ft-under'); ftPlace(el, camera, ink); ftButtonWords(el);

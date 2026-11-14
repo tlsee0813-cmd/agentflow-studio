@@ -31,6 +31,7 @@ import { h, put, fullTime, codeGate, codeNote, quotedText as quoted } from './pl
 import { captureRequestReading, restoreRequestReading, type RequestReading } from './request-results.js';
 import type { RecordEvidence } from '../shared/types.js';
 import { modelLabel } from '../shared/model-label.js';
+import { easyWordOf, detailNote } from './plain-words.js'; // v14 B: the pane is named as its control is
 import { EVIDENCE_KIND_LABEL, NOT_EXECUTED, NOT_RECORDED, EVIDENCE_NAME_MAX, EVIDENCE_VERSION_MAX, EVIDENCE_ORIGIN_MAX, PROVIDED_FILE_BYTES, decodeProvided, evidenceProblem, type DecodeProblem } from '../shared/record-source.js';
 
 /** Every saved reading's exclusions, including older readings after another succeeds. Positions refer to the held source;
@@ -604,7 +605,7 @@ export function createReturnView(host: ReturnHost) {
   function header(o: PlanOpened): Node {
     const ex = o.key === UI62_KEY;
     return h('header', { class: 'lens-head rr-head' },
-      h('h2', { id: 'lens-title' }, '돌아와 읽기', ex ? h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 자료예요. 당시 실시간으로 받은 기록이 아니에요.' }, '공개 자료 · 사후 편집') : null),
+      h('h2', { id: 'lens-title', title: detailNote('돌아와 읽기') || false }, easyWordOf('돌아와 읽기'), ex ? h('span', { class: 'tag', title: '공개 commit과 결과 문서에서 사후 편집한 자료예요. 당시 실시간으로 받은 기록이 아니에요.' }, '공개 자료 · 사후 편집') : null),
       ex ? stageSwitch() : null,
       // The provided-file entry under the title, beside the paste action (the head keeps its title room at any pane width).
       o.kind === 'saved' && s!.view.kind !== 'file' ? h('p', { class: 'rr-head-more' }, h('button', { type: 'button', class: 'link-button rr-file-open', title: '코드나 검사 기록 파일 하나를 원문 그대로 자료로 보관해요', onclick: () => openFile(null, null) }, '코드·검사 자료 추가')) : null,

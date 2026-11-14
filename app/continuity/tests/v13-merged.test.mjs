@@ -56,7 +56,7 @@ test('V13M-3 at 쉽게 a script or key named with a colon is code (「build:dock
 test('V13M-4 층 at 쉽게: the band words in the legend\'s plain words, the lane counts behind the lane\'s tip (자세히 keeps both)', async () => {
   assert.equal(W.easyBand('촉발'), '시작 신호');
   assert.equal(W.easyBand('저장 · 관문'), '저장 · 관문');
-  assert.equal(W.easyBand('참여'), '참여');
+  assert.equal(W.easyBand('참여'), '사람', 'v14 B: the 참여 band holds the people who use the product (V14B-10)');
   const src = await app(), lanes = fn(src, 'drawFormLanes');
   assert.match(lanes, /easy\(\) \? easyBand\(l\.text\) : l\.text/);
   assert.match(lanes, /title: l\.kind === 'band' \? `\$\{l\.text\} · 기록이 정한 표현군 · 부품 \$\{l\.count\}`/, 'the tip keeps the record\'s words and the count');
