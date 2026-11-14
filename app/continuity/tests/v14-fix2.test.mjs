@@ -72,7 +72,7 @@ test('V14F2-4 in the clear state only the main flow is strong: its context lines
 test('V14F2-5 a frame on the flow sets the short fade between rows of cards (zoom out a little, or down), and 흐름 reads from its row\'s start', async () => {
   const a = await app(), s = await css();
   assert.match(a, /if \(!explicit\) \{ sidesClear\(\); bottomClear\(\); \}/);
-  assert.match(a, /const BOTTOM_SHRINK = 0\.8, BOTTOM_DROP = 48, FADE_TOP_PX = 12, FADE_END_PX = 2;/);
+  assert.match(a, /const BOTTOM_SHRINK = 0\.8, BOTTOM_DROP = 48, FADE_TOP_PX = 12, FADE_END_PX = 2, SAID_DROP = 160;/);
   const bc = fn(a, 'bottomClear');
   assert.match(bc, /for \(let k = k0; k >= Math\.max\(FIRST_FIT_MIN, k0 \* BOTTOM_SHRINK\) - 1e-9 && best\.n; k -= 0\.004\)/);
   assert.match(bc, /for \(let dy = 0; dy <= BOTTOM_DROP && best\.n; dy \+= 2\)/);
@@ -176,4 +176,11 @@ test('V14F2-18 a name a box holds whole only on one more line takes a smaller ty
   assert.match(fc, /const g = fitTag\(x\.name, x\.width \/ s, more, x\.measure, x\.px, x\.slack \/ s\);/);
   assert.match(fc, /if \(g\.full && \(g\.scale \?\? 1\) \* s \* x\.px >= WHOLE_MIN_PX - 1e-9\) \{ f = \{ \.\.\.g, scale: \(g\.scale \?\? 1\) \* s \}; lhScale = s; \}/);
   assert.match(fc, /const left = x\.boxH - 2 \* \(x\.compact \? TAG_COMPACT\.padY : TAG\.padY\) - f\.lines\.length \* lh \* lhScale;/);
+});
+
+test('V14F2-19 a frame that kept the sentence keeps it after the sides\' and the fade\'s adjustments (the map down, else those left out)', async () => {
+  const fv = fn(await app(), 'fitView');
+  assert.match(fv, /const saidCam = \{ \.\.\.camera \}, saidBefore = !explicit && FT_SAID\.some\(form => clear\(form, camera\.k\)\);/);
+  assert.match(fv, /if \(saidBefore && !FT_SAID\.some\(form => clear\(form, camera\.k\)\)\) \{/);
+  assert.match(fv, /for \(let d = 4; d <= SAID_DROP && !ok; d \+= 4\) \{ camera = \{ \.\.\.c0, y: c0\.y \+ d \}; ok = FT_SAID\.some\(form => clear\(form, camera\.k\)\); \}\n    if \(!ok\) camera = saidCam;/);
 });

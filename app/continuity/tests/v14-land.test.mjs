@@ -89,7 +89,7 @@ test('V14A-3 the first view never lands under FIRST_FIT_MIN: a map too large ope
   assert.equal((a.match(/titlePanKeeps\(16 - (?:s|ti)\.x\)/g) ?? []).length, 3, 'every title pan asks first (v14 fix 1: with the box\'s room above the map too)');
   // After the fit's last pans (the title, the focus over the tools): a side that still cuts a card pans or zooms out a little (never 전체 보기's).
   const fit = fn(a, 'fitView'), sc = fn(a, 'sidesClear');
-  assert.match(fit, /  if \(!at\.whole && !above\) focusOverDock\(\);\n  if \(!explicit\) \{ sidesClear\(\); bottomClear\(\); \}[^\n]*\n  if \(pairRoute\(explicit, animate\)\) return;/);
+  assert.match(fit, /  if \(!at\.whole && !above\) focusOverDock\(\);\n[\s\S]*?  if \(!explicit\) \{ sidesClear\(\); bottomClear\(\); \}[^\n]*\n[\s\S]*?  if \(pairRoute\(explicit, animate\)\) return;/);
   assert.match(sc, /if \(!vpw\) return;/); assert.match(sc, /\n  if \(!cutAt\(camera\.x, k0\)\) return;/, 'a frame with no cut is left as it is (v14 fix 2: after the row start of 흐름)');
   assert.match(sc, /for \(let k = k0; k >= Math\.min\(k0, FIRST_FIT_MIN\) - 1e-9; k -= 0\.005\)/);
   // The top line's give never takes a frame under FIRST_FIT_MIN (dagu-sized maps at 1280×720 went to 34%).

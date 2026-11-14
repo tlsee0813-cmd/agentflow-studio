@@ -4428,7 +4428,7 @@ function sidesClear() {
  * BOTTOM_SHRINK of its zoom, never under FIRST_FIT_MIN), the map's top and the flow's place across kept, to the largest zoom where the fade
  * falls between rows (every card wholly over it or wholly under the window, the flow over it, no card cut by a side); else the frame with
  * the fewest cut, when fewer. What stays under the window is named by the off-screen cue (offCue). */
-const BOTTOM_SHRINK = 0.8, BOTTOM_DROP = 48, FADE_TOP_PX = 12, FADE_END_PX = 2;
+const BOTTOM_SHRINK = 0.8, BOTTOM_DROP = 48, FADE_TOP_PX = 12, FADE_END_PX = 2, SAID_DROP = 160;
 const fadeTop = () => mapBottom() - dockHeight() - FADE_TOP_PX;
 function bottomCut(k: number, x: number, y: number): number {
   // The fade runs from FADE_TOP_PX over the top of what stands at the bottom to FADE_END_PX under it (styles.css --dock-h); under it nothing is drawn.
@@ -4706,7 +4706,16 @@ function fitView(explicit: boolean, animate = false) {
   if (!done && at.whole) { frameView(explicit, base); done = give(['ft-under']); }
   if (!done) frameView(explicit, base + ftBox('ft-under', camera, null).h + 8);
   if (!at.whole && !above) focusOverDock();
+  // v14 fix 2 (shapez at 780, 흐름 at 자세히: the side's pan put a card under the box and the sentence stepped back with room for it above the
+  // map): a frame that kept the sentence keeps it after the sides' and the fade's adjustments, the map moved down (SAID_DROP at most) else
+  // those adjustments left out.
+  const saidCam = { ...camera }, saidBefore = !explicit && FT_SAID.some(form => clear(form, camera.k));
   if (!explicit) { sidesClear(); bottomClear(); } // V14-A HOOK (whole names, spec 2): no card cut by the window's side, nor by the fade over the tools
+  if (saidBefore && !FT_SAID.some(form => clear(form, camera.k))) {
+    const c0 = { ...camera }; let ok = false;
+    for (let d = 4; d <= SAID_DROP && !ok; d += 4) { camera = { ...c0, y: c0.y + d }; ok = FT_SAID.some(form => clear(form, camera.k)); }
+    if (!ok) camera = saidCam;
+  }
   if (pairRoute(explicit, animate)) return;
   // v12 (review of v11: at 1280 chips placed for the frame's first zoom overlapped once the frame gave a little more room): the labels and
   // chips placed again at the zoom the frame settled on.
