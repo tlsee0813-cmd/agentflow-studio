@@ -87,7 +87,11 @@ test('V13X2-4 a switch never routes on the page while its cards fly: the new for
   assert.match(a, /syncLineMode\(\); markLines\(\); foldHubs\(\); routeShown\(\); if \(!formSwitching\) placeEdgeLabels\(\); renderFocusTop\(\);/);
   // The new frame from the old fit, routed a little wider apart (never narrower), and kept by the fit after the landing.
   assert.match(sw, /const k1 = Math\.max\(0\.05, fit0 \? fit0\.k \* room\(B\) \/ room\(B0\) : Math\.min\(cam0\.k \* 1\.6, room\(B\)\)\);/);
-  assert.match(fn(a, 'pairRoute'), /if \(formLanding && routedGap >= want - 0\.75 && routedGap <= want \/ FORM_ROUTE_UNDER \+ 0\.75\) return false;/);
+  assert.match(fn(a, 'pairRoute'), /if \(formLanding && routedGap >= want - 0\.75 && routedGap <= want \* FORM_ROUTE_WIDE\) return false;/);
+  assert.match(a, /const FORM_ROUTE_UNDER = 0\.9, FORM_ROUTE_WIDE = 1\.4;/);
+  // The worker starts and routes once while a map with 보기 is quiet (the first switch finds it ready).
+  assert.match(fn(a, 'drawFormLanes'), /if \(sw && routeWorker === undefined\) window\.setTimeout\(warmRoutes, ROUTE_WARM_MS\);/);
+  assert.match(fn(a, 'warmRoutes'), /void routeAhead\(\[\{ boxes: lay\.boxes, edges: lay\.edges\.slice\(0, 48\)/);
   // The 구성 arrangement a form is placed from is kept from the last layout while nothing it reads has changed.
   const bl = fn(a, 'baseLayout');
   assert.match(bl, /stamp = JSON\.stringify\(\[o\.key, scope, \[\.\.\.tempExpand\], \[\.\.\.previewExpand\], \[\.\.\.expandState\], \[\.\.\.budgetFolded\(o\)\], held, mapAspect\(\), words, !!planRows, !!o\.past\]\)/);

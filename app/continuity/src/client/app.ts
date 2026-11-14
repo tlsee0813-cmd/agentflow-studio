@@ -976,6 +976,7 @@ function drawFormLanes() {
   $('space').dataset.form = formPlace ? formNow : 'compose';
   // The switcher by the map's name in the header (always in sight, never over the map): the whole map's forms only.
   const o = opened, sw = o ? formSwitchEl(o) : null, host = $('map-forms-host'); host.hidden = !sw; host.replaceChildren(...(sw ? [sw] : []));
+  if (sw && routeWorker === undefined) window.setTimeout(warmRoutes, ROUTE_WARM_MS); // v13 fix 2
   if (!formPlace) return;
   const first = world.firstChild;
   for (const l of formPlace.lanes) {
@@ -1113,7 +1114,7 @@ function landFormFlight() {
   formTimers.push(window.setTimeout(() => sp.classList.remove('form-lines-in'), FORM_LINES_IN_MS + 40));
 }
 /** v13 fix 2: a switch with no fit of its 보기 known routes for this share of the estimated zoom; formLanding: the switch's fit is running. */
-const FORM_ROUTE_UNDER = 0.94;
+const FORM_ROUTE_UNDER = 0.9, FORM_ROUTE_WIDE = 1.4;
 let formLanding = false;
 /** The camera's ease from the flight's frame into the map's own (ms; styles: #world.animate.form-cam). */
 const FORM_SETTLE_MS = 320;
@@ -3068,6 +3069,13 @@ function routeAhead(jobs: { boxes: Map<string, Box>; edges: Edge[]; opts: { pair
   const id = ++routeJobId;
   return new Promise(res => { routeWaits.set(id, res); try { routeWorker!.postMessage({ id, jobs: todo }); } catch { routeWaits.delete(id); res(); } });
 }
+/** v13 fix 2 (a page's first switch routed on the page: the worker was still loading): once a map with 보기 is drawn, the worker starts and
+ * routes a set of the map's lines once while the map is quiet (its result kept like any other), so the first switch finds it ready. */
+const ROUTE_WARM_MS = 1500;
+function warmRoutes() {
+  if (routeWorker !== undefined || !opened || dragQuick) return;
+  void routeAhead([{ boxes: lay.boxes, edges: lay.edges.slice(0, 48), opts: { pairGap: pairGapNow + 0.25, pitch: formPitch() }, c: 1 }]);
+}
 /** The set the shown lines were last routed as (routeShown): its keys and focus scale, so a switch can have the same set routed ahead. */
 let shownPlan: { keys: string[]; from: ('rest' | 'sums' | 'edges')[]; c: number } | null = null;
 /** The lines drawFocus last drew one by one at rest (their summary holds the rest): a switch builds the same summary ahead. */
@@ -4282,8 +4290,8 @@ function pairRoute(explicit: boolean, animate: boolean): boolean {
   // v13 fix 1: the zoom each 보기 fitted at (this map, this window), so a switch back routes its lines once.
   if (opened && formApplies(opened)) formFitK.set(formFitKey(opened, formNow), { x: camera.x, y: camera.y, k: camera.k });
   if (pairRefit || Math.abs(want - routedGap) <= 0.75) return false;
-  // v13 fix 2: a switch's lines routed a little wider apart than its fit asks are kept (FORM_ROUTE_UNDER): never under the 12px.
-  if (formLanding && routedGap >= want - 0.75 && routedGap <= want / FORM_ROUTE_UNDER + 0.75) return false;
+  // v13 fix 2: a switch's lines routed wider apart than its fit asks (FORM_ROUTE_UNDER, at most FORM_ROUTE_WIDE times) are kept: never under the 12px.
+  if (formLanding && routedGap >= want - 0.75 && routedGap <= want * FORM_ROUTE_WIDE) return false;
   pairGapNow = want; pairRefit = true;
   try { positionWorld(); fitView(explicit, animate); } finally { pairRefit = false; }
   return true;
