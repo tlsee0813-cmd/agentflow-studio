@@ -653,6 +653,16 @@ function setBar(o: Opened | null) {
   entry.title = planning ? '변경 구상 닫기 (Esc) · 초안은 남아요' : '현재 지도 위에서 바꿀 모습을 시험해요';
   document.title = o ? `${o.project.name} · AgentFlow Studio` : 'AgentFlow Studio';
   plainHeader(); // v14 B hook 8
+  barRows(); // v14 merged (the map's own fit measures it again: syncMapArea)
+}
+/** v14 merged: the bar on one row while every control fits on it (no control laid over another, none cut), else the controls on a second
+ * row (.bar-two). Measured, never by the window's width alone: the project's name and the words of the level change the room. */
+function barRows(): boolean {
+  const bar = document.querySelector<HTMLElement>('.bar'); if (!bar) return false;
+  const was = bar.classList.contains('bar-two'); bar.classList.remove('bar-two');
+  const kids = [...bar.children].filter((c): c is HTMLElement => c instanceof HTMLElement && c.offsetWidth > 0), y = (e: HTMLElement) => e.getBoundingClientRect();
+  const top = kids.length ? Math.min(...kids.map(k => y(k).top)) : 0, two = kids.some(k => y(k).top - top > 12);
+  bar.classList.toggle('bar-two', two); return two !== was;
 }
 
 /* ---------- home: back to the programs one is making ----------
@@ -1002,9 +1012,11 @@ function shapeTopLine(o: Opened, row: HTMLElement | null): HTMLElement | null {
 function shapeYield(el: HTMLElement, covers: () => boolean): boolean {
   if (!el.querySelector('.ft-cover') || !el.querySelector('.ft-cover-cue')) return false;
   const basis = !!el.querySelector('.ft-basis');
-  el.classList.add('ft-nocover'); if (basis) el.classList.add('ft-nobasis');
+  // v14 merge: the switcher's words fitted again with the cue on its row (at 자세히 its count made the row wrap there, and paperless at 1440
+  // lost its sentence with room for it on one row).
+  el.classList.add('ft-nocover'); if (basis) el.classList.add('ft-nobasis'); fitSwitch(el);
   if (!covers()) return true;
-  el.classList.remove('ft-nocover', 'ft-nobasis'); return false;
+  el.classList.remove('ft-nocover', 'ft-nobasis'); fitSwitch(el); return false;
 }
 function shapeTitleEls(o: Opened): HTMLElement[] {
   if (scope) return [];
@@ -3537,7 +3549,7 @@ function keepPlanFit(el: HTMLElement, text: string, lines: number, less = 0, wor
  * the top box's basis hide by styles.css; the labels and the tags are placed again for it (their words are measured). */
 function easy(): boolean { return words === 'easy'; }
 function syncWords() {
-  setPlainLevel(words); plainHeader(); // v14 B hook 8
+  setPlainLevel(words); plainHeader(); barRows(); // v14 B hook 8 (v14 merged: the bar measured again)
   const sp = document.getElementById('space'); sp?.classList.toggle('words-easy', easy()); sp?.classList.toggle('words-detail', !easy());
   document.querySelectorAll<HTMLElement>('.words-seg [data-words]').forEach(b => { const on = b.dataset.words === words; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); b.title = WORDS_TIP[b.dataset.words === 'detail' ? 'detail' : 'easy']; });
   document.querySelectorAll<HTMLElement>('.lens-seg [data-lens]').forEach(b => { b.dataset.short ??= b.textContent ?? ''; b.textContent = easy() ? EASY_LENS[b.dataset.lens ?? ''] ?? b.dataset.short : b.dataset.short; });
@@ -3545,7 +3557,12 @@ function syncWords() {
 function setWords(w: WordLevel) {
   if (w === words) return;
   words = w; writeWords(kv, w); syncWords(); tagAt = { k: 0, n: 0 };
-  if (opened) { renderLegend(); renderSpace('keep'); }
+  if (opened) {
+    renderLegend(); renderSpace('keep');
+    // v14 merged (review at 1280: after 쉽게 → 자세히 the top box's longer controls covered the map and its sentence stepped back): a map the
+    // person has not moved takes its fit again for the words of the level, as a window's resize does (the press is the person's own).
+    if (!selected && !planView.isOpen() && $('lens').hidden && !mapMoved) fitView(false);
+  }
 }
 function placeLineLabels() {
   const world = $('world'), o = opened; if (!o) return;
@@ -4392,7 +4409,8 @@ function fitView(explicit: boolean, animate = false) {
   const scene = ftScene(), ink = titleInk();
   const inkAt = (k: number) => (k >= TITLE_FLOOR_K ? ink : null);
   // Ruling F8 Q2: the box as it is (its sentence whole, up to three lines): never narrower, never one line; the map makes the room.
-  const clear = (form: string | null, k: number) => !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k));
+  // v14 merged: a form that says the sentence is clear only where the box can hold one (beside the title it may be too narrow).
+  const clear = (form: string | null, k: number) => { const b = ftBox(form, camera, inkAt(k)); return (form === 'ft-under' || ftBoxSaid) && !ftCovers(b, camera, scene, inkAt(k)); };
   // A frame that shows the map's own title never gives it up for the top line's room (the give stops at the title's floor).
   // V14-A HOOK (whole names, spec 2): nor under FIRST_FIT_MIN, where a tag stops holding two lines of a name (unless the frame is already under it).
   const least = Math.max(at.k - FT_GIVE, at.k >= TITLE_FLOOR_K ? TITLE_FLOOR_K : 0, Math.min(at.k, FIRST_FIT_MIN)) - 1e-9;
@@ -4586,6 +4604,9 @@ function ftPlace(el: HTMLElement, cam: Cam, ink: Rect | null) {
 }
 /** The top line's box in the camera's frame (the viewport's) in one form (null: whole; ft-under: its sentence stepped back), placed for
  * that camera, with a 6px margin; the line is left as it was. Ruling F8 Q2: its sentence chosen for the width it has there (ftIntro). */
+/** v14 merged (review at 780: axios landed with its box beside the map's title, too narrow for any whole sentence of the summary in three
+ * lines, and no sentence at all): whether the box ftBox last measured holds a sentence (or the summary has none to hold). */
+let ftBoxSaid = true;
 function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
   const el = $('focus-top'), v = $('viewport'), w = $('world'), ox = v.offsetLeft + w.offsetLeft, oy = v.offsetTop + w.offsetTop;
   const was = FT_FORMS.filter(c => el.classList.contains(c)), left = el.style.left, maxW = el.style.maxWidth;
@@ -4596,7 +4617,8 @@ function ftBox(form: string | null, cam: Cam, ink: Rect | null): Rect {
   const keep = sent ? { text: sent.textContent, hidden: sent.hidden, kind: sent.dataset.kind, data: sent.dataset.text, title: sent.getAttribute('title'), btn: btn?.textContent ?? null } : null;
   el.classList.remove(...FT_FORMS); ftPlace(el, cam, ink); fitSwitch(el);
   if (sent) { ftIntro(el, sent); ftPlace(el, cam, ink); fitSwitch(el); }
-  if (form) el.classList.add(...form.split(' '));
+  ftBoxSaid = !sent || !ftSaid.some(Boolean) || (!sent.hidden && !!sent.textContent); // v14 merged
+  if (form) { el.classList.add(...form.split(' ')); if (form.includes('ft-nocover')) fitSwitch(el); } // v14 merge: the cue's row fitted again
   const out = { x: el.offsetLeft - ox - 6, y: el.offsetTop - oy - 6, w: el.offsetWidth + 12, h: el.offsetHeight + 12 };
   el.classList.remove(...FT_FORMS); el.classList.add(...was); el.style.left = left; el.style.maxWidth = maxW;
   for (const [t, c] of cut) t.textContent = c;
@@ -4858,6 +4880,7 @@ const mapBottom = () => $('viewport').offsetTop + $('viewport').clientHeight;
 /** The map's viewport: below the plan's strip when it is open, left of the pane when it is open. Camera coordinates stay
  * relative to the space, so neither moves anything already drawn. */
 function syncMapArea() {
+  barRows(); // v14 merged: the bar's rows first (the map's room under it)
   const vp = $('viewport'), world = $('world'), pane = paneWidth();
   // AF140: behind the full reading the map is shown, not used: no pan, zoom, selection, drag or focus reaches it until it closes.
   // Only the lock this reading set is its to lift (marked); one already there (the change plan's wide comparison covers the same

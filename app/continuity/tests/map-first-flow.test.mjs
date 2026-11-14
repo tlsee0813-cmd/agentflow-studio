@@ -450,7 +450,7 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   // Polish 5: the sentence's forms (whole, one line) with the give and then with room above, before the sentence steps back.
   // v11 (ruling F8 Q2): whole only (never one line); the map makes the room.
   // v12: whole only, with its basis line and then without it (the basis line gives way before the sentence).
-  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis'\] as const;/, 'whole only');
+  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis', 'ft-nobasis ft-nocover'\] as const;/, 'whole only');
   // v9 (review of v8): each form by the give and then by the free height before the next (two lines before one); v10: first-flow
   // sentenceRoom (its order tested in v10-maps), the free height measured per column (mapSlack).
   assert.match(a, /const room = sentenceRoom\(FT_SAID, at\.k, least, /);
@@ -458,7 +458,8 @@ test('FF-28 the fit keeps room only for what the top line covers, giving at most
   assert.ok(a.includes('if (!done && !at.whole) for (const form of FT_SAID) { frameView(explicit, base + ftBox(form, camera, null).h + 8); if (clear(form, camera.k)) { done = true; break; } }'), 'a frame on the first flow keeps the sentence the same way (first-user judge 9)');
   // Review of the growth view (verifier, the fixture map at 1280): the one-line form may also stand narrower, clear of a caption at its end.
   // v11 (ruling F8 Q2): the box as it is, never narrower.
-  assert.ok(a.includes("const clear = (form: string | null, k: number) => !ftCovers(ftBox(form, camera, inkAt(k)), camera, scene, inkAt(k));"));
+  // v14 merged: and a form that says the sentence is clear only where the box holds one (beside the title it may be too narrow).
+  assert.ok(a.includes("const clear = (form: string | null, k: number) => { const b = ftBox(form, camera, inkAt(k)); return (form === 'ft-under' || ftBoxSaid) && !ftCovers(b, camera, scene, inkAt(k)); };"));
   assert.match(a, /const ftObstacles = \(\): Rect\[\] => \[\.\.\.\[\.\.\.lay\.boxes\.values\(\)\]\.filter\(b => b\.kind === 'node' \|\| b\.kind === 'ghost'\), \.\.\.bandRects, \.\.\.loneRects\(\)\];/, 'never over a card, a lane caption or (v12) the unlinked cards\' caption');
   assert.ok(!a.includes("el.classList.add('ft-one')"), 'v11 (ruling F8 Q2): never on one line before it steps back');
   assert.match(a, /classList\.toggle\('pinned', !st\.hidden \|\| underTop \|\| cutSide\)/, 'the map\'s own title never reads through the top line');

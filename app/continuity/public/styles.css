@@ -4221,11 +4221,16 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* v14 B: the brand's words give way first on a map (its mark stays and keeps its name in its label), so the path, the 보기 방식 and the
  * controls stand on one row at 1440 px; narrower, the controls take the second row. */
 @media (max-width: 1560px) { .bar:has(#modebar:not([hidden])) .brand-name { display: none; } }
+/* v14 merged (review at 1280x720: the second row took the map's room, the map no longer fitted whole and the top box lay over its cards):
+ * the path, the 보기 방식 and the controls stay on one row while they fit (measured, app.ts barRows: .bar-two only when a control would wrap),
+ * a little tighter under 1420 px (the folder pill's 「켜기」 in its tip and label, the gaps 8px); narrower, the controls take the second row. */
 @media (max-width: 1420px) {
-  .bar:has(#modebar:not([hidden])) > .context { flex: 1 0 calc(100% - 44px); }
-  .bar:has(#modebar:not([hidden])) > .modebar { order: 3; }
-  .bar:has(#modebar:not([hidden])) > :is(#sync-pill, #ai-pill) { order: 4; }
+  .bar:has(#modebar:not([hidden])) { column-gap: 8px; }
+  .bar:has(#modebar:not([hidden])) #sync-pill > span > span + span { display: none; }
 }
+.bar.bar-two > .context { flex: 1 0 calc(100% - 44px); }
+.bar.bar-two > .modebar { order: 3; }
+.bar.bar-two > :is(#sync-pill, #ai-pill) { order: 4; }
 /* v14 B: the top box's last line: what the record covered (its words in the tip) and, at 쉽게, the three card shapes. */
 .focus-top .ft-cover { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 16px; margin: 0; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
 .focus-top .ft-cover .map-cover { margin: 0; pointer-events: auto; cursor: help; word-break: keep-all; }
@@ -4270,7 +4275,10 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* The card shapes hold on every typed card (the typed cards' own rule, .space .node.card:is(.f-…), set 10px and a solid edge over B's
    shapes) and at every zoom: a person's card round at the ends, an outside system's dashed edge kept at least about 1px on screen. */
 .space .node.card.pk-person { border-radius: 24px; }
-.space .node.card.pk-outside { border-style: dashed; border-width: max(1px, calc(1px * min(var(--u, 1), 2.4))); border-radius: 10px; }
+.space .node.card.pk-outside { --pk-w: max(1px, calc(1px * min(var(--u, 1), 2.4))); border-style: dashed; border-radius: 10px; }
+/* The extra width drawn as an outline over the edge (never the card's inner room, which its name was fitted to), only while no other mark
+   uses the outline (a lit flow, a pick, a plan's impact, the first view's emphasis, the keyboard's focus). */
+.space .node.card.pk-outside:not(.selected):not(.lit):not(.ff-card):not(.ff-start):not(.plan-impact):not(.fv-emph):not(:focus-visible) { outline: calc(var(--pk-w) - 1px) dashed var(--line-strong, rgba(17,24,39,.32)); outline-offset: calc(-1 * var(--pk-w)); }
 .space .node.card.pk-outside.selected { border-style: solid; }
 /* In the quiet state an outside card keeps its dashed edge seen (its colour steps back with the others, never to the page's own tone). */
 #space.cl-on:not(.lt-sel) #world > .node:not(.ff-card):not(.ff-start):not(.selected):not(.related):not(.near-end):not(.near-self):not(.cited):not(.sc-visit):not(.since-hit):not(:hover):not(:focus-visible).pk-outside { border-color: var(--text-4); }

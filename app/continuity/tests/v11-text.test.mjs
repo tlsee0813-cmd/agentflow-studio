@@ -68,7 +68,7 @@ test('V11-6 the top box: the sentence chosen whole for its width (no clause cut,
   const place = fn(a, 'placeFocusTop');
   assert.ok(!place.includes("'ft-one'") && !place.includes('FT_CAPS'), 'never one line, never narrower');
   assert.ok(!a.includes('FT_CAPS_TWO') && !a.includes("ftBox('ft-one'"));
-  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis'\] as const;/, 'v12: the whole sentence, with its basis line and then without it');
+  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis', 'ft-nobasis ft-nocover'\] as const;/,'v12: the whole sentence, with its basis line and then without it');
 });
 
 test('V11-7 the way to the whole summary is always in the box, a button (click and keyboard) that opens every sentence of it', async () => {

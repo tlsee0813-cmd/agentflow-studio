@@ -102,8 +102,8 @@ test('V12-7 the control line stays on one line; the basis line gives way before 
   assert.match(sw, /for \(const t of forms\) \{ nm\.textContent = t; if \(one\(\)\) break; \}/);
   assert.match(sw, /d\.classList\.add\('ft-dot-off'\)/, 'still two lines: no line starts or ends on a separator');
   assert.match(c, /\.focus-top \.ft-dot\.ft-dot-off \{ display: none; \}/);
-  assert.match(a, /const FT_FORMS = \['ft-nobasis', 'ft-under'\];/);
-  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis'\] as const;/, 'the fit tries the sentence without its basis line before stepping it back');
+  assert.match(a, /const FT_FORMS = \['ft-nobasis', 'ft-nocover', 'ft-under'\];/);
+  assert.match(a, /const FT_SAID = \[null, 'ft-nobasis', 'ft-nobasis ft-nocover'\] as const;/,'the fit tries the sentence without its basis line before stepping it back');
   assert.match(fn(a, 'placeFocusTop'), /el\.classList\.add\('ft-nobasis'\); ftPlace\(el, camera, ink\); if \(!covers\(\)\) return;[\s\S]*?el\.classList\.add\('ft-under'\)/);
   assert.match(c, /\.focus-top:is\(\.ft-nobasis, \.ft-under\) \.ft-basis \{ display: none; \}/, 'never a stepped-back sentence under a basis line that stays');
   assert.match(a, /\.\.\.\(ftBasisSaid \? \[h\('p', \{ class: 'ft-full-head ft-full-basis' \}/, 'the basis line\'s words in the summary panel');
