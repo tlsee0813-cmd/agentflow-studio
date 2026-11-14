@@ -47,7 +47,7 @@ test('V14F1-2 a frame on the flow keeps the top box\'s room above the map when o
   assert.match(fn(a, 'ftBox'), /el\.classList\.remove\(\.\.\.FT_FORMS\); el\.classList\.add\(\.\.\.was\); el\.style\.left = left; el\.style\.maxWidth = maxW;\n[^\n]*\n[^\n]*\n  fitSwitch\(el\);/);
   // A box that grew after the fit (its rest caption came after the opening) and now covers the map: fitted again, once per frame.
   const rf = fn(a, 'refitUnderBox');
-  assert.match(a, /landed: \(\) => \{ applyCamera\(\); requestAnimationFrame\(refitUnderBox\); \}/);
+  assert.match(a, /landed: \(\) => \{ applyCamera\(\); requestAnimationFrame\(refitUnderBox\);[^}]*\}/); // v14 fix 2: and a later look at the tools
   assert.match(rf, /boxWatch = new ResizeObserver\(/);
   assert.match(rf, /if \(!o \|\| !el \|\| !ftShown\(\) \|\| !isFitCam\(\) \|\| opening\.running\(\) \|\| formFlight \|\| formSwitching/);
   assert.match(rf, /if \(sig === refitFrom\) return;/);
@@ -65,7 +65,7 @@ test('V14F1-3 what stands at the bottom: the chip beside the guide line on one r
   assert.match(pd, /space\.style\.setProperty\('--dock-h', `\$\{Math\.max\(0, Math\.round\(sb - Math\.min\(\.\.\.tops\)\)\)\}px`\)/);
   assert.match(a, /return k\?\.dataset\.beside \? Math\.max\(fvH, kH\) : fvH \+ kH;/);
   const tail = c.slice(c.indexOf('---------- v14 fix 1 ----------'));
-  assert.match(tail, /\.space:not\(\.cmp-foot\) > \.viewport \{ -webkit-mask-image: linear-gradient\(to bottom, #000 calc\(100% - var\(--dock-h, 58px\) - 30px\), transparent calc\(100% - var\(--dock-h, 58px\) \+ 6px\)\);/);
+  assert.match(tail, /\.space:not\(\.cmp-foot\) > \.viewport \{ -webkit-mask-image: linear-gradient\(to bottom, #000 calc\(100% - var\(--dock-h, 58px\) - 12px\), transparent calc\(100% - var\(--dock-h, 58px\) \+ 2px\)\);/); // v14 fix 2: the short fade
 });
 
 test('V14F1-4 the title chip never stands over a lane\'s words; the top box like the chip for the labels and marks (a condition slides clear of it)', async () => {

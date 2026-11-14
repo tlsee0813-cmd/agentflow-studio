@@ -75,7 +75,7 @@ test('V13C-4 the switch: in the header beside the reading modes, one class on th
 test('V13C-5 쉽게 on the map: tags say the role (a person or an outside system marked), labels plain words, counts and port marks behind cues', async () => {
   const a = await app(), c = await css();
   const tag = fn(a, 'fitTagKind');
-  assert.match(tag, /const ez = easy\(\), mark = ez \? kd\.dataset\.pmark \?\? '' : '', role = ez \? kd\.dataset\.role \?\? '' : ''/);
+  assert.match(tag, /const ez = easy\(\), mark = ez \? kd\.dataset\.pmark \?\? '' : '', role = ez && !nameOnly \? kd\.dataset\.role \?\? '' : ''/); // v14 fix 2: no role beside a shortened name
   assert.match(tag, /\[role, \.\.\.rolePhrases\(role\)\.filter\(x => !leansBack\(x\)\)\]\.filter\(x => !hasCode\(x\)\)\.find\(x => n\(x\) > 0\)/);
   assert.match(a, /'data-role': t\.role \?\? '', 'data-pmark': partMark\(r\.typeRead\?\.type\) \?\? ''/);
   assert.match(fn(a, 'placeFitLabels'), /const easyFull = easy\(\) \? plainLabel\(full\) : full;/);

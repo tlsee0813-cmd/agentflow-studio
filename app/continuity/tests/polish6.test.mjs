@@ -18,7 +18,8 @@ test('P6-1 a code label counts its words at spaces (not at the letter s) and, fi
   assert.match(f, /return done\(false\);\n?$/, 'no cut fits (one word, or the first word already too wide): false, never left clipped');
   // Every caller that places a label leaves one that fits in no cut to its line's hover.
   // v12: whole or nothing (fillWhole); a label with no whole form is removed and counted hidden, its line keeps its detail cue.
-  assert.ok(a.includes('box.append(label); if (!fillWhole(label, cutWord)) { label.remove(); hidden.push(g); continue; }'), 'a rest label: removed, counted hidden');
+  // v14 fix 2: each form tried through fillWhole and removed when it does not fit or has no place; none left: counted hidden.
+  assert.ok(a.includes("const m = fillWhole(el, f) ? spotsFor(el) : [];") && a.includes('        el.remove();\n        if (!litRest) break;') && a.includes("      if (!label) { if (litRest) litMiss.push([g, `${e.from}|${kindForm}`]); hidden.push(g); continue; } }"), 'a rest label: removed, counted hidden');
   assert.ok(a.includes('const text = c; if (!(cond ? fillLabel(el, text) : fillWhole(el, text))) return;'), 'a fit label: that form gets no place');
   assert.ok(a.includes('filled = fillLabel(el, text); if (!filled) continue;') && a.includes("if (!spot && (filled || b.kind === 'condition')) {"), 'a badge: that form skipped, never forced clipped');
   assert.ok(a.includes('fits = fillWhole(label, text); if (!fits) return null;'), 'a selection\'s label: no place (v12: whole or none)');

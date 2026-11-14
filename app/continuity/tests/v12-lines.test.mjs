@@ -85,7 +85,7 @@ test('V12-5 a line\'s label is its words whole or its relation-detail cue: never
   assert.match(whole, /!text\.includes\('…'\) && fillLabel\(el, text\) && el\.textContent === text && !\(el\.isConnected && el\.scrollWidth > el\.clientWidth \+ 1\)/);
   assert.doesNotMatch(rest, /wholeWords\(/, 'v11: 「Promise 이행 또는」 (the middle tier\'s whole-word cut)');
   assert.match(rest, /const shortWord = \(w: string\) => \{ if \(w\.length <= LABEL_SHORT\) return w;/);
-  assert.match(rest, /if \(!fillWhole\(label, cutWord\)\)/);
+  assert.match(rest, /const m = fillWhole\(el, f\) \? spotsFor\(el\) : \[\];/); // v14 fix 2: each form whole or none
   assert.doesNotMatch(fit, /fitCut\(/);
   assert.match(fit, /if \(!\(cond \? fillLabel\(el, text\) : fillWhole\(el, text\)\)\) return;/);
   assert.match(lab, /fits = fillWhole\(label, text\)/);

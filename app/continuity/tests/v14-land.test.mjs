@@ -89,8 +89,8 @@ test('V14A-3 the first view never lands under FIRST_FIT_MIN: a map too large ope
   assert.equal((a.match(/titlePanKeeps\(16 - (?:s|ti)\.x\)/g) ?? []).length, 3, 'every title pan asks first (v14 fix 1: with the box\'s room above the map too)');
   // After the fit's last pans (the title, the focus over the tools): a side that still cuts a card pans or zooms out a little (never 전체 보기's).
   const fit = fn(a, 'fitView'), sc = fn(a, 'sidesClear');
-  assert.match(fit, /  if \(!at\.whole && !above\) focusOverDock\(\);\n  if \(!explicit\) sidesClear\(\);[^\n]*\n  if \(pairRoute\(explicit, animate\)\) return;/);
-  assert.match(sc, /if \(!vpw \|\| !cutAt\(camera\.x, k0\)\) return;/, 'a frame with no cut is left as it is');
+  assert.match(fit, /  if \(!at\.whole && !above\) focusOverDock\(\);\n  if \(!explicit\) \{ sidesClear\(\); bottomClear\(\); \}[^\n]*\n  if \(pairRoute\(explicit, animate\)\) return;/);
+  assert.match(sc, /if \(!vpw\) return;/); assert.match(sc, /\n  if \(!cutAt\(camera\.x, k0\)\) return;/, 'a frame with no cut is left as it is (v14 fix 2: after the row start of 흐름)');
   assert.match(sc, /for \(let k = k0; k >= Math\.min\(k0, FIRST_FIT_MIN\) - 1e-9; k -= 0\.005\)/);
   // The top line's give never takes a frame under FIRST_FIT_MIN (dagu-sized maps at 1280×720 went to 34%).
   assert.match(fit, /const least = Math\.max\(at\.k - FT_GIVE, at\.k >= TITLE_FLOOR_K \? TITLE_FLOOR_K : 0, Math\.min\(at\.k, FIRST_FIT_MIN\)\) - 1e-9;/);
@@ -142,9 +142,9 @@ test('V14A-6 the quiet rest: cards whole at 4.5:1 or more, lines thin at a third
   const quiet = mix(tok('surface'), tok('bg'), 0.45);
   for (const t of ['text', 'text-2', 'text-3', 'text-4']) { const r = ratio(saturate(tok(t), 0.5), saturate(quiet, 0.5)); assert.ok(r >= 4.5, `--${t} ${r.toFixed(2)}`); }
   for (const f of ['participant', 'process', 'store', 'trigger', 'neutral']) { const r = ratio(saturate(tok(`fam-${f}-ink`), 0.5), saturate(quiet, 0.5)); assert.ok(r >= 4.5, `${f} ${r.toFixed(2)}`); }
-  assert.match(v14, /#space\.cl-on #world \.edge:not\(\.ff-flow\):not\(\.ff-ctx\):not\(\.on\):not\(\.near\)[^{]*\{ --bw: 1; \}/);
-  assert.match(v14, /#space\.cl-on #world \.edge:not\(\.ff-flow\):not\(\.ff-ctx\):not\(\.on\):not\(\.near\)[^{]*\.edge-line \{ opacity: \.35; \}/);
-  assert.match(v14, /#space\.cl-on #world \.edge-labels > :is\(\.edge-label:not\(\.fit-cond\), \.edge-count\):not\(\.ff-keep\):not\(\.near\):not\(:hover\):not\(:focus-visible\) \{ visibility: hidden; \}/, 'a condition\'s words stay');
+  assert.match(v14, /#space\.cl-on #world \.edge:not\(\.ff-flow\):not\(\.on\):not\(\.near\)[^{]*\{ --bw: 1; \}/); // v14 fix 2: the context quiet too
+  assert.match(v14, /#space\.cl-on #world \.edge:not\(\.ff-flow\):not\(\.on\):not\(\.near\)[^{]*\.edge-line \{ opacity: \.35; \}/);
+  assert.match(v14, /#space\.cl-on #world \.edge-labels > :is\(\.edge-label:not\(\.fit-cond\), \.edge-count\):is\(:not\(\.ff-keep\), \.ff-ctxk\):not\(\.near\):not\(:hover\):not\(:focus-visible\) \{ visibility: hidden; \}/, 'a condition\'s words stay');
   assert.doesNotMatch(v14, /cl-on[^{]*\{[^}]*display: none/, 'nothing of the rest folded or hidden');
   assert.match(v14, /#space\.cl-on #world \.edge-labels > :not\(\.ff-keep\):not\(\.edge-cue\):not\(\.edge-label\):not\(\.near\):not\(:hover\) \{ opacity: 1; \}/, 'a badge on a quiet line keeps its words at 4.5:1 (v12 gave it .6)');
   assert.match(v14, /#space\.cl-on #world \.edge-labels > \.edge-cue\.cue-bg\.q-stack \{ opacity: 1; \}/, 'a condition count (「조건 2」 at 자세히) never at half opacity (2.6:1)');

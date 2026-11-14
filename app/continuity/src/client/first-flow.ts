@@ -19,7 +19,7 @@
  * Pure: no DOM, no storage. */
 import { norm, nameStem, STARTING_ENTRIES, type FvLoop, type FvPart } from './first-view.js';
 import { hasRowId } from './plain-ids.js';
-import { COND_UNSAID, tokenFit } from './line-grammar.js';
+import { COND_UNSAID } from './line-grammar.js';
 import { isMapReading, type Channel, type Project } from '../shared/types.js';
 import { v5Folds } from '../shared/record-excerpt.js';
 import { rowLedger, rowBindings } from '../shared/row-ledger.js';
@@ -600,7 +600,9 @@ export function sourceText(f: FirstFlow): string | null {
 export function switcherText(f: FirstFlow, name: (id: string) => string = id => id): string | null {
   const c = f.flow; if (!c) return null;
   // v9 (review of v8: 「WebSocketManage…」, 「{out_dir}…」): each name cut between its units, as a label is (line-grammar tokenFit).
-  const at = (id: string) => tokenFit(name(id), 16);
+  // v14 fix 2 (verify of v14 fix 1: 「Savegame → ReadWriteProxy…」, 「자동 배정(매칭·inbox…」 with a bracket left open, even at 1440 with room
+  // to spare): every name whole; a line too long for its row gives way between names (switcherForms), never inside one.
+  const at = (id: string) => name(id).replace(/\s+/g, ' ').trim();
   let what: string;
   if (c.rule === 'entry') what = `${at(c.parts[0]!)}에서 나가는 연결 ${c.drawnLines}개`;
   // F8 Q3: a recorded set of more lines than the foreground's target is said as such (never cut): every one of them is drawn.
@@ -619,7 +621,7 @@ export function switcherForms(f: FirstFlow, name: (id: string) => string = id =>
   const whole = switcherText(f, name), c = f.flow; if (!whole || !c) return [];
   const tail = ` · ${sourceText(f)}${f.candidates.length > 1 ? ` · 보기 ${f.index + 1}/${f.candidates.length}` : ''}`, out = [whole];
   if (c.rule !== 'entry' && c.drawnLines <= FOCUS_FG_MAX) {
-    const ls = c.chain.map(l => l.map(id => tokenFit(name(id), 16)).join(', ')), more = c.more ? ` 외 연결 ${c.more}개` : '';
+    const ls = c.chain.map(l => l.map(id => name(id).replace(/\s+/g, ' ').trim()).join(', ')), more = c.more ? ` 외 연결 ${c.more}개` : '';
     for (let k = Math.min(ls.length - 1, 3); k >= 1; k--) out.push(`${FLOW_CONTROL}: ${[...ls.slice(0, k), '…'].join(' → ')}${more}${tail}`);
   }
   // The view's subject whole before its basis's name (that name stays in the hover, with the basis); then the basis's name alone.

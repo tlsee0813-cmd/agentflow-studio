@@ -123,7 +123,8 @@ test('P5-7 code in a label reads as quoted code: a monospace chip, words kept as
   // Polish 6 (P6-1 to P6-3) keeps these sites and the cut, and makes them say when no cut fits.
   assert.match(a, /function fillLabel\(el: HTMLElement, text: string, full = text\): boolean \{/);
   // v12: a rest label goes through fillWhole (fillLabel, whole or nothing).
-  for (const site of ['box.append(label); if (!fillWhole(label, cutWord))', 'box.append(label); fillLabel(label, verb);', 'fillLabel(s.el, s.text);', "filled = fillLabel(el, text); if (!filled) continue; el.classList.toggle('glyph'"]) assert.ok(a.includes(site), site);
+  // v14 fix 2: a rest label tries its forms (a lit line's other whole forms) each through fillWhole.
+  for (const site of ["'data-key': e.key }); box.append(el);\n        const m = fillWhole(el, f) ? spotsFor(el) : [];",'box.append(label); fillLabel(label, verb);', 'fillLabel(s.el, s.text);', "filled = fillLabel(el, text); if (!filled) continue; el.classList.toggle('glyph'"]) assert.ok(a.includes(site), site);
   assert.match(a, /for \(let n = cutCount\(text\) - 1; n >= 1; n--\) \{ const c = tokenCut\(text, n\); if \(c === null\) continue; draw\(c\); el\.dataset\.full = full; if \(!over\(\)\) return done\(true\); \}/, 'wider than its room: whole units off the end, the whole text in the tip');
   const c = await css();
   assert.match(c, /\.edge-labels code\.lb-code, \.ff-note code\.lb-code \{ font-family: ui-monospace,[^}]*font-size: 1em;[^}]*background: none;/, 'monospace at the label\'s own size (polish 7: on the label\'s own halo, no chip)');

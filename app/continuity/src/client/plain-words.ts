@@ -35,3 +35,8 @@ export function easyWordOf(w: string): string { return level === 'easy' ? EASY_W
 export function detailNote(w: string): string { return level === 'easy' && EASY_WORD[w] && EASY_WORD[w] !== w ? `자세히 보기의 이름: ${w}` : ''; }
 /** A text that opens with a control's 자세히 word (「먼저 볼 연결: …」), with that word in its plain form at 쉽게. */
 export function plainLead(text: string, w: string): string { return level === 'easy' && EASY_WORD[w] && text.startsWith(w) ? EASY_WORD[w] + text.slice(w.length) : text; }
+/** v14 fix 2 (first reactions to v14: 「부채꼴(hyperfine)·시동 순서(pocketbase)에 "주 흐름"이라는 이름을 붙였다」, 「"CLI에서 나가는 연결 2개"는 흐름이 아니라
+ * 연결 개수」): at 쉽게 the lines a recorded start sends out are said as what they are, the start and its lines (「시작점: …에서 나가는 연결
+ * N개」), never 「주 흐름」 (the record gives no flow there); 자세히 keeps 「먼저 볼 연결」. */
+export const ENTRY_LEAD = '시작점';
+export function entryLead(text: string): string { return level === 'easy' ? text.replace(new RegExp(`^${EASY_WORD['먼저 볼 연결']}(?=:)`), ENTRY_LEAD) : text; }

@@ -21,7 +21,7 @@ test('V14M-2 the fit makes room for the sentence with the coverage line given wa
   // A form of two classes is put on as two classes (classList.add with a space throws).
   assert.match(fn(a, 'ftBox'), /if \(form\) \{ el\.classList\.add\(\.\.\.form\.split\(' '\)\); if \(form\.includes\('ft-nocover'\)\) fitSwitch\(el\); \}/);
   // The cue on the switcher's row: the row fitted again with it (at 자세히 its count made the row wrap and the sentence stepped back).
-  assert.match(fn(a, 'shapeYield'), /el\.classList\.add\('ft-nocover'\); if \(basis\) el\.classList\.add\('ft-nobasis'\); fitSwitch\(el\);\n  if \(!covers\(\)\) return true;\n  el\.classList\.remove\('ft-nocover', 'ft-nobasis'\); fitSwitch\(el\); return false;/);
+  assert.match(fn(a, 'shapeYield'), /el\.classList\.add\('ft-nocover'\); if \(basis\) el\.classList\.add\('ft-nobasis'\);\n[^\n]*\n  fitSwitch\(el\);\n  if \(!covers\(\)\) return true;\n[^\n]*\n  el\.classList\.remove\('ft-nocover', 'ft-nobasis'\); fitSwitch\(el\); return false;/); // v14 fix 2: the legend kept on a row
   // The box's own steps keep the same order: the basis line, then the coverage line with it, then the sentence.
   const p = fn(a, 'placeFocusTop');
   assert.ok(p.indexOf("el.classList.add('ft-nobasis')") < p.indexOf('shapeYield(') && p.indexOf('shapeYield(') < p.indexOf("el.classList.add('ft-under')"));

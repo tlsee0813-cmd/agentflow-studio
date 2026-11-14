@@ -3648,8 +3648,8 @@ details.pn-unlinked[open] > summary { margin-bottom: 4px; }
 .focus-top .ft-basis-l { margin-right: 6px; color: var(--text-3); font-weight: var(--fw-name); }
 .focus-top .ft-basis.none .ft-basis-t { color: var(--text-3); }
 #space.ff-on.ff-rest .world .edge.lf-bg:not(.ff-flow):not(.ff-ctx):not(.s-sparse):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked) { --bw: 1.15; }
-#space.ff-on.ff-rest .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) { --bw: 2.25; }
-#space.ff-on.ff-rest .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) .edge-line { stroke: var(--edge-spine); stroke-opacity: 1; opacity: 1; }
+#space.ff-on.ff-rest:not(.cl-on) .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) { --bw: 2.25; }
+#space.ff-on.ff-rest:not(.cl-on) .world .edge.ff-ctx:not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.picked) .edge-line { stroke: var(--edge-spine); stroke-opacity: 1; opacity: 1; }
 #space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 3; }
 #space.ff-on.ff-rest.ff-soft .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) { --bw: 2.25; }
 #space.ff-on.ff-rest:not(.ff-soft) .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line { stroke: var(--accent); stroke-opacity: 1; opacity: 1; }
@@ -4250,9 +4250,11 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
    about a third of its strength, its verb label and count left to its hover (a condition's words and ◇ stay). Nothing is folded or hidden:
    a hover brings its neighbourhood up (.near, .near-end), a pick lights its own (lt-sel). */
 #space.cl-on:not(.lt-sel) #world > .node:not(.ff-card):not(.ff-start):not(.selected):not(.related):not(.near-end):not(.near-self):not(.cited):not(.sc-visit):not(.since-hit):not(:hover):not(:focus-visible) { filter: saturate(.5); background-color: color-mix(in srgb, var(--surface) 45%, var(--bg)); border-color: var(--hair-2); box-shadow: none; }
-#space.cl-on #world .edge:not(.ff-flow):not(.ff-ctx):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.growth-lit):not(.growth-gone-line) { --bw: 1; }
-#space.cl-on #world .edge:not(.ff-flow):not(.ff-ctx):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.growth-lit):not(.growth-gone-line) .edge-line { opacity: .35; }
-#space.cl-on #world .edge-labels > :is(.edge-label:not(.fit-cond), .edge-count):not(.ff-keep):not(.near):not(:hover):not(:focus-visible) { visibility: hidden; }
+/* v14 fix 2 (verify of v14 fix 1: nanogpt's train.py→Weights & Biases, umami's 수집 API→Redis read at 2.4px in the spine colour while the
+   caption said only the main flow was strong): the view's context lines (ff-ctx) are quiet too in the clear state, their labels with them. */
+#space.cl-on #world .edge:not(.ff-flow):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.growth-lit):not(.growth-gone-line) { --bw: 1; }
+#space.cl-on #world .edge:not(.ff-flow):not(.on):not(.near):not(.lit):not(.lg-pick):not(.lg-hover):not(.sc-path):not(.picked):not(.growth-lit):not(.growth-gone-line) .edge-line { opacity: .35; }
+#space.cl-on #world .edge-labels > :is(.edge-label:not(.fit-cond), .edge-count):is(:not(.ff-keep), .ff-ctxk):not(.near):not(:hover):not(:focus-visible) { visibility: hidden; }
 /* The marks that stay on the quiet lines (a condition's ◇ and words, a badge) keep their words at 4.5:1 or more: never the half opacity the
    v12 focus gave them (a 「조건 2」 badge read 2.6:1). */
 #space.cl-on #world .edge-labels > :not(.ff-keep):not(.edge-cue):not(.edge-label):not(.near):not(:hover) { opacity: 1; }
@@ -4286,7 +4288,9 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 /* ---------- v14 fix 1 ---------- */
 /* The map fades out up to the top of what stands at the bottom (placeDock sets --dock-h: the tools, and the guide line and the legend chip
    when they went above them), never drawn under it: at 780 the chip and the guide line stood over the map's last row. */
-.space:not(.cmp-foot) > .viewport { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--dock-h, 58px) - 30px), transparent calc(100% - var(--dock-h, 58px) + 6px)); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--dock-h, 58px) - 30px), transparent calc(100% - var(--dock-h, 58px) + 6px)); }
+/* v14 fix 2: a short fade (12px over the top of what stands at the bottom to 2px under it) the first frame can set between two rows of cards
+   (app.ts bottomClear: a 30px fade fell on a row on every large map at 1280 and 780). */
+.space:not(.cmp-foot) > .viewport { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--dock-h, 58px) - 12px), transparent calc(100% - var(--dock-h, 58px) + 2px)); mask-image: linear-gradient(to bottom, #000 calc(100% - var(--dock-h, 58px) - 12px), transparent calc(100% - var(--dock-h, 58px) + 2px)); }
 /* A name tag that reads its name's own words before the bracket that ends it (name-tag fitTag gloss): a dotted underline says the rest of
    the name is in the card's hover and keyboard name. */
 .space.face-tag .node.card.tag-gloss .c-tag-name { text-decoration: underline dotted; text-decoration-color: var(--text-3); text-underline-offset: 2px; }
@@ -4295,3 +4299,16 @@ button.gs-item:hover { border-color: var(--accent-line); background: var(--accen
 #space.op-run #world .edge:not(.op-out) { transition: opacity .18s ease .16s; }
 /* A lane's words under the tools or the pills at the bottom (clipAtEdge lane-cut) step back; the lane's tip keeps them. */
 .form-lane .form-lane-word.lane-cut { visibility: hidden; }
+
+/* v14 fix 2: the off-screen cue (app.ts offCue): how many cards stand outside the window or under the fade over the tools, and where; a press
+   shows the whole map. It sits over the fade (no card is drawn there after the frame), centred, small, at 4.5:1 or more. */
+.space > .off-cue { position: absolute; left: 50%; transform: translateX(-50%); z-index: 6; height: 24px; padding: 0 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--text-2); font: inherit; font-size: 12.5px; line-height: 22px; white-space: nowrap; cursor: pointer; box-shadow: var(--shadow-sm); }
+.space > .off-cue:hover { color: var(--text); border-color: var(--line-hover); }
+.space > .off-cue:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.space > .off-cue.in-row { transform: none; height: 32px; border-radius: 16px; line-height: 30px; padding: 0 12px; }
+/* v14 fix 2: the shapes' legend kept on the caption's row (or the switcher's) while the coverage line gives way (app.ts shapeYield). */
+.focus-top .map-kinds.mk-in-row { display: none; margin: 0 0 0 4px; gap: 12px; pointer-events: auto; font-size: 12.5px; line-height: 18px; color: var(--text-2); }
+.space.words-easy .focus-top .map-kinds.mk-in-row { display: inline-flex; }
+/* v14 fix 2: a card wholly under the fade over the tools is not drawn (the mask hides it; app.ts clipAtEdge marks it), so nothing of it stands
+   under the tools; the off-screen cue counts it. */
+#world > :is(.node, .ghost).dock-hid { visibility: hidden; }

@@ -84,6 +84,25 @@ export function besideSpots(pts: Point[], w: number, h: number, gap: number, pre
   }
   return out;
 }
+/** v14 fix 2 (verify of v14 fix 1: umami's 수집 API → 분배 계층 and shapez's Savegame → ReadWriteProxy, main flow lines, landed with no
+ * word: each runs a few pixels between two cards, too short for a label on it or beside a stretch of it): places centred on each level or
+ * upright run's middle, gap off it (above and below a level run, right and left of an upright one), however short the run, the longest run
+ * first. The caller keeps only places clear of the line, the parts, the heads and the other labels. */
+export function midSpots(pts: Point[], w: number, h: number, gap: number): Rect[] {
+  const runs: { a: Point; b: Point; horiz: boolean; len: number }[] = [];
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1]!, b = pts[i]!, horiz = Math.abs(a.y - b.y) < 0.5, upright = Math.abs(a.x - b.x) < 0.5, len = Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+    if ((horiz || upright) && len >= 2) runs.push({ a, b, horiz, len });
+  }
+  runs.sort((p, q) => q.len - p.len);
+  const out: Rect[] = [];
+  for (const r of runs) {
+    const mx = (r.a.x + r.b.x) / 2, my = (r.a.y + r.b.y) / 2;
+    if (r.horiz) out.push({ x: mx - w / 2, y: my - gap - h, w, h }, { x: mx - w / 2, y: my + gap, w, h });
+    else out.push({ x: mx + gap, y: my - h / 2, w, h }, { x: mx - gap - w, y: my - h / 2, w, h });
+  }
+  return out;
+}
 /** v10 (review of v9: labels sat on arrowheads): the room a line's end marks take, in map units at zoom k: a head of headPx screen pixels
  * at its last point (back along its last run, as wide as it is long), a start mark of startPx at its first point (0: none drawn), each
  * with 3px more on every side, so a label set clear of it never touches it. */

@@ -132,7 +132,7 @@ test('V11-12 the card draws its role as measured, the overview tag never cuts it
   assert.match(fn(a, 'fitTagKind'), /kindShort\(kind, kd\.dataset\.fam \|\| null,/);
   // Fitted again for the zoom the fit settles on (a line fitted 2% larger ran past its box at 1280): within 0.5%.
   assert.match(fn(a, 'fitCards'), /Math\.abs\(k - tagAt\.k\) \/ Math\.max\(tagAt\.k, 0\.01\) < 0\.005 &&/);
-  assert.match(a, /kd\.classList\.toggle\('tk-empty', !shown && !pre\)/, 'no empty second line');
+  assert.match(a, /kd\.classList\.toggle\('tk-empty', !shown && !pre2\)/, 'no empty second line'); // v14 fix 2: pre2, the marks as they fit
   assert.match(a, /const tagKindW = \(s: string\) => tagMeasure\(s, TAG\.kind, 520\) \* 1\.03 \+ 1;/, 'measured with the margin the scaled type needs');
   assert.match(a, /h\('button', \{ type: 'button', class: 'c-role-text c-role-more'/, 'the way to the whole role is a button');
   const c = await css();

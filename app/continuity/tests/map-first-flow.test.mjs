@@ -188,7 +188,8 @@ test('FF-11 the app reads the sentence from the record, draws only existing line
   const rule = (sel) => css.split('\n').find(l => l.startsWith(sel)) ?? '';
   assert.match(rule('#space.ff-on.ff-rest .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) {'), /--bw: 3;/);
   assert.match(rule('#space.ff-on.ff-rest:not(.ff-soft) .world .edge.ff-flow:not(.on):not(.lg-hover):not(.picked) .edge-line'), /stroke: var\(--accent\)/);
-  assert.match(rule('#space.ff-on.ff-rest .world .edge.ff-ctx:not(.on)'), /--bw: 2\.25;/);
+  // v14 fix 2: the context's weight outside the clear state only (in it, the context is quiet with the rest).
+  assert.match(rule('#space.ff-on.ff-rest:not(.cl-on) .world .edge.ff-ctx:not(.on)'), /--bw: 2\.25;/);
   assert.match(rule('#space.ff-on.ff-rest .world .edge.lf-bg:not(.ff-flow)'), /--bw: 1\.15;/);
   const off = css.split('\n').filter(l => /#space\.ff-on.*(lens-off|lg-fade)/.test(l)).join('\n');
   // v13 (spec 2): half its colour by the selection's light, never faded.

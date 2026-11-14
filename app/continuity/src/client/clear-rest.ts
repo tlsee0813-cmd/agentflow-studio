@@ -1,3 +1,4 @@
+import { plainLabel } from './word-level.js';
 /* v14 A (spec 1): the landed state is the clear state. At rest (nothing picked, no lens picked, no plan open) a map whose record gives a main
  * flow (먼저 볼 연결's lines) draws that flow and its cards at full strength with their labels, and everything else quiet: every other card
  * whole and readable (its words keep a 4.5:1 contrast; only its colour and edge step back), every other line thin and at about a third of
@@ -35,4 +36,36 @@ export function readStrong(get: (k: string) => string | null): Record<string, 1>
 export const allStrongFor = (kept: Record<string, 1>, key: string): boolean => kept[key] === 1;
 export function keepStrong(get: (k: string) => string | null, set: (k: string, v: string) => void, key: string, on: boolean) {
   try { const s = readStrong(get); if (on) s[key] = 1; else delete s[key]; set(CLEAR_KEY, JSON.stringify(s)); } catch { /* no storage: the choice holds for this page */ }
+}
+
+/* ---------- v14 fix 2: the words a lit line says ---------- */
+/** v14 fix 2 (verify of v14 fix 1: at the 1440 쉽게 landing umami's 4 lit lines, hyperfine's 7, nanogpt's 2, gpt-researcher's 2 and
+ * paperless's 1 said nothing: what they hand over is written in code (「createSession·saveEvent·saveSessionData」), or wider than a label
+ * (「Kafka 메시지(topic event 등)」)): the forms a lit line's label may take after its own, best first, each whole and as the record says it:
+ * - its whole words (at 쉽게 only when every unit of them is plain);
+ * - the units of them in plain words (at 쉽게; a unit is a part between 「 · 」, 「 → 」, 「, 」 or 「; 」), in their order, with 「 등」 after
+ *   them when a unit was left to the hover;
+ * - the same with a bracket's words left to the hover (「Kafka 메시지」);
+ * - its first unit (its bracket's words left off) with 「 등」;
+ * - the relation's own kind word (kindWord: 「넘겨줌」, 「시작시킴」), so a lit line always says what it is.
+ * Never a 「…」, never a unit cut inside, never one side of an OR alone. The full words stay in the line's hover. */
+export const LIT_FORM_MAX = 22;
+export function litForms(full: string, easy: boolean, kindWord: string): string[] {
+  // A control line's channel word (「기동 · 」) is no unit of what starts it: the kind word says it.
+  const t = full.replace(/\s+/g, ' ').trim().replace(/^기동\s*·\s*/, ''), out: string[] = [];
+  const add = (s: string | null | undefined) => { const v = (s ?? '').replace(/\s+/g, ' ').trim();
+    if (v && !v.includes('…') && v.length <= LIT_FORM_MAX && !/(?:^|\s)(?:또는|혹은|or)(?:\s|$)|\|/i.test(v) && !out.includes(v)) out.push(v); };
+  const units = t ? t.split(/\s+(?:·|→|->)\s+|,\s+|;\s+/).map(u => u.trim()).filter(Boolean) : [];
+  const said = (u: string) => (u.includes('…') ? null : easy ? plainLabel(u) : u);
+  const bare = (u: string) => u.replace(/\s*[(（][^()（）]*[)）]/g, '').trim();
+  const kept = units.map(said).filter((u): u is string => !!u), all = kept.length === units.length, more = all ? '' : ' 등';
+  if (units.length && all) add(easy ? plainLabel(t) : t);
+  if (kept.length) { add(kept.join(' · ') + more); add(kept.map(bare).filter(Boolean).join(' · ') + more); }
+  if (kept.length) { const first = bare(kept[0]!); add(first + (kept.length > 1 || !all ? ' 등' : '')); }
+  add(kindWord);
+  return out;
+}
+/** A line's own kind word, as a lit line says it when its words cannot be said (쉽게 plainer for a control line: 「시작시킴」). */
+export function litKindWord(channel: string | null, kindLabel: string, easy: boolean): string {
+  return channel === 'control' ? (easy ? '시작시킴' : '제어') : channel === 'uses' ? '참조' : kindLabel;
 }

@@ -122,7 +122,8 @@ test('V9-7 a name in the 먼저 볼 연결 line is cut between its units, never 
   for (const t of ['StreamHubManager·run_task', 'ReadWriteStore·Snapshot·Log', '아주 긴 이름의 부분 하나 둘 셋 넷 다섯 여섯']) {
     const c = tokenFit(t, 16); assert.ok(c === t || (c.endsWith('…') && !/[·,]…$/.test(c) && t.startsWith(c.slice(0, -1))), c);
   }
-  assert.match(await flow(), /const at = \(id: string\) => tokenFit\(name\(id\), 16\);/);
+  // v14 fix 2: the names whole (switcherForms gives way between names, never inside one).
+  assert.match(await flow(), /const at = \(id: string\) => name\(id\)\.replace\(\/\\s\+\/g, ' '\)\.trim\(\);/);
 });
 
 test('V9-8 the screen keeps 폐기 · 사용 중단 like plan words; a run\'s halt (중단) and what the model reads stay as they were', () => {
